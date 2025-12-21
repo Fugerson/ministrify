@@ -31,14 +31,27 @@ class EventController extends Controller
     {
         $church = $this->getCurrentChurch();
 
+        $view = $request->get('view', 'month');
         $year = $request->get('year', now()->year);
         $month = $request->get('month', now()->month);
+        $week = $request->get('week');
 
-        $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->endOfMonth();
+        if ($view === 'week') {
+            if ($week) {
+                $startDate = Carbon::create($year)->setISODate($year, $week)->startOfWeek(Carbon::MONDAY);
+            } else {
+                $startDate = now()->startOfWeek(Carbon::MONDAY);
+            }
+            $endDate = $startDate->copy()->endOfWeek(Carbon::SUNDAY);
+            $currentWeek = $startDate->weekOfYear;
+        } else {
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = $startDate->copy()->endOfMonth();
+            $currentWeek = null;
+        }
 
         $events = Event::where('church_id', $church->id)
-            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->whereBetween('date', [$startDate, $endDate])
             ->with(['ministry', 'assignments.person', 'assignments.position'])
             ->orderBy('date')
             ->orderBy('time')
@@ -47,7 +60,10 @@ class EventController extends Controller
 
         $ministries = $church->ministries;
 
-        return view('schedule.calendar', compact('events', 'year', 'month', 'startOfMonth', 'ministries'));
+        return view('schedule.calendar', compact(
+            'events', 'year', 'month', 'startDate', 'endDate',
+            'ministries', 'view', 'currentWeek'
+        ));
     }
 
     public function calendar(Request $request)
