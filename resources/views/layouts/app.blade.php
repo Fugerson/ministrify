@@ -283,7 +283,7 @@
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 lg:pl-64">
+        <div class="flex-1 lg:pl-64 overflow-x-hidden">
             <!-- Mobile Header -->
             <header class="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
                 <div class="flex items-center justify-between h-14 px-4">
@@ -582,5 +582,31 @@
     </script>
 
     @stack('scripts')
+
+    <!-- Toast Notifications -->
+    @include('components.toast')
+
+    <!-- Show session messages as toasts -->
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast('success', '{{ session('success') }}');
+            });
+        </script>
+    @endif
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast('error', '{{ session('error') }}');
+            });
+        </script>
+    @endif
+    @if(session('warning'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast('warning', '{{ session('warning') }}');
+            });
+        </script>
+    @endif
 </body>
 </html>

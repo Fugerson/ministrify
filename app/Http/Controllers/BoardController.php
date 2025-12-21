@@ -19,6 +19,7 @@ class BoardController extends Controller
         $boards = Board::where('church_id', $church->id)
             ->where('is_archived', false)
             ->withCount(['columns', 'cards'])
+            ->with(['columns.cards', 'columns'])
             ->get();
 
         $archivedCount = Board::where('church_id', $church->id)
@@ -69,10 +70,11 @@ class BoardController extends Controller
         $board->load([
             'columns.cards.assignee',
             'columns.cards.checklistItems',
+            'columns.cards.comments',
         ]);
 
         $church = $this->getCurrentChurch();
-        $people = Person::where('church_id', $church->id)->get();
+        $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
 
         return view('boards.show', compact('board', 'people'));
     }
