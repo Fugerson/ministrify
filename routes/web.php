@@ -16,6 +16,8 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\UserPreferencesController;
+use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\BoardController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -76,6 +78,25 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::post('assignments/{assignment}/decline', [AssignmentController::class, 'decline'])->name('assignments.decline');
     Route::post('events/{event}/notify-all', [AssignmentController::class, 'notifyAll'])->name('assignments.notify-all');
 
+    // Checklists
+    Route::prefix('checklists')->name('checklists.')->group(function () {
+        // Templates
+        Route::get('templates', [ChecklistController::class, 'templates'])->name('templates');
+        Route::get('templates/create', [ChecklistController::class, 'createTemplate'])->name('templates.create');
+        Route::post('templates', [ChecklistController::class, 'storeTemplate'])->name('templates.store');
+        Route::get('templates/{template}/edit', [ChecklistController::class, 'editTemplate'])->name('templates.edit');
+        Route::put('templates/{template}', [ChecklistController::class, 'updateTemplate'])->name('templates.update');
+        Route::delete('templates/{template}', [ChecklistController::class, 'destroyTemplate'])->name('templates.destroy');
+
+        // Event checklists
+        Route::post('events/{event}', [ChecklistController::class, 'createForEvent'])->name('events.create');
+        Route::delete('{checklist}', [ChecklistController::class, 'deleteChecklist'])->name('destroy');
+        Route::post('{checklist}/items', [ChecklistController::class, 'addItem'])->name('items.add');
+        Route::post('items/{item}/toggle', [ChecklistController::class, 'toggleItem'])->name('items.toggle');
+        Route::put('items/{item}', [ChecklistController::class, 'updateItem'])->name('items.update');
+        Route::delete('items/{item}', [ChecklistController::class, 'deleteItem'])->name('items.delete');
+    });
+
     // Expenses (admin and leaders)
     Route::middleware('role:admin,leader')->group(function () {
         Route::resource('expenses', ExpenseController::class);
@@ -133,5 +154,42 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::post('send', [MessageController::class, 'send'])->name('send');
         Route::post('templates', [MessageController::class, 'storeTemplate'])->name('templates.store');
         Route::delete('templates/{template}', [MessageController::class, 'destroyTemplate'])->name('templates.destroy');
+    });
+
+    // Kanban Boards
+    Route::prefix('boards')->name('boards.')->group(function () {
+        Route::get('/', [BoardController::class, 'index'])->name('index');
+        Route::get('create', [BoardController::class, 'create'])->name('create');
+        Route::post('/', [BoardController::class, 'store'])->name('store');
+        Route::get('archived', [BoardController::class, 'archived'])->name('archived');
+        Route::get('{board}', [BoardController::class, 'show'])->name('show');
+        Route::get('{board}/edit', [BoardController::class, 'edit'])->name('edit');
+        Route::put('{board}', [BoardController::class, 'update'])->name('update');
+        Route::delete('{board}', [BoardController::class, 'destroy'])->name('destroy');
+        Route::post('{board}/archive', [BoardController::class, 'archive'])->name('archive');
+        Route::post('{board}/restore', [BoardController::class, 'restore'])->name('restore');
+
+        // Columns
+        Route::post('{board}/columns', [BoardController::class, 'storeColumn'])->name('columns.store');
+        Route::post('{board}/columns/reorder', [BoardController::class, 'reorderColumns'])->name('columns.reorder');
+        Route::put('columns/{column}', [BoardController::class, 'updateColumn'])->name('columns.update');
+        Route::delete('columns/{column}', [BoardController::class, 'destroyColumn'])->name('columns.destroy');
+
+        // Cards
+        Route::post('columns/{column}/cards', [BoardController::class, 'storeCard'])->name('cards.store');
+        Route::get('cards/{card}', [BoardController::class, 'showCard'])->name('cards.show');
+        Route::put('cards/{card}', [BoardController::class, 'updateCard'])->name('cards.update');
+        Route::delete('cards/{card}', [BoardController::class, 'destroyCard'])->name('cards.destroy');
+        Route::post('cards/{card}/move', [BoardController::class, 'moveCard'])->name('cards.move');
+        Route::post('cards/{card}/toggle', [BoardController::class, 'toggleCardComplete'])->name('cards.toggle');
+
+        // Card Comments
+        Route::post('cards/{card}/comments', [BoardController::class, 'storeComment'])->name('cards.comments.store');
+        Route::delete('comments/{comment}', [BoardController::class, 'destroyComment'])->name('comments.destroy');
+
+        // Card Checklist
+        Route::post('cards/{card}/checklist', [BoardController::class, 'storeChecklistItem'])->name('cards.checklist.store');
+        Route::post('checklist/{item}/toggle', [BoardController::class, 'toggleChecklistItem'])->name('cards.checklist.toggle');
+        Route::delete('checklist/{item}', [BoardController::class, 'destroyChecklistItem'])->name('cards.checklist.destroy');
     });
 });

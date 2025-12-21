@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Board;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Ministry;
@@ -92,6 +93,23 @@ class SearchController extends Controller
             ];
         }
 
+        // Search boards
+        $boards = Board::where('church_id', $churchId)
+            ->where('is_archived', false)
+            ->where('name', 'like', "%{$query}%")
+            ->limit(3)
+            ->get();
+
+        foreach ($boards as $board) {
+            $results[] = [
+                'type' => 'board',
+                'icon' => 'kanban',
+                'title' => $board->name,
+                'subtitle' => $board->cards()->count() . ' карток',
+                'url' => route('boards.show', $board),
+            ];
+        }
+
         return response()->json(['results' => $results]);
     }
 
@@ -128,6 +146,13 @@ class SearchController extends Controller
             'label' => 'Нова група',
             'url' => route('groups.create'),
             'icon' => 'users',
+        ];
+
+        $actions[] = [
+            'key' => 'b',
+            'label' => 'Нова дошка',
+            'url' => route('boards.create'),
+            'icon' => 'kanban',
         ];
 
         return response()->json(['actions' => $actions]);

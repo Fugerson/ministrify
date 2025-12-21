@@ -125,11 +125,13 @@ class EventController extends Controller
     public function show(Event $event)
     {
         $this->authorizeChurch($event);
+        $church = $this->getCurrentChurch();
 
         $event->load([
             'ministry.positions',
             'assignments.person',
             'assignments.position',
+            'checklist.items.completedBy',
         ]);
 
         // Get available people for unfilled positions
@@ -140,7 +142,12 @@ class EventController extends Controller
             })
             ->get();
 
-        return view('schedule.show', compact('event', 'availablePeople'));
+        // Get checklist templates
+        $checklistTemplates = \App\Models\ChecklistTemplate::where('church_id', $church->id)
+            ->with('items')
+            ->get();
+
+        return view('schedule.show', compact('event', 'availablePeople', 'checklistTemplates'));
     }
 
     public function edit(Event $event)

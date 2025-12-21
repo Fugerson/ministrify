@@ -58,6 +58,11 @@ class Event extends Model
         return $this->hasOne(Attendance::class);
     }
 
+    public function checklist(): HasOne
+    {
+        return $this->hasOne(EventChecklist::class);
+    }
+
     public function getFilledPositionsCountAttribute(): int
     {
         return $this->assignments()->count();
