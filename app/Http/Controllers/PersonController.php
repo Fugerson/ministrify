@@ -248,6 +248,12 @@ class PersonController extends Controller
                 Storage::disk('public')->delete($person->photo);
             }
             $validated['photo'] = $request->file('photo')->store('people', 'public');
+        } elseif ($request->input('remove_photo') === '1') {
+            // Remove photo if requested
+            if ($person->photo) {
+                Storage::disk('public')->delete($person->photo);
+            }
+            $validated['photo'] = null;
         }
 
         $person->update($validated);
