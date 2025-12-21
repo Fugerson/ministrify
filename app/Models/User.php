@@ -20,6 +20,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'theme',
+        'preferences',
+        'onboarding_completed',
     ];
 
     protected $hidden = [
@@ -30,6 +33,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'preferences' => 'array',
+        'onboarding_completed' => 'boolean',
     ];
 
     public function church(): BelongsTo

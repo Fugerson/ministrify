@@ -6,12 +6,16 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\UserPreferencesController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -105,4 +109,29 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::put('my-profile', [PersonController::class, 'updateMyProfile'])->name('my-profile.update');
     Route::post('my-profile/unavailable', [PersonController::class, 'addUnavailableDate'])->name('my-profile.unavailable.add');
     Route::delete('my-profile/unavailable/{unavailableDate}', [PersonController::class, 'removeUnavailableDate'])->name('my-profile.unavailable.remove');
+
+    // Groups (Home Groups)
+    Route::resource('groups', GroupController::class);
+    Route::post('groups/{group}/members', [GroupController::class, 'addMember'])->name('groups.members.add');
+    Route::delete('groups/{group}/members/{person}', [GroupController::class, 'removeMember'])->name('groups.members.remove');
+    Route::post('groups/{group}/attendance', [GroupController::class, 'attendance'])->name('groups.attendance');
+
+    // Global Search
+    Route::get('search', [SearchController::class, 'search'])->name('search');
+    Route::get('quick-actions', [SearchController::class, 'quickActions'])->name('quick-actions');
+
+    // User Preferences
+    Route::post('preferences/theme', [UserPreferencesController::class, 'updateTheme'])->name('preferences.theme');
+    Route::post('preferences', [UserPreferencesController::class, 'updatePreferences'])->name('preferences.update');
+    Route::post('onboarding/complete', [UserPreferencesController::class, 'completeOnboarding'])->name('onboarding.complete');
+
+    // Messages (admin and leaders)
+    Route::middleware('role:admin,leader')->prefix('messages')->name('messages.')->group(function () {
+        Route::get('/', [MessageController::class, 'index'])->name('index');
+        Route::get('create', [MessageController::class, 'create'])->name('create');
+        Route::post('preview', [MessageController::class, 'preview'])->name('preview');
+        Route::post('send', [MessageController::class, 'send'])->name('send');
+        Route::post('templates', [MessageController::class, 'storeTemplate'])->name('templates.store');
+        Route::delete('templates/{template}', [MessageController::class, 'destroyTemplate'])->name('templates.destroy');
+    });
 });

@@ -80,6 +80,68 @@ class Person extends Model
         return $this->hasMany(AttendanceRecord::class);
     }
 
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class)
+            ->withPivot(['role', 'joined_at'])
+            ->withTimestamps();
+    }
+
+    public function leadingGroups(): HasMany
+    {
+        return $this->hasMany(Group::class, 'leader_id');
+    }
+
+    public function communications(): HasMany
+    {
+        return $this->hasMany(PersonCommunication::class)->orderByDesc('communicated_at');
+    }
+
+    public function getAttendanceStatsAttribute(): array
+    {
+        $records = $this->attendanceRecords()
+            ->with('attendance')
+            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->get();
+
+        $total = $records->count();
+        $present = $records->where('present', true)->count();
+
+        return [
+            'total' => $total,
+            'present' => $present,
+            'absent' => $total - $present,
+            'rate' => $total > 0 ? round(($present / $total) * 100) : 0,
+        ];
+    }
+
+    public function getLastAttendedAttribute(): ?\Carbon\Carbon
+    {
+        return $this->attendanceRecords()
+            ->where('present', true)
+            ->with('attendance')
+            ->get()
+            ->sortByDesc(fn($r) => $r->attendance->date)
+            ->first()?->attendance?->date;
+    }
+
+    public function getMembershipDurationAttribute(): string
+    {
+        if (!$this->joined_date) {
+            return 'Невідомо';
+        }
+
+        $diff = $this->joined_date->diff(now());
+
+        if ($diff->y > 0) {
+            return $diff->y . ' ' . trans_choice('рік|роки|років', $diff->y);
+        }
+        if ($diff->m > 0) {
+            return $diff->m . ' ' . trans_choice('місяць|місяці|місяців', $diff->m);
+        }
+        return $diff->d . ' ' . trans_choice('день|дні|днів', $diff->d);
+    }
+
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
