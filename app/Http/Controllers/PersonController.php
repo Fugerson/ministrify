@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Person;
 use App\Models\Tag;
 use App\Models\UnavailableDate;
+use App\Exports\PeopleExport;
+use App\Imports\PeopleImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PersonController extends Controller
 {
@@ -208,8 +211,26 @@ class PersonController extends Controller
 
     public function export()
     {
-        // TODO: Implement Excel export using Maatwebsite/Excel
-        return back()->with('info', 'Експорт буде доступний найближчим часом.');
+        $church = $this->getCurrentChurch();
+        $filename = 'people_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(new PeopleExport($church->id), $filename);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        $church = $this->getCurrentChurch();
+
+        try {
+            Excel::import(new PeopleImport($church->id), $request->file('file'));
+            return back()->with('success', 'Людей успішно імпортовано.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Помилка імпорту: ' . $e->getMessage());
+        }
     }
 
     public function myProfile()

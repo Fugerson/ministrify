@@ -42,6 +42,7 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::resource('people', PersonController::class);
     Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore');
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export');
+    Route::post('people-import', [PersonController::class, 'import'])->name('people.import');
 
     // Tags
     Route::resource('tags', TagController::class)->except(['show']);
@@ -102,6 +103,6 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::get('my-schedule', [EventController::class, 'mySchedule'])->name('my-schedule');
     Route::get('my-profile', [PersonController::class, 'myProfile'])->name('my-profile');
     Route::put('my-profile', [PersonController::class, 'updateMyProfile'])->name('my-profile.update');
-    Route::post('my-unavailable', [PersonController::class, 'addUnavailableDate'])->name('my-unavailable.store');
-    Route::delete('my-unavailable/{unavailableDate}', [PersonController::class, 'removeUnavailableDate'])->name('my-unavailable.destroy');
+    Route::post('my-profile/unavailable', [PersonController::class, 'addUnavailableDate'])->name('my-profile.unavailable.add');
+    Route::delete('my-profile/unavailable/{unavailableDate}', [PersonController::class, 'removeUnavailableDate'])->name('my-profile.unavailable.remove');
 });
