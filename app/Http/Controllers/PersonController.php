@@ -106,7 +106,7 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        $person->load(['tags', 'ministries.positions', 'assignments' => function ($q) {
+        $person->load(['tags', 'ministries.positions', 'groups', 'assignments' => function ($q) {
             $q->whereHas('event', fn($eq) => $eq->where('date', '>=', now()->subMonths(3)))
               ->with(['event.ministry', 'position'])
               ->orderByDesc('created_at');
@@ -116,15 +116,97 @@ class PersonController extends Controller
         $stats = [
             'services_this_month' => $person->assignments()
                 ->where('status', 'confirmed')
-                ->whereHas('event', fn($q) => $q->whereMonth('date', now()->month))
+                ->whereHas('event', fn($q) => $q->whereMonth('date', now()->month)->whereYear('date', now()->year))
+                ->count(),
+            'services_total' => $person->assignments()
+                ->where('status', 'confirmed')
                 ->count(),
             'attendance_30_days' => $person->attendanceRecords()
                 ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subDays(30)))
                 ->where('present', true)
                 ->count(),
+            'attendance_rate' => $this->calculateAttendanceRate($person),
+            'last_attended' => $person->attendanceRecords()
+                ->whereHas('attendance')
+                ->where('present', true)
+                ->with('attendance')
+                ->orderByDesc('created_at')
+                ->first()?->attendance?->date,
+            'membership_days' => $person->joined_date ? now()->diffInDays($person->joined_date) : null,
         ];
 
-        return view('people.show', compact('person', 'stats'));
+        // Activity history (last 3 months)
+        $activities = collect();
+
+        // Get attendance records
+        $attendanceRecords = $person->attendanceRecords()
+            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->with('attendance')
+            ->get()
+            ->map(fn($r) => [
+                'type' => 'attendance',
+                'date' => $r->attendance->date,
+                'title' => $r->present ? 'Відвідав(ла) служіння' : 'Пропустив(ла) служіння',
+                'icon' => $r->present ? '✅' : '❌',
+                'color' => $r->present ? 'green' : 'red',
+            ]);
+
+        // Get assignments
+        $assignmentRecords = $person->assignments()
+            ->whereHas('event', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->with(['event.ministry', 'position'])
+            ->get()
+            ->map(fn($a) => [
+                'type' => 'assignment',
+                'date' => $a->event->date,
+                'title' => $a->event->title . ' - ' . $a->position->name,
+                'subtitle' => $a->event->ministry->icon . ' ' . $a->event->ministry->name,
+                'icon' => $a->status === 'confirmed' ? '🎯' : ($a->status === 'pending' ? '⏳' : '❌'),
+                'color' => $a->status === 'confirmed' ? 'green' : ($a->status === 'pending' ? 'yellow' : 'red'),
+                'status' => $a->status,
+            ]);
+
+        $activities = $attendanceRecords->merge($assignmentRecords)
+            ->sortByDesc('date')
+            ->take(20)
+            ->values();
+
+        // Attendance chart data (last 12 weeks)
+        $attendanceChartData = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $weekStart = now()->subWeeks($i)->startOfWeek();
+            $weekEnd = $weekStart->copy()->endOfWeek();
+
+            $attended = $person->attendanceRecords()
+                ->whereHas('attendance', fn($q) => $q->whereBetween('date', [$weekStart, $weekEnd]))
+                ->where('present', true)
+                ->count();
+
+            $attendanceChartData[] = [
+                'week' => $weekStart->format('d.m'),
+                'count' => $attended,
+            ];
+        }
+
+        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData'));
+    }
+
+    private function calculateAttendanceRate(Person $person): ?int
+    {
+        $totalEvents = $person->attendanceRecords()
+            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->count();
+
+        if ($totalEvents === 0) {
+            return null;
+        }
+
+        $attended = $person->attendanceRecords()
+            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->where('present', true)
+            ->count();
+
+        return round(($attended / $totalEvents) * 100);
     }
 
     public function edit(Person $person)
