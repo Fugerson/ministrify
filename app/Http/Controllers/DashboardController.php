@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Event;
 use App\Models\Expense;
+use App\Models\Group;
 use App\Models\Person;
 use Carbon\Carbon;
 
@@ -14,6 +15,17 @@ class DashboardController extends Controller
     {
         $church = $this->getCurrentChurch();
         $user = auth()->user();
+
+        // Birthdays this week
+        $birthdaysThisWeek = Person::where('church_id', $church->id)
+            ->whereNotNull('birth_date')
+            ->get()
+            ->filter(function ($person) {
+                $birthday = $person->birth_date->copy()->year(now()->year);
+                return $birthday->between(now()->startOfDay(), now()->addDays(7));
+            })
+            ->sortBy(fn($p) => $p->birth_date->copy()->year(now()->year))
+            ->take(5);
 
         // Upcoming events (next 7 days)
         $upcomingEvents = Event::where('church_id', $church->id)
@@ -29,6 +41,7 @@ class DashboardController extends Controller
         $stats = [
             'total_people' => Person::where('church_id', $church->id)->count(),
             'total_ministries' => $church->ministries()->count(),
+            'total_groups' => Group::where('church_id', $church->id)->where('is_active', true)->count(),
             'events_this_month' => Event::where('church_id', $church->id)
                 ->whereMonth('date', now()->month)
                 ->whereYear('date', now()->year)
@@ -106,7 +119,8 @@ class DashboardController extends Controller
             'attendanceData',
             'pendingAssignments',
             'needAttention',
-            'ministryBudgets'
+            'ministryBudgets',
+            'birthdaysThisWeek'
         ));
     }
 }
