@@ -21,6 +21,8 @@ use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\SystemAdminController;
+use App\Http\Controllers\PrivateMessageController;
+use App\Http\Controllers\AnnouncementController;
 use Illuminate\Support\Facades\Route;
 
 // Home redirect
@@ -301,5 +303,27 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::post('cards/{card}/checklist', [BoardController::class, 'storeChecklistItem'])->name('cards.checklist.store');
         Route::post('checklist/{item}/toggle', [BoardController::class, 'toggleChecklistItem'])->name('cards.checklist.toggle');
         Route::delete('checklist/{item}', [BoardController::class, 'destroyChecklistItem'])->name('cards.checklist.destroy');
+    });
+
+    // Private Messages
+    Route::prefix('pm')->name('pm.')->group(function () {
+        Route::get('/', [PrivateMessageController::class, 'index'])->name('index');
+        Route::get('create', [PrivateMessageController::class, 'create'])->name('create');
+        Route::post('/', [PrivateMessageController::class, 'store'])->name('store');
+        Route::get('unread-count', [PrivateMessageController::class, 'unreadCount'])->name('unread-count');
+        Route::get('{user}', [PrivateMessageController::class, 'show'])->name('show');
+        Route::get('{user}/poll', [PrivateMessageController::class, 'poll'])->name('poll');
+    });
+
+    // Church Announcements
+    Route::prefix('announcements')->name('announcements.')->group(function () {
+        Route::get('/', [AnnouncementController::class, 'index'])->name('index');
+        Route::get('create', [AnnouncementController::class, 'create'])->name('create')->middleware('role:admin,leader');
+        Route::post('/', [AnnouncementController::class, 'store'])->name('store')->middleware('role:admin,leader');
+        Route::get('{announcement}', [AnnouncementController::class, 'show'])->name('show');
+        Route::get('{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit')->middleware('role:admin,leader');
+        Route::put('{announcement}', [AnnouncementController::class, 'update'])->name('update')->middleware('role:admin,leader');
+        Route::delete('{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy')->middleware('role:admin,leader');
+        Route::post('{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('pin')->middleware('role:admin,leader');
     });
 });
