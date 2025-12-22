@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SettingsController extends Controller
 {
@@ -67,7 +68,68 @@ class SettingsController extends Controller
 
             return back()->with('success', "Бот підключено: @{$botInfo['username']}");
         } catch (\Exception $e) {
-            return back()->with('error', 'Помилка підключення: ' . $e->getMessage());
+            // Log error for debugging but don't expose to user
+            \Log::error('Telegram connection error', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Помилка підключення до Telegram. Перевірте токен.');
+        }
+    }
+
+    public function setupWebhook()
+    {
+        $church = $this->getCurrentChurch();
+
+        if (!$church->telegram_bot_token) {
+            return back()->with('error', 'Спочатку введіть токен бота.');
+        }
+
+        try {
+            $telegram = new TelegramService($church->telegram_bot_token);
+
+            // Get webhook URL
+            $webhookUrl = url('/api/telegram/webhook');
+
+            // Set webhook
+            $result = $telegram->setWebhook($webhookUrl);
+
+            if ($result) {
+                return back()->with('success', "Webhook встановлено: {$webhookUrl}");
+            } else {
+                return back()->with('error', 'Не вдалося встановити webhook.');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Telegram webhook error', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Помилка налаштування webhook. Перевірте токен та спробуйте ще раз.');
+        }
+    }
+
+    public function getTelegramStatus()
+    {
+        $church = $this->getCurrentChurch();
+
+        if (!$church->telegram_bot_token) {
+            return response()->json(['connected' => false, 'error' => 'Токен не налаштовано']);
+        }
+
+        try {
+            $telegram = new TelegramService($church->telegram_bot_token);
+            $botInfo = $telegram->getMe();
+
+            // Get webhook info
+            $response = \Illuminate\Support\Facades\Http::get(
+                "https://api.telegram.org/bot{$church->telegram_bot_token}/getWebhookInfo"
+            );
+            $webhookInfo = $response->json()['result'] ?? null;
+
+            return response()->json([
+                'connected' => true,
+                'bot_username' => $botInfo['username'],
+                'bot_name' => $botInfo['first_name'],
+                'webhook_url' => $webhookInfo['url'] ?? null,
+                'pending_updates' => $webhookInfo['pending_update_count'] ?? 0,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Telegram status check error', ['error' => $e->getMessage()]);
+            return response()->json(['connected' => false, 'error' => 'Не вдалося перевірити статус']);
         }
     }
 
@@ -85,5 +147,76 @@ class SettingsController extends Controller
         $church->update(['settings' => $settings]);
 
         return back()->with('success', 'Налаштування сповіщень оновлено.');
+    }
+
+    public function updatePublicSite(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'slug' => 'required|string|max:50|alpha_dash|unique:churches,slug,' . $church->id,
+            'public_site_enabled' => 'boolean',
+            'public_description' => 'nullable|string|max:1000',
+            'public_email' => 'nullable|email|max:255',
+            'public_phone' => 'nullable|string|max:20',
+            'website_url' => 'nullable|url|max:255',
+            'facebook_url' => 'nullable|url|max:255',
+            'instagram_url' => 'nullable|url|max:255',
+            'youtube_url' => 'nullable|url|max:255',
+            'service_times' => 'nullable|string|max:255',
+            'cover_image' => 'nullable|image|max:4096',
+            'pastor_name' => 'nullable|string|max:255',
+            'pastor_photo' => 'nullable|image|max:2048',
+            'pastor_message' => 'nullable|string|max:2000',
+        ]);
+
+        $validated['slug'] = Str::slug($validated['slug']);
+        $validated['public_site_enabled'] = $request->boolean('public_site_enabled');
+
+        if ($request->hasFile('cover_image')) {
+            if ($church->cover_image) {
+                Storage::disk('public')->delete($church->cover_image);
+            }
+            $validated['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+        }
+
+        if ($request->hasFile('pastor_photo')) {
+            if ($church->pastor_photo) {
+                Storage::disk('public')->delete($church->pastor_photo);
+            }
+            $validated['pastor_photo'] = $request->file('pastor_photo')->store('pastors', 'public');
+        }
+
+        $church->update($validated);
+
+        return back()->with('success', 'Налаштування публічного сайту оновлено.');
+    }
+
+    /**
+     * Update payment settings (LiqPay, Monobank)
+     */
+    public function updatePaymentSettings(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'liqpay_enabled' => 'boolean',
+            'liqpay_public_key' => 'nullable|string|max:255',
+            'liqpay_private_key' => 'nullable|string|max:255',
+            'monobank_enabled' => 'boolean',
+            'monobank_jar_id' => 'nullable|string|max:255',
+        ]);
+
+        $church->update([
+            'payment_settings' => [
+                'liqpay_enabled' => $validated['liqpay_enabled'] ?? false,
+                'liqpay_public_key' => $validated['liqpay_public_key'] ?? null,
+                'liqpay_private_key' => $validated['liqpay_private_key'] ?? null,
+                'monobank_enabled' => $validated['monobank_enabled'] ?? false,
+                'monobank_jar_id' => $validated['monobank_jar_id'] ?? null,
+            ],
+        ]);
+
+        return back()->with('success', 'Налаштування платежів оновлено.');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Board;
 use App\Models\Group;
 use App\Models\Person;
 use Illuminate\Http\Request;
@@ -67,7 +68,12 @@ class GroupController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        return view('groups.show', compact('group', 'availablePeople'));
+        // Get boards for task creation
+        $boards = Board::where('church_id', auth()->user()->church_id)
+            ->where('is_archived', false)
+            ->get();
+
+        return view('groups.show', compact('group', 'availablePeople', 'boards'));
     }
 
     public function edit(Group $group)

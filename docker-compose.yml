@@ -93,6 +93,22 @@ services:
       - mysql
       - redis
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: churchhub_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USERNAME:-churchhub}
+      PMA_PASSWORD: ${DB_PASSWORD:-secret}
+      UPLOAD_LIMIT: 100M
+    networks:
+      - churchhub
+    depends_on:
+      - mysql
+
 networks:
   churchhub:
     driver: bridge

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'church_id',
@@ -21,11 +22,21 @@ class Event extends Model
         'notes',
         'recurrence_rule',
         'parent_event_id',
+        'is_public',
+        'allow_registration',
+        'registration_limit',
+        'registration_deadline',
+        'public_description',
+        'location',
+        'cover_image',
     ];
 
     protected $casts = [
         'date' => 'date',
         'time' => 'datetime:H:i',
+        'is_public' => 'boolean',
+        'allow_registration' => 'boolean',
+        'registration_deadline' => 'datetime',
     ];
 
     public function church(): BelongsTo
@@ -61,6 +72,47 @@ class Event extends Model
     public function checklist(): HasOne
     {
         return $this->hasOne(EventChecklist::class);
+    }
+
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(EventRegistration::class);
+    }
+
+    public function getConfirmedRegistrationsCountAttribute(): int
+    {
+        return $this->registrations()
+            ->whereIn('status', ['confirmed', 'attended'])
+            ->sum(\DB::raw('1 + guests'));
+    }
+
+    public function getRemainingSpacesAttribute(): ?int
+    {
+        if (!$this->registration_limit) {
+            return null;
+        }
+        return max(0, $this->registration_limit - $this->confirmed_registrations_count);
+    }
+
+    public function canAcceptRegistrations(): bool
+    {
+        if (!$this->allow_registration) {
+            return false;
+        }
+
+        if ($this->registration_deadline && $this->registration_deadline->isPast()) {
+            return false;
+        }
+
+        if ($this->date->isPast()) {
+            return false;
+        }
+
+        if ($this->registration_limit && $this->remaining_spaces <= 0) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getFilledPositionsCountAttribute(): int

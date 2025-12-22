@@ -14,6 +14,8 @@
 @endsection
 
 @section('content')
+<x-page-help page="groups" />
+
 <div class="space-y-6">
     @if($groups->isEmpty())
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center">

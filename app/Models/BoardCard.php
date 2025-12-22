@@ -18,6 +18,11 @@ class BoardCard extends Model
         'assigned_to',
         'created_by',
         'labels',
+        'event_id',
+        'ministry_id',
+        'group_id',
+        'person_id',
+        'entity_type',
         'is_completed',
         'completed_at',
     ];
@@ -42,6 +47,37 @@ class BoardCard extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    public function ministry(): BelongsTo
+    {
+        return $this->belongsTo(Ministry::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    public function person(): BelongsTo
+    {
+        return $this->belongsTo(Person::class);
+    }
+
+    public function getLinkedEntityAttribute(): ?object
+    {
+        return match($this->entity_type) {
+            'event' => $this->event,
+            'ministry' => $this->ministry,
+            'group' => $this->group,
+            'person' => $this->person,
+            default => null,
+        };
     }
 
     public function comments(): HasMany

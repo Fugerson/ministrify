@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Board;
 use App\Models\Event;
 use App\Models\Ministry;
+use App\Services\CalendarService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -62,7 +64,7 @@ class EventController extends Controller
 
         return view('schedule.calendar', compact(
             'events', 'year', 'month', 'startDate', 'endDate',
-            'ministries', 'view', 'currentWeek'
+            'ministries', 'view', 'currentWeek', 'church'
         ));
     }
 
@@ -147,7 +149,12 @@ class EventController extends Controller
             ->with('items')
             ->get();
 
-        return view('schedule.show', compact('event', 'availablePeople', 'checklistTemplates'));
+        // Get boards for task creation
+        $boards = Board::where('church_id', $church->id)
+            ->where('is_archived', false)
+            ->get();
+
+        return view('schedule.show', compact('event', 'availablePeople', 'checklistTemplates', 'boards'));
     }
 
     public function edit(Event $event)
@@ -232,5 +239,82 @@ class EventController extends Controller
         if ($event->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
+    }
+
+    /**
+     * Export calendar to iCal format
+     */
+    public function exportIcal(Request $request, CalendarService $calendarService)
+    {
+        $church = $this->getCurrentChurch();
+
+        $ministryId = $request->get('ministry');
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
+
+        $icalContent = $calendarService->exportToIcal($church, $ministryId, $startDate, $endDate);
+
+        $filename = 'calendar-' . $church->slug . '-' . now()->format('Y-m-d') . '.ics';
+
+        return response($icalContent)
+            ->header('Content-Type', 'text/calendar; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    /**
+     * Show import form
+     */
+    public function importForm()
+    {
+        $church = $this->getCurrentChurch();
+        $ministries = Ministry::where('church_id', $church->id)->get();
+
+        return view('schedule.import', compact('ministries'));
+    }
+
+    /**
+     * Import events from iCal file
+     */
+    public function importIcal(Request $request, CalendarService $calendarService)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:ics,txt|max:5120',
+            'ministry_id' => 'required|exists:ministries,id',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $ministry = Ministry::findOrFail($request->ministry_id);
+
+        if ($ministry->church_id !== $church->id) {
+            abort(404);
+        }
+
+        Gate::authorize('manage-ministry', $ministry);
+
+        $result = $calendarService->importFromIcal($request->file('file'), $church, $ministry);
+
+        $message = "Імпортовано подій: {$result['total_imported']}";
+        if ($result['total_skipped'] > 0) {
+            $message .= ", пропущено: {$result['total_skipped']}";
+        }
+        if ($result['total_errors'] > 0) {
+            $message .= ", помилок: {$result['total_errors']}";
+        }
+
+        return redirect()->route('schedule')
+            ->with('success', $message)
+            ->with('import_details', $result);
+    }
+
+    /**
+     * Add single event to Google Calendar
+     */
+    public function addToGoogle(Event $event, CalendarService $calendarService)
+    {
+        $this->authorizeChurch($event);
+
+        $url = $calendarService->getGoogleCalendarUrl($event);
+
+        return redirect()->away($url);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ministry extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'church_id',
@@ -20,10 +21,17 @@ class Ministry extends Model
         'color',
         'leader_id',
         'monthly_budget',
+        'is_public',
+        'slug',
+        'public_description',
+        'cover_image',
+        'allow_registrations',
     ];
 
     protected $casts = [
         'monthly_budget' => 'decimal:2',
+        'is_public' => 'boolean',
+        'allow_registrations' => 'boolean',
     ];
 
     public function church(): BelongsTo
@@ -78,5 +86,20 @@ class Ministry extends Model
     public function getRemainingBudgetAttribute(): float
     {
         return max(0, ($this->monthly_budget ?? 0) - $this->spent_this_month);
+    }
+
+    public function joinRequests(): HasMany
+    {
+        return $this->hasMany(MinistryJoinRequest::class);
+    }
+
+    public function pendingJoinRequests(): HasMany
+    {
+        return $this->joinRequests()->where('status', 'pending');
+    }
+
+    public function getPublicUrlAttribute(): string
+    {
+        return route('public.ministry', [$this->church->slug, $this->slug]);
     }
 }

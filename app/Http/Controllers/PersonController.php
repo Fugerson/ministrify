@@ -396,6 +396,51 @@ class PersonController extends Controller
         return back()->with('success', 'Дати видалено.');
     }
 
+    public function generateTelegramCode()
+    {
+        $user = auth()->user();
+
+        if (!$user->person) {
+            return response()->json(['error' => 'Профіль не знайдено'], 404);
+        }
+
+        $church = $user->church;
+
+        if (!$church->telegram_bot_token) {
+            return response()->json(['error' => 'Telegram бот не налаштовано церквою'], 400);
+        }
+
+        $code = \App\Http\Controllers\Api\TelegramController::generateLinkingCode($user->person);
+
+        // Get bot username for link
+        try {
+            $telegram = new \App\Services\TelegramService($church->telegram_bot_token);
+            $botInfo = $telegram->getMe();
+            $botUsername = $botInfo['username'];
+        } catch (\Exception $e) {
+            $botUsername = null;
+        }
+
+        return response()->json([
+            'code' => $code,
+            'bot_username' => $botUsername,
+            'expires_in' => 10, // minutes
+        ]);
+    }
+
+    public function unlinkTelegram()
+    {
+        $user = auth()->user();
+
+        if (!$user->person) {
+            return back()->with('error', 'Профіль не знайдено');
+        }
+
+        $user->person->update(['telegram_chat_id' => null]);
+
+        return back()->with('success', 'Telegram від\'єднано');
+    }
+
     private function authorizeChurch(Person $person): void
     {
         if ($person->church_id !== $this->getCurrentChurch()->id) {

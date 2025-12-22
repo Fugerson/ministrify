@@ -20,6 +20,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_super_admin',
         'theme',
         'preferences',
         'onboarding_completed',
@@ -35,6 +36,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'preferences' => 'array',
         'onboarding_completed' => 'boolean',
+        'is_super_admin' => 'boolean',
     ];
 
     public function church(): BelongsTo
@@ -50,6 +52,11 @@ class User extends Authenticatable
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->is_super_admin === true;
     }
 
     public function isAdmin(): bool

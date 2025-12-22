@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
 
 class Church extends Model
 {
@@ -12,6 +14,7 @@ class Church extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'city',
         'address',
         'logo',
@@ -19,10 +22,62 @@ class Church extends Model
         'theme',
         'telegram_bot_token',
         'settings',
+        'payment_settings',
+        'calendar_token',
+        'public_site_enabled',
+        'public_description',
+        'public_email',
+        'public_phone',
+        'website_url',
+        'facebook_url',
+        'instagram_url',
+        'youtube_url',
+        'service_times',
+        'cover_image',
+        'pastor_name',
+        'pastor_photo',
+        'pastor_message',
     ];
 
     protected $casts = [
         'settings' => 'array',
+        'payment_settings' => 'array',
+        'public_site_enabled' => 'boolean',
+    ];
+
+    /**
+     * Get telegram bot token (with decryption error handling)
+     */
+    public function getTelegramBotTokenAttribute($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (DecryptException $e) {
+            // Token was encrypted with different key, clear it
+            $this->attributes['telegram_bot_token'] = null;
+            $this->saveQuietly();
+            return null;
+        }
+    }
+
+    /**
+     * Set telegram bot token (encrypted)
+     */
+    public function setTelegramBotTokenAttribute($value): void
+    {
+        $this->attributes['telegram_bot_token'] = $value ? Crypt::encryptString($value) : null;
+    }
+
+    /**
+     * Fields that should be hidden from serialization
+     */
+    protected $hidden = [
+        'telegram_bot_token',
+        'calendar_token',
     ];
 
     public function users(): HasMany
@@ -80,6 +135,61 @@ class Church extends Model
         return $this->hasMany(MessageTemplate::class);
     }
 
+    public function boards(): HasMany
+    {
+        return $this->hasMany(Board::class);
+    }
+
+    public function donations(): HasMany
+    {
+        return $this->hasMany(Donation::class);
+    }
+
+    public function donationCampaigns(): HasMany
+    {
+        return $this->hasMany(DonationCampaign::class);
+    }
+
+    public function eventRegistrations(): HasMany
+    {
+        return $this->hasMany(EventRegistration::class);
+    }
+
+    public function getPublicEventsAttribute()
+    {
+        return $this->events()
+            ->where('is_public', true)
+            ->where('date', '>=', now()->startOfDay())
+            ->orderBy('date')
+            ->get();
+    }
+
+    public function getPublicMinistriesAttribute()
+    {
+        return $this->ministries()
+            ->where('is_public', true)
+            ->get();
+    }
+
+    public function getPublicGroupsAttribute()
+    {
+        return $this->groups()
+            ->where('is_public', true)
+            ->get();
+    }
+
+    public function getPublicUrlAttribute(): string
+    {
+        return route('public.church', $this->slug);
+    }
+
+    public static function findBySlug(string $slug)
+    {
+        return static::where('slug', $slug)
+            ->where('public_site_enabled', true)
+            ->first();
+    }
+
     public function getThemeColorsAttribute(): array
     {
         $color = $this->primary_color ?? '#3b82f6';
@@ -128,5 +238,35 @@ class Church extends Model
         data_set($settings, $key, $value);
         $this->settings = $settings;
         $this->save();
+    }
+
+    /**
+     * Get or generate calendar token
+     */
+    public function getCalendarToken(): string
+    {
+        if (!$this->calendar_token) {
+            $this->calendar_token = \Illuminate\Support\Str::random(32);
+            $this->save();
+        }
+        return $this->calendar_token;
+    }
+
+    /**
+     * Get calendar feed URL
+     */
+    public function getCalendarFeedUrlAttribute(): string
+    {
+        return route('api.calendar.feed', ['token' => $this->getCalendarToken()]);
+    }
+
+    /**
+     * Regenerate calendar token
+     */
+    public function regenerateCalendarToken(): string
+    {
+        $this->calendar_token = \Illuminate\Support\Str::random(32);
+        $this->save();
+        return $this->calendar_token;
     }
 }

@@ -30,6 +30,38 @@
 
         <!-- Board Stats & Filters -->
         <div class="flex items-center gap-3">
+            <!-- Search -->
+            <div class="relative" x-show="showSearch" x-transition>
+                <input type="text" x-ref="searchInput" x-model="searchQuery"
+                       @keydown.escape="showSearch = false; searchQuery = ''"
+                       placeholder="Пошук карток..."
+                       class="w-48 sm:w-64 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                <button @click="showSearch = false; searchQuery = ''"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Search trigger -->
+            <button x-show="!showSearch" @click="showSearch = true; $nextTick(() => $refs.searchInput?.focus())"
+                    class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Пошук (/)">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+
+            <!-- Shortcuts help -->
+            <button @click="showShortcuts = true"
+                    class="hidden sm:flex p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Шорткати (?)">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </button>
+
             <!-- Filter -->
             <div class="relative" x-data="{ filterOpen: false }">
                 <button @click="filterOpen = !filterOpen"
@@ -402,6 +434,103 @@
     </div>
 </div>
 
+<!-- Keyboard Shortcuts Modal -->
+<div x-show="showShortcuts" x-cloak
+     class="fixed inset-0 z-50 overflow-y-auto"
+     @keydown.escape.window="showShortcuts = false">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showShortcuts = false"></div>
+
+        <div x-show="showShortcuts"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg z-10 p-6">
+
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Клавіатурні скорочення</h3>
+                <button @click="showShortcuts = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Навігація</h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Вгору/Вниз</span>
+                            <div class="flex gap-1">
+                                <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">↑</kbd>
+                                <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">↓</kbd>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Колонки</span>
+                            <div class="flex gap-1">
+                                <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">←</kbd>
+                                <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">→</kbd>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">До колонки</span>
+                            <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">1-9</kbd>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Пошук</span>
+                            <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">/</kbd>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Дії</h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Нова картка</span>
+                            <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">N</kbd>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Відкрити</span>
+                            <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">Enter</kbd>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Завершити</span>
+                            <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">C</kbd>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Видалити</span>
+                            <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">D</kbd>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Загальні</h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Ця довідка</span>
+                            <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">?</kbd>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-gray-700 dark:text-gray-300">Закрити</span>
+                            <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">Esc</kbd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                    Використовуйте Cmd/Ctrl + Enter для швидкого збереження
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
 function kanbanBoard() {
@@ -417,6 +546,12 @@ function kanbanBoard() {
             card: null
         },
         cards: @json($board->columns->flatMap->cards->keyBy('id')),
+        selectedCardIndex: -1,
+        selectedColumnIndex: 0,
+        columns: [],
+        showShortcuts: false,
+        searchQuery: '',
+        showSearch: false,
 
         get activeFilters() {
             return [this.filters.priority, this.filters.assignee, this.filters.dueDate].filter(f => f).length;
@@ -424,7 +559,158 @@ function kanbanBoard() {
 
         init() {
             this.initSortable();
+            this.initKeyboardShortcuts();
+            this.columns = Array.from(document.querySelectorAll('.kanban-column'));
             this.$watch('filters', () => this.applyFilters(), { deep: true });
+            this.$watch('searchQuery', () => this.searchCards());
+        },
+
+        initKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Skip if typing in input/textarea
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+                    if (e.key === 'Escape') {
+                        e.target.blur();
+                        this.showAddCard = null;
+                        this.showSearch = false;
+                    }
+                    return;
+                }
+
+                // Show shortcuts help
+                if (e.key === '?') {
+                    e.preventDefault();
+                    this.showShortcuts = !this.showShortcuts;
+                    return;
+                }
+
+                // Search
+                if (e.key === '/' || (e.key === 'f' && (e.metaKey || e.ctrlKey))) {
+                    e.preventDefault();
+                    this.showSearch = true;
+                    this.$nextTick(() => this.$refs.searchInput?.focus());
+                    return;
+                }
+
+                // Close modals
+                if (e.key === 'Escape') {
+                    this.cardModal.open = false;
+                    this.showShortcuts = false;
+                    this.showSearch = false;
+                    this.showAddCard = null;
+                    return;
+                }
+
+                // New card in first column
+                if (e.key === 'n' && !e.metaKey && !e.ctrlKey) {
+                    e.preventDefault();
+                    const firstColumn = this.columns[0];
+                    if (firstColumn) {
+                        const columnId = firstColumn.dataset.columnId;
+                        this.showAddCard = parseInt(columnId);
+                        this.$nextTick(() => {
+                            const input = document.querySelector(`[x-ref="cardInput${columnId}"]`);
+                            if (input) input.focus();
+                        });
+                    }
+                    return;
+                }
+
+                // Arrow key navigation
+                if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                    e.preventDefault();
+                    this.navigateCards(e.key);
+                    return;
+                }
+
+                // Enter to open selected card
+                if (e.key === 'Enter' && this.selectedCardIndex >= 0) {
+                    e.preventDefault();
+                    const cards = this.getVisibleCardsInColumn(this.selectedColumnIndex);
+                    if (cards[this.selectedCardIndex]) {
+                        this.openCard(parseInt(cards[this.selectedCardIndex].dataset.cardId));
+                    }
+                    return;
+                }
+
+                // Quick complete with 'c'
+                if (e.key === 'c' && this.selectedCardIndex >= 0) {
+                    e.preventDefault();
+                    const cards = this.getVisibleCardsInColumn(this.selectedColumnIndex);
+                    if (cards[this.selectedCardIndex]) {
+                        this.toggleComplete(parseInt(cards[this.selectedCardIndex].dataset.cardId));
+                    }
+                    return;
+                }
+
+                // Delete with 'd' or 'Delete'
+                if ((e.key === 'd' || e.key === 'Delete') && this.selectedCardIndex >= 0) {
+                    e.preventDefault();
+                    const cards = this.getVisibleCardsInColumn(this.selectedColumnIndex);
+                    if (cards[this.selectedCardIndex]) {
+                        this.deleteCard(parseInt(cards[this.selectedCardIndex].dataset.cardId));
+                    }
+                    return;
+                }
+
+                // Quick column switch with 1-9
+                if (/^[1-9]$/.test(e.key)) {
+                    const colIndex = parseInt(e.key) - 1;
+                    if (colIndex < this.columns.length) {
+                        this.selectedColumnIndex = colIndex;
+                        this.selectedCardIndex = 0;
+                        this.highlightSelected();
+                    }
+                    return;
+                }
+            });
+        },
+
+        getVisibleCardsInColumn(colIndex) {
+            if (!this.columns[colIndex]) return [];
+            return Array.from(this.columns[colIndex].querySelectorAll('.kanban-card:not([style*="display: none"])'));
+        },
+
+        navigateCards(key) {
+            const cards = this.getVisibleCardsInColumn(this.selectedColumnIndex);
+
+            if (key === 'ArrowDown') {
+                this.selectedCardIndex = Math.min(this.selectedCardIndex + 1, cards.length - 1);
+            } else if (key === 'ArrowUp') {
+                this.selectedCardIndex = Math.max(this.selectedCardIndex - 1, 0);
+            } else if (key === 'ArrowRight') {
+                this.selectedColumnIndex = Math.min(this.selectedColumnIndex + 1, this.columns.length - 2);
+                this.selectedCardIndex = Math.min(this.selectedCardIndex, this.getVisibleCardsInColumn(this.selectedColumnIndex).length - 1);
+                if (this.selectedCardIndex < 0) this.selectedCardIndex = 0;
+            } else if (key === 'ArrowLeft') {
+                this.selectedColumnIndex = Math.max(this.selectedColumnIndex - 1, 0);
+                this.selectedCardIndex = Math.min(this.selectedCardIndex, this.getVisibleCardsInColumn(this.selectedColumnIndex).length - 1);
+                if (this.selectedCardIndex < 0) this.selectedCardIndex = 0;
+            }
+
+            this.highlightSelected();
+        },
+
+        highlightSelected() {
+            // Remove all highlights
+            document.querySelectorAll('.kanban-card').forEach(c => c.classList.remove('ring-2', 'ring-primary-500'));
+
+            // Add highlight to selected
+            const cards = this.getVisibleCardsInColumn(this.selectedColumnIndex);
+            if (cards[this.selectedCardIndex]) {
+                cards[this.selectedCardIndex].classList.add('ring-2', 'ring-primary-500');
+                cards[this.selectedCardIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        },
+
+        searchCards() {
+            const query = this.searchQuery.toLowerCase();
+            document.querySelectorAll('.kanban-card').forEach(card => {
+                const title = card.querySelector('p')?.textContent?.toLowerCase() || '';
+                const desc = card.querySelectorAll('p')[1]?.textContent?.toLowerCase() || '';
+                const matches = !query || title.includes(query) || desc.includes(query);
+                card.style.display = matches ? '' : 'none';
+            });
         },
 
         initSortable() {

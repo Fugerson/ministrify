@@ -7,6 +7,9 @@ use App\Models\BoardCard;
 use App\Models\BoardCardChecklistItem;
 use App\Models\BoardCardComment;
 use App\Models\BoardColumn;
+use App\Models\Event;
+use App\Models\Group;
+use App\Models\Ministry;
 use App\Models\Person;
 use Illuminate\Http\Request;
 
@@ -215,6 +218,11 @@ class BoardController extends Controller
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => 'nullable|exists:people,id',
+            'event_id' => 'nullable|exists:events,id',
+            'ministry_id' => 'nullable|exists:ministries,id',
+            'group_id' => 'nullable|exists:groups,id',
+            'person_id' => 'nullable|exists:people,id',
+            'entity_type' => 'nullable|in:event,ministry,group,person',
         ]);
 
         $maxPosition = $column->cards()->max('position') ?? -1;
@@ -225,6 +233,152 @@ class BoardController extends Controller
 
         return redirect()->route('boards.show', $column->board)
             ->with('success', 'Картку додано.');
+    }
+
+    // Quick card creation from entities
+    public function createFromEntity(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'entity_type' => 'required|in:event,ministry,group,person',
+            'entity_id' => 'required|integer',
+            'board_id' => 'required|exists:boards,id',
+            'title' => 'nullable|string|max:255',
+        ]);
+
+        $board = Board::find($validated['board_id']);
+        $this->authorizeBoard($board);
+
+        // Get the first column (typically "To Do")
+        $column = $board->columns()->orderBy('position')->first();
+        if (!$column) {
+            return back()->with('error', 'Дошка не має колонок.');
+        }
+
+        // Get entity details
+        $entityData = $this->getEntityData($validated['entity_type'], $validated['entity_id'], $church->id);
+        if (!$entityData) {
+            return back()->with('error', 'Об\'єкт не знайдено.');
+        }
+
+        $maxPosition = $column->cards()->max('position') ?? -1;
+
+        $card = $column->cards()->create([
+            'title' => $validated['title'] ?: $entityData['title'],
+            'description' => $entityData['description'],
+            'priority' => $entityData['priority'] ?? 'medium',
+            'due_date' => $entityData['due_date'] ?? null,
+            'created_by' => auth()->id(),
+            'position' => $maxPosition + 1,
+            'event_id' => $validated['entity_type'] === 'event' ? $validated['entity_id'] : null,
+            'ministry_id' => $validated['entity_type'] === 'ministry' ? $validated['entity_id'] : null,
+            'group_id' => $validated['entity_type'] === 'group' ? $validated['entity_id'] : null,
+            'person_id' => $validated['entity_type'] === 'person' ? $validated['entity_id'] : null,
+            'entity_type' => $validated['entity_type'],
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'card' => $card]);
+        }
+
+        return redirect()->route('boards.show', $board)
+            ->with('success', 'Картку створено з ' . $this->getEntityTypeLabel($validated['entity_type']) . '.');
+    }
+
+    private function getEntityData(string $type, int $id, int $churchId): ?array
+    {
+        return match($type) {
+            'event' => $this->getEventData($id, $churchId),
+            'ministry' => $this->getMinistryData($id, $churchId),
+            'group' => $this->getGroupData($id, $churchId),
+            'person' => $this->getPersonData($id, $churchId),
+            default => null,
+        };
+    }
+
+    private function getEventData(int $id, int $churchId): ?array
+    {
+        $event = Event::where('id', $id)->where('church_id', $churchId)->first();
+        if (!$event) return null;
+
+        return [
+            'title' => "Підготовка: {$event->title}",
+            'description' => "Подія: {$event->title}\nДата: {$event->start_date->format('d.m.Y H:i')}\n\n{$event->description}",
+            'priority' => $event->start_date->isBefore(now()->addDays(3)) ? 'high' : 'medium',
+            'due_date' => $event->start_date->subDay(),
+        ];
+    }
+
+    private function getMinistryData(int $id, int $churchId): ?array
+    {
+        $ministry = Ministry::where('id', $id)->where('church_id', $churchId)->first();
+        if (!$ministry) return null;
+
+        return [
+            'title' => "Завдання: {$ministry->name}",
+            'description' => "Служіння: {$ministry->name}\n\n{$ministry->description}",
+            'priority' => 'medium',
+            'due_date' => null,
+        ];
+    }
+
+    private function getGroupData(int $id, int $churchId): ?array
+    {
+        $group = Group::where('id', $id)->where('church_id', $churchId)->first();
+        if (!$group) return null;
+
+        return [
+            'title' => "Завдання: {$group->name}",
+            'description' => "Група: {$group->name}\n\n{$group->description}",
+            'priority' => 'medium',
+            'due_date' => null,
+        ];
+    }
+
+    private function getPersonData(int $id, int $churchId): ?array
+    {
+        $person = Person::where('id', $id)->where('church_id', $churchId)->first();
+        if (!$person) return null;
+
+        return [
+            'title' => "Завдання: {$person->full_name}",
+            'description' => "Особа: {$person->full_name}\nТелефон: {$person->phone}\nEmail: {$person->email}",
+            'priority' => 'medium',
+            'due_date' => null,
+        ];
+    }
+
+    private function getEntityTypeLabel(string $type): string
+    {
+        return match($type) {
+            'event' => 'події',
+            'ministry' => 'служіння',
+            'group' => 'групи',
+            'person' => 'особи',
+            default => 'об\'єкту',
+        };
+    }
+
+    // Get cards linked to an entity
+    public function getLinkedCards(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'entity_type' => 'required|in:event,ministry,group,person',
+            'entity_id' => 'required|integer',
+        ]);
+
+        $query = BoardCard::whereHas('column.board', function ($q) use ($church) {
+            $q->where('church_id', $church->id);
+        });
+
+        $query->where($validated['entity_type'] . '_id', $validated['entity_id']);
+
+        $cards = $query->with(['column.board', 'assignee'])->get();
+
+        return response()->json($cards);
     }
 
     public function showCard(BoardCard $card)

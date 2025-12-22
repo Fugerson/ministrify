@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Person;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Rules\SecurePassword;
 
 class UserController extends Controller
 {
@@ -39,13 +42,12 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'role' => ['required', Rule::in(['admin', 'leader', 'volunteer'])],
             'person_id' => 'nullable|exists:people,id',
-            'send_invite' => 'boolean',
         ]);
 
         $church = $this->getCurrentChurch();
 
-        // Generate random password
-        $password = Str::random(12);
+        // Generate secure random password (user will reset via email)
+        $password = Str::random(32);
 
         $user = User::create([
             'church_id' => $church->id,
@@ -63,10 +65,15 @@ class UserController extends Controller
             }
         }
 
-        // TODO: Send invite email with password
+        // Send password reset link instead of showing password
+        $status = Password::sendResetLink(['email' => $user->email]);
+
+        $message = $status === Password::RESET_LINK_SENT
+            ? 'Користувача створено. Посилання для входу надіслано на email.'
+            : 'Користувача створено. Надішліть запрошення вручну.';
 
         return redirect()->route('settings.users.index')
-            ->with('success', "Користувача створено. Тимчасовий пароль: {$password}");
+            ->with('success', $message);
     }
 
     public function edit(User $user)
@@ -94,7 +101,7 @@ class UserController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'role' => ['required', Rule::in(['admin', 'leader', 'volunteer'])],
             'person_id' => 'nullable|exists:people,id',
-            'password' => 'nullable|string|min:8',
+            'password' => ['nullable', 'string', 'min:10', new SecurePassword],
         ]);
 
         $user->update([

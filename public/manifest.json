@@ -1,0 +1,86 @@
+{
+    "name": "ChurchHub",
+    "short_name": "ChurchHub",
+    "description": "Церковна CRM система для управління служіннями, подіями та членами",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3b82f6",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "uk",
+    "categories": ["productivity", "utilities"],
+    "icons": [
+        {
+            "src": "/icons/icon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/icons/icon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/icons/icon-128x128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/icons/icon-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/icons/icon-152x152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/icons/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable any"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Розклад",
+            "short_name": "Розклад",
+            "description": "Переглянути розклад подій",
+            "url": "/schedule",
+            "icons": [{"src": "/icons/calendar.png", "sizes": "96x96"}]
+        },
+        {
+            "name": "Люди",
+            "short_name": "Люди",
+            "description": "Список членів церкви",
+            "url": "/people",
+            "icons": [{"src": "/icons/people.png", "sizes": "96x96"}]
+        },
+        {
+            "name": "Дошки",
+            "short_name": "Дошки",
+            "description": "Kanban дошки задач",
+            "url": "/boards",
+            "icons": [{"src": "/icons/boards.png", "sizes": "96x96"}]
+        }
+    ]
+}

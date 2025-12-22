@@ -102,7 +102,7 @@ class ExpenseController extends Controller
 
         Expense::create($validated);
 
-        return redirect()->route('expenses.index')
+        return redirect()->route('finances.expenses.index')
             ->with('success', 'Витрату додано.');
     }
 
@@ -143,7 +143,7 @@ class ExpenseController extends Controller
 
         $expense->update($validated);
 
-        return redirect()->route('expenses.index')
+        return redirect()->route('finances.expenses.index')
             ->with('success', 'Витрату оновлено.');
     }
 
@@ -158,7 +158,7 @@ class ExpenseController extends Controller
 
         $expense->delete();
 
-        return redirect()->route('expenses.index')
+        return redirect()->route('finances.expenses.index')
             ->with('success', 'Витрату видалено.');
     }
 

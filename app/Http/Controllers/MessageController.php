@@ -68,7 +68,11 @@ class MessageController extends Controller
             return back()->with('error', 'Немає отримувачів з Telegram');
         }
 
-        $telegram = new TelegramService($church);
+        if (!$church->telegram_bot_token) {
+            return back()->with('error', 'Telegram бот не налаштовано. Перейдіть в Налаштування → Інтеграції.');
+        }
+
+        $telegram = new TelegramService($church->telegram_bot_token);
         $sent = 0;
         $failed = 0;
 

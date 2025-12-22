@@ -25,6 +25,8 @@
 @endsection
 
 @section('content')
+<x-page-help page="boards" />
+
 <div class="space-y-6">
     <!-- Quick Stats -->
     @if($boards->count() > 0)

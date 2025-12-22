@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\Board;
+use App\Models\BoardCard;
 use App\Models\Event;
 use App\Models\Expense;
 use App\Models\Group;
+use App\Models\Income;
 use App\Models\Person;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -113,6 +117,81 @@ class DashboardController extends Controller
                 ]);
         }
 
+        // Boards with stats
+        $boards = Board::where('church_id', $church->id)
+            ->where('is_archived', false)
+            ->withCount(['columns', 'cards'])
+            ->orderBy('updated_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        // Urgent & overdue tasks
+        $urgentTasks = BoardCard::whereHas('column.board', function ($q) use ($church) {
+            $q->where('church_id', $church->id)->where('is_archived', false);
+        })
+            ->where('is_completed', false)
+            ->where(function ($q) {
+                $q->where('priority', 'urgent')
+                  ->orWhere('priority', 'high')
+                  ->orWhere(function ($dq) {
+                      $dq->whereNotNull('due_date')
+                         ->where('due_date', '<=', now()->addDays(2));
+                  });
+            })
+            ->with(['column.board', 'assignee'])
+            ->orderByRaw("CASE WHEN priority = 'urgent' THEN 0 WHEN priority = 'high' THEN 1 ELSE 2 END")
+            ->orderBy('due_date')
+            ->limit(5)
+            ->get();
+
+        // Growth stats (for admins)
+        $growthData = [];
+        if ($user->isAdmin()) {
+            // Members joined per month (last 6 months)
+            for ($i = 5; $i >= 0; $i--) {
+                $month = now()->subMonths($i);
+                $count = Person::where('church_id', $church->id)
+                    ->whereYear('joined_date', $month->year)
+                    ->whereMonth('joined_date', $month->month)
+                    ->count();
+
+                $growthData[] = [
+                    'month' => $month->translatedFormat('M'),
+                    'count' => $count,
+                ];
+            }
+        }
+
+        // Financial overview (for admins)
+        $financialData = [];
+        if ($user->isAdmin()) {
+            for ($i = 5; $i >= 0; $i--) {
+                $month = now()->subMonths($i);
+
+                $income = Income::where('church_id', $church->id)
+                    ->whereYear('date', $month->year)
+                    ->whereMonth('date', $month->month)
+                    ->sum('amount');
+
+                $expenses = Expense::where('church_id', $church->id)
+                    ->whereYear('date', $month->year)
+                    ->whereMonth('date', $month->month)
+                    ->sum('amount');
+
+                $financialData[] = [
+                    'month' => $month->translatedFormat('M'),
+                    'income' => $income,
+                    'expenses' => $expenses,
+                ];
+            }
+
+            // Current month totals
+            $stats['income_this_month'] = Income::where('church_id', $church->id)
+                ->whereMonth('date', now()->month)
+                ->whereYear('date', now()->year)
+                ->sum('amount');
+        }
+
         return view('dashboard.index', compact(
             'upcomingEvents',
             'stats',
@@ -120,7 +199,122 @@ class DashboardController extends Controller
             'pendingAssignments',
             'needAttention',
             'ministryBudgets',
-            'birthdaysThisWeek'
+            'birthdaysThisWeek',
+            'boards',
+            'urgentTasks',
+            'growthData',
+            'financialData'
         ));
+    }
+
+    /**
+     * Get chart data via AJAX
+     */
+    public function chartData(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+        $type = $request->get('type', 'attendance');
+
+        switch ($type) {
+            case 'attendance':
+                $data = $this->getAttendanceChartData($church);
+                break;
+            case 'growth':
+                $data = $this->getGrowthChartData($church);
+                break;
+            case 'financial':
+                $data = $this->getFinancialChartData($church);
+                break;
+            case 'ministries':
+                $data = $this->getMinistriesChartData($church);
+                break;
+            default:
+                $data = [];
+        }
+
+        return response()->json($data);
+    }
+
+    private function getAttendanceChartData($church): array
+    {
+        $data = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $attendance = Attendance::where('church_id', $church->id)
+                ->whereYear('date', $month->year)
+                ->whereMonth('date', $month->month)
+                ->avg('total_count') ?? 0;
+
+            $data[] = [
+                'label' => $month->translatedFormat('M'),
+                'value' => round($attendance),
+            ];
+        }
+        return $data;
+    }
+
+    private function getGrowthChartData($church): array
+    {
+        $data = [];
+        $cumulative = Person::where('church_id', $church->id)
+            ->where('joined_date', '<', now()->subMonths(11)->startOfMonth())
+            ->count();
+
+        for ($i = 11; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $joined = Person::where('church_id', $church->id)
+                ->whereYear('joined_date', $month->year)
+                ->whereMonth('joined_date', $month->month)
+                ->count();
+
+            $cumulative += $joined;
+
+            $data[] = [
+                'label' => $month->translatedFormat('M'),
+                'value' => $cumulative,
+                'new' => $joined,
+            ];
+        }
+        return $data;
+    }
+
+    private function getFinancialChartData($church): array
+    {
+        $data = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+
+            $income = Income::where('church_id', $church->id)
+                ->whereYear('date', $month->year)
+                ->whereMonth('date', $month->month)
+                ->sum('amount');
+
+            $expenses = Expense::where('church_id', $church->id)
+                ->whereYear('date', $month->year)
+                ->whereMonth('date', $month->month)
+                ->sum('amount');
+
+            $data[] = [
+                'label' => $month->translatedFormat('M'),
+                'income' => $income,
+                'expenses' => $expenses,
+            ];
+        }
+        return $data;
+    }
+
+    private function getMinistriesChartData($church): array
+    {
+        return $church->ministries()
+            ->withCount('members')
+            ->orderByDesc('members_count')
+            ->limit(10)
+            ->get()
+            ->map(fn($m) => [
+                'label' => $m->name,
+                'value' => $m->members_count,
+                'color' => $m->color ?? '#3b82f6',
+            ])
+            ->toArray();
     }
 }

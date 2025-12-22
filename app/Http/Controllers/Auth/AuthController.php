@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Rules\SecurePassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -24,10 +26,46 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        // First check credentials without logging in
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Check if 2FA is enabled
+            if ($user->two_factor_confirmed_at) {
+                // Store user ID in session and redirect to 2FA challenge
+                $request->session()->put('2fa_user_id', $user->id);
+                $request->session()->put('2fa_remember', $request->boolean('remember'));
+
+                Log::channel('security')->info('2FA challenge initiated', [
+                    'user_id' => $user->id,
+                    'email' => $credentials['email'],
+                    'ip' => $request->ip(),
+                ]);
+
+                return redirect()->route('two-factor.challenge');
+            }
+
+            // No 2FA, proceed with normal login
+            Auth::login($user, $request->boolean('remember'));
             $request->session()->regenerate();
+
+            // Log successful login
+            Log::channel('security')->info('User logged in', [
+                'user_id' => Auth::id(),
+                'email' => $credentials['email'],
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             return redirect()->intended(route('dashboard'));
         }
+
+        // Log failed login attempt
+        Log::channel('security')->warning('Failed login attempt', [
+            'email' => $credentials['email'],
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return back()->withErrors([
             'email' => 'Невірний email або пароль.',
@@ -36,9 +74,18 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $userId = Auth::id();
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        // Log logout
+        Log::channel('security')->info('User logged out', [
+            'user_id' => $userId,
+            'ip' => $request->ip(),
+        ]);
+
         return redirect()->route('login');
     }
 
@@ -70,7 +117,7 @@ class AuthController extends Controller
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required', 'confirmed', new SecurePassword],
         ]);
 
         $status = Password::reset(

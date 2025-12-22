@@ -47,5 +47,14 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        // Security audit log - separate from application logs
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'info',
+            'days' => 90, // Keep security logs longer
+            'replace_placeholders' => true,
+        ],
     ],
 ];

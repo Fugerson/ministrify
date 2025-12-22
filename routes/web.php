@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MessageController;
@@ -18,31 +19,86 @@ use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\UserPreferencesController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\BoardController;
+use App\Http\Controllers\PublicSiteController;
+use App\Http\Controllers\SystemAdminController;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
+// Home redirect
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Authentication routes
+// Public church mini-sites with rate limiting for forms
+Route::prefix('c/{slug}')->name('public.')->middleware('throttle:60,1')->group(function () {
+    Route::get('/', [PublicSiteController::class, 'church'])->name('church');
+    Route::get('/events', [PublicSiteController::class, 'events'])->name('events');
+    Route::get('/events/{event}', [PublicSiteController::class, 'event'])->name('event');
+    Route::post('/events/{event}/register', [PublicSiteController::class, 'registerForEvent'])->name('event.register')->middleware('throttle:10,1');
+    Route::get('/ministry/{ministrySlug}', [PublicSiteController::class, 'ministry'])->name('ministry');
+    Route::post('/ministry/{ministrySlug}/join', [PublicSiteController::class, 'joinMinistry'])->name('ministry.join')->middleware('throttle:10,1');
+    Route::get('/group/{groupSlug}', [PublicSiteController::class, 'group'])->name('group');
+    Route::post('/group/{groupSlug}/join', [PublicSiteController::class, 'joinGroup'])->name('group.join')->middleware('throttle:10,1');
+    Route::get('/donate', [PublicSiteController::class, 'donate'])->name('donate');
+    Route::post('/donate', [PublicSiteController::class, 'processDonation'])->name('donate.process')->middleware('throttle:5,1');
+    Route::get('/donate/success', [PublicSiteController::class, 'donateSuccess'])->name('donate.success');
+    Route::get('/contact', [PublicSiteController::class, 'contact'])->name('contact');
+});
+
+// Authentication routes with rate limiting
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle.login');
     Route::get('register', [RegisterController::class, 'showRegister'])->name('register');
-    Route::post('register', [RegisterController::class, 'register']);
+    Route::post('register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
     Route::get('forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::post('forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:3,1');
     Route::get('reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
-    Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:5,1');
 });
 
 Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// Two-Factor Authentication
+Route::get('two-factor/challenge', [\App\Http\Controllers\TwoFactorController::class, 'challenge'])->name('two-factor.challenge');
+Route::post('two-factor/verify', [\App\Http\Controllers\TwoFactorController::class, 'verify'])->name('two-factor.verify');
+
+Route::middleware('auth')->prefix('two-factor')->name('two-factor.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\TwoFactorController::class, 'show'])->name('show');
+    Route::get('enable', [\App\Http\Controllers\TwoFactorController::class, 'enable'])->name('enable');
+    Route::post('confirm', [\App\Http\Controllers\TwoFactorController::class, 'confirm'])->name('confirm');
+    Route::delete('disable', [\App\Http\Controllers\TwoFactorController::class, 'disable'])->name('disable');
+    Route::post('regenerate', [\App\Http\Controllers\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('regenerate');
+});
+
+// System Admin Panel (Super Admin only)
+Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system.')->group(function () {
+    Route::get('/', [SystemAdminController::class, 'index'])->name('index');
+
+    // Churches
+    Route::get('churches', [SystemAdminController::class, 'churches'])->name('churches.index');
+    Route::get('churches/create', [SystemAdminController::class, 'createChurch'])->name('churches.create');
+    Route::post('churches', [SystemAdminController::class, 'storeChurch'])->name('churches.store');
+    Route::get('churches/{church}', [SystemAdminController::class, 'showChurch'])->name('churches.show');
+    Route::post('churches/{church}/switch', [SystemAdminController::class, 'switchToChurch'])->name('churches.switch');
+
+    // Users
+    Route::get('users', [SystemAdminController::class, 'users'])->name('users.index');
+    Route::get('users/{user}/edit', [SystemAdminController::class, 'editUser'])->name('users.edit');
+    Route::put('users/{user}', [SystemAdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('users/{user}', [SystemAdminController::class, 'destroyUser'])->name('users.destroy');
+
+    // Audit Logs
+    Route::get('audit-logs', [SystemAdminController::class, 'auditLogs'])->name('audit-logs');
+
+    // Exit church context
+    Route::post('exit-church', [SystemAdminController::class, 'exitChurchContext'])->name('exit-church');
+});
 
 // Protected routes
 Route::middleware(['auth', 'church'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/charts', [DashboardController::class, 'chartData'])->name('dashboard.charts');
 
     // People
     Route::resource('people', PersonController::class);
@@ -70,6 +126,12 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
     Route::get('calendar', [EventController::class, 'calendar'])->name('calendar');
 
+    // Calendar Export/Import
+    Route::get('calendar/export', [EventController::class, 'exportIcal'])->name('calendar.export');
+    Route::get('calendar/import', [EventController::class, 'importForm'])->name('calendar.import');
+    Route::post('calendar/import', [EventController::class, 'importIcal'])->name('calendar.import.store');
+    Route::get('events/{event}/google', [EventController::class, 'addToGoogle'])->name('events.google');
+
     // Assignments
     Route::post('events/{event}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
     Route::put('assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
@@ -77,6 +139,17 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::post('assignments/{assignment}/confirm', [AssignmentController::class, 'confirm'])->name('assignments.confirm');
     Route::post('assignments/{assignment}/decline', [AssignmentController::class, 'decline'])->name('assignments.decline');
     Route::post('events/{event}/notify-all', [AssignmentController::class, 'notifyAll'])->name('assignments.notify-all');
+
+    // Rotation
+    Route::prefix('rotation')->name('rotation.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\RotationController::class, 'index'])->name('index');
+        Route::get('ministry/{ministry}', [\App\Http\Controllers\RotationController::class, 'ministry'])->name('ministry');
+        Route::post('ministry/{ministry}/auto-assign', [\App\Http\Controllers\RotationController::class, 'autoAssignBulk'])->name('ministry.auto-assign');
+        Route::post('event/{event}/auto-assign', [\App\Http\Controllers\RotationController::class, 'autoAssignEvent'])->name('event.auto-assign');
+        Route::get('event/{event}/preview', [\App\Http\Controllers\RotationController::class, 'previewAutoAssign'])->name('event.preview');
+        Route::get('report/{ministry}', [\App\Http\Controllers\RotationController::class, 'report'])->name('report');
+        Route::get('volunteer/{person}/stats', [\App\Http\Controllers\RotationController::class, 'volunteerStats'])->name('volunteer.stats');
+    });
 
     // Checklists
     Route::prefix('checklists')->name('checklists.')->group(function () {
@@ -97,11 +170,30 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::delete('items/{item}', [ChecklistController::class, 'deleteItem'])->name('items.delete');
     });
 
-    // Expenses (admin and leaders)
-    Route::middleware('role:admin,leader')->group(function () {
+    // Finances (admin and leaders)
+    Route::middleware('role:admin,leader')->prefix('finances')->name('finances.')->group(function () {
+        // Dashboard
+        Route::get('/', [FinanceController::class, 'index'])->name('index');
+        Route::get('chart-data', [FinanceController::class, 'chartData'])->name('chart-data');
+
+        // Incomes
+        Route::get('incomes', [FinanceController::class, 'incomes'])->name('incomes');
+        Route::get('incomes/create', [FinanceController::class, 'createIncome'])->name('incomes.create');
+        Route::post('incomes', [FinanceController::class, 'storeIncome'])->name('incomes.store');
+        Route::get('incomes/{income}/edit', [FinanceController::class, 'editIncome'])->name('incomes.edit');
+        Route::put('incomes/{income}', [FinanceController::class, 'updateIncome'])->name('incomes.update');
+        Route::delete('incomes/{income}', [FinanceController::class, 'destroyIncome'])->name('incomes.destroy');
+
+        // Expenses (legacy routes still work)
         Route::resource('expenses', ExpenseController::class);
         Route::get('expenses-report', [ExpenseController::class, 'report'])->name('expenses.report');
         Route::get('expenses-export', [ExpenseController::class, 'export'])->name('expenses.export');
+    });
+
+    // Legacy expenses routes redirect
+    Route::middleware('role:admin,leader')->group(function () {
+        Route::get('expenses', fn() => redirect()->route('finances.expenses.index'))->name('expenses.index');
+        Route::get('expenses/create', fn() => redirect()->route('finances.expenses.create'))->name('expenses.create');
     });
 
     // Attendance
@@ -114,14 +206,28 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::put('church', [SettingsController::class, 'updateChurch'])->name('church');
         Route::put('telegram', [SettingsController::class, 'updateTelegram'])->name('telegram');
         Route::post('telegram/test', [SettingsController::class, 'testTelegram'])->name('telegram.test');
+        Route::post('telegram/webhook', [SettingsController::class, 'setupWebhook'])->name('telegram.webhook');
+        Route::get('telegram/status', [SettingsController::class, 'getTelegramStatus'])->name('telegram.status');
         Route::put('notifications', [SettingsController::class, 'updateNotifications'])->name('notifications');
+        Route::put('public-site', [SettingsController::class, 'updatePublicSite'])->name('public-site');
+        Route::put('payments', [SettingsController::class, 'updatePaymentSettings'])->name('payments');
 
         // Expense categories
         Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->except(['show']);
 
+        // Income categories
+        Route::get('income-categories', [FinanceController::class, 'incomeCategories'])->name('income-categories.index');
+        Route::post('income-categories', [FinanceController::class, 'storeIncomeCategory'])->name('income-categories.store');
+        Route::put('income-categories/{incomeCategory}', [FinanceController::class, 'updateIncomeCategory'])->name('income-categories.update');
+        Route::delete('income-categories/{incomeCategory}', [FinanceController::class, 'destroyIncomeCategory'])->name('income-categories.destroy');
+
         // Users management
         Route::resource('users', \App\Http\Controllers\UserController::class);
         Route::post('users/{user}/invite', [\App\Http\Controllers\UserController::class, 'sendInvite'])->name('users.invite');
+
+        // Audit Logs
+        Route::get('audit-logs', [\App\Http\Controllers\AuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\AuditLogController::class, 'show'])->name('audit-logs.show');
     });
 
     // My profile (for volunteers)
@@ -130,6 +236,8 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::put('my-profile', [PersonController::class, 'updateMyProfile'])->name('my-profile.update');
     Route::post('my-profile/unavailable', [PersonController::class, 'addUnavailableDate'])->name('my-profile.unavailable.add');
     Route::delete('my-profile/unavailable/{unavailableDate}', [PersonController::class, 'removeUnavailableDate'])->name('my-profile.unavailable.remove');
+    Route::post('my-profile/telegram/generate-code', [PersonController::class, 'generateTelegramCode'])->name('my-profile.telegram.generate');
+    Route::delete('my-profile/telegram/unlink', [PersonController::class, 'unlinkTelegram'])->name('my-profile.telegram.unlink');
 
     // Groups (Home Groups)
     Route::resource('groups', GroupController::class);
@@ -162,6 +270,8 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::get('create', [BoardController::class, 'create'])->name('create');
         Route::post('/', [BoardController::class, 'store'])->name('store');
         Route::get('archived', [BoardController::class, 'archived'])->name('archived');
+        Route::post('create-from-entity', [BoardController::class, 'createFromEntity'])->name('create-from-entity');
+        Route::get('linked-cards', [BoardController::class, 'getLinkedCards'])->name('linked-cards');
         Route::get('{board}', [BoardController::class, 'show'])->name('show');
         Route::get('{board}/edit', [BoardController::class, 'edit'])->name('edit');
         Route::put('{board}', [BoardController::class, 'update'])->name('update');

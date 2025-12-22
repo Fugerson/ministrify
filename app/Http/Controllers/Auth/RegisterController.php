@@ -7,10 +7,12 @@ use App\Models\Church;
 use App\Models\ExpenseCategory;
 use App\Models\Tag;
 use App\Models\User;
+use App\Rules\SecurePassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -26,15 +28,23 @@ class RegisterController extends Controller
             'city' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed', new SecurePassword],
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
         DB::transaction(function () use ($request) {
-            // Create church
+            // Create church with unique slug
+            $baseSlug = Str::slug($request->church_name);
+            $slug = $baseSlug;
+            $counter = 1;
+            while (Church::where('slug', $slug)->exists()) {
+                $slug = $baseSlug . '-' . $counter++;
+            }
+
             $church = Church::create([
                 'name' => $request->church_name,
                 'city' => $request->city,
+                'slug' => $slug,
                 'settings' => [
                     'notifications' => [
                         'reminder_day_before' => true,

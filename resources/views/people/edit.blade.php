@@ -43,13 +43,13 @@
                            :class="isDragging ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : ''">
                         <input type="file" name="photo" accept="image/*" class="sr-only" @change="handleFileSelect($event)">
                         <div class="text-center">
-                            <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                                 <span class="text-primary-600 dark:text-primary-400 font-medium">Натисніть</span> або перетягніть фото
                             </p>
-                            <p class="text-xs text-gray-500 dark:text-gray-500">PNG, JPG до 2MB</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG до 2MB</p>
                         </div>
                     </label>
                 </div>
@@ -193,7 +193,7 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нотатки</h2>
 
             <textarea name="notes" rows="4" placeholder="Додаткова інформація про людину..."
-                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ old('notes', $person->notes) }}</textarea>
+                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">{{ old('notes', $person->notes) }}</textarea>
         </div>
 
         <!-- Actions -->

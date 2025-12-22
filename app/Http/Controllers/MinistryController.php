@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Board;
 use App\Models\Ministry;
 use App\Models\Person;
 use Illuminate\Http\Request;
@@ -75,6 +76,7 @@ class MinistryController extends Controller
     {
         $this->authorizeChurch($ministry);
         Gate::authorize('view-ministry', $ministry);
+        $church = $this->getCurrentChurch();
 
         $ministry->load([
             'leader',
@@ -86,7 +88,12 @@ class MinistryController extends Controller
 
         $tab = request('tab', 'schedule');
 
-        return view('ministries.show', compact('ministry', 'tab'));
+        // Get boards for task creation
+        $boards = Board::where('church_id', $church->id)
+            ->where('is_archived', false)
+            ->get();
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards'));
     }
 
     public function edit(Ministry $ministry)

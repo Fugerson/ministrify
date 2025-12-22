@@ -41,7 +41,7 @@
         </div>
 
         @if($event->notes)
-            <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+            <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <p class="text-sm text-gray-600 dark:text-gray-300">{{ $event->notes }}</p>
             </div>
         @endif
@@ -210,6 +210,9 @@
 
         <!-- Sidebar -->
         <div class="space-y-6">
+            <!-- Linked Tasks from Boards -->
+            <x-linked-cards entityType="event" :entityId="$event->id" :boards="$boards" />
+
             <!-- Checklist -->
             @can('manage-ministry', $event->ministry)
                 <x-event-checklist :event="$event" :templates="$checklistTemplates" />
@@ -219,6 +222,15 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Швидкі дії</h3>
                 <div class="space-y-2">
+                    <!-- Add to Google Calendar -->
+                    <a href="{{ route('events.google', $event) }}" target="_blank"
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
+                        <svg class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zM8.25 18.75h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm4 8h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm4 8h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5z"/>
+                        </svg>
+                        <span>Додати в Google Calendar</span>
+                    </a>
+
                     <a href="{{ route('schedule') }}"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -8,6 +8,7 @@ class Kernel extends HttpKernel
 {
     protected $middleware = [
         \Illuminate\Http\Middleware\HandleCors::class,
+        \App\Http\Middleware\SecurityHeaders::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
@@ -20,6 +21,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\SanitizeInput::class,
         ],
 
         'api' => [
@@ -42,5 +44,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'church' => \App\Http\Middleware\EnsureChurchContext::class,
         'role' => \App\Http\Middleware\CheckRole::class,
+        'throttle.login' => \App\Http\Middleware\ThrottleLogin::class,
+        'super_admin' => \App\Http\Middleware\SuperAdmin::class,
     ];
 }
