@@ -83,14 +83,32 @@
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
-    <div class="fixed top-0 left-0 right-0 z-50 bg-red-600 text-white text-center py-2 px-4 text-sm">
-        <span class="font-medium">Super Admin Mode:</span> Ви працюєте в контексті церкви "{{ $currentChurch->name }}"
-        <form method="POST" action="{{ route('system.exit-church') }}" class="inline ml-4">
-            @csrf
-            <button type="submit" class="underline hover:no-underline">Вийти з контексту →</button>
-        </form>
+    <!-- Invisible mode indicator - only small icon in corner -->
+    <div class="fixed bottom-4 left-4 z-50" x-data="{ show: false }">
+        <button @click="show = !show"
+                class="w-10 h-10 bg-gray-900/80 hover:bg-red-600 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+                title="System Admin Mode">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+        </button>
+        <div x-show="show" x-cloak @click.away="show = false"
+             class="absolute bottom-12 left-0 w-64 bg-gray-900 text-white rounded-xl shadow-2xl p-4 text-sm">
+            <p class="text-gray-400 text-xs mb-2">INVISIBLE MODE</p>
+            <p class="font-medium">{{ $currentChurch->name }}</p>
+            <p class="text-gray-400 text-xs mt-1">{{ $currentChurch->city }}</p>
+            <form method="POST" action="{{ route('system.exit-church') }}" class="mt-3">
+                @csrf
+                <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm">
+                    Вийти з церкви
+                </button>
+            </form>
+            <a href="{{ route('system.index') }}" class="block text-center mt-2 text-gray-400 hover:text-white text-xs">
+                System Admin Panel →
+            </a>
+        </div>
     </div>
-    <style>.min-h-screen { margin-top: 40px; }</style>
     @endif
     <div x-data="{ sidebarOpen: false }" class="min-h-screen flex"
          @keydown.window.prevent.cmd.k="searchOpen = true"

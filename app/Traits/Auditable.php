@@ -50,6 +50,11 @@ trait Auditable
 
         $user = auth()->user();
 
+        // Skip logging for super admin in invisible mode (impersonating church)
+        if ($user->isSuperAdmin() && session('impersonate_church_id')) {
+            return;
+        }
+
         // Get church_id from model or user
         $churchId = $this->church_id ?? $user->church_id ?? null;
 
@@ -141,6 +146,12 @@ trait Auditable
         }
 
         $user = auth()->user();
+
+        // Skip logging for super admin in invisible mode
+        if ($user->isSuperAdmin() && session('impersonate_church_id')) {
+            return;
+        }
+
         $churchId = $this->church_id ?? $user->church_id ?? null;
 
         if (!$churchId) {
