@@ -19,7 +19,7 @@
             @if($event)
                 <input type="hidden" name="event_id" value="{{ $event->id }}">
                 <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <p class="font-medium text-gray-900 dark:text-white">{{ $event->ministry->icon }} {{ $event->ministry->name }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ $event->ministry->name }}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->date->format('d.m.Y') }} о {{ $event->time->format('H:i') }}</p>
                 </div>
             @endif

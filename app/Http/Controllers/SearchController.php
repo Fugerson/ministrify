@@ -53,9 +53,10 @@ class SearchController extends Controller
             $results[] = [
                 'type' => 'ministry',
                 'icon' => 'church',
-                'title' => $ministry->icon . ' ' . $ministry->name,
+                'title' => $ministry->name,
                 'subtitle' => $ministry->members()->count() . ' учасників',
                 'url' => route('ministries.show', $ministry),
+                'color' => $ministry->color,
             ];
         }
 

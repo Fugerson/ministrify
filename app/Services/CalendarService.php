@@ -174,7 +174,7 @@ class CalendarService
     /**
      * Parse iCal content and create events
      */
-    private function parseIcalContent(string $content, Church $church, Ministry $ministry): array
+    private function parseIcalContent(string $content, Church $church, Ministry $ministry, ?Carbon $startDate = null, ?Carbon $endDate = null): array
     {
         $imported = [];
         $skipped = [];
@@ -195,6 +195,14 @@ class CalendarService
 
                 if (!$eventData) {
                     $skipped[] = 'Подія без дати або назви';
+                    continue;
+                }
+
+                // Apply date filters
+                if ($startDate && $eventData['date']->lt($startDate)) {
+                    continue;
+                }
+                if ($endDate && $eventData['date']->gt($endDate)) {
                     continue;
                 }
 
@@ -351,4 +359,34 @@ class CalendarService
     {
         return route('calendar.feed', ['token' => $token]);
     }
+
+    /**
+     * Import events from a remote iCal URL (Google Calendar, etc.)
+     */
+    public function importFromUrl(string $url, Church $church, Ministry $ministry, ?Carbon $startDate = null, ?Carbon $endDate = null): array
+    {
+        // Fetch iCal content from URL
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 30,
+                'user_agent' => 'ChurchHub Calendar Sync/1.0',
+            ],
+            'ssl' => [
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+            ],
+        ]);
+
+        $content = @file_get_contents($url, false, $context);
+
+        if ($content === false) {
+            throw new \Exception('Не вдалося завантажити календар. Перевірте URL та доступність календаря.');
+        }
+
+        // Parse the iCal content
+        $result = $this->parseIcalContent($content, $church, $ministry, $startDate, $endDate);
+
+        return $result;
+    }
+
 }

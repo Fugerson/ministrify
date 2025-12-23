@@ -52,7 +52,7 @@
                 <select name="ministry_id" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
                     <option value="">Оберіть...</option>
                     @foreach($ministries as $ministry)
-                    <option value="{{ $ministry->id }}">{{ $ministry->icon }} {{ $ministry->name }}</option>
+                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                     @endforeach
                 </select>
             </div>

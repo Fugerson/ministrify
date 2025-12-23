@@ -56,9 +56,9 @@
                         @if($item->description)
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $item->description }}</p>
                         @endif
-                        @if($item->is_completed && $item->completedBy)
+                        @if($item->is_completed && $item->completedByUser)
                             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                {{ $item->completedBy->name }} &bull; {{ $item->completed_at->format('d.m.Y H:i') }}
+                                {{ $item->completedByUser->name }} &bull; {{ $item->completed_at->format('d.m.Y H:i') }}
                             </p>
                         @endif
                     </div>

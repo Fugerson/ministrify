@@ -122,8 +122,7 @@ class ChecklistController extends Controller
 
         $template->delete();
 
-        return redirect()->route('checklists.templates')
-            ->with('success', 'Шаблон видалено.');
+        return back()->with('success', 'Шаблон видалено.');
     }
 
     // Event Checklists
@@ -146,7 +145,7 @@ class ChecklistController extends Controller
         ]);
 
         // If template selected, copy items from template
-        if ($validated['template_id']) {
+        if (!empty($validated['template_id'])) {
             $template = ChecklistTemplate::with('items')->find($validated['template_id']);
 
             foreach ($template->items as $item) {

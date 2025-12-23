@@ -133,7 +133,7 @@ class EventController extends Controller
             'ministry.positions',
             'assignments.person',
             'assignments.position',
-            'checklist.items.completedBy',
+            'checklist.items.completedByUser',
         ]);
 
         // Get available people for unfilled positions
@@ -194,8 +194,7 @@ class EventController extends Controller
 
         $event->delete();
 
-        return redirect()->route('schedule')
-            ->with('success', 'Подію видалено.');
+        return back()->with('success', 'Подію видалено.');
     }
 
     public function mySchedule()
@@ -316,5 +315,54 @@ class EventController extends Controller
         $url = $calendarService->getGoogleCalendarUrl($event);
 
         return redirect()->away($url);
+    }
+
+    /**
+     * Import events from Google Calendar URL
+     */
+    public function importFromUrl(Request $request, CalendarService $calendarService)
+    {
+        $request->validate([
+            'calendar_url' => 'required|url',
+            'ministry_id' => 'required|exists:ministries,id',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $ministry = Ministry::findOrFail($request->ministry_id);
+
+        if ($ministry->church_id !== $church->id) {
+            abort(404);
+        }
+
+        Gate::authorize('manage-ministry', $ministry);
+
+        try {
+            $result = $calendarService->importFromUrl(
+                $request->calendar_url,
+                $church,
+                $ministry,
+                $request->start_date ? Carbon::parse($request->start_date) : null,
+                $request->end_date ? Carbon::parse($request->end_date) : null
+            );
+
+            $message = "Синхронізовано подій: {$result['total_imported']}";
+            if ($result['total_skipped'] > 0) {
+                $message .= ", пропущено (дублікати): {$result['total_skipped']}";
+            }
+            if ($result['total_errors'] > 0) {
+                $message .= ", помилок: {$result['total_errors']}";
+            }
+
+            return redirect()->route('schedule')
+                ->with('success', $message)
+                ->with('import_details', $result);
+
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['calendar_url' => 'Помилка завантаження календаря: ' . $e->getMessage()]);
+        }
     }
 }

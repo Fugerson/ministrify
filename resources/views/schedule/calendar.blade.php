@@ -183,7 +183,6 @@
                                     <p class="font-medium text-gray-900 dark:text-white truncate">{{ $event->time->format('H:i') }}</p>
                                     <p class="text-gray-600 dark:text-gray-300 truncate">{{ $event->title }}</p>
                                     <div class="flex items-center mt-1">
-                                        <span class="text-lg mr-1">{{ $event->ministry->icon }}</span>
                                         @if($event->isFullyStaffed())
                                             <span class="w-2 h-2 rounded-full bg-green-500"></span>
                                         @else
@@ -297,7 +296,9 @@
                                        class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $event->ministry->color ?? '#3b82f6' }}20;">
-                                                <span class="text-xl">{{ $event->ministry->icon }}</span>
+                                                <svg class="w-5 h-5" style="color: {{ $event->ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
                                             </div>
                                             <div>
                                                 <p class="font-medium text-gray-900 dark:text-white">{{ $event->title }}</p>

@@ -95,6 +95,30 @@ class BoardCard extends Model
         return $this->hasMany(BoardCardChecklistItem::class, 'card_id')->orderBy('position');
     }
 
+    public function activities(): HasMany
+    {
+        return $this->hasMany(BoardCardActivity::class, 'card_id')->orderBy('created_at', 'desc');
+    }
+
+    public function relatedCards()
+    {
+        return $this->belongsToMany(BoardCard::class, 'board_card_relations', 'card_id', 'related_card_id')
+            ->withPivot('relation_type')
+            ->withTimestamps();
+    }
+
+    public function relatedFrom()
+    {
+        return $this->belongsToMany(BoardCard::class, 'board_card_relations', 'related_card_id', 'card_id')
+            ->withPivot('relation_type')
+            ->withTimestamps();
+    }
+
+    public function allRelatedCards()
+    {
+        return $this->relatedCards->merge($this->relatedFrom)->unique('id');
+    }
+
     public function isOverdue(): bool
     {
         if (!$this->due_date || $this->is_completed) return false;

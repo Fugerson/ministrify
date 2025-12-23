@@ -81,7 +81,7 @@
                     <option value="">Всі служіння</option>
                     @foreach($ministries as $ministry)
                         <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
-                            {{ $ministry->icon }} {{ $ministry->name }}
+                            {{ $ministry->name }}
                         </option>
                     @endforeach
                 </select>
@@ -113,7 +113,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                {{ $expense->ministry->icon }} {{ $expense->ministry->name }}
+                                {{ $expense->ministry->name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ $expense->category?->name ?? '-' }}

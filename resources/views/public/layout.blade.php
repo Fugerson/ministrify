@@ -56,6 +56,28 @@
             --primary-color: {{ $church->primary_color ?? '#3b82f6' }};
             --primary-dark: {{ $church->theme_colors["700"] }};
         }
+
+        /* Custom Scrollbars - Theme colored */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            opacity: 0.5;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased">

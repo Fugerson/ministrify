@@ -15,8 +15,9 @@ class SettingsController extends Controller
         $expenseCategories = $church->expenseCategories;
         $tags = $church->tags;
         $users = $church->users()->with('person')->get();
+        $ministries = $church->ministries()->orderBy('name')->get();
 
-        return view('settings.index', compact('church', 'expenseCategories', 'tags', 'users'));
+        return view('settings.index', compact('church', 'expenseCategories', 'tags', 'users', 'ministries'));
     }
 
     public function updateChurch(Request $request)
@@ -218,5 +219,35 @@ class SettingsController extends Controller
         ]);
 
         return back()->with('success', 'Налаштування платежів оновлено.');
+    }
+
+    /**
+     * Update theme color (accent color)
+     */
+    public function updateThemeColor(Request $request)
+    {
+        $validated = $request->validate([
+            'primary_color' => 'required|string|regex:/^#[a-fA-F0-9]{6}$/',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $church->update(['primary_color' => $validated['primary_color']]);
+
+        return back();
+    }
+
+    /**
+     * Update design theme (overall UI style)
+     */
+    public function updateDesignTheme(Request $request)
+    {
+        $validated = $request->validate([
+            'design_theme' => 'required|string|in:modern,minimal,brutalist,glass,neumorphism,corporate,playful',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $church->update(['design_theme' => $validated['design_theme']]);
+
+        return back()->with('success', 'Стиль дизайну оновлено!');
     }
 }

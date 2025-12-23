@@ -13,8 +13,8 @@
                 </svg>
             </a>
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background-color: {{ $ministry->color ?? '#3b82f6' }}20;">
-                    {{ $ministry->icon }}
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}20;">
+                    <div class="w-4 h-4 rounded-full" style="background-color: {{ $ministry->color ?? '#3b82f6' }}"></div>
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>

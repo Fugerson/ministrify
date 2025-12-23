@@ -25,9 +25,11 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
         <div class="flex items-start justify-between">
             <div class="flex items-center">
-                <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center"
                      style="background-color: {{ $event->ministry->color }}20;">
-                    {{ $event->ministry->icon }}
+                    <svg class="w-7 h-7" style="color: {{ $event->ministry->color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
                 </div>
                 <div class="ml-4">
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $event->title }}</h1>
@@ -209,7 +211,7 @@
         </div>
 
         <!-- Sidebar -->
-        <div class="space-y-6">
+        <div class="space-y-8">
             <!-- Linked Tasks from Boards -->
             <x-linked-cards entityType="event" :entityId="$event->id" :boards="$boards" />
 

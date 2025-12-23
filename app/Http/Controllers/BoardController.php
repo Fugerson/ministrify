@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Board;
 use App\Models\BoardCard;
+use App\Models\BoardCardActivity;
 use App\Models\BoardCardChecklistItem;
 use App\Models\BoardCardComment;
 use App\Models\BoardColumn;
@@ -15,21 +16,58 @@ use Illuminate\Http\Request;
 
 class BoardController extends Controller
 {
-    // Board Management
-    public function index()
+    // Board Management - Unified Church Board
+    public function index(Request $request)
     {
         $church = $this->getCurrentChurch();
-        $boards = Board::where('church_id', $church->id)
-            ->where('is_archived', false)
-            ->withCount(['columns', 'cards'])
-            ->with(['columns.cards', 'columns'])
-            ->get();
 
-        $archivedCount = Board::where('church_id', $church->id)
-            ->where('is_archived', true)
-            ->count();
+        // Get or create the main church board
+        $board = Board::firstOrCreate(
+            ['church_id' => $church->id, 'name' => 'Церковна дошка'],
+            [
+                'description' => 'Єдина дошка для всіх завдань церкви',
+                'color' => $church->primary_color ?? '#3b82f6',
+                'is_archived' => false,
+            ]
+        );
 
-        return view('boards.index', compact('boards', 'archivedCount'));
+        // Create default columns if they don't exist
+        if ($board->columns()->count() === 0) {
+            $defaultColumns = [
+                ['name' => 'Беклог', 'color' => 'gray', 'position' => 0],
+                ['name' => 'До виконання', 'color' => 'blue', 'position' => 1],
+                ['name' => 'В процесі', 'color' => 'yellow', 'position' => 2],
+                ['name' => 'Завершено', 'color' => 'green', 'position' => 3],
+            ];
+            foreach ($defaultColumns as $column) {
+                $board->columns()->create($column);
+            }
+        }
+
+        // Load board with cards
+        $board->load([
+            'columns.cards.assignee',
+            'columns.cards.ministry',
+            'columns.cards.checklistItems',
+            'columns.cards.comments',
+            'columns.cards.creator',
+            'columns.cards.attachments',
+        ]);
+
+        // Get filter data
+        $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
+        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+
+        // Get stats
+        $allCards = $board->columns->flatMap->cards;
+        $stats = [
+            'total' => $allCards->count(),
+            'completed' => $allCards->where('is_completed', true)->count(),
+            'overdue' => $allCards->filter(fn($c) => $c->due_date && $c->due_date->isPast() && !$c->is_completed)->count(),
+            'my_tasks' => $allCards->where('assigned_to', auth()->user()->person?->id)->count(),
+        ];
+
+        return view('boards.index', compact('board', 'people', 'ministries', 'stats'));
     }
 
     public function create()
@@ -74,6 +112,7 @@ class BoardController extends Controller
             'columns.cards.assignee',
             'columns.cards.checklistItems',
             'columns.cards.comments',
+            'columns.cards.attachments',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -109,8 +148,7 @@ class BoardController extends Controller
         $this->authorizeBoard($board);
         $board->delete();
 
-        return redirect()->route('boards.index')
-            ->with('success', 'Дошку видалено.');
+        return back()->with('success', 'Дошку видалено.');
     }
 
     public function archive(Board $board)
@@ -229,10 +267,13 @@ class BoardController extends Controller
         $validated['position'] = $maxPosition + 1;
         $validated['created_by'] = auth()->id();
 
-        $column->cards()->create($validated);
+        $card = $column->cards()->create($validated);
 
-        return redirect()->route('boards.show', $column->board)
-            ->with('success', 'Картку додано.');
+        // Log activity
+        BoardCardActivity::log($card, 'created');
+
+        return redirect()->route('boards.index')
+            ->with('success', 'Завдання додано.');
     }
 
     // Quick card creation from entities
@@ -381,21 +422,109 @@ class BoardController extends Controller
         return response()->json($cards);
     }
 
-    public function showCard(BoardCard $card)
+    public function showCard(BoardCard $card, Request $request)
     {
         $this->authorizeBoard($card->column->board);
 
         $card->load([
-            'column.board',
+            'column.board.columns',
             'assignee',
             'creator',
             'comments.user',
-            'attachments',
+            'attachments.uploader',
             'checklistItems',
+            'ministry',
+            'relatedCards.column',
+            'relatedFrom.column',
+            'activities.user',
         ]);
 
         $church = $this->getCurrentChurch();
-        $people = Person::where('church_id', $church->id)->get();
+        $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
+
+        // Return JSON for AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            // Get all related cards (both directions)
+            $allRelated = $card->relatedCards->merge($card->relatedFrom)->unique('id');
+
+            // Get other cards for linking (excluding current and already related)
+            $relatedIds = $allRelated->pluck('id')->push($card->id)->toArray();
+            $availableCards = BoardCard::whereHas('column.board', fn($q) => $q->where('church_id', $church->id))
+                ->whereNotIn('id', $relatedIds)
+                ->with('column')
+                ->orderBy('created_at', 'desc')
+                ->limit(50)
+                ->get();
+
+            return response()->json([
+                'card' => $card,
+                'column_name' => $card->column->name,
+                'columns' => $card->column->board->columns,
+                'comments' => $card->comments->map(fn($c) => [
+                    'id' => $c->id,
+                    'content' => $c->content,
+                    'user_name' => $c->user->name,
+                    'user_initial' => mb_substr($c->user->name, 0, 1),
+                    'created_at' => $c->created_at->diffForHumans(),
+                    'created_at_full' => $c->created_at->format('d.m.Y H:i'),
+                    'updated_at' => $c->updated_at->diffForHumans(),
+                    'is_edited' => $c->created_at->ne($c->updated_at),
+                    'is_mine' => $c->user_id === auth()->id(),
+                    'attachments' => $c->attachments ? collect($c->attachments)->map(fn($a) => [
+                        'name' => $a['name'],
+                        'url' => \Storage::url($a['path']),
+                        'mime_type' => $a['mime_type'],
+                        'is_image' => str_starts_with($a['mime_type'], 'image/'),
+                    ])->toArray() : [],
+                ]),
+                'checklist' => $card->checklistItems->map(fn($i) => [
+                    'id' => $i->id,
+                    'title' => $i->title,
+                    'is_completed' => $i->is_completed,
+                ]),
+                'checklist_progress' => $card->checklist_progress,
+                'attachments' => $card->attachments->map(fn($a) => [
+                    'id' => $a->id,
+                    'name' => $a->name,
+                    'size' => $a->size_for_humans,
+                    'mime_type' => $a->mime_type,
+                    'url' => \Storage::url($a->path),
+                    'uploader' => $a->uploader?->name,
+                    'created_at' => $a->created_at->diffForHumans(),
+                    'is_image' => str_starts_with($a->mime_type, 'image/'),
+                ]),
+                'related_cards' => $allRelated->map(fn($r) => [
+                    'id' => $r->id,
+                    'title' => $r->title,
+                    'column_name' => $r->column->name,
+                    'is_completed' => $r->is_completed,
+                ]),
+                'available_cards' => $availableCards->map(fn($c) => [
+                    'id' => $c->id,
+                    'title' => $c->title,
+                    'column_name' => $c->column->name,
+                ]),
+                'people' => $people->map(fn($p) => [
+                    'id' => $p->id,
+                    'name' => $p->full_name,
+                    'initial' => mb_substr($p->first_name, 0, 1),
+                ]),
+                'activities' => $card->activities->take(50)->map(fn($a) => [
+                    'id' => $a->id,
+                    'action' => $a->action,
+                    'field' => $a->field,
+                    'old_value' => $a->old_value,
+                    'new_value' => $a->new_value,
+                    'description' => $a->description,
+                    'user_name' => $a->user->name ?? 'Система',
+                    'user_initial' => mb_substr($a->user->name ?? 'С', 0, 1),
+                    'created_at' => $a->created_at->diffForHumans(),
+                    'created_at_full' => $a->created_at->format('d.m.Y H:i'),
+                    'metadata' => $a->metadata,
+                ]),
+            ]);
+        }
+
         $columns = $card->column->board->columns;
 
         return view('boards.card', compact('card', 'people', 'columns'));
@@ -414,6 +543,28 @@ class BoardController extends Controller
             'column_id' => 'nullable|exists:board_columns,id',
         ]);
 
+        // Track changes for activity log
+        $changes = [];
+        foreach (['title', 'description', 'priority', 'due_date', 'assigned_to', 'column_id'] as $field) {
+            if (array_key_exists($field, $validated) && $card->$field != $validated[$field]) {
+                $oldValue = $card->$field;
+                $newValue = $validated[$field];
+
+                // Get human-readable values for relationships
+                if ($field === 'column_id' && $newValue) {
+                    $newColumn = BoardColumn::find($newValue);
+                    $oldColumn = $card->column;
+                    BoardCardActivity::log($card, 'moved', $field, $oldColumn?->name, $newColumn?->name);
+                } elseif ($field === 'assigned_to') {
+                    $oldPerson = $oldValue ? Person::find($oldValue) : null;
+                    $newPerson = $newValue ? Person::find($newValue) : null;
+                    BoardCardActivity::log($card, 'assigned', $field, $oldPerson?->full_name, $newPerson?->full_name);
+                } else {
+                    BoardCardActivity::log($card, 'updated', $field, $oldValue, $newValue);
+                }
+            }
+        }
+
         $card->update($validated);
 
         if ($request->expectsJson()) {
@@ -430,8 +581,7 @@ class BoardController extends Controller
         $board = $card->column->board;
         $card->delete();
 
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Картку видалено.');
+        return back()->with('success', 'Картку видалено.');
     }
 
     public function moveCard(Request $request, BoardCard $card)
@@ -467,11 +617,52 @@ class BoardController extends Controller
 
         if ($card->is_completed) {
             $card->markAsIncomplete();
+            BoardCardActivity::log($card, 'reopened');
         } else {
             $card->markAsCompleted();
+            BoardCardActivity::log($card, 'completed');
         }
 
         return back()->with('success', 'Статус картки оновлено.');
+    }
+
+    // Duplicate card
+    public function duplicateCard(Request $request, BoardCard $card)
+    {
+        $this->authorizeBoard($card->column->board);
+
+        // Create duplicate
+        $newCard = $card->replicate(['is_completed', 'completed_at']);
+        $newCard->title = $card->title . ' (копія)';
+        $newCard->is_completed = false;
+        $newCard->completed_at = null;
+        $newCard->created_by = auth()->id();
+        $newCard->position = $card->column->cards()->max('position') + 1;
+        $newCard->save();
+
+        // Duplicate checklist items
+        foreach ($card->checklistItems as $item) {
+            $newCard->checklistItems()->create([
+                'title' => $item->title,
+                'position' => $item->position,
+                'is_completed' => false,
+            ]);
+        }
+
+        // Log activity
+        BoardCardActivity::log($newCard, 'created', null, null, null, [
+            'duplicated_from' => $card->id,
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'card' => $newCard->load('column'),
+                'message' => 'Картку здубльовано',
+            ]);
+        }
+
+        return redirect()->route('boards.index')->with('success', 'Картку здубльовано.');
     }
 
     // Card Comments
@@ -481,17 +672,59 @@ class BoardController extends Controller
 
         $validated = $request->validate([
             'content' => 'required|string',
+            'files.*' => 'nullable|file|max:10240',
         ]);
 
-        $card->comments()->create([
+        // Handle file uploads
+        $attachments = [];
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('comment-attachments', 'public');
+                $attachments[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'mime_type' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                ];
+            }
+        }
+
+        $comment = $card->comments()->create([
             'user_id' => auth()->id(),
             'content' => $validated['content'],
+            'attachments' => !empty($attachments) ? $attachments : null,
         ]);
+
+        // Log activity
+        BoardCardActivity::log($card, 'comment_added', null, null, null, [
+            'comment_id' => $comment->id,
+            'preview' => \Str::limit($validated['content'], 50),
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'comment' => [
+                    'id' => $comment->id,
+                    'content' => $comment->content,
+                    'user_name' => auth()->user()->name,
+                    'user_initial' => mb_substr(auth()->user()->name, 0, 1),
+                    'created_at' => $comment->created_at->diffForHumans(),
+                    'is_mine' => true,
+                    'attachments' => $comment->attachments ? collect($comment->attachments)->map(fn($a) => [
+                        'name' => $a['name'],
+                        'url' => \Storage::url($a['path']),
+                        'mime_type' => $a['mime_type'],
+                        'is_image' => str_starts_with($a['mime_type'], 'image/'),
+                    ])->toArray() : [],
+                ],
+            ]);
+        }
 
         return back()->with('success', 'Коментар додано.');
     }
 
-    public function destroyComment(BoardCardComment $comment)
+    public function destroyComment(Request $request, BoardCardComment $comment)
     {
         $this->authorizeBoard($comment->card->column->board);
 
@@ -499,7 +732,16 @@ class BoardController extends Controller
             abort(403);
         }
 
+        $card = $comment->card;
+        $commentContent = $comment->content;
         $comment->delete();
+
+        // Log activity
+        BoardCardActivity::log($card, 'comment_deleted', null, \Str::limit($commentContent, 50));
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Коментар видалено.');
     }
@@ -516,25 +758,218 @@ class BoardController extends Controller
         $maxPosition = $card->checklistItems()->max('position') ?? -1;
         $validated['position'] = $maxPosition + 1;
 
-        $card->checklistItems()->create($validated);
+        $item = $card->checklistItems()->create($validated);
+
+        // Log activity
+        BoardCardActivity::log($card, 'checklist_added', null, null, $validated['title']);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'item' => [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'is_completed' => false,
+                ],
+            ]);
+        }
 
         return back()->with('success', 'Пункт додано.');
     }
 
-    public function toggleChecklistItem(BoardCardChecklistItem $item)
+    public function toggleChecklistItem(Request $request, BoardCardChecklistItem $item)
     {
         $this->authorizeBoard($item->card->column->board);
+        $wasCompleted = $item->is_completed;
         $item->toggle();
+
+        // Log activity
+        $action = $item->is_completed ? 'checklist_completed' : 'checklist_uncompleted';
+        BoardCardActivity::log($item->card, $action, null, null, null, ['title' => $item->title]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'is_completed' => $item->is_completed,
+            ]);
+        }
 
         return back();
     }
 
-    public function destroyChecklistItem(BoardCardChecklistItem $item)
+    public function destroyChecklistItem(Request $request, BoardCardChecklistItem $item)
     {
         $this->authorizeBoard($item->card->column->board);
+        $card = $item->card;
+        $title = $item->title;
         $item->delete();
 
+        // Log activity
+        BoardCardActivity::log($card, 'checklist_deleted', null, $title);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Пункт видалено.');
+    }
+
+    // Update comment
+    public function updateComment(Request $request, BoardCardComment $comment)
+    {
+        $this->authorizeBoard($comment->card->column->board);
+
+        if ($comment->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'content' => 'required|string',
+        ]);
+
+        $oldContent = $comment->content;
+        $comment->update($validated);
+
+        // Log activity with diff
+        BoardCardActivity::log($comment->card, 'comment_edited', null, $oldContent, $validated['content'], [
+            'comment_id' => $comment->id,
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'comment' => [
+                    'id' => $comment->id,
+                    'content' => $comment->content,
+                    'updated_at' => $comment->updated_at->diffForHumans(),
+                    'is_edited' => true,
+                ],
+            ]);
+        }
+
+        return back()->with('success', 'Коментар оновлено.');
+    }
+
+    // Attachments
+    public function storeAttachment(Request $request, BoardCard $card)
+    {
+        $this->authorizeBoard($card->column->board);
+
+        $request->validate([
+            'file' => 'required|file|max:10240', // 10MB max
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->store('board-attachments', 'public');
+
+        $attachment = $card->attachments()->create([
+            'name' => $file->getClientOriginalName(),
+            'path' => $path,
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'uploaded_by' => auth()->id(),
+        ]);
+
+        // Log activity
+        BoardCardActivity::log($card, 'attachment_added', null, null, $file->getClientOriginalName());
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'attachment' => [
+                    'id' => $attachment->id,
+                    'name' => $attachment->name,
+                    'size' => $attachment->size_for_humans,
+                    'mime_type' => $attachment->mime_type,
+                    'url' => \Storage::url($attachment->path),
+                    'uploader' => auth()->user()->name,
+                    'created_at' => $attachment->created_at->diffForHumans(),
+                    'is_image' => str_starts_with($attachment->mime_type, 'image/'),
+                ],
+            ]);
+        }
+
+        return back()->with('success', 'Файл завантажено.');
+    }
+
+    public function destroyAttachment(Request $request, \App\Models\BoardCardAttachment $attachment)
+    {
+        $this->authorizeBoard($attachment->card->column->board);
+
+        $card = $attachment->card;
+        $fileName = $attachment->name;
+
+        \Storage::disk('public')->delete($attachment->path);
+        $attachment->delete();
+
+        // Log activity
+        BoardCardActivity::log($card, 'attachment_deleted', null, $fileName);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Файл видалено.');
+    }
+
+    // Related cards
+    public function addRelatedCard(Request $request, BoardCard $card)
+    {
+        $this->authorizeBoard($card->column->board);
+
+        $validated = $request->validate([
+            'related_card_id' => 'required|exists:board_cards,id',
+        ]);
+
+        // Don't allow relating to self
+        if ($validated['related_card_id'] == $card->id) {
+            return response()->json(['error' => 'Cannot relate card to itself'], 422);
+        }
+
+        // Check if already related
+        $exists = $card->relatedCards()->where('related_card_id', $validated['related_card_id'])->exists()
+            || $card->relatedFrom()->where('card_id', $validated['related_card_id'])->exists();
+
+        $relatedCard = BoardCard::with('column')->find($validated['related_card_id']);
+
+        if (!$exists) {
+            $card->relatedCards()->attach($validated['related_card_id'], ['relation_type' => 'related']);
+
+            // Log activity
+            BoardCardActivity::log($card, 'related_added', null, null, $relatedCard->title);
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'related_card' => [
+                    'id' => $relatedCard->id,
+                    'title' => $relatedCard->title,
+                    'column_name' => $relatedCard->column->name,
+                    'is_completed' => $relatedCard->is_completed,
+                ],
+            ]);
+        }
+
+        return back()->with('success', 'Картку пов\'язано.');
+    }
+
+    public function removeRelatedCard(Request $request, BoardCard $card, BoardCard $relatedCard)
+    {
+        $this->authorizeBoard($card->column->board);
+
+        $relatedTitle = $relatedCard->title;
+        $card->relatedCards()->detach($relatedCard->id);
+        $card->relatedFrom()->detach($relatedCard->id);
+
+        // Log activity
+        BoardCardActivity::log($card, 'related_removed', null, $relatedTitle);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Зв\'язок видалено.');
     }
 
     private function authorizeBoard(Board $board): void

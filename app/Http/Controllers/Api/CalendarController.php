@@ -57,7 +57,7 @@ class CalendarController extends Controller
         }
 
         $query = Event::where('church_id', $church->id)
-            ->with(['ministry:id,name,icon,color']);
+            ->with(['ministry:id,name,color']);
 
         // Filter by ministry
         if ($ministryId = $request->get('ministry')) {
@@ -98,7 +98,6 @@ class CalendarController extends Controller
                     'ministry' => $event->ministry ? [
                         'id' => $event->ministry->id,
                         'name' => $event->ministry->name,
-                        'icon' => $event->ministry->icon,
                         'color' => $event->ministry->color,
                     ] : null,
                 ];
@@ -126,7 +125,7 @@ class CalendarController extends Controller
 
         $event = Event::where('church_id', $church->id)
             ->where('id', $id)
-            ->with(['ministry:id,name,icon,color'])
+            ->with(['ministry:id,name,color'])
             ->first();
 
         if (!$event) {
@@ -150,7 +149,6 @@ class CalendarController extends Controller
                 'ministry' => $event->ministry ? [
                     'id' => $event->ministry->id,
                     'name' => $event->ministry->name,
-                    'icon' => $event->ministry->icon,
                     'color' => $event->ministry->color,
                 ] : null,
             ],
@@ -175,7 +173,7 @@ class CalendarController extends Controller
         }
 
         $ministries = $church->ministries()
-            ->select('id', 'name', 'icon', 'color')
+            ->select('id', 'name', 'color')
             ->get();
 
         return response()->json([

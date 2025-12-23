@@ -18,32 +18,11 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Основна інформація</h2>
 
             <div class="space-y-4">
-                <div class="grid grid-cols-4 gap-4">
-                    <div class="col-span-1">
-                        <label for="icon" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Іконка *</label>
-                        <select name="icon" id="icon" required
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-2xl">
-                            <option value="🎵">🎵</option>
-                            <option value="👶">👶</option>
-                            <option value="🎤">🎤</option>
-                            <option value="🙏">🙏</option>
-                            <option value="📖">📖</option>
-                            <option value="🏠">🏠</option>
-                            <option value="🎬">🎬</option>
-                            <option value="🎧">🎧</option>
-                            <option value="☕">☕</option>
-                            <option value="🚗">🚗</option>
-                            <option value="💻">💻</option>
-                            <option value="🎨">🎨</option>
-                        </select>
-                    </div>
-
-                    <div class="col-span-3">
-                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                               placeholder="Worship">
-                    </div>
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                    <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                           placeholder="Прославлення, Медіа, Дитяче...">
                 </div>
 
                 <div>

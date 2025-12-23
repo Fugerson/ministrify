@@ -41,6 +41,27 @@
                 font-size: 16px !important;
             }
         }
+
+        /* Custom Scrollbars - Minimalistic */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.6);
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-primary-50 via-white to-blue-50 min-h-screen">

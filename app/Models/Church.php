@@ -20,6 +20,7 @@ class Church extends Model
         'logo',
         'primary_color',
         'theme',
+        'design_theme',
         'telegram_bot_token',
         'settings',
         'payment_settings',
@@ -148,6 +149,11 @@ class Church extends Model
     public function donationCampaigns(): HasMany
     {
         return $this->hasMany(DonationCampaign::class);
+    }
+
+    public function ministryTypes(): HasMany
+    {
+        return $this->hasMany(MinistryType::class)->orderBy('sort_order');
     }
 
     public function eventRegistrations(): HasMany

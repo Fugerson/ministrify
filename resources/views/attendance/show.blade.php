@@ -16,7 +16,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendance->date->format('d.m.Y') }}</h1>
                 @if($attendance->event)
-                    <p class="text-gray-500 dark:text-gray-400">{{ $attendance->event->ministry->icon }} {{ $attendance->event->title }}</p>
+                    <p class="text-gray-500 dark:text-gray-400">{{ $attendance->event->title }}</p>
                 @endif
             </div>
             <div class="text-right">

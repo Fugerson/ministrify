@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Board;
 use App\Models\Group;
 use App\Models\Person;
 use Illuminate\Http\Request;
@@ -35,10 +34,6 @@ class GroupController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'leader_id' => 'nullable|exists:people,id',
-            'meeting_day' => 'nullable|string',
-            'meeting_time' => 'nullable|date_format:H:i',
-            'location' => 'nullable|string|max:255',
-            'color' => 'nullable|string|max:7',
         ]);
 
         $validated['church_id'] = auth()->user()->church_id;
@@ -61,19 +56,14 @@ class GroupController extends Controller
     {
         $this->authorize('view', $group);
 
-        $group->load(['leader', 'members', 'attendances' => fn($q) => $q->orderByDesc('date')->limit(10)]);
+        $group->load(['leader', 'members']);
 
         $availablePeople = Person::where('church_id', auth()->user()->church_id)
             ->whereNotIn('id', $group->members->pluck('id'))
             ->orderBy('first_name')
             ->get();
 
-        // Get boards for task creation
-        $boards = Board::where('church_id', auth()->user()->church_id)
-            ->where('is_archived', false)
-            ->get();
-
-        return view('groups.show', compact('group', 'availablePeople', 'boards'));
+        return view('groups.show', compact('group', 'availablePeople'));
     }
 
     public function edit(Group $group)
@@ -95,11 +85,6 @@ class GroupController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'leader_id' => 'nullable|exists:people,id',
-            'meeting_day' => 'nullable|string',
-            'meeting_time' => 'nullable|date_format:H:i',
-            'location' => 'nullable|string|max:255',
-            'color' => 'nullable|string|max:7',
-            'is_active' => 'boolean',
         ]);
 
         $group->update($validated);
@@ -114,8 +99,7 @@ class GroupController extends Controller
 
         $group->delete();
 
-        return redirect()->route('groups.index')
-            ->with('success', 'Групу видалено');
+        return back()->with('success', 'Групу видалено.');
     }
 
     public function addMember(Request $request, Group $group)
@@ -142,26 +126,5 @@ class GroupController extends Controller
         $group->members()->detach($person->id);
 
         return back()->with('success', 'Учасника видалено');
-    }
-
-    public function attendance(Request $request, Group $group)
-    {
-        $this->authorize('update', $group);
-
-        $validated = $request->validate([
-            'date' => 'required|date',
-            'total_count' => 'required|integer|min:0',
-            'notes' => 'nullable|string',
-        ]);
-
-        $group->attendances()->updateOrCreate(
-            ['date' => $validated['date']],
-            [
-                'total_count' => $validated['total_count'],
-                'notes' => $validated['notes'] ?? null,
-            ]
-        );
-
-        return back()->with('success', 'Відвідуваність збережено');
     }
 }

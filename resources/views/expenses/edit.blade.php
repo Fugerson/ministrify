@@ -35,7 +35,7 @@
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @foreach($ministries as $ministry)
                             <option value="{{ $ministry->id }}" {{ old('ministry_id', $expense->ministry_id) == $ministry->id ? 'selected' : '' }}>
-                                {{ $ministry->icon }} {{ $ministry->name }}
+                                {{ $ministry->name }}
                             </option>
                         @endforeach
                     </select>

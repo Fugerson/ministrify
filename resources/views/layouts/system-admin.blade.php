@@ -12,7 +12,34 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>[x-cloak] { display: none !important; }</style>
+    <style>
+        [x-cloak] { display: none !important; }
+
+        /* Custom Scrollbars - Dark theme */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(75, 85, 99, 0.6) transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.5);
+            border-radius: 3px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.7);
+        }
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+    </style>
 </head>
 <body class="font-sans antialiased bg-gray-900 text-gray-100">
     <div class="min-h-screen flex">

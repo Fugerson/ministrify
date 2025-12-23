@@ -5,31 +5,42 @@
 @section('content')
 <x-page-help page="settings" />
 
-<div class="max-w-4xl mx-auto space-y-6" x-data="{ activeTab: 'general' }">
+<div class="max-w-4xl mx-auto space-y-6" x-data="{
+    activeTab: localStorage.getItem('settings_tab') || 'general',
+    setTab(tab) {
+        this.activeTab = tab;
+        localStorage.setItem('settings_tab', tab);
+    }
+}">
     <!-- Tabs -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
         <div class="flex flex-wrap gap-2">
-            <button @click="activeTab = 'general'"
+            <button @click="setTab('general')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'general' }"
                     class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors">
                 Загальні
             </button>
-            <button @click="activeTab = 'public'"
+            <button @click="setTab('theme')"
+                    :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'theme' }"
+                    class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors">
+                Тема
+            </button>
+            <button @click="setTab('public')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'public' }"
                     class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors">
                 Публічний сайт
             </button>
-            <button @click="activeTab = 'integrations'"
+            <button @click="setTab('integrations')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'integrations' }"
                     class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors">
                 Інтеграції
             </button>
-            <button @click="activeTab = 'data'"
+            <button @click="setTab('data')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'data' }"
                     class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors">
                 Категорії та теги
             </button>
-            <button @click="activeTab = 'payments'"
+            <button @click="setTab('payments')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'payments' }"
                     class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors">
                 Платежі
@@ -142,6 +153,181 @@
             </a>
         </div>
     </div>
+    </div>
+
+    <!-- Theme Tab -->
+    <div x-show="activeTab === 'theme'" x-cloak class="space-y-6">
+        @php
+            $currentDesign = $church->design_theme ?? 'modern';
+            $currentColor = $church->primary_color ?? '#3b82f6';
+
+            $designThemes = [
+                [
+                    'id' => 'modern',
+                    'name' => 'Сучасний',
+                    'desc' => 'Заокруглені кути, м\'які тіні, сучасний вигляд',
+                    'preview' => 'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900',
+                    'card' => 'rounded-2xl shadow-lg',
+                    'btn' => 'rounded-xl'
+                ],
+                [
+                    'id' => 'minimal',
+                    'name' => 'Мінімалістичний',
+                    'desc' => 'Чисті лінії, гострі кути, без тіней',
+                    'preview' => 'bg-gray-50 dark:bg-gray-950',
+                    'card' => 'rounded border',
+                    'btn' => 'rounded-sm uppercase text-xs tracking-wider'
+                ],
+                [
+                    'id' => 'brutalist',
+                    'name' => 'Бруталізм',
+                    'desc' => 'Сміливий, різкий, високий контраст',
+                    'preview' => 'bg-white dark:bg-black',
+                    'card' => 'border-2 border-black dark:border-white',
+                    'btn' => 'border-2 border-black dark:border-white uppercase font-bold'
+                ],
+                [
+                    'id' => 'glass',
+                    'name' => 'Скло',
+                    'desc' => 'Прозорість, розмиття, ефект матового скла',
+                    'preview' => 'bg-gradient-to-br from-purple-500 to-pink-500',
+                    'card' => 'rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30',
+                    'btn' => 'rounded-xl bg-white/20 backdrop-blur'
+                ],
+                [
+                    'id' => 'neumorphism',
+                    'name' => 'Неоморфізм',
+                    'desc' => 'М\'який UI, випуклі форми, внутрішні тіні',
+                    'preview' => 'bg-gray-200 dark:bg-gray-800',
+                    'card' => 'rounded-2xl shadow-[9px_9px_16px_rgba(163,177,198,0.6),-9px_-9px_16px_rgba(255,255,255,0.8)]',
+                    'btn' => 'rounded-xl'
+                ],
+                [
+                    'id' => 'corporate',
+                    'name' => 'Корпоративний',
+                    'desc' => 'Професійний, стриманий, класичний',
+                    'preview' => 'bg-slate-50 dark:bg-slate-900',
+                    'card' => 'rounded-lg shadow-sm border',
+                    'btn' => 'rounded-md font-semibold tracking-wide'
+                ],
+                [
+                    'id' => 'playful',
+                    'name' => 'Грайливий',
+                    'desc' => 'Кольоровий, веселий, великі заокруглення',
+                    'preview' => 'bg-gradient-to-br from-yellow-200 via-pink-200 to-purple-300',
+                    'card' => 'rounded-3xl border-3 border-purple-400 shadow-xl',
+                    'btn' => 'rounded-full font-bold'
+                ],
+            ];
+        @endphp
+
+        <!-- Design Theme Selection -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Стиль дизайну</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть загальний вигляд вашого інтерфейсу</p>
+            </div>
+
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($designThemes as $theme)
+                        <form method="POST" action="{{ route('settings.design-theme') }}">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="design_theme" value="{{ $theme['id'] }}">
+                            <button type="submit"
+                                    class="w-full text-left transition-all hover:scale-[1.02] {{ $currentDesign === $theme['id'] ? 'ring-2 ring-primary-500 ring-offset-2' : '' }}">
+                                <!-- Preview Card -->
+                                <div class="h-40 {{ $theme['preview'] }} rounded-t-xl p-4 flex items-center justify-center">
+                                    <div class="w-full max-w-[200px] space-y-3">
+                                        <!-- Mini card preview -->
+                                        <div class="bg-white dark:bg-gray-800 {{ $theme['card'] }} p-3 text-xs">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <div class="w-6 h-6 rounded-full bg-primary-500"></div>
+                                                <div class="h-2 bg-gray-300 dark:bg-gray-600 rounded w-20"></div>
+                                            </div>
+                                            <div class="space-y-1">
+                                                <div class="h-1.5 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                                                <div class="h-1.5 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                                            </div>
+                                        </div>
+                                        <!-- Mini button preview -->
+                                        <div class="flex gap-2">
+                                            <div class="bg-primary-500 text-white {{ $theme['btn'] }} px-3 py-1 text-[10px]">Кнопка</div>
+                                            <div class="bg-gray-200 dark:bg-gray-700 {{ $theme['btn'] }} px-3 py-1 text-[10px]">Скасувати</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Theme info -->
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-b-xl p-4 border border-t-0 border-gray-200 dark:border-gray-700 {{ $currentDesign === $theme['id'] ? 'border-primary-500' : '' }}">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white">{{ $theme['name'] }}</h3>
+                                        @if($currentDesign === $theme['id'])
+                                            <span class="text-xs bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">Активний</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $theme['desc'] }}</p>
+                                </div>
+                            </button>
+                        </form>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Presets -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Акцентний колір</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть основний колір інтерфейсу</p>
+            </div>
+
+            <div class="p-6">
+                @php
+                    $colorPresets = [
+                        ['color' => '#3b82f6', 'name' => 'Синій'],
+                        ['color' => '#8b5cf6', 'name' => 'Фіолетовий'],
+                        ['color' => '#10b981', 'name' => 'Смарагдовий'],
+                        ['color' => '#ef4444', 'name' => 'Червоний'],
+                        ['color' => '#f59e0b', 'name' => 'Бурштиновий'],
+                        ['color' => '#ec4899', 'name' => 'Рожевий'],
+                        ['color' => '#6366f1', 'name' => 'Індіго'],
+                        ['color' => '#14b8a6', 'name' => 'Бірюзовий'],
+                        ['color' => '#84cc16', 'name' => 'Лайм'],
+                        ['color' => '#f97316', 'name' => 'Помаранч'],
+                        ['color' => '#06b6d4', 'name' => 'Блакитний'],
+                        ['color' => '#a855f7', 'name' => 'Пурпур'],
+                    ];
+                @endphp
+                <div class="flex flex-wrap gap-3">
+                    @foreach($colorPresets as $preset)
+                        <form method="POST" action="{{ route('settings.theme-color') }}" class="inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="primary_color" value="{{ $preset['color'] }}">
+                            <button type="submit"
+                                    class="group relative w-12 h-12 rounded-xl border-2 transition-all hover:scale-110 {{ $currentColor === $preset['color'] ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-500' }}"
+                                    style="background-color: {{ $preset['color'] }}"
+                                    title="{{ $preset['name'] }}">
+                                @if($currentColor === $preset['color'])
+                                    <svg class="w-5 h-5 text-white absolute inset-0 m-auto" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                @endif
+                            </button>
+                        </form>
+                    @endforeach
+                    <!-- Custom color picker -->
+                    <form method="POST" action="{{ route('settings.theme-color') }}" class="inline-flex items-center gap-2">
+                        @csrf
+                        @method('PUT')
+                        <input type="color" name="primary_color" value="{{ $currentColor }}"
+                               class="w-12 h-12 rounded-xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer"
+                               onchange="this.form.submit()">
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Public Site Tab -->
@@ -507,6 +693,45 @@
 
     <!-- Data Tab -->
     <div x-show="activeTab === 'data'" x-cloak class="space-y-6">
+    <!-- Ministries -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Служіння</h2>
+        </div>
+
+        <div class="p-6">
+            <div class="space-y-2 mb-4">
+                @forelse($ministries as $ministry)
+                    <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <a href="{{ route('ministries.show', $ministry) }}" class="flex items-center gap-2 hover:text-primary-600 dark:hover:text-primary-400">
+                            @if($ministry->color)
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $ministry->color }}"></span>
+                            @endif
+                            <span class="text-gray-900 dark:text-white">{{ $ministry->name }}</span>
+                        </a>
+                        <form method="POST" action="{{ route('settings.ministries.destroy', $ministry) }}"
+                              onsubmit="return confirm('Видалити служіння?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                Видалити
+                            </button>
+                        </form>
+                    </div>
+                @empty
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Служінь ще немає</p>
+                @endforelse
+            </div>
+
+            <a href="{{ route('ministries.create') }}" class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Додати служіння
+            </a>
+        </div>
+    </div>
+
     <!-- Expense categories -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">

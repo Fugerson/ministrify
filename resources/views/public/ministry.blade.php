@@ -20,13 +20,9 @@
             </div>
         @else
             <div class="h-40 flex items-center justify-center" style="background: linear-gradient(135deg, {{ $ministry->color ?? '#6366f1' }} 0%, {{ $ministry->color ?? '#6366f1' }}99 100%);">
-                @if($ministry->icon)
-                    <span class="text-6xl">{{ $ministry->icon }}</span>
-                @else
-                    <svg class="w-20 h-20 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
-                @endif
+                <svg class="w-20 h-20 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
             </div>
         @endif
 
@@ -36,12 +32,6 @@
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{{ $ministry->name }}</h1>
                     <p class="text-gray-500">{{ $ministry->members_count }} учасників</p>
                 </div>
-                @if($ministry->icon)
-                    <div class="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0"
-                         style="background-color: {{ $ministry->color }}20;">
-                        <span class="text-3xl">{{ $ministry->icon }}</span>
-                    </div>
-                @endif
             </div>
 
             @if($ministry->leader)

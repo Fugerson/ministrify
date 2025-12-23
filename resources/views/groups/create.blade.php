@@ -11,14 +11,17 @@
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва групи *</label>
                 <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                       placeholder="Домашня група Центр"
+                       placeholder="Молодіжна група, Хор, Служіння дітям..."
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                @error('name')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
                 <textarea name="description" id="description" rows="3"
-                          placeholder="Коротко про групу..."
+                          placeholder="Коротко про групу та її діяльність..."
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ old('description') }}</textarea>
             </div>
 
@@ -33,45 +36,7 @@
                     </option>
                     @endforeach
                 </select>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="meeting_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">День зустрічі</label>
-                    <select name="meeting_day" id="meeting_day"
-                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                        <option value="">Обрати день...</option>
-                        <option value="monday" {{ old('meeting_day') == 'monday' ? 'selected' : '' }}>Понеділок</option>
-                        <option value="tuesday" {{ old('meeting_day') == 'tuesday' ? 'selected' : '' }}>Вівторок</option>
-                        <option value="wednesday" {{ old('meeting_day') == 'wednesday' ? 'selected' : '' }}>Середа</option>
-                        <option value="thursday" {{ old('meeting_day') == 'thursday' ? 'selected' : '' }}>Четвер</option>
-                        <option value="friday" {{ old('meeting_day') == 'friday' ? 'selected' : '' }}>П'ятниця</option>
-                        <option value="saturday" {{ old('meeting_day') == 'saturday' ? 'selected' : '' }}>Субота</option>
-                        <option value="sunday" {{ old('meeting_day') == 'sunday' ? 'selected' : '' }}>Неділя</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="meeting_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Час зустрічі</label>
-                    <input type="time" name="meeting_time" id="meeting_time" value="{{ old('meeting_time') }}"
-                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                </div>
-            </div>
-
-            <div>
-                <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Місце зустрічі</label>
-                <input type="text" name="location" id="location" value="{{ old('location') }}"
-                       placeholder="вул. Хрещатик 1, кв. 5"
-                       class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-            </div>
-
-            <div>
-                <label for="color" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Колір групи</label>
-                <div class="flex items-center space-x-3">
-                    <input type="color" name="color" id="color" value="{{ old('color', '#3b82f6') }}"
-                           class="w-12 h-12 rounded-xl border-0 cursor-pointer">
-                    <span class="text-sm text-gray-500 dark:text-gray-400">Виберіть колір для ідентифікації групи</span>
-                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Лідер автоматично стане учасником групи</p>
             </div>
 
             <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">

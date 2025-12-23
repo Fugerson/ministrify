@@ -25,7 +25,7 @@
                         <option value="">Виберіть служіння</option>
                         @foreach($ministries as $ministry)
                             <option value="{{ $ministry->id }}" {{ old('ministry_id') == $ministry->id ? 'selected' : '' }}>
-                                {{ $ministry->icon }} {{ $ministry->name }}
+                                {{ $ministry->name }}
                                 @if($ministry->monthly_budget)
                                     (залишок: {{ number_format($ministry->remaining_budget, 0, ',', ' ') }} ₴)
                                 @endif

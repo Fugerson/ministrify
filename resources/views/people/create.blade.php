@@ -100,7 +100,7 @@
                             <input type="checkbox" name="ministries[{{ $ministry->id }}][selected]" value="1"
                                    @click="open = $event.target.checked"
                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 font-medium text-gray-900 dark:text-white">{{ $ministry->icon }} {{ $ministry->name }}</span>
+                            <span class="ml-2 font-medium text-gray-900 dark:text-white">{{ $ministry->name }}</span>
                         </label>
 
                         <div x-show="open" x-cloak class="mt-3 ml-6 space-y-2">

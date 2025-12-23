@@ -123,6 +123,38 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::delete('positions/{position}', [PositionController::class, 'destroy'])->name('positions.destroy');
     Route::post('positions/reorder', [PositionController::class, 'reorder'])->name('positions.reorder');
 
+    // Ministry Meetings
+    Route::prefix('ministries/{ministry}/meetings')->name('meetings.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MeetingController::class, 'index'])->name('index');
+        Route::get('create', [\App\Http\Controllers\MeetingController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\MeetingController::class, 'store'])->name('store');
+        Route::get('{meeting}', [\App\Http\Controllers\MeetingController::class, 'show'])->name('show');
+        Route::get('{meeting}/edit', [\App\Http\Controllers\MeetingController::class, 'edit'])->name('edit');
+        Route::put('{meeting}', [\App\Http\Controllers\MeetingController::class, 'update'])->name('update');
+        Route::delete('{meeting}', [\App\Http\Controllers\MeetingController::class, 'destroy'])->name('destroy');
+        Route::get('{meeting}/copy', [\App\Http\Controllers\MeetingController::class, 'copy'])->name('copy');
+        Route::post('{meeting}/copy', [\App\Http\Controllers\MeetingController::class, 'storeCopy'])->name('copy.store');
+
+        // Agenda items
+        Route::post('{meeting}/agenda', [\App\Http\Controllers\MeetingController::class, 'storeAgendaItem'])->name('agenda.store');
+        Route::post('{meeting}/agenda/reorder', [\App\Http\Controllers\MeetingController::class, 'reorderAgendaItems'])->name('agenda.reorder');
+
+        // Materials
+        Route::post('{meeting}/materials', [\App\Http\Controllers\MeetingController::class, 'storeMaterial'])->name('materials.store');
+
+        // Attendees
+        Route::post('{meeting}/attendees', [\App\Http\Controllers\MeetingController::class, 'storeAttendee'])->name('attendees.store');
+        Route::post('{meeting}/attendees/mark-all', [\App\Http\Controllers\MeetingController::class, 'markAllAttended'])->name('attendees.mark-all');
+    });
+
+    // Meeting items (standalone routes)
+    Route::put('agenda-items/{item}', [\App\Http\Controllers\MeetingController::class, 'updateAgendaItem'])->name('meetings.agenda.update');
+    Route::post('agenda-items/{item}/toggle', [\App\Http\Controllers\MeetingController::class, 'toggleAgendaItem'])->name('meetings.agenda.toggle');
+    Route::delete('agenda-items/{item}', [\App\Http\Controllers\MeetingController::class, 'destroyAgendaItem'])->name('meetings.agenda.destroy');
+    Route::delete('meeting-materials/{material}', [\App\Http\Controllers\MeetingController::class, 'destroyMaterial'])->name('meetings.materials.destroy');
+    Route::put('meeting-attendees/{attendee}', [\App\Http\Controllers\MeetingController::class, 'updateAttendee'])->name('meetings.attendees.update');
+    Route::delete('meeting-attendees/{attendee}', [\App\Http\Controllers\MeetingController::class, 'destroyAttendee'])->name('meetings.attendees.destroy');
+
     // Schedule/Events
     Route::resource('events', EventController::class);
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
@@ -132,6 +164,7 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::get('calendar/export', [EventController::class, 'exportIcal'])->name('calendar.export');
     Route::get('calendar/import', [EventController::class, 'importForm'])->name('calendar.import');
     Route::post('calendar/import', [EventController::class, 'importIcal'])->name('calendar.import.store');
+    Route::post('calendar/import/url', [EventController::class, 'importFromUrl'])->name('calendar.import.url');
     Route::get('events/{event}/google', [EventController::class, 'addToGoogle'])->name('events.google');
 
     // Assignments
@@ -213,6 +246,8 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::put('notifications', [SettingsController::class, 'updateNotifications'])->name('notifications');
         Route::put('public-site', [SettingsController::class, 'updatePublicSite'])->name('public-site');
         Route::put('payments', [SettingsController::class, 'updatePaymentSettings'])->name('payments');
+        Route::put('theme-color', [SettingsController::class, 'updateThemeColor'])->name('theme-color');
+        Route::put('design-theme', [SettingsController::class, 'updateDesignTheme'])->name('design-theme');
 
         // Expense categories
         Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->except(['show']);
@@ -222,6 +257,15 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::post('income-categories', [FinanceController::class, 'storeIncomeCategory'])->name('income-categories.store');
         Route::put('income-categories/{incomeCategory}', [FinanceController::class, 'updateIncomeCategory'])->name('income-categories.update');
         Route::delete('income-categories/{incomeCategory}', [FinanceController::class, 'destroyIncomeCategory'])->name('income-categories.destroy');
+
+        // Ministry types
+        Route::post('ministry-types', [\App\Http\Controllers\MinistryTypeController::class, 'store'])->name('ministry-types.store');
+        Route::put('ministry-types/{ministryType}', [\App\Http\Controllers\MinistryTypeController::class, 'update'])->name('ministry-types.update');
+        Route::delete('ministry-types/{ministryType}', [\App\Http\Controllers\MinistryTypeController::class, 'destroy'])->name('ministry-types.destroy');
+
+        // Ministries management from settings
+        Route::put('ministries/{ministry}/type', [\App\Http\Controllers\MinistryTypeController::class, 'updateMinistryType'])->name('ministries.update-type');
+        Route::delete('ministries/{ministry}', [\App\Http\Controllers\MinistryTypeController::class, 'destroyMinistry'])->name('ministries.destroy');
 
         // Users management
         Route::resource('users', \App\Http\Controllers\UserController::class);
@@ -241,11 +285,10 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::post('my-profile/telegram/generate-code', [PersonController::class, 'generateTelegramCode'])->name('my-profile.telegram.generate');
     Route::delete('my-profile/telegram/unlink', [PersonController::class, 'unlinkTelegram'])->name('my-profile.telegram.unlink');
 
-    // Groups (Home Groups)
+    // Groups
     Route::resource('groups', GroupController::class);
     Route::post('groups/{group}/members', [GroupController::class, 'addMember'])->name('groups.members.add');
     Route::delete('groups/{group}/members/{person}', [GroupController::class, 'removeMember'])->name('groups.members.remove');
-    Route::post('groups/{group}/attendance', [GroupController::class, 'attendance'])->name('groups.attendance');
 
     // Global Search
     Route::get('search', [SearchController::class, 'search'])->name('search');
@@ -297,12 +340,24 @@ Route::middleware(['auth', 'church'])->group(function () {
 
         // Card Comments
         Route::post('cards/{card}/comments', [BoardController::class, 'storeComment'])->name('cards.comments.store');
+        Route::put('comments/{comment}', [BoardController::class, 'updateComment'])->name('comments.update');
         Route::delete('comments/{comment}', [BoardController::class, 'destroyComment'])->name('comments.destroy');
 
         // Card Checklist
         Route::post('cards/{card}/checklist', [BoardController::class, 'storeChecklistItem'])->name('cards.checklist.store');
-        Route::post('checklist/{item}/toggle', [BoardController::class, 'toggleChecklistItem'])->name('cards.checklist.toggle');
-        Route::delete('checklist/{item}', [BoardController::class, 'destroyChecklistItem'])->name('cards.checklist.destroy');
+        Route::post('cards/checklist/{item}/toggle', [BoardController::class, 'toggleChecklistItem'])->name('cards.checklist.toggle');
+        Route::delete('cards/checklist/{item}', [BoardController::class, 'destroyChecklistItem'])->name('cards.checklist.destroy');
+
+        // Card Attachments
+        Route::post('cards/{card}/attachments', [BoardController::class, 'storeAttachment'])->name('cards.attachments.store');
+        Route::delete('attachments/{attachment}', [BoardController::class, 'destroyAttachment'])->name('attachments.destroy');
+
+        // Related Cards
+        Route::post('cards/{card}/related', [BoardController::class, 'addRelatedCard'])->name('cards.related.store');
+        Route::delete('cards/{card}/related/{relatedCard}', [BoardController::class, 'removeRelatedCard'])->name('cards.related.destroy');
+
+        // Duplicate Card
+        Route::post('cards/{card}/duplicate', [BoardController::class, 'duplicateCard'])->name('cards.duplicate');
     });
 
     // Private Messages
@@ -325,5 +380,15 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::put('{announcement}', [AnnouncementController::class, 'update'])->name('update')->middleware('role:admin,leader');
         Route::delete('{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy')->middleware('role:admin,leader');
         Route::post('{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('pin')->middleware('role:admin,leader');
+    });
+
+    // Donations (admin and leaders)
+    Route::middleware('role:admin,leader')->prefix('donations')->name('donations.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\DonationController::class, 'index'])->name('index');
+        Route::get('qr', [\App\Http\Controllers\DonationController::class, 'qrCode'])->name('qr');
+        Route::get('export', [\App\Http\Controllers\DonationController::class, 'export'])->name('export');
+        Route::post('campaigns', [\App\Http\Controllers\DonationController::class, 'storeCampaign'])->name('campaigns.store');
+        Route::post('campaigns/{campaign}/toggle', [\App\Http\Controllers\DonationController::class, 'toggleCampaign'])->name('campaigns.toggle');
+        Route::delete('campaigns/{campaign}', [\App\Http\Controllers\DonationController::class, 'destroyCampaign'])->name('campaigns.destroy');
     });
 });

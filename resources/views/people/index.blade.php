@@ -52,7 +52,7 @@
                 <select name="ministry" class="flex-shrink-0 px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500/20 text-gray-700 dark:text-gray-300">
                     <option value="">Служіння</option>
                     @foreach($ministries as $ministry)
-                        <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>{{ $ministry->icon }} {{ $ministry->name }}</option>
+                        <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>{{ $ministry->name }}</option>
                     @endforeach
                 </select>
 
@@ -97,11 +97,11 @@
                     <p class="text-sm text-primary-600 dark:text-primary-400 truncate">{{ $person->telegram_username }}</p>
                     @endif
 
-                    <!-- Ministries icons -->
+                    <!-- Ministries colors -->
                     @if($person->ministries->isNotEmpty())
                     <div class="flex items-center gap-1 mt-2">
                         @foreach($person->ministries->take(3) as $ministry)
-                        <span class="text-base" title="{{ $ministry->name }}">{{ $ministry->icon }}</span>
+                        <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $ministry->color ?? '#3b82f6' }}" title="{{ $ministry->name }}"></span>
                         @endforeach
                         @if($person->ministries->count() > 3)
                         <span class="text-xs text-gray-400 dark:text-gray-500 ml-1">+{{ $person->ministries->count() - 3 }}</span>

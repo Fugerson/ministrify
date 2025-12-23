@@ -215,8 +215,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($income);
         $income->delete();
 
-        return redirect()->route('finances.incomes')
-            ->with('success', 'Надходження видалено.');
+        return back()->with('success', 'Надходження видалено.');
     }
 
     // Income Categories

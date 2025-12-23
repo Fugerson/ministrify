@@ -18,7 +18,7 @@
                         <option value="">Виберіть служіння</option>
                         @foreach($ministries as $ministry)
                             <option value="{{ $ministry->id }}" {{ $selectedMinistry == $ministry->id ? 'selected' : '' }}>
-                                {{ $ministry->icon }} {{ $ministry->name }}
+                                {{ $ministry->name }}
                             </option>
                         @endforeach
                     </select>

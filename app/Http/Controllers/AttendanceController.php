@@ -154,8 +154,7 @@ class AttendanceController extends Controller
 
         $attendance->delete();
 
-        return redirect()->route('attendance.index')
-            ->with('success', 'Запис видалено.');
+        return back()->with('success', 'Запис видалено.');
     }
 
     public function stats(Request $request)

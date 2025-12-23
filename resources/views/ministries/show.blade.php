@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $ministry->icon . ' ' . $ministry->name)
+@section('title', $ministry->name)
 
 @section('actions')
 @can('manage-ministry', $ministry)
@@ -12,16 +12,18 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-8">
     <!-- Linked Tasks -->
     <x-linked-cards entityType="ministry" :entityId="$ministry->id" :boards="$boards" />
 
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <div class="flex items-center justify-between">
-            <div class="flex items-center">
-                <span class="text-4xl">{{ $ministry->icon }}</span>
-                <div class="ml-4">
+            <div class="flex items-center gap-3">
+                @if($ministry->color)
+                    <div class="w-4 h-4 rounded-full" style="background-color: {{ $ministry->color }}"></div>
+                @endif
+                <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
                     @if($ministry->leader)
                         <p class="text-gray-500 dark:text-gray-400">Лідер: {{ $ministry->leader->full_name }}</p>
@@ -54,6 +56,16 @@
                 <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'positions']) }}"
                    class="px-6 py-3 border-b-2 text-sm font-medium {{ $tab === 'positions' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' }}">
                     Позиції
+                </a>
+                <a href="{{ route('meetings.index', $ministry) }}"
+                   class="px-6 py-3 border-b-2 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Зустрічі
+                    @if($ministry->upcomingMeetings()->count() > 0)
+                    <span class="ml-1 px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full">{{ $ministry->upcomingMeetings()->count() }}</span>
+                    @endif
                 </a>
                 @can('manage-ministry', $ministry)
                 <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'expenses']) }}"

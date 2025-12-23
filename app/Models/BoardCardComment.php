@@ -11,6 +11,13 @@ class BoardCardComment extends Model
         'card_id',
         'user_id',
         'content',
+        'mentions',
+        'attachments',
+    ];
+
+    protected $casts = [
+        'mentions' => 'array',
+        'attachments' => 'array',
     ];
 
     public function card(): BelongsTo
@@ -21,5 +28,12 @@ class BoardCardComment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Parse @mentions from content
+    public function extractMentions(): array
+    {
+        preg_match_all('/@(\w+)/', $this->content, $matches);
+        return $matches[1] ?? [];
     }
 }

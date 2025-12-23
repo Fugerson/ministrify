@@ -42,7 +42,7 @@
                 @foreach($byMinistry as $ministry)
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium text-gray-700">{{ $ministry['icon'] }} {{ $ministry['name'] }}</span>
+                            <span class="text-sm font-medium text-gray-700">{{ $ministry['name'] }}</span>
                             <span class="text-sm text-gray-500">
                                 {{ number_format($ministry['spent'], 0, ',', ' ') }}
                                 @if($ministry['budget'])
@@ -99,7 +99,7 @@
                     @foreach($recentExpenses as $expense)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->date->format('d.m') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->ministry->icon }} {{ $expense->ministry->name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->ministry->name }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $expense->description }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">{{ number_format($expense->amount, 0, ',', ' ') }} &#8372;</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->user->name }}</td>

@@ -170,7 +170,7 @@
                                    @click="open = $event.target.checked"
                                    {{ $isInMinistry ? 'checked' : '' }}
                                    class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-3 font-medium text-gray-900 dark:text-white">{{ $ministry->icon }} {{ $ministry->name }}</span>
+                            <span class="ml-3 font-medium text-gray-900 dark:text-white">{{ $ministry->name }}</span>
                         </label>
 
                         <div x-show="open" x-cloak x-transition class="mt-4 ml-8 grid grid-cols-2 gap-2">
@@ -197,15 +197,25 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center justify-end gap-3">
+        <div class="flex items-center justify-between">
             <a href="{{ route('people.show', $person) }}"
-               class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
-                Скасувати
+               class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 text-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                Переглянути профіль
             </a>
-            <button type="submit"
-                    class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                Зберегти
-            </button>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('people.index') }}"
+                   class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
+                    Назад
+                </a>
+                <button type="submit"
+                        class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                    Зберегти
+                </button>
+            </div>
         </div>
     </form>
 </div>

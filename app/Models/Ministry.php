@@ -15,6 +15,7 @@ class Ministry extends Model
 
     protected $fillable = [
         'church_id',
+        'type_id',
         'name',
         'description',
         'icon',
@@ -37,6 +38,11 @@ class Ministry extends Model
     public function church(): BelongsTo
     {
         return $this->belongsTo(Church::class);
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(MinistryType::class, 'type_id');
     }
 
     public function leader(): BelongsTo
@@ -64,6 +70,19 @@ class Ministry extends Model
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function meetings(): HasMany
+    {
+        return $this->hasMany(MinistryMeeting::class)->orderByDesc('date');
+    }
+
+    public function upcomingMeetings(): HasMany
+    {
+        return $this->hasMany(MinistryMeeting::class)
+            ->where('date', '>=', now()->startOfDay())
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('date');
     }
 
     public function getSpentThisMonthAttribute(): float

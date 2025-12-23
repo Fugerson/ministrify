@@ -47,7 +47,6 @@ class MinistryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'icon' => 'required|string|max:10',
             'color' => 'nullable|string|max:7',
             'leader_id' => 'nullable|exists:people,id',
             'monthly_budget' => 'nullable|numeric|min:0',
@@ -82,7 +81,7 @@ class MinistryController extends Controller
             'leader',
             'positions',
             'members',
-            'events' => fn($q) => $q->upcoming()->limit(10),
+            'events' => fn($q) => $q->upcoming()->with(['ministry.positions', 'assignments'])->limit(10),
             'expenses' => fn($q) => $q->forMonth(now()->year, now()->month)->with('category'),
         ]);
 
@@ -117,7 +116,6 @@ class MinistryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'icon' => 'required|string|max:10',
             'color' => 'nullable|string|max:7',
             'leader_id' => 'nullable|exists:people,id',
             'monthly_budget' => 'nullable|numeric|min:0',
@@ -136,8 +134,7 @@ class MinistryController extends Controller
 
         $ministry->delete();
 
-        return redirect()->route('ministries.index')
-            ->with('success', 'Служіння видалено.');
+        return back()->with('success', 'Служіння видалено.');
     }
 
     public function addMember(Request $request, Ministry $ministry)

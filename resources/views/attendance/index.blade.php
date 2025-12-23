@@ -60,7 +60,7 @@
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             @if($attendance->event)
-                                {{ $attendance->event->ministry->icon }} {{ $attendance->event->ministry->name }}
+                                {{ $attendance->event->ministry->name }}
                             @else
                                 Загальний check-in
                             @endif

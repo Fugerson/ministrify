@@ -17,21 +17,21 @@
 @section('content')
 <x-page-help page="ministries" />
 
-<div class="space-y-6">
+<div class="space-y-8">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     @forelse($ministries as $ministry)
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700">
             <div class="p-6">
                 <div class="flex items-start justify-between">
-                    <div class="flex items-center">
-                        <span class="text-3xl">{{ $ministry->icon }}</span>
-                        <div class="ml-3">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $ministry->name }}</h3>
-                            @if($ministry->leader)
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Лідер: {{ $ministry->leader->full_name }}</p>
-                            @endif
-                        </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $ministry->name }}</h3>
+                        @if($ministry->leader)
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Лідер: {{ $ministry->leader->full_name }}</p>
+                        @endif
                     </div>
+                    @if($ministry->color)
+                        <div class="w-3 h-3 rounded-full" style="background-color: {{ $ministry->color }}"></div>
+                    @endif
                 </div>
 
                 <div class="mt-4">

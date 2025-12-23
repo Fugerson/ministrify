@@ -80,13 +80,40 @@ class PrivateMessageController extends Controller
      */
     public function store(Request $request)
     {
+        $currentUser = auth()->user();
+        $church = $currentUser->church;
+
+        // Check if broadcast to all
+        if ($request->input('recipient_id') === 'all') {
+            $request->validate([
+                'message' => 'required|string|max:5000',
+            ]);
+
+            $recipients = User::where('church_id', $church->id)
+                ->where('id', '!=', $currentUser->id)
+                ->pluck('id');
+
+            foreach ($recipients as $recipientId) {
+                PrivateMessage::create([
+                    'church_id' => $church->id,
+                    'sender_id' => $currentUser->id,
+                    'recipient_id' => $recipientId,
+                    'message' => $request->input('message'),
+                ]);
+            }
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'broadcast' => true, 'count' => $recipients->count()]);
+            }
+
+            return redirect()->route('pm.index')
+                ->with('success', 'Повідомлення надіслано ' . $recipients->count() . ' користувачам');
+        }
+
         $validated = $request->validate([
             'recipient_id' => 'required|exists:users,id',
             'message' => 'required|string|max:5000',
         ]);
-
-        $currentUser = auth()->user();
-        $church = $currentUser->church;
 
         // Verify recipient is from same church
         $recipient = User::findOrFail($validated['recipient_id']);

@@ -158,8 +158,7 @@ class ExpenseController extends Controller
 
         $expense->delete();
 
-        return redirect()->route('finances.expenses.index')
-            ->with('success', 'Витрату видалено.');
+        return back()->with('success', 'Витрату видалено.');
     }
 
     public function report(Request $request)
@@ -176,7 +175,7 @@ class ExpenseController extends Controller
             ->map(fn($m) => [
                 'id' => $m->id,
                 'name' => $m->name,
-                'icon' => $m->icon,
+                'color' => $m->color,
                 'budget' => $m->monthly_budget,
                 'spent' => $m->spent_this_month,
                 'percentage' => $m->budget_usage_percent,

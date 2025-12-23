@@ -160,7 +160,7 @@ class PersonController extends Controller
                 'type' => 'assignment',
                 'date' => $a->event->date,
                 'title' => $a->event->title . ' - ' . $a->position->name,
-                'subtitle' => $a->event->ministry->icon . ' ' . $a->event->ministry->name,
+                'subtitle' => $a->event->ministry->name,
                 'icon' => $a->status === 'confirmed' ? '🎯' : ($a->status === 'pending' ? '⏳' : '❌'),
                 'color' => $a->status === 'confirmed' ? 'green' : ($a->status === 'pending' ? 'yellow' : 'red'),
                 'status' => $a->status,
@@ -188,7 +188,16 @@ class PersonController extends Controller
             ];
         }
 
-        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData'));
+        // For admin inline editing
+        $tags = collect();
+        $ministries = collect();
+        if (auth()->user()->isAdmin()) {
+            $church = $this->getCurrentChurch();
+            $tags = Tag::where('church_id', $church->id)->get();
+            $ministries = $church->ministries()->with('positions')->get();
+        }
+
+        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData', 'tags', 'ministries'));
     }
 
     private function calculateAttendanceRate(Person $person): ?int
@@ -273,6 +282,11 @@ class PersonController extends Controller
             }
         }
 
+        // Return JSON for AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Дані успішно оновлено.']);
+        }
+
         return redirect()->route('people.show', $person)
             ->with('success', 'Дані успішно оновлено.');
     }
@@ -283,8 +297,7 @@ class PersonController extends Controller
 
         $person->delete();
 
-        return redirect()->route('people.index')
-            ->with('success', 'Людину видалено.');
+        return back()->with('success', 'Людину видалено.');
     }
 
     public function restore(Person $person)

@@ -52,8 +52,8 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="p-5">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background-color: {{ $ministry->color ?? '#3b82f6' }}20;">
-                        {{ $ministry->icon }}
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}20;">
+                        <div class="w-4 h-4 rounded-full" style="background-color: {{ $ministry->color ?? '#3b82f6' }}"></div>
                     </div>
                     <div>
                         <h3 class="font-semibold text-gray-900 dark:text-white">{{ $ministry->name }}</h3>

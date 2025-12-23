@@ -2,38 +2,107 @@
 
 @section('title', $person->full_name)
 
-@section('actions')
-<a href="{{ route('people.edit', $person) }}"
-   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
-    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-    </svg>
-    Редагувати
-</a>
-@endsection
+@php
+    $isAdmin = auth()->user()->isAdmin();
+    $personMinistries = $person->ministries->keyBy('id');
+@endphp
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-8" x-data="personProfile()" @change="autoSave()">
+    @if($isAdmin)
+    <!-- Auto-save status indicator -->
+    <div x-show="saveStatus !== 'idle'" x-cloak
+         class="fixed top-20 right-4 z-50 px-4 py-2 rounded-xl shadow-lg text-sm font-medium transition-all"
+         :class="{
+             'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': saveStatus === 'saving',
+             'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300': saveStatus === 'saved',
+             'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300': saveStatus === 'error'
+         }">
+        <span x-show="saveStatus === 'saving'" class="flex items-center gap-2">
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Збереження...
+        </span>
+        <span x-show="saveStatus === 'saved'" class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Збережено
+        </span>
+        <span x-show="saveStatus === 'error'" class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Помилка збереження
+        </span>
+    </div>
+    <form id="personForm" method="POST" action="{{ route('people.update', $person) }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+    @endif
+
     <!-- Header Card -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="bg-gradient-to-r from-primary-500 to-primary-600 h-24"></div>
         <div class="px-6 pb-6 -mt-12">
             <div class="flex flex-col sm:flex-row sm:items-end gap-4">
                 <!-- Avatar -->
-                <div class="flex-shrink-0">
-                    @if($person->photo)
-                        <img class="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg"
-                             src="{{ Storage::url($person->photo) }}" alt="">
+                <div class="flex-shrink-0 relative" x-data="avatarUpload()">
+                    @if($isAdmin)
+                        <template x-if="preview">
+                            <img :src="preview" class="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg">
+                        </template>
+                        <template x-if="!preview && existingPhoto">
+                            <img src="{{ $person->photo ? Storage::url($person->photo) : '' }}" class="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg">
+                        </template>
+                        <template x-if="!preview && !existingPhoto">
+                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-lg">
+                                <span class="text-3xl font-bold text-gray-500 dark:text-gray-300">{{ mb_substr($person->first_name, 0, 1) }}</span>
+                            </div>
+                        </template>
+                        <!-- Photo upload overlay -->
+                        <label class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 rounded-2xl cursor-pointer transition-opacity border-4 border-transparent">
+                            <input type="file" name="photo" accept="image/*" class="sr-only" @change="handleFileSelect($event)">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </label>
+                        <button type="button" x-show="preview || existingPhoto" @click="removePhoto()"
+                                class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors z-10">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="remove_photo" x-ref="removePhotoInput" value="0">
                     @else
-                        <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-lg">
-                            <span class="text-3xl font-bold text-gray-500 dark:text-gray-300">{{ mb_substr($person->first_name, 0, 1) }}</span>
-                        </div>
+                        @if($person->photo)
+                            <img class="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg"
+                                 src="{{ Storage::url($person->photo) }}" alt="">
+                        @else
+                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-lg">
+                                <span class="text-3xl font-bold text-gray-500 dark:text-gray-300">{{ mb_substr($person->first_name, 0, 1) }}</span>
+                            </div>
+                        @endif
                     @endif
                 </div>
 
                 <!-- Info -->
                 <div class="flex-1">
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $person->full_name }}</h1>
+                    @if($isAdmin)
+                        <div class="flex items-center gap-2">
+                            <input type="text" name="first_name" value="{{ old('first_name', $person->first_name) }}" required
+                                   class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 w-auto"
+                                   placeholder="Ім'я">
+                            <input type="text" name="last_name" value="{{ old('last_name', $person->last_name) }}" required
+                                   class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 w-auto"
+                                   placeholder="Прізвище">
+                        </div>
+                    @else
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $person->full_name }}</h1>
+                    @endif
                     <div class="flex flex-wrap gap-2 mt-2">
                         @foreach($person->tags as $tag)
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
@@ -77,31 +146,73 @@
 
             <!-- Contact Info -->
             <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                @if($person->phone)
+                @if($isAdmin)
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Телефон</p>
-                        <p class="font-medium text-gray-900 dark:text-white">{{ $person->phone }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Телефон</p>
+                        <input type="tel" name="phone" value="{{ old('phone', $person->phone) }}"
+                               class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm"
+                               placeholder="Не вказано">
                     </div>
-                @endif
-                @if($person->email)
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Email</p>
-                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ $person->email }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                        <input type="email" name="email" value="{{ old('email', $person->email) }}"
+                               class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm truncate"
+                               placeholder="Не вказано">
                     </div>
-                @endif
-                @if($person->birth_date)
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">День народження</p>
-                        <p class="font-medium text-gray-900 dark:text-white">{{ $person->birth_date->format('d.m.Y') }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">День народження</p>
+                        <input type="date" name="birth_date" value="{{ old('birth_date', $person->birth_date?->format('Y-m-d')) }}"
+                               class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm">
                     </div>
-                @endif
-                @if($person->address)
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Адреса</p>
-                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ $person->address }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Адреса</p>
+                        <input type="text" name="address" value="{{ old('address', $person->address) }}"
+                               class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm truncate"
+                               placeholder="Не вказано">
                     </div>
+                @else
+                    @if($person->phone)
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Телефон</p>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ $person->phone }}</p>
+                        </div>
+                    @endif
+                    @if($person->email)
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Email</p>
+                            <p class="font-medium text-gray-900 dark:text-white truncate">{{ $person->email }}</p>
+                        </div>
+                    @endif
+                    @if($person->birth_date)
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">День народження</p>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ $person->birth_date->format('d.m.Y') }}</p>
+                        </div>
+                    @endif
+                    @if($person->address)
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Адреса</p>
+                            <p class="font-medium text-gray-900 dark:text-white truncate">{{ $person->address }}</p>
+                        </div>
+                    @endif
                 @endif
             </div>
+
+            @if($isAdmin)
+            <!-- Additional Admin Fields -->
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Telegram</p>
+                    <div class="flex items-center">
+                        <span class="text-gray-400 text-sm">@</span>
+                        <input type="text" name="telegram_username" value="{{ old('telegram_username', $person->telegram_username) }}"
+                               class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm"
+                               placeholder="username">
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="joined_date" value="{{ $person->joined_date?->format('Y-m-d') }}">
+            @endif
         </div>
     </div>
 
@@ -164,10 +275,59 @@
         </div>
     </div>
 
+    @if($isAdmin)
+    <!-- Hidden tags to preserve existing values -->
+    @foreach($person->tags as $tag)
+        <input type="hidden" name="tags[]" value="{{ $tag->id }}">
+    @endforeach
+
+    <!-- Ministries (Admin editable) -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+        <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Служіння</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            @foreach($ministries as $ministry)
+                @php
+                    $isInMinistry = $personMinistries->has($ministry->id);
+                    $personPositionIds = [];
+                    if ($isInMinistry) {
+                        $pivot = $personMinistries->get($ministry->id)->pivot;
+                        $personPositionIds = is_array($pivot->position_ids)
+                            ? $pivot->position_ids
+                            : json_decode($pivot->position_ids ?? '[]', true);
+                    }
+                @endphp
+                <div x-data="{ open: {{ $isInMinistry ? 'true' : 'false' }} }"
+                     class="border border-gray-200 dark:border-gray-700 rounded-xl p-3 transition-colors"
+                     :class="open ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800' : ''">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="ministries[{{ $ministry->id }}][selected]" value="1"
+                               @click="open = $event.target.checked"
+                               {{ $isInMinistry ? 'checked' : '' }}
+                               class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ $ministry->name }}</span>
+                    </label>
+
+                    <div x-show="open" x-cloak x-collapse class="mt-3 ml-6 flex flex-wrap gap-2">
+                        @foreach($ministry->positions as $position)
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="ministries[{{ $ministry->id }}][positions][]" value="{{ $position->id }}"
+                                       {{ in_array($position->id, $personPositionIds ?? []) ? 'checked' : '' }}
+                                       class="w-3 h-3 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="ml-1 text-xs text-gray-600 dark:text-gray-400">{{ $position->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Ministries & Groups -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Ministries -->
+            @if(!$isAdmin)
+            <!-- Ministries (View only for non-admins) -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
                     <h2 class="font-semibold text-gray-900 dark:text-white">Служіння</h2>
@@ -178,7 +338,9 @@
                             <a href="{{ route('ministries.show', $ministry) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}20;">
-                                        <span class="text-xl">{{ $ministry->icon }}</span>
+                                        <svg class="w-5 h-5" style="color: {{ $ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900 dark:text-white">{{ $ministry->name }}</p>
@@ -205,6 +367,7 @@
                     </div>
                 @endif
             </div>
+            @endif
 
             <!-- Groups -->
             @if($person->groups->count() > 0)
@@ -294,8 +457,10 @@
             @foreach($person->assignments->take(10) as $assignment)
                 <a href="{{ route('events.show', $assignment->event) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                            <span class="text-xl">{{ $assignment->event->ministry->icon }}</span>
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $assignment->event->ministry->color ?? '#3b82f6' }}20;">
+                            <svg class="w-5 h-5" style="color: {{ $assignment->event->ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
                         </div>
                         <div>
                             <p class="font-medium text-gray-900 dark:text-white">{{ $assignment->event->title }}</p>
@@ -316,12 +481,19 @@
     @endif
 
     <!-- Notes -->
-    @if($person->notes)
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Нотатки</h2>
-        <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $person->notes }}</p>
+        @if($isAdmin)
+            <textarea name="notes" rows="3" placeholder="Додаткова інформація про людину..."
+                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm">{{ old('notes', $person->notes) }}</textarea>
+        @else
+            @if($person->notes)
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $person->notes }}</p>
+            @else
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Немає нотаток</p>
+            @endif
+        @endif
     </div>
-    @endif
 
     <!-- Actions -->
     <div class="flex items-center justify-between">
@@ -332,6 +504,7 @@
             Назад до списку
         </a>
 
+        @admin
         <form method="POST" action="{{ route('people.destroy', $person) }}"
               onsubmit="return confirm('Ви впевнені, що хочете видалити цю людину?')">
             @csrf
@@ -340,11 +513,98 @@
                 Видалити
             </button>
         </form>
+        @endadmin
     </div>
+
+    @if($isAdmin)
+    </form>
+    @endif
 </div>
 
 @push('scripts')
 <script>
+function personProfile() {
+    return {
+        saveStatus: 'idle',
+        saveTimeout: null,
+
+        autoSave() {
+            // Debounce - wait 800ms after last change
+            clearTimeout(this.saveTimeout);
+            this.saveTimeout = setTimeout(() => {
+                this.saveForm();
+            }, 800);
+        },
+
+        async saveForm() {
+            const form = document.getElementById('personForm');
+            if (!form) return;
+
+            this.saveStatus = 'saving';
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    this.saveStatus = 'saved';
+                    setTimeout(() => {
+                        this.saveStatus = 'idle';
+                    }, 2000);
+                } else {
+                    this.saveStatus = 'error';
+                    setTimeout(() => {
+                        this.saveStatus = 'idle';
+                    }, 3000);
+                }
+            } catch (error) {
+                this.saveStatus = 'error';
+                setTimeout(() => {
+                    this.saveStatus = 'idle';
+                }, 3000);
+            }
+        }
+    }
+}
+
+function avatarUpload() {
+    return {
+        preview: null,
+        isDragging: false,
+        existingPhoto: {{ $person->photo ? 'true' : 'false' }},
+
+        handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.showPreview(file);
+            }
+        },
+
+        showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.preview = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+
+        removePhoto() {
+            this.preview = null;
+            this.existingPhoto = false;
+            this.$refs.removePhotoInput.value = '1';
+            const input = this.$el.querySelector('input[type="file"]');
+            if (input) input.value = '';
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('attendanceChart');
     if (!ctx) return;

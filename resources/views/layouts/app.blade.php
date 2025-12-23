@@ -5,6 +5,16 @@
     fabOpen: false
 }" :class="{ 'dark': darkMode }">
 <head>
+    <script>
+        // Apply dark mode immediately before any rendering to prevent FOUC
+        (function() {
+            const theme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (theme === 'dark' || (theme === 'auto' && prefersDark) || (!theme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -62,6 +72,7 @@
         }
     </script>
 
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -77,9 +88,87 @@
             input, select, textarea { font-size: 16px !important; }
         }
         .dark body { background-color: #111827; }
+
+        /* Custom Scrollbars - Minimalistic Design */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        .dark * {
+            scrollbar-color: rgba(75, 85, 99, 0.6) transparent;
+        }
+
+        /* Webkit Scrollbars (Chrome, Safari, Edge) */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 3px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.6);
+        }
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* Dark mode scrollbars */
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.5);
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.7);
+        }
+
+        /* Scrollbar on hover only for cleaner look */
+        .scroll-hover::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+        .scroll-hover:hover::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+        }
+        .dark .scroll-hover:hover::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.5);
+        }
+
+        /* Thin scrollbar variant */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 2px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.5);
+        }
+        .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.4);
+        }
+        .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.6);
+        }
+
+        /* Accent colored scrollbar */
+        .scrollbar-accent::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.4);
+        }
+        .scrollbar-accent::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.6);
+        }
     </style>
 
     @stack('styles')
+
+    @include('partials.design-themes')
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
@@ -236,27 +325,86 @@
             </nav>
 
             <!-- Theme Toggle & User -->
-            <div class="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+            <div class="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50" x-data="{ showColors: false }">
                 <!-- Theme Toggle -->
                 <div class="flex items-center justify-between mb-3 px-2">
+                    @admin
+                    <button @click="showColors = !showColors" class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                        <span>Тема</span>
+                        <svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': showColors }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    @else
                     <span class="text-xs text-gray-500 dark:text-gray-400">Тема</span>
+                    @endadmin
                     <div class="flex items-center space-x-1 bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
                         <button @click="darkMode = false; localStorage.setItem('theme', 'light')"
                                 :class="!darkMode ? 'bg-white dark:bg-gray-600 shadow' : ''"
-                                class="p-1.5 rounded-md transition-all">
+                                class="p-1.5 rounded-md transition-all" title="Світла тема">
                             <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
                             </svg>
                         </button>
                         <button @click="darkMode = true; localStorage.setItem('theme', 'dark')"
                                 :class="darkMode ? 'bg-white dark:bg-gray-600 shadow' : ''"
-                                class="p-1.5 rounded-md transition-all">
+                                class="p-1.5 rounded-md transition-all" title="Темна тема">
                             <svg class="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                             </svg>
                         </button>
                     </div>
                 </div>
+
+                <!-- Color Picker (expandable, admin only) -->
+                @admin
+                <div x-show="showColors" x-collapse class="mb-3 px-2" x-data="{ currentColor: '{{ $currentChurch->primary_color ?? '#3b82f6' }}', saving: false }">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Акцентний колір</p>
+                    <div class="grid grid-cols-6 gap-1.5">
+                        @php
+                            $colorPresets = [
+                                ['color' => '#3b82f6', 'name' => 'Синій'],
+                                ['color' => '#8b5cf6', 'name' => 'Фіолетовий'],
+                                ['color' => '#10b981', 'name' => 'Зелений'],
+                                ['color' => '#ef4444', 'name' => 'Червоний'],
+                                ['color' => '#f59e0b', 'name' => 'Оранжевий'],
+                                ['color' => '#ec4899', 'name' => 'Рожевий'],
+                                ['color' => '#6366f1', 'name' => 'Індіго'],
+                                ['color' => '#14b8a6', 'name' => 'Бірюзовий'],
+                                ['color' => '#84cc16', 'name' => 'Лайм'],
+                                ['color' => '#f97316', 'name' => 'Помаранч'],
+                                ['color' => '#06b6d4', 'name' => 'Блакитний'],
+                                ['color' => '#a855f7', 'name' => 'Пурпуровий'],
+                            ];
+                        @endphp
+                        @foreach($colorPresets as $preset)
+                            <button type="button"
+                                    @click="if(!saving && currentColor !== '{{ $preset['color'] }}') {
+                                        saving = true;
+                                        currentColor = '{{ $preset['color'] }}';
+                                        fetch('{{ route('settings.theme-color') }}', {
+                                            method: 'PUT',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                                'Accept': 'application/json'
+                                            },
+                                            body: JSON.stringify({ primary_color: '{{ $preset['color'] }}' })
+                                        }).then(() => {
+                                            saving = false;
+                                            window.location.reload();
+                                        }).catch(() => saving = false);
+                                    }"
+                                    class="w-6 h-6 rounded-full border-2 transition-all hover:scale-110"
+                                    :class="currentColor === '{{ $preset['color'] }}' ? 'border-gray-900 dark:border-white ring-2 ring-offset-1 ring-gray-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-500'"
+                                    style="background-color: {{ $preset['color'] }}"
+                                    title="{{ $preset['name'] }}">
+                            </button>
+                        @endforeach
+                    </div>
+                    <p x-show="saving" class="text-xs text-primary-500 mt-2 animate-pulse">Зберігаю...</p>
+                </div>
+                @endadmin
 
                 <div class="flex items-center space-x-3">
                     <div class="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
