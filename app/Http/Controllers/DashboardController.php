@@ -6,10 +6,9 @@ use App\Models\Attendance;
 use App\Models\Board;
 use App\Models\BoardCard;
 use App\Models\Event;
-use App\Models\Expense;
 use App\Models\Group;
-use App\Models\Income;
 use App\Models\Person;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -135,23 +134,25 @@ class DashboardController extends Controller
         // Expenses breakdown by category (for admins)
         $expensesByCategory = collect();
         if ($user->isAdmin()) {
-            $stats['expenses_this_month'] = Expense::where('church_id', $church->id)
-                ->whereMonth('date', now()->month)
-                ->whereYear('date', now()->year)
+            $stats['expenses_this_month'] = Transaction::where('church_id', $church->id)
+                ->outgoing()
+                ->completed()
+                ->thisMonth()
                 ->sum('amount');
 
-            $expensesByCategory = Expense::where('church_id', $church->id)
-                ->whereMonth('date', now()->month)
-                ->whereYear('date', now()->year)
+            $expensesByCategory = Transaction::where('church_id', $church->id)
+                ->outgoing()
+                ->completed()
+                ->thisMonth()
                 ->with('category')
                 ->get()
                 ->groupBy('category_id')
-                ->map(function ($expenses, $categoryId) {
-                    $category = $expenses->first()->category;
+                ->map(function ($transactions, $categoryId) {
+                    $category = $transactions->first()->category;
                     return [
                         'name' => $category?->name ?? 'Без категорії',
-                        'amount' => $expenses->sum('amount'),
-                        'count' => $expenses->count(),
+                        'amount' => $transactions->sum('amount'),
+                        'count' => $transactions->count(),
                     ];
                 })
                 ->sortByDesc('amount')
@@ -266,14 +267,16 @@ class DashboardController extends Controller
             for ($i = 5; $i >= 0; $i--) {
                 $month = now()->subMonths($i);
 
-                $income = Income::where('church_id', $church->id)
-                    ->whereYear('date', $month->year)
-                    ->whereMonth('date', $month->month)
+                $income = Transaction::where('church_id', $church->id)
+                    ->incoming()
+                    ->completed()
+                    ->forMonth($month->year, $month->month)
                     ->sum('amount');
 
-                $expenses = Expense::where('church_id', $church->id)
-                    ->whereYear('date', $month->year)
-                    ->whereMonth('date', $month->month)
+                $expenses = Transaction::where('church_id', $church->id)
+                    ->outgoing()
+                    ->completed()
+                    ->forMonth($month->year, $month->month)
                     ->sum('amount');
 
                 $financialData[] = [
@@ -284,9 +287,10 @@ class DashboardController extends Controller
             }
 
             // Current month totals
-            $stats['income_this_month'] = Income::where('church_id', $church->id)
-                ->whereMonth('date', now()->month)
-                ->whereYear('date', now()->year)
+            $stats['income_this_month'] = Transaction::where('church_id', $church->id)
+                ->incoming()
+                ->completed()
+                ->thisMonth()
                 ->sum('amount');
         }
 
@@ -382,14 +386,16 @@ class DashboardController extends Controller
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
 
-            $income = Income::where('church_id', $church->id)
-                ->whereYear('date', $month->year)
-                ->whereMonth('date', $month->month)
+            $income = Transaction::where('church_id', $church->id)
+                ->incoming()
+                ->completed()
+                ->forMonth($month->year, $month->month)
                 ->sum('amount');
 
-            $expenses = Expense::where('church_id', $church->id)
-                ->whereYear('date', $month->year)
-                ->whereMonth('date', $month->month)
+            $expenses = Transaction::where('church_id', $church->id)
+                ->outgoing()
+                ->completed()
+                ->forMonth($month->year, $month->month)
                 ->sum('amount');
 
             $data[] = [

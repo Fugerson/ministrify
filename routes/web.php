@@ -214,7 +214,7 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::get('/', [FinanceController::class, 'index'])->name('index');
         Route::get('chart-data', [FinanceController::class, 'chartData'])->name('chart-data');
 
-        // Incomes
+        // Incomes (using Transaction model)
         Route::get('incomes', [FinanceController::class, 'incomes'])->name('incomes');
         Route::get('incomes/create', [FinanceController::class, 'createIncome'])->name('incomes.create');
         Route::post('incomes', [FinanceController::class, 'storeIncome'])->name('incomes.store');
@@ -222,10 +222,19 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::put('incomes/{income}', [FinanceController::class, 'updateIncome'])->name('incomes.update');
         Route::delete('incomes/{income}', [FinanceController::class, 'destroyIncome'])->name('incomes.destroy');
 
-        // Expenses (legacy routes still work)
-        Route::resource('expenses', ExpenseController::class);
-        Route::get('expenses-report', [ExpenseController::class, 'report'])->name('expenses.report');
-        Route::get('expenses-export', [ExpenseController::class, 'export'])->name('expenses.export');
+        // Expenses (using Transaction model)
+        Route::get('expenses', [FinanceController::class, 'expenses'])->name('expenses.index');
+        Route::get('expenses/create', [FinanceController::class, 'createExpense'])->name('expenses.create');
+        Route::post('expenses', [FinanceController::class, 'storeExpense'])->name('expenses.store');
+        Route::get('expenses/{expense}/edit', [FinanceController::class, 'editExpense'])->name('expenses.edit');
+        Route::put('expenses/{expense}', [FinanceController::class, 'updateExpense'])->name('expenses.update');
+        Route::delete('expenses/{expense}', [FinanceController::class, 'destroyExpense'])->name('expenses.destroy');
+
+        // Categories
+        Route::get('categories', [FinanceController::class, 'categories'])->name('categories.index');
+        Route::post('categories', [FinanceController::class, 'storeCategory'])->name('categories.store');
+        Route::put('categories/{category}', [FinanceController::class, 'updateCategory'])->name('categories.update');
+        Route::delete('categories/{category}', [FinanceController::class, 'destroyCategory'])->name('categories.destroy');
     });
 
     // Legacy expenses routes redirect

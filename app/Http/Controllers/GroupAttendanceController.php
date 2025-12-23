@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
+use App\Models\AttendanceRecord;
 use App\Models\Group;
-use App\Models\GroupAttendance;
-use App\Models\GroupAttendanceRecord;
 use Illuminate\Http\Request;
 
 class GroupAttendanceController extends Controller
@@ -68,9 +68,8 @@ class GroupAttendanceController extends Controller
 
         $presentIds = $validated['present'] ?? [];
 
-        $attendance = GroupAttendance::create([
-            'group_id' => $group->id,
-            'church_id' => auth()->user()->church_id,
+        // Create unified attendance record
+        $attendance = $group->createAttendance([
             'date' => $validated['date'],
             'time' => $validated['time'] ?? null,
             'location' => $validated['location'] ?? $group->meeting_location,
@@ -83,8 +82,8 @@ class GroupAttendanceController extends Controller
 
         // Create attendance records
         foreach ($group->members as $member) {
-            GroupAttendanceRecord::create([
-                'group_attendance_id' => $attendance->id,
+            AttendanceRecord::create([
+                'attendance_id' => $attendance->id,
                 'person_id' => $member->id,
                 'present' => in_array($member->id, $presentIds),
                 'checked_in_at' => in_array($member->id, $presentIds) ? now()->format('H:i') : null,
@@ -95,7 +94,7 @@ class GroupAttendanceController extends Controller
             ->with('success', 'Відвідуваність записано');
     }
 
-    public function show(Group $group, GroupAttendance $attendance)
+    public function show(Group $group, Attendance $attendance)
     {
         $this->authorize('view', $group);
 
@@ -104,7 +103,7 @@ class GroupAttendanceController extends Controller
         return view('groups.attendance.show', compact('group', 'attendance'));
     }
 
-    public function edit(Group $group, GroupAttendance $attendance)
+    public function edit(Group $group, Attendance $attendance)
     {
         $this->authorize('update', $group);
 
@@ -116,7 +115,7 @@ class GroupAttendanceController extends Controller
         return view('groups.attendance.edit', compact('group', 'attendance', 'presentIds'));
     }
 
-    public function update(Request $request, Group $group, GroupAttendance $attendance)
+    public function update(Request $request, Group $group, Attendance $attendance)
     {
         $this->authorize('update', $group);
 
@@ -153,8 +152,8 @@ class GroupAttendanceController extends Controller
         $existingPersonIds = $attendance->records->pluck('person_id')->toArray();
         foreach ($group->members as $member) {
             if (!in_array($member->id, $existingPersonIds)) {
-                GroupAttendanceRecord::create([
-                    'group_attendance_id' => $attendance->id,
+                AttendanceRecord::create([
+                    'attendance_id' => $attendance->id,
                     'person_id' => $member->id,
                     'present' => in_array($member->id, $presentIds),
                 ]);
@@ -165,7 +164,7 @@ class GroupAttendanceController extends Controller
             ->with('success', 'Відвідуваність оновлено');
     }
 
-    public function destroy(Group $group, GroupAttendance $attendance)
+    public function destroy(Group $group, Attendance $attendance)
     {
         $this->authorize('update', $group);
 
@@ -187,9 +186,7 @@ class GroupAttendanceController extends Controller
         $attendance = $group->attendances()->whereDate('date', today())->first();
 
         if (!$attendance) {
-            $attendance = GroupAttendance::create([
-                'group_id' => $group->id,
-                'church_id' => auth()->user()->church_id,
+            $attendance = $group->createAttendance([
                 'date' => today(),
                 'time' => now()->format('H:i'),
                 'location' => $group->meeting_location,
@@ -198,8 +195,8 @@ class GroupAttendanceController extends Controller
 
             // Create empty records for all members
             foreach ($group->members as $member) {
-                GroupAttendanceRecord::create([
-                    'group_attendance_id' => $attendance->id,
+                AttendanceRecord::create([
+                    'attendance_id' => $attendance->id,
                     'person_id' => $member->id,
                     'present' => false,
                 ]);
@@ -214,7 +211,7 @@ class GroupAttendanceController extends Controller
     /**
      * Toggle member presence via AJAX
      */
-    public function togglePresence(Request $request, Group $group, GroupAttendance $attendance)
+    public function togglePresence(Request $request, Group $group, Attendance $attendance)
     {
         $this->authorize('update', $group);
 
@@ -230,8 +227,8 @@ class GroupAttendanceController extends Controller
                 'checked_in_at' => !$record->present ? now()->format('H:i') : null,
             ]);
         } else {
-            $record = GroupAttendanceRecord::create([
-                'group_attendance_id' => $attendance->id,
+            $record = AttendanceRecord::create([
+                'attendance_id' => $attendance->id,
                 'person_id' => $validated['person_id'],
                 'present' => true,
                 'checked_in_at' => now()->format('H:i'),
@@ -239,16 +236,12 @@ class GroupAttendanceController extends Controller
         }
 
         // Update attendance counts
-        $membersPresent = $attendance->records()->where('present', true)->count();
-        $attendance->update([
-            'members_present' => $membersPresent,
-            'total_count' => $membersPresent + $attendance->guests_count,
-        ]);
+        $attendance->recalculateCounts();
 
         return response()->json([
             'success' => true,
             'present' => $record->present,
-            'members_present' => $membersPresent,
+            'members_present' => $attendance->members_present,
         ]);
     }
 }

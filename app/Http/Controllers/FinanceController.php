@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Expense;
-use App\Models\ExpenseCategory;
-use App\Models\Income;
-use App\Models\IncomeCategory;
 use App\Models\Ministry;
 use App\Models\Person;
+use App\Models\Transaction;
+use App\Models\TransactionCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,9 +19,9 @@ class FinanceController extends Controller
         $year = $request->get('year', now()->year);
         $month = $request->get('month');
 
-        // Calculate totals
-        $incomeQuery = Income::where('church_id', $church->id);
-        $expenseQuery = Expense::where('church_id', $church->id);
+        // Calculate totals using Transaction model
+        $incomeQuery = Transaction::where('church_id', $church->id)->incoming()->completed();
+        $expenseQuery = Transaction::where('church_id', $church->id)->outgoing()->completed();
 
         if ($month) {
             $incomeQuery->forMonth($year, $month);
@@ -31,7 +29,7 @@ class FinanceController extends Controller
             $periodLabel = $this->getMonthName($month) . ' ' . $year;
         } else {
             $incomeQuery->forYear($year);
-            $expenseQuery->whereYear('date', $year);
+            $expenseQuery->forYear($year);
             $periodLabel = $year . ' рік';
         }
 
@@ -39,42 +37,74 @@ class FinanceController extends Controller
         $totalExpense = $expenseQuery->sum('amount');
         $balance = $totalIncome - $totalExpense;
 
-        // Monthly data for chart (last 12 months or selected year)
+        // Monthly data for chart
         $monthlyData = $this->getMonthlyData($church->id, $year);
 
         // Income by category
-        $incomeByCategory = IncomeCategory::where('church_id', $church->id)
-            ->withSum(['incomes' => function($q) use ($year, $month) {
-                $month ? $q->forMonth($year, $month) : $q->forYear($year);
-            }], 'amount')
-            ->orderByDesc('incomes_sum_amount')
-            ->get();
+        $incomeByCategory = TransactionCategory::where('church_id', $church->id)
+            ->forIncome()
+            ->get()
+            ->map(function ($cat) use ($year, $month) {
+                $query = $cat->transactions()->incoming()->completed();
+                if ($month) {
+                    $query->forMonth($year, $month);
+                } else {
+                    $query->forYear($year);
+                }
+                $cat->total_amount = $query->sum('amount');
+                return $cat;
+            })
+            ->sortByDesc('total_amount')
+            ->filter(fn($c) => $c->total_amount > 0);
 
         // Expense by category
-        $expenseByCategory = ExpenseCategory::where('church_id', $church->id)
-            ->withSum(['expenses' => function($q) use ($year, $month) {
-                $month ? $q->forMonth($year, $month) : $q->whereYear('date', $year);
-            }], 'amount')
-            ->orderByDesc('expenses_sum_amount')
-            ->get();
+        $expenseByCategory = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->get()
+            ->map(function ($cat) use ($year, $month) {
+                $query = $cat->transactions()->outgoing()->completed();
+                if ($month) {
+                    $query->forMonth($year, $month);
+                } else {
+                    $query->forYear($year);
+                }
+                $cat->total_amount = $query->sum('amount');
+                return $cat;
+            })
+            ->sortByDesc('total_amount')
+            ->filter(fn($c) => $c->total_amount > 0);
 
         // Expense by ministry
         $expenseByMinistry = Ministry::where('church_id', $church->id)
-            ->withSum(['expenses' => function($q) use ($year, $month) {
-                $month ? $q->forMonth($year, $month) : $q->whereYear('date', $year);
-            }], 'amount')
-            ->having('expenses_sum_amount', '>', 0)
-            ->orderByDesc('expenses_sum_amount')
-            ->get();
+            ->get()
+            ->map(function ($ministry) use ($year, $month, $church) {
+                $query = Transaction::where('church_id', $church->id)
+                    ->where('ministry_id', $ministry->id)
+                    ->outgoing()
+                    ->completed();
+                if ($month) {
+                    $query->forMonth($year, $month);
+                } else {
+                    $query->forYear($year);
+                }
+                $ministry->total_expense = $query->sum('amount');
+                return $ministry;
+            })
+            ->sortByDesc('total_expense')
+            ->filter(fn($m) => $m->total_expense > 0);
 
         // Recent transactions
-        $recentIncomes = Income::where('church_id', $church->id)
+        $recentIncomes = Transaction::where('church_id', $church->id)
+            ->incoming()
+            ->completed()
             ->with(['category', 'person'])
             ->orderByDesc('date')
             ->limit(5)
             ->get();
 
-        $recentExpenses = Expense::where('church_id', $church->id)
+        $recentExpenses = Transaction::where('church_id', $church->id)
+            ->outgoing()
+            ->completed()
             ->with(['category', 'ministry'])
             ->orderByDesc('date')
             ->limit(5)
@@ -84,7 +114,9 @@ class FinanceController extends Controller
         $yearComparison = $this->getYearComparison($church->id, $year);
 
         // Top donors (non-anonymous)
-        $topDonors = Income::where('church_id', $church->id)
+        $topDonors = Transaction::where('church_id', $church->id)
+            ->incoming()
+            ->completed()
             ->where('is_anonymous', false)
             ->whereNotNull('person_id')
             ->when($month, fn($q) => $q->forMonth($year, $month), fn($q) => $q->forYear($year))
@@ -105,7 +137,7 @@ class FinanceController extends Controller
         ));
     }
 
-    // Income CRUD
+    // Income/Transactions list
     public function incomes(Request $request)
     {
         $church = $this->getCurrentChurch();
@@ -113,9 +145,10 @@ class FinanceController extends Controller
         $year = $request->get('year', now()->year);
         $month = $request->get('month', now()->month);
 
-        $query = Income::where('church_id', $church->id)
+        $query = Transaction::where('church_id', $church->id)
+            ->incoming()
             ->forMonth($year, $month)
-            ->with(['category', 'person', 'user']);
+            ->with(['category', 'person', 'recorder']);
 
         if ($categoryId = $request->get('category')) {
             $query->where('category_id', $categoryId);
@@ -123,12 +156,15 @@ class FinanceController extends Controller
 
         $incomes = $query->orderByDesc('date')->paginate(20);
 
-        $categories = IncomeCategory::where('church_id', $church->id)->orderBy('sort_order')->get();
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->forIncome()
+            ->orderBy('sort_order')
+            ->get();
 
         $totals = [
-            'total' => Income::where('church_id', $church->id)->forMonth($year, $month)->sum('amount'),
-            'tithes' => Income::where('church_id', $church->id)->forMonth($year, $month)->tithes()->sum('amount'),
-            'offerings' => Income::where('church_id', $church->id)->forMonth($year, $month)->offerings()->sum('amount'),
+            'total' => Transaction::where('church_id', $church->id)->incoming()->completed()->forMonth($year, $month)->sum('amount'),
+            'tithes' => Transaction::where('church_id', $church->id)->incoming()->completed()->forMonth($year, $month)->tithes()->sum('amount'),
+            'offerings' => Transaction::where('church_id', $church->id)->incoming()->completed()->forMonth($year, $month)->offerings()->sum('amount'),
         ];
 
         return view('finances.incomes.index', compact('incomes', 'categories', 'year', 'month', 'totals'));
@@ -137,7 +173,10 @@ class FinanceController extends Controller
     public function createIncome()
     {
         $church = $this->getCurrentChurch();
-        $categories = IncomeCategory::where('church_id', $church->id)->orderBy('sort_order')->get();
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->forIncome()
+            ->orderBy('sort_order')
+            ->get();
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
 
         return view('finances.incomes.create', compact('categories', 'people'));
@@ -146,7 +185,7 @@ class FinanceController extends Controller
     public function storeIncome(Request $request)
     {
         $validated = $request->validate([
-            'category_id' => 'required|exists:income_categories,id',
+            'category_id' => 'required|exists:transaction_categories,id',
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
             'person_id' => 'nullable|exists:people,id',
@@ -158,37 +197,57 @@ class FinanceController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        $validated['church_id'] = $church->id;
-        $validated['user_id'] = auth()->id();
-        $validated['is_anonymous'] = $request->boolean('is_anonymous');
-
-        if ($validated['is_anonymous']) {
-            $validated['person_id'] = null;
+        // Determine source type based on category
+        $category = TransactionCategory::find($validated['category_id']);
+        $sourceType = 'income';
+        if ($category->is_tithe) {
+            $sourceType = Transaction::SOURCE_TITHE;
+        } elseif ($category->is_offering) {
+            $sourceType = Transaction::SOURCE_OFFERING;
+        } elseif ($category->is_donation) {
+            $sourceType = Transaction::SOURCE_DONATION;
         }
 
-        Income::create($validated);
+        Transaction::create([
+            'church_id' => $church->id,
+            'direction' => Transaction::DIRECTION_IN,
+            'source_type' => $sourceType,
+            'amount' => $validated['amount'],
+            'date' => $validated['date'],
+            'category_id' => $validated['category_id'],
+            'person_id' => $request->boolean('is_anonymous') ? null : $validated['person_id'],
+            'is_anonymous' => $request->boolean('is_anonymous'),
+            'payment_method' => $validated['payment_method'],
+            'description' => $validated['description'],
+            'notes' => $validated['notes'],
+            'status' => Transaction::STATUS_COMPLETED,
+            'recorded_by' => auth()->id(),
+        ]);
 
         return redirect()->route('finances.incomes')
             ->with('success', 'Надходження додано.');
     }
 
-    public function editIncome(Income $income)
+    public function editIncome(Transaction $income)
     {
         $this->authorizeChurch($income);
 
         $church = $this->getCurrentChurch();
-        $categories = IncomeCategory::where('church_id', $church->id)->orderBy('sort_order')->get();
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->forIncome()
+            ->orderBy('sort_order')
+            ->get();
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
 
         return view('finances.incomes.edit', compact('income', 'categories', 'people'));
     }
 
-    public function updateIncome(Request $request, Income $income)
+    public function updateIncome(Request $request, Transaction $income)
     {
         $this->authorizeChurch($income);
 
         $validated = $request->validate([
-            'category_id' => 'required|exists:income_categories,id',
+            'category_id' => 'required|exists:transaction_categories,id',
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
             'person_id' => 'nullable|exists:people,id',
@@ -199,7 +258,6 @@ class FinanceController extends Controller
         ]);
 
         $validated['is_anonymous'] = $request->boolean('is_anonymous');
-
         if ($validated['is_anonymous']) {
             $validated['person_id'] = null;
         }
@@ -210,7 +268,7 @@ class FinanceController extends Controller
             ->with('success', 'Надходження оновлено.');
     }
 
-    public function destroyIncome(Income $income)
+    public function destroyIncome(Transaction $income)
     {
         $this->authorizeChurch($income);
         $income->delete();
@@ -218,23 +276,151 @@ class FinanceController extends Controller
         return back()->with('success', 'Надходження видалено.');
     }
 
-    // Income Categories
-    public function incomeCategories()
+    // Expenses
+    public function expenses(Request $request)
     {
         $church = $this->getCurrentChurch();
-        $categories = IncomeCategory::where('church_id', $church->id)
+
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month', now()->month);
+
+        $query = Transaction::where('church_id', $church->id)
+            ->outgoing()
+            ->forMonth($year, $month)
+            ->with(['category', 'ministry', 'recorder']);
+
+        if ($categoryId = $request->get('category')) {
+            $query->where('category_id', $categoryId);
+        }
+
+        $expenses = $query->orderByDesc('date')->paginate(20);
+
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
             ->orderBy('sort_order')
-            ->withCount('incomes')
             ->get();
 
-        return view('finances.income-categories.index', compact('categories'));
+        $total = Transaction::where('church_id', $church->id)
+            ->outgoing()
+            ->completed()
+            ->forMonth($year, $month)
+            ->sum('amount');
+
+        return view('finances.expenses.index', compact('expenses', 'categories', 'year', 'month', 'total'));
     }
 
-    public function storeIncomeCategory(Request $request)
+    public function createExpense()
+    {
+        $church = $this->getCurrentChurch();
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->orderBy('sort_order')
+            ->get();
+        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+
+        return view('finances.expenses.create', compact('categories', 'ministries'));
+    }
+
+    public function storeExpense(Request $request)
+    {
+        $validated = $request->validate([
+            'category_id' => 'required|exists:transaction_categories,id',
+            'amount' => 'required|numeric|min:0.01',
+            'date' => 'required|date',
+            'ministry_id' => 'nullable|exists:ministries,id',
+            'description' => 'required|string|max:255',
+            'payment_method' => 'nullable|in:cash,card,transfer',
+            'notes' => 'nullable|string',
+        ]);
+
+        $church = $this->getCurrentChurch();
+
+        Transaction::create([
+            'church_id' => $church->id,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'amount' => $validated['amount'],
+            'date' => $validated['date'],
+            'category_id' => $validated['category_id'],
+            'ministry_id' => $validated['ministry_id'],
+            'payment_method' => $validated['payment_method'],
+            'description' => $validated['description'],
+            'notes' => $validated['notes'],
+            'status' => Transaction::STATUS_COMPLETED,
+            'recorded_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('finances.expenses')
+            ->with('success', 'Витрату додано.');
+    }
+
+    public function editExpense(Transaction $expense)
+    {
+        $this->authorizeChurch($expense);
+
+        $church = $this->getCurrentChurch();
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->orderBy('sort_order')
+            ->get();
+        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+
+        return view('finances.expenses.edit', compact('expense', 'categories', 'ministries'));
+    }
+
+    public function updateExpense(Request $request, Transaction $expense)
+    {
+        $this->authorizeChurch($expense);
+
+        $validated = $request->validate([
+            'category_id' => 'required|exists:transaction_categories,id',
+            'amount' => 'required|numeric|min:0.01',
+            'date' => 'required|date',
+            'ministry_id' => 'nullable|exists:ministries,id',
+            'description' => 'required|string|max:255',
+            'payment_method' => 'nullable|in:cash,card,transfer',
+            'notes' => 'nullable|string',
+        ]);
+
+        $expense->update($validated);
+
+        return redirect()->route('finances.expenses')
+            ->with('success', 'Витрату оновлено.');
+    }
+
+    public function destroyExpense(Transaction $expense)
+    {
+        $this->authorizeChurch($expense);
+        $expense->delete();
+
+        return back()->with('success', 'Витрату видалено.');
+    }
+
+    // Categories (unified)
+    public function categories()
+    {
+        $church = $this->getCurrentChurch();
+        $incomeCategories = TransactionCategory::where('church_id', $church->id)
+            ->forIncome()
+            ->orderBy('sort_order')
+            ->withCount('transactions')
+            ->get();
+
+        $expenseCategories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->orderBy('sort_order')
+            ->withCount('transactions')
+            ->get();
+
+        return view('finances.categories.index', compact('incomeCategories', 'expenseCategories'));
+    }
+
+    public function storeCategory(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'icon' => 'nullable|string|max:10',
+            'type' => 'required|in:income,expense',
+            'icon' => 'nullable|string|max:50',
             'color' => 'nullable|string|max:7',
             'is_tithe' => 'boolean',
             'is_offering' => 'boolean',
@@ -244,44 +430,46 @@ class FinanceController extends Controller
         $church = $this->getCurrentChurch();
 
         $validated['church_id'] = $church->id;
-        $validated['sort_order'] = IncomeCategory::where('church_id', $church->id)->max('sort_order') + 1;
+        $validated['sort_order'] = TransactionCategory::where('church_id', $church->id)
+            ->where('type', $validated['type'])
+            ->max('sort_order') + 1;
 
-        IncomeCategory::create($validated);
+        TransactionCategory::create($validated);
 
         return back()->with('success', 'Категорію додано.');
     }
 
-    public function updateIncomeCategory(Request $request, IncomeCategory $incomeCategory)
+    public function updateCategory(Request $request, TransactionCategory $category)
     {
-        if ($incomeCategory->church_id !== $this->getCurrentChurch()->id) {
+        if ($category->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'icon' => 'nullable|string|max:10',
+            'icon' => 'nullable|string|max:50',
             'color' => 'nullable|string|max:7',
             'is_tithe' => 'boolean',
             'is_offering' => 'boolean',
             'is_donation' => 'boolean',
         ]);
 
-        $incomeCategory->update($validated);
+        $category->update($validated);
 
         return back()->with('success', 'Категорію оновлено.');
     }
 
-    public function destroyIncomeCategory(IncomeCategory $incomeCategory)
+    public function destroyCategory(TransactionCategory $category)
     {
-        if ($incomeCategory->church_id !== $this->getCurrentChurch()->id) {
+        if ($category->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
 
-        if ($incomeCategory->incomes()->count() > 0) {
-            return back()->with('error', 'Неможливо видалити категорію з надходженнями.');
+        if ($category->transactions()->count() > 0) {
+            return back()->with('error', 'Неможливо видалити категорію з транзакціями.');
         }
 
-        $incomeCategory->delete();
+        $category->delete();
 
         return back()->with('success', 'Категорію видалено.');
     }
@@ -300,11 +488,15 @@ class FinanceController extends Controller
     {
         $months = [];
         for ($m = 1; $m <= 12; $m++) {
-            $income = Income::where('church_id', $churchId)
+            $income = Transaction::where('church_id', $churchId)
+                ->incoming()
+                ->completed()
                 ->forMonth($year, $m)
                 ->sum('amount');
 
-            $expense = Expense::where('church_id', $churchId)
+            $expense = Transaction::where('church_id', $churchId)
+                ->outgoing()
+                ->completed()
                 ->forMonth($year, $m)
                 ->sum('amount');
 
@@ -321,14 +513,14 @@ class FinanceController extends Controller
     private function getYearComparison(int $churchId, int $year): array
     {
         $currentYear = [
-            'income' => Income::where('church_id', $churchId)->forYear($year)->sum('amount'),
-            'expense' => Expense::where('church_id', $churchId)->whereYear('date', $year)->sum('amount'),
+            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->forYear($year)->sum('amount'),
+            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->forYear($year)->sum('amount'),
         ];
         $currentYear['balance'] = $currentYear['income'] - $currentYear['expense'];
 
         $prevYear = [
-            'income' => Income::where('church_id', $churchId)->forYear($year - 1)->sum('amount'),
-            'expense' => Expense::where('church_id', $churchId)->whereYear('date', $year - 1)->sum('amount'),
+            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->forYear($year - 1)->sum('amount'),
+            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->forYear($year - 1)->sum('amount'),
         ];
         $prevYear['balance'] = $prevYear['income'] - $prevYear['expense'];
 

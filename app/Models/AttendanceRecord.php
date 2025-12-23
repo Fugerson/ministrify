@@ -14,10 +14,13 @@ class AttendanceRecord extends Model
         'attendance_id',
         'person_id',
         'present',
+        'checked_in_at',
+        'notes',
     ];
 
     protected $casts = [
         'present' => 'boolean',
+        'checked_in_at' => 'datetime:H:i',
     ];
 
     public function attendance(): BelongsTo
