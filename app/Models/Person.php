@@ -31,6 +31,19 @@ class Person extends Model
         self::ROLE_PASTOR => 'Пастор',
     ];
 
+    // Membership statuses (journey from guest to active member)
+    public const STATUS_GUEST = 'guest';
+    public const STATUS_NEWCOMER = 'newcomer';
+    public const STATUS_MEMBER = 'member';
+    public const STATUS_ACTIVE = 'active';
+
+    public const MEMBERSHIP_STATUSES = [
+        self::STATUS_GUEST => ['label' => 'Гість', 'color' => '#9ca3af', 'icon' => 'user'],
+        self::STATUS_NEWCOMER => ['label' => 'Новоприбулий', 'color' => '#f59e0b', 'icon' => 'star'],
+        self::STATUS_MEMBER => ['label' => 'Член церкви', 'color' => '#3b82f6', 'icon' => 'users'],
+        self::STATUS_ACTIVE => ['label' => 'Активний член', 'color' => '#10b981', 'icon' => 'badge-check'],
+    ];
+
     // Age categories
     public const AGE_CHILD = 'child';        // 0-12
     public const AGE_TEEN = 'teen';          // 13-17
@@ -58,14 +71,19 @@ class Person extends Model
         'photo',
         'address',
         'birth_date',
+        'first_visit_date',
         'joined_date',
+        'baptism_date',
         'church_role',
+        'membership_status',
         'notes',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
+        'first_visit_date' => 'date',
         'joined_date' => 'date',
+        'baptism_date' => 'date',
     ];
 
     protected $appends = ['full_name'];
@@ -254,5 +272,113 @@ class Person extends Model
     public function getChurchRoleLabelAttribute(): string
     {
         return self::CHURCH_ROLES[$this->church_role] ?? 'Член церкви';
+    }
+
+    public function getMembershipStatusLabelAttribute(): string
+    {
+        return self::MEMBERSHIP_STATUSES[$this->membership_status]['label'] ?? 'Член церкви';
+    }
+
+    public function getMembershipStatusColorAttribute(): string
+    {
+        return self::MEMBERSHIP_STATUSES[$this->membership_status]['color'] ?? '#3b82f6';
+    }
+
+    public function getIsBaptizedAttribute(): bool
+    {
+        return $this->baptism_date !== null;
+    }
+
+    public function getDaysSinceFirstVisitAttribute(): ?int
+    {
+        if (!$this->first_visit_date) {
+            return null;
+        }
+        return $this->first_visit_date->diffInDays(now());
+    }
+
+    // ==================
+    // Relationships for unified system
+    // ==================
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function donations(): HasMany
+    {
+        return $this->transactions()->where('source_type', Transaction::SOURCE_DONATION);
+    }
+
+    public function tithes(): HasMany
+    {
+        return $this->transactions()->where('source_type', Transaction::SOURCE_TITHE);
+    }
+
+    /**
+     * Get total giving for this year
+     */
+    public function getTotalGivingThisYearAttribute(): float
+    {
+        return $this->transactions()
+            ->incoming()
+            ->completed()
+            ->thisYear()
+            ->sum('amount');
+    }
+
+    /**
+     * Promote membership status
+     */
+    public function promoteStatus(): void
+    {
+        $order = [self::STATUS_GUEST, self::STATUS_NEWCOMER, self::STATUS_MEMBER, self::STATUS_ACTIVE];
+        $currentIndex = array_search($this->membership_status, $order);
+
+        if ($currentIndex !== false && $currentIndex < count($order) - 1) {
+            $this->update(['membership_status' => $order[$currentIndex + 1]]);
+        }
+    }
+
+    /**
+     * Check if person is serving in any ministry
+     */
+    public function getIsServingAttribute(): bool
+    {
+        return $this->ministries()->exists();
+    }
+
+    /**
+     * Scopes for membership status
+     */
+    public function scopeGuests($query)
+    {
+        return $query->where('membership_status', self::STATUS_GUEST);
+    }
+
+    public function scopeNewcomers($query)
+    {
+        return $query->where('membership_status', self::STATUS_NEWCOMER);
+    }
+
+    public function scopeMembers($query)
+    {
+        return $query->whereIn('membership_status', [self::STATUS_MEMBER, self::STATUS_ACTIVE]);
+    }
+
+    public function scopeActiveMembers($query)
+    {
+        return $query->where('membership_status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeBaptized($query)
+    {
+        return $query->whereNotNull('baptism_date');
+    }
+
+    public function scopeServing($query)
+    {
+        return $query->whereHas('ministries');
     }
 }

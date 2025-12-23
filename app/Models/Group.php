@@ -108,12 +108,25 @@ class Group extends Model
             ->withTimestamps();
     }
 
-    public function attendances(): HasMany
+    /**
+     * Get all attendances for this group (unified system)
+     */
+    public function attendances()
+    {
+        return Attendance::where('attendable_type', self::class)
+            ->where('attendable_id', $this->id);
+    }
+
+    /**
+     * Legacy: Get old GroupAttendance records
+     * @deprecated Use attendances() instead
+     */
+    public function legacyAttendances(): HasMany
     {
         return $this->hasMany(GroupAttendance::class);
     }
 
-    public function getLastAttendanceAttribute(): ?GroupAttendance
+    public function getLastAttendanceAttribute(): ?Attendance
     {
         return $this->attendances()->orderByDesc('date')->first();
     }
@@ -137,5 +150,41 @@ class Group extends Model
         if ($last > $first * 1.1) return 'up';
         if ($last < $first * 0.9) return 'down';
         return 'stable';
+    }
+
+    /**
+     * Create a new attendance record for this group
+     */
+    public function createAttendance(array $data): Attendance
+    {
+        return Attendance::create([
+            'church_id' => $this->church_id,
+            'attendable_type' => self::class,
+            'attendable_id' => $this->id,
+            'type' => Attendance::TYPE_GROUP,
+            'date' => $data['date'] ?? now(),
+            'time' => $data['time'] ?? $this->meeting_time,
+            'location' => $data['location'] ?? $this->meeting_location,
+            'total_count' => $data['total_count'] ?? 0,
+            'members_present' => $data['members_present'] ?? 0,
+            'guests_count' => $data['guests_count'] ?? 0,
+            'recorded_by' => $data['recorded_by'] ?? auth()->id(),
+            'notes' => $data['notes'] ?? null,
+        ]);
+    }
+
+    /**
+     * Get attendance stats for dashboard
+     */
+    public function getAttendanceStatsAttribute(): array
+    {
+        $attendances = $this->attendances()->orderByDesc('date')->take(10)->get();
+
+        return [
+            'total_meetings' => $this->attendances()->count(),
+            'average_attendance' => $this->average_attendance,
+            'last_meeting' => $this->last_attendance,
+            'trend' => $this->attendance_trend,
+        ];
     }
 }
