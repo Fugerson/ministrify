@@ -119,6 +119,16 @@
                     <input type="date" name="joined_date" id="joined_date" value="{{ old('joined_date', $person->joined_date?->format('Y-m-d')) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
+
+                <div>
+                    <label for="church_role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Церковна роль</label>
+                    <select name="church_role" id="church_role"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                        @foreach(\App\Models\Person::CHURCH_ROLES as $value => $label)
+                        <option value="{{ $value }}" {{ old('church_role', $person->church_role ?? 'member') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
         </div>
 

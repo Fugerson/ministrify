@@ -25,7 +25,7 @@
                 <option value="">Всі ролі</option>
                 <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Адміністратор</option>
                 <option value="leader" {{ request('role') == 'leader' ? 'selected' : '' }}>Лідер</option>
-                <option value="volunteer" {{ request('role') == 'volunteer' ? 'selected' : '' }}>Волонтер</option>
+                <option value="volunteer" {{ request('role') == 'volunteer' ? 'selected' : '' }}>Служитель</option>
             </select>
 
             <label class="flex items-center gap-2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white cursor-pointer">

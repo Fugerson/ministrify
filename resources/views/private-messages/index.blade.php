@@ -136,7 +136,7 @@
                         </div>
                         <div class="ml-3 flex-1">
                             <h2 class="font-semibold text-gray-900 dark:text-white" x-text="selectedUser.name"></h2>
-                            <p class="text-xs text-gray-500" x-text="selectedUser.role === 'admin' ? 'Адміністратор' : (selectedUser.role === 'leader' ? 'Лідер' : 'Волонтер')"></p>
+                            <p class="text-xs text-gray-500" x-text="selectedUser.role === 'admin' ? 'Адміністратор' : (selectedUser.role === 'leader' ? 'Лідер' : 'Служитель')"></p>
                         </div>
                         <div class="flex items-center gap-2">
                             <span x-show="isTyping" class="text-xs text-primary-600 animate-pulse">Друкує...</span>
@@ -317,7 +317,7 @@
                                         </div>
                                         <div class="ml-3 flex-1">
                                             <p class="font-medium text-gray-900 dark:text-white">{{ $user->name }}</p>
-                                            <p class="text-xs text-gray-500">{{ $user->role === 'admin' ? 'Адміністратор' : ($user->role === 'leader' ? 'Лідер' : 'Волонтер') }}</p>
+                                            <p class="text-xs text-gray-500">{{ $user->role === 'admin' ? 'Адміністратор' : ($user->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
                                             @if(auth()->user()->is_super_admin && $user->church)
                                                 <p class="text-xs text-gray-400">{{ $user->church->name }}</p>
                                             @endif

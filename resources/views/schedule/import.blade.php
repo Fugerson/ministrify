@@ -108,6 +108,16 @@
                 </div>
             </div>
 
+            <!-- Save Settings -->
+            <div class="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                <input type="checkbox" name="save_settings" id="save_settings" value="1" checked
+                       class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 rounded focus:ring-primary-500">
+                <label for="save_settings" class="text-sm text-gray-700 dark:text-gray-300">
+                    <span class="font-medium">Запам'ятати налаштування</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400">Для швидкої синхронізації одним кліком на сторінці розкладу</span>
+                </label>
+            </div>
+
             <!-- Actions -->
             <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                 <a href="{{ route('schedule') }}"

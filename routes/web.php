@@ -165,6 +165,9 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::get('calendar/import', [EventController::class, 'importForm'])->name('calendar.import');
     Route::post('calendar/import', [EventController::class, 'importIcal'])->name('calendar.import.store');
     Route::post('calendar/import/url', [EventController::class, 'importFromUrl'])->name('calendar.import.url');
+    Route::post('calendar/sync', [EventController::class, 'quickSync'])->name('calendar.sync');
+    Route::post('calendar/google-settings', [EventController::class, 'saveGoogleSettings'])->name('calendar.google-settings');
+    Route::delete('calendar/google-settings', [EventController::class, 'removeGoogleSettings'])->name('calendar.google-settings.remove');
     Route::get('events/{event}/google', [EventController::class, 'addToGoogle'])->name('events.google');
 
     // Assignments
@@ -289,6 +292,20 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::resource('groups', GroupController::class);
     Route::post('groups/{group}/members', [GroupController::class, 'addMember'])->name('groups.members.add');
     Route::delete('groups/{group}/members/{person}', [GroupController::class, 'removeMember'])->name('groups.members.remove');
+    Route::put('groups/{group}/members/{person}/role', [GroupController::class, 'updateMemberRole'])->name('groups.members.role');
+
+    // Group Attendance
+    Route::prefix('groups/{group}/attendance')->name('groups.attendance.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\GroupAttendanceController::class, 'index'])->name('index');
+        Route::get('create', [\App\Http\Controllers\GroupAttendanceController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\GroupAttendanceController::class, 'store'])->name('store');
+        Route::get('checkin', [\App\Http\Controllers\GroupAttendanceController::class, 'quickCheckin'])->name('checkin');
+        Route::get('{attendance}', [\App\Http\Controllers\GroupAttendanceController::class, 'show'])->name('show');
+        Route::get('{attendance}/edit', [\App\Http\Controllers\GroupAttendanceController::class, 'edit'])->name('edit');
+        Route::put('{attendance}', [\App\Http\Controllers\GroupAttendanceController::class, 'update'])->name('update');
+        Route::delete('{attendance}', [\App\Http\Controllers\GroupAttendanceController::class, 'destroy'])->name('destroy');
+        Route::post('{attendance}/toggle', [\App\Http\Controllers\GroupAttendanceController::class, 'togglePresence'])->name('toggle');
+    });
 
     // Global Search
     Route::get('search', [SearchController::class, 'search'])->name('search');

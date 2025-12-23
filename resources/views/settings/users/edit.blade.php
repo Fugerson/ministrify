@@ -34,7 +34,7 @@
             <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль</label>
             <select name="role" id="role" required
                 class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                <option value="volunteer" {{ old('role', $user->role) === 'volunteer' ? 'selected' : '' }}>Волонтер</option>
+                <option value="volunteer" {{ old('role', $user->role) === 'volunteer' ? 'selected' : '' }}>Служитель</option>
                 <option value="leader" {{ old('role', $user->role) === 'leader' ? 'selected' : '' }}>Лідер</option>
                 <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Адмін</option>
             </select>

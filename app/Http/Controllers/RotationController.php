@@ -25,7 +25,7 @@ class RotationController extends Controller
         $upcomingEvents = Event::where('church_id', $church->id)
             ->where('date', '>=', now())
             ->where('date', '<=', now()->addWeeks(4))
-            ->with(['ministry', 'assignments.person', 'assignments.position'])
+            ->with(['ministry.positions', 'assignments.person', 'assignments.position'])
             ->orderBy('date')
             ->get()
             ->groupBy('ministry_id');

@@ -12,8 +12,8 @@
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
-                            <a href="{{ route('boards.show', $card->column->board) }}" class="hover:text-primary-600">
-                                {{ $card->column->board->name }}
+                            <a href="{{ route('boards.index') }}" class="hover:text-primary-600">
+                                Завдання
                             </a>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -304,12 +304,12 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Дії</h3>
                 <div class="space-y-2">
-                    <a href="{{ route('boards.show', $card->column->board) }}"
+                    <a href="{{ route('boards.index') }}"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
-                        <span>Назад до дошки</span>
+                        <span>Назад до завдань</span>
                     </a>
 
                     <form method="POST" action="{{ route('boards.cards.destroy', $card) }}"

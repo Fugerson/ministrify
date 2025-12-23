@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Головна')
 
 @section('content')
 <x-page-help page="dashboard" />
@@ -12,164 +12,277 @@
         <p class="text-sm text-gray-500 dark:text-gray-400">{{ now()->locale('uk')->translatedFormat('l, d F') }}</p>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        <a href="{{ route('people.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between">
-                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center">
+    <!-- Stats Grid - Informative Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mt-4 lg:mt-6">
+        <!-- People Stats -->
+        <a href="{{ route('people.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                     </svg>
                 </div>
+                <div class="flex items-center gap-2">
+                    @if($stats['people_trend'] > 0)
+                    <span class="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50 px-2 py-1 rounded-lg flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        +{{ $stats['people_trend'] }}
+                    </span>
+                    @elseif($stats['people_trend'] < 0)
+                    <span class="text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/50 px-2 py-1 rounded-lg flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                        {{ $stats['people_trend'] }}
+                    </span>
+                    @endif
+                    <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 px-2 py-1 rounded-lg">Люди</span>
+                </div>
             </div>
-            <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mt-3">{{ $stats['total_people'] }}</p>
-            <p class="text-xs lg:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Людей</p>
+            <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['total_people'] }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">за 3 місяці</p>
+            <div class="mt-2 space-y-1.5">
+                @if($stats['age_stats']['children'] > 0)
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-amber-600 dark:text-amber-400">Діти (0-12)</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['children'] }}</span>
+                </div>
+                @endif
+                @if($stats['age_stats']['teens'] > 0)
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-purple-600 dark:text-purple-400">Підлітки (13-17)</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['teens'] }}</span>
+                </div>
+                @endif
+                @if($stats['age_stats']['youth'] > 0)
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-blue-600 dark:text-blue-400">Молодь (18-35)</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['youth'] }}</span>
+                </div>
+                @endif
+                @if($stats['age_stats']['adults'] > 0)
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-green-600 dark:text-green-400">Дорослі (36-59)</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['adults'] }}</span>
+                </div>
+                @endif
+                @if($stats['age_stats']['seniors'] > 0)
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-600 dark:text-gray-400">Старші (60+)</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['seniors'] }}</span>
+                </div>
+                @endif
+            </div>
         </a>
 
-        <a href="{{ route('ministries.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between">
-                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-50 dark:bg-green-900/50 flex items-center justify-center">
+        <!-- Ministries Stats -->
+        <a href="{{ route('ministries.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md hover:border-green-200 dark:hover:border-green-800 transition-all group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-50 dark:bg-green-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </div>
+                <div class="flex items-center gap-2">
+                    @if($stats['volunteers_trend'] > 0)
+                    <span class="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50 px-2 py-1 rounded-lg flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        +{{ $stats['volunteers_trend'] }}
+                    </span>
+                    @elseif($stats['volunteers_trend'] < 0)
+                    <span class="text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/50 px-2 py-1 rounded-lg flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                        {{ $stats['volunteers_trend'] }}
+                    </span>
+                    @endif
+                    <span class="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50 px-2 py-1 rounded-lg">Служіння</span>
+                </div>
             </div>
-            <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mt-3">{{ $stats['total_ministries'] }}</p>
-            <p class="text-xs lg:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Служінь</p>
+            <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['volunteers_count'] }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">служителів</p>
+            <div class="mt-2 space-y-1.5 max-h-32 overflow-y-auto">
+                @foreach($stats['ministries_list'] as $ministry)
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-600 dark:text-gray-400 truncate mr-2">{{ $ministry->name }}</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0">{{ $ministry->members_count }}</span>
+                </div>
+                @endforeach
+            </div>
         </a>
 
-        <a href="{{ route('groups.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between">
-                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-purple-50 dark:bg-purple-900/50 flex items-center justify-center">
+        <!-- Groups Stats -->
+        <a href="{{ route('groups.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md hover:border-purple-200 dark:hover:border-purple-800 transition-all group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-purple-50 dark:bg-purple-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
+                <span class="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/50 px-2 py-1 rounded-lg">Групи</span>
             </div>
-            <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mt-3">{{ $stats['total_groups'] ?? 0 }}</p>
-            <p class="text-xs lg:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Груп</p>
+            <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['total_groups'] ?? 0 }}</p>
+            <div class="mt-3 space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-gray-500 dark:text-gray-400">Активних</span>
+                    </div>
+                    <span class="font-semibold text-green-600 dark:text-green-400">{{ $stats['active_groups'] }}</span>
+                </div>
+                @if($stats['paused_groups'] > 0)
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                        <span class="text-gray-500 dark:text-gray-400">На паузі</span>
+                    </div>
+                    <span class="font-semibold text-yellow-600 dark:text-yellow-400">{{ $stats['paused_groups'] }}</span>
+                </div>
+                @endif
+                @if($stats['vacation_groups'] > 0)
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <span class="text-gray-500 dark:text-gray-400">У відпустці</span>
+                    </div>
+                    <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $stats['vacation_groups'] }}</span>
+                </div>
+                @endif
+                <div class="flex items-center justify-between text-xs pt-1 border-t border-gray-100 dark:border-gray-700">
+                    <span class="text-gray-500 dark:text-gray-400">Учасників</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['total_group_members'] }}</span>
+                </div>
+            </div>
         </a>
 
-        <a href="{{ route('schedule') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between">
-                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-amber-50 dark:bg-amber-900/50 flex items-center justify-center">
+        <!-- Events Stats -->
+        <a href="{{ route('schedule') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md hover:border-amber-200 dark:hover:border-amber-800 transition-all group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-amber-50 dark:bg-amber-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
+                <span class="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/50 px-2 py-1 rounded-lg">{{ now()->locale('uk')->translatedFormat('F') }}</span>
             </div>
-            <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mt-3">{{ $stats['events_this_month'] }}</p>
-            <p class="text-xs lg:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Подій в місяці</p>
+            <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['events_this_month'] }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 -mt-1 mb-2">подій цього місяця</p>
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-500 dark:text-gray-400">Проведено</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['past_events'] }}</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-500 dark:text-gray-400">Заплановано</span>
+                    <span class="font-semibold text-amber-600 dark:text-amber-400">{{ $stats['upcoming_events'] }}</span>
+                </div>
+            </div>
         </a>
     </div>
 
-    <!-- Quick Actions: Boards & Tasks -->
-    @if(count($boards) > 0 || count($urgentTasks) > 0)
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        <!-- Active Boards -->
-        @if(count($boards) > 0)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <h2 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
-                    </svg>
-                    Дошки завдань
-                </h2>
-                <a href="{{ route('boards.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
-            </div>
-            <div class="divide-y divide-gray-50 dark:divide-gray-700">
-                @foreach($boards as $board)
-                <a href="{{ route('boards.show', $board) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $board->color }}20;">
-                        <div class="w-4 h-4 rounded" style="background-color: {{ $board->color }};"></div>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ $board->name }}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $board->cards_count }} карток</p>
-                    </div>
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                @endforeach
-            </div>
-            <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
-                <a href="{{ route('boards.create') }}" class="flex items-center justify-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Створити нову дошку
-                </a>
-            </div>
+    <!-- Task Tracker -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-4 lg:mt-6">
+        <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <h2 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+                Завдання
+            </h2>
+            <a href="{{ route('boards.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
+                Всі завдання
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
         </div>
-        @endif
 
-        <!-- Urgent Tasks -->
         @if(count($urgentTasks) > 0)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <h2 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Термінові завдання
-                </h2>
-            </div>
-            <div class="divide-y divide-gray-50 dark:divide-gray-700">
-                @foreach($urgentTasks as $task)
-                <a href="{{ route('boards.cards.show', $task) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div class="w-3 h-3 rounded-full flex-shrink-0
-                        {{ $task->priority === 'urgent' ? 'bg-red-500' : ($task->priority === 'high' ? 'bg-orange-500' : 'bg-yellow-500') }}">
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ $task->title }}</p>
-                        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                            <span>{{ $task->column->board->name }}</span>
+        <div class="p-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+                @foreach($urgentTasks->take(5) as $task)
+                <a href="{{ route('boards.index', ['card' => $task->id]) }}"
+                   class="block bg-gray-50 dark:bg-gray-700/50 border-l-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 overflow-hidden
+                          {{ $task->priority === 'urgent' ? 'border-l-red-500' : ($task->priority === 'high' ? 'border-l-orange-500' : 'border-l-yellow-500') }}">
+                    <div class="p-3">
+                        <!-- Title -->
+                        <h4 class="font-medium text-sm text-gray-900 dark:text-white line-clamp-2 mb-2">{{ $task->title }}</h4>
+
+                        <!-- Column badge -->
+                        <div class="flex items-center gap-1.5 mb-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                {{ $task->column->name }}
+                            </span>
+                            @if($task->priority === 'urgent')
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400">
+                                !
+                            </span>
+                            @endif
+                        </div>
+
+                        <!-- Footer: due date & assignee -->
+                        <div class="flex items-center justify-between text-xs">
                             @if($task->due_date)
-                            <span class="flex items-center gap-1 {{ $task->isOverdue() ? 'text-red-500' : '' }}">
+                            <span class="flex items-center gap-1 {{ $task->isOverdue() ? 'text-red-500 font-medium' : 'text-gray-500 dark:text-gray-400' }}">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                                 {{ $task->due_date->format('d.m') }}
                             </span>
+                            @else
+                            <span></span>
+                            @endif
+
+                            @if($task->assignee)
+                            <div class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center" title="{{ $task->assignee->full_name }}">
+                                <span class="text-[10px] font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($task->assignee->first_name, 0, 1) }}</span>
+                            </div>
                             @endif
                         </div>
                     </div>
-                    @if($task->assignee)
-                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center flex-shrink-0">
-                        <span class="text-xs font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($task->assignee->first_name, 0, 1) }}</span>
-                    </div>
-                    @endif
                 </a>
                 @endforeach
             </div>
+
+            @if(count($urgentTasks) > 5)
+            <a href="{{ route('boards.index') }}" class="block text-center py-3 mt-3 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 border-t border-gray-100 dark:border-gray-700">
+                + ще {{ count($urgentTasks) - 5 }} завдань
+            </a>
+            @endif
+        </div>
+        @else
+        <div class="p-8 text-center">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400">Немає термінових завдань</p>
+            <a href="{{ route('boards.index') }}" class="inline-block mt-2 text-sm text-primary-600 dark:text-primary-400 hover:underline">
+                Перейти до трекера
+            </a>
         </div>
         @endif
     </div>
-    @endif
 
-    <!-- Birthdays This Week -->
-    @if($birthdaysThisWeek->isNotEmpty())
-    <div class="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/30 dark:to-purple-900/30 rounded-2xl border border-pink-100 dark:border-pink-800 p-4">
+    <!-- Birthdays This Month -->
+    @if($birthdaysThisMonth->isNotEmpty())
+    <div class="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/30 dark:to-purple-900/30 rounded-2xl border border-pink-100 dark:border-pink-800 p-4 mt-4 lg:mt-6">
         <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 rounded-xl bg-pink-100 dark:bg-pink-900 flex items-center justify-center">
                 <span class="text-xl">🎂</span>
             </div>
             <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Дні народження цього тижня</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Не забудьте привітати!</p>
+                <h3 class="font-semibold text-gray-900 dark:text-white">Дні народження в цьому місяці</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $birthdaysThisMonth->count() }} {{ trans_choice('осіб|особи|осіб', $birthdaysThisMonth->count()) }}</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
-            @foreach($birthdaysThisWeek as $person)
+            @foreach($birthdaysThisMonth as $person)
             <a href="{{ route('people.show', $person) }}" class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-xl hover:shadow-md transition-shadow">
                 <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
                     <span class="text-xs font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($person->first_name, 0, 1) }}</span>
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $person->full_name }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $person->birth_date->format('d.m') }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $person->birth_date->format('d') }} {{ $person->birth_date->translatedFormat('M') }}</p>
                 </div>
             </a>
             @endforeach
@@ -179,7 +292,7 @@
 
     <!-- Pending Assignments Alert -->
     @if(count($pendingAssignments) > 0)
-    <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl border border-amber-100 dark:border-amber-800 p-4">
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl border border-amber-100 dark:border-amber-800 p-4 mt-4 lg:mt-6">
         <div class="flex items-start gap-3">
             <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center flex-shrink-0">
                 <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +335,8 @@
     </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+    <!-- Events & Attendance Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mt-4 lg:mt-6">
         <!-- Upcoming Events -->
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
@@ -268,7 +382,7 @@
 
         <!-- Attendance Chart -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5">
-            <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Відвідуваність</h2>
+            <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Відвідуваність богослужінь</h2>
             <div class="h-48">
                 <canvas id="attendanceChart"></canvas>
             </div>
@@ -283,7 +397,7 @@
 
     @admin
     <!-- Analytics Charts Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-4 lg:mt-6">
         <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <h2 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,7 +438,7 @@
 
     <!-- Financial Summary Cards (for admins) -->
     @if(isset($stats['income_this_month']) || isset($stats['expenses_this_month']))
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mt-4 lg:mt-6">
         @if(isset($stats['income_this_month']))
         <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-2xl border border-green-100 dark:border-green-800 p-4 lg:p-5">
             <div class="flex items-center gap-3 mb-3">
@@ -385,7 +499,8 @@
     </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+    <!-- Admin Details Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-4 lg:mt-6">
         <!-- Ministry Budgets -->
         @if(count($ministryBudgets) > 0)
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
@@ -420,10 +535,33 @@
                 <h2 class="font-semibold text-gray-900 dark:text-white">Витрати за місяць</h2>
                 <a href="{{ route('expenses.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
             </div>
-            <div class="text-center py-4">
-                <p class="text-4xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['expenses_this_month'], 0, ',', ' ') }}</p>
-                <p class="text-lg text-gray-500 dark:text-gray-400 mt-1">₴</p>
+
+            <!-- Total -->
+            <div class="text-center pb-4 mb-4 border-b border-gray-100 dark:border-gray-700">
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['expenses_this_month'], 0, ',', ' ') }} ₴</p>
             </div>
+
+            <!-- Breakdown by category -->
+            @if($expensesByCategory->isNotEmpty())
+            <div class="space-y-3">
+                @foreach($expensesByCategory as $category)
+                @php
+                    $percentage = $stats['expenses_this_month'] > 0 ? ($category['amount'] / $stats['expenses_this_month']) * 100 : 0;
+                @endphp
+                <div>
+                    <div class="flex items-center justify-between text-sm mb-1">
+                        <span class="text-gray-700 dark:text-gray-300">{{ $category['name'] }}</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ number_format($category['amount'], 0, ',', ' ') }} ₴</span>
+                    </div>
+                    <div class="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-red-500 rounded-full" style="width: {{ $percentage }}%"></div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center">Немає витрат за цей місяць</p>
+            @endif
         </div>
         @endif
 
@@ -664,6 +802,19 @@ document.addEventListener('DOMContentLoaded', function() {
                             backgroundColor: chartColors.danger + 'cc',
                             borderRadius: 6,
                             borderSkipped: false,
+                        }, {
+                            label: 'Залишок',
+                            data: data.map(d => d.balance),
+                            type: 'line',
+                            borderColor: chartColors.info,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointBackgroundColor: chartColors.info,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            yAxisID: 'y',
                         }]
                     },
                     options: getChartOptions('financial')
@@ -749,6 +900,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full" style="background: ${chartColors.danger}"></span>
                         <span>Витрати</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full" style="background: ${chartColors.info}"></span>
+                        <span>Залишок</span>
                     </div>
                 `;
                 break;

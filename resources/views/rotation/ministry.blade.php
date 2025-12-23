@@ -18,7 +18,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
-                    <p class="text-gray-500 dark:text-gray-400">Ротація волонтерів</p>
+                    <p class="text-gray-500 dark:text-gray-400">Ротація служительів</p>
                 </div>
             </div>
         </div>

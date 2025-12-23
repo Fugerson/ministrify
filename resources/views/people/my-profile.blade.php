@@ -20,7 +20,7 @@
                     @endif
                     <div>
                         <h2 class="text-xl font-semibold text-gray-900">{{ $person->full_name }}</h2>
-                        <p class="text-gray-500">{{ auth()->user()->role === 'admin' ? 'Адміністратор' : (auth()->user()->role === 'leader' ? 'Лідер' : 'Волонтер') }}</p>
+                        <p class="text-gray-500">{{ auth()->user()->role === 'admin' ? 'Адміністратор' : (auth()->user()->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
                     </div>
                 </div>
 

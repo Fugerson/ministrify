@@ -38,7 +38,7 @@
             Помилка збереження
         </span>
     </div>
-    <form id="personForm" method="POST" action="{{ route('people.update', $person) }}" enctype="multipart/form-data">
+    <form id="personForm" method="POST" action="{{ route('people.update', $person) }}" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')
     @endif
@@ -217,7 +217,7 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
@@ -282,7 +282,7 @@
     @endforeach
 
     <!-- Ministries (Admin editable) -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mt-6">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Служіння</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             @foreach($ministries as $ministry)
@@ -323,7 +323,7 @@
     </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <!-- Ministries & Groups -->
         <div class="lg:col-span-2 space-y-6">
             @if(!$isAdmin)
@@ -449,7 +449,7 @@
 
     <!-- Recent Assignments -->
     @if($person->assignments->count() > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-6">
         <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
             <h2 class="font-semibold text-gray-900 dark:text-white">Останні призначення</h2>
         </div>
@@ -481,7 +481,7 @@
     @endif
 
     <!-- Notes -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mt-6">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Нотатки</h2>
         @if($isAdmin)
             <textarea name="notes" rows="3" placeholder="Додаткова інформація про людину..."
@@ -496,7 +496,7 @@
     </div>
 
     <!-- Actions -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between mt-6">
         <a href="{{ route('people.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>

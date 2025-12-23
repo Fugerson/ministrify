@@ -327,6 +327,7 @@ class EventController extends Controller
             'ministry_id' => 'required|exists:ministries,id',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
+            'save_settings' => 'nullable|boolean',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -338,6 +339,12 @@ class EventController extends Controller
 
         Gate::authorize('manage-ministry', $ministry);
 
+        // Save settings for quick sync if requested
+        if ($request->save_settings) {
+            $church->setSetting('google_calendar_url', $request->calendar_url);
+            $church->setSetting('google_calendar_ministry_id', $request->ministry_id);
+        }
+
         try {
             $result = $calendarService->importFromUrl(
                 $request->calendar_url,
@@ -346,6 +353,9 @@ class EventController extends Controller
                 $request->start_date ? Carbon::parse($request->start_date) : null,
                 $request->end_date ? Carbon::parse($request->end_date) : null
             );
+
+            // Update last sync time
+            $church->setSetting('google_calendar_last_sync', now()->toIso8601String());
 
             $message = "Синхронізовано подій: {$result['total_imported']}";
             if ($result['total_skipped'] > 0) {
@@ -364,5 +374,85 @@ class EventController extends Controller
                 ->withInput()
                 ->withErrors(['calendar_url' => 'Помилка завантаження календаря: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Quick sync with saved Google Calendar settings
+     */
+    public function quickSync(CalendarService $calendarService)
+    {
+        $church = $this->getCurrentChurch();
+
+        $url = $church->getSetting('google_calendar_url');
+        $ministryId = $church->getSetting('google_calendar_ministry_id');
+
+        if (!$url || !$ministryId) {
+            return redirect()->route('calendar.import')
+                ->with('info', 'Спочатку налаштуйте синхронізацію з Google Calendar');
+        }
+
+        $ministry = Ministry::find($ministryId);
+        if (!$ministry || $ministry->church_id !== $church->id) {
+            return redirect()->route('calendar.import')
+                ->with('error', 'Служіння для синхронізації не знайдено. Налаштуйте заново.');
+        }
+
+        try {
+            $result = $calendarService->importFromUrl(
+                $url,
+                $church,
+                $ministry,
+                now()->subMonth(),
+                now()->addMonths(3)
+            );
+
+            $church->setSetting('google_calendar_last_sync', now()->toIso8601String());
+
+            $message = "Синхронізовано подій: {$result['total_imported']}";
+            if ($result['total_skipped'] > 0) {
+                $message .= ", пропущено (дублікати): {$result['total_skipped']}";
+            }
+
+            return redirect()->route('schedule')->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()->route('schedule')
+                ->with('error', 'Помилка синхронізації: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Save Google Calendar sync settings
+     */
+    public function saveGoogleSettings(Request $request)
+    {
+        $request->validate([
+            'google_calendar_url' => 'required|url',
+            'google_calendar_ministry_id' => 'required|exists:ministries,id',
+        ]);
+
+        $church = $this->getCurrentChurch();
+
+        $church->setSetting('google_calendar_url', $request->google_calendar_url);
+        $church->setSetting('google_calendar_ministry_id', $request->google_calendar_ministry_id);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Remove Google Calendar sync settings
+     */
+    public function removeGoogleSettings()
+    {
+        $church = $this->getCurrentChurch();
+
+        $settings = $church->settings ?? [];
+        unset($settings['google_calendar_url']);
+        unset($settings['google_calendar_ministry_id']);
+        unset($settings['google_calendar_last_sync']);
+        $church->settings = $settings;
+        $church->save();
+
+        return redirect()->route('schedule')->with('success', 'Налаштування синхронізації видалено');
     }
 }

@@ -37,6 +37,21 @@
                 </select>
             </div>
 
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус</label>
+                <select name="status" id="status"
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                    @foreach(\App\Models\Group::STATUSES as $value => $label)
+                    <option value="{{ $value }}" {{ old('status', $group->status) == $value ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Активна — група регулярно зустрічається. На паузі — тимчасово призупинена. У відпустці — сезонна перерва.
+                </p>
+            </div>
+
             <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                 @can('delete', $group)
                 <form method="POST" action="{{ route('groups.destroy', $group) }}" onsubmit="return confirm('Видалити групу? Усі дані про членство будуть втрачені.')">

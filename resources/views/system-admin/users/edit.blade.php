@@ -67,7 +67,7 @@
                         class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-red-500 focus:border-transparent">
                     <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Адміністратор</option>
                     <option value="leader" {{ old('role', $user->role) === 'leader' ? 'selected' : '' }}>Лідер</option>
-                    <option value="volunteer" {{ old('role', $user->role) === 'volunteer' ? 'selected' : '' }}>Волонтер</option>
+                    <option value="volunteer" {{ old('role', $user->role) === 'volunteer' ? 'selected' : '' }}>Служитель</option>
                 </select>
                 @error('role')
                 <p class="mt-1 text-sm text-red-400">{{ $message }}</p>

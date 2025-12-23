@@ -35,6 +35,21 @@ class PersonController extends Controller
             $query->inMinistry($ministryId);
         }
 
+        // Filter by age category
+        if ($ageCategory = $request->get('age')) {
+            $category = Person::AGE_CATEGORIES[$ageCategory] ?? null;
+            if ($category) {
+                $query->whereNotNull('birth_date')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= ?', [$category['min']])
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) <= ?', [$category['max']]);
+            }
+        }
+
+        // Filter by church role
+        if ($role = $request->get('role')) {
+            $query->where('church_role', $role);
+        }
+
         $people = $query->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(20)
@@ -43,7 +58,52 @@ class PersonController extends Controller
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries;
 
-        return view('people.index', compact('people', 'tags', 'ministries'));
+        // Calculate statistics
+        $allPeople = Person::where('church_id', $church->id)->with('ministries')->get();
+
+        // Age statistics
+        $ageStats = [];
+        foreach (Person::AGE_CATEGORIES as $key => $category) {
+            $count = $allPeople->filter(fn($p) => $p->age_category === $key)->count();
+            $ageStats[$key] = [
+                'label' => $category['label'],
+                'count' => $count,
+                'color' => $category['color'],
+            ];
+        }
+        $ageStats['unknown'] = [
+            'label' => 'Невідомо',
+            'count' => $allPeople->filter(fn($p) => $p->age_category === null)->count(),
+            'color' => '#9ca3af',
+        ];
+
+        // Church role statistics
+        $roleStats = [];
+        foreach (Person::CHURCH_ROLES as $key => $label) {
+            $count = $allPeople->where('church_role', $key)->count();
+            if ($count > 0 || $key === Person::ROLE_MEMBER) {
+                $roleStats[$key] = [
+                    'label' => $label,
+                    'count' => $count,
+                ];
+            }
+        }
+        // Count those without role as members
+        $noRoleCount = $allPeople->whereNull('church_role')->count();
+        $roleStats[Person::ROLE_MEMBER]['count'] = ($roleStats[Person::ROLE_MEMBER]['count'] ?? 0) + $noRoleCount;
+
+        // Ministry stats (how many serve)
+        $servingCount = $allPeople->filter(fn($p) => $p->ministries->isNotEmpty())->count();
+
+        $stats = [
+            'total' => $allPeople->count(),
+            'age' => $ageStats,
+            'roles' => $roleStats,
+            'serving' => $servingCount,
+            'new_this_month' => $allPeople->filter(fn($p) => $p->created_at->isCurrentMonth())->count(),
+        ];
+
+        return view('people.index', compact('people', 'tags', 'ministries', 'stats'));
     }
 
     public function create()
@@ -66,6 +126,7 @@ class PersonController extends Controller
             'address' => 'nullable|string|max:500',
             'birth_date' => 'nullable|date',
             'joined_date' => 'nullable|date',
+            'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
             'notes' => 'nullable|string',
             'photo' => 'nullable|image|max:2048',
             'tags' => 'nullable|array',
@@ -244,6 +305,7 @@ class PersonController extends Controller
             'address' => 'nullable|string|max:500',
             'birth_date' => 'nullable|date',
             'joined_date' => 'nullable|date',
+            'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
             'notes' => 'nullable|string',
             'photo' => 'nullable|image|max:2048',
             'tags' => 'nullable|array',

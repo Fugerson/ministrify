@@ -211,7 +211,7 @@
         </div>
 
         <!-- Sidebar -->
-        <div class="space-y-8">
+        <div class="space-y-6">
             <!-- Linked Tasks from Boards -->
             <x-linked-cards entityType="event" :entityId="$event->id" :boards="$boards" />
 

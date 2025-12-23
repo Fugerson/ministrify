@@ -28,6 +28,98 @@
         </a>
     </div>
 
+    <!-- Statistics -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            <!-- Age Categories -->
+            <div>
+                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">За віком</h4>
+                <div class="space-y-1.5">
+                    @foreach($stats['age'] as $key => $age)
+                    @if($age['count'] > 0)
+                    <a href="{{ route('people.index', array_merge(request()->except('page'), ['age' => $key])) }}"
+                       class="flex items-center justify-between text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-2 py-1 -mx-2 transition-colors {{ request('age') === $key ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+                        <span style="color: {{ $age['color'] }}" class="font-medium">{{ $age['label'] }}</span>
+                        <span class="text-gray-500 dark:text-gray-400">{{ $age['count'] }}</span>
+                    </a>
+                    @endif
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Church Roles -->
+            <div>
+                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">За роллю</h4>
+                <div class="space-y-1.5">
+                    @foreach($stats['roles'] as $key => $role)
+                    @if($role['count'] > 0)
+                    <a href="{{ route('people.index', array_merge(request()->except('page'), ['role' => $key])) }}"
+                       class="flex items-center justify-between text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg px-2 py-1 -mx-2 transition-colors {{ request('role') === $key ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+                        <span class="text-gray-700 dark:text-gray-300">{{ $role['label'] }}</span>
+                        <span class="text-gray-500 dark:text-gray-400">{{ $role['count'] }}</span>
+                    </a>
+                    @endif
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div>
+                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Статистика</h4>
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between text-sm px-2 py-1 -mx-2">
+                        <span class="text-gray-700 dark:text-gray-300">Всього</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ $stats['total'] }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm px-2 py-1 -mx-2">
+                        <span class="text-gray-700 dark:text-gray-300">Служать</span>
+                        <span class="font-semibold text-primary-600 dark:text-primary-400">{{ $stats['serving'] }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm px-2 py-1 -mx-2">
+                        <span class="text-gray-700 dark:text-gray-300">Нові (місяць)</span>
+                        <span class="font-semibold text-green-600 dark:text-green-400">{{ $stats['new_this_month'] }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Bar -->
+            <div class="hidden lg:block">
+                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Розподіл за віком</h4>
+                @if($stats['total'] > 0)
+                <div class="flex h-4 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                    @foreach($stats['age'] as $key => $age)
+                    @if($age['count'] > 0 && $key !== 'unknown')
+                    <div style="width: {{ ($age['count'] / $stats['total']) * 100 }}%; background-color: {{ $age['color'] }}"
+                         title="{{ $age['label'] }}: {{ $age['count'] }}"
+                         class="transition-all hover:opacity-80"></div>
+                    @endif
+                    @endforeach
+                </div>
+                <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                    @foreach($stats['age'] as $key => $age)
+                    @if($age['count'] > 0 && $key !== 'unknown')
+                    <div class="flex items-center text-xs">
+                        <span class="w-2 h-2 rounded-full mr-1" style="background-color: {{ $age['color'] }}"></span>
+                        <span class="text-gray-500 dark:text-gray-400">{{ $age['label'] }}</span>
+                    </div>
+                    @endif
+                    @endforeach
+                </div>
+                @else
+                <p class="text-sm text-gray-400">Немає даних</p>
+                @endif
+            </div>
+        </div>
+
+        @if(request()->hasAny(['age', 'role']))
+        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <a href="{{ route('people.index', request()->except(['age', 'role', 'page'])) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">
+                Скинути фільтри статистики
+            </a>
+        </div>
+        @endif
+    </div>
+
     <!-- Search and Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
         <form method="GET" class="space-y-3 lg:space-y-0 lg:flex lg:items-center lg:gap-3">
@@ -97,14 +189,14 @@
                     <p class="text-sm text-primary-600 dark:text-primary-400 truncate">{{ $person->telegram_username }}</p>
                     @endif
 
-                    <!-- Ministries colors -->
+                    <!-- Ministries -->
                     @if($person->ministries->isNotEmpty())
-                    <div class="flex items-center gap-1 mt-2">
-                        @foreach($person->ministries->take(3) as $ministry)
-                        <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $ministry->color ?? '#3b82f6' }}" title="{{ $ministry->name }}"></span>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1.5">
+                        @foreach($person->ministries->take(2) as $ministry)
+                        <span class="text-xs font-medium" style="color: {{ $ministry->color ?? '#3b82f6' }}">{{ $ministry->name }}</span>
                         @endforeach
-                        @if($person->ministries->count() > 3)
-                        <span class="text-xs text-gray-400 dark:text-gray-500 ml-1">+{{ $person->ministries->count() - 3 }}</span>
+                        @if($person->ministries->count() > 2)
+                        <span class="text-xs text-gray-400 dark:text-gray-500">+{{ $person->ministries->count() - 2 }}</span>
                         @endif
                     </div>
                     @endif
@@ -163,7 +255,7 @@
 
     <!-- Pagination -->
     @if($people->hasPages())
-    <div class="flex justify-center py-2">
+    <div class="mt-6 mb-4">
         {{ $people->links() }}
     </div>
     @endif

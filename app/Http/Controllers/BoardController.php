@@ -16,16 +16,16 @@ use Illuminate\Http\Request;
 
 class BoardController extends Controller
 {
-    // Board Management - Unified Church Board
+    // Task Tracker - Single board for all church tasks
     public function index(Request $request)
     {
         $church = $this->getCurrentChurch();
 
-        // Get or create the main church board
+        // Get or create the main church task tracker
         $board = Board::firstOrCreate(
-            ['church_id' => $church->id, 'name' => 'Церковна дошка'],
+            ['church_id' => $church->id, 'name' => 'Трекер завдань'],
             [
-                'description' => 'Єдина дошка для всіх завдань церкви',
+                'description' => 'Єдиний трекер для всіх завдань церкви',
                 'color' => $church->primary_color ?? '#3b82f6',
                 'is_archived' => false,
             ]
@@ -100,25 +100,14 @@ class BoardController extends Controller
             $board->columns()->create($column);
         }
 
-        return redirect()->route('boards.show', $board)
+        return redirect()->route('boards.index')
             ->with('success', 'Дошку створено.');
     }
 
     public function show(Board $board)
     {
-        $this->authorizeBoard($board);
-
-        $board->load([
-            'columns.cards.assignee',
-            'columns.cards.checklistItems',
-            'columns.cards.comments',
-            'columns.cards.attachments',
-        ]);
-
-        $church = $this->getCurrentChurch();
-        $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
-
-        return view('boards.show', compact('board', 'people'));
+        // Redirect to single task tracker
+        return redirect()->route('boards.index');
     }
 
     public function edit(Board $board)
@@ -271,6 +260,14 @@ class BoardController extends Controller
 
         // Log activity
         BoardCardActivity::log($card, 'created');
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'card' => $card,
+                'message' => 'Завдання додано.'
+            ]);
+        }
 
         return redirect()->route('boards.index')
             ->with('success', 'Завдання додано.');

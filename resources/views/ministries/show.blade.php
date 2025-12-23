@@ -12,7 +12,7 @@
 @endsection
 
 @section('content')
-<div class="space-y-8">
+<div class="space-y-6">
     <!-- Linked Tasks -->
     <x-linked-cards entityType="ministry" :entityId="$ministry->id" :boards="$boards" />
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Церковна дошка')
+@section('title', 'Трекер завдань')
 
 @section('content')
 <div class="h-full -mt-2" x-data="churchBoard()" x-init="init()">
@@ -9,7 +9,7 @@
         <!-- Title & Stats Row -->
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">Церковна дошка</h1>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">Трекер завдань</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Всі завдання служінь в одному місці</p>
             </div>
 
@@ -188,18 +188,14 @@
                             <!-- Top badges row -->
                             <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
                                 <span class="text-[10px] font-mono text-gray-400 dark:text-gray-500">#{{ $card->id }}</span>
-                                @if($card->priority && $card->priority !== 'low')
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium
-                                        @if($card->priority === 'urgent') bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300
-                                        @elseif($card->priority === 'high') bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300
-                                        @elseif($card->priority === 'medium') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300
-                                        @endif">
-                                        @if($card->priority === 'urgent')
-                                            <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                        @endif
-                                        {{ ['urgent' => 'Терміново', 'high' => 'Високий', 'medium' => 'Середній'][$card->priority] ?? '' }}
-                                    </span>
-                                @endif
+                                <span class="priority-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium
+                                    @if($card->priority === 'urgent') bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300
+                                    @elseif($card->priority === 'high') bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300
+                                    @elseif($card->priority === 'medium') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300
+                                    @else hidden @endif">
+                                    <svg class="priority-icon w-2.5 h-2.5 {{ $card->priority !== 'urgent' ? 'hidden' : '' }}" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    <span class="priority-text">{{ ['urgent' => 'Терміново', 'high' => 'Високий', 'medium' => 'Середній'][$card->priority] ?? '' }}</span>
+                                </span>
 
                                 @if($card->isOverdue())
                                     <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
@@ -300,49 +296,9 @@
                     @endforeach
                 </div>
 
-                <!-- Add Card Form -->
-                <div class="p-2" x-show="showAddCard === {{ $column->id }}" x-cloak>
-                    <form method="POST" action="{{ route('boards.cards.store', $column) }}" class="space-y-2">
-                        @csrf
-                        <textarea name="title" rows="2" required placeholder="Що потрібно зробити?"
-                                  x-ref="cardInput{{ $column->id }}"
-                                  @keydown.escape="showAddCard = null"
-                                  @keydown.cmd.enter="$el.form.submit()"
-                                  @keydown.ctrl.enter="$el.form.submit()"
-                                  class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white text-sm resize-none shadow-sm"></textarea>
-
-                        <!-- Quick options -->
-                        <div class="flex items-center gap-2">
-                            <select name="ministry_id" class="flex-1 px-2 py-1.5 bg-gray-50 dark:bg-gray-600 border-0 rounded-lg text-xs dark:text-white">
-                                <option value="">Служіння</option>
-                                @foreach($ministries as $ministry)
-                                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                                @endforeach
-                            </select>
-                            <select name="priority" class="px-2 py-1.5 bg-gray-50 dark:bg-gray-600 border-0 rounded-lg text-xs dark:text-white">
-                                <option value="medium">Середній</option>
-                                <option value="low">Низький</option>
-                                <option value="high">Високий</option>
-                                <option value="urgent">Терміново</option>
-                            </select>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <button type="submit"
-                                    class="px-4 py-1.5 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200 text-white dark:text-gray-900 text-sm font-medium rounded-lg transition-colors">
-                                Додати
-                            </button>
-                            <button type="button" @click="showAddCard = null"
-                                    class="px-3 py-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                Скасувати
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
                 <!-- Quick Add Button -->
-                <div class="p-2 border-t border-gray-200/50 dark:border-gray-700/50" x-show="showAddCard !== {{ $column->id }}">
-                    <button type="button" @click="showAddCard = {{ $column->id }}; $nextTick(() => $refs.cardInput{{ $column->id }}?.focus())"
+                <div class="p-2 border-t border-gray-200/50 dark:border-gray-700/50">
+                    <button type="button" @click="openAddCardModal({{ $column->id }})"
                             class="w-full p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg text-sm transition-colors flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -988,6 +944,180 @@
     </div>
 </div>
 
+<!-- Add Card Slide-Over Panel -->
+<div x-show="addCardModal.open" x-cloak class="fixed inset-0 z-50 overflow-hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/40" @click="addCardModal.open = false" x-show="addCardModal.open"
+         x-transition:enter="transition-opacity ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"></div>
+
+    <!-- Panel -->
+    <div class="absolute inset-y-0 right-0 flex max-w-full">
+        <div x-show="addCardModal.open"
+             x-transition:enter="transform transition ease-out duration-200"
+             x-transition:enter-start="translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transform transition ease-in duration-150"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="translate-x-full"
+             class="w-screen max-w-xl">
+            <div class="h-full bg-white dark:bg-gray-900 shadow-xl flex flex-col">
+                <!-- Header -->
+                <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-900 dark:text-white">Нове завдання</h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Створіть нову картку</p>
+                            </div>
+                        </div>
+                        <button @click="addCardModal.open = false"
+                                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form Content -->
+                <form @submit.prevent="submitNewCard()" class="flex-1 overflow-y-auto">
+                    <div class="p-6 space-y-6">
+                        <!-- Title -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва *</label>
+                            <input type="text" x-model="addCardModal.title" x-ref="addCardTitle" required
+                                   placeholder="Що потрібно зробити?"
+                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white text-lg">
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
+                            <textarea x-model="addCardModal.description" rows="4"
+                                      placeholder="Детальний опис завдання..."
+                                      class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white resize-none"></textarea>
+                        </div>
+
+                        <!-- Column -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Колонка</label>
+                            <select x-model="addCardModal.columnId"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
+                                @foreach($board->columns as $column)
+                                    <option value="{{ $column->id }}">{{ $column->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Priority -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Пріоритет</label>
+                            <div class="grid grid-cols-4 gap-2">
+                                <label class="relative">
+                                    <input type="radio" x-model="addCardModal.priority" value="low" class="peer sr-only">
+                                    <div class="p-3 text-center rounded-xl border-2 cursor-pointer transition-all
+                                                peer-checked:border-gray-500 peer-checked:bg-gray-50 dark:peer-checked:bg-gray-800
+                                                border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
+                                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Низький</span>
+                                    </div>
+                                </label>
+                                <label class="relative">
+                                    <input type="radio" x-model="addCardModal.priority" value="medium" class="peer sr-only">
+                                    <div class="p-3 text-center rounded-xl border-2 cursor-pointer transition-all
+                                                peer-checked:border-yellow-500 peer-checked:bg-yellow-50 dark:peer-checked:bg-yellow-900/20
+                                                border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
+                                        <span class="text-sm font-medium text-yellow-600 dark:text-yellow-400">Середній</span>
+                                    </div>
+                                </label>
+                                <label class="relative">
+                                    <input type="radio" x-model="addCardModal.priority" value="high" class="peer sr-only">
+                                    <div class="p-3 text-center rounded-xl border-2 cursor-pointer transition-all
+                                                peer-checked:border-orange-500 peer-checked:bg-orange-50 dark:peer-checked:bg-orange-900/20
+                                                border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
+                                        <span class="text-sm font-medium text-orange-600 dark:text-orange-400">Високий</span>
+                                    </div>
+                                </label>
+                                <label class="relative">
+                                    <input type="radio" x-model="addCardModal.priority" value="urgent" class="peer sr-only">
+                                    <div class="p-3 text-center rounded-xl border-2 cursor-pointer transition-all
+                                                peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20
+                                                border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
+                                        <span class="text-sm font-medium text-red-600 dark:text-red-400">Терміново</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Ministry -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Служіння</label>
+                            <select x-model="addCardModal.ministryId"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
+                                <option value="">Без служіння</option>
+                                @foreach($ministries as $ministry)
+                                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Assignee -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Виконавець</label>
+                            <select x-model="addCardModal.assignedTo"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
+                                <option value="">Без виконавця</option>
+                                @foreach($people as $person)
+                                    <option value="{{ $person->id }}">{{ $person->full_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Due Date -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дедлайн</label>
+                            <input type="date" x-model="addCardModal.dueDate"
+                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div class="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <div class="flex items-center justify-end gap-3">
+                            <button type="button" @click="addCardModal.open = false"
+                                    class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                Скасувати
+                            </button>
+                            <button type="submit" :disabled="addCardModal.loading || !addCardModal.title.trim()"
+                                    class="px-6 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center gap-2">
+                                <template x-if="addCardModal.loading">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </template>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Створити завдання
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Keyboard Shortcuts Modal -->
 <div x-show="showShortcuts" x-cloak
      class="fixed inset-0 z-50 overflow-y-auto"
@@ -1058,6 +1188,17 @@ function churchBoard() {
             data: null,
             cardId: null
         },
+        addCardModal: {
+            open: false,
+            loading: false,
+            columnId: {{ $board->columns->first()?->id ?? 'null' }},
+            title: '',
+            description: '',
+            priority: 'medium',
+            ministryId: '',
+            assignedTo: '',
+            dueDate: ''
+        },
         cards: @json($board->columns->flatMap->cards->keyBy('id')),
         allCards: @json($allCardsData),
         showShortcuts: false,
@@ -1082,6 +1223,15 @@ function churchBoard() {
             this.initKeyboardShortcuts();
             this.$watch('filters', () => this.applyFilters(), { deep: true });
             this.$watch('searchQuery', () => this.applyFilters());
+
+            // Open card from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const cardId = urlParams.get('card');
+            if (cardId) {
+                this.openCard(parseInt(cardId));
+                // Clean URL
+                window.history.replaceState({}, '', window.location.pathname);
+            }
         },
 
         initKeyboardShortcuts() {
@@ -1109,11 +1259,7 @@ function churchBoard() {
 
                 if (e.key === 'n' && !e.metaKey && !e.ctrlKey) {
                     e.preventDefault();
-                    const firstColumn = document.querySelector('.kanban-column');
-                    if (firstColumn) {
-                        const columnId = firstColumn.dataset.columnId;
-                        this.showAddCard = parseInt(columnId);
-                    }
+                    this.openAddCardModal();
                     return;
                 }
             });
@@ -1200,6 +1346,62 @@ function churchBoard() {
             this.searchQuery = '';
         },
 
+        // Add Card Modal Methods
+        openAddCardModal(columnId = null) {
+            this.addCardModal = {
+                open: true,
+                loading: false,
+                columnId: columnId || {{ $board->columns->first()?->id ?? 'null' }},
+                title: '',
+                description: '',
+                priority: 'medium',
+                ministryId: '',
+                assignedTo: '',
+                dueDate: ''
+            };
+            this.$nextTick(() => {
+                this.$refs.addCardTitle?.focus();
+            });
+        },
+
+        async submitNewCard() {
+            if (!this.addCardModal.title.trim()) return;
+
+            this.addCardModal.loading = true;
+
+            try {
+                const response = await fetch(`/boards/columns/${this.addCardModal.columnId}/cards`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: this.addCardModal.title,
+                        description: this.addCardModal.description,
+                        priority: this.addCardModal.priority,
+                        ministry_id: this.addCardModal.ministryId || null,
+                        assigned_to: this.addCardModal.assignedTo || null,
+                        due_date: this.addCardModal.dueDate || null
+                    })
+                });
+
+                if (response.ok) {
+                    this.addCardModal.open = false;
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Помилка при створенні завдання');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Помилка при створенні завдання');
+            } finally {
+                this.addCardModal.loading = false;
+            }
+        },
+
         // Card Panel Methods
         async openCard(cardId) {
             this.cardPanel.open = true;
@@ -1240,12 +1442,97 @@ function churchBoard() {
                 body: JSON.stringify(data)
             });
 
-            // Update column name if column changed
-            if (field === 'column_id') {
-                const colOption = document.querySelector(`select option[value="${value}"]`);
-                if (colOption) {
-                    this.cardPanel.data.column_name = colOption.textContent.trim();
+            // Update the card in the kanban view
+            const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (cardEl) {
+                // Update title
+                if (field === 'title') {
+                    const titleEl = cardEl.querySelector('p.text-sm.font-medium');
+                    if (titleEl) titleEl.textContent = value;
+                    cardEl.dataset.title = value.toLowerCase();
                 }
+
+                // Update column - move card to new column
+                if (field === 'column_id') {
+                    const newColumn = document.querySelector(`.kanban-cards[data-column-id="${value}"]`);
+                    if (newColumn && cardEl.parentElement.dataset.columnId !== value.toString()) {
+                        const oldColumn = cardEl.parentElement;
+                        newColumn.insertBefore(cardEl, newColumn.firstChild);
+                        this.updateColumnCount(oldColumn.dataset.columnId);
+                        this.updateColumnCount(value);
+                    }
+                    const colOption = document.querySelector(`select option[value="${value}"]`);
+                    if (colOption) {
+                        this.cardPanel.data.column_name = colOption.textContent.trim();
+                    }
+                }
+
+                // Update priority
+                if (field === 'priority') {
+                    cardEl.dataset.priority = value;
+                    // Update border
+                    cardEl.classList.remove('border-l-4', 'border-l-red-500', 'border-l-orange-500', 'border-l-yellow-500');
+                    if (value === 'urgent') cardEl.classList.add('border-l-4', 'border-l-red-500');
+                    else if (value === 'high') cardEl.classList.add('border-l-4', 'border-l-orange-500');
+                    else if (value === 'medium') cardEl.classList.add('border-l-4', 'border-l-yellow-500');
+
+                    // Update badge
+                    const badge = cardEl.querySelector('.priority-badge');
+                    if (badge) {
+                        const priorityLabels = { urgent: 'Терміново', high: 'Високий', medium: 'Середній', low: '' };
+                        const priorityClasses = {
+                            urgent: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
+                            high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
+                            medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'
+                        };
+
+                        // Remove old classes
+                        badge.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'dark:bg-red-900/50', 'dark:text-red-300',
+                            'bg-orange-100', 'text-orange-700', 'dark:bg-orange-900/50', 'dark:text-orange-300',
+                            'bg-yellow-100', 'text-yellow-700', 'dark:bg-yellow-900/50', 'dark:text-yellow-300');
+
+                        if (value === 'low' || !value) {
+                            badge.classList.add('hidden');
+                        } else {
+                            priorityClasses[value]?.split(' ').forEach(c => badge.classList.add(c));
+                            const textEl = badge.querySelector('.priority-text');
+                            if (textEl) textEl.textContent = priorityLabels[value] || '';
+                            const iconEl = badge.querySelector('.priority-icon');
+                            if (iconEl) {
+                                if (value === 'urgent') iconEl.classList.remove('hidden');
+                                else iconEl.classList.add('hidden');
+                            }
+                        }
+                    }
+                }
+
+                // Update assignee
+                if (field === 'assigned_to') {
+                    cardEl.dataset.assignee = value || 'unassigned';
+                }
+
+                // Update due date
+                if (field === 'due_date') {
+                    cardEl.dataset.due = value || '';
+                }
+            }
+
+            // Update in allCards for search
+            const cardIndex = this.allCards.findIndex(c => c.id === cardId);
+            if (cardIndex !== -1) {
+                this.allCards[cardIndex] = { ...this.allCards[cardIndex], [field]: value };
+                if (field === 'column_id') {
+                    const colOption = document.querySelector(`select option[value="${value}"]`);
+                    if (colOption) this.allCards[cardIndex].columnName = colOption.textContent.trim();
+                }
+            }
+        },
+
+        updateColumnCount(columnId) {
+            const column = document.querySelector(`.kanban-cards[data-column-id="${columnId}"]`);
+            const countEl = document.querySelector(`.column-count[data-column-id="${columnId}"]`);
+            if (column && countEl) {
+                countEl.textContent = column.querySelectorAll('.kanban-card').length;
             }
         },
 
@@ -1259,6 +1546,19 @@ function churchBoard() {
             });
 
             this.cardPanel.data.card.is_completed = !this.cardPanel.data.card.is_completed;
+
+            // Update the card in the kanban view
+            const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (cardEl) {
+                const titleEl = cardEl.querySelector('p.text-sm.font-medium');
+                if (titleEl) {
+                    if (this.cardPanel.data.card.is_completed) {
+                        titleEl.classList.add('line-through', 'text-gray-400', 'dark:text-gray-500');
+                    } else {
+                        titleEl.classList.remove('line-through', 'text-gray-400', 'dark:text-gray-500');
+                    }
+                }
+            }
         },
 
         // Comments

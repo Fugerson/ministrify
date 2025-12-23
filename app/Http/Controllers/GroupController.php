@@ -34,9 +34,11 @@ class GroupController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'leader_id' => 'nullable|exists:people,id',
+            'status' => 'nullable|in:active,paused,vacation',
         ]);
 
         $validated['church_id'] = auth()->user()->church_id;
+        $validated['status'] = $validated['status'] ?? 'active';
 
         $group = Group::create($validated);
 
@@ -56,14 +58,22 @@ class GroupController extends Controller
     {
         $this->authorize('view', $group);
 
-        $group->load(['leader', 'members']);
+        $group->load(['leader', 'members', 'attendances' => fn($q) => $q->orderByDesc('date')->limit(10)]);
 
         $availablePeople = Person::where('church_id', auth()->user()->church_id)
             ->whereNotIn('id', $group->members->pluck('id'))
             ->orderBy('first_name')
             ->get();
 
-        return view('groups.show', compact('group', 'availablePeople'));
+        // Attendance stats
+        $attendanceStats = [
+            'total_meetings' => $group->attendances()->count(),
+            'average_attendance' => $group->average_attendance,
+            'trend' => $group->attendance_trend,
+            'last_meeting' => $group->last_attendance,
+        ];
+
+        return view('groups.show', compact('group', 'availablePeople', 'attendanceStats'));
     }
 
     public function edit(Group $group)
@@ -85,6 +95,7 @@ class GroupController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'leader_id' => 'nullable|exists:people,id',
+            'status' => 'nullable|in:active,paused,vacation',
         ]);
 
         $group->update($validated);
@@ -126,5 +137,29 @@ class GroupController extends Controller
         $group->members()->detach($person->id);
 
         return back()->with('success', 'Учасника видалено');
+    }
+
+    public function updateMemberRole(Request $request, Group $group, Person $person)
+    {
+        $this->authorize('update', $group);
+
+        $validated = $request->validate([
+            'role' => 'required|in:leader,assistant,member',
+        ]);
+
+        // If promoting to leader, demote current leader
+        if ($validated['role'] === 'leader' && $group->leader_id !== $person->id) {
+            // Update old leader to assistant
+            if ($group->leader_id) {
+                $group->members()->updateExistingPivot($group->leader_id, ['role' => 'assistant']);
+            }
+            // Update group leader
+            $group->update(['leader_id' => $person->id]);
+        }
+
+        $group->members()->updateExistingPivot($person->id, ['role' => $validated['role']]);
+
+        $roleLabel = Group::ROLES[$validated['role']] ?? $validated['role'];
+        return back()->with('success', "Роль змінено на: {$roleLabel}");
     }
 }

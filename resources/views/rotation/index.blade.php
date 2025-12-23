@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Ротація волонтерів')
+@section('title', 'Ротація служительів')
 
 @section('content')
 <x-page-help page="rotation" />
@@ -9,7 +9,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ротація волонтерів</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ротація служительів</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">Автоматичний розподіл служителів по подіям</p>
         </div>
     </div>
@@ -25,7 +25,7 @@
             <div>
                 <h3 class="font-semibold text-gray-900 dark:text-white">Як працює ротація?</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Система аналізує навантаження волонтерів, їх навички та доступність, щоб справедливо розподілити призначення.
+                    Система аналізує навантаження служительів, їх навички та доступність, щоб справедливо розподілити призначення.
                     Враховується мінімальний відпочинок між служіннями та максимальна кількість на місяць.
                 </p>
                 <div class="flex flex-wrap gap-4 mt-3">
@@ -156,7 +156,7 @@ function autoAssignMinistry(ministryId, ministryName) {
     document.getElementById('modalContent').innerHTML = `
         <div class="space-y-4">
             <p class="text-gray-600 dark:text-gray-400">
-                Система автоматично призначить волонтерів на всі події цього служіння на найближчі тижні.
+                Система автоматично призначить служительів на всі події цього служіння на найближчі тижні.
             </p>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Період</label>

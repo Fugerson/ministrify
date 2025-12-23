@@ -16,6 +16,36 @@ class Person extends Model
 
     protected $table = 'people';
 
+    // Church roles
+    public const ROLE_MEMBER = 'member';
+    public const ROLE_SERVANT = 'servant';
+    public const ROLE_DEACON = 'deacon';
+    public const ROLE_PRESBYTER = 'presbyter';
+    public const ROLE_PASTOR = 'pastor';
+
+    public const CHURCH_ROLES = [
+        self::ROLE_MEMBER => 'Член церкви',
+        self::ROLE_SERVANT => 'Служитель',
+        self::ROLE_DEACON => 'Диякон',
+        self::ROLE_PRESBYTER => 'Пресвітер',
+        self::ROLE_PASTOR => 'Пастор',
+    ];
+
+    // Age categories
+    public const AGE_CHILD = 'child';        // 0-12
+    public const AGE_TEEN = 'teen';          // 13-17
+    public const AGE_YOUTH = 'youth';        // 18-35
+    public const AGE_ADULT = 'adult';        // 36-59
+    public const AGE_SENIOR = 'senior';      // 60+
+
+    public const AGE_CATEGORIES = [
+        self::AGE_CHILD => ['label' => 'Діти', 'min' => 0, 'max' => 12, 'color' => '#f59e0b'],
+        self::AGE_TEEN => ['label' => 'Підлітки', 'min' => 13, 'max' => 17, 'color' => '#8b5cf6'],
+        self::AGE_YOUTH => ['label' => 'Молодь', 'min' => 18, 'max' => 35, 'color' => '#3b82f6'],
+        self::AGE_ADULT => ['label' => 'Дорослі', 'min' => 36, 'max' => 59, 'color' => '#10b981'],
+        self::AGE_SENIOR => ['label' => 'Старші', 'min' => 60, 'max' => 150, 'color' => '#6b7280'],
+    ];
+
     protected $fillable = [
         'church_id',
         'user_id',
@@ -29,6 +59,7 @@ class Person extends Model
         'address',
         'birth_date',
         'joined_date',
+        'church_role',
         'notes',
     ];
 
@@ -189,5 +220,39 @@ class Person extends Model
     public function scopeInMinistry($query, int $ministryId)
     {
         return $query->whereHas('ministries', fn($q) => $q->where('ministries.id', $ministryId));
+    }
+
+    public function getAgeAttribute(): ?int
+    {
+        if (!$this->birth_date) {
+            return null;
+        }
+        return $this->birth_date->age;
+    }
+
+    public function getAgeCategoryAttribute(): ?string
+    {
+        $age = $this->age;
+        if ($age === null) {
+            return null;
+        }
+
+        foreach (self::AGE_CATEGORIES as $key => $category) {
+            if ($age >= $category['min'] && $age <= $category['max']) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+    public function getAgeCategoryLabelAttribute(): ?string
+    {
+        $category = $this->age_category;
+        return $category ? self::AGE_CATEGORIES[$category]['label'] : null;
+    }
+
+    public function getChurchRoleLabelAttribute(): string
+    {
+        return self::CHURCH_ROLES[$this->church_role] ?? 'Член церкви';
     }
 }

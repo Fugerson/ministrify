@@ -20,16 +20,12 @@ class DashboardController extends Controller
         $church = $this->getCurrentChurch();
         $user = auth()->user();
 
-        // Birthdays this week
-        $birthdaysThisWeek = Person::where('church_id', $church->id)
+        // Birthdays this month
+        $birthdaysThisMonth = Person::where('church_id', $church->id)
             ->whereNotNull('birth_date')
+            ->whereMonth('birth_date', now()->month)
             ->get()
-            ->filter(function ($person) {
-                $birthday = $person->birth_date->copy()->year(now()->year);
-                return $birthday->between(now()->startOfDay(), now()->addDays(7));
-            })
-            ->sortBy(fn($p) => $p->birth_date->copy()->year(now()->year))
-            ->take(5);
+            ->sortBy(fn($p) => $p->birth_date->day);
 
         // Upcoming events (next 7 days)
         $upcomingEvents = Event::where('church_id', $church->id)
@@ -41,23 +37,125 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Stats
+        // Detailed People Stats
+        $allPeople = Person::where('church_id', $church->id)->get();
+        $totalPeople = $allPeople->count();
+        $leadersCount = Person::where('church_id', $church->id)
+            ->where(function ($q) {
+                $q->whereHas('leadingMinistries')
+                  ->orWhereHas('leadingGroups');
+            })->count();
+        $volunteersCount = Person::where('church_id', $church->id)
+            ->whereHas('ministries')
+            ->count();
+        $newThisMonth = Person::where('church_id', $church->id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        // Age statistics
+        $ageStats = [
+            'children' => $allPeople->filter(fn($p) => $p->age !== null && $p->age <= 12)->count(),
+            'teens' => $allPeople->filter(fn($p) => $p->age !== null && $p->age >= 13 && $p->age <= 17)->count(),
+            'youth' => $allPeople->filter(fn($p) => $p->age !== null && $p->age >= 18 && $p->age <= 35)->count(),
+            'adults' => $allPeople->filter(fn($p) => $p->age !== null && $p->age >= 36 && $p->age <= 59)->count(),
+            'seniors' => $allPeople->filter(fn($p) => $p->age !== null && $p->age >= 60)->count(),
+        ];
+
+        // People trend (last 3 months)
+        $threeMonthsAgo = now()->subMonths(3);
+        $newPeopleLastThreeMonths = Person::where('church_id', $church->id)
+            ->where('created_at', '>=', $threeMonthsAgo)
+            ->count();
+        $peopleTrend = $newPeopleLastThreeMonths;
+
+        // Volunteers trend (last 3 months) - count people who joined ministries
+        $volunteersThreeMonthsAgo = \DB::table('ministry_person')
+            ->whereIn('ministry_id', $church->ministries()->pluck('id'))
+            ->where('created_at', '<', $threeMonthsAgo)
+            ->distinct('person_id')
+            ->count('person_id');
+        $volunteersTrend = $volunteersCount - $volunteersThreeMonthsAgo;
+
+        // Detailed Ministry Stats
+        $ministriesList = $church->ministries()->withCount('members')->orderByDesc('members_count')->get();
+        $totalMinistries = $ministriesList->count();
+        $activeVolunteers = \DB::table('ministry_person')
+            ->whereIn('ministry_id', $church->ministries()->pluck('id'))
+            ->distinct('person_id')
+            ->count('person_id');
+        $ministriesWithEvents = $church->ministries()
+            ->whereHas('events', fn($q) => $q->where('date', '>=', now()))
+            ->count();
+
+        // Detailed Group Stats
+        $activeGroupIds = Group::where('church_id', $church->id)->where('status', 'active')->pluck('id');
+        $totalGroups = Group::where('church_id', $church->id)->count();
+        $activeGroups = $activeGroupIds->count();
+        $pausedGroups = Group::where('church_id', $church->id)->where('status', 'paused')->count();
+        $vacationGroups = Group::where('church_id', $church->id)->where('status', 'vacation')->count();
+        $totalGroupMembers = $activeGroups > 0
+            ? \DB::table('group_person')->whereIn('group_id', $activeGroupIds)->distinct('person_id')->count('person_id')
+            : 0;
+
+        // Detailed Event Stats
+        $eventsThisMonth = Event::where('church_id', $church->id)
+            ->whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->count();
+        $upcomingEventsCount = Event::where('church_id', $church->id)
+            ->where('date', '>=', now())
+            ->where('date', '<=', now()->endOfMonth())
+            ->count();
+        $pastEventsThisMonth = $eventsThisMonth - $upcomingEventsCount;
+
         $stats = [
-            'total_people' => Person::where('church_id', $church->id)->count(),
-            'total_ministries' => $church->ministries()->count(),
-            'total_groups' => Group::where('church_id', $church->id)->where('is_active', true)->count(),
-            'events_this_month' => Event::where('church_id', $church->id)
-                ->whereMonth('date', now()->month)
-                ->whereYear('date', now()->year)
-                ->count(),
+            'total_people' => $totalPeople,
+            'leaders_count' => $leadersCount,
+            'volunteers_count' => $volunteersCount,
+            'new_people_this_month' => $newThisMonth,
+            'people_trend' => $peopleTrend,
+            'volunteers_trend' => $volunteersTrend,
+            'age_stats' => $ageStats,
+            'total_ministries' => $totalMinistries,
+            'ministries_list' => $ministriesList,
+            'active_volunteers' => $activeVolunteers,
+            'ministries_with_events' => $ministriesWithEvents,
+            'total_groups' => $totalGroups,
+            'active_groups' => $activeGroups,
+            'paused_groups' => $pausedGroups,
+            'vacation_groups' => $vacationGroups,
+            'total_group_members' => $totalGroupMembers,
+            'events_this_month' => $eventsThisMonth,
+            'upcoming_events' => $upcomingEventsCount,
+            'past_events' => $pastEventsThisMonth,
         ];
 
         // Expenses this month (for admins)
+        // Expenses breakdown by category (for admins)
+        $expensesByCategory = collect();
         if ($user->isAdmin()) {
             $stats['expenses_this_month'] = Expense::where('church_id', $church->id)
                 ->whereMonth('date', now()->month)
                 ->whereYear('date', now()->year)
                 ->sum('amount');
+
+            $expensesByCategory = Expense::where('church_id', $church->id)
+                ->whereMonth('date', now()->month)
+                ->whereYear('date', now()->year)
+                ->with('category')
+                ->get()
+                ->groupBy('category_id')
+                ->map(function ($expenses, $categoryId) {
+                    $category = $expenses->first()->category;
+                    return [
+                        'name' => $category?->name ?? 'Без категорії',
+                        'amount' => $expenses->sum('amount'),
+                        'count' => $expenses->count(),
+                    ];
+                })
+                ->sortByDesc('amount')
+                ->values();
         }
 
         // Attendance chart data (last 4 weeks)
@@ -117,18 +215,17 @@ class DashboardController extends Controller
                 ]);
         }
 
-        // Boards with stats
-        $boards = Board::where('church_id', $church->id)
-            ->where('is_archived', false)
-            ->withCount(['columns', 'cards'])
-            ->orderBy('updated_at', 'desc')
-            ->limit(3)
-            ->get();
+        // Get main task tracker board
+        $taskTracker = Board::where('church_id', $church->id)
+            ->where('name', 'Трекер завдань')
+            ->first();
 
-        // Urgent & overdue tasks
-        $urgentTasks = BoardCard::whereHas('column.board', function ($q) use ($church) {
-            $q->where('church_id', $church->id)->where('is_archived', false);
-        })
+        // Urgent & overdue tasks (only from main tracker)
+        $urgentTasks = collect();
+        if ($taskTracker) {
+            $urgentTasks = BoardCard::whereHas('column', function ($q) use ($taskTracker) {
+                $q->where('board_id', $taskTracker->id);
+            })
             ->where('is_completed', false)
             ->where(function ($q) {
                 $q->where('priority', 'urgent')
@@ -138,11 +235,12 @@ class DashboardController extends Controller
                          ->where('due_date', '<=', now()->addDays(2));
                   });
             })
-            ->with(['column.board', 'assignee'])
+            ->with(['column', 'assignee'])
             ->orderByRaw("CASE WHEN priority = 'urgent' THEN 0 WHEN priority = 'high' THEN 1 ELSE 2 END")
             ->orderBy('due_date')
             ->limit(5)
             ->get();
+        }
 
         // Growth stats (for admins)
         $growthData = [];
@@ -199,11 +297,11 @@ class DashboardController extends Controller
             'pendingAssignments',
             'needAttention',
             'ministryBudgets',
-            'birthdaysThisWeek',
-            'boards',
+            'birthdaysThisMonth',
             'urgentTasks',
             'growthData',
-            'financialData'
+            'financialData',
+            'expensesByCategory'
         ));
     }
 
@@ -298,6 +396,7 @@ class DashboardController extends Controller
                 'label' => $month->translatedFormat('M'),
                 'income' => $income,
                 'expenses' => $expenses,
+                'balance' => $income - $expenses,
             ];
         }
         return $data;

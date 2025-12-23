@@ -539,7 +539,7 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Telegram бот</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Сповіщення волонтерам</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Сповіщення служительам</p>
                 </div>
             </div>
 
@@ -679,7 +679,7 @@
                        class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
                 <div>
                     <p class="font-medium text-gray-900 dark:text-white">Повідомлення лідеру при відмові</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Коли волонтер відхиляє призначення</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Коли служитель відхиляє призначення</p>
                 </div>
             </label>
 
