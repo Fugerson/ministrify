@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, SoftDeletes, Auditable;
 
     protected $fillable = [
         'church_id',
@@ -29,15 +30,34 @@ class Event extends Model
         'public_description',
         'location',
         'cover_image',
+        'is_service',
+        'service_type',
     ];
 
     protected $casts = [
         'date' => 'date',
         'time' => 'datetime:H:i',
         'is_public' => 'boolean',
+        'is_service' => 'boolean',
         'allow_registration' => 'boolean',
         'registration_deadline' => 'datetime',
     ];
+
+    // Service types
+    const SERVICE_SUNDAY = 'sunday_service';
+    const SERVICE_YOUTH = 'youth_meeting';
+    const SERVICE_PRAYER = 'prayer_meeting';
+    const SERVICE_SPECIAL = 'special_service';
+
+    public static function serviceTypeLabels(): array
+    {
+        return [
+            self::SERVICE_SUNDAY => 'Воскресне служіння',
+            self::SERVICE_YOUTH => 'Молодіжна зустріч',
+            self::SERVICE_PRAYER => 'Молитовна зустріч',
+            self::SERVICE_SPECIAL => 'Особливе служіння',
+        ];
+    }
 
     public function church(): BelongsTo
     {
@@ -77,6 +97,46 @@ class Event extends Model
     public function registrations(): HasMany
     {
         return $this->hasMany(EventRegistration::class);
+    }
+
+    public function planItems(): HasMany
+    {
+        return $this->hasMany(ServicePlanItem::class)->ordered();
+    }
+
+    public function hasServicePlan(): bool
+    {
+        return $this->is_service && $this->planItems()->exists();
+    }
+
+    public function getServiceTypeLabelAttribute(): ?string
+    {
+        if (!$this->service_type) {
+            return null;
+        }
+        return self::serviceTypeLabels()[$this->service_type] ?? $this->service_type;
+    }
+
+    public function getTotalPlanDurationAttribute(): int
+    {
+        return $this->planItems->sum('duration_minutes') ?? 0;
+    }
+
+    public function duplicatePlanFrom(Event $source): void
+    {
+        foreach ($source->planItems as $item) {
+            $this->planItems()->create([
+                'title' => $item->title,
+                'description' => $item->description,
+                'type' => $item->type,
+                'start_time' => $item->start_time,
+                'end_time' => $item->end_time,
+                'sort_order' => $item->sort_order,
+                'notes' => $item->notes,
+                'status' => ServicePlanItem::STATUS_PLANNED,
+                // responsible_id is not copied - needs to be assigned fresh
+            ]);
+        }
     }
 
     public function getConfirmedRegistrationsCountAttribute(): int
@@ -122,11 +182,15 @@ class Event extends Model
 
     public function getTotalPositionsCountAttribute(): int
     {
-        return $this->ministry->positions()->count();
+        return $this->ministry?->positions()->count() ?? 0;
     }
 
     public function getUnfilledPositionsAttribute(): \Illuminate\Database\Eloquent\Collection
     {
+        if (!$this->ministry) {
+            return collect();
+        }
+
         $filledPositionIds = $this->assignments()->pluck('position_id')->toArray();
 
         return $this->ministry->positions()
@@ -176,5 +240,15 @@ class Event extends Model
             $startOfWeek,
             $startOfWeek->copy()->endOfWeek()
         ]);
+    }
+
+    public function scopeServices($query)
+    {
+        return $query->where('is_service', true);
+    }
+
+    public function scopeOfServiceType($query, string $type)
+    {
+        return $query->where('service_type', $type);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Event;
 use App\Models\Ministry;
+use App\Rules\BelongsToChurch;
 use App\Services\CalendarService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -94,22 +95,22 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'ministry_id' => 'required|exists:ministries,id',
+            'ministry_id' => ['required', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'title' => 'required|string|max:255',
             'date' => 'required|date',
             'time' => 'required|date_format:H:i',
             'notes' => 'nullable|string',
             'recurrence_rule' => 'nullable|string',
+            'is_service' => 'nullable|boolean',
+            'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
         ]);
+
+        $validated['is_service'] = $request->boolean('is_service');
 
         $church = $this->getCurrentChurch();
         $ministry = Ministry::findOrFail($validated['ministry_id']);
 
-        // Check access
-        if ($ministry->church_id !== $church->id) {
-            abort(404);
-        }
-
+        // Authorization already validated by BelongsToChurch rule
         Gate::authorize('manage-ministry', $ministry);
 
         $validated['church_id'] = $church->id;
@@ -134,15 +135,26 @@ class EventController extends Controller
             'assignments.person',
             'assignments.position',
             'checklist.items.completedByUser',
+            'planItems',
         ]);
 
-        // Get available people for unfilled positions
-        $availablePeople = $event->ministry->members()
-            ->whereDoesntHave('unavailableDates', function ($q) use ($event) {
-                $q->where('date_from', '<=', $event->date)
-                  ->where('date_to', '>=', $event->date);
-            })
-            ->get();
+        // Get available people for unfilled positions (only if ministry exists)
+        $availablePeople = collect();
+        $volunteerBlockouts = [];
+        if ($event->ministry) {
+            $availablePeople = $event->ministry->members()
+                ->with(['blockoutDates' => function ($q) use ($event) {
+                    $q->active()->forDate($event->date);
+                }])
+                ->get();
+
+            // Build blockout info for each person
+            foreach ($availablePeople as $person) {
+                if ($person->hasBlockoutOn($event->date, $event->ministry_id)) {
+                    $volunteerBlockouts[$person->id] = $person->getBlockoutReasonFor($event->date, $event->ministry_id);
+                }
+            }
+        }
 
         // Get checklist templates
         $checklistTemplates = \App\Models\ChecklistTemplate::where('church_id', $church->id)
@@ -154,13 +166,19 @@ class EventController extends Controller
             ->where('is_archived', false)
             ->get();
 
-        return view('schedule.show', compact('event', 'availablePeople', 'checklistTemplates', 'boards'));
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards'));
     }
 
     public function edit(Event $event)
     {
         $this->authorizeChurch($event);
-        Gate::authorize('manage-ministry', $event->ministry);
+
+        // Authorize ministry management if event has ministry
+        if ($event->ministry) {
+            Gate::authorize('manage-ministry', $event->ministry);
+        } elseif (!$this->isAdmin()) {
+            abort(403, 'Тільки адміністратор може редагувати події без служіння.');
+        }
 
         $church = $this->getCurrentChurch();
         $ministries = Ministry::where('church_id', $church->id)->get();
@@ -171,16 +189,25 @@ class EventController extends Controller
     public function update(Request $request, Event $event)
     {
         $this->authorizeChurch($event);
-        Gate::authorize('manage-ministry', $event->ministry);
+
+        // Authorize ministry management if event has ministry
+        if ($event->ministry) {
+            Gate::authorize('manage-ministry', $event->ministry);
+        } elseif (!$this->isAdmin()) {
+            abort(403, 'Тільки адміністратор може редагувати події без служіння.');
+        }
 
         $validated = $request->validate([
-            'ministry_id' => 'required|exists:ministries,id',
+            'ministry_id' => ['required', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'title' => 'required|string|max:255',
             'date' => 'required|date',
             'time' => 'required|date_format:H:i',
             'notes' => 'nullable|string',
+            'is_service' => 'nullable|boolean',
+            'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
         ]);
 
+        $validated['is_service'] = $request->boolean('is_service');
         $event->update($validated);
 
         return redirect()->route('events.show', $event)
@@ -190,7 +217,13 @@ class EventController extends Controller
     public function destroy(Event $event)
     {
         $this->authorizeChurch($event);
-        Gate::authorize('manage-ministry', $event->ministry);
+
+        // Authorize ministry management if event has ministry
+        if ($event->ministry) {
+            Gate::authorize('manage-ministry', $event->ministry);
+        } elseif (!$this->isAdmin()) {
+            abort(403, 'Тільки адміністратор може видаляти події без служіння.');
+        }
 
         $event->delete();
 
@@ -230,13 +263,6 @@ class EventController extends Controller
                     'parent_event_id' => $parentEvent->id,
                 ]);
             }
-        }
-    }
-
-    private function authorizeChurch(Event $event): void
-    {
-        if ($event->church_id !== $this->getCurrentChurch()->id) {
-            abort(404);
         }
     }
 

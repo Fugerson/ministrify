@@ -7,8 +7,7 @@ use App\Models\Church;
 use App\Models\User;
 use App\Models\Person;
 use App\Models\Event;
-use App\Models\Expense;
-use App\Models\Income;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -28,10 +27,10 @@ class SystemAdminController extends Controller
             'events' => Event::count(),
         ];
 
-        // Financial summary
+        // Financial summary (using unified Transaction model)
         $finances = [
-            'total_income' => Income::sum('amount'),
-            'total_expenses' => Expense::sum('amount'),
+            'total_income' => Transaction::incoming()->completed()->sum('amount'),
+            'total_expenses' => Transaction::outgoing()->completed()->sum('amount'),
         ];
 
         // Recent churches
@@ -90,10 +89,10 @@ class SystemAdminController extends Controller
         $recentEvents = $church->events()->latest()->take(10)->get();
         $auditLogs = AuditLog::where('church_id', $church->id)->latest()->take(20)->get();
 
-        // Church finances
+        // Church finances (using unified Transaction model)
         $finances = [
-            'income' => Income::where('church_id', $church->id)->sum('amount'),
-            'expenses' => Expense::where('church_id', $church->id)->sum('amount'),
+            'income' => Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount'),
+            'expenses' => Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount'),
         ];
 
         return view('system-admin.churches.show', compact('church', 'users', 'recentEvents', 'auditLogs', 'finances'));

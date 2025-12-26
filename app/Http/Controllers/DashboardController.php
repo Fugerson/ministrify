@@ -209,6 +209,7 @@ class DashboardController extends Controller
                 ->get()
                 ->map(fn($m) => [
                     'name' => $m->name,
+                    'icon' => $m->icon ?? '⛪',
                     'color' => $m->color,
                     'budget' => $m->monthly_budget,
                     'spent' => $m->spent_this_month,

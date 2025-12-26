@@ -46,6 +46,7 @@ class SearchController extends Controller
         // Search ministries
         $ministries = Ministry::where('church_id', $churchId)
             ->where('name', 'like', "%{$query}%")
+            ->withCount('members')
             ->limit(3)
             ->get();
 
@@ -54,7 +55,7 @@ class SearchController extends Controller
                 'type' => 'ministry',
                 'icon' => 'church',
                 'title' => $ministry->name,
-                'subtitle' => $ministry->members()->count() . ' учасників',
+                'subtitle' => $ministry->members_count . ' учасників',
                 'url' => route('ministries.show', $ministry),
                 'color' => $ministry->color,
             ];
@@ -98,6 +99,7 @@ class SearchController extends Controller
         $boards = Board::where('church_id', $churchId)
             ->where('is_archived', false)
             ->where('name', 'like', "%{$query}%")
+            ->withCount('cards')
             ->limit(3)
             ->get();
 
@@ -106,7 +108,7 @@ class SearchController extends Controller
                 'type' => 'board',
                 'icon' => 'kanban',
                 'title' => $board->name,
-                'subtitle' => $board->cards()->count() . ' карток',
+                'subtitle' => $board->cards_count . ' карток',
                 'url' => route('boards.show', $board),
             ];
         }

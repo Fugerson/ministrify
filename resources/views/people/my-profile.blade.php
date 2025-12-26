@@ -207,6 +207,189 @@
                     </div>
                 @endif
             </div>
+
+            <!-- Push Notifications -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
+                 x-data="{
+                     supported: 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window,
+                     permission: Notification.permission || 'default',
+                     subscribed: false,
+                     loading: false,
+                     error: null,
+                     async checkSubscription() {
+                         if (!this.supported) return;
+                         try {
+                             const registration = await navigator.serviceWorker.ready;
+                             const subscription = await registration.pushManager.getSubscription();
+                             this.subscribed = !!subscription;
+                         } catch (e) {
+                             console.error('Check subscription error:', e);
+                         }
+                     },
+                     async subscribe() {
+                         this.loading = true;
+                         this.error = null;
+                         try {
+                             // Get VAPID key
+                             const keyResponse = await fetch('/api/push/public-key');
+                             const { publicKey } = await keyResponse.json();
+                             if (!publicKey) {
+                                 this.error = 'Push-сповіщення не налаштовані на сервері';
+                                 return;
+                             }
+
+                             // Request permission
+                             const permission = await Notification.requestPermission();
+                             this.permission = permission;
+                             if (permission !== 'granted') {
+                                 this.error = 'Дозвіл на сповіщення відхилено';
+                                 return;
+                             }
+
+                             // Subscribe
+                             const registration = await navigator.serviceWorker.ready;
+                             const subscription = await registration.pushManager.subscribe({
+                                 userVisibleOnly: true,
+                                 applicationServerKey: this.urlBase64ToUint8Array(publicKey)
+                             });
+
+                             // Send to server
+                             const response = await fetch('/api/push/subscribe', {
+                                 method: 'POST',
+                                 headers: {
+                                     'Content-Type': 'application/json',
+                                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                     'Accept': 'application/json'
+                                 },
+                                 body: JSON.stringify(subscription.toJSON())
+                             });
+
+                             if (response.ok) {
+                                 this.subscribed = true;
+                             } else {
+                                 const data = await response.json();
+                                 this.error = data.error || 'Помилка підписки';
+                             }
+                         } catch (e) {
+                             console.error('Subscribe error:', e);
+                             this.error = 'Помилка: ' + e.message;
+                         } finally {
+                             this.loading = false;
+                         }
+                     },
+                     async unsubscribe() {
+                         this.loading = true;
+                         try {
+                             const registration = await navigator.serviceWorker.ready;
+                             const subscription = await registration.pushManager.getSubscription();
+                             if (subscription) {
+                                 await subscription.unsubscribe();
+                                 await fetch('/api/push/unsubscribe', {
+                                     method: 'DELETE',
+                                     headers: {
+                                         'Content-Type': 'application/json',
+                                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                     },
+                                     body: JSON.stringify({ endpoint: subscription.endpoint })
+                                 });
+                             }
+                             this.subscribed = false;
+                         } catch (e) {
+                             console.error('Unsubscribe error:', e);
+                         } finally {
+                             this.loading = false;
+                         }
+                     },
+                     urlBase64ToUint8Array(base64String) {
+                         const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                         const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                         const rawData = window.atob(base64);
+                         const outputArray = new Uint8Array(rawData.length);
+                         for (let i = 0; i < rawData.length; ++i) {
+                             outputArray[i] = rawData.charCodeAt(i);
+                         }
+                         return outputArray;
+                     }
+                 }"
+                 x-init="checkSubscription()">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Push-сповіщення</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Миттєві сповіщення в браузері</p>
+                    </div>
+                </div>
+
+                <template x-if="!supported">
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
+                        <p class="text-yellow-700 dark:text-yellow-400 text-sm">
+                            Ваш браузер не підтримує Push-сповіщення. Спробуйте інший браузер (Chrome, Firefox, Edge).
+                        </p>
+                    </div>
+                </template>
+
+                <template x-if="supported">
+                    <div>
+                        <div x-show="error" x-cloak class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4">
+                            <p class="text-red-700 dark:text-red-400 text-sm" x-text="error"></p>
+                        </div>
+
+                        <template x-if="permission === 'denied'">
+                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+                                <p class="text-red-700 dark:text-red-400 text-sm">
+                                    Сповіщення заблоковані. Дозвольте сповіщення в налаштуваннях браузера.
+                                </p>
+                            </div>
+                        </template>
+
+                        <template x-if="permission !== 'denied'">
+                            <div>
+                                <template x-if="subscribed">
+                                    <div>
+                                        <div class="flex items-center gap-2 text-green-600 dark:text-green-400 mb-4">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span class="text-sm font-medium">Push-сповіщення увімкнені</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                            Ви отримуватимете сповіщення про нові призначення, нагадування та важливі повідомлення.
+                                        </p>
+                                        <button @click="unsubscribe()" :disabled="loading" type="button"
+                                                class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
+                                            <span x-show="!loading">Вимкнути сповіщення</span>
+                                            <span x-show="loading">Вимкнення...</span>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <template x-if="!subscribed">
+                                    <div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                            Увімкніть Push-сповіщення, щоб отримувати миттєві сповіщення про призначення, нагадування та важливі повідомлення.
+                                        </p>
+                                        <button @click="subscribe()" :disabled="loading" type="button"
+                                                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white font-medium rounded-xl transition-colors">
+                                            <svg x-show="loading" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                            </svg>
+                                            <span x-text="loading ? 'Увімкнення...' : 'Увімкнути Push-сповіщення'"></span>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
         </div>
 
         <!-- Sidebar -->
@@ -236,54 +419,79 @@
                 @endif
             </div>
 
-            <!-- Unavailable dates -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Дати недоступності</h3>
+            <!-- Blockout Dates -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Періоди недоступності</h3>
+                    </div>
+                    <a href="{{ route('blockouts.index') }}" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                        Керувати
+                    </a>
+                </div>
 
-                @if($person->unavailableDates->isNotEmpty())
+                @php
+                    $activeBlockouts = $person->blockoutDates()->active()->upcoming()->take(3)->get();
+                @endphp
+
+                @if($activeBlockouts->isNotEmpty())
                 <div class="space-y-2 mb-4">
-                    @foreach($person->unavailableDates as $date)
-                    <div class="flex items-center justify-between py-2 border-b last:border-0">
-                        <div>
-                            <p class="text-sm text-gray-900">{{ $date->date_from->format('d.m') }} - {{ $date->date_to->format('d.m.Y') }}</p>
-                            @if($date->reason)
-                            <p class="text-xs text-gray-500">{{ $date->reason }}</p>
-                            @endif
+                    @foreach($activeBlockouts as $blockout)
+                    <div class="flex items-center gap-3 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                        <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                            <span class="text-sm">
+                                @switch($blockout->reason)
+                                    @case('vacation') 🏖️ @break
+                                    @case('travel') ✈️ @break
+                                    @case('sick') 🏥 @break
+                                    @case('family') 👨‍👩‍👧 @break
+                                    @case('work') 💼 @break
+                                    @default 📅
+                                @endswitch
+                            </span>
                         </div>
-                        <form action="{{ route('my-profile.unavailable.remove', $date) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:text-red-700">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </form>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $blockout->date_range }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $blockout->reason_label }}</p>
+                        </div>
                     </div>
                     @endforeach
                 </div>
+                @else
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Немає активних періодів недоступності</p>
                 @endif
 
-                <form action="{{ route('my-profile.unavailable.add') }}" method="POST" class="space-y-3">
-                    @csrf
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs text-gray-600">З</label>
-                            <input type="date" name="date_from" required min="{{ now()->format('Y-m-d') }}"
-                                class="block w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-600">По</label>
-                            <input type="date" name="date_to" required min="{{ now()->format('Y-m-d') }}"
-                                class="block w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                    </div>
-                    <input type="text" name="reason" placeholder="Причина (необов'язково)"
-                        class="block w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-                    <button type="submit" class="w-full px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm">
-                        Додати
-                    </button>
-                </form>
+                <a href="{{ route('blockouts.create') }}"
+                   class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Додати період
+                </a>
+            </div>
+
+            <!-- Scheduling Preferences -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Налаштування планування</h3>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Вкажіть бажану частоту служіння та інші параметри
+                </p>
+                <a href="{{ route('scheduling-preferences.index') }}"
+                   class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Налаштувати
+                </a>
             </div>
         </div>
     </div>

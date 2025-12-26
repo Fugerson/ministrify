@@ -13,6 +13,7 @@ use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ServicePlanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\AssignmentController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\SystemAdminController;
 use App\Http\Controllers\PrivateMessageController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\OnboardingController;
 use Illuminate\Support\Facades\Route;
 
 // Home redirect
@@ -97,7 +99,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
 });
 
 // Protected routes
-Route::middleware(['auth', 'church'])->group(function () {
+Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/charts', [DashboardController::class, 'chartData'])->name('dashboard.charts');
@@ -160,6 +162,23 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
     Route::get('calendar', [EventController::class, 'calendar'])->name('calendar');
 
+    // Service Plan
+    Route::prefix('events/{event}/plan')->name('events.plan.')->group(function () {
+        Route::get('/', [ServicePlanController::class, 'index'])->name('index');
+        Route::post('/', [ServicePlanController::class, 'store'])->name('store');
+        Route::get('/print', [ServicePlanController::class, 'print'])->name('print');
+        Route::post('/reorder', [ServicePlanController::class, 'reorder'])->name('reorder');
+        Route::post('/quick-add', [ServicePlanController::class, 'quickAdd'])->name('quick-add');
+        Route::post('/apply-template', [ServicePlanController::class, 'applyTemplate'])->name('apply-template');
+        Route::post('/bulk-add', [ServicePlanController::class, 'bulkAdd'])->name('bulk-add');
+        Route::post('/parse-text', [ServicePlanController::class, 'parseText'])->name('parse-text');
+        Route::post('/duplicate/{source}', [ServicePlanController::class, 'duplicate'])->name('duplicate');
+        Route::get('/{item}/data', [ServicePlanController::class, 'itemData'])->name('item.data');
+        Route::put('/{item}', [ServicePlanController::class, 'update'])->name('update');
+        Route::delete('/{item}', [ServicePlanController::class, 'destroy'])->name('destroy');
+        Route::post('/{item}/status', [ServicePlanController::class, 'updateStatus'])->name('status');
+    });
+
     // Calendar Export/Import
     Route::get('calendar/export', [EventController::class, 'exportIcal'])->name('calendar.export');
     Route::get('calendar/import', [EventController::class, 'importForm'])->name('calendar.import');
@@ -177,6 +196,9 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::post('assignments/{assignment}/confirm', [AssignmentController::class, 'confirm'])->name('assignments.confirm');
     Route::post('assignments/{assignment}/decline', [AssignmentController::class, 'decline'])->name('assignments.decline');
     Route::post('events/{event}/notify-all', [AssignmentController::class, 'notifyAll'])->name('assignments.notify-all');
+    Route::post('events/{event}/confirm-all', [AssignmentController::class, 'confirmAll'])->name('assignments.confirm-all');
+    Route::post('events/{event}/mark-all-attended', [AssignmentController::class, 'markAllAttended'])->name('assignments.mark-all-attended');
+    Route::patch('assignments/{assignment}/status', [AssignmentController::class, 'updateStatus'])->name('assignments.update-status');
 
     // Rotation
     Route::prefix('rotation')->name('rotation.')->group(function () {
@@ -297,6 +319,29 @@ Route::middleware(['auth', 'church'])->group(function () {
     Route::post('my-profile/telegram/generate-code', [PersonController::class, 'generateTelegramCode'])->name('my-profile.telegram.generate');
     Route::delete('my-profile/telegram/unlink', [PersonController::class, 'unlinkTelegram'])->name('my-profile.telegram.unlink');
 
+    // Blockout Dates (volunteer availability)
+    Route::prefix('blockouts')->name('blockouts.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\BlockoutDateController::class, 'index'])->name('index');
+        Route::get('create', [\App\Http\Controllers\BlockoutDateController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\BlockoutDateController::class, 'store'])->name('store');
+        Route::get('{blockout}/edit', [\App\Http\Controllers\BlockoutDateController::class, 'edit'])->name('edit');
+        Route::put('{blockout}', [\App\Http\Controllers\BlockoutDateController::class, 'update'])->name('update');
+        Route::delete('{blockout}', [\App\Http\Controllers\BlockoutDateController::class, 'destroy'])->name('destroy');
+        Route::post('{blockout}/cancel', [\App\Http\Controllers\BlockoutDateController::class, 'cancel'])->name('cancel');
+        Route::post('quick', [\App\Http\Controllers\BlockoutDateController::class, 'quickStore'])->name('quick');
+        Route::get('calendar', [\App\Http\Controllers\BlockoutDateController::class, 'calendar'])->name('calendar');
+    });
+
+    // Scheduling Preferences (volunteer scheduling preferences)
+    Route::prefix('scheduling-preferences')->name('scheduling-preferences.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SchedulingPreferenceController::class, 'index'])->name('index');
+        Route::put('/', [\App\Http\Controllers\SchedulingPreferenceController::class, 'update'])->name('update');
+        Route::put('ministry/{ministry}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'updateMinistry'])->name('ministry.update');
+        Route::delete('ministry/{ministry}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'deleteMinistry'])->name('ministry.delete');
+        Route::put('position/{position}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'updatePosition'])->name('position.update');
+        Route::delete('position/{position}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'deletePosition'])->name('position.delete');
+    });
+
     // Groups
     Route::resource('groups', GroupController::class);
     Route::post('groups/{group}/members', [GroupController::class, 'addMember'])->name('groups.members.add');
@@ -323,7 +368,17 @@ Route::middleware(['auth', 'church'])->group(function () {
     // User Preferences
     Route::post('preferences/theme', [UserPreferencesController::class, 'updateTheme'])->name('preferences.theme');
     Route::post('preferences', [UserPreferencesController::class, 'updatePreferences'])->name('preferences.update');
-    Route::post('onboarding/complete', [UserPreferencesController::class, 'completeOnboarding'])->name('onboarding.complete');
+
+    // Onboarding Wizard
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/', [OnboardingController::class, 'show'])->name('show');
+        Route::get('step/{step}', [OnboardingController::class, 'step'])->name('step');
+        Route::post('step/{step}', [OnboardingController::class, 'saveStep'])->name('save');
+        Route::post('step/{step}/skip', [OnboardingController::class, 'skip'])->name('skip');
+        Route::post('complete', [OnboardingController::class, 'complete'])->name('complete');
+        Route::post('restart', [OnboardingController::class, 'restart'])->name('restart');
+        Route::post('dismiss-hint', [OnboardingController::class, 'dismissHint'])->name('dismiss-hint');
+    });
 
     // Messages (admin and leaders)
     Route::middleware('role:admin,leader')->prefix('messages')->name('messages.')->group(function () {
@@ -416,5 +471,41 @@ Route::middleware(['auth', 'church'])->group(function () {
         Route::post('campaigns', [\App\Http\Controllers\DonationController::class, 'storeCampaign'])->name('campaigns.store');
         Route::post('campaigns/{campaign}/toggle', [\App\Http\Controllers\DonationController::class, 'toggleCampaign'])->name('campaigns.toggle');
         Route::delete('campaigns/{campaign}', [\App\Http\Controllers\DonationController::class, 'destroyCampaign'])->name('campaigns.destroy');
+    });
+
+    // Songs Library
+    Route::middleware('role:admin,leader')->prefix('songs')->name('songs.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SongController::class, 'index'])->name('index');
+        Route::get('create', [\App\Http\Controllers\SongController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\SongController::class, 'store'])->name('store');
+        Route::get('{song}', [\App\Http\Controllers\SongController::class, 'show'])->name('show');
+        Route::get('{song}/edit', [\App\Http\Controllers\SongController::class, 'edit'])->name('edit');
+        Route::put('{song}', [\App\Http\Controllers\SongController::class, 'update'])->name('update');
+        Route::delete('{song}', [\App\Http\Controllers\SongController::class, 'destroy'])->name('destroy');
+        Route::post('{song}/add-to-event', [\App\Http\Controllers\SongController::class, 'addToEvent'])->name('add-to-event');
+    });
+
+    // Reports (admin and leaders)
+    Route::middleware('role:admin,leader')->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ReportsController::class, 'index'])->name('index');
+        Route::get('attendance', [\App\Http\Controllers\ReportsController::class, 'attendance'])->name('attendance');
+        Route::get('finances', [\App\Http\Controllers\ReportsController::class, 'finances'])->name('finances');
+        Route::get('volunteers', [\App\Http\Controllers\ReportsController::class, 'volunteers'])->name('volunteers');
+        Route::get('export/finances', [\App\Http\Controllers\ReportsController::class, 'exportFinances'])->name('export-finances');
+        Route::get('export/attendance', [\App\Http\Controllers\ReportsController::class, 'exportAttendance'])->name('export-attendance');
+    });
+
+    // Prayer Requests
+    Route::prefix('prayer-requests')->name('prayer-requests.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\PrayerRequestController::class, 'index'])->name('index');
+        Route::get('wall', [\App\Http\Controllers\PrayerRequestController::class, 'wall'])->name('wall');
+        Route::get('create', [\App\Http\Controllers\PrayerRequestController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\PrayerRequestController::class, 'store'])->name('store');
+        Route::get('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'show'])->name('show');
+        Route::get('{prayerRequest}/edit', [\App\Http\Controllers\PrayerRequestController::class, 'edit'])->name('edit');
+        Route::put('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'update'])->name('update');
+        Route::delete('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'destroy'])->name('destroy');
+        Route::post('{prayerRequest}/pray', [\App\Http\Controllers\PrayerRequestController::class, 'pray'])->name('pray');
+        Route::post('{prayerRequest}/answered', [\App\Http\Controllers\PrayerRequestController::class, 'markAnswered'])->name('mark-answered');
     });
 });

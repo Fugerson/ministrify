@@ -185,9 +185,9 @@ class MinistryController extends Controller
         return back()->with('success', 'Позиції оновлено.');
     }
 
-    private function authorizeChurch(Ministry $ministry): void
+    protected function authorizeChurch($model): void
     {
-        if ($ministry->church_id !== $this->getCurrentChurch()->id) {
+        if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
     }

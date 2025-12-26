@@ -31,7 +31,7 @@ class Attendance extends Model
         'attendable_type',
         'attendable_id',
         'type',
-        'event_id', // Legacy, keep for backward compatibility
+        'event_id', // @deprecated - Use attendable_type/attendable_id polymorphic relation instead
         'date',
         'time',
         'location',
@@ -65,7 +65,8 @@ class Attendance extends Model
     }
 
     /**
-     * Legacy relation to event (for backward compatibility)
+     * @deprecated Use attendable() polymorphic relation instead.
+     * Legacy relation to event (for backward compatibility only).
      */
     public function event(): BelongsTo
     {

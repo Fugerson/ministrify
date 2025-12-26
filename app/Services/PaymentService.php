@@ -3,9 +3,8 @@
 namespace App\Services;
 
 use App\Models\Church;
-use App\Models\Donation;
 use App\Models\DonationCampaign;
-use Illuminate\Support\Facades\Http;
+use App\Models\Transaction;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -69,19 +68,23 @@ class PaymentService
 
         $orderId = 'donation_' . Str::uuid();
 
-        // Create donation record
-        $donation = Donation::create([
+        // Create transaction record (unified system)
+        $transaction = Transaction::create([
             'church_id' => $this->church->id,
+            'direction' => Transaction::DIRECTION_IN,
+            'source_type' => Transaction::SOURCE_DONATION,
             'order_id' => $orderId,
             'amount' => $data['amount'],
             'currency' => $data['currency'] ?? 'UAH',
+            'date' => now()->toDateString(),
             'donor_name' => $data['donor_name'] ?? null,
             'donor_email' => $data['donor_email'] ?? null,
             'donor_phone' => $data['donor_phone'] ?? null,
             'campaign_id' => $data['campaign_id'] ?? null,
-            'message' => $data['message'] ?? null,
-            'payment_method' => 'liqpay',
-            'status' => 'pending',
+            'description' => $data['message'] ?? null,
+            'is_anonymous' => $data['is_anonymous'] ?? false,
+            'payment_method' => Transaction::PAYMENT_LIQPAY,
+            'status' => Transaction::STATUS_PENDING,
         ]);
 
         $paymentData = [
@@ -102,7 +105,7 @@ class PaymentService
         return [
             'data' => $dataEncoded,
             'signature' => $signature,
-            'donation_id' => $donation->id,
+            'transaction_id' => $transaction->id,
         ];
     }
 
@@ -127,7 +130,7 @@ class PaymentService
     /**
      * Process LiqPay callback
      */
-    public function processLiqPayCallback(array $data): ?Donation
+    public function processLiqPayCallback(array $data): ?Transaction
     {
         $orderId = $data['order_id'] ?? null;
 
@@ -135,31 +138,31 @@ class PaymentService
             return null;
         }
 
-        $donation = Donation::where('order_id', $orderId)->first();
+        $transaction = Transaction::where('order_id', $orderId)->first();
 
-        if (!$donation) {
+        if (!$transaction) {
             return null;
         }
 
         $status = match ($data['status'] ?? '') {
-            'success', 'sandbox' => 'completed',
-            'failure', 'error' => 'failed',
-            'reversed' => 'refunded',
-            default => 'pending',
+            'success', 'sandbox' => Transaction::STATUS_COMPLETED,
+            'failure', 'error' => Transaction::STATUS_FAILED,
+            'reversed' => Transaction::STATUS_REFUNDED,
+            default => Transaction::STATUS_PENDING,
         };
 
-        $donation->update([
+        $transaction->update([
             'status' => $status,
-            'payment_id' => $data['payment_id'] ?? null,
+            'transaction_id' => $data['payment_id'] ?? null,
             'payment_data' => $data,
-            'paid_at' => $status === 'completed' ? now() : null,
+            'paid_at' => $status === Transaction::STATUS_COMPLETED ? now() : null,
         ]);
 
-        if ($status === 'completed') {
-            $this->onDonationCompleted($donation);
+        if ($status === Transaction::STATUS_COMPLETED) {
+            $this->onTransactionCompleted($transaction);
         }
 
-        return $donation;
+        return $transaction;
     }
 
     /**
@@ -185,22 +188,26 @@ class PaymentService
     /**
      * Create Monobank payment record
      */
-    public function createMonobankPayment(array $data): Donation
+    public function createMonobankPayment(array $data): Transaction
     {
         $orderId = 'mono_' . Str::uuid();
 
-        return Donation::create([
+        return Transaction::create([
             'church_id' => $this->church->id,
+            'direction' => Transaction::DIRECTION_IN,
+            'source_type' => Transaction::SOURCE_DONATION,
             'order_id' => $orderId,
             'amount' => $data['amount'],
             'currency' => 'UAH',
+            'date' => now()->toDateString(),
             'donor_name' => $data['donor_name'] ?? null,
             'donor_email' => $data['donor_email'] ?? null,
             'donor_phone' => $data['donor_phone'] ?? null,
             'campaign_id' => $data['campaign_id'] ?? null,
-            'message' => $data['message'] ?? null,
-            'payment_method' => 'monobank',
-            'status' => 'pending', // Will be updated manually or via webhook
+            'description' => $data['message'] ?? null,
+            'is_anonymous' => $data['is_anonymous'] ?? false,
+            'payment_method' => Transaction::PAYMENT_MONOBANK,
+            'status' => Transaction::STATUS_PENDING, // Will be updated manually or via webhook
         ]);
     }
 
@@ -222,24 +229,24 @@ class PaymentService
     }
 
     /**
-     * Actions when donation is completed
+     * Actions when transaction is completed
      */
-    protected function onDonationCompleted(Donation $donation): void
+    protected function onTransactionCompleted(Transaction $transaction): void
     {
         // Update campaign progress if applicable
-        if ($donation->campaign_id) {
-            $campaign = $donation->campaign;
+        if ($transaction->campaign_id) {
+            $campaign = $transaction->campaign;
             if ($campaign) {
                 $campaign->updateCollectedAmount();
             }
         }
 
-        // Log donation
-        Log::channel('security')->info('Donation completed', [
-            'church_id' => $donation->church_id,
-            'donation_id' => $donation->id,
-            'amount' => $donation->amount,
-            'payment_method' => $donation->payment_method,
+        // Log transaction
+        Log::channel('security')->info('Donation transaction completed', [
+            'church_id' => $transaction->church_id,
+            'transaction_id' => $transaction->id,
+            'amount' => $transaction->amount,
+            'payment_method' => $transaction->payment_method,
         ]);
 
         // Could also trigger notifications here
@@ -250,8 +257,9 @@ class PaymentService
      */
     public function getStatistics(?string $period = null): array
     {
-        $query = Donation::where('church_id', $this->church->id)
-            ->where('status', 'completed');
+        $query = Transaction::where('church_id', $this->church->id)
+            ->where('source_type', Transaction::SOURCE_DONATION)
+            ->where('status', Transaction::STATUS_COMPLETED);
 
         if ($period === 'month') {
             $query->whereMonth('paid_at', now()->month)
@@ -260,18 +268,18 @@ class PaymentService
             $query->whereYear('paid_at', now()->year);
         }
 
-        $donations = $query->get();
+        $transactions = $query->get();
 
         return [
-            'total_amount' => $donations->sum('amount'),
-            'count' => $donations->count(),
-            'average' => $donations->count() > 0 ? round($donations->avg('amount'), 2) : 0,
-            'by_method' => $donations->groupBy('payment_method')
+            'total_amount' => $transactions->sum('amount'),
+            'count' => $transactions->count(),
+            'average' => $transactions->count() > 0 ? round($transactions->avg('amount'), 2) : 0,
+            'by_method' => $transactions->groupBy('payment_method')
                 ->map(fn($group) => [
                     'count' => $group->count(),
                     'amount' => $group->sum('amount'),
                 ]),
-            'by_campaign' => $donations->where('campaign_id', '!=', null)
+            'by_campaign' => $transactions->where('campaign_id', '!=', null)
                 ->groupBy('campaign_id')
                 ->map(fn($group) => $group->sum('amount')),
         ];

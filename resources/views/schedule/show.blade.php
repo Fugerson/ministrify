@@ -3,6 +3,7 @@
 @section('title', $event->title)
 
 @section('actions')
+@if($event->ministry)
 @can('manage-ministry', $event->ministry)
 <div class="flex items-center space-x-2">
     <form method="POST" action="{{ route('assignments.notify-all', $event) }}">
@@ -17,6 +18,7 @@
     </a>
 </div>
 @endcan
+@endif
 @endsection
 
 @section('content')
@@ -26,19 +28,19 @@
         <div class="flex items-start justify-between">
             <div class="flex items-center">
                 <div class="w-14 h-14 rounded-xl flex items-center justify-center"
-                     style="background-color: {{ $event->ministry->color }}20;">
-                    <svg class="w-7 h-7" style="color: {{ $event->ministry->color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     style="background-color: {{ $event->ministry?->color ?? '#3b82f6' }}20;">
+                    <svg class="w-7 h-7" style="color: {{ $event->ministry?->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $event->title }}</h1>
-                    <p class="text-gray-500 dark:text-gray-400">{{ $event->ministry->name }}</p>
+                    <p class="text-gray-500 dark:text-gray-400">{{ $event->ministry?->name ?? 'Без служіння' }}</p>
                 </div>
             </div>
             <div class="text-right">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $event->date->format('d.m.Y') }}</p>
-                <p class="text-gray-500 dark:text-gray-400">{{ $event->time->format('H:i') }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $event->date?->format('d.m.Y') ?? '-' }}</p>
+                <p class="text-gray-500 dark:text-gray-400">{{ $event->time?->format('H:i') ?? '-' }}</p>
             </div>
         </div>
 
@@ -52,7 +54,7 @@
         <div class="mt-4 flex items-center gap-4 text-sm">
             @php
                 $confirmed = $event->assignments->where('status', 'confirmed')->count();
-                $total = $event->ministry->positions->count();
+                $total = $event->ministry?->positions?->count() ?? 0;
             @endphp
             <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,18 +78,45 @@
         <div class="lg:col-span-2 space-y-6">
             <!-- Positions and assignments -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        <h2 class="font-semibold text-gray-900 dark:text-white">Позиції</h2>
+                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <h2 class="font-semibold text-gray-900 dark:text-white">Позиції</h2>
+                        </div>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $event->assignments->count() }} / {{ $event->ministry?->positions?->count() ?? 0 }}</span>
                     </div>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ $event->assignments->count() }} / {{ $event->ministry->positions->count() }}</span>
+
+                    {{-- Bulk actions --}}
+                    @can('manage-ministry', $event->ministry)
+                        @if($event->assignments->isNotEmpty())
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                @if($event->assignments->where('status', 'pending')->isNotEmpty())
+                                    <form method="POST" action="{{ route('assignments.confirm-all', $event) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 rounded-lg transition-colors">
+                                            Підтвердити всіх ({{ $event->assignments->where('status', 'pending')->count() }})
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if($event->date && $event->date->isPast() && $event->assignments->where('status', 'confirmed')->isNotEmpty())
+                                    <form method="POST" action="{{ route('assignments.mark-all-attended', $event) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg transition-colors">
+                                            Позначити присутність ({{ $event->assignments->where('status', 'confirmed')->count() }})
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endif
+                    @endcan
                 </div>
 
                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @foreach($event->ministry->positions as $position)
+                    @foreach($event->ministry?->positions ?? [] as $position)
                         @php
                             $assignment = $event->assignments->firstWhere('position_id', $position->id);
                         @endphp
@@ -113,30 +142,94 @@
                                                    class="text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 font-medium">
                                                     {{ $assignment->person->full_name }}
                                                 </a>
-                                                <p class="text-sm">
-                                                    @if($assignment->isConfirmed())
-                                                        <span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                                            </svg>
-                                                            Підтверджено
-                                                        </span>
-                                                    @elseif($assignment->isPending())
-                                                        <span class="inline-flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                            </svg>
-                                                            Очікує
-                                                        </span>
-                                                    @else
-                                                        <span class="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                            </svg>
-                                                            Відхилено
-                                                        </span>
-                                                    @endif
-                                                </p>
+                                                @if($assignment->hasOverriddenConflicts())
+                                                    <span class="ml-1 text-orange-500" title="{{ $assignment->conflict_warning }}">
+                                                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                        </svg>
+                                                    </span>
+                                                @endif
+                                                {{-- Status display with inline editing --}}
+                                                @can('manage-ministry', $event->ministry)
+                                                    <div x-data="{
+                                                        status: '{{ $assignment->status }}',
+                                                        loading: false,
+                                                        async updateStatus(newStatus) {
+                                                            if (this.loading || newStatus === this.status) return;
+                                                            this.loading = true;
+                                                            try {
+                                                                const response = await fetch('{{ route('assignments.update-status', $assignment) }}', {
+                                                                    method: 'PATCH',
+                                                                    headers: {
+                                                                        'Content-Type': 'application/json',
+                                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                                    },
+                                                                    body: JSON.stringify({ status: newStatus })
+                                                                });
+                                                                const data = await response.json();
+                                                                if (data.success) {
+                                                                    this.status = data.status;
+                                                                } else {
+                                                                    alert(data.message);
+                                                                }
+                                                            } catch (e) {
+                                                                alert('Помилка при зміні статусу');
+                                                            }
+                                                            this.loading = false;
+                                                        }
+                                                    }">
+                                                        <select @change="updateStatus($event.target.value)"
+                                                                x-model="status"
+                                                                :disabled="loading"
+                                                                class="text-xs border-0 bg-transparent focus:ring-0 p-0 pr-6 cursor-pointer"
+                                                                :class="{
+                                                                    'text-green-600 dark:text-green-400': status === 'confirmed',
+                                                                    'text-yellow-600 dark:text-yellow-400': status === 'pending',
+                                                                    'text-red-600 dark:text-red-400': status === 'declined',
+                                                                    'text-blue-600 dark:text-blue-400': status === 'attended',
+                                                                    'opacity-50': loading
+                                                                }">
+                                                            <option value="pending" class="text-yellow-600">Очікує</option>
+                                                            <option value="confirmed" class="text-green-600">Підтверджено</option>
+                                                            <option value="declined" class="text-red-600">Відхилено</option>
+                                                            @if($event->date && $event->date->isPast())
+                                                                <option value="attended" class="text-blue-600">Був присутній</option>
+                                                            @endif
+                                                        </select>
+                                                    </div>
+                                                @else
+                                                    <p class="text-sm">
+                                                        @if($assignment->isConfirmed())
+                                                            <span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                                </svg>
+                                                                Підтверджено
+                                                            </span>
+                                                        @elseif($assignment->isPending())
+                                                            <span class="inline-flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                </svg>
+                                                                Очікує
+                                                            </span>
+                                                        @elseif($assignment->isAttended())
+                                                            <span class="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                </svg>
+                                                                Був присутній
+                                                            </span>
+                                                        @else
+                                                            <span class="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                                Відхилено
+                                                            </span>
+                                                        @endif
+                                                    </p>
+                                                @endcan
                                             </div>
                                         </div>
                                     @else
@@ -152,16 +245,18 @@
                                 @can('manage-ministry', $event->ministry)
                                 <div>
                                     @if($assignment)
-                                        <form method="POST" action="{{ route('assignments.destroy', $assignment) }}"
-                                              onsubmit="return confirm('Видалити призначення?')" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        <x-delete-confirm
+                                            :action="route('assignments.destroy', $assignment)"
+                                            title="Видалити призначення?"
+                                            message="Ви впевнені, що хочете видалити це призначення?"
+                                            button-text="Видалити"
+                                            button-class="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                            :icon="false"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </x-delete-confirm>
                                     @else
                                         <div x-data="{ open: false }" class="relative">
                                             <button @click="open = !open" type="button"
@@ -175,7 +270,14 @@
                                                  x-transition:enter-end="opacity-100 scale-100"
                                                  class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-10 overflow-hidden">
                                                 <div class="p-2 max-h-64 overflow-y-auto">
-                                                    @foreach($availablePeople->filter(fn($p) => $p->hasPositionInMinistry($event->ministry, $position)) as $person)
+                                                    @php
+                                                        $qualifiedPeople = $availablePeople->filter(fn($p) => $p->hasPositionInMinistry($event->ministry, $position));
+                                                        $availableNow = $qualifiedPeople->filter(fn($p) => !isset($volunteerBlockouts[$p->id]));
+                                                        $blockedPeople = $qualifiedPeople->filter(fn($p) => isset($volunteerBlockouts[$p->id]));
+                                                    @endphp
+
+                                                    {{-- Available people first --}}
+                                                    @foreach($availableNow as $person)
                                                         <form method="POST" action="{{ route('assignments.store', $event) }}">
                                                             @csrf
                                                             <input type="hidden" name="position_id" value="{{ $position->id }}">
@@ -189,12 +291,48 @@
                                                                         {{ substr($person->first_name, 0, 1) }}
                                                                     </div>
                                                                 @endif
-                                                                {{ $person->full_name }}
+                                                                <span class="flex-1">{{ $person->full_name }}</span>
+                                                                @if($person->last_scheduled_at)
+                                                                    <span class="text-xs text-gray-400">{{ $person->last_scheduled_label }}</span>
+                                                                @endif
                                                             </button>
                                                         </form>
                                                     @endforeach
 
-                                                    @if($availablePeople->filter(fn($p) => $p->hasPositionInMinistry($event->ministry, $position))->isEmpty())
+                                                    {{-- Blocked people with warning --}}
+                                                    @if($blockedPeople->isNotEmpty())
+                                                        <div class="border-t border-gray-200 dark:border-gray-600 my-2 pt-2">
+                                                            <p class="px-3 py-1 text-xs text-orange-600 dark:text-orange-400 font-medium">Недоступні:</p>
+                                                        </div>
+                                                        @foreach($blockedPeople as $person)
+                                                            <form method="POST" action="{{ route('assignments.store', $event) }}"
+                                                                  onsubmit="return confirm('{{ $person->full_name }} недоступний: {{ $volunteerBlockouts[$person->id] }}. Призначити все одно?')">
+                                                                @csrf
+                                                                <input type="hidden" name="position_id" value="{{ $position->id }}">
+                                                                <input type="hidden" name="person_id" value="{{ $person->id }}">
+                                                                <input type="hidden" name="blockout_override" value="1">
+                                                                <button type="submit"
+                                                                        class="w-full text-left px-3 py-2 text-sm rounded-lg flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30">
+                                                                    @if($person->photo)
+                                                                        <img src="{{ Storage::url($person->photo) }}" class="w-6 h-6 rounded-full object-cover opacity-70">
+                                                                    @else
+                                                                        <div class="w-6 h-6 rounded-full bg-orange-200 dark:bg-orange-800 flex items-center justify-center text-xs">
+                                                                            {{ substr($person->first_name, 0, 1) }}
+                                                                        </div>
+                                                                    @endif
+                                                                    <span class="flex-1">{{ $person->full_name }}</span>
+                                                                    <span class="text-xs flex items-center gap-1">
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                                        </svg>
+                                                                        {{ $volunteerBlockouts[$person->id] }}
+                                                                    </span>
+                                                                </button>
+                                                            </form>
+                                                        @endforeach
+                                                    @endif
+
+                                                    @if($qualifiedPeople->isEmpty())
                                                         <p class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Немає доступних людей</p>
                                                     @endif
                                                 </div>
@@ -224,6 +362,22 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Швидкі дії</h3>
                 <div class="space-y-2">
+                    @if($event->is_service)
+                        <!-- Service Plan -->
+                        <a href="{{ route('events.plan.index', $event) }}"
+                           class="flex items-center gap-3 p-3 rounded-xl bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors text-primary-700 dark:text-primary-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <span class="font-medium">План служіння</span>
+                            @if($event->planItems->isNotEmpty())
+                                <span class="ml-auto text-xs bg-primary-200 dark:bg-primary-800 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">
+                                    {{ $event->planItems->count() }}
+                                </span>
+                            @endif
+                        </a>
+                    @endif
+
                     <!-- Add to Google Calendar -->
                     <a href="{{ route('events.google', $event) }}" target="_blank"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
@@ -250,18 +404,18 @@
                             <span>Редагувати подію</span>
                         </a>
 
-                        <form method="POST" action="{{ route('events.destroy', $event) }}"
-                              onsubmit="return confirm('Ви впевнені, що хочете видалити цю подію?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                <span>Видалити подію</span>
-                            </button>
-                        </form>
+                        <x-delete-confirm
+                            :action="route('events.destroy', $event)"
+                            title="Видалити подію?"
+                            message="Ви впевнені, що хочете видалити цю подію? Усі призначення також будуть видалені."
+                            button-text="Видалити подію"
+                            button-class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            <span>Видалити подію</span>
+                        </x-delete-confirm>
                     @endcan
                 </div>
             </div>

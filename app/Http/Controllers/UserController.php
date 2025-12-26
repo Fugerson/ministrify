@@ -158,9 +158,9 @@ class UserController extends Controller
         return back()->with('success', 'Запрошення надіслано.');
     }
 
-    private function authorizeChurch(User $user): void
+    protected function authorizeChurch($model): void
     {
-        if ($user->church_id !== $this->getCurrentChurch()->id) {
+        if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
     }

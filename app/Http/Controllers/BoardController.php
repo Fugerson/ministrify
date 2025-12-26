@@ -286,6 +286,9 @@ class BoardController extends Controller
         ]);
 
         $board = Board::find($validated['board_id']);
+        if (!$board) {
+            return back()->with('error', 'Дошку не знайдено.');
+        }
         $this->authorizeBoard($board);
 
         // Get the first column (typically "To Do")
@@ -340,11 +343,15 @@ class BoardController extends Controller
         $event = Event::where('id', $id)->where('church_id', $churchId)->first();
         if (!$event) return null;
 
+        $dateStr = $event->date ? $event->date->format('d.m.Y') : '';
+        $timeStr = $event->time ? $event->time->format('H:i') : '';
+        $fullDateTime = trim("{$dateStr} {$timeStr}");
+
         return [
             'title' => "Підготовка: {$event->title}",
-            'description' => "Подія: {$event->title}\nДата: {$event->start_date->format('d.m.Y H:i')}\n\n{$event->description}",
-            'priority' => $event->start_date->isBefore(now()->addDays(3)) ? 'high' : 'medium',
-            'due_date' => $event->start_date->subDay(),
+            'description' => "Подія: {$event->title}\nДата: {$fullDateTime}\n\n{$event->description}",
+            'priority' => $event->date && $event->date->isBefore(now()->addDays(3)) ? 'high' : 'medium',
+            'due_date' => $event->date ? $event->date->subDay() : now(),
         ];
     }
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Assignment;
 use App\Models\Event;
+use App\Models\Person;
+use App\Models\SchedulingConflict;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -13,43 +15,97 @@ class AssignmentController extends Controller
     public function store(Request $request, Event $event)
     {
         $this->authorizeChurch($event);
+
+        // Check if event has a ministry
+        if (!$event->ministry) {
+            return back()->with('error', 'Подія не має служіння.');
+        }
+
         Gate::authorize('manage-ministry', $event->ministry);
 
         $validated = $request->validate([
             'position_id' => 'required|exists:positions,id',
             'person_id' => 'required|exists:people,id',
+            'blockout_override' => 'boolean',
         ]);
 
-        // Check if position belongs to the ministry
+        // Check if event date has passed
+        if ($event->date && $event->date->isPast()) {
+            return back()->with('error', 'Неможливо призначити на минулу подію.');
+        }
         $position = $event->ministry->positions()->findOrFail($validated['position_id']);
 
-        // Check for duplicate assignment
-        $exists = Assignment::where('event_id', $event->id)
-            ->where('position_id', $validated['position_id'])
+        // Check if person is already assigned to ANY position in this event
+        $existingAssignment = Assignment::where('event_id', $event->id)
             ->where('person_id', $validated['person_id'])
+            ->with('position')
+            ->first();
+
+        if ($existingAssignment) {
+            $positionName = $existingAssignment->position?->name ?? 'іншу позицію';
+            return back()->with('error', "Ця людина вже призначена на {$positionName} для цієї події.");
+        }
+
+        // Check if position is already filled
+        $positionFilled = Assignment::where('event_id', $event->id)
+            ->where('position_id', $validated['position_id'])
             ->exists();
 
-        if ($exists) {
-            return back()->with('error', 'Ця людина вже призначена на цю позицію.');
+        if ($positionFilled) {
+            return back()->with('error', 'Ця позиція вже зайнята.');
         }
+
+        // Get person and check for blockouts
+        $person = Person::find($validated['person_id']);
+        $hasBlockout = $person->hasBlockoutOn($event->date, $event->ministry_id);
+        $blockoutOverride = $request->boolean('blockout_override');
 
         $assignment = Assignment::create([
             'event_id' => $event->id,
             'position_id' => $validated['position_id'],
             'person_id' => $validated['person_id'],
-            'status' => 'pending',
+            'status' => Assignment::STATUS_PENDING,
+            'blockout_override' => $hasBlockout && $blockoutOverride,
+        ]);
+
+        // Log conflict if blockout was overridden
+        if ($hasBlockout && $blockoutOverride) {
+            SchedulingConflict::create([
+                'assignment_id' => $assignment->id,
+                'conflict_type' => 'blockout',
+                'conflict_details' => $person->getBlockoutReasonFor($event->date, $event->ministry_id),
+                'was_overridden' => true,
+                'overridden_by' => auth()->id(),
+            ]);
+        }
+
+        // Update person's scheduling stats
+        $person->update([
+            'last_scheduled_at' => now(),
+            'times_scheduled_this_month' => $person->times_scheduled_this_month + 1,
+            'times_scheduled_this_year' => $person->times_scheduled_this_year + 1,
         ]);
 
         // Send Telegram notification if configured
         $this->sendNotification($assignment);
 
-        return back()->with('success', 'Людину призначено на позицію.');
+        $message = 'Людину призначено на позицію.';
+        if ($hasBlockout && $blockoutOverride) {
+            $message .= ' (Увага: волонтер недоступний у цю дату)';
+        }
+
+        return back()->with('success', $message);
     }
 
     public function update(Request $request, Assignment $assignment)
     {
         $event = $assignment->event;
         $this->authorizeChurch($event);
+
+        if (!$event->ministry) {
+            return back()->with('error', 'Подія не має служіння.');
+        }
+
         Gate::authorize('manage-ministry', $event->ministry);
 
         $validated = $request->validate([
@@ -73,6 +129,11 @@ class AssignmentController extends Controller
     {
         $event = $assignment->event;
         $this->authorizeChurch($event);
+
+        if (!$event->ministry) {
+            return back()->with('error', 'Подія не має служіння.');
+        }
+
         Gate::authorize('manage-ministry', $event->ministry);
 
         $assignment->delete();
@@ -93,6 +154,11 @@ class AssignmentController extends Controller
         // Or if this is a leader/admin
         $event = $assignment->event;
         $this->authorizeChurch($event);
+
+        if (!$event->ministry) {
+            abort(404);
+        }
+
         Gate::authorize('manage-ministry', $event->ministry);
 
         $assignment->confirm();
@@ -117,6 +183,11 @@ class AssignmentController extends Controller
         // Or if this is a leader/admin
         $event = $assignment->event;
         $this->authorizeChurch($event);
+
+        if (!$event->ministry) {
+            abort(404);
+        }
+
         Gate::authorize('manage-ministry', $event->ministry);
 
         $assignment->decline();
@@ -127,7 +198,7 @@ class AssignmentController extends Controller
     public function notifyAll(Event $event)
     {
         $this->authorizeChurch($event);
-        Gate::authorize('manage-ministry', $event->ministry);
+        $this->requireMinistry($event);
 
         $assignments = $event->assignments()->notNotified()->with('person')->get();
 
@@ -136,6 +207,97 @@ class AssignmentController extends Controller
         }
 
         return back()->with('success', "Сповіщення надіслано {$assignments->count()} учасникам.");
+    }
+
+    /**
+     * Bulk confirm all pending assignments for an event
+     */
+    public function confirmAll(Event $event)
+    {
+        $this->authorizeChurch($event);
+        $this->requireMinistry($event);
+
+        $count = 0;
+        $assignments = $event->assignments()->pending()->get();
+
+        foreach ($assignments as $assignment) {
+            if ($assignment->confirm()) {
+                $count++;
+            }
+        }
+
+        if ($count === 0) {
+            return back()->with('info', 'Немає призначень для підтвердження.');
+        }
+
+        return back()->with('success', "Підтверджено {$count} призначень.");
+    }
+
+    /**
+     * Bulk mark all confirmed assignments as attended (for past events)
+     */
+    public function markAllAttended(Event $event)
+    {
+        $this->authorizeChurch($event);
+        $this->requireMinistry($event);
+
+        // Only allow for past events
+        if ($event->date && $event->date->isFuture()) {
+            return back()->with('error', 'Можна позначати присутність лише для минулих подій.');
+        }
+
+        $count = 0;
+        $assignments = $event->assignments()->confirmed()->get();
+
+        foreach ($assignments as $assignment) {
+            if ($assignment->markAsAttended()) {
+                $count++;
+            }
+        }
+
+        if ($count === 0) {
+            return back()->with('info', 'Немає призначень для позначення.');
+        }
+
+        return back()->with('success', "Позначено присутність для {$count} осіб.");
+    }
+
+    /**
+     * Update assignment status via AJAX
+     */
+    public function updateStatus(Request $request, Assignment $assignment)
+    {
+        $event = $assignment->event;
+        $this->authorizeChurch($event);
+
+        if (!$event->ministry) {
+            return response()->json(['success' => false, 'message' => 'Подія не має служіння.'], 404);
+        }
+
+        Gate::authorize('manage-ministry', $event->ministry);
+
+        $validated = $request->validate([
+            'status' => 'required|in:pending,confirmed,declined,attended',
+        ]);
+
+        $newStatus = $validated['status'];
+
+        // Check if transition is allowed
+        if (!$assignment->canTransitionTo($newStatus)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Неможливо змінити статус на ' . Assignment::STATUSES[$newStatus],
+            ], 422);
+        }
+
+        $assignment->transitionTo($newStatus);
+
+        return response()->json([
+            'success' => true,
+            'status' => $assignment->status,
+            'status_label' => $assignment->status_label,
+            'status_color' => $assignment->status_color,
+        ]);
     }
 
     private function sendNotification(Assignment $assignment): void
@@ -162,14 +324,21 @@ class AssignmentController extends Controller
 
     private function notifyLeaderOfDecline(Assignment $assignment): void
     {
-        $church = $assignment->event->church;
+        $event = $assignment->event;
+        $church = $event->church;
+
+        if (!$church) {
+            return;
+        }
+
         $settings = $church->settings ?? [];
 
         if (empty($settings['notifications']['notify_leader_on_decline'])) {
             return;
         }
 
-        $leader = $assignment->event->ministry->leader;
+        // Null-safe ministry and leader access
+        $leader = $event->ministry?->leader;
         if (!$leader || !$leader->telegram_chat_id || !$church->telegram_bot_token) {
             return;
         }
@@ -185,10 +354,22 @@ class AssignmentController extends Controller
         }
     }
 
-    private function authorizeChurch(Event $event): void
+    protected function authorizeChurch($model): void
     {
-        if ($event->church_id !== auth()->user()->church_id) {
+        if ($model->church_id !== auth()->user()->church_id) {
             abort(404);
         }
+    }
+
+    /**
+     * Check that event has a ministry and authorize access to it
+     */
+    private function requireMinistry(Event $event): void
+    {
+        if (!$event->ministry) {
+            abort(404, 'Подія не має служіння.');
+        }
+
+        Gate::authorize('manage-ministry', $event->ministry);
     }
 }

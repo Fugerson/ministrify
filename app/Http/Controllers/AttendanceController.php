@@ -198,9 +198,9 @@ class AttendanceController extends Controller
         return view('attendance.stats', compact('monthlyAttendance', 'chartData', 'needAttention', 'year', 'month'));
     }
 
-    private function authorizeChurch(Attendance $attendance): void
+    protected function authorizeChurch($model): void
     {
-        if ($attendance->church_id !== $this->getCurrentChurch()->id) {
+        if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
     }

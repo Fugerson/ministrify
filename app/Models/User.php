@@ -24,6 +24,9 @@ class User extends Authenticatable
         'theme',
         'preferences',
         'onboarding_completed',
+        'onboarding_state',
+        'onboarding_started_at',
+        'onboarding_completed_at',
     ];
 
     protected $hidden = [
@@ -36,6 +39,9 @@ class User extends Authenticatable
         'password' => 'hashed',
         'preferences' => 'array',
         'onboarding_completed' => 'boolean',
+        'onboarding_state' => 'array',
+        'onboarding_started_at' => 'datetime',
+        'onboarding_completed_at' => 'datetime',
         'is_super_admin' => 'boolean',
     ];
 
@@ -52,6 +58,11 @@ class User extends Authenticatable
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
     }
 
     public function isSuperAdmin(): bool
@@ -94,5 +105,156 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    // Onboarding Methods
+
+    public const ONBOARDING_STEPS = [
+        'welcome' => ['order' => 1, 'required' => true, 'title' => 'Вітаємо', 'icon' => 'hand-raised'],
+        'church_profile' => ['order' => 2, 'required' => true, 'title' => 'Профіль церкви', 'icon' => 'building-library'],
+        'first_ministry' => ['order' => 3, 'required' => false, 'title' => 'Служіння', 'icon' => 'user-group'],
+        'add_people' => ['order' => 4, 'required' => false, 'title' => 'Люди', 'icon' => 'users'],
+        'set_roles' => ['order' => 5, 'required' => false, 'title' => 'Ролі', 'icon' => 'shield-check'],
+        'feature_tour' => ['order' => 6, 'required' => true, 'title' => 'Огляд', 'icon' => 'sparkles'],
+    ];
+
+    public function needsOnboarding(): bool
+    {
+        return $this->isAdmin() && !$this->isSuperAdmin() && !$this->onboarding_completed;
+    }
+
+    public function startOnboarding(): void
+    {
+        $steps = [];
+        foreach (self::ONBOARDING_STEPS as $key => $step) {
+            $steps[$key] = [
+                'completed' => false,
+                'skipped' => false,
+                'completed_at' => null,
+            ];
+        }
+
+        $this->update([
+            'onboarding_state' => [
+                'current_step' => 'welcome',
+                'steps' => $steps,
+                'dismissed_hints' => [],
+            ],
+            'onboarding_started_at' => now(),
+        ]);
+    }
+
+    public function getOnboardingStep(string $step): ?array
+    {
+        $state = $this->onboarding_state ?? [];
+        return $state['steps'][$step] ?? null;
+    }
+
+    public function getCurrentOnboardingStep(): string
+    {
+        return $this->onboarding_state['current_step'] ?? 'welcome';
+    }
+
+    public function completeOnboardingStep(string $step, array $data = []): void
+    {
+        $state = $this->onboarding_state ?? [];
+        $state['steps'][$step] = [
+            'completed' => true,
+            'skipped' => false,
+            'completed_at' => now()->toISOString(),
+            'data' => $data,
+        ];
+
+        // Move to next step
+        $steps = array_keys(self::ONBOARDING_STEPS);
+        $currentIndex = array_search($step, $steps);
+        if ($currentIndex !== false && $currentIndex < count($steps) - 1) {
+            $state['current_step'] = $steps[$currentIndex + 1];
+        }
+
+        $this->update(['onboarding_state' => $state]);
+    }
+
+    public function skipOnboardingStep(string $step): void
+    {
+        $stepConfig = self::ONBOARDING_STEPS[$step] ?? null;
+        if (!$stepConfig || $stepConfig['required']) {
+            return; // Cannot skip required steps
+        }
+
+        $state = $this->onboarding_state ?? [];
+        $state['steps'][$step] = [
+            'completed' => false,
+            'skipped' => true,
+            'skipped_at' => now()->toISOString(),
+        ];
+
+        // Move to next step
+        $steps = array_keys(self::ONBOARDING_STEPS);
+        $currentIndex = array_search($step, $steps);
+        if ($currentIndex !== false && $currentIndex < count($steps) - 1) {
+            $state['current_step'] = $steps[$currentIndex + 1];
+        }
+
+        $this->update(['onboarding_state' => $state]);
+    }
+
+    public function finishOnboarding(): void
+    {
+        $this->update([
+            'onboarding_completed' => true,
+            'onboarding_completed_at' => now(),
+        ]);
+    }
+
+    public function restartOnboarding(): void
+    {
+        $this->update([
+            'onboarding_completed' => false,
+            'onboarding_completed_at' => null,
+            'onboarding_state' => null,
+            'onboarding_started_at' => null,
+        ]);
+        $this->startOnboarding();
+    }
+
+    public function getOnboardingProgress(): array
+    {
+        $state = $this->onboarding_state ?? [];
+        $steps = $state['steps'] ?? [];
+
+        $total = count(self::ONBOARDING_STEPS);
+        $completed = 0;
+
+        foreach ($steps as $step) {
+            if ($step['completed'] || $step['skipped']) {
+                $completed++;
+            }
+        }
+
+        return [
+            'total' => $total,
+            'completed' => $completed,
+            'percentage' => $total > 0 ? round(($completed / $total) * 100) : 0,
+        ];
+    }
+
+    public function dismissOnboardingHint(string $hint): void
+    {
+        $state = $this->onboarding_state ?? [];
+        $hints = $state['dismissed_hints'] ?? [];
+
+        if (!in_array($hint, $hints)) {
+            $hints[] = $hint;
+            $state['dismissed_hints'] = $hints;
+            $this->update(['onboarding_state' => $state]);
+        }
+    }
+
+    public function hasSeenOnboardingHint(string $hint): bool
+    {
+        $state = $this->onboarding_state ?? [];
+        $hints = $state['dismissed_hints'] ?? [];
+        return in_array($hint, $hints);
     }
 }

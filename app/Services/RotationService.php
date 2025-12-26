@@ -2,15 +2,18 @@
 
 namespace App\Services;
 
+use App\Models\Assignment;
 use App\Models\Church;
 use App\Models\Event;
-use App\Models\EventAssignment;
 use App\Models\Ministry;
-use App\Models\MinistryPosition;
 use App\Models\Person;
+use App\Models\Position;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
+/**
+ * @deprecated Use SchedulingService instead. This service will be removed in a future version.
+ */
 class RotationService
 {
     protected Church $church;
@@ -93,7 +96,7 @@ class RotationService
                 }
 
                 // Create assignment
-                $assignment = EventAssignment::create([
+                $assignment = Assignment::create([
                     'event_id' => $event->id,
                     'person_id' => $bestCandidate['person']->id,
                     'position_id' => $position->id,
@@ -140,13 +143,13 @@ class RotationService
     /**
      * Get ranked candidates for a position
      */
-    protected function getCandidatesForPosition(Event $event, MinistryPosition $position): Collection
+    protected function getCandidatesForPosition(Event $event, Position $position): Collection
     {
         $ministry = $event->ministry;
 
         // Get members who can serve in this position
         $members = $ministry->members()
-            ->whereHas('positions', fn($q) => $q->where('ministry_positions.id', $position->id))
+            ->whereHas('positions', fn($q) => $q->where('positions.id', $position->id))
             ->where('is_active', true)
             ->get();
 
@@ -164,7 +167,7 @@ class RotationService
     /**
      * Calculate assignment score for a person
      */
-    protected function calculateScore(Person $person, Event $event, MinistryPosition $position): float
+    protected function calculateScore(Person $person, Event $event, Position $position): float
     {
         $score = 0;
 
@@ -192,7 +195,7 @@ class RotationService
         $monthEnd = $event->date->copy()->endOfMonth();
 
         // Count assignments this month
-        $monthlyCount = EventAssignment::where('person_id', $person->id)
+        $monthlyCount = Assignment::where('person_id', $person->id)
             ->whereHas('event', function ($q) use ($monthStart, $monthEnd) {
                 $q->whereBetween('date', [$monthStart, $monthEnd]);
             })
@@ -203,7 +206,7 @@ class RotationService
         }
 
         // Check last assignment date
-        $lastAssignment = EventAssignment::where('person_id', $person->id)
+        $lastAssignment = Assignment::where('person_id', $person->id)
             ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
             ->whereHas('event', fn($q) => $q->orderByDesc('date'))
             ->first();
@@ -223,11 +226,11 @@ class RotationService
     /**
      * Get skill score for position
      */
-    protected function getSkillScore(Person $person, MinistryPosition $position): float
+    protected function getSkillScore(Person $person, Position $position): float
     {
         // Check if person has this position's skill
         $hasPosition = $person->positions()
-            ->where('ministry_positions.id', $position->id)
+            ->where('positions.id', $position->id)
             ->exists();
 
         if (!$hasPosition) {
@@ -236,7 +239,7 @@ class RotationService
 
         // Get experience level
         $pivot = $person->positions()
-            ->where('ministry_positions.id', $position->id)
+            ->where('positions.id', $position->id)
             ->first();
 
         if (!$pivot) {
@@ -280,7 +283,7 @@ class RotationService
         }
 
         // Check for other events on the same day
-        $hasOtherEvent = EventAssignment::where('person_id', $person->id)
+        $hasOtherEvent = Assignment::where('person_id', $person->id)
             ->whereHas('event', fn($q) => $q->whereDate('date', $event->date))
             ->where('status', '!=', 'declined')
             ->exists();
@@ -298,7 +301,7 @@ class RotationService
     protected function checkConflicts(Person $person, Event $event): ?string
     {
         // Already assigned to this event?
-        $alreadyAssigned = EventAssignment::where('person_id', $person->id)
+        $alreadyAssigned = Assignment::where('person_id', $person->id)
             ->where('event_id', $event->id)
             ->exists();
 
@@ -350,7 +353,7 @@ class RotationService
     {
         $fromDate = $fromDate ?? now()->subMonths(3);
 
-        $assignments = EventAssignment::where('person_id', $person->id)
+        $assignments = Assignment::where('person_id', $person->id)
             ->whereHas('event', fn($q) => $q->where('date', '>=', $fromDate))
             ->with(['event.ministry', 'position'])
             ->get();
@@ -386,7 +389,7 @@ class RotationService
 
         $memberStats = [];
         foreach ($members as $member) {
-            $assignmentsCount = EventAssignment::where('person_id', $member->id)
+            $assignmentsCount = Assignment::where('person_id', $member->id)
                 ->whereIn('event_id', $events->pluck('id'))
                 ->whereIn('status', ['confirmed', 'completed', 'pending'])
                 ->count();

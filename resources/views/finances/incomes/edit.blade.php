@@ -14,14 +14,14 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Редагувати надходження</h2>
-            <form action="{{ route('finances.incomes.destroy', $income) }}" method="POST"
-                  onsubmit="return confirm('Видалити це надходження?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-red-600 hover:text-red-700 text-sm">
-                    Видалити
-                </button>
-            </form>
+            <x-delete-confirm
+                :action="route('finances.incomes.destroy', $income)"
+                title="Видалити надходження?"
+                message="Ви впевнені, що хочете видалити це надходження? Цю дію неможливо скасувати."
+                button-text="Видалити"
+                :icon="false"
+                class="text-sm"
+            />
         </div>
 
         <form action="{{ route('finances.incomes.update', $income) }}" method="POST" class="p-6 space-y-6">

@@ -52,9 +52,9 @@ class TagController extends Controller
         return back()->with('success', 'Тег видалено.');
     }
 
-    private function authorizeChurch(Tag $tag): void
+    protected function authorizeChurch($model): void
     {
-        if ($tag->church_id !== $this->getCurrentChurch()->id) {
+        if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
     }

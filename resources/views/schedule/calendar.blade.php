@@ -332,7 +332,7 @@
                                             </div>
                                             <div>
                                                 <p class="font-medium text-gray-900 dark:text-white">{{ $event->title }}</p>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->ministry->name }} &bull; {{ $event->time->format('H:i') }}</p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->ministry->name ?? 'Без служіння' }} &bull; {{ $event->time?->format('H:i') ?? '-' }}</p>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-2">

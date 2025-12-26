@@ -77,6 +77,9 @@ class Person extends Model
         'church_role',
         'membership_status',
         'notes',
+        'last_scheduled_at',
+        'times_scheduled_this_month',
+        'times_scheduled_this_year',
     ];
 
     protected $casts = [
@@ -84,6 +87,7 @@ class Person extends Model
         'first_visit_date' => 'date',
         'joined_date' => 'date',
         'baptism_date' => 'date',
+        'last_scheduled_at' => 'datetime',
     ];
 
     protected $appends = ['full_name'];
@@ -380,5 +384,81 @@ class Person extends Model
     public function scopeServing($query)
     {
         return $query->whereHas('ministries');
+    }
+
+    // ========== VOLUNTEER SCHEDULING ==========
+
+    public function blockoutDates(): HasMany
+    {
+        return $this->hasMany(BlockoutDate::class);
+    }
+
+    public function activeBlockouts(): HasMany
+    {
+        return $this->hasMany(BlockoutDate::class)->active()->upcoming();
+    }
+
+    public function schedulingPreference(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SchedulingPreference::class);
+    }
+
+    /**
+     * Check if person has a blockout on a specific date
+     */
+    public function hasBlockoutOn($date, $ministryId = null): bool
+    {
+        $query = $this->blockoutDates()->active()->forDate($date);
+
+        if ($ministryId) {
+            $query->forMinistry($ministryId);
+        }
+
+        return $query->exists();
+    }
+
+    /**
+     * Get blockout reason for a specific date
+     */
+    public function getBlockoutReasonFor($date, $ministryId = null): ?string
+    {
+        $query = $this->blockoutDates()->active()->forDate($date);
+
+        if ($ministryId) {
+            $query->forMinistry($ministryId);
+        }
+
+        $blockout = $query->first();
+
+        return $blockout ? $blockout->reason_label : null;
+    }
+
+    /**
+     * Get "last scheduled" formatted string
+     */
+    public function getLastScheduledLabelAttribute(): string
+    {
+        if (!$this->last_scheduled_at) {
+            return 'Ніколи';
+        }
+
+        $weeks = $this->last_scheduled_at->diffInWeeks(now());
+
+        if ($weeks === 0) return 'Цього тижня';
+        if ($weeks === 1) return '1 тиж. тому';
+        if ($weeks < 4) return "+{$weeks}т";
+
+        $months = $this->last_scheduled_at->diffInMonths(now());
+        if ($months < 12) return "+{$months}м";
+
+        return $this->last_scheduled_at->format('d.m.Y');
+    }
+
+    /**
+     * Get or create scheduling preference
+     */
+    public function getOrCreateSchedulingPreference(): SchedulingPreference
+    {
+        return SchedulingPreference::getOrCreate($this->id, $this->church_id);
     }
 }

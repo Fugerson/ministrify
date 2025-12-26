@@ -62,17 +62,38 @@ class PositionController extends Controller
             'positions.*.sort_order' => 'required|integer|min:0',
         ]);
 
+        $church = $this->getCurrentChurch();
+
+        // Validate all positions belong to ministries in the current church
+        $positionIds = collect($validated['positions'])->pluck('id');
+        $positions = Position::whereIn('id', $positionIds)
+            ->with('ministry')
+            ->get();
+
+        foreach ($positions as $position) {
+            if (!$position->ministry || $position->ministry->church_id !== $church->id) {
+                abort(403, 'Немає доступу до цієї позиції.');
+            }
+        }
+
+        // Verify user can manage at least one of the ministries
+        $ministryIds = $positions->pluck('ministry.id')->unique();
+        $user = auth()->user();
+
+        if (!$user->isAdmin()) {
+            foreach ($ministryIds as $ministryId) {
+                $ministry = Ministry::find($ministryId);
+                if ($ministry) {
+                    Gate::authorize('manage-ministry', $ministry);
+                }
+            }
+        }
+
+        // Update sort order
         foreach ($validated['positions'] as $item) {
             Position::where('id', $item['id'])->update(['sort_order' => $item['sort_order']]);
         }
 
         return response()->json(['success' => true]);
-    }
-
-    private function authorizeChurch(Ministry $ministry): void
-    {
-        if ($ministry->church_id !== auth()->user()->church_id) {
-            abort(404);
-        }
     }
 }

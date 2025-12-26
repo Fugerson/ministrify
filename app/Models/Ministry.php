@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ministry extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, SoftDeletes, Auditable;
 
     protected $fillable = [
         'church_id',
@@ -105,6 +106,60 @@ class Ministry extends Model
     public function getRemainingBudgetAttribute(): float
     {
         return max(0, ($this->monthly_budget ?? 0) - $this->spent_this_month);
+    }
+
+    /**
+     * Check if budget is at warning level (80%+)
+     */
+    public function isBudgetWarning(): bool
+    {
+        return $this->monthly_budget > 0 && $this->budget_usage_percent >= 80;
+    }
+
+    /**
+     * Check if budget is exceeded (100%+)
+     */
+    public function isBudgetExceeded(): bool
+    {
+        return $this->monthly_budget > 0 && $this->spent_this_month >= $this->monthly_budget;
+    }
+
+    /**
+     * Check if expense can be added within budget
+     */
+    public function canAddExpense(float $amount): array
+    {
+        if (!$this->monthly_budget || $this->monthly_budget <= 0) {
+            return ['allowed' => true, 'warning' => null];
+        }
+
+        $newTotal = $this->spent_this_month + $amount;
+        $newPercentage = ($newTotal / $this->monthly_budget) * 100;
+
+        if ($newTotal > $this->monthly_budget) {
+            return [
+                'allowed' => false,
+                'warning' => 'exceeded',
+                'message' => sprintf(
+                    'Ця витрата перевищить бюджет на %.2f грн. Залишок: %.2f грн.',
+                    $newTotal - $this->monthly_budget,
+                    $this->remaining_budget
+                ),
+            ];
+        }
+
+        if ($newPercentage >= 80) {
+            return [
+                'allowed' => true,
+                'warning' => 'high',
+                'message' => sprintf(
+                    'Увага! Після цієї витрати буде використано %.1f%% бюджету.',
+                    $newPercentage
+                ),
+            ];
+        }
+
+        return ['allowed' => true, 'warning' => null];
     }
 
     public function joinRequests(): HasMany

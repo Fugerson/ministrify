@@ -50,9 +50,9 @@ class ExpenseCategoryController extends Controller
         return back()->with('success', 'Категорію видалено.');
     }
 
-    private function authorizeChurch(ExpenseCategory $category): void
+    protected function authorizeChurch($model): void
     {
-        if ($category->church_id !== $this->getCurrentChurch()->id) {
+        if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
     }

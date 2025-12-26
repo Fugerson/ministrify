@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Expense;
+use App\Models\Transaction;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -24,12 +24,12 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping, WithS
 
     public function collection()
     {
-        $query = Expense::where('church_id', $this->churchId)
-            ->with(['ministry', 'category', 'user']);
+        $query = Transaction::where('church_id', $this->churchId)
+            ->outgoing()
+            ->with(['ministry', 'category', 'recorder']);
 
         if ($this->month && $this->year) {
-            $query->whereMonth('date', $this->month)
-                ->whereYear('date', $this->year);
+            $query->forMonth($this->year, $this->month);
         }
 
         return $query->orderBy('date', 'desc')->get();
@@ -52,11 +52,11 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping, WithS
     {
         return [
             $expense->date->format('d.m.Y'),
-            $expense->ministry->name,
+            $expense->ministry?->name ?? '-',
             $expense->category?->name ?? '-',
             $expense->description,
             $expense->amount,
-            $expense->user->name,
+            $expense->recorder?->name ?? '-',
             $expense->notes,
         ];
     }

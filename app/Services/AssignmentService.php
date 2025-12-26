@@ -3,12 +3,16 @@
 namespace App\Services;
 
 use App\Models\Assignment;
+use App\Models\BlockoutDate;
 use App\Models\Event;
 use App\Models\Person;
 use App\Models\Position;
 use App\Models\UnavailableDate;
 use Carbon\Carbon;
 
+/**
+ * @deprecated Use SchedulingService instead. This service will be removed in a future version.
+ */
 class AssignmentService
 {
     public function getAvailablePeople(Event $event, Position $position): array
@@ -61,7 +65,7 @@ class AssignmentService
 
     public function checkConflicts(Person $person, Event $event): array
     {
-        // Check if person is marked as unavailable
+        // Check if person is marked as unavailable (legacy)
         $unavailable = UnavailableDate::where('person_id', $person->id)
             ->where('date_from', '<=', $event->date)
             ->where('date_to', '>=', $event->date)
@@ -71,6 +75,19 @@ class AssignmentService
             return [
                 'type' => 'unavailable',
                 'reason' => $unavailable->reason ?? 'Недоступний',
+            ];
+        }
+
+        // Check BlockoutDate (new system)
+        $blockout = BlockoutDate::forPerson($person->id)
+            ->active()
+            ->forDate($event->date)
+            ->first();
+
+        if ($blockout) {
+            return [
+                'type' => 'unavailable',
+                'reason' => $blockout->reason_label ?? 'Недоступний',
             ];
         }
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\TelegramController;
 use App\Http\Controllers\PublicSiteController;
+use App\Http\Controllers\PushSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 // Telegram webhook with rate limiting
@@ -25,4 +26,15 @@ Route::prefix('calendar')->name('api.calendar.')->middleware('throttle:60,1')->g
     Route::get('events', [CalendarController::class, 'events'])->name('events');
     Route::get('events/{id}', [CalendarController::class, 'event'])->name('event');
     Route::get('ministries', [CalendarController::class, 'ministries'])->name('ministries');
+});
+
+// Push notifications API
+Route::prefix('push')->name('api.push.')->group(function () {
+    Route::get('public-key', [PushSubscriptionController::class, 'getPublicKey'])->name('public-key');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('subscribe', [PushSubscriptionController::class, 'store'])->name('subscribe');
+        Route::delete('unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('unsubscribe');
+        Route::get('status', [PushSubscriptionController::class, 'status'])->name('status');
+        Route::post('test', [PushSubscriptionController::class, 'test'])->name('test');
+    });
 });

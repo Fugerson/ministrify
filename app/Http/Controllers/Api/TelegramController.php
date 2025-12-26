@@ -50,8 +50,11 @@ class TelegramController extends Controller
             if ($assignment && $assignment->person_id === $person->id) {
                 $assignment->confirm();
 
-                $telegram = new TelegramService($person->church->telegram_bot_token);
-                $telegram->sendMessage($chatId, '✅ Дякуємо! Ви підтвердили участь.');
+                $church = $person->church;
+                if ($church?->telegram_bot_token) {
+                    $telegram = new TelegramService($church->telegram_bot_token);
+                    $telegram->sendMessage($chatId, '✅ Дякуємо! Ви підтвердили участь.');
+                }
             }
         } elseif (str_starts_with($data, 'decline_')) {
             $assignmentId = (int) str_replace('decline_', '', $data);
@@ -62,10 +65,14 @@ class TelegramController extends Controller
 
                 // Notify leader
                 $church = $person->church;
+                if (!$church?->telegram_bot_token) {
+                    return response()->json(['ok' => true]);
+                }
+
                 $settings = $church->settings ?? [];
 
                 if (!empty($settings['notifications']['notify_leader_on_decline'])) {
-                    $leader = $assignment->event->ministry->leader;
+                    $leader = $assignment->event?->ministry?->leader;
                     if ($leader && $leader->telegram_chat_id) {
                         $telegram = new TelegramService($church->telegram_bot_token);
                         $telegram->sendDeclineNotification($assignment, $leader);
@@ -218,14 +225,17 @@ class TelegramController extends Controller
         // Clear the code
         Cache::forget("telegram_link_{$code}");
 
-        $telegram = new TelegramService($person->church->telegram_bot_token);
-        $telegram->sendMessage($chatId,
-            "✅ Акаунт успішно підключено!\n\n"
-            . "Тепер ви будете отримувати сповіщення про служіння.\n\n"
-            . "Доступні команди:\n"
-            . "/schedule — ваш розклад\n"
-            . "/next — наступне служіння"
-        );
+        $church = $person->church;
+        if ($church?->telegram_bot_token) {
+            $telegram = new TelegramService($church->telegram_bot_token);
+            $telegram->sendMessage($chatId,
+                "✅ Акаунт успішно підключено!\n\n"
+                . "Тепер ви будете отримувати сповіщення про служіння.\n\n"
+                . "Доступні команди:\n"
+                . "/schedule — ваш розклад\n"
+                . "/next — наступне служіння"
+            );
+        }
 
         return response()->json(['ok' => true]);
     }

@@ -153,6 +153,36 @@
             </a>
         </div>
     </div>
+
+    <!-- Onboarding -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+         x-data="{ restarting: false }">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Onboarding Wizard</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    @if(auth()->user()->onboarding_completed)
+                        Завершено {{ auth()->user()->onboarding_completed_at?->diffForHumans() ?? '' }}
+                    @else
+                        Не завершено
+                    @endif
+                </p>
+            </div>
+            <button type="button"
+                    @click="if(confirm('Ви впевнені, що хочете перезапустити Onboarding Wizard?')) { restarting = true; fetch('{{ route('onboarding.restart') }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }}).then(r => r.json()).then(d => { if(d.redirect) window.location.href = d.redirect; }).catch(() => restarting = false); }"
+                    :disabled="restarting"
+                    class="px-4 py-2 bg-primary-100 dark:bg-primary-900/30 hover:bg-primary-200 dark:hover:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
+                <svg x-show="!restarting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <svg x-show="restarting" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25"></circle>
+                    <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" class="opacity-75"></path>
+                </svg>
+                <span x-text="restarting ? 'Перезапуск...' : 'Перезапустити'"></span>
+            </button>
+        </div>
+    </div>
     </div>
 
     <!-- Theme Tab -->

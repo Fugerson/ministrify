@@ -516,9 +516,9 @@ class PersonController extends Controller
         return back()->with('success', 'Telegram від\'єднано');
     }
 
-    private function authorizeChurch(Person $person): void
+    protected function authorizeChurch($model): void
     {
-        if ($person->church_id !== $this->getCurrentChurch()->id) {
+        if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
     }

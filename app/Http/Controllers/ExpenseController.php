@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Expense;
-use App\Models\ExpenseCategory;
 use App\Models\Ministry;
+use App\Models\Transaction;
+use App\Models\TransactionCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -20,9 +20,10 @@ class ExpenseController extends Controller
         $year = $request->get('year', now()->year);
         $month = $request->get('month', now()->month);
 
-        $query = Expense::where('church_id', $church->id)
+        $query = Transaction::where('church_id', $church->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
             ->forMonth($year, $month)
-            ->with(['ministry', 'category', 'user']);
+            ->with(['ministry', 'category', 'recorder']);
 
         // Leaders can only see their ministry expenses
         if ($user->isLeader() && $user->person) {
@@ -46,10 +47,12 @@ class ExpenseController extends Controller
         // Calculate totals
         $totals = [
             'budget' => $ministries->sum('monthly_budget'),
-            'spent' => $ministries->sum('spent_this_month'),
+            'spent' => $this->calculateSpentThisMonth($church->id, $ministries->pluck('id')->toArray()),
         ];
 
-        $categories = ExpenseCategory::where('church_id', $church->id)->get();
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->where('type', 'expense')
+            ->get();
 
         return view('expenses.index', compact('expenses', 'ministries', 'categories', 'year', 'month', 'totals'));
     }
@@ -65,7 +68,9 @@ class ExpenseController extends Controller
         }
         $ministries = $ministriesQuery->get();
 
-        $categories = ExpenseCategory::where('church_id', $church->id)->get();
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->where('type', 'expense')
+            ->get();
 
         return view('expenses.create', compact('ministries', 'categories'));
     }
@@ -76,7 +81,7 @@ class ExpenseController extends Controller
             'ministry_id' => 'required|exists:ministries,id',
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
-            'category_id' => 'nullable|exists:expense_categories,id',
+            'category_id' => 'nullable|exists:transaction_categories,id',
             'date' => 'required|date',
             'receipt_photo' => 'nullable|image|max:5120',
             'notes' => 'nullable|string',
@@ -93,67 +98,96 @@ class ExpenseController extends Controller
         Gate::authorize('manage-ministry', $ministry);
 
         // Handle receipt upload
+        $receiptPath = null;
         if ($request->hasFile('receipt_photo')) {
-            $validated['receipt_photo'] = $request->file('receipt_photo')->store('receipts', 'public');
+            $receiptPath = $request->file('receipt_photo')->store('receipts', 'public');
         }
 
-        $validated['church_id'] = $church->id;
-        $validated['user_id'] = auth()->id();
-
-        Expense::create($validated);
+        Transaction::create([
+            'church_id' => $church->id,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'ministry_id' => $validated['ministry_id'],
+            'amount' => $validated['amount'],
+            'description' => $validated['description'],
+            'category_id' => $validated['category_id'],
+            'date' => $validated['date'],
+            'notes' => $validated['notes'],
+            'payment_data' => $receiptPath ? ['receipt_photo' => $receiptPath] : null,
+            'recorded_by' => auth()->id(),
+            'status' => Transaction::STATUS_COMPLETED,
+        ]);
 
         return redirect()->route('finances.expenses.index')
             ->with('success', 'Витрату додано.');
     }
 
-    public function edit(Expense $expense)
+    public function edit(Transaction $expense)
     {
-        $this->authorizeChurch($expense);
-        Gate::authorize('manage-ministry', $expense->ministry);
+        $this->authorizeExpense($expense);
+        if ($expense->ministry) {
+            Gate::authorize('manage-ministry', $expense->ministry);
+        }
 
         $church = $this->getCurrentChurch();
         $ministries = Ministry::where('church_id', $church->id)->get();
-        $categories = ExpenseCategory::where('church_id', $church->id)->get();
+        $categories = TransactionCategory::where('church_id', $church->id)
+            ->where('type', 'expense')
+            ->get();
 
         return view('expenses.edit', compact('expense', 'ministries', 'categories'));
     }
 
-    public function update(Request $request, Expense $expense)
+    public function update(Request $request, Transaction $expense)
     {
-        $this->authorizeChurch($expense);
-        Gate::authorize('manage-ministry', $expense->ministry);
+        $this->authorizeExpense($expense);
+        if ($expense->ministry) {
+            Gate::authorize('manage-ministry', $expense->ministry);
+        }
 
         $validated = $request->validate([
             'ministry_id' => 'required|exists:ministries,id',
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
-            'category_id' => 'nullable|exists:expense_categories,id',
+            'category_id' => 'nullable|exists:transaction_categories,id',
             'date' => 'required|date',
             'receipt_photo' => 'nullable|image|max:5120',
             'notes' => 'nullable|string',
         ]);
 
         // Handle receipt upload
+        $paymentData = $expense->payment_data ?? [];
         if ($request->hasFile('receipt_photo')) {
-            if ($expense->receipt_photo) {
-                Storage::disk('public')->delete($expense->receipt_photo);
+            if (!empty($paymentData['receipt_photo'])) {
+                Storage::disk('public')->delete($paymentData['receipt_photo']);
             }
-            $validated['receipt_photo'] = $request->file('receipt_photo')->store('receipts', 'public');
+            $paymentData['receipt_photo'] = $request->file('receipt_photo')->store('receipts', 'public');
         }
 
-        $expense->update($validated);
+        $expense->update([
+            'ministry_id' => $validated['ministry_id'],
+            'amount' => $validated['amount'],
+            'description' => $validated['description'],
+            'category_id' => $validated['category_id'],
+            'date' => $validated['date'],
+            'notes' => $validated['notes'],
+            'payment_data' => !empty($paymentData) ? $paymentData : null,
+        ]);
 
         return redirect()->route('finances.expenses.index')
             ->with('success', 'Витрату оновлено.');
     }
 
-    public function destroy(Expense $expense)
+    public function destroy(Transaction $expense)
     {
-        $this->authorizeChurch($expense);
-        Gate::authorize('manage-ministry', $expense->ministry);
+        $this->authorizeExpense($expense);
+        if ($expense->ministry) {
+            Gate::authorize('manage-ministry', $expense->ministry);
+        }
 
-        if ($expense->receipt_photo) {
-            Storage::disk('public')->delete($expense->receipt_photo);
+        $paymentData = $expense->payment_data ?? [];
+        if (!empty($paymentData['receipt_photo'])) {
+            Storage::disk('public')->delete($paymentData['receipt_photo']);
         }
 
         $expense->delete();
@@ -170,36 +204,55 @@ class ExpenseController extends Controller
 
         // By ministry
         $byMinistry = Ministry::where('church_id', $church->id)
-            ->with(['expenses' => fn($q) => $q->forMonth($year, $month)])
             ->get()
-            ->map(fn($m) => [
-                'id' => $m->id,
-                'name' => $m->name,
-                'color' => $m->color,
-                'budget' => $m->monthly_budget,
-                'spent' => $m->spent_this_month,
-                'percentage' => $m->budget_usage_percent,
-            ]);
+            ->map(function ($m) use ($year, $month) {
+                $spent = Transaction::where('ministry_id', $m->id)
+                    ->where('direction', Transaction::DIRECTION_OUT)
+                    ->forMonth($year, $month)
+                    ->completed()
+                    ->sum('amount');
+                $percentage = $m->monthly_budget > 0
+                    ? round(($spent / $m->monthly_budget) * 100, 1)
+                    : 0;
+                return [
+                    'id' => $m->id,
+                    'name' => $m->name,
+                    'color' => $m->color,
+                    'budget' => $m->monthly_budget,
+                    'spent' => $spent,
+                    'percentage' => $percentage,
+                ];
+            });
 
         // By category
-        $byCategory = ExpenseCategory::where('church_id', $church->id)
-            ->withCount(['expenses as total' => function ($q) use ($year, $month) {
-                $q->forMonth($year, $month)->select(\DB::raw('SUM(amount)'));
-            }])
-            ->get();
+        $byCategory = TransactionCategory::where('church_id', $church->id)
+            ->where('type', 'expense')
+            ->get()
+            ->map(function ($cat) use ($church, $year, $month) {
+                $cat->total = Transaction::where('church_id', $church->id)
+                    ->where('category_id', $cat->id)
+                    ->where('direction', Transaction::DIRECTION_OUT)
+                    ->forMonth($year, $month)
+                    ->completed()
+                    ->sum('amount');
+                return $cat;
+            });
 
         // Total
-        $totalSpent = Expense::where('church_id', $church->id)
+        $totalSpent = Transaction::where('church_id', $church->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
             ->forMonth($year, $month)
+            ->completed()
             ->sum('amount');
 
         $totalBudget = Ministry::where('church_id', $church->id)
             ->sum('monthly_budget');
 
         // Recent expenses
-        $recentExpenses = Expense::where('church_id', $church->id)
+        $recentExpenses = Transaction::where('church_id', $church->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
             ->forMonth($year, $month)
-            ->with(['ministry', 'category', 'user'])
+            ->with(['ministry', 'category', 'recorder'])
             ->orderByDesc('date')
             ->limit(10)
             ->get();
@@ -221,10 +274,23 @@ class ExpenseController extends Controller
         return back()->with('info', 'Експорт буде доступний найближчим часом.');
     }
 
-    private function authorizeChurch(Expense $expense): void
+    private function authorizeExpense(Transaction $expense): void
     {
         if ($expense->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
+        if ($expense->direction !== Transaction::DIRECTION_OUT) {
+            abort(404);
+        }
+    }
+
+    private function calculateSpentThisMonth(int $churchId, array $ministryIds): float
+    {
+        return Transaction::where('church_id', $churchId)
+            ->whereIn('ministry_id', $ministryIds)
+            ->where('direction', Transaction::DIRECTION_OUT)
+            ->thisMonth()
+            ->completed()
+            ->sum('amount');
     }
 }

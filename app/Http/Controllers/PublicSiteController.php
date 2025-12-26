@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Church;
-use App\Models\Donation;
 use App\Models\DonationCampaign;
+use App\Models\Transaction;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\Group;
@@ -299,6 +299,15 @@ class PublicSiteController extends Controller
             // Redirect to Monobank jar
             $jarLink = $paymentService->getMonobankJarLink();
 
+            // Validate URL is from trusted Monobank domain
+            $allowedDomains = ['send.monobank.ua', 'monobank.ua', 'mono.bank'];
+            $parsedUrl = parse_url($jarLink);
+            $host = $parsedUrl['host'] ?? '';
+
+            if (!in_array($host, $allowedDomains)) {
+                return back()->with('error', 'Невірне посилання Monobank.');
+            }
+
             return redirect()->away($jarLink);
         }
 
@@ -333,13 +342,13 @@ class PublicSiteController extends Controller
             return response()->json(['status' => 'error'], 400);
         }
 
-        // Find donation and church
-        $donation = Donation::where('order_id', $orderId)->first();
-        if (!$donation) {
+        // Find transaction and church
+        $transaction = Transaction::where('order_id', $orderId)->first();
+        if (!$transaction) {
             return response()->json(['status' => 'error'], 404);
         }
 
-        $church = $donation->church;
+        $church = $transaction->church;
         $paymentService = new PaymentService($church);
 
         // Verify signature

@@ -6,6 +6,7 @@ use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
+use App\Rules\BelongsToChurch;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -185,10 +186,10 @@ class FinanceController extends Controller
     public function storeIncome(Request $request)
     {
         $validated = $request->validate([
-            'category_id' => 'required|exists:transaction_categories,id',
+            'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
-            'person_id' => 'nullable|exists:people,id',
+            'person_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'description' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cash,card,transfer,online',
             'is_anonymous' => 'boolean',
@@ -215,11 +216,11 @@ class FinanceController extends Controller
             'amount' => $validated['amount'],
             'date' => $validated['date'],
             'category_id' => $validated['category_id'],
-            'person_id' => $request->boolean('is_anonymous') ? null : $validated['person_id'],
+            'person_id' => $request->boolean('is_anonymous') ? null : ($validated['person_id'] ?? null),
             'is_anonymous' => $request->boolean('is_anonymous'),
-            'payment_method' => $validated['payment_method'],
-            'description' => $validated['description'],
-            'notes' => $validated['notes'],
+            'payment_method' => $validated['payment_method'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'notes' => $validated['notes'] ?? null,
             'status' => Transaction::STATUS_COMPLETED,
             'recorded_by' => auth()->id(),
         ]);
@@ -300,13 +301,22 @@ class FinanceController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        $total = Transaction::where('church_id', $church->id)
+        $spent = Transaction::where('church_id', $church->id)
             ->outgoing()
             ->completed()
             ->forMonth($year, $month)
             ->sum('amount');
 
-        return view('finances.expenses.index', compact('expenses', 'categories', 'year', 'month', 'total'));
+        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+
+        $budget = $ministries->whereNotNull('monthly_budget')->sum('monthly_budget');
+
+        $totals = [
+            'budget' => $budget,
+            'spent' => $spent,
+        ];
+
+        return view('finances.expenses.index', compact('expenses', 'categories', 'year', 'month', 'totals', 'ministries'));
     }
 
     public function createExpense()
@@ -324,16 +334,38 @@ class FinanceController extends Controller
     public function storeExpense(Request $request)
     {
         $validated = $request->validate([
-            'category_id' => 'required|exists:transaction_categories,id',
+            'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
-            'ministry_id' => 'nullable|exists:ministries,id',
+            'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'description' => 'required|string|max:255',
-            'payment_method' => 'nullable|in:cash,card,transfer',
+            'payment_method' => 'nullable|in:cash,card,transfer,online',
             'notes' => 'nullable|string',
+            'force_over_budget' => 'boolean',
         ]);
 
         $church = $this->getCurrentChurch();
+
+        // Check ministry budget limits
+        $budgetWarning = null;
+        if (!empty($validated['ministry_id'])) {
+            $ministry = Ministry::find($validated['ministry_id']);
+            if ($ministry) {
+                $budgetCheck = $ministry->canAddExpense((float) $validated['amount']);
+
+                if (!$budgetCheck['allowed'] && !$request->boolean('force_over_budget')) {
+                    return back()
+                        ->with('error', $budgetCheck['message'])
+                        ->with('budget_exceeded', true)
+                        ->with('ministry_id', $ministry->id)
+                        ->withInput();
+                }
+
+                if ($budgetCheck['warning']) {
+                    $budgetWarning = $budgetCheck['message'];
+                }
+            }
+        }
 
         Transaction::create([
             'church_id' => $church->id,
@@ -341,17 +373,23 @@ class FinanceController extends Controller
             'source_type' => Transaction::SOURCE_EXPENSE,
             'amount' => $validated['amount'],
             'date' => $validated['date'],
-            'category_id' => $validated['category_id'],
-            'ministry_id' => $validated['ministry_id'],
-            'payment_method' => $validated['payment_method'],
+            'category_id' => $validated['category_id'] ?? null,
+            'ministry_id' => $validated['ministry_id'] ?? null,
+            'payment_method' => $validated['payment_method'] ?? null,
             'description' => $validated['description'],
-            'notes' => $validated['notes'],
+            'notes' => $validated['notes'] ?? null,
             'status' => Transaction::STATUS_COMPLETED,
             'recorded_by' => auth()->id(),
         ]);
 
-        return redirect()->route('finances.expenses')
-            ->with('success', 'Витрату додано.');
+        $message = 'Витрату додано.';
+        if ($budgetWarning) {
+            $message .= ' ' . $budgetWarning;
+        }
+
+        return redirect()->route('finances.expenses.index')
+            ->with('success', $message)
+            ->with('budget_warning', $budgetWarning);
     }
 
     public function editExpense(Transaction $expense)
@@ -373,19 +411,56 @@ class FinanceController extends Controller
         $this->authorizeChurch($expense);
 
         $validated = $request->validate([
-            'category_id' => 'required|exists:transaction_categories,id',
+            'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
-            'ministry_id' => 'nullable|exists:ministries,id',
+            'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'description' => 'required|string|max:255',
-            'payment_method' => 'nullable|in:cash,card,transfer',
+            'payment_method' => 'nullable|in:cash,card,transfer,online',
             'notes' => 'nullable|string',
+            'force_over_budget' => 'boolean',
         ]);
+
+        // Check ministry budget limits (only if amount increased or ministry changed)
+        $budgetWarning = null;
+        $newMinistryId = $validated['ministry_id'] ?? null;
+        $amountDifference = (float) $validated['amount'] - (float) $expense->amount;
+
+        // Check budget if: ministry changed to new one, or amount increased for same ministry
+        if ($newMinistryId) {
+            $ministry = Ministry::find($newMinistryId);
+            if ($ministry) {
+                // Calculate effective new expense for budget check
+                $checkAmount = ($expense->ministry_id === $newMinistryId)
+                    ? $amountDifference  // Same ministry - only check the increase
+                    : (float) $validated['amount'];  // New ministry - check full amount
+
+                if ($checkAmount > 0) {
+                    $budgetCheck = $ministry->canAddExpense($checkAmount);
+
+                    if (!$budgetCheck['allowed'] && !$request->boolean('force_over_budget')) {
+                        return back()
+                            ->with('error', $budgetCheck['message'])
+                            ->with('budget_exceeded', true)
+                            ->withInput();
+                    }
+
+                    if ($budgetCheck['warning']) {
+                        $budgetWarning = $budgetCheck['message'];
+                    }
+                }
+            }
+        }
 
         $expense->update($validated);
 
-        return redirect()->route('finances.expenses')
-            ->with('success', 'Витрату оновлено.');
+        $message = 'Витрату оновлено.';
+        if ($budgetWarning) {
+            $message .= ' ' . $budgetWarning;
+        }
+
+        return redirect()->route('finances.expenses.index')
+            ->with('success', $message);
     }
 
     public function destroyExpense(Transaction $expense)
@@ -542,7 +617,7 @@ class FinanceController extends Controller
         return $months[$month] ?? '';
     }
 
-    private function authorizeChurch($model): void
+    protected function authorizeChurch($model): void
     {
         if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);

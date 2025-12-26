@@ -327,6 +327,13 @@ function financesDashboard() {
 
             const monthlyData = @json($monthlyData);
 
+            // Calculate cumulative balance
+            let cumulativeBalance = 0;
+            const balanceData = monthlyData.map(d => {
+                cumulativeBalance += d.balance;
+                return cumulativeBalance;
+            });
+
             new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -337,30 +344,100 @@ function financesDashboard() {
                             data: monthlyData.map(d => d.income),
                             backgroundColor: 'rgba(34, 197, 94, 0.8)',
                             borderRadius: 4,
+                            yAxisID: 'y',
+                            order: 2,
                         },
                         {
                             label: 'Витрати',
                             data: monthlyData.map(d => d.expense),
                             backgroundColor: 'rgba(239, 68, 68, 0.8)',
                             borderRadius: 4,
+                            yAxisID: 'y',
+                            order: 2,
+                        },
+                        {
+                            label: 'Баланс (накопичувальний)',
+                            data: balanceData,
+                            type: 'line',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 7,
+                            yAxisID: 'y1',
+                            order: 1,
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     plugins: {
                         legend: {
                             position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const value = context.parsed.y;
+                                    const sign = context.datasetIndex === 2 && value >= 0 ? '+' : '';
+                                    label += sign + value.toLocaleString('uk-UA') + ' ₴';
+                                    return label;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
                             beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Надходження / Витрати',
+                                color: '#6b7280',
+                            },
                             ticks: {
                                 callback: function(value) {
                                     return value.toLocaleString('uk-UA') + ' ₴';
                                 }
+                            },
+                            grid: {
+                                drawOnChartArea: true,
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Накопичувальний баланс',
+                                color: '#3b82f6',
+                            },
+                            ticks: {
+                                color: '#3b82f6',
+                                callback: function(value) {
+                                    const sign = value >= 0 ? '+' : '';
+                                    return sign + value.toLocaleString('uk-UA') + ' ₴';
+                                }
+                            },
+                            grid: {
+                                drawOnChartArea: false,
                             }
                         }
                     }

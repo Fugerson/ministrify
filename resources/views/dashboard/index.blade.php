@@ -5,7 +5,10 @@
 @section('content')
 <x-page-help page="dashboard" />
 
-<div class="space-y-4 lg:space-y-6">
+<!-- Onboarding Reminder for new admins -->
+<x-onboarding-reminder />
+
+<div class="space-y-4 lg:space-y-6 page-transition">
     <!-- Mobile Welcome -->
     <div class="lg:hidden">
         <h1 class="text-xl font-bold text-gray-900 dark:text-white">Привіт, {{ explode(' ', auth()->user()->name)[0] }}!</h1>
@@ -15,7 +18,7 @@
     <!-- Stats Grid - Informative Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mt-4 lg:mt-6">
         <!-- People Stats -->
-        <a href="{{ route('people.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
+        <a href="{{ route('people.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +77,7 @@
         </a>
 
         <!-- Ministries Stats -->
-        <a href="{{ route('ministries.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md hover:border-green-200 dark:hover:border-green-800 transition-all group">
+        <a href="{{ route('ministries.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:border-green-200 dark:hover:border-green-800 transition-all group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-50 dark:bg-green-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +112,7 @@
         </a>
 
         <!-- Groups Stats -->
-        <a href="{{ route('groups.index') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md hover:border-purple-200 dark:hover:border-purple-800 transition-all group">
+        <a href="{{ route('groups.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:border-purple-200 dark:hover:border-purple-800 transition-all group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-purple-50 dark:bg-purple-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +156,7 @@
         </a>
 
         <!-- Events Stats -->
-        <a href="{{ route('schedule') }}" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:shadow-md hover:border-amber-200 dark:hover:border-amber-800 transition-all group">
+        <a href="{{ route('schedule') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:border-amber-200 dark:hover:border-amber-800 transition-all group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-amber-50 dark:bg-amber-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -346,8 +349,8 @@
             <div class="divide-y divide-gray-50 dark:divide-gray-700">
                 @forelse($upcomingEvents as $event)
                 <a href="{{ route('events.show', $event) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: {{ $event->ministry->color ?? '#3b82f6' }}20;">
-                        <svg class="w-6 h-6" style="color: {{ $event->ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: {{ $event->ministry?->color ?? '#3b82f6' }}20;">
+                        <svg class="w-6 h-6" style="color: {{ $event->ministry?->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </div>
@@ -506,7 +509,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Бюджети служінь</h2>
-                <a href="{{ route('expenses.report') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Звіт</a>
+                <a href="{{ route('finances.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Звіт</a>
             </div>
             <div class="p-4 lg:p-5 space-y-4">
                 @foreach($ministryBudgets as $budget)
@@ -533,7 +536,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Витрати за місяць</h2>
-                <a href="{{ route('expenses.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
+                <a href="{{ route('finances.expenses.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
             </div>
 
             <!-- Total -->

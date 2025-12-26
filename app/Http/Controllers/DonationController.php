@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Church;
-use App\Models\Donation;
 use App\Models\DonationCampaign;
+use App\Models\Transaction;
 use App\Services\LiqPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -26,16 +26,18 @@ class DonationController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($campaign) {
-                $campaign->raised = Donation::where('church_id', $campaign->church_id)
-                    ->where('status', 'completed')
-                    ->where('purpose', $campaign->name)
+                $campaign->raised = Transaction::where('church_id', $campaign->church_id)
+                    ->where('source_type', Transaction::SOURCE_DONATION)
+                    ->where('status', Transaction::STATUS_COMPLETED)
+                    ->where('campaign_id', $campaign->id)
                     ->sum('amount');
                 $campaign->progress = $campaign->goal_amount > 0
                     ? min(100, round(($campaign->raised / $campaign->goal_amount) * 100))
                     : 0;
-                $campaign->donors_count = Donation::where('church_id', $campaign->church_id)
-                    ->where('status', 'completed')
-                    ->where('purpose', $campaign->name)
+                $campaign->donors_count = Transaction::where('church_id', $campaign->church_id)
+                    ->where('source_type', Transaction::SOURCE_DONATION)
+                    ->where('status', Transaction::STATUS_COMPLETED)
+                    ->where('campaign_id', $campaign->id)
                     ->distinct('donor_email')
                     ->count('donor_email');
                 return $campaign;
@@ -66,26 +68,31 @@ class DonationController extends Controller
         ]);
 
         $paymentSettings = $church->payment_settings ?? [];
+        $paymentMethod = $validated['payment_method'] === 'liqpay'
+            ? Transaction::PAYMENT_LIQPAY
+            : Transaction::PAYMENT_MONOBANK;
 
-        // Create donation record
-        $donation = Donation::create([
+        // Create transaction record
+        $transaction = Transaction::create([
             'church_id' => $church->id,
+            'direction' => Transaction::DIRECTION_IN,
+            'source_type' => Transaction::SOURCE_DONATION,
             'donor_name' => $validated['is_anonymous'] ?? false ? null : ($validated['donor_name'] ?? null),
             'donor_email' => $validated['donor_email'] ?? null,
             'amount' => $validated['amount'],
             'currency' => 'UAH',
-            'type' => ($validated['is_recurring'] ?? false) ? 'recurring' : 'one_time',
+            'date' => now()->toDateString(),
             'purpose' => $validated['purpose'] ?? 'Загальна пожертва',
-            'status' => 'pending',
-            'payment_method' => $validated['payment_method'],
+            'status' => Transaction::STATUS_PENDING,
+            'payment_method' => $paymentMethod,
             'is_anonymous' => $validated['is_anonymous'] ?? false,
-            'transaction_id' => 'DON-' . strtoupper(Str::random(12)),
+            'order_id' => 'DON-' . strtoupper(Str::random(12)),
         ]);
 
         if ($validated['payment_method'] === 'liqpay') {
-            return $this->processLiqPay($church, $donation, $paymentSettings);
+            return $this->processLiqPay($church, $transaction, $paymentSettings);
         } elseif ($validated['payment_method'] === 'monobank') {
-            return $this->processMonobank($church, $donation, $paymentSettings);
+            return $this->processMonobank($church, $transaction, $paymentSettings);
         }
 
         return back()->with('error', 'Невідомий метод оплати');
@@ -94,26 +101,26 @@ class DonationController extends Controller
     /**
      * Process LiqPay payment
      */
-    private function processLiqPay(Church $church, Donation $donation, array $settings)
+    private function processLiqPay(Church $church, Transaction $transaction, array $settings)
     {
         if (empty($settings['liqpay_public_key']) || empty($settings['liqpay_private_key'])) {
-            $donation->update(['status' => 'failed', 'notes' => 'LiqPay не налаштовано']);
+            $transaction->update(['status' => Transaction::STATUS_FAILED, 'notes' => 'LiqPay не налаштовано']);
             return back()->with('error', 'LiqPay не налаштовано для цієї церкви');
         }
 
         $liqpay = new LiqPayService($settings['liqpay_public_key'], $settings['liqpay_private_key']);
 
         $callbackUrl = route('donations.callback', ['slug' => $church->slug]);
-        $resultUrl = route('public.donate.thanks', ['slug' => $church->slug, 'donation' => $donation->id]);
+        $resultUrl = route('public.donate.thanks', ['slug' => $church->slug, 'transaction' => $transaction->id]);
 
         $formData = $liqpay->createPayment([
-            'amount' => $donation->amount,
+            'amount' => $transaction->amount,
             'currency' => 'UAH',
-            'description' => "Пожертва для {$church->name}: {$donation->purpose}",
-            'order_id' => $donation->transaction_id,
+            'description' => "Пожертва для {$church->name}: {$transaction->purpose}",
+            'order_id' => $transaction->order_id,
             'result_url' => $resultUrl,
             'server_url' => $callbackUrl,
-            'action' => $donation->type === 'recurring' ? 'subscribe' : 'pay',
+            'action' => 'pay',
         ]);
 
         return view('public.donate-redirect', [
@@ -125,12 +132,12 @@ class DonationController extends Controller
     /**
      * Process Monobank payment (redirect to jar)
      */
-    private function processMonobank(Church $church, Donation $donation, array $settings)
+    private function processMonobank(Church $church, Transaction $transaction, array $settings)
     {
         $jarId = $settings['monobank_jar_id'] ?? null;
 
         if (empty($jarId)) {
-            $donation->update(['status' => 'failed', 'notes' => 'Monobank банка не налаштована']);
+            $transaction->update(['status' => Transaction::STATUS_FAILED, 'notes' => 'Monobank банка не налаштована']);
             return back()->with('error', 'Monobank банка не налаштована');
         }
 
@@ -141,10 +148,9 @@ class DonationController extends Controller
         }
 
         // For Monobank, we can't track the payment automatically
-        // Mark as pending and redirect to jar
-        $donation->update(['notes' => 'Перенаправлено на Monobank']);
+        $transaction->update(['notes' => 'Перенаправлено на Monobank']);
 
-        $monobankUrl = "https://send.monobank.ua/jar/{$jarId}?amount={$donation->amount}";
+        $monobankUrl = "https://send.monobank.ua/jar/{$jarId}?amount={$transaction->amount}";
 
         return redirect()->away($monobankUrl);
     }
@@ -185,32 +191,26 @@ class DonationController extends Controller
             'amount' => $decodedData['amount'] ?? null,
         ]);
 
-        $donation = Donation::where('transaction_id', $orderId)->first();
+        $transaction = Transaction::where('order_id', $orderId)->first();
 
-        if (!$donation) {
-            Log::warning('LiqPay callback: donation not found', ['order_id' => $orderId]);
-            return response()->json(['status' => 'error', 'message' => 'Donation not found'], 404);
+        if (!$transaction) {
+            Log::warning('LiqPay callback: transaction not found', ['order_id' => $orderId]);
+            return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
         }
 
-        // Map LiqPay status to our status
-        $statusMap = [
-            'success' => 'completed',
-            'sandbox' => 'completed', // For testing
-            'failure' => 'failed',
-            'error' => 'failed',
-            'reversed' => 'refunded',
-            'processing' => 'pending',
-            'wait_accept' => 'pending',
-        ];
+        // Map LiqPay status to Transaction status constants
+        $newStatus = match ($status) {
+            'success', 'sandbox' => Transaction::STATUS_COMPLETED,
+            'failure', 'error' => Transaction::STATUS_FAILED,
+            'reversed' => Transaction::STATUS_REFUNDED,
+            default => Transaction::STATUS_PENDING,
+        };
 
-        $newStatus = $statusMap[$status] ?? 'pending';
-
-        $donation->update([
+        $transaction->update([
             'status' => $newStatus,
             'notes' => "LiqPay status: {$status}",
+            'paid_at' => $newStatus === Transaction::STATUS_COMPLETED ? now() : null,
         ]);
-
-        // TODO: Send email notification
 
         return response()->json(['status' => 'ok']);
     }
@@ -218,18 +218,18 @@ class DonationController extends Controller
     /**
      * Thank you page
      */
-    public function thanks(string $slug, Donation $donation)
+    public function thanks(string $slug, Transaction $transaction)
     {
         $church = Church::where('slug', $slug)
             ->where('public_site_enabled', true)
             ->firstOrFail();
 
-        // Make sure donation belongs to this church
-        if ($donation->church_id !== $church->id) {
+        // Make sure transaction belongs to this church
+        if ($transaction->church_id !== $church->id) {
             abort(404);
         }
 
-        return view('public.donate-thanks', compact('church', 'donation'));
+        return view('public.donate-thanks', compact('church', 'transaction'));
     }
 
     // ==================== ADMIN METHODS ====================
@@ -241,33 +241,35 @@ class DonationController extends Controller
     {
         $church = $this->getCurrentChurch();
 
-        $donations = Donation::where('church_id', $church->id)
+        $donations = Transaction::where('church_id', $church->id)
+            ->where('source_type', Transaction::SOURCE_DONATION)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
         // Statistics
         $stats = [
-            'total_month' => Donation::where('church_id', $church->id)
-                ->where('status', 'completed')
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
+            'total_month' => Transaction::where('church_id', $church->id)
+                ->where('source_type', Transaction::SOURCE_DONATION)
+                ->where('status', Transaction::STATUS_COMPLETED)
+                ->whereMonth('date', now()->month)
+                ->whereYear('date', now()->year)
                 ->sum('amount'),
-            'total_year' => Donation::where('church_id', $church->id)
-                ->where('status', 'completed')
-                ->whereYear('created_at', now()->year)
+            'total_year' => Transaction::where('church_id', $church->id)
+                ->where('source_type', Transaction::SOURCE_DONATION)
+                ->where('status', Transaction::STATUS_COMPLETED)
+                ->whereYear('date', now()->year)
                 ->sum('amount'),
-            'donors_count' => Donation::where('church_id', $church->id)
-                ->where('status', 'completed')
-                ->whereMonth('created_at', now()->month)
+            'donors_count' => Transaction::where('church_id', $church->id)
+                ->where('source_type', Transaction::SOURCE_DONATION)
+                ->where('status', Transaction::STATUS_COMPLETED)
+                ->whereMonth('date', now()->month)
                 ->distinct('donor_email')
                 ->count('donor_email'),
-            'recurring_count' => Donation::where('church_id', $church->id)
-                ->where('status', 'completed')
-                ->where('type', 'recurring')
-                ->count(),
-            'avg_donation' => Donation::where('church_id', $church->id)
-                ->where('status', 'completed')
-                ->whereMonth('created_at', now()->month)
+            'recurring_count' => 0, // Recurring handled differently in unified system
+            'avg_donation' => Transaction::where('church_id', $church->id)
+                ->where('source_type', Transaction::SOURCE_DONATION)
+                ->where('status', Transaction::STATUS_COMPLETED)
+                ->whereMonth('date', now()->month)
                 ->avg('amount') ?? 0,
         ];
 
@@ -277,18 +279,20 @@ class DonationController extends Controller
             $date = now()->subMonths($i);
             $chartData[] = [
                 'month' => $date->translatedFormat('M'),
-                'amount' => Donation::where('church_id', $church->id)
-                    ->where('status', 'completed')
-                    ->whereMonth('created_at', $date->month)
-                    ->whereYear('created_at', $date->year)
+                'amount' => Transaction::where('church_id', $church->id)
+                    ->where('source_type', Transaction::SOURCE_DONATION)
+                    ->where('status', Transaction::STATUS_COMPLETED)
+                    ->whereMonth('date', $date->month)
+                    ->whereYear('date', $date->year)
                     ->sum('amount'),
             ];
         }
 
         // Top donors
-        $topDonors = Donation::where('church_id', $church->id)
-            ->where('status', 'completed')
-            ->whereYear('created_at', now()->year)
+        $topDonors = Transaction::where('church_id', $church->id)
+            ->where('source_type', Transaction::SOURCE_DONATION)
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->whereYear('date', now()->year)
             ->whereNotNull('donor_email')
             ->where('is_anonymous', false)
             ->selectRaw('donor_name, donor_email, SUM(amount) as total_amount, COUNT(*) as donations_count')
@@ -298,9 +302,10 @@ class DonationController extends Controller
             ->get();
 
         // By purpose
-        $byPurpose = Donation::where('church_id', $church->id)
-            ->where('status', 'completed')
-            ->whereYear('created_at', now()->year)
+        $byPurpose = Transaction::where('church_id', $church->id)
+            ->where('source_type', Transaction::SOURCE_DONATION)
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->whereYear('date', now()->year)
             ->selectRaw('purpose, SUM(amount) as total_amount')
             ->groupBy('purpose')
             ->orderByDesc('total_amount')
@@ -398,10 +403,11 @@ class DonationController extends Controller
 
         $year = $request->input('year', now()->year);
 
-        $donations = Donation::where('church_id', $church->id)
-            ->where('status', 'completed')
-            ->whereYear('created_at', $year)
-            ->orderBy('created_at', 'desc')
+        $transactions = Transaction::where('church_id', $church->id)
+            ->where('source_type', Transaction::SOURCE_DONATION)
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->whereYear('date', $year)
+            ->orderBy('date', 'desc')
             ->get();
 
         // Generate CSV
@@ -411,22 +417,22 @@ class DonationController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $callback = function () use ($donations) {
+        $callback = function () use ($transactions) {
             $file = fopen('php://output', 'w');
             // BOM for Excel UTF-8
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             fputcsv($file, ['Дата', 'Донатор', 'Email', 'Сума', 'Призначення', 'Метод', 'Статус']);
 
-            foreach ($donations as $donation) {
+            foreach ($transactions as $transaction) {
                 fputcsv($file, [
-                    $donation->created_at->format('d.m.Y H:i'),
-                    $donation->is_anonymous ? 'Анонім' : ($donation->donor_name ?? '-'),
-                    $donation->donor_email ?? '-',
-                    $donation->amount,
-                    $donation->purpose ?? '-',
-                    $donation->payment_method,
-                    $donation->status,
+                    $transaction->date->format('d.m.Y'),
+                    $transaction->is_anonymous ? 'Анонім' : ($transaction->donor_name ?? '-'),
+                    $transaction->donor_email ?? '-',
+                    $transaction->amount,
+                    $transaction->purpose ?? '-',
+                    $transaction->payment_method_label,
+                    $transaction->status_label,
                 ]);
             }
 

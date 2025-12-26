@@ -46,5 +46,6 @@ class Kernel extends HttpKernel
         'role' => \App\Http\Middleware\CheckRole::class,
         'throttle.login' => \App\Http\Middleware\ThrottleLogin::class,
         'super_admin' => \App\Http\Middleware\SuperAdmin::class,
+        'onboarding' => \App\Http\Middleware\CheckOnboarding::class,
     ];
 }
