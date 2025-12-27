@@ -140,7 +140,7 @@
                             'email' => $person->email ?? '',
                             'birth_date' => $person->birth_date?->format('Y-m-d') ?? '',
                             'ministry' => $person->ministries->pluck('name')->join(', '),
-                            'role' => \App\Models\Person::CHURCH_ROLES[$person->church_role] ?? '',
+                            'role' => $person->churchRoleRelation?->name ?? '',
                         ]))"
                         x-transition:enter="transition ease-out duration-100"
                         x-transition:enter-start="opacity-0"
@@ -205,9 +205,10 @@
                         </td>
                         <!-- Role -->
                         <td class="px-4 py-3 hidden xl:table-cell">
-                            @if($person->church_role)
-                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300">
-                                {{ \App\Models\Person::CHURCH_ROLES[$person->church_role] ?? $person->church_role }}
+                            @if($person->churchRoleRelation)
+                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
+                                  style="background-color: {{ $person->churchRoleRelation->color }}20; color: {{ $person->churchRoleRelation->color }}">
+                                {{ $person->churchRoleRelation->name }}
                             </span>
                             @else
                             <span class="text-gray-400">—</span>
@@ -359,7 +360,7 @@ function peopleTable() {
         filteredCount: {{ $people->count() }},
         perPage: 25,
         currentPage: 1,
-        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'role' => \App\Models\Person::CHURCH_ROLES[$p->church_role] ?? ''])->values()),
+        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'role' => $p->churchRoleRelation?->name ?? ''])->values()),
         filteredIndices: [],
 
         init() {

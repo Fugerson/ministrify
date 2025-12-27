@@ -21,7 +21,7 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
 
         $query = Person::where('church_id', $church->id)
-            ->with(['tags', 'ministries']);
+            ->with(['tags', 'ministries', 'churchRoleRelation']);
 
         // Search
         if ($search = $request->get('search')) {
@@ -169,7 +169,7 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        $person->load(['tags', 'ministries.positions', 'groups', 'user', 'assignments' => function ($q) {
+        $person->load(['tags', 'ministries.positions', 'groups', 'user', 'churchRoleRelation', 'assignments' => function ($q) {
             $q->whereHas('event', fn($eq) => $eq->where('date', '>=', now()->subMonths(3)))
               ->with(['event.ministry', 'position'])
               ->orderByDesc('created_at');
