@@ -25,12 +25,18 @@ use App\Http\Controllers\SystemAdminController;
 use App\Http\Controllers\PrivateMessageController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\MigrationController;
 use Illuminate\Support\Facades\Route;
 
-// Home redirect
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Landing pages (public)
+Route::get('/', [LandingController::class, 'home'])->name('landing.home');
+Route::get('features', [LandingController::class, 'features'])->name('landing.features');
+Route::get('pricing', [LandingController::class, 'pricing'])->name('landing.pricing');
+Route::get('contact', [LandingController::class, 'contact'])->name('landing.contact');
+Route::post('contact', [LandingController::class, 'sendContact'])->name('landing.contact.send')->middleware('throttle:5,1');
+Route::get('register-church', [LandingController::class, 'register'])->name('landing.register');
+Route::post('register-church', [LandingController::class, 'processRegistration'])->name('landing.register.process')->middleware('throttle:3,1');
 
 // Public church mini-sites with rate limiting for forms
 Route::prefix('c/{slug}')->name('public.')->middleware('throttle:60,1')->group(function () {
@@ -107,8 +113,17 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     // People
     Route::resource('people', PersonController::class);
     Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore');
+    Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role');
+    Route::post('people/{person}/create-account', [PersonController::class, 'createAccount'])->name('people.create-account');
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export');
     Route::post('people-import', [PersonController::class, 'import'])->name('people.import');
+
+    // Migration tools
+    Route::prefix('migrate')->name('migration.')->group(function () {
+        Route::get('planning-center', [MigrationController::class, 'planningCenter'])->name('planning-center');
+        Route::post('planning-center/preview', [MigrationController::class, 'preview'])->name('planning-center.preview');
+        Route::post('planning-center/import', [MigrationController::class, 'import'])->name('planning-center.import');
+    });
 
     // Tags
     Route::resource('tags', TagController::class)->except(['show']);
@@ -308,6 +323,15 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         // Audit Logs
         Route::get('audit-logs', [\App\Http\Controllers\AuditLogController::class, 'index'])->name('audit-logs.index');
         Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\AuditLogController::class, 'show'])->name('audit-logs.show');
+
+        // Church Roles
+        Route::get('church-roles', [\App\Http\Controllers\ChurchRoleController::class, 'index'])->name('church-roles.index');
+        Route::post('church-roles', [\App\Http\Controllers\ChurchRoleController::class, 'store'])->name('church-roles.store');
+        Route::put('church-roles/{churchRole}', [\App\Http\Controllers\ChurchRoleController::class, 'update'])->name('church-roles.update');
+        Route::delete('church-roles/{churchRole}', [\App\Http\Controllers\ChurchRoleController::class, 'destroy'])->name('church-roles.destroy');
+        Route::post('church-roles/{churchRole}/set-default', [\App\Http\Controllers\ChurchRoleController::class, 'setDefault'])->name('church-roles.set-default');
+        Route::post('church-roles/reorder', [\App\Http\Controllers\ChurchRoleController::class, 'reorder'])->name('church-roles.reorder');
+        Route::post('church-roles/reset', [\App\Http\Controllers\ChurchRoleController::class, 'resetToDefaults'])->name('church-roles.reset');
     });
 
     // My profile (for volunteers)

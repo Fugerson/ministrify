@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Person;
 use App\Models\Tag;
+use App\Models\User;
 use App\Models\UnavailableDate;
 use App\Exports\PeopleExport;
 use App\Imports\PeopleImport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PersonController extends Controller
@@ -52,8 +55,7 @@ class PersonController extends Controller
 
         $people = $query->orderBy('last_name')
             ->orderBy('first_name')
-            ->paginate(20)
-            ->withQueryString();
+            ->get();
 
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries;
@@ -167,7 +169,7 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        $person->load(['tags', 'ministries.positions', 'groups', 'assignments' => function ($q) {
+        $person->load(['tags', 'ministries.positions', 'groups', 'user', 'assignments' => function ($q) {
             $q->whereHas('event', fn($eq) => $eq->where('date', '>=', now()->subMonths(3)))
               ->with(['event.ministry', 'position'])
               ->orderByDesc('created_at');
@@ -252,13 +254,15 @@ class PersonController extends Controller
         // For admin inline editing
         $tags = collect();
         $ministries = collect();
+        $churchRoles = collect();
         if (auth()->user()->isAdmin()) {
             $church = $this->getCurrentChurch();
             $tags = Tag::where('church_id', $church->id)->get();
             $ministries = $church->ministries()->with('positions')->get();
+            $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
         }
 
-        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData', 'tags', 'ministries'));
+        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData', 'tags', 'ministries', 'churchRoles'));
     }
 
     private function calculateAttendanceRate(Person $person): ?int
@@ -306,6 +310,7 @@ class PersonController extends Controller
             'birth_date' => 'nullable|date',
             'joined_date' => 'nullable|date',
             'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
+            'church_role_id' => 'nullable|exists:church_roles,id',
             'notes' => 'nullable|string',
             'photo' => 'nullable|image|max:2048',
             'tags' => 'nullable|array',
@@ -325,6 +330,11 @@ class PersonController extends Controller
                 Storage::disk('public')->delete($person->photo);
             }
             $validated['photo'] = null;
+        }
+
+        // Handle empty church_role_id
+        if (isset($validated['church_role_id']) && $validated['church_role_id'] === '') {
+            $validated['church_role_id'] = null;
         }
 
         $person->update($validated);
@@ -514,6 +524,70 @@ class PersonController extends Controller
         $user->person->update(['telegram_chat_id' => null]);
 
         return back()->with('success', 'Telegram від\'єднано');
+    }
+
+    public function updateRole(Request $request, Person $person)
+    {
+        $this->authorizeChurch($person);
+
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Недостатньо прав'], 403);
+        }
+
+        $validated = $request->validate([
+            'role' => 'required|in:admin,leader,volunteer',
+        ]);
+
+        if (!$person->user) {
+            return response()->json(['message' => 'Користувач не має облікового запису'], 404);
+        }
+
+        // Prevent changing own role
+        if ($person->user->id === auth()->id()) {
+            return response()->json(['message' => 'Не можна змінювати власну роль'], 400);
+        }
+
+        $person->user->update(['role' => $validated['role']]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function createAccount(Request $request, Person $person)
+    {
+        $this->authorizeChurch($person);
+
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Недостатньо прав'], 403);
+        }
+
+        $validated = $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'role' => 'required|in:admin,leader,volunteer',
+        ]);
+
+        if ($person->user) {
+            return response()->json(['message' => 'Користувач вже має обліковий запис'], 400);
+        }
+
+        $church = $this->getCurrentChurch();
+
+        // Create user
+        $user = User::create([
+            'church_id' => $church->id,
+            'name' => $person->full_name,
+            'email' => $validated['email'],
+            'password' => Hash::make(Str::random(16)),
+            'role' => $validated['role'],
+            'onboarding_completed' => true,
+        ]);
+
+        // Link person to user
+        $person->update(['user_id' => $user->id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Обліковий запис створено',
+        ]);
     }
 
     protected function authorizeChurch($model): void

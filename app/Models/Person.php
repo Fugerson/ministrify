@@ -75,6 +75,7 @@ class Person extends Model
         'joined_date',
         'baptism_date',
         'church_role',
+        'church_role_id',
         'membership_status',
         'notes',
         'last_scheduled_at',
@@ -95,6 +96,11 @@ class Person extends Model
     public function church(): BelongsTo
     {
         return $this->belongsTo(Church::class);
+    }
+
+    public function churchRoleRelation(): BelongsTo
+    {
+        return $this->belongsTo(ChurchRole::class, 'church_role_id');
     }
 
     public function user(): BelongsTo

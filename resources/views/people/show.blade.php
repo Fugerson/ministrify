@@ -210,8 +210,131 @@
                                placeholder="username">
                     </div>
                 </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Церковна роль</p>
+                    <select name="church_role_id"
+                            class="w-full font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border-0 p-0 focus:ring-0 text-sm cursor-pointer">
+                        <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- Не вказано --</option>
+                        @foreach($churchRoles as $role)
+                            <option value="{{ $role->id }}" {{ $person->church_role_id == $role->id ? 'selected' : '' }} class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $role->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <input type="hidden" name="joined_date" value="{{ $person->joined_date?->format('Y-m-d') }}">
+
+            <!-- User Account & System Access -->
+            <div class="mt-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800"
+                 x-data="userRoleManager()">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">Доступ до системи</p>
+                            @if($person->user)
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $person->user->email }}</p>
+                            @else
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Немає доступу до системи</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if($person->user)
+                        <!-- System Role Selector -->
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Рівень доступу:</span>
+                            <select x-model="role" @change="updateRole()"
+                                    :disabled="saving || {{ $person->user->id === auth()->id() ? 'true' : 'false' }}"
+                                    class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
+                                <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Волонтер</option>
+                                <option value="leader" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Лідер служіння</option>
+                                <option value="admin" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Адміністратор</option>
+                            </select>
+                            <span x-show="saving" class="text-purple-600 dark:text-purple-400">
+                                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                            <span x-show="saved" x-cloak class="text-green-600 dark:text-green-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </span>
+                            @if($person->user->id === auth()->id())
+                                <span class="text-xs text-gray-500 dark:text-gray-400">(це ви)</span>
+                            @endif
+                        </div>
+                    @else
+                        <!-- Create Account Button -->
+                        <button type="button" @click="showCreateModal = true"
+                                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                            </svg>
+                            Надати доступ
+                        </button>
+                    @endif
+                </div>
+
+                <!-- Create Account Modal -->
+                <template x-teleport="body">
+                    <div x-show="showCreateModal" x-cloak
+                         class="fixed inset-0 z-50 overflow-y-auto"
+                         @keydown.escape.window="showCreateModal = false">
+                        <div class="flex items-center justify-center min-h-screen p-4">
+                            <div class="fixed inset-0 bg-black/50" @click="showCreateModal = false"></div>
+                            <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Надати доступ до системи</h3>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email для входу</label>
+                                        <input type="email" x-model="newEmail"
+                                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 dark:text-white"
+                                               placeholder="email@example.com">
+                                        <p x-show="createError" x-text="createError" class="mt-1 text-sm text-red-600"></p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Рівень доступу</label>
+                                        <select x-model="newRole"
+                                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white">
+                                            <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Волонтер — перегляд розкладу, підтвердження участі</option>
+                                            <option value="leader" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Лідер — керування своїм служінням</option>
+                                            <option value="admin" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Адмін — повний доступ</option>
+                                        </select>
+                                    </div>
+
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        Користувач отримає доступ до системи. Пароль буде згенеровано автоматично.
+                                    </p>
+                                </div>
+
+                                <div class="flex justify-end gap-3 mt-6">
+                                    <button type="button" @click="showCreateModal = false"
+                                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                        Скасувати
+                                    </button>
+                                    <button type="button" @click="createAccount()"
+                                            :disabled="creating || !newEmail"
+                                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-2">
+                                        <svg x-show="creating" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span x-text="creating ? 'Створення...' : 'Створити'"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
             @endif
         </div>
     </div>
@@ -495,6 +618,10 @@
         @endif
     </div>
 
+    @if($isAdmin)
+    </form>
+    @endif
+
     <!-- Actions -->
     <div class="flex items-center justify-between mt-6">
         <a href="{{ route('people.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
@@ -515,10 +642,6 @@
         </form>
         @endadmin
     </div>
-
-    @if($isAdmin)
-    </form>
-    @endif
 </div>
 
 @push('scripts')
@@ -569,6 +692,78 @@ function personProfile() {
                 setTimeout(() => {
                     this.saveStatus = 'idle';
                 }, 3000);
+            }
+        }
+    }
+}
+
+function userRoleManager() {
+    return {
+        role: '{{ $person->user?->role ?? "volunteer" }}',
+        saving: false,
+        saved: false,
+        showCreateModal: false,
+        newEmail: '{{ $person->email ?? "" }}',
+        newRole: 'volunteer',
+        creating: false,
+        createError: '',
+
+        async updateRole() {
+            this.saving = true;
+            this.saved = false;
+
+            try {
+                const response = await fetch('{{ route("people.update-role", $person) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ role: this.role })
+                });
+
+                if (response.ok) {
+                    this.saved = true;
+                    setTimeout(() => this.saved = false, 2000);
+                }
+            } catch (error) {
+                console.error('Error updating role:', error);
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        async createAccount() {
+            this.creating = true;
+            this.createError = '';
+
+            try {
+                const response = await fetch('{{ route("people.create-account", $person) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: this.newEmail,
+                        role: this.newRole
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.showCreateModal = false;
+                    window.location.reload();
+                } else {
+                    this.createError = data.message || 'Помилка при створенні акаунту';
+                }
+            } catch (error) {
+                this.createError = 'Помилка з\'єднання';
+            } finally {
+                this.creating = false;
             }
         }
     }
