@@ -233,10 +233,40 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                             </svg>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <p class="font-medium text-gray-900 dark:text-white">Доступ до системи</p>
                             @if($person->user)
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $person->user->email }}</p>
+                                <div class="flex items-center gap-2">
+                                    <template x-if="!editingEmail">
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-sm text-gray-600 dark:text-gray-400" x-text="userEmail">{{ $person->user->email }}</p>
+                                            <button @click="editingEmail = true; $nextTick(() => $refs.emailInput.focus())"
+                                                    class="p-1 text-gray-400 hover:text-purple-600 rounded transition-colors">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template x-if="editingEmail">
+                                        <div class="flex items-center gap-2">
+                                            <input type="email" x-model="userEmail" x-ref="emailInput"
+                                                   @keydown.enter="updateEmail()"
+                                                   @keydown.escape="editingEmail = false; userEmail = '{{ $person->user->email }}'"
+                                                   class="px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white w-48">
+                                            <button @click="updateEmail()" class="p-1 text-green-600 hover:text-green-700">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                            <button @click="editingEmail = false; userEmail = '{{ $person->user->email }}'" class="p-1 text-gray-400 hover:text-gray-600">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
                             @else
                                 <p class="text-sm text-gray-500 dark:text-gray-400">Немає доступу до системи</p>
                             @endif
@@ -245,7 +275,7 @@
 
                     @if($person->user)
                         <!-- System Role Selector -->
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                             <span class="text-xs text-gray-500 dark:text-gray-400">Рівень доступу:</span>
                             <select x-model="role" @change="updateRole()"
                                     :disabled="saving || {{ $person->user->id === auth()->id() ? 'true' : 'false' }}"
@@ -707,6 +737,36 @@ function userRoleManager() {
         newRole: 'volunteer',
         creating: false,
         createError: '',
+        editingEmail: false,
+        userEmail: '{{ $person->user?->email ?? "" }}',
+
+        async updateEmail() {
+            if (!this.userEmail.trim()) return;
+
+            try {
+                const response = await fetch('{{ route("people.update-email", $person) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email: this.userEmail })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.editingEmail = false;
+                } else {
+                    alert(data.message || 'Помилка при оновленні email');
+                    this.userEmail = '{{ $person->user?->email ?? "" }}';
+                }
+            } catch (error) {
+                alert('Помилка з\'єднання');
+                this.userEmail = '{{ $person->user?->email ?? "" }}';
+            }
+        },
 
         async updateRole() {
             this.saving = true;

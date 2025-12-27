@@ -114,6 +114,7 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::resource('people', PersonController::class);
     Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore');
     Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role');
+    Route::post('people/{person}/update-email', [PersonController::class, 'updateEmail'])->name('people.update-email');
     Route::post('people/{person}/create-account', [PersonController::class, 'createAccount'])->name('people.create-account');
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export');
     Route::post('people-import', [PersonController::class, 'import'])->name('people.import');

@@ -566,6 +566,27 @@ class PersonController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function updateEmail(Request $request, Person $person)
+    {
+        $this->authorizeChurch($person);
+
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Недостатньо прав'], 403);
+        }
+
+        if (!$person->user) {
+            return response()->json(['message' => 'Користувач не має облікового запису'], 404);
+        }
+
+        $validated = $request->validate([
+            'email' => 'required|email|unique:users,email,' . $person->user->id,
+        ]);
+
+        $person->user->update(['email' => $validated['email']]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function createAccount(Request $request, Person $person)
     {
         $this->authorizeChurch($person);
