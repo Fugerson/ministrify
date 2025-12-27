@@ -59,9 +59,10 @@ class PersonController extends Controller
 
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries;
+        $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
         // Calculate statistics
-        $allPeople = Person::where('church_id', $church->id)->with('ministries')->get();
+        $allPeople = Person::where('church_id', $church->id)->with(['ministries', 'churchRoleRelation'])->get();
 
         // Age statistics
         $ageStats = [];
@@ -79,20 +80,25 @@ class PersonController extends Controller
             'color' => '#9ca3af',
         ];
 
-        // Church role statistics
+        // Church role statistics (using dynamic roles)
         $roleStats = [];
-        foreach (Person::CHURCH_ROLES as $key => $label) {
-            $count = $allPeople->where('church_role', $key)->count();
-            if ($count > 0 || $key === Person::ROLE_MEMBER) {
-                $roleStats[$key] = [
-                    'label' => $label,
-                    'count' => $count,
-                ];
-            }
+        foreach ($churchRoles as $role) {
+            $count = $allPeople->where('church_role_id', $role->id)->count();
+            $roleStats[$role->id] = [
+                'label' => $role->name,
+                'count' => $count,
+                'color' => $role->color,
+            ];
         }
-        // Count those without role as members
-        $noRoleCount = $allPeople->whereNull('church_role')->count();
-        $roleStats[Person::ROLE_MEMBER]['count'] = ($roleStats[Person::ROLE_MEMBER]['count'] ?? 0) + $noRoleCount;
+        // Count those without role
+        $noRoleCount = $allPeople->whereNull('church_role_id')->count();
+        if ($noRoleCount > 0) {
+            $roleStats['none'] = [
+                'label' => 'Не вказано',
+                'count' => $noRoleCount,
+                'color' => '#9ca3af',
+            ];
+        }
 
         // Ministry stats (how many serve)
         $servingCount = $allPeople->filter(fn($p) => $p->ministries->isNotEmpty())->count();
@@ -105,7 +111,7 @@ class PersonController extends Controller
             'new_this_month' => $allPeople->filter(fn($p) => $p->created_at->isCurrentMonth())->count(),
         ];
 
-        return view('people.index', compact('people', 'tags', 'ministries', 'stats'));
+        return view('people.index', compact('people', 'tags', 'ministries', 'churchRoles', 'stats'));
     }
 
     public function create()
@@ -113,8 +119,9 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries()->with('positions')->get();
+        $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
-        return view('people.create', compact('tags', 'ministries'));
+        return view('people.create', compact('tags', 'ministries', 'churchRoles'));
     }
 
     public function store(Request $request)
@@ -129,6 +136,7 @@ class PersonController extends Controller
             'birth_date' => 'nullable|date',
             'joined_date' => 'nullable|date',
             'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
+            'church_role_id' => 'nullable|exists:church_roles,id',
             'notes' => 'nullable|string',
             'photo' => 'nullable|image|max:2048',
             'tags' => 'nullable|array',
@@ -140,6 +148,11 @@ class PersonController extends Controller
         // Handle photo upload
         if ($request->hasFile('photo')) {
             $validated['photo'] = $request->file('photo')->store('people', 'public');
+        }
+
+        // Handle empty church_role_id
+        if (isset($validated['church_role_id']) && $validated['church_role_id'] === '') {
+            $validated['church_role_id'] = null;
         }
 
         $validated['church_id'] = $church->id;
@@ -290,10 +303,11 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries()->with('positions')->get();
+        $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
         $person->load(['tags', 'ministries']);
 
-        return view('people.edit', compact('person', 'tags', 'ministries'));
+        return view('people.edit', compact('person', 'tags', 'ministries', 'churchRoles'));
     }
 
     public function update(Request $request, Person $person)

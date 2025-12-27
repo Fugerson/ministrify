@@ -121,11 +121,12 @@
                 </div>
 
                 <div>
-                    <label for="church_role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Церковна роль</label>
-                    <select name="church_role" id="church_role"
-                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                        @foreach(\App\Models\Person::CHURCH_ROLES as $value => $label)
-                        <option value="{{ $value }}" {{ old('church_role', $person->church_role ?? 'member') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                    <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Церковна роль</label>
+                    <select name="church_role_id" id="church_role_id"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white">
+                        <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- Не вказано --</option>
+                        @foreach($churchRoles as $role)
+                        <option value="{{ $role->id }}" {{ old('church_role_id', $person->church_role_id) == $role->id ? 'selected' : '' }} class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $role->name }}</option>
                         @endforeach
                     </select>
                 </div>

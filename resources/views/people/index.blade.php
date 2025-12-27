@@ -113,10 +113,10 @@
                             <div class="space-y-2">
                                 <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Роль</span>
                                 <select x-model="filters.role"
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                                    <option value="">Всі</option>
-                                    @foreach(\App\Models\Person::CHURCH_ROLES as $key => $label)
-                                    <option value="{{ $label }}">{{ $label }}</option>
+                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
+                                    <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Всі</option>
+                                    @foreach($churchRoles as $role)
+                                    <option value="{{ $role->name }}" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $role->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
