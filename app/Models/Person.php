@@ -81,6 +81,8 @@ class Person extends Model
         'last_scheduled_at',
         'times_scheduled_this_month',
         'times_scheduled_this_year',
+        'is_shepherd',
+        'shepherd_id',
     ];
 
     protected $casts = [
@@ -89,6 +91,7 @@ class Person extends Model
         'joined_date' => 'date',
         'baptism_date' => 'date',
         'last_scheduled_at' => 'datetime',
+        'is_shepherd' => 'boolean',
     ];
 
     protected $appends = ['full_name'];
@@ -101,6 +104,22 @@ class Person extends Model
     public function churchRoleRelation(): BelongsTo
     {
         return $this->belongsTo(ChurchRole::class, 'church_role_id');
+    }
+
+    /**
+     * The shepherd assigned to this person
+     */
+    public function shepherd(): BelongsTo
+    {
+        return $this->belongsTo(Person::class, 'shepherd_id');
+    }
+
+    /**
+     * People this person shepherds (if they are a shepherd)
+     */
+    public function sheep(): HasMany
+    {
+        return $this->hasMany(Person::class, 'shepherd_id');
     }
 
     public function user(): BelongsTo
@@ -390,6 +409,11 @@ class Person extends Model
     public function scopeServing($query)
     {
         return $query->whereHas('ministries');
+    }
+
+    public function scopeShepherds($query)
+    {
+        return $query->where('is_shepherd', true);
     }
 
     // ========== VOLUNTEER SCHEDULING ==========

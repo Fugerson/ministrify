@@ -1,6 +1,6 @@
 @extends('layouts.landing')
 
-@section('title', 'ChurchHub — Система управління церквою | Українська CRM для церков')
+@section('title', 'Ministrify — Система управління церквою | Українська CRM для церков')
 @section('description', 'Безкоштовна українська платформа для управління церквою: члени, події, пожертви, групи, служіння. Інтеграція з LiqPay, Monobank та Telegram.')
 @section('keywords', 'церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви, українська CRM, безкоштовно')
 
@@ -69,7 +69,7 @@
                         <div class="w-3 h-3 bg-red-400 rounded-full"></div>
                         <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
                         <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                        <span class="ml-4 text-sm text-gray-500 dark:text-gray-400">churchhub.one/dashboard</span>
+                        <span class="ml-4 text-sm text-gray-500 dark:text-gray-400">ministrify.one/dashboard</span>
                     </div>
                     <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6 aspect-video">
                         {{-- Mock dashboard --}}
@@ -402,7 +402,7 @@
             Готові спростити управління церквою?
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
-            Приєднуйтесь до церков, які вже використовують ChurchHub. Безкоштовно до 50 членів.
+            Приєднуйтесь до церков, які вже використовують Ministrify. Безкоштовно до 50 членів.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ url('/register-church') }}" class="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary-600/25 hover:shadow-primary-600/40">

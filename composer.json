@@ -1,5 +1,5 @@
 {
-    "name": "churchhub/churchhub",
+    "name": "ministrify/ministrify",
     "type": "project",
     "description": "Church management SaaS application",
     "keywords": ["church", "management", "saas", "laravel"],

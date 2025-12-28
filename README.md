@@ -1,4 +1,4 @@
-# ChurchHub
+# Ministrify
 
 Веб-додаток для управління церквою. Допомагає з розкладом служінь, обліком людей, витратами та відвідуваністю.
 
@@ -17,7 +17,7 @@
 
 ```bash
 git clone <repository-url>
-cd churchhub
+cd ministrify
 ```
 
 ### 2. Скопіюйте файл конфігурації
@@ -62,7 +62,7 @@ docker-compose exec app php artisan db:seed
 http://localhost
 ```
 
-**Демо-вхід:** admin@churchhub.app / password
+**Демо-вхід:** admin@ministrify.app / password
 
 ## Модулі
 

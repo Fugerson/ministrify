@@ -1,7 +1,7 @@
 @extends('layouts.landing')
 
-@section('title', 'Ціни — ChurchHub | Тарифи для церков')
-@section('description', 'Прозорі ціни на ChurchHub. Безкоштовний план до 50 членів. Доступні тарифи для церков будь-якого розміру.')
+@section('title', 'Ціни — Ministrify | Тарифи для церков')
+@section('description', 'Прозорі ціни на Ministrify. Безкоштовний план до 50 членів. Доступні тарифи для церков будь-якого розміру.')
 
 @section('content')
 <section class="pt-32 pb-20 bg-gray-50 dark:bg-gray-900">
@@ -195,7 +195,7 @@
                         <svg :class="{ 'rotate-180': open === 2 }" class="w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="open === 2" x-collapse class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        ChurchHub не бере комісію за пожертви. Ви платите тільки стандартну комісію платіжної системи (LiqPay ~2.75%, Monobank ~1.5%).
+                        Ministrify не бере комісію за пожертви. Ви платите тільки стандартну комісію платіжної системи (LiqPay ~2.75%, Monobank ~1.5%).
                     </div>
                 </div>
 

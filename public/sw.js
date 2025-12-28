@@ -1,4 +1,4 @@
-const CACHE_NAME = 'churchhub-v1';
+const CACHE_NAME = 'ministrify-v1';
 const OFFLINE_URL = '/offline.html';
 
 // Only cache static assets that don't require auth
@@ -122,7 +122,7 @@ self.addEventListener('push', (event) => {
     };
 
     event.waitUntil(
-        self.registration.showNotification(data.title || 'ChurchHub', options)
+        self.registration.showNotification(data.title || 'Ministrify', options)
     );
 });
 

@@ -12,7 +12,7 @@ use League\Csv\Reader;
 
 class MigrationController extends Controller
 {
-    // Planning Center column mappings to ChurchHub fields
+    // Planning Center column mappings to Ministrify fields
     protected array $defaultMappings = [
         'first_name' => ['First Name', 'Given Name', 'Nickname'],
         'last_name' => ['Last Name'],

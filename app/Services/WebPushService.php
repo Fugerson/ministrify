@@ -30,7 +30,7 @@ class WebPushService
 
             Log::info('Push notification queued', [
                 'user_id' => $subscription->user_id,
-                'title' => $payload['title'] ?? 'ChurchHub',
+                'title' => $payload['title'] ?? 'Ministrify',
             ]);
 
             return true;

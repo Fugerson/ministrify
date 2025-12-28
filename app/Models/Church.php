@@ -38,12 +38,14 @@ class Church extends Model
         'pastor_name',
         'pastor_photo',
         'pastor_message',
+        'shepherds_enabled',
     ];
 
     protected $casts = [
         'settings' => 'array',
         'payment_settings' => 'array',
         'public_site_enabled' => 'boolean',
+        'shepherds_enabled' => 'boolean',
     ];
 
     /**

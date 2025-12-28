@@ -3,7 +3,7 @@
 @section('title', $user->name)
 
 @section('content')
-<div class="max-w-4xl mx-auto flex flex-col h-[calc(100vh-12rem)]" x-data="chatApp()">
+<div class="max-w-4xl mx-auto flex flex-col h-[calc(100vh-12rem)]" x-data="chatApp()" x-init="$dispatch('pm-read')">
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 rounded-t-2xl border border-gray-200 dark:border-gray-700 border-b-0 px-6 py-4 flex items-center">
         <a href="{{ route('pm.index') }}" class="p-2 -ml-2 mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 lg:hidden">

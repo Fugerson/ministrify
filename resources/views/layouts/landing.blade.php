@@ -6,27 +6,27 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     {{-- Primary Meta Tags --}}
-    <title>@yield('title', 'ChurchHub — Система управління церквою')</title>
-    <meta name="title" content="@yield('title', 'ChurchHub — Система управління церквою')">
+    <title>@yield('title', 'Ministrify — Система управління церквою')</title>
+    <meta name="title" content="@yield('title', 'Ministrify — Система управління церквою')">
     <meta name="description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, служіння. Українська мова, LiqPay та Monobank.')">
     <meta name="keywords" content="@yield('keywords', 'церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви')">
-    <meta name="author" content="ChurchHub">
+    <meta name="author" content="Ministrify">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Open Graph / Facebook --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="@yield('title', 'ChurchHub — Система управління церквою')">
+    <meta property="og:title" content="@yield('title', 'Ministrify — Система управління церквою')">
     <meta property="og:description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, служіння.')">
     <meta property="og:image" content="@yield('og_image', asset('images/og-image.jpg'))">
     <meta property="og:locale" content="uk_UA">
-    <meta property="og:site_name" content="ChurchHub">
+    <meta property="og:site_name" content="Ministrify">
 
     {{-- Twitter --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ url()->current() }}">
-    <meta name="twitter:title" content="@yield('title', 'ChurchHub — Система управління церквою')">
+    <meta name="twitter:title" content="@yield('title', 'Ministrify — Система управління церквою')">
     <meta name="twitter:description" content="@yield('description', 'Сучасна платформа для управління церквою.')">
     <meta name="twitter:image" content="@yield('og_image', asset('images/og-image.jpg'))">
 
@@ -93,14 +93,14 @@
     {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "ChurchHub",
+        "name": "Ministrify",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
         "description": "Сучасна платформа для управління церквою: члени, події, пожертви, групи, служіння.",
         "url": "{{ url('/') }}",
         "author": {
             "@type": "Organization",
-            "name": "ChurchHub"
+            "name": "Ministrify"
         },
         "offers": {
             "@type": "Offer",
@@ -134,7 +134,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
                     </div>
-                    <span class="text-xl font-bold text-gray-900 dark:text-white">ChurchHub</span>
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">Ministrify</span>
                 </a>
 
                 {{-- Desktop Menu --}}
@@ -202,7 +202,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                         </div>
-                        <span class="text-lg font-bold text-gray-900 dark:text-white">ChurchHub</span>
+                        <span class="text-lg font-bold text-gray-900 dark:text-white">Ministrify</span>
                     </a>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">
                         Сучасна платформа для управління церквою. Зроблено в Україні 🇺🇦
@@ -241,7 +241,7 @@
 
             <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between">
                 <p class="text-gray-500 dark:text-gray-400 text-sm">
-                    © {{ date('Y') }} ChurchHub. Всі права захищені.
+                    © {{ date('Y') }} Ministrify. Всі права захищені.
                 </p>
                 <div class="flex items-center space-x-4 mt-4 md:mt-0">
                     <a href="#" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">

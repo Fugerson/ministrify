@@ -67,6 +67,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('stop-impersonating', [SystemAdminController::class, 'stopImpersonating'])->name('stop-impersonating')->middleware('auth');
 
 // Two-Factor Authentication
 Route::get('two-factor/challenge', [\App\Http\Controllers\TwoFactorController::class, 'challenge'])->name('two-factor.challenge');
@@ -96,6 +97,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     Route::get('users/{user}/edit', [SystemAdminController::class, 'editUser'])->name('users.edit');
     Route::put('users/{user}', [SystemAdminController::class, 'updateUser'])->name('users.update');
     Route::delete('users/{user}', [SystemAdminController::class, 'destroyUser'])->name('users.destroy');
+    Route::post('users/{user}/impersonate', [SystemAdminController::class, 'impersonateUser'])->name('users.impersonate');
 
     // Audit Logs
     Route::get('audit-logs', [SystemAdminController::class, 'auditLogs'])->name('audit-logs');
@@ -116,6 +118,8 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role');
     Route::post('people/{person}/update-email', [PersonController::class, 'updateEmail'])->name('people.update-email');
     Route::post('people/{person}/create-account', [PersonController::class, 'createAccount'])->name('people.create-account');
+    Route::post('people/{person}/reset-password', [PersonController::class, 'resetPassword'])->name('people.reset-password');
+    Route::post('people/{person}/update-shepherd', [PersonController::class, 'updateShepherd'])->name('people.update-shepherd');
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export');
     Route::post('people-import', [PersonController::class, 'import'])->name('people.import');
 
@@ -333,6 +337,12 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::post('church-roles/{churchRole}/set-default', [\App\Http\Controllers\ChurchRoleController::class, 'setDefault'])->name('church-roles.set-default');
         Route::post('church-roles/reorder', [\App\Http\Controllers\ChurchRoleController::class, 'reorder'])->name('church-roles.reorder');
         Route::post('church-roles/reset', [\App\Http\Controllers\ChurchRoleController::class, 'resetToDefaults'])->name('church-roles.reset');
+
+        // Shepherds
+        Route::get('shepherds', [\App\Http\Controllers\ShepherdController::class, 'index'])->name('shepherds.index');
+        Route::post('shepherds', [\App\Http\Controllers\ShepherdController::class, 'store'])->name('shepherds.store');
+        Route::delete('shepherds/{person}', [\App\Http\Controllers\ShepherdController::class, 'destroy'])->name('shepherds.destroy');
+        Route::post('shepherds/toggle-feature', [\App\Http\Controllers\ShepherdController::class, 'toggleFeature'])->name('shepherds.toggle-feature');
     });
 
     // My profile (for volunteers)

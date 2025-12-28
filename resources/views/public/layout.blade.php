@@ -234,7 +234,7 @@
             </div>
 
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
-                <p>&copy; {{ date('Y') }} {{ $church->name }}. Powered by ChurchHub</p>
+                <p>&copy; {{ date('Y') }} {{ $church->name }}. Powered by Ministrify</p>
             </div>
         </div>
     </footer>

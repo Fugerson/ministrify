@@ -133,7 +133,7 @@ class TelegramController extends Controller
                 if ($person) {
                     $telegram?->sendMessage($chatId,
                         "👋 Вітаємо, {$person->first_name}!\n\n"
-                        . "Ваш акаунт підключено до ChurchHub.\n\n"
+                        . "Ваш акаунт підключено до Ministrify.\n\n"
                         . "Доступні команди:\n"
                         . "/schedule — ваш розклад\n"
                         . "/next — наступне служіння\n"
@@ -142,9 +142,9 @@ class TelegramController extends Controller
                 } else {
                     // Generic response for unlinked users
                     $this->sendGenericMessage($chatId,
-                        "👋 Вітаємо в ChurchHub!\n\n"
+                        "👋 Вітаємо в Ministrify!\n\n"
                         . "Для підключення акаунту:\n"
-                        . "1. Увійдіть в ChurchHub\n"
+                        . "1. Увійдіть в Ministrify\n"
                         . "2. Перейдіть в профіль\n"
                         . "3. Натисніть «Підключити Telegram»\n"
                         . "4. Введіть код, який ви отримаєте"
@@ -174,7 +174,7 @@ class TelegramController extends Controller
                 if ($person && $telegram) {
                     $telegram->sendMessage($chatId,
                         "📅 Щоб вказати дати недоступності:\n\n"
-                        . "1. Увійдіть в ChurchHub\n"
+                        . "1. Увійдіть в Ministrify\n"
                         . "2. Перейдіть в «Мій профіль»\n"
                         . "3. Додайте дати недоступності"
                     );
@@ -184,7 +184,7 @@ class TelegramController extends Controller
                 break;
 
             case '/help':
-                $helpMessage = "📚 <b>Допомога ChurchHub</b>\n\n"
+                $helpMessage = "📚 <b>Допомога Ministrify</b>\n\n"
                     . "/start — початок роботи\n"
                     . "/schedule — ваш розклад на місяць\n"
                     . "/next — наступне служіння\n"

@@ -21,7 +21,7 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
 
         $query = Person::where('church_id', $church->id)
-            ->with(['tags', 'ministries', 'churchRoleRelation']);
+            ->with(['tags', 'ministries', 'churchRoleRelation', 'shepherd']);
 
         // Search
         if ($search = $request->get('search')) {
@@ -111,7 +111,17 @@ class PersonController extends Controller
             'new_this_month' => $allPeople->filter(fn($p) => $p->created_at->isCurrentMonth())->count(),
         ];
 
-        return view('people.index', compact('people', 'tags', 'ministries', 'churchRoles', 'stats'));
+        // Get shepherds list if feature is enabled
+        $shepherds = collect();
+        if ($church->shepherds_enabled) {
+            $shepherds = Person::where('church_id', $church->id)
+                ->where('is_shepherd', true)
+                ->orderBy('last_name')
+                ->orderBy('first_name')
+                ->get();
+        }
+
+        return view('people.index', compact('people', 'tags', 'ministries', 'churchRoles', 'stats', 'shepherds', 'church'));
     }
 
     public function create()
@@ -182,7 +192,7 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        $person->load(['tags', 'ministries.positions', 'groups', 'user', 'churchRoleRelation', 'assignments' => function ($q) {
+        $person->load(['tags', 'ministries.positions', 'groups', 'user', 'churchRoleRelation', 'shepherd', 'sheep', 'assignments' => function ($q) {
             $q->whereHas('event', fn($eq) => $eq->where('date', '>=', now()->subMonths(3)))
               ->with(['event.ministry', 'position'])
               ->orderByDesc('created_at');
@@ -268,14 +278,22 @@ class PersonController extends Controller
         $tags = collect();
         $ministries = collect();
         $churchRoles = collect();
+        $shepherds = collect();
+        $church = $this->getCurrentChurch();
         if (auth()->user()->isAdmin()) {
-            $church = $this->getCurrentChurch();
             $tags = Tag::where('church_id', $church->id)->get();
             $ministries = $church->ministries()->with('positions')->get();
             $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
+            if ($church->shepherds_enabled) {
+                $shepherds = Person::where('church_id', $church->id)
+                    ->where('is_shepherd', true)
+                    ->orderBy('last_name')
+                    ->orderBy('first_name')
+                    ->get();
+            }
         }
 
-        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData', 'tags', 'ministries', 'churchRoles'));
+        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData', 'tags', 'ministries', 'churchRoles', 'shepherds', 'church'));
     }
 
     private function calculateAttendanceRate(Person $person): ?int
@@ -606,12 +624,15 @@ class PersonController extends Controller
 
         $church = $this->getCurrentChurch();
 
+        // Generate random password
+        $password = Str::random(10);
+
         // Create user
         $user = User::create([
             'church_id' => $church->id,
             'name' => $person->full_name,
             'email' => $validated['email'],
-            'password' => Hash::make(Str::random(16)),
+            'password' => Hash::make($password),
             'role' => $validated['role'],
             'onboarding_completed' => true,
         ]);
@@ -622,7 +643,76 @@ class PersonController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Обліковий запис створено',
+            'password' => $password,
         ]);
+    }
+
+    public function resetPassword(Request $request, Person $person)
+    {
+        $this->authorizeChurch($person);
+
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Недостатньо прав'], 403);
+        }
+
+        if (!$person->user) {
+            return response()->json(['message' => 'Користувач не має облікового запису'], 404);
+        }
+
+        // Generate new password
+        $password = Str::random(10);
+        $person->user->update(['password' => Hash::make($password)]);
+
+        return response()->json([
+            'success' => true,
+            'password' => $password,
+        ]);
+    }
+
+    public function updateShepherd(Request $request, Person $person)
+    {
+        $this->authorizeChurch($person);
+
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Недостатньо прав'], 403);
+        }
+
+        $church = $this->getCurrentChurch();
+
+        if (!$church->shepherds_enabled) {
+            return response()->json(['message' => 'Функція опікунів вимкнена'], 400);
+        }
+
+        $validated = $request->validate([
+            'shepherd_id' => 'nullable|exists:people,id',
+        ]);
+
+        // Handle empty string as null
+        $shepherdId = $validated['shepherd_id'] ?? null;
+        if ($shepherdId === '') {
+            $shepherdId = null;
+        }
+
+        // Validate shepherd if provided
+        if ($shepherdId) {
+            $shepherd = Person::find($shepherdId);
+
+            if (!$shepherd || $shepherd->church_id !== $church->id) {
+                return response()->json(['message' => 'Опікун не знайдений'], 400);
+            }
+
+            if (!$shepherd->is_shepherd) {
+                return response()->json(['message' => 'Ця людина не є опікуном'], 400);
+            }
+
+            if ($shepherd->id === $person->id) {
+                return response()->json(['message' => 'Людина не може бути своїм опікуном'], 400);
+            }
+        }
+
+        $person->update(['shepherd_id' => $shepherdId]);
+
+        return response()->json(['success' => true]);
     }
 
     protected function authorizeChurch($model): void

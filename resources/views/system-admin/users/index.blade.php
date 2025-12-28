@@ -95,6 +95,16 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
+                                @if($user->id !== auth()->id())
+                                <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="p-2 text-gray-400 hover:text-green-400 hover:bg-gray-700 rounded-lg" title="Увійти як {{ $user->name }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                                @endif
                                 <a href="{{ route('system.users.edit', $user) }}"
                                    class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg" title="Редагувати">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

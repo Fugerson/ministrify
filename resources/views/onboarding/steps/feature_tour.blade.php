@@ -157,7 +157,7 @@
         </div>
         <h4 class="font-bold text-gray-900 dark:text-white text-xl mb-2">Вітаємо!</h4>
         <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            Ви готові почати користуватися ChurchHub. Натисніть "Завершити" щоб перейти до панелі управління.
+            Ви готові почати користуватися Ministrify. Натисніть "Завершити" щоб перейти до панелі управління.
         </p>
     </div>
 

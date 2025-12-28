@@ -21,8 +21,8 @@
     <meta name="theme-color" content="{{ $currentChurch->primary_color ?? '#3b82f6' }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ChurchHub">
-    <meta name="application-name" content="ChurchHub">
+    <meta name="apple-mobile-web-app-title" content="Ministrify">
+    <meta name="application-name" content="Ministrify">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="msapplication-TileColor" content="#3b82f6">
     <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
@@ -39,7 +39,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png">
 
-    <title>{{ config('app.name', 'ChurchHub') }} - @yield('title', 'Головна')</title>
+    <title>{{ config('app.name', 'Ministrify') }} - @yield('title', 'Головна')</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
@@ -572,7 +572,27 @@
         </div>
     </div>
     @endif
-    <div x-data="{ sidebarOpen: false }" class="min-h-screen flex"
+
+    @if(session('impersonating_from'))
+    <!-- User impersonation banner -->
+    <div class="fixed top-0 inset-x-0 z-50 bg-orange-500 text-white text-center py-2 px-4 flex items-center justify-center gap-4">
+        <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            Ви увійшли як <strong>{{ auth()->user()->name }}</strong>
+        </span>
+        <form method="POST" action="{{ route('stop-impersonating') }}" class="inline">
+            @csrf
+            <button type="submit" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                ← Повернутись
+            </button>
+        </form>
+    </div>
+    @endif
+
+    <div x-data="{ sidebarOpen: false }" class="min-h-screen flex {{ session('impersonating_from') ? 'pt-10' : '' }}"
          @keydown.window.prevent.cmd.k="searchOpen = true"
          @keydown.window.prevent.ctrl.k="searchOpen = true"
          @keydown.window.escape="searchOpen = false; fabOpen = false"
@@ -583,7 +603,7 @@
          @keydown.window.prevent.b="if(!searchOpen) window.location.href='{{ route('boards.create') }}'">
 
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 {{ session('impersonating_from') ? 'pt-10' : '' }}">
             <div class="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
@@ -591,7 +611,7 @@
                     @else
                     <span class="text-2xl">⛪</span>
                     @endif
-                    <span class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ $currentChurch->name ?? 'ChurchHub' }}</span>
+                    <span class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ $currentChurch->name ?? 'Ministrify' }}</span>
                 </a>
             </div>
 
@@ -632,12 +652,20 @@
                     </svg>
                     Оголошення
                 </a>
-                <a href="{{ route('pm.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('pm.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                    </svg>
-                    Повідомлення
-                </a>
+                <div x-data="pmBadge()" x-init="startPolling()" @pm-read.window="fetchCount()">
+                    <a href="{{ route('pm.index') }}" class="flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('pm.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            Повідомлення
+                        </span>
+                        @php $initialPmCount = \App\Models\PrivateMessage::unreadCount(auth()->user()->church_id, auth()->id()); @endphp
+                        @if($initialPmCount > 0)
+                        <span x-cloak x-show="count > 0" x-text="count > 99 ? '99+' : count" class="px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
+                        @endif
+                    </a>
+                </div>
                 <a href="{{ route('prayer-requests.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('prayer-requests.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -722,19 +750,10 @@
             </nav>
 
             <!-- Theme Toggle & User -->
-            <div class="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50" x-data="{ showColors: false }">
+            <div class="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                 <!-- Theme Toggle -->
                 <div class="flex items-center justify-between mb-3 px-2">
-                    @admin
-                    <button @click="showColors = !showColors" class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                        <span>Тема</span>
-                        <svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': showColors }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    @else
                     <span class="text-xs text-gray-500 dark:text-gray-400">Тема</span>
-                    @endadmin
                     <div class="flex items-center space-x-1 bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
                         <button @click="darkMode = false; localStorage.setItem('theme', 'light')"
                                 :class="!darkMode ? 'bg-white dark:bg-gray-600 shadow' : ''"
@@ -752,56 +771,6 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Color Picker (expandable, admin only) -->
-                @admin
-                <div x-show="showColors" x-collapse class="mb-3 px-2" x-data="{ currentColor: '{{ $currentChurch->primary_color ?? '#3b82f6' }}', saving: false }">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Акцентний колір</p>
-                    <div class="grid grid-cols-6 gap-1.5">
-                        @php
-                            $colorPresets = [
-                                ['color' => '#3b82f6', 'name' => 'Синій'],
-                                ['color' => '#8b5cf6', 'name' => 'Фіолетовий'],
-                                ['color' => '#10b981', 'name' => 'Зелений'],
-                                ['color' => '#ef4444', 'name' => 'Червоний'],
-                                ['color' => '#f59e0b', 'name' => 'Оранжевий'],
-                                ['color' => '#ec4899', 'name' => 'Рожевий'],
-                                ['color' => '#6366f1', 'name' => 'Індіго'],
-                                ['color' => '#14b8a6', 'name' => 'Бірюзовий'],
-                                ['color' => '#84cc16', 'name' => 'Лайм'],
-                                ['color' => '#f97316', 'name' => 'Помаранч'],
-                                ['color' => '#06b6d4', 'name' => 'Блакитний'],
-                                ['color' => '#a855f7', 'name' => 'Пурпуровий'],
-                            ];
-                        @endphp
-                        @foreach($colorPresets as $preset)
-                            <button type="button"
-                                    @click="if(!saving && currentColor !== '{{ $preset['color'] }}') {
-                                        saving = true;
-                                        currentColor = '{{ $preset['color'] }}';
-                                        fetch('{{ route('settings.theme-color') }}', {
-                                            method: 'PUT',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                                                'Accept': 'application/json'
-                                            },
-                                            body: JSON.stringify({ primary_color: '{{ $preset['color'] }}' })
-                                        }).then(() => {
-                                            saving = false;
-                                            window.location.reload();
-                                        }).catch(() => saving = false);
-                                    }"
-                                    class="w-6 h-6 rounded-full border-2 transition-all hover:scale-110"
-                                    :class="currentColor === '{{ $preset['color'] }}' ? 'border-gray-900 dark:border-white ring-2 ring-offset-1 ring-gray-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-500'"
-                                    style="background-color: {{ $preset['color'] }}"
-                                    title="{{ $preset['name'] }}">
-                            </button>
-                        @endforeach
-                    </div>
-                    <p x-show="saving" class="text-xs text-primary-500 mt-2 animate-pulse">Зберігаю...</p>
-                </div>
-                @endadmin
 
                 <div class="flex items-center space-x-3">
                     <div class="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
@@ -840,7 +809,7 @@
                     @else
                     <span class="text-2xl">⛪</span>
                     @endif
-                    <span class="text-lg font-bold text-gray-900 dark:text-white">ChurchHub</span>
+                    <span class="text-lg font-bold text-gray-900 dark:text-white">Ministrify</span>
                 </a>
                 <button @click="sidebarOpen = false" class="p-2 -mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1279,6 +1248,33 @@
             });
         </script>
     @endif
+
+    <!-- PM Badge Polling -->
+    <script>
+        function pmBadge() {
+            return {
+                count: {{ \App\Models\PrivateMessage::unreadCount(auth()->user()->church_id, auth()->id()) }},
+                interval: null,
+
+                startPolling() {
+                    this.fetchCount();
+                    this.interval = setInterval(() => this.fetchCount(), 10000); // кожні 10 сек
+                },
+
+                async fetchCount() {
+                    try {
+                        const response = await fetch('{{ route("pm.unread-count") }}');
+                        const data = await response.json();
+                        this.count = data.count;
+                    } catch (e) {}
+                },
+
+                destroy() {
+                    if (this.interval) clearInterval(this.interval);
+                }
+            }
+        }
+    </script>
 
     <!-- PWA Service Worker Registration -->
     <script>

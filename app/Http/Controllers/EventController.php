@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Event;
 use App\Models\Ministry;
+use App\Models\MinistryMeeting;
 use App\Rules\BelongsToChurch;
 use App\Services\CalendarService;
 use Carbon\Carbon;
@@ -58,14 +59,53 @@ class EventController extends Controller
             ->with(['ministry', 'assignments.person', 'assignments.position'])
             ->orderBy('date')
             ->orderBy('time')
-            ->get()
-            ->groupBy(fn($e) => $e->date->format('Y-m-d'));
+            ->get();
+
+        // Get ministry meetings for the same period
+        $meetings = MinistryMeeting::whereHas('ministry', fn($q) => $q->where('church_id', $church->id))
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with('ministry')
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get();
+
+        // Combine events and meetings into unified collection
+        $calendarItems = collect();
+
+        foreach ($events as $event) {
+            $calendarItems->push((object)[
+                'type' => 'event',
+                'id' => $event->id,
+                'title' => $event->title,
+                'date' => $event->date,
+                'time' => $event->time,
+                'ministry' => $event->ministry,
+                'ministry_id' => $event->ministry_id,
+                'original' => $event,
+            ]);
+        }
+
+        foreach ($meetings as $meeting) {
+            $calendarItems->push((object)[
+                'type' => 'meeting',
+                'id' => $meeting->id,
+                'title' => $meeting->title,
+                'date' => $meeting->date,
+                'time' => $meeting->start_time,
+                'ministry' => $meeting->ministry,
+                'ministry_id' => $meeting->ministry_id,
+                'original' => $meeting,
+            ]);
+        }
+
+        // Group by date
+        $events = $calendarItems->groupBy(fn($item) => Carbon::parse($item->date)->format('Y-m-d'));
 
         $ministries = $church->ministries;
 
         return view('schedule.calendar', compact(
             'events', 'year', 'month', 'startDate', 'endDate',
-            'ministries', 'view', 'currentWeek', 'church'
+            'ministries', 'view', 'currentWeek', 'church', 'meetings'
         ));
     }
 

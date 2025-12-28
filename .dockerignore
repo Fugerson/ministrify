@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Dependencies
+/node_modules
+/vendor
+
+# Build files
+/public/build
+/public/hot
+/public/storage
+
+# Storage (will be mounted as volume)
+/storage/app/public/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Dev files
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+
+# IDE
+/.fleet
+/.idea
+/.vscode
+
+# Docker
+docker-compose.yml
+docker-compose.prod.yml
+Dockerfile.prod
+
+# Docs
+*.md
+!README.md

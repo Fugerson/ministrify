@@ -87,7 +87,7 @@ class SystemAdminController extends Controller
 
         $users = $church->users()->with('person')->get();
         $recentEvents = $church->events()->latest()->take(10)->get();
-        $auditLogs = AuditLog::where('church_id', $church->id)->latest()->take(20)->get();
+        $auditLogs = AuditLog::with('user')->where('church_id', $church->id)->latest()->take(20)->get();
 
         // Church finances (using unified Transaction model)
         $finances = [
@@ -182,6 +182,42 @@ class SystemAdminController extends Controller
 
         return redirect()->route('system.users.index')
             ->with('success', 'Користувача видалено.');
+    }
+
+    /**
+     * Impersonate user (login as)
+     */
+    public function impersonateUser(User $user)
+    {
+        // Store original admin ID in session
+        session(['impersonating_from' => auth()->id()]);
+
+        // Login as the target user
+        auth()->login($user);
+
+        return redirect()->route('dashboard')
+            ->with('success', "Ви увійшли як {$user->name}. Натисніть 'Повернутись' у верхній панелі.");
+    }
+
+    /**
+     * Stop impersonating and return to super admin
+     */
+    public function stopImpersonating()
+    {
+        $originalUserId = session('impersonating_from');
+
+        if ($originalUserId) {
+            $originalUser = User::find($originalUserId);
+            if ($originalUser && $originalUser->is_super_admin) {
+                auth()->login($originalUser);
+                session()->forget('impersonating_from');
+
+                return redirect()->route('system.users.index')
+                    ->with('success', 'Ви повернулись до свого акаунту.');
+            }
+        }
+
+        return redirect()->route('dashboard');
     }
 
     /**

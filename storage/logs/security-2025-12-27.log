@@ -5,3 +5,9 @@
 [2025-12-27 03:09:56] local.INFO: User logged in {"user_id":1,"email":"admin@churchhub.app","ip":"172.24.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 
 [2025-12-27 15:50:26] local.INFO: User logged in {"user_id":1,"email":"admin@churchhub.app","ip":"172.24.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 
 [2025-12-27 19:03:36] local.INFO: User logged in {"user_id":1,"email":"admin@churchhub.app","ip":"172.24.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 
+[2025-12-27 20:20:27] local.INFO: User logged out {"user_id":1,"ip":"172.24.0.1"} 
+[2025-12-27 20:20:37] local.INFO: User logged in {"user_id":3,"email":"chernyaknew@gmail.com","ip":"172.24.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 
+[2025-12-27 20:21:20] local.INFO: User logged out {"user_id":3,"ip":"172.24.0.1"} 
+[2025-12-27 20:21:23] local.INFO: User logged in {"user_id":1,"email":"admin@churchhub.app","ip":"172.24.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 
+[2025-12-27 20:27:07] local.INFO: User logged out {"user_id":1,"ip":"172.24.0.1"} 
+[2025-12-27 20:32:43] local.INFO: User logged in {"user_id":2,"email":"fugerson91@gmail.com","ip":"172.24.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 

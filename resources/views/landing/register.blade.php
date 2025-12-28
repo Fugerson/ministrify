@@ -1,15 +1,15 @@
 @extends('layouts.landing')
 
-@section('title', 'Зареєструвати церкву - ChurchHub')
-@section('description', 'Зареєструйте вашу церкву в ChurchHub за 2 хвилини. Безкоштовний старт, без кредитної картки. Управління громадою стало простіше!')
-@section('keywords', 'реєстрація церкви, ChurchHub реєстрація, управління церквою безкоштовно')
+@section('title', 'Зареєструвати церкву - Ministrify')
+@section('description', 'Зареєструйте вашу церкву в Ministrify за 2 хвилини. Безкоштовний старт, без кредитної картки. Управління громадою стало простіше!')
+@section('keywords', 'реєстрація церкви, Ministrify реєстрація, управління церквою безкоштовно')
 
 @section('schema')
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "Реєстрація церкви в ChurchHub",
+    "name": "Реєстрація церкви в Ministrify",
     "description": "Швидка реєстрація церкви для доступу до всіх функцій управління громадою",
     "potentialAction": {
         "@type": "RegisterAction",
@@ -42,7 +42,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </div>
-                <span class="text-2xl font-bold text-white">ChurchHub</span>
+                <span class="text-2xl font-bold text-white">Ministrify</span>
             </a>
         </div>
 

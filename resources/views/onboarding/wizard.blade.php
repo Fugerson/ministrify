@@ -13,7 +13,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>ChurchHub - Налаштування</title>
+    <title>Ministrify - Налаштування</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -233,7 +233,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">ChurchHub</h1>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ministrify</h1>
                         <p class="text-sm font-medium theme-primary">Налаштування</p>
                     </div>
                 </div>

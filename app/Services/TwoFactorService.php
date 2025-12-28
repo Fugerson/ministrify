@@ -25,7 +25,7 @@ class TwoFactorService
      */
     public function getQrCodeUrl(User $user, string $secret): string
     {
-        $appName = urlencode(config('app.name', 'ChurchHub'));
+        $appName = urlencode(config('app.name', 'Ministrify'));
         $email = urlencode($user->email);
 
         return "otpauth://totp/{$appName}:{$email}?secret={$secret}&issuer={$appName}";

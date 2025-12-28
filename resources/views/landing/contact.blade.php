@@ -1,20 +1,20 @@
 @extends('layouts.landing')
 
-@section('title', 'Зв\'язатися з нами - ChurchHub')
-@section('description', 'Маєте питання про ChurchHub? Напишіть нам і ми відповімо протягом 24 годин. Безкоштовна консультація для церков.')
-@section('keywords', 'контакти ChurchHub, підтримка, допомога, консультація для церков')
+@section('title', 'Зв\'язатися з нами - Ministrify')
+@section('description', 'Маєте питання про Ministrify? Напишіть нам і ми відповімо протягом 24 годин. Безкоштовна консультація для церков.')
+@section('keywords', 'контакти Ministrify, підтримка, допомога, консультація для церков')
 
 @section('schema')
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "name": "Контакти ChurchHub",
-    "description": "Зв'яжіться з командою ChurchHub",
+    "name": "Контакти Ministrify",
+    "description": "Зв'яжіться з командою Ministrify",
     "mainEntity": {
         "@type": "Organization",
-        "name": "ChurchHub",
-        "email": "hello@churchhub.one",
+        "name": "Ministrify",
+        "email": "hello@ministrify.one",
         "areaServed": "UA",
         "availableLanguage": ["uk", "ru", "en"]
     }
@@ -136,7 +136,7 @@
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Email</h3>
-                            <p class="text-gray-600 dark:text-gray-400">hello@churchhub.one</p>
+                            <p class="text-gray-600 dark:text-gray-400">hello@ministrify.one</p>
                             <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Відповідаємо протягом 24 годин</p>
                         </div>
                     </div>
@@ -150,7 +150,7 @@
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Telegram</h3>
-                            <p class="text-gray-600 dark:text-gray-400">@churchhub_support</p>
+                            <p class="text-gray-600 dark:text-gray-400">@ministrify_support</p>
                             <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Швидкі відповіді у робочий час</p>
                         </div>
                     </div>
@@ -221,7 +221,7 @@
                 Працюємо для церков по всій Україні
             </h2>
             <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                ChurchHub — це хмарний сервіс, доступний з будь-якої точки світу.
+                Ministrify — це хмарний сервіс, доступний з будь-якої точки світу.
                 Ми допомагаємо церквам України та української діаспори ефективно управляти громадою.
             </p>
 

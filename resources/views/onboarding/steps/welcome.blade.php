@@ -10,7 +10,7 @@
     </div>
 
     <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
-        Вітаємо в <span class="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">ChurchHub</span>!
+        Вітаємо в <span class="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">Ministrify</span>!
     </h1>
 
     <p class="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-lg mx-auto leading-relaxed">

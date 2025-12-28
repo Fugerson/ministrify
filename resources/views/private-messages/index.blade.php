@@ -433,6 +433,8 @@ function messengerApp() {
                     this.lastMessageId = Math.max(...this.messages.map(m => m.id));
                 }
                 this.scrollToBottom();
+                // Update sidebar badge
+                window.dispatchEvent(new CustomEvent('pm-read'));
             } catch (e) {
                 console.error('Error loading messages:', e);
             }

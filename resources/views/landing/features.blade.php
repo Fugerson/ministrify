@@ -1,7 +1,7 @@
 @extends('layouts.landing')
 
-@section('title', 'Можливості — ChurchHub | Функції системи управління церквою')
-@section('description', 'Повний список можливостей ChurchHub: управління членами, події, пожертви, групи, служіння, Telegram бот, звіти та багато іншого.')
+@section('title', 'Можливості — Ministrify | Функції системи управління церквою')
+@section('description', 'Повний список можливостей Ministrify: управління членами, події, пожертви, групи, служіння, Telegram бот, звіти та багато іншого.')
 
 @section('content')
 <section class="pt-32 pb-20">

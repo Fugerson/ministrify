@@ -783,6 +783,46 @@
         </div>
     </a>
 
+    <!-- Shepherds -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="{ enabled: {{ $church->shepherds_enabled ? 'true' : 'false' }}, saving: false }">
+        <div class="p-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Опікуни</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Призначайте духовних опікунів для членів церкви</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Toggle -->
+                <button type="button"
+                        @click="enabled = !enabled; saving = true; fetch('{{ route("settings.shepherds.toggle-feature") }}', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                            body: JSON.stringify({ enabled: enabled })
+                        }).finally(() => saving = false)"
+                        :class="enabled ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2">
+                    <span class="sr-only">Увімкнути опікунів</span>
+                    <span :class="enabled ? 'translate-x-5' : 'translate-x-0'"
+                          class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
+                    </span>
+                </button>
+                <!-- Link to manage -->
+                <a x-show="enabled" href="{{ route('settings.shepherds.index') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Expense categories -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">

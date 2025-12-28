@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
 return [
-    'name' => env('APP_NAME', 'ChurchHub'),
+    'name' => env('APP_NAME', 'Ministrify'),
     'env' => env('APP_ENV', 'production'),
     'debug' => (bool) env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost'),

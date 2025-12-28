@@ -1,6 +1,6 @@
 {
-    "name": "ChurchHub",
-    "short_name": "ChurchHub",
+    "name": "Ministrify",
+    "short_name": "Ministrify",
     "description": "Церковна CRM система для управління служіннями, подіями та членами",
     "start_url": "/dashboard",
     "display": "standalone",

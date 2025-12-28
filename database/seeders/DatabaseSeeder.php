@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'church_id' => $church->id,
             'name' => 'Адміністратор',
-            'email' => 'admin@churchhub.app',
+            'email' => 'admin@ministrify.app',
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
@@ -126,6 +126,6 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->info('Demo data seeded successfully!');
-        $this->command->info('Login: admin@churchhub.app / password');
+        $this->command->info('Login: admin@ministrify.app / password');
     }
 }

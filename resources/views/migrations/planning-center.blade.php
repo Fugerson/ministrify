@@ -15,7 +15,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Міграція з Planning Center</h1>
         </div>
         <p class="text-gray-600 dark:text-gray-400">
-            Імпортуйте дані про людей з Planning Center People у ChurchHub
+            Імпортуйте дані про людей з Planning Center People у Ministrify
         </p>
     </div>
 
@@ -157,13 +157,13 @@
     <div x-show="step === 2" x-cloak class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Мапінг полів</h2>
         <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Вкажіть відповідність між колонками CSV та полями ChurchHub. Знайдено <span class="font-medium text-indigo-600" x-text="totalRows"></span> записів.
+            Вкажіть відповідність між колонками CSV та полями Ministrify. Знайдено <span class="font-medium text-indigo-600" x-text="totalRows"></span> записів.
         </p>
 
         <div class="grid md:grid-cols-2 gap-6 mb-6">
-            <!-- ChurchHub Fields -->
+            <!-- Ministrify Fields -->
             <div class="space-y-4">
-                <h3 class="font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Поля ChurchHub</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Поля Ministrify</h3>
 
                 <template x-for="(field, key) in churchHubFields" :key="key">
                     <div class="flex items-center gap-4">

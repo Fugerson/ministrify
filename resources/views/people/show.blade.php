@@ -195,6 +195,12 @@
                             <p class="font-medium text-gray-900 dark:text-white truncate">{{ $person->address }}</p>
                         </div>
                     @endif
+                    @if($church->shepherds_enabled && $person->shepherd)
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Опікун</p>
+                            <a href="{{ route('people.show', $person->shepherd) }}" class="font-medium text-primary-600 dark:text-primary-400 hover:underline">{{ $person->shepherd->full_name }}</a>
+                        </div>
+                    @endif
                 @endif
             </div>
 
@@ -220,6 +226,61 @@
                         @endforeach
                     </select>
                 </div>
+                @if($church->shepherds_enabled)
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3" x-data="shepherdSearch()">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Опікун</p>
+                        <a x-show="selectedId" :href="'/people/' + selectedId"
+                           class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Профіль
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <input type="text"
+                               x-model="searchQuery"
+                               @focus="isOpen = true"
+                               @click.away="isOpen = false"
+                               @keydown.escape="isOpen = false"
+                               @keydown.arrow-down.prevent="highlightNext()"
+                               @keydown.arrow-up.prevent="highlightPrev()"
+                               @keydown.enter.prevent="selectHighlighted()"
+                               :placeholder="selectedName || 'Пошук опікуна...'"
+                               :class="{'text-gray-400': !searchQuery && selectedName}"
+                               class="w-full text-sm font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 placeholder-gray-500 dark:placeholder-gray-400">
+
+                        <!-- Dropdown -->
+                        <div x-show="isOpen && filteredShepherds.length > 0"
+                             x-transition
+                             class="absolute z-50 left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-48 overflow-auto">
+                            <!-- Clear option -->
+                            <div @click="clearShepherd()"
+                                 class="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+                                -- Без опікуна --
+                            </div>
+                            <template x-for="(shepherd, index) in filteredShepherds" :key="shepherd.id">
+                                <div @click="selectShepherd(shepherd)"
+                                     @mouseenter="highlightedIndex = index"
+                                     :class="{'bg-primary-50 dark:bg-primary-900/30': highlightedIndex === index}"
+                                     class="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                                        <template x-if="shepherd.photo">
+                                            <img :src="shepherd.photo" :alt="shepherd.full_name" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!shepherd.photo">
+                                            <div class="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium" x-text="shepherd.initials"></div>
+                                        </template>
+                                    </div>
+                                    <span class="text-sm text-gray-900 dark:text-white" x-text="shepherd.full_name"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <span x-show="updating" class="text-xs text-gray-400">Збереження...</span>
+                </div>
+                @endif
             </div>
             <input type="hidden" name="joined_date" value="{{ $person->joined_date?->format('Y-m-d') }}">
 
@@ -241,9 +302,19 @@
                                         <div class="flex items-center gap-2">
                                             <p class="text-sm text-gray-600 dark:text-gray-400" x-text="userEmail">{{ $person->user->email }}</p>
                                             <button @click="editingEmail = true; $nextTick(() => $refs.emailInput.focus())"
-                                                    class="p-1 text-gray-400 hover:text-purple-600 rounded transition-colors">
+                                                    class="p-1 text-gray-400 hover:text-purple-600 rounded transition-colors" title="Редагувати email">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                </svg>
+                                            </button>
+                                            <button @click="resetPassword()" :disabled="resettingPassword"
+                                                    class="p-1 text-gray-400 hover:text-orange-600 rounded transition-colors disabled:opacity-50" title="Скинути пароль">
+                                                <svg x-show="!resettingPassword" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                                </svg>
+                                                <svg x-show="resettingPassword" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
                                             </button>
                                         </div>
@@ -359,6 +430,45 @@
                                         </svg>
                                         <span x-text="creating ? 'Створення...' : 'Створити'"></span>
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Password Display Modal -->
+                <template x-teleport="body">
+                    <div x-show="showPasswordModal" x-cloak
+                         class="fixed inset-0 z-50 overflow-y-auto">
+                        <div class="flex items-center justify-center min-h-screen p-4">
+                            <div class="fixed inset-0 bg-black/50"></div>
+                            <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mb-4">
+                                        <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Пароль згенеровано</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                        Збережіть або передайте цей пароль користувачу. Він більше не буде показаний.
+                                    </p>
+
+                                    <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-4">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Пароль:</p>
+                                        <p class="text-2xl font-mono font-bold text-gray-900 dark:text-white tracking-wider" x-text="generatedPassword"></p>
+                                    </div>
+
+                                    <div class="flex gap-3">
+                                        <button type="button" @click="copyPassword()" id="copyPasswordBtn"
+                                                class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium">
+                                            Скопіювати
+                                        </button>
+                                        <button type="button" @click="closePasswordModal()"
+                                                class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                                            Готово
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -556,6 +666,42 @@
             </div>
             @endif
 
+            <!-- Sheep (People under their care) -->
+            @if($church->shepherds_enabled && $person->is_shepherd && $person->sheep->count() > 0)
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <h2 class="font-semibold text-gray-900 dark:text-white">Підопічні ({{ $person->sheep->count() }})</h2>
+                </div>
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach($person->sheep as $sheep)
+                        <a href="{{ route('people.show', $sheep) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                @if($sheep->photo)
+                                <img src="{{ Storage::url($sheep->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover">
+                                @else
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-white">{{ mb_substr($sheep->first_name, 0, 1) }}{{ mb_substr($sheep->last_name, 0, 1) }}</span>
+                                </div>
+                                @endif
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">{{ $sheep->full_name }}</p>
+                                    @if($sheep->churchRoleRelation)
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $sheep->churchRoleRelation->name }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             <!-- Attendance Chart -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
                 <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Відвідуваність (12 тижнів)</h2>
@@ -733,12 +879,56 @@ function userRoleManager() {
         saving: false,
         saved: false,
         showCreateModal: false,
+        showPasswordModal: false,
+        generatedPassword: '',
         newEmail: '{{ $person->email ?? "" }}',
         newRole: 'volunteer',
         creating: false,
         createError: '',
         editingEmail: false,
         userEmail: '{{ $person->user?->email ?? "" }}',
+        resettingPassword: false,
+
+        copyPassword() {
+            navigator.clipboard.writeText(this.generatedPassword);
+            // Show brief confirmation
+            const btn = document.getElementById('copyPasswordBtn');
+            if (btn) {
+                const originalText = btn.textContent;
+                btn.textContent = 'Скопійовано!';
+                setTimeout(() => btn.textContent = originalText, 1500);
+            }
+        },
+
+        async resetPassword() {
+            if (!confirm('Згенерувати новий пароль для цього користувача?')) return;
+
+            this.resettingPassword = true;
+
+            try {
+                const response = await fetch('{{ route("people.reset-password", $person) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.generatedPassword = data.password;
+                    this.showPasswordModal = true;
+                } else {
+                    alert(data.message || 'Помилка при скиданні пароля');
+                }
+            } catch (error) {
+                alert('Помилка з\'єднання');
+            } finally {
+                this.resettingPassword = false;
+            }
+        },
 
         async updateEmail() {
             if (!this.userEmail.trim()) return;
@@ -816,7 +1006,10 @@ function userRoleManager() {
 
                 if (response.ok) {
                     this.showCreateModal = false;
-                    window.location.reload();
+                    this.generatedPassword = data.password;
+                    this.showPasswordModal = true;
+                    // Reload after showing password to update UI
+                    this.userEmail = this.newEmail;
                 } else {
                     this.createError = data.message || 'Помилка при створенні акаунту';
                 }
@@ -825,9 +1018,118 @@ function userRoleManager() {
             } finally {
                 this.creating = false;
             }
+        },
+
+        closePasswordModal() {
+            this.showPasswordModal = false;
+            this.generatedPassword = '';
+            window.location.reload();
         }
     }
 }
+
+@if($church->shepherds_enabled)
+function shepherdSearch() {
+    @php
+        $shepherdName = $person->shepherd?->full_name ?? '';
+        $shepherdsList = $shepherds->sortBy('last_name')->filter(fn($s) => $s->id !== $person->id)->map(function($s) {
+            return [
+                'id' => $s->id,
+                'full_name' => $s->full_name,
+                'photo' => $s->photo ? Storage::url($s->photo) : null,
+                'initials' => mb_substr($s->first_name, 0, 1) . mb_substr($s->last_name, 0, 1)
+            ];
+        })->values();
+    @endphp
+    return {
+        searchQuery: '',
+        selectedId: {{ $person->shepherd_id ?? 'null' }},
+        selectedName: @json($shepherdName),
+        isOpen: false,
+        highlightedIndex: 0,
+        updating: false,
+        shepherds: @json($shepherdsList),
+        get filteredShepherds() {
+            if (!this.searchQuery) {
+                return this.shepherds;
+            }
+            const query = this.searchQuery.toLowerCase();
+            return this.shepherds.filter(s =>
+                s.full_name.toLowerCase().includes(query)
+            );
+        },
+        async selectShepherd(shepherd) {
+            this.updating = true;
+            try {
+                const response = await fetch('{{ route('people.update-shepherd', $person) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ shepherd_id: shepherd.id })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.selectedId = shepherd.id;
+                    this.selectedName = shepherd.full_name;
+                    this.searchQuery = '';
+                    this.isOpen = false;
+                } else {
+                    alert(data.message || 'Помилка');
+                }
+            } catch (error) {
+                alert('Помилка з\'єднання');
+            } finally {
+                this.updating = false;
+            }
+        },
+        async clearShepherd() {
+            this.updating = true;
+            try {
+                const response = await fetch('{{ route('people.update-shepherd', $person) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ shepherd_id: null })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.selectedId = null;
+                    this.selectedName = '';
+                    this.searchQuery = '';
+                    this.isOpen = false;
+                } else {
+                    alert(data.message || 'Помилка');
+                }
+            } catch (error) {
+                alert('Помилка з\'єднання');
+            } finally {
+                this.updating = false;
+            }
+        },
+        highlightNext() {
+            if (this.highlightedIndex < this.filteredShepherds.length - 1) {
+                this.highlightedIndex++;
+            }
+        },
+        highlightPrev() {
+            if (this.highlightedIndex > 0) {
+                this.highlightedIndex--;
+            }
+        },
+        selectHighlighted() {
+            if (this.filteredShepherds.length > 0) {
+                this.selectShepherd(this.filteredShepherds[this.highlightedIndex]);
+            }
+        }
+    }
+}
+@endif
 
 function avatarUpload() {
     return {

@@ -44,7 +44,7 @@ class CalendarService
     {
         $ical = "BEGIN:VCALENDAR\r\n";
         $ical .= "VERSION:2.0\r\n";
-        $ical .= "PRODID:-//ChurchHub//{$church->name}//UK\r\n";
+        $ical .= "PRODID:-//Ministrify//{$church->name}//UK\r\n";
         $ical .= "CALSCALE:GREGORIAN\r\n";
         $ical .= "METHOD:PUBLISH\r\n";
         $ical .= "X-WR-CALNAME:" . $this->escapeIcalText($church->name) . "\r\n";
@@ -67,7 +67,7 @@ class CalendarService
      */
     private function eventToVevent(Event $event, Church $church): string
     {
-        $uid = $event->id . '@' . Str::slug($church->name) . '.churchhub';
+        $uid = $event->id . '@' . Str::slug($church->name) . '.ministrify';
         $dtstart = $this->formatIcalDateTime($event->date, $event->time);
 
         // Assume 1 hour duration if not specified
@@ -369,7 +369,7 @@ class CalendarService
         $context = stream_context_create([
             'http' => [
                 'timeout' => 30,
-                'user_agent' => 'ChurchHub Calendar Sync/1.0',
+                'user_agent' => 'Ministrify Calendar Sync/1.0',
             ],
             'ssl' => [
                 'verify_peer' => true,

@@ -1,0 +1,4 @@
+[2025-12-28 16:26:52] local.WARNING: Failed login attempt {"email":"fugerson91@gmail.com","ip":"172.25.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 
+[2025-12-28 16:27:09] local.WARNING: Failed login attempt {"email":"fugerson91@gmail.com","ip":"172.25.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 
+[2025-12-28 16:27:12] local.WARNING: Failed login attempt {"email":"fugerson91@gmail.com","ip":"172.25.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 
+[2025-12-28 16:29:03] local.INFO: User logged in {"user_id":1,"email":"admin@ministrify.app","ip":"172.25.0.1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"} 

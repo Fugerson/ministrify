@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#3b82f6">
 
-    <title>{{ config('app.name', 'ChurchHub') }} - @yield('title', 'Вхід')</title>
+    <title>{{ config('app.name', 'Ministrify') }} - @yield('title', 'Вхід')</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
@@ -74,7 +74,7 @@
                         <span class="text-3xl">⛪</span>
                     </div>
                 </a>
-                <h1 class="mt-4 text-2xl font-bold text-gray-900">ChurchHub</h1>
+                <h1 class="mt-4 text-2xl font-bold text-gray-900">Ministrify</h1>
                 <p class="mt-1 text-gray-500">Управління церквою просто</p>
             </div>
 
@@ -109,7 +109,7 @@
 
             <!-- Footer -->
             <p class="mt-8 text-center text-sm text-gray-400">
-                &copy; {{ date('Y') }} ChurchHub. Для церков України
+                &copy; {{ date('Y') }} Ministrify. Для церков України
             </p>
         </div>
     </div>

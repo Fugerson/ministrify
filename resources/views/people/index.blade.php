@@ -121,6 +121,21 @@
                                 </select>
                             </div>
                         </th>
+                        @if($church->shepherds_enabled)
+                        <th class="px-4 py-3 text-left hidden xl:table-cell">
+                            <div class="space-y-2">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Опікун</span>
+                                <select x-model="filters.shepherd"
+                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
+                                    <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Всі</option>
+                                    @foreach($shepherds as $shepherd)
+                                    <option value="{{ $shepherd->full_name }}" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $shepherd->full_name }}</option>
+                                    @endforeach
+                                    <option value="none" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Без опікуна</option>
+                                </select>
+                            </div>
+                        </th>
+                        @endif
                         <th class="px-4 py-3 w-10">
                             <button @click="clearFilters()" x-show="hasFilters" x-cloak
                                 class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -141,6 +156,7 @@
                             'birth_date' => $person->birth_date?->format('Y-m-d') ?? '',
                             'ministry' => $person->ministries->pluck('name')->join(', '),
                             'role' => $person->churchRoleRelation?->name ?? '',
+                            'shepherd' => $person->shepherd?->full_name ?? '',
                         ]))"
                         x-transition:enter="transition ease-out duration-100"
                         x-transition:enter-start="opacity-0"
@@ -214,6 +230,25 @@
                             <span class="text-gray-400">—</span>
                             @endif
                         </td>
+                        @if($church->shepherds_enabled)
+                        <!-- Shepherd -->
+                        <td class="px-4 py-3 hidden xl:table-cell">
+                            @if($person->shepherd)
+                            <div class="flex items-center gap-2">
+                                @if($person->shepherd->photo)
+                                <img src="{{ Storage::url($person->shepherd->photo) }}" alt="" class="w-6 h-6 rounded-full object-cover">
+                                @else
+                                <div class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                    <span class="text-xs font-medium text-green-600 dark:text-green-400">{{ mb_substr($person->shepherd->first_name, 0, 1) }}</span>
+                                </div>
+                                @endif
+                                <span class="text-sm text-gray-600 dark:text-gray-300">{{ $person->shepherd->full_name }}</span>
+                            </div>
+                            @else
+                            <span class="text-gray-400">—</span>
+                            @endif
+                        </td>
+                        @endif
                         <!-- Action -->
                         <td class="px-4 py-3">
                             <a href="{{ route('people.show', $person) }}"
@@ -354,13 +389,14 @@ function peopleTable() {
             birth_to: '',
             dateRangeDisplay: '',
             ministry: '',
-            role: ''
+            role: '',
+            shepherd: ''
         },
         flatpickrInstance: null,
         filteredCount: {{ $people->count() }},
         perPage: 25,
         currentPage: 1,
-        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'role' => $p->churchRoleRelation?->name ?? ''])->values()),
+        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'role' => $p->churchRoleRelation?->name ?? '', 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
         filteredIndices: [],
 
         init() {
@@ -436,14 +472,23 @@ function peopleTable() {
         get hasFilters() {
             return this.filters.search || this.filters.name || this.filters.phone || this.filters.email ||
                    this.filters.birth_from || this.filters.birth_to ||
-                   this.filters.ministry || this.filters.role;
+                   this.filters.ministry || this.filters.role || this.filters.shepherd;
         },
 
         matchesFilters(person) {
             if (this.filters.search) {
                 const searchLower = this.filters.search.toLowerCase();
-                const allText = [person.name, person.phone, person.email, person.ministry, person.role].join(' ').toLowerCase();
+                const allText = [person.name, person.phone, person.email, person.ministry, person.role, person.shepherd].join(' ').toLowerCase();
                 if (!allText.includes(searchLower)) return false;
+            }
+
+            // Special handling for shepherd filter
+            if (this.filters.shepherd) {
+                if (this.filters.shepherd === 'none') {
+                    if (person.shepherd) return false;
+                } else {
+                    if (!person.shepherd || !person.shepherd.toLowerCase().includes(this.filters.shepherd.toLowerCase())) return false;
+                }
             }
 
             return (
@@ -481,7 +526,8 @@ function peopleTable() {
                 birth_to: '',
                 dateRangeDisplay: '',
                 ministry: '',
-                role: ''
+                role: '',
+                shepherd: ''
             };
             this.currentPage = 1;
             if (this.flatpickrInstance) {

@@ -1,0 +1,75 @@
+FROM php:8.2-fpm AS base
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip opcache
+
+# Install Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Configure OPcache for production
+RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.interned_strings_buffer=16" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.max_accelerated_files=20000" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.validate_timestamps=0" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.save_comments=1" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.fast_shutdown=1" >> /usr/local/etc/php/conf.d/opcache.ini
+
+# Get latest Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# ========================================
+# Build stage
+FROM base AS builder
+
+# Copy composer files first for caching
+COPY composer.json composer.lock ./
+
+# Install dependencies (no dev)
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# Copy application files
+COPY . .
+
+# Generate optimized autoloader
+RUN composer dump-autoload --optimize --no-dev
+
+# ========================================
+# Production stage
+FROM base AS production
+
+# Create system user
+RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
+
+# Copy application from builder
+COPY --from=builder --chown=www:www /var/www/html /var/www/html
+
+# Create storage directories
+RUN mkdir -p storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs \
+    bootstrap/cache \
+    && chown -R www:www storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+USER www
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
