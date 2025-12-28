@@ -35,10 +35,10 @@ class SecurityHeaders
             $response->headers->set('Content-Security-Policy',
                 "default-src 'self'; " .
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com; " .
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; " .
-                "font-src 'self' https://fonts.gstatic.com; " .
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.tailwindcss.com; " .
+                "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net; " .
                 "img-src 'self' data: https: http:; " .
-                "connect-src 'self'; " .
+                "connect-src 'self' https://cdn.jsdelivr.net; " .
                 "manifest-src 'self'; " .
                 "frame-ancestors 'self';"
             );
