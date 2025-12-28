@@ -24,61 +24,61 @@
 @section('content')
 <div class="space-y-6">
     <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="grid grid-cols-3 gap-2 md:gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 md:p-6">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Активні прохання</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['active'] }}</p>
+                <div class="sm:ml-3 md:ml-4 mt-2 sm:mt-0 text-center sm:text-left">
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Активні</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['active'] }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 md:p-6">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Відповіді отримано</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['answered'] }}</p>
+                <div class="sm:ml-3 md:ml-4 mt-2 sm:mt-0 text-center sm:text-left">
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Відповіді</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['answered'] }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                    <span class="text-2xl">🙏</span>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 md:p-6">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="text-lg md:text-2xl">🙏</span>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Всього молитов</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_prayers'] }}</p>
+                <div class="sm:ml-3 md:ml-4 mt-2 sm:mt-0 text-center sm:text-left">
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Молитов</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_prayers'] }}</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div class="flex flex-wrap gap-2">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 md:p-4 overflow-x-auto">
+        <div class="flex gap-1 sm:gap-2 min-w-max">
             <a href="{{ route('prayer-requests.index') }}"
-               class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ !request('status') ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+               class="px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap {{ !request('status') ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 Активні
             </a>
             <a href="{{ route('prayer-requests.index', ['status' => 'answered']) }}"
-               class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ request('status') === 'answered' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                Відповіді отримано
+               class="px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap {{ request('status') === 'answered' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                Відповіді
             </a>
             <a href="{{ route('prayer-requests.index', ['status' => 'closed']) }}"
-               class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ request('status') === 'closed' ? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+               class="px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap {{ request('status') === 'closed' ? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 Закриті
             </a>
         </div>
@@ -87,10 +87,10 @@
     <!-- Prayer Requests List -->
     <div class="space-y-4">
         @forelse($prayerRequests as $request)
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-2">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
                             @if($request->is_urgent)
                                 <span class="px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-medium rounded-full">
                                     🔥 Терміново
@@ -128,10 +128,10 @@
                     </div>
 
                     @if($request->status === 'active')
-                        <form action="{{ route('prayer-requests.pray', $request) }}" method="POST" class="ml-4">
+                        <form action="{{ route('prayer-requests.pray', $request) }}" method="POST" class="sm:ml-4 w-full sm:w-auto">
                             @csrf
                             <button type="submit"
-                                    class="px-4 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg font-medium text-sm transition-colors {{ $request->hasPrayed(auth()->user()) ? 'opacity-50' : '' }}"
+                                    class="w-full sm:w-auto px-4 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg font-medium text-sm transition-colors {{ $request->hasPrayed(auth()->user()) ? 'opacity-50' : '' }}"
                                     {{ $request->hasPrayed(auth()->user()) ? 'disabled' : '' }}>
                                 🙏 {{ $request->hasPrayed(auth()->user()) ? 'Помолився' : 'Молюсь' }}
                             </button>
