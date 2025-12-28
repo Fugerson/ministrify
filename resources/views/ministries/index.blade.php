@@ -17,11 +17,11 @@
 @section('content')
 <x-page-help page="ministries" />
 
-<div class="space-y-8">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="space-y-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
     @forelse($ministries as $ministry)
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700">
-            <div class="p-6">
+            <div class="p-4 md:p-6">
                 <div class="flex items-start justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $ministry->name }}</h3>
@@ -52,15 +52,18 @@
                 @endif
             </div>
 
-            <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
+            <div class="px-4 md:px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
                 <a href="{{ route('ministries.show', $ministry) }}"
-                   class="text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm font-medium">
-                    Відкрити →
+                   class="text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm font-medium flex items-center">
+                    Відкрити
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
                 </a>
             </div>
         </div>
     @empty
-        <div class="col-span-full text-center py-12">
+        <div class="col-span-full text-center py-8 md:py-12">
             <p class="text-gray-500 dark:text-gray-400">Ще немає служінь.</p>
             @admin
             <a href="{{ route('ministries.create') }}" class="mt-2 inline-block text-primary-600 dark:text-primary-400 hover:text-primary-500">

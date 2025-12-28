@@ -27,16 +27,16 @@
     </a>
 
     <!-- Summary card -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4">
                 <a href="{{ route('finances.expenses.index', ['year' => $month == 1 ? $year - 1 : $year, 'month' => $month == 1 ? 12 : $month - 1]) }}"
                    class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </a>
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $months[$month - 1] }} {{ $year }}</h2>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{{ $months[$month - 1] }} {{ $year }}</h2>
                 <a href="{{ route('finances.expenses.index', ['year' => $month == 12 ? $year + 1 : $year, 'month' => $month == 12 ? 1 : $month + 1]) }}"
                    class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,13 +46,13 @@
             </div>
 
             @admin
-            <a href="{{ route('finances.index') }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm">
+            <a href="{{ route('finances.index') }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm hidden sm:inline">
                 Повний звіт
             </a>
             @endadmin
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
             <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                 <p class="text-sm text-blue-600 dark:text-blue-400">Бюджет</p>
                 <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ number_format($totals['budget'], 0, ',', ' ') }} ₴</p>
@@ -72,12 +72,12 @@
 
     <!-- Expenses list -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="px-3 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <form method="GET" class="flex items-center space-x-4">
                 <input type="hidden" name="year" value="{{ $year }}">
                 <input type="hidden" name="month" value="{{ $month }}">
                 <select name="ministry" onchange="this.form.submit()"
-                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                        class="w-full sm:w-auto px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     <option value="">Всі служіння</option>
                     @foreach($ministries as $ministry)
                         <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
@@ -92,44 +92,48 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дата</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Опис</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Служіння</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Категорія</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Сума</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дата</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Опис</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Служіння</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Категорія</th>
+                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Сума</th>
+                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($expenses as $expense)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ $expense->date->format('d.m') }}
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $expense->description }}</p>
+                            <td class="px-3 md:px-6 py-3 md:py-4">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px] sm:max-w-none">{{ $expense->description }}</p>
                                 @if($expense->notes)
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ Str::limit($expense->notes, 50) }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">{{ Str::limit($expense->notes, 50) }}</p>
                                 @endif
+                                <!-- Mobile: show ministry under description -->
+                                <p class="md:hidden text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $expense->ministry?->name ?? '' }}</p>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
                                 {{ $expense->ministry?->name ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                                 {{ $expense->category?->name ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600 dark:text-red-400 text-right">
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm font-semibold text-red-600 dark:text-red-400 text-right">
                                 -{{ number_format($expense->amount, 0, ',', ' ') }} ₴
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                <a href="{{ route('finances.expenses.edit', $expense) }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300">
-                                    Редагувати
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm">
+                                <a href="{{ route('finances.expenses.edit', $expense) }}" class="p-1.5 inline-flex text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="6" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                 Немає витрат за цей місяць
                             </td>
                         </tr>

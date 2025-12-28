@@ -81,71 +81,77 @@
 
     <!-- Groups Table -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-700/50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Група</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Лідер</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Статус</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Учасників</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дії</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                @foreach($groups as $group)
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <a href="{{ route('groups.show', $group) }}" class="flex items-center group">
-                            <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Група</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">Лідер</th>
+                        <th class="px-3 md:px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">Статус</th>
+                        <th class="px-3 md:px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Учасників</th>
+                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дії</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    @foreach($groups as $group)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td class="px-3 md:px-6 py-3 md:py-4">
+                            <a href="{{ route('groups.show', $group) }}" class="flex items-center group">
+                                <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3 min-w-0">
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate">{{ $group->name }}</p>
+                                    @if($group->description)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px] sm:max-w-xs hidden sm:block">{{ Str::limit($group->description, 50) }}</p>
+                                    @endif
+                                    <!-- Mobile: show leader under name -->
+                                    <p class="md:hidden text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $group->leader?->full_name ?? '' }}</p>
+                                </div>
+                            </a>
+                        </td>
+                        <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden md:table-cell">
+                            @if($group->leader)
+                            <a href="{{ route('people.show', $group->leader) }}" class="text-sm text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400">
+                                {{ $group->leader->full_name }}
+                            </a>
+                            @else
+                            <span class="text-sm text-gray-400">—</span>
+                            @endif
+                        </td>
+                        <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-center hidden sm:table-cell">
+                            <span class="inline-flex items-center gap-1.5 px-2 md:px-2.5 py-1 rounded-lg text-xs font-medium
+                                @if($group->status === 'active') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
+                                @elseif($group->status === 'paused') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300
+                                @else bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                                @endif">
+                                <span class="w-1.5 h-1.5 rounded-full
+                                    @if($group->status === 'active') bg-green-500
+                                    @elseif($group->status === 'paused') bg-yellow-500
+                                    @else bg-blue-500
+                                    @endif"></span>
+                                <span class="hidden md:inline">{{ $group->status_label }}</span>
+                            </span>
+                        </td>
+                        <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
+                            <span class="inline-flex items-center px-2 md:px-2.5 py-1 rounded-lg text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                                {{ $group->members_count }}
+                            </span>
+                        </td>
+                        <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
+                            <a href="{{ route('groups.show', $group) }}" class="p-1.5 inline-flex text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400">{{ $group->name }}</p>
-                                @if($group->description)
-                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ Str::limit($group->description, 50) }}</p>
-                                @endif
-                            </div>
-                        </a>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @if($group->leader)
-                        <a href="{{ route('people.show', $group->leader) }}" class="text-sm text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400">
-                            {{ $group->leader->full_name }}
-                        </a>
-                        @else
-                        <span class="text-sm text-gray-400">—</span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium
-                            @if($group->status === 'active') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
-                            @elseif($group->status === 'paused') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300
-                            @else bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
-                            @endif">
-                            <span class="w-1.5 h-1.5 rounded-full
-                                @if($group->status === 'active') bg-green-500
-                                @elseif($group->status === 'paused') bg-yellow-500
-                                @else bg-blue-500
-                                @endif"></span>
-                            {{ $group->status_label }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-                            {{ $group->members_count }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">
-                        <a href="{{ route('groups.show', $group) }}" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium">
-                            Переглянути
-                        </a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
     @endif
 </div>

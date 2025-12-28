@@ -61,21 +61,21 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-4 py-3 text-left">
+                        <th class="px-3 md:px-4 py-3 text-left">
                             <div class="space-y-2">
                                 <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ім'я</span>
                                 <input type="text" x-model="filters.name" placeholder="Фільтр..."
                                     class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
                             </div>
                         </th>
-                        <th class="px-4 py-3 text-left">
+                        <th class="px-3 md:px-4 py-3 text-left hidden sm:table-cell">
                             <div class="space-y-2">
                                 <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Телефон</span>
                                 <input type="text" x-model="filters.phone" placeholder="Фільтр..."
                                     class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
                             </div>
                         </th>
-                        <th class="px-4 py-3 text-left">
+                        <th class="px-3 md:px-4 py-3 text-left hidden md:table-cell">
                             <div class="space-y-2">
                                 <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</span>
                                 <input type="text" x-model="filters.email" placeholder="Фільтр..."
@@ -136,7 +136,7 @@
                             </div>
                         </th>
                         @endif
-                        <th class="px-4 py-3 w-10">
+                        <th class="px-2 md:px-4 py-3 w-10">
                             <button @click="clearFilters()" x-show="hasFilters" x-cloak
                                 class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                 title="Очистити фільтри">
@@ -164,7 +164,7 @@
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
                         onclick="window.location='{{ route('people.show', $person) }}'">
                         <!-- Name -->
-                        <td class="px-4 py-3">
+                        <td class="px-3 md:px-4 py-3">
                             <div class="flex items-center gap-3">
                                 @if($person->photo)
                                 <img src="{{ Storage::url($person->photo) }}" alt=""
@@ -174,22 +174,26 @@
                                     <span class="text-xs font-semibold text-white">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
                                 </div>
                                 @endif
-                                <div>
-                                    <div class="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                                <div class="min-w-0">
+                                    <div class="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                                         {{ $person->full_name ?: '—' }}
                                     </div>
+                                    <!-- Mobile: show phone/email under name -->
+                                    <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 truncate">
+                                        {{ $person->phone ?: $person->email ?: '' }}
+                                    </div>
                                     @if($person->telegram_username)
-                                    <div class="text-xs text-gray-400">{{ $person->telegram_username }}</div>
+                                    <div class="text-xs text-gray-400 hidden sm:block">{{ $person->telegram_username }}</div>
                                     @endif
                                 </div>
                             </div>
                         </td>
                         <!-- Phone -->
-                        <td class="px-4 py-3">
+                        <td class="px-3 md:px-4 py-3 hidden sm:table-cell">
                             <span class="text-gray-600 dark:text-gray-300">{{ $person->phone ?: '—' }}</span>
                         </td>
                         <!-- Email -->
-                        <td class="px-4 py-3">
+                        <td class="px-3 md:px-4 py-3 hidden md:table-cell">
                             <span class="text-gray-600 dark:text-gray-300 text-sm">{{ $person->email ?: '—' }}</span>
                         </td>
                         <!-- Birth Date -->
@@ -250,7 +254,7 @@
                         </td>
                         @endif
                         <!-- Action -->
-                        <td class="px-4 py-3">
+                        <td class="px-2 md:px-4 py-3">
                             <a href="{{ route('people.show', $person) }}"
                                class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors inline-block"
                                onclick="event.stopPropagation()">
@@ -304,20 +308,20 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="px-3 md:px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <span>Показувати</span>
+                <span class="hidden sm:inline">Показувати</span>
                 <select x-model.number="perPage" @change="currentPage = 1"
-                    class="px-2 py-1 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20">
+                    class="px-2 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20">
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
                     <option value="0">Всі</option>
                 </select>
-                <span>записів</span>
+                <span class="hidden sm:inline">записів</span>
             </div>
 
-            <div class="flex items-center gap-1">
+            <div class="flex items-center gap-0.5 sm:gap-1">
                 <button @click="currentPage = 1" :disabled="currentPage === 1"
                     class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -353,15 +357,15 @@
 
     <!-- Export/Import -->
     @admin
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-        <div class="flex flex-wrap items-center gap-3">
-            <a href="{{ route('people.export') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-3 md:p-4">
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <a href="{{ route('people.export') }}" class="inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
                 Експорт Excel
             </a>
-            <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors text-sm">
+            <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors text-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                 </svg>

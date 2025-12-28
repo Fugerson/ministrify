@@ -339,9 +339,9 @@
     @endif
 
     <!-- Events & Attendance Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mt-4 lg:mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mt-4 lg:mt-6">
         <!-- Upcoming Events -->
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="md:col-span-2 lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Найближчі події</h2>
                 <a href="{{ route('schedule') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
@@ -408,17 +408,17 @@
                 </svg>
                 Аналітика
             </h2>
-            <div class="flex rounded-xl bg-gray-100 dark:bg-gray-700 p-1">
-                <button type="button" data-chart="growth" class="chart-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm">
+            <div class="flex rounded-xl bg-gray-100 dark:bg-gray-700 p-1 overflow-x-auto">
+                <button type="button" data-chart="growth" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm whitespace-nowrap">
                     Зростання
                 </button>
-                <button type="button" data-chart="financial" class="chart-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <button type="button" data-chart="financial" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
                     Фінанси
                 </button>
-                <button type="button" data-chart="attendance" class="chart-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <button type="button" data-chart="attendance" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
                     Відвідуваність
                 </button>
-                <button type="button" data-chart="ministries" class="chart-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <button type="button" data-chart="ministries" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
                     Служіння
                 </button>
             </div>
