@@ -34,11 +34,12 @@ class SecurityHeaders
         if (config('app.env') === 'production') {
             $response->headers->set('Content-Security-Policy',
                 "default-src 'self'; " .
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " .
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com; " .
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; " .
                 "font-src 'self' https://fonts.gstatic.com; " .
-                "img-src 'self' data: https:; " .
+                "img-src 'self' data: https: http:; " .
                 "connect-src 'self'; " .
+                "manifest-src 'self'; " .
                 "frame-ancestors 'self';"
             );
 
