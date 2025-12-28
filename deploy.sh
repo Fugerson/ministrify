@@ -11,62 +11,85 @@ echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}   Ministrify.app Deployment Script    ${NC}"
 echo -e "${GREEN}========================================${NC}"
 
-# Configuration
-APP_DIR="/var/www/ministrify"
-REPO_URL="git@github.com:YOUR_USERNAME/ministrify.git"
-BRANCH="main"
+cd /var/www/ministrify
 
-# Check if this is initial deployment
-if [ ! -d "$APP_DIR" ]; then
-    echo -e "${YELLOW}Initial deployment detected...${NC}"
-
-    # Clone repository
-    echo -e "${GREEN}Cloning repository...${NC}"
-    git clone $REPO_URL $APP_DIR
-    cd $APP_DIR
-
-    # Create .env file
-    if [ ! -f ".env" ]; then
-        echo -e "${YELLOW}Creating .env file from template...${NC}"
-        cp .env.production.example .env
-        echo -e "${RED}IMPORTANT: Edit .env file with your production values!${NC}"
-        echo -e "${RED}Then run this script again.${NC}"
-        exit 1
-    fi
+# Step 1: Ensure .env exists with all required variables
+echo -e "${GREEN}[1/8] Checking .env file...${NC}"
+if [ ! -f .env ]; then
+    echo -e "${YELLOW}Creating new .env file...${NC}"
+    APP_KEY="base64:$(openssl rand -base64 32)"
+    cat > .env << EOF
+APP_KEY=${APP_KEY}
+APP_URL=https://ministrify.app
+DB_DATABASE=ministrify
+DB_USERNAME=ministrify
+DB_PASSWORD=secret
+REDIS_HOST=redis
+EOF
 else
-    echo -e "${GREEN}Updating existing deployment...${NC}"
-    cd $APP_DIR
-
-    # Pull latest changes
-    echo -e "${GREEN}Pulling latest changes...${NC}"
-    git fetch origin
-    git reset --hard origin/$BRANCH
+    # Ensure REDIS_HOST is set
+    if ! grep -q "^REDIS_HOST=" .env; then
+        echo "REDIS_HOST=redis" >> .env
+        echo -e "${YELLOW}Added REDIS_HOST=redis${NC}"
+    fi
 fi
+echo -e "${GREEN}Done${NC}"
 
-# Build and start containers
-echo -e "${GREEN}Building Docker containers...${NC}"
-docker compose -f docker-compose.prod.yml build --no-cache
+# Step 2: Pull latest code
+echo -e "${GREEN}[2/8] Pulling latest code...${NC}"
+git fetch origin
+git reset --hard origin/main
+echo -e "${GREEN}Done${NC}"
 
-echo -e "${GREEN}Starting containers...${NC}"
-docker compose -f docker-compose.prod.yml up -d
+# Step 3: Stop containers
+echo -e "${GREEN}[3/8] Stopping containers...${NC}"
+docker compose -f docker-compose.prod.yml down
+echo -e "${GREEN}Done${NC}"
 
-# Wait for MySQL to be ready
-echo -e "${YELLOW}Waiting for MySQL to be ready...${NC}"
-sleep 10
+# Step 4: Build and start containers
+echo -e "${GREEN}[4/8] Building and starting containers...${NC}"
+docker compose -f docker-compose.prod.yml up -d --build
+echo -e "${GREEN}Done${NC}"
 
-# Run Laravel commands
-echo -e "${GREEN}Running Laravel optimizations...${NC}"
+# Step 5: Wait for services
+echo -e "${GREEN}[5/8] Waiting for services to start...${NC}"
+sleep 15
+echo -e "${GREEN}Done${NC}"
+
+# Step 6: Run migrations
+echo -e "${GREEN}[6/8] Running migrations...${NC}"
 docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force
+echo -e "${GREEN}Done${NC}"
+
+# Step 7: Cache configuration
+echo -e "${GREEN}[7/8] Caching configuration...${NC}"
+docker compose -f docker-compose.prod.yml exec -T app php artisan config:clear
 docker compose -f docker-compose.prod.yml exec -T app php artisan config:cache
 docker compose -f docker-compose.prod.yml exec -T app php artisan route:cache
 docker compose -f docker-compose.prod.yml exec -T app php artisan view:cache
-docker compose -f docker-compose.prod.yml exec -T app php artisan storage:link
+docker compose -f docker-compose.prod.yml exec -T app php artisan storage:link 2>/dev/null || true
+echo -e "${GREEN}Done${NC}"
 
+# Step 8: Test application
+echo -e "${GREEN}[8/8] Testing application...${NC}"
+sleep 3
+RESPONSE=$(docker compose -f docker-compose.prod.yml exec -T nginx curl -s -o /dev/null -w "%{http_code}" http://localhost 2>/dev/null || echo "000")
+
+if [ "$RESPONSE" = "200" ]; then
+    echo -e "${GREEN}Application is working! (HTTP 200)${NC}"
+elif [ "$RESPONSE" = "302" ]; then
+    echo -e "${GREEN}Application is working! (HTTP 302 - redirect to login)${NC}"
+else
+    echo -e "${RED}HTTP $RESPONSE - checking logs...${NC}"
+    docker compose -f docker-compose.prod.yml exec -T app cat storage/logs/laravel.log 2>/dev/null | tail -30 || echo "No logs available"
+fi
+
+echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}   Deployment completed successfully!  ${NC}"
+echo -e "${GREEN}   Deployment Complete!                ${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo -e "Next steps:"
-echo -e "1. Configure DNS: Point ministrify.app to your server IP"
-echo -e "2. Get SSL certificate: ./init-ssl.sh"
-echo -e "3. Switch to HTTPS: ./enable-ssl.sh"
+echo "Container status:"
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep ministrify || true
+echo ""
+echo -e "${YELLOW}Next: Configure host nginx for ministrify.app${NC}"
