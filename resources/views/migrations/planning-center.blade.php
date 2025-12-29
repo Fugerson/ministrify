@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Міграція з Planning Center')
+@section('title', 'Імпорт CSV')
 
 @section('content')
 <div class="max-w-6xl mx-auto" x-data="migrationWizard()">
@@ -12,10 +12,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Міграція з Planning Center</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Імпорт CSV</h1>
         </div>
         <p class="text-gray-600 dark:text-gray-400">
-            Імпортуйте дані про людей з Planning Center People у Ministrify
+            Імпортуйте дані про людей з CSV файлу у Ministrify
         </p>
     </div>
 
@@ -100,7 +100,7 @@
                         <input type="file" accept=".csv,.txt" class="hidden" @change="handleFileSelect($event)">
                     </label>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                        Підтримуються CSV файли експортовані з Planning Center People
+                        Підтримуються CSV файли з будь-якої системи
                     </p>
                 </div>
             </template>
@@ -123,16 +123,15 @@
             </template>
         </div>
 
-        <!-- How to Export from Planning Center -->
+        <!-- CSV Format Info -->
         <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-            <h3 class="font-medium text-gray-900 dark:text-white mb-2">Як експортувати з Planning Center:</h3>
-            <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
-                <li>Відкрийте Planning Center People</li>
-                <li>Перейдіть до Lists &rarr; All People</li>
-                <li>Натисніть Export &rarr; Choose Columns</li>
-                <li>Виберіть потрібні колонки (Name, Email, Phone, Birthdate, тощо)</li>
-                <li>Натисніть Export та завантажте CSV файл</li>
-            </ol>
+            <h3 class="font-medium text-gray-900 dark:text-white mb-2">Формат CSV файлу:</h3>
+            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
+                <li>Перший рядок повинен містити назви колонок</li>
+                <li>Обов'язкова колонка: Ім'я (first_name, name, ім'я)</li>
+                <li>Опціональні: прізвище, email, телефон, дата народження, адреса</li>
+                <li>Підтримується експорт з Excel, Google Sheets, Planning Center тощо</li>
+            </ul>
         </div>
 
         <div class="mt-6 flex justify-end">
