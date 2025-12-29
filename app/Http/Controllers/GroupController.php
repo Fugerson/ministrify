@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\Person;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
@@ -33,7 +34,7 @@ class GroupController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'leader_id' => 'nullable|exists:people,id',
+            'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'status' => 'nullable|in:active,paused,vacation',
         ]);
 
@@ -94,7 +95,7 @@ class GroupController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'leader_id' => 'nullable|exists:people,id',
+            'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'status' => 'nullable|in:active,paused,vacation',
         ]);
 
@@ -118,7 +119,7 @@ class GroupController extends Controller
         $this->authorize('update', $group);
 
         $validated = $request->validate([
-            'person_id' => 'required|exists:people,id',
+            'person_id' => ['required', new BelongsToChurch(Person::class)],
             'role' => 'nullable|string',
         ]);
 

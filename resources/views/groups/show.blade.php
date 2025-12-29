@@ -133,7 +133,7 @@
                 <div class="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <a href="{{ route('people.show', $member) }}" class="flex items-center flex-1 min-w-0">
                         @if($member->photo)
-                        <img src="{{ Storage::url($member->photo) }}" class="w-10 h-10 rounded-full object-cover mr-3">
+                        <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-10 h-10 rounded-full object-cover mr-3">
                         @else
                         <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3 flex-shrink-0">
                             <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>

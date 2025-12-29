@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\Group;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GroupAttendanceController extends Controller
 {
@@ -59,39 +60,45 @@ class GroupAttendanceController extends Controller
             'present.*' => 'exists:people,id',
         ]);
 
-        // Check for duplicate
-        $existing = $group->attendances()->whereDate('date', $validated['date'])->first();
-        if ($existing) {
-            return redirect()->route('groups.attendance.edit', [$group, $existing])
-                ->with('info', 'Відвідуваність за цю дату вже існує. Ви можете її редагувати.');
-        }
-
         $presentIds = $validated['present'] ?? [];
 
-        // Create unified attendance record
-        $attendance = $group->createAttendance([
-            'date' => $validated['date'],
-            'time' => $validated['time'] ?? null,
-            'location' => $validated['location'] ?? $group->meeting_location,
-            'notes' => $validated['notes'] ?? null,
-            'guests_count' => $validated['guests_count'] ?? 0,
-            'members_present' => count($presentIds),
-            'total_count' => count($presentIds) + ($validated['guests_count'] ?? 0),
-            'recorded_by' => auth()->id(),
-        ]);
+        return DB::transaction(function () use ($group, $validated, $presentIds) {
+            // Check for duplicate with lock to prevent race condition
+            $existing = $group->attendances()
+                ->whereDate('date', $validated['date'])
+                ->lockForUpdate()
+                ->first();
 
-        // Create attendance records
-        foreach ($group->members as $member) {
-            AttendanceRecord::create([
-                'attendance_id' => $attendance->id,
-                'person_id' => $member->id,
-                'present' => in_array($member->id, $presentIds),
-                'checked_in_at' => in_array($member->id, $presentIds) ? now()->format('H:i') : null,
+            if ($existing) {
+                return redirect()->route('groups.attendance.edit', [$group, $existing])
+                    ->with('info', 'Відвідуваність за цю дату вже існує. Ви можете її редагувати.');
+            }
+
+            // Create unified attendance record
+            $attendance = $group->createAttendance([
+                'date' => $validated['date'],
+                'time' => $validated['time'] ?? null,
+                'location' => $validated['location'] ?? $group->meeting_location,
+                'notes' => $validated['notes'] ?? null,
+                'guests_count' => $validated['guests_count'] ?? 0,
+                'members_present' => count($presentIds),
+                'total_count' => count($presentIds) + ($validated['guests_count'] ?? 0),
+                'recorded_by' => auth()->id(),
             ]);
-        }
 
-        return redirect()->route('groups.show', $group)
-            ->with('success', 'Відвідуваність записано');
+            // Create attendance records
+            foreach ($group->members as $member) {
+                AttendanceRecord::create([
+                    'attendance_id' => $attendance->id,
+                    'person_id' => $member->id,
+                    'present' => in_array($member->id, $presentIds),
+                    'checked_in_at' => in_array($member->id, $presentIds) ? now()->format('H:i') : null,
+                ]);
+            }
+
+            return redirect()->route('groups.show', $group)
+                ->with('success', 'Відвідуваність записано');
+        });
     }
 
     public function show(Group $group, Attendance $attendance)

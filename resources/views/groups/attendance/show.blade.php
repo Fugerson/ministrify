@@ -97,7 +97,7 @@
             <div class="p-4 flex items-center justify-between {{ $record->present ? '' : 'opacity-50' }}">
                 <div class="flex items-center">
                     @if($record->person->photo)
-                    <img src="{{ Storage::url($record->person->photo) }}" class="w-10 h-10 rounded-full object-cover mr-3">
+                    <img src="{{ Storage::url($record->person->photo) }}" alt="{{ $record->person->full_name }}" class="w-10 h-10 rounded-full object-cover mr-3">
                     @else
                     <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
                         <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($record->person->first_name, 0, 1) }}{{ mb_substr($record->person->last_name, 0, 1) }}</span>

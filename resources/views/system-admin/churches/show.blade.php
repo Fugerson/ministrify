@@ -22,7 +22,7 @@
     <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700">
         <div class="flex items-start gap-6">
             @if($church->logo)
-            <img src="/storage/{{ $church->logo }}" class="w-24 h-24 rounded-xl object-cover">
+            <img src="/storage/{{ $church->logo }}" alt="{{ $church->name }}" class="w-24 h-24 rounded-xl object-cover">
             @else
             <div class="w-24 h-24 rounded-xl bg-blue-600/20 flex items-center justify-center">
                 <span class="text-4xl">⛪</span>

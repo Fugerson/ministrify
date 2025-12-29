@@ -248,10 +248,10 @@ class FinanceController extends Controller
         $this->authorizeChurch($income);
 
         $validated = $request->validate([
-            'category_id' => 'required|exists:transaction_categories,id',
+            'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
-            'person_id' => 'nullable|exists:people,id',
+            'person_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'description' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cash,card,transfer,online',
             'is_anonymous' => 'boolean',

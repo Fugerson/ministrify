@@ -38,7 +38,8 @@ class DonationController extends Controller
                     ->where('source_type', Transaction::SOURCE_DONATION)
                     ->where('status', Transaction::STATUS_COMPLETED)
                     ->where('campaign_id', $campaign->id)
-                    ->distinct('donor_email')
+                    ->whereNotNull('donor_email')
+                    ->distinct()
                     ->count('donor_email');
                 return $campaign;
             });
@@ -263,7 +264,8 @@ class DonationController extends Controller
                 ->where('source_type', Transaction::SOURCE_DONATION)
                 ->where('status', Transaction::STATUS_COMPLETED)
                 ->whereMonth('date', now()->month)
-                ->distinct('donor_email')
+                ->whereNotNull('donor_email')
+                ->distinct()
                 ->count('donor_email'),
             'recurring_count' => 0, // Recurring handled differently in unified system
             'avg_donation' => Transaction::where('church_id', $church->id)

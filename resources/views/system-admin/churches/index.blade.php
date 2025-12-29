@@ -41,7 +41,7 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center">
                                 @if($church->logo)
-                                <img src="/storage/{{ $church->logo }}" class="w-10 h-10 rounded-lg object-cover mr-3">
+                                <img src="/storage/{{ $church->logo }}" alt="{{ $church->name }}" class="w-10 h-10 rounded-lg object-cover mr-3">
                                 @else
                                 <div class="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center mr-3">
                                     <span class="text-lg">⛪</span>

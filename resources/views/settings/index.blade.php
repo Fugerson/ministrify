@@ -89,7 +89,7 @@
                 <label for="logo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Логотип</label>
                 @if($church->logo)
                     <div class="mb-2">
-                        <img src="{{ Storage::url($church->logo) }}" class="w-16 h-16 object-contain rounded-lg">
+                        <img src="{{ Storage::url($church->logo) }}" alt="{{ $church->name }} логотип" class="w-16 h-16 object-contain rounded-lg">
                     </div>
                 @endif
                 <input type="file" name="logo" id="logo" accept="image/*"

@@ -129,6 +129,7 @@
                                         <div class="mt-2 flex items-center">
                                             @if($assignment->person->photo)
                                                 <img src="{{ Storage::url($assignment->person->photo) }}"
+                                                     alt="{{ $assignment->person->full_name }}"
                                                      class="w-8 h-8 rounded-full object-cover">
                                             @else
                                                 <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
@@ -285,7 +286,7 @@
                                                             <button type="submit"
                                                                     class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
                                                                 @if($person->photo)
-                                                                    <img src="{{ Storage::url($person->photo) }}" class="w-6 h-6 rounded-full object-cover">
+                                                                    <img src="{{ Storage::url($person->photo) }}" alt="{{ $person->full_name }}" class="w-6 h-6 rounded-full object-cover">
                                                                 @else
                                                                     <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs">
                                                                         {{ substr($person->first_name, 0, 1) }}
@@ -314,7 +315,7 @@
                                                                 <button type="submit"
                                                                         class="w-full text-left px-3 py-2 text-sm rounded-lg flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30">
                                                                     @if($person->photo)
-                                                                        <img src="{{ Storage::url($person->photo) }}" class="w-6 h-6 rounded-full object-cover opacity-70">
+                                                                        <img src="{{ Storage::url($person->photo) }}" alt="{{ $person->full_name }}" class="w-6 h-6 rounded-full object-cover opacity-70">
                                                                     @else
                                                                         <div class="w-6 h-6 rounded-full bg-orange-200 dark:bg-orange-800 flex items-center justify-center text-xs">
                                                                             {{ substr($person->first_name, 0, 1) }}

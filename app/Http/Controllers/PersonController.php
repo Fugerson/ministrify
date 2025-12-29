@@ -244,9 +244,9 @@ class PersonController extends Controller
             ->get()
             ->map(fn($a) => [
                 'type' => 'assignment',
-                'date' => $a->event->date,
-                'title' => $a->event->title . ' - ' . $a->position->name,
-                'subtitle' => $a->event->ministry->name,
+                'date' => $a->event?->date,
+                'title' => ($a->event?->title ?? 'Подія') . ' - ' . ($a->position?->name ?? 'Позиція'),
+                'subtitle' => $a->event?->ministry?->name ?? 'Служіння',
                 'icon' => $a->status === 'confirmed' ? '🎯' : ($a->status === 'pending' ? '⏳' : '❌'),
                 'color' => $a->status === 'confirmed' ? 'green' : ($a->status === 'pending' ? 'yellow' : 'red'),
                 'status' => $a->status,
