@@ -157,9 +157,16 @@ class UserController extends Controller
     {
         $this->authorizeChurch($user);
 
-        // TODO: Send password reset email as invite
+        try {
+            $status = Password::sendResetLink(['email' => $user->email]);
+            if ($status !== Password::RESET_LINK_SENT) {
+                return back()->with('error', 'Не вдалося надіслати запрошення.');
+            }
+        } catch (\Exception $e) {
+            return back()->with('error', 'Помилка надсилання: ' . $e->getMessage());
+        }
 
-        return back()->with('success', 'Запрошення надіслано.');
+        return back()->with('success', 'Запрошення надіслано на ' . $user->email);
     }
 
     protected function authorizeChurch($model): void

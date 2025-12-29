@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPassword;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -257,5 +258,10 @@ class User extends Authenticatable
         $state = $this->onboarding_state ?? [];
         $hints = $state['dismissed_hints'] ?? [];
         return in_array($hint, $hints);
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPassword($token));
     }
 }
