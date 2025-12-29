@@ -179,6 +179,22 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ministrify_phpmyadmin
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      UPLOAD_LIMIT: 100M
+    networks:
+      - ministrify
+    depends_on:
+      - mysql
+
 networks:
   ministrify:
     driver: bridge
