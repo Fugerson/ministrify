@@ -125,12 +125,17 @@ window.personSelectData = window.personSelectData || {};
 <script>
 window.personSelectData['{{ $uniqueId }}'] = [
     @foreach($people->sortBy('last_name') as $person)
+    @php
+        $photoUrl = $person->photo ? \Illuminate\Support\Facades\Storage::url($person->photo) : null;
+        $roleName = $person->churchRoleRelation ? $person->churchRoleRelation->name : ($person->church_role ?? null);
+        $initials = mb_substr($person->first_name, 0, 1) . mb_substr($person->last_name ?? '', 0, 1);
+    @endphp
     {
         id: {{ $person->id }},
         full_name: @json($person->full_name),
-        photo: @json($person->photo ? Storage::url($person->photo) : null),
-        role: @json($person->churchRoleRelation?->name ?? ($person->church_role ?? null)),
-        initials: @json(mb_substr($person->first_name, 0, 1) . mb_substr($person->last_name ?? '', 0, 1))
+        photo: @json($photoUrl),
+        role: @json($roleName),
+        initials: @json($initials)
     },
     @endforeach
 ];
