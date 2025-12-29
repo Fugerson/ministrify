@@ -1,33 +1,33 @@
 <div x-data="{
-    form: {
-        name: '',
-        description: ''
-    },
-    errors: {},
-    touched: {},
+    selectedMinistries: [],
+    customMinistry: '',
 
-    validateField(field) {
-        this.touched[field] = true;
-        this.errors[field] = null;
-
-        if (field === 'name' && this.form.name.trim()) {
-            if (this.form.name.length > 255) {
-                this.errors.name = 'Максимум 255 символів';
-            }
-        }
-        if (field === 'description' && this.form.description.length > 1000) {
-            this.errors.description = 'Максимум 1000 символів';
+    toggleMinistry(name) {
+        const index = this.selectedMinistries.indexOf(name);
+        if (index > -1) {
+            this.selectedMinistries.splice(index, 1);
+        } else {
+            this.selectedMinistries.push(name);
         }
     },
 
-    selectSuggestion(name) {
-        this.form.name = name;
-        this.touched.name = true;
-        this.validateField('name');
+    isSelected(name) {
+        return this.selectedMinistries.includes(name);
     },
 
-    get hasErrors() {
-        return Object.values(this.errors).some(e => e !== null);
+    addCustom() {
+        const trimmed = this.customMinistry.trim();
+        if (trimmed && !this.selectedMinistries.includes(trimmed)) {
+            this.selectedMinistries.push(trimmed);
+            this.customMinistry = '';
+        }
+    },
+
+    removeMinistry(name) {
+        const index = this.selectedMinistries.indexOf(name);
+        if (index > -1) {
+            this.selectedMinistries.splice(index, 1);
+        }
     }
 }">
     <!-- Header -->
@@ -40,7 +40,7 @@
             </div>
             <div>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">КРОК 3 - ОПЦІЙНО</p>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Створіть перше служіння</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Виберіть служіння</h2>
             </div>
         </div>
     </div>
@@ -55,7 +55,7 @@
                 </div>
                 <div>
                     <p class="font-semibold text-green-800 dark:text-green-200">У вас вже є {{ $ministries->count() }} {{ trans_choice('служіння|служіння|служінь', $ministries->count()) }}</p>
-                    <p class="text-sm text-green-600 dark:text-green-300">Ви можете пропустити цей крок або додати ще одне</p>
+                    <p class="text-sm text-green-600 dark:text-green-300">Ви можете пропустити цей крок або додати ще</p>
                 </div>
             </div>
         </div>
@@ -76,64 +76,12 @@
     @endif
 
     <form class="space-y-6">
-        <!-- Ministry Name -->
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Назва служіння
-            </label>
-            <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                    </svg>
-                </span>
-                <input type="text" name="name"
-                       x-model="form.name"
-                       @blur="validateField('name')"
-                       @input="touched.name && validateField('name')"
-                       :class="{'ring-2 ring-red-500 border-red-500': errors.name, 'ring-2 ring-green-500 border-green-500': touched.name && !errors.name && form.name}"
-                       class="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-lg"
-                       placeholder="Наприклад: Прославлення">
-            </div>
-            <div class="flex justify-between mt-2">
-                <p x-show="errors.name" x-cloak class="text-sm text-red-500 flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span x-text="errors.name"></span>
-                </p>
-                <p class="text-xs text-gray-400" x-show="form.name.length > 200">
-                    <span x-text="form.name.length"></span>/255
-                </p>
-            </div>
-        </div>
+        <!-- Hidden input to pass selected ministries -->
+        <template x-for="(ministry, index) in selectedMinistries" :key="index">
+            <input type="hidden" :name="'ministries[' + index + ']'" :value="ministry">
+        </template>
 
-        <!-- Description -->
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Опис</label>
-            <div class="relative">
-                <textarea name="description" rows="3"
-                          x-model="form.description"
-                          @blur="validateField('description')"
-                          @input="touched.description && validateField('description')"
-                          :class="{'ring-2 ring-red-500 border-red-500': errors.description, 'ring-2 ring-green-500 border-green-500': touched.description && !errors.description && form.description}"
-                          class="w-full px-4 py-3 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none transition-all"
-                          placeholder="Коротко опишіть це служіння..."></textarea>
-            </div>
-            <div class="flex justify-between mt-2">
-                <p x-show="errors.description" x-cloak class="text-sm text-red-500 flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span x-text="errors.description"></span>
-                </p>
-                <p class="text-xs text-gray-400" x-show="form.description.length > 0">
-                    <span x-text="form.description.length"></span>/1000
-                </p>
-            </div>
-        </div>
-
-        <!-- Popular Suggestions -->
+        <!-- Popular Ministries Grid -->
         <div class="p-5 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-slate-700/50 dark:to-slate-800/50 rounded-2xl border border-gray-200/50 dark:border-slate-600/50">
             <h4 class="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
@@ -141,19 +89,86 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                 </div>
-                Популярні служіння
+                Оберіть служіння
+                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(можна декілька)</span>
             </h4>
-            <div class="flex flex-wrap gap-2">
-                @foreach(['Прославлення', 'Звук та техніка', 'Дитяче служіння', 'Привітання', 'Молодь', 'Медіа'] as $suggestion)
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                @foreach([
+                    ['name' => 'Прославлення', 'icon' => '🎸'],
+                    ['name' => 'Звук та техніка', 'icon' => '🎧'],
+                    ['name' => 'Дитяче служіння', 'icon' => '👶'],
+                    ['name' => 'Привітання', 'icon' => '👋'],
+                    ['name' => 'Молодь', 'icon' => '🔥'],
+                    ['name' => 'Медіа', 'icon' => '📸'],
+                    ['name' => 'Молитва', 'icon' => '🙏'],
+                    ['name' => 'Догляд', 'icon' => '❤️'],
+                    ['name' => 'Євангелізм', 'icon' => '📖'],
+                ] as $suggestion)
                     <button type="button"
-                            @click="selectSuggestion('{{ $suggestion }}')"
-                            :class="form.name === '{{ $suggestion }}'
-                                ? 'bg-gradient-to-r from-primary-500 to-primary-700 text-white border-transparent shadow-lg shadow-primary-500/30'
+                            @click="toggleMinistry('{{ $suggestion['name'] }}')"
+                            :class="isSelected('{{ $suggestion['name'] }}')
+                                ? 'bg-gradient-to-r from-primary-500 to-primary-700 text-white border-transparent shadow-lg shadow-primary-500/30 scale-[1.02]'
                                 : 'bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md'"
-                            class="px-4 py-2 border rounded-xl text-sm font-medium transition-all duration-200 hover:scale-105">
-                        {{ $suggestion }}
+                            class="relative flex items-center gap-2 px-4 py-3 border rounded-xl text-sm font-medium transition-all duration-200">
+                        <span class="text-lg">{{ $suggestion['icon'] }}</span>
+                        <span>{{ $suggestion['name'] }}</span>
+                        <span x-show="isSelected('{{ $suggestion['name'] }}')"
+                              class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center shadow-md">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </span>
                     </button>
                 @endforeach
+            </div>
+        </div>
+
+        <!-- Custom Ministry Input -->
+        <div class="p-5 bg-white dark:bg-slate-700/50 rounded-2xl border border-gray-200 dark:border-slate-600">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Або додайте своє
+            </h4>
+            <div class="flex gap-2">
+                <input type="text"
+                       x-model="customMinistry"
+                       @keydown.enter.prevent="addCustom()"
+                       class="flex-1 px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                       placeholder="Назва служіння...">
+                <button type="button"
+                        @click="addCustom()"
+                        :disabled="!customMinistry.trim()"
+                        class="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-slate-600 text-white font-medium rounded-xl transition-colors">
+                    Додати
+                </button>
+            </div>
+        </div>
+
+        <!-- Selected Summary -->
+        <div x-show="selectedMinistries.length > 0" x-cloak
+             class="p-5 bg-gradient-to-br from-primary-50 to-primary-100/50 dark:from-primary-900/20 dark:to-primary-800/10 rounded-2xl border border-primary-200/50 dark:border-primary-700/30">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="font-semibold text-primary-800 dark:text-primary-200 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Обрано служінь: <span x-text="selectedMinistries.length"></span>
+                </h4>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <template x-for="ministry in selectedMinistries" :key="ministry">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm">
+                        <span x-text="ministry"></span>
+                        <button type="button" @click="removeMinistry(ministry)" class="text-gray-400 hover:text-red-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </span>
+                </template>
             </div>
         </div>
     </form>

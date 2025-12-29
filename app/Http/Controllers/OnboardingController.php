@@ -231,22 +231,34 @@ class OnboardingController extends Controller
     private function handleFirstMinistry(Request $request, $church): array
     {
         // Allow completing without data (optional step)
-        if (!$request->filled('name')) {
+        $ministries = $request->input('ministries', []);
+
+        if (empty($ministries)) {
             return ['skipped' => true];
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
+            'ministries' => 'required|array|min:1',
+            'ministries.*' => 'required|string|max:255',
         ]);
 
-        $ministry = $church->ministries()->create([
-            'name' => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'slug' => Str::slug($validated['name']),
-        ]);
+        $createdIds = [];
+        foreach ($validated['ministries'] as $name) {
+            $name = trim($name);
+            if (empty($name)) continue;
 
-        return ['ministry_id' => $ministry->id];
+            // Check if ministry with this name already exists
+            $exists = $church->ministries()->where('name', $name)->exists();
+            if ($exists) continue;
+
+            $ministry = $church->ministries()->create([
+                'name' => $name,
+                'slug' => Str::slug($name) . '-' . Str::random(4),
+            ]);
+            $createdIds[] = $ministry->id;
+        }
+
+        return ['ministry_ids' => $createdIds, 'created_count' => count($createdIds)];
     }
 
     private function handleAddPeople(Request $request, $church): array
