@@ -1,8 +1,6 @@
 <div x-data="{
-    mode: 'manual',
     people: [{ first_name: '', last_name: '', email: '', phone: '' }],
     errors: {},
-    fileName: '',
 
     validatePerson(index) {
         const person = this.people[index];
@@ -105,27 +103,28 @@
             </div>
             <span :class="mode === 'manual' ? 'text-primary-700 dark:text-primary-300 font-semibold' : 'text-gray-700 dark:text-gray-300'" class="transition-colors">Вручну</span>
         </button>
-        <button type="button"
-                @click="mode = 'csv'"
-                :class="mode === 'csv'
-                    ? 'bg-gradient-to-br from-primary-50 to-emerald-50 dark:from-primary-900/30 dark:to-emerald-900/20 border-primary-500 shadow-lg'
-                    : 'bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 hover:border-gray-300 hover:shadow-md'"
-                class="group flex items-center justify-center gap-3 p-5 border-2 rounded-2xl transition-all duration-300">
-            <div :class="mode === 'csv' ? 'bg-gradient-to-br from-primary-500 to-emerald-600' : 'bg-gray-100 dark:bg-slate-600'"
-                 class="w-10 h-10 rounded-xl flex items-center justify-center transition-all">
-                <svg :class="mode === 'csv' ? 'text-white' : 'text-gray-500 dark:text-gray-400'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="{{ route('migration.planning-center') }}"
+                class="group flex items-center justify-center gap-3 p-5 border-2 rounded-2xl transition-all duration-300 bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 hover:border-primary-300 hover:shadow-lg hover:scale-[1.02]">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-gray-100 dark:bg-slate-600 group-hover:bg-gradient-to-br group-hover:from-primary-500 group-hover:to-emerald-600">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                 </svg>
             </div>
-            <span :class="mode === 'csv' ? 'text-primary-700 dark:text-primary-300 font-semibold' : 'text-gray-700 dark:text-gray-300'" class="transition-colors">CSV імпорт</span>
-        </button>
+            <div class="text-left">
+                <span class="text-gray-700 dark:text-gray-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 font-medium transition-colors block">Імпорт CSV</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">з мапінгом колонок</span>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+        </a>
     </div>
 
     <form class="space-y-6">
-        <input type="hidden" name="mode" :value="mode">
+        <input type="hidden" name="mode" value="manual">
 
         <!-- Manual Entry -->
-        <div x-show="mode === 'manual'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0">
+        <div>
             <template x-for="(person, index) in people" :key="index">
                 <div class="mb-4 p-5 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-slate-700/50 dark:to-slate-800/50 rounded-2xl border border-gray-200/50 dark:border-slate-600/50">
                     <div class="flex items-center justify-between mb-4">
@@ -230,65 +229,5 @@
             </div>
         </div>
 
-        <!-- CSV Upload -->
-        <div x-show="mode === 'csv'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0">
-            <div class="border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-300"
-                 x-data="{ dragging: false }"
-                 @dragover.prevent="dragging = true"
-                 @dragleave.prevent="dragging = false"
-                 @drop.prevent="dragging = false; fileName = $event.dataTransfer.files[0]?.name; $refs.csvFile.files = $event.dataTransfer.files"
-                 :class="dragging ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 scale-[1.02]' : fileName ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800/50'">
-                <input type="file" name="csv_file" accept=".csv,.txt" class="hidden" x-ref="csvFile"
-                       @change="fileName = $event.target.files[0]?.name">
-
-                <template x-if="!fileName">
-                    <div>
-                        <div class="w-20 h-20 mx-auto mb-5 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-600 rounded-2xl flex items-center justify-center">
-                            <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4 text-lg">Перетягніть CSV файл сюди або</p>
-                        <button type="button" @click="$refs.csvFile.click()"
-                                class="px-6 py-3 bg-gradient-to-r from-primary-500 to-emerald-600 hover:from-primary-600 hover:to-emerald-700 text-white rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 font-medium">
-                            Виберіть файл
-                        </button>
-                    </div>
-                </template>
-
-                <template x-if="fileName">
-                    <div class="flex items-center justify-center gap-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <div class="text-left">
-                            <p class="font-semibold text-gray-900 dark:text-white text-lg" x-text="fileName"></p>
-                            <p class="text-sm text-green-600 dark:text-green-400">Файл готовий до завантаження</p>
-                        </div>
-                        <button type="button" @click="fileName = ''; $refs.csvFile.value = ''"
-                                class="ml-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 p-3 rounded-xl transition-all hover:scale-110">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </div>
-                </template>
-            </div>
-
-            <div class="mt-5 p-5 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-slate-700/50 dark:to-slate-800/50 rounded-2xl border border-gray-200/50 dark:border-slate-600/50">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-emerald-600 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    Формат CSV
-                </h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Файл має містити заголовки:</p>
-                <code class="inline-block text-sm bg-white dark:bg-slate-700 px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-600 text-primary-600 dark:text-primary-400 font-mono">first_name, last_name, email, phone</code>
-            </div>
-        </div>
     </form>
 </div>
