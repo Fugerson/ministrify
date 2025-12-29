@@ -43,16 +43,16 @@
         </div>
 
         <div>
-            <label for="person_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Прив'язати до людини (необов'язково)</label>
-            <select name="person_id" id="person_id"
-                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                <option value="">-- Не прив'язувати --</option>
-                @foreach($people as $person)
-                <option value="{{ $person->id }}" {{ old('person_id') == $person->id ? 'selected' : '' }}>
-                    {{ $person->full_name }}
-                </option>
-                @endforeach
-            </select>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Прив'язати до людини (необов'язково)</label>
+            <div class="mt-1">
+                <x-person-select
+                    name="person_id"
+                    :people="$people"
+                    :selected="old('person_id')"
+                    placeholder="Почніть вводити ім'я..."
+                    null-text="Не прив'язувати"
+                />
+            </div>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Якщо обрати людину, користувач зможе бачити своє розклад та статистику</p>
         </div>
 

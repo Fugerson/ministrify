@@ -25,16 +25,14 @@
             </div>
 
             <div>
-                <label for="leader_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Лідер групи</label>
-                <select name="leader_id" id="leader_id"
-                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                    <option value="">Обрати лідера...</option>
-                    @foreach($people as $person)
-                    <option value="{{ $person->id }}" {{ old('leader_id', $group->leader_id) == $person->id ? 'selected' : '' }}>
-                        {{ $person->full_name }}
-                    </option>
-                    @endforeach
-                </select>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Лідер групи</label>
+                <x-person-select
+                    name="leader_id"
+                    :people="$people"
+                    :selected="old('leader_id', $group->leader_id)"
+                    placeholder="Почніть вводити ім'я лідера..."
+                    null-text="Без лідера"
+                />
             </div>
 
             <div>

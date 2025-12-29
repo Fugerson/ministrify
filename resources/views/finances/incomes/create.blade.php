@@ -99,15 +99,13 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Жертводавець
                     </label>
-                    <select name="person_id"
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">Не вказано</option>
-                        @foreach($people as $person)
-                            <option value="{{ $person->id }}" {{ old('person_id') == $person->id ? 'selected' : '' }}>
-                                {{ $person->full_name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <x-person-select
+                        name="person_id"
+                        :people="$people"
+                        :selected="old('person_id')"
+                        placeholder="Почніть вводити ім'я..."
+                        null-text="Не вказано"
+                    />
                 </div>
             </div>
 

@@ -391,17 +391,237 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                 </svg>
-                Імпорт з Planning Center
+                Імпорт CSV
             </a>
         </div>
     </div>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 </div>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/uk.js"></script>
+
+<style>
+/* Flatpickr base styles (inlined to avoid CSP issues) */
+.flatpickr-calendar {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
+    display: none;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 24px;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    text-align: center;
+    touch-action: manipulation;
+    visibility: hidden;
+    width: 307.875px;
+    z-index: 9999;
+}
+.flatpickr-calendar.open, .flatpickr-calendar.inline {
+    opacity: 1;
+    visibility: visible;
+    display: block;
+}
+.flatpickr-calendar.animate.open {
+    animation: fpFadeInDown 200ms ease-out;
+}
+@keyframes fpFadeInDown {
+    from { opacity: 0; transform: translate3d(0, -10px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.flatpickr-months {
+    display: flex;
+    align-items: center;
+    padding: 8px 4px;
+}
+.flatpickr-months .flatpickr-month {
+    flex: 1;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background 0.15s;
+}
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    background: #f3f4f6;
+}
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg {
+    width: 14px;
+    height: 14px;
+    fill: #6b7280;
+}
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+    fill: #111827;
+}
+
+.flatpickr-current-month {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 8px;
+    color: #111827;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+    background: #f3f4f6;
+}
+.flatpickr-current-month .numInputWrapper {
+    display: inline-flex;
+    align-items: center;
+}
+.flatpickr-current-month input.cur-year {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: text;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 8px;
+    width: 60px;
+    color: #111827;
+}
+.flatpickr-current-month .numInputWrapper span {
+    display: none;
+}
+
+.flatpickr-weekdays {
+    display: flex;
+    padding: 0 12px;
+    height: 28px;
+    align-items: center;
+}
+.flatpickr-weekdaycontainer {
+    display: flex;
+    flex: 1;
+}
+.flatpickr-weekday {
+    flex: 1;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+}
+
+.flatpickr-days {
+    padding: 4px 12px 12px;
+}
+.dayContainer {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 2px;
+}
+.flatpickr-day {
+    width: calc(100% / 7 - 2px);
+    max-width: 39px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+}
+.flatpickr-day:hover {
+    background: #f3f4f6;
+}
+.flatpickr-day.today {
+    border-color: #4f46e5;
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #4f46e5;
+}
+.flatpickr-day.inRange {
+    background: #eef2ff;
+    border-color: #eef2ff;
+}
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+    color: #d1d5db;
+}
+.flatpickr-day.disabled {
+    color: #d1d5db;
+    cursor: not-allowed;
+}
+
+/* Dark mode */
+.dark .flatpickr-calendar {
+    background: #1f2937;
+    border-color: #374151;
+}
+.dark .flatpickr-months .flatpickr-prev-month:hover,
+.dark .flatpickr-months .flatpickr-next-month:hover {
+    background: #374151;
+}
+.dark .flatpickr-months .flatpickr-prev-month svg,
+.dark .flatpickr-months .flatpickr-next-month svg {
+    fill: #9ca3af;
+}
+.dark .flatpickr-months .flatpickr-prev-month:hover svg,
+.dark .flatpickr-months .flatpickr-next-month:hover svg {
+    fill: #fff;
+}
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months,
+.dark .flatpickr-current-month input.cur-year {
+    color: #fff;
+}
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+    background: #374151;
+}
+.dark .flatpickr-weekday {
+    color: #6b7280;
+}
+.dark .flatpickr-day {
+    color: #e5e7eb;
+}
+.dark .flatpickr-day:hover {
+    background: #374151;
+}
+.dark .flatpickr-day.inRange {
+    background: #312e81;
+    border-color: #312e81;
+}
+.dark .flatpickr-day.prevMonthDay,
+.dark .flatpickr-day.nextMonthDay {
+    color: #6b7280;
+}
+</style>
 
 <script>
 function peopleTable() {
@@ -438,14 +658,14 @@ function peopleTable() {
         },
 
         initDatePicker() {
-            const isDark = document.documentElement.classList.contains('dark');
             this.flatpickrInstance = flatpickr(this.$refs.dateRange, {
                 mode: 'range',
                 dateFormat: 'd.m.Y',
                 locale: 'uk',
                 allowInput: false,
                 clickOpens: true,
-                theme: isDark ? 'dark' : 'light',
+                disableMobile: true,
+                appendTo: document.body,
                 onChange: (dates, dateStr) => {
                     if (dates.length === 2) {
                         this.filters.birth_from = dates[0].toISOString().split('T')[0];
