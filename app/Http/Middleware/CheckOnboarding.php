@@ -32,6 +32,12 @@ class CheckOnboarding
             return $next($request);
         }
 
+        // Skip for invited admins (they didn't start onboarding themselves)
+        // Only the church creator who started onboarding should see it
+        if (!$user->onboarding_started_at) {
+            return $next($request);
+        }
+
         // Skip if already on onboarding routes
         if ($request->is('onboarding*')) {
             return $next($request);
