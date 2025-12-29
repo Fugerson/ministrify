@@ -377,9 +377,122 @@
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/uk.js"></script>
+
+<style>
+/* Flatpickr custom styles */
+.flatpickr-calendar {
+    z-index: 9999 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #e5e7eb !important;
+    font-family: inherit !important;
+}
+
+.flatpickr-calendar.arrowTop:after,
+.flatpickr-calendar.arrowTop:before {
+    display: none !important;
+}
+
+.flatpickr-months {
+    padding: 8px !important;
+}
+
+.flatpickr-month {
+    height: 36px !important;
+}
+
+.flatpickr-current-month {
+    padding-top: 0 !important;
+}
+
+.flatpickr-monthDropdown-months {
+    font-weight: 600 !important;
+    background: transparent !important;
+}
+
+.flatpickr-weekdays {
+    background: transparent !important;
+}
+
+.flatpickr-weekday {
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+}
+
+.flatpickr-day {
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+}
+
+.flatpickr-day:hover {
+    background: #f3f4f6 !important;
+    border-color: #f3f4f6 !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+}
+
+.flatpickr-day.inRange {
+    background: #eef2ff !important;
+    border-color: #eef2ff !important;
+    box-shadow: none !important;
+}
+
+.flatpickr-day.today:not(.selected) {
+    border-color: #4f46e5 !important;
+}
+
+/* Dark mode styles */
+.dark .flatpickr-calendar {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+.dark .flatpickr-months .flatpickr-prev-month,
+.dark .flatpickr-months .flatpickr-next-month {
+    fill: #9ca3af !important;
+}
+
+.dark .flatpickr-months .flatpickr-prev-month:hover,
+.dark .flatpickr-months .flatpickr-next-month:hover {
+    fill: #fff !important;
+}
+
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months,
+.dark .flatpickr-current-month input.cur-year {
+    color: #fff !important;
+}
+
+.dark .flatpickr-weekday {
+    color: #9ca3af !important;
+}
+
+.dark .flatpickr-day {
+    color: #e5e7eb !important;
+}
+
+.dark .flatpickr-day:hover {
+    background: #374151 !important;
+    border-color: #374151 !important;
+}
+
+.dark .flatpickr-day.inRange {
+    background: #312e81 !important;
+    border-color: #312e81 !important;
+}
+
+.dark .flatpickr-day.prevMonthDay,
+.dark .flatpickr-day.nextMonthDay {
+    color: #6b7280 !important;
+}
+</style>
 
 <script>
 function peopleTable() {
@@ -416,14 +529,14 @@ function peopleTable() {
         },
 
         initDatePicker() {
-            const isDark = document.documentElement.classList.contains('dark');
             this.flatpickrInstance = flatpickr(this.$refs.dateRange, {
                 mode: 'range',
                 dateFormat: 'd.m.Y',
                 locale: 'uk',
                 allowInput: false,
                 clickOpens: true,
-                theme: isDark ? 'dark' : 'light',
+                disableMobile: true,
+                appendTo: document.body,
                 onChange: (dates, dateStr) => {
                     if (dates.length === 2) {
                         this.filters.birth_from = dates[0].toISOString().split('T')[0];
