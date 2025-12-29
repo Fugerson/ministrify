@@ -65,12 +65,16 @@ class UserController extends Controller
             }
         }
 
-        // Send password reset link instead of showing password
-        $status = Password::sendResetLink(['email' => $user->email]);
-
-        $message = $status === Password::RESET_LINK_SENT
-            ? 'Користувача створено. Посилання для входу надіслано на email.'
-            : 'Користувача створено. Надішліть запрошення вручну.';
+        // Try to send password reset link
+        $message = 'Користувача створено.';
+        try {
+            $status = Password::sendResetLink(['email' => $user->email]);
+            if ($status === Password::RESET_LINK_SENT) {
+                $message .= ' Посилання для входу надіслано на email.';
+            }
+        } catch (\Exception $e) {
+            $message .= ' Налаштуйте пароль вручну або надішліть запрошення пізніше.';
+        }
 
         return redirect()->route('settings.users.index')
             ->with('success', $message);
