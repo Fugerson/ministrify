@@ -301,12 +301,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Людина</label>
-                        <select name="person_id" required class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="">Оберіть...</option>
-                            @foreach($availablePeople as $person)
-                            <option value="{{ $person->id }}">{{ $person->full_name }}</option>
-                            @endforeach
-                        </select>
+                        <x-person-select name="person_id" :people="$availablePeople" :required="true" :nullable="false" placeholder="Пошук людини..." />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Роль</label>

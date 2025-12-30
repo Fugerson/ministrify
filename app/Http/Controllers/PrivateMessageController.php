@@ -8,17 +8,6 @@ use Illuminate\Http\Request;
 
 class PrivateMessageController extends Controller
 {
-    public function __construct()
-    {
-        // Super admins don't have a church, so PM is not available for them
-        $this->middleware(function ($request, $next) {
-            if (!auth()->user()->church_id) {
-                abort(403, 'Приватні повідомлення недоступні без церкви');
-            }
-            return $next($request);
-        });
-    }
-
     /**
      * Display inbox - list of conversations
      */

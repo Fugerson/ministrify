@@ -30,17 +30,27 @@
                 </div>
 
                 <div>
-                    <label for="leader_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Лідер</label>
-                    <select name="leader_id" id="leader_id"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">Не вибрано</option>
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $people; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $person): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($person->id); ?>" <?php echo e(old('leader_id') == $person->id ? 'selected' : ''); ?>>
-                                <?php echo e($person->full_name); ?>
-
-                            </option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Лідер</label>
+                    <?php if (isset($component)) { $__componentOriginaldc128e045e365e722151ae7c115e6fd4 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginaldc128e045e365e722151ae7c115e6fd4 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.person-select','data' => ['name' => 'leader_id','people' => $people,'selected' => old('leader_id'),'placeholder' => 'Пошук лідера...']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('person-select'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['name' => 'leader_id','people' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($people),'selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(old('leader_id')),'placeholder' => 'Пошук лідера...']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginaldc128e045e365e722151ae7c115e6fd4)): ?>
+<?php $attributes = $__attributesOriginaldc128e045e365e722151ae7c115e6fd4; ?>
+<?php unset($__attributesOriginaldc128e045e365e722151ae7c115e6fd4); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginaldc128e045e365e722151ae7c115e6fd4)): ?>
+<?php $component = $__componentOriginaldc128e045e365e722151ae7c115e6fd4; ?>
+<?php unset($__componentOriginaldc128e045e365e722151ae7c115e6fd4); ?>
+<?php endif; ?>
                 </div>
 
                 <div>

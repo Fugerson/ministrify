@@ -106,7 +106,7 @@
                 <label for="logo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Логотип</label>
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($church->logo): ?>
                     <div class="mb-2">
-                        <img src="<?php echo e(Storage::url($church->logo)); ?>" class="w-16 h-16 object-contain rounded-lg">
+                        <img src="<?php echo e(Storage::url($church->logo)); ?>" alt="<?php echo e($church->name); ?> логотип" class="w-16 h-16 object-contain rounded-lg">
                     </div>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 <input type="file" name="logo" id="logo" accept="image/*"
