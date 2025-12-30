@@ -91,8 +91,12 @@ class PrivateMessage extends Model
     /**
      * Count unread messages for user
      */
-    public static function unreadCount(int $churchId, int $userId): int
+    public static function unreadCount(?int $churchId, int $userId): int
     {
+        if ($churchId === null) {
+            return 0;
+        }
+
         return static::where('church_id', $churchId)
             ->where('recipient_id', $userId)
             ->whereNull('read_at')
