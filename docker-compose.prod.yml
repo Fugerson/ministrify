@@ -51,7 +51,7 @@ services:
     container_name: ministrify_nginx
     restart: always
     ports:
-      - "8080:80"
+      - "8082:80"
       # SSL handled by host nginx
     volumes:
       - app_storage:/var/www/html/storage/app/public:ro
