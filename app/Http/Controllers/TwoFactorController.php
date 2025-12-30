@@ -170,7 +170,8 @@ class TwoFactorController extends Controller
             auth()->login($user, session('2fa_remember', false));
             session()->forget('2fa_remember');
 
-            return redirect()->intended(route('dashboard'));
+            $redirect = $user->isSuperAdmin() ? route('system.index') : route('dashboard');
+            return redirect()->intended($redirect);
         }
 
         // Try recovery code
@@ -179,7 +180,8 @@ class TwoFactorController extends Controller
             auth()->login($user, session('2fa_remember', false));
             session()->forget('2fa_remember');
 
-            return redirect()->intended(route('dashboard'))
+            $redirect = $user->isSuperAdmin() ? route('system.index') : route('dashboard');
+            return redirect()->intended($redirect)
                 ->with('warning', 'Ви використали код відновлення. Залишилось: ' .
                     count(json_decode(decrypt($user->two_factor_recovery_codes), true)));
         }

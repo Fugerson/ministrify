@@ -36,8 +36,9 @@
     <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
     <title><?php echo e(config('app.name', 'Ministrify')); ?> - <?php echo $__env->yieldContent('title', 'Головна'); ?></title>
 

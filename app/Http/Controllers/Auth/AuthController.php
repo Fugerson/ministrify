@@ -57,6 +57,11 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent(),
             ]);
 
+            // Redirect super admins to system admin panel
+            if ($user->isSuperAdmin()) {
+                return redirect()->intended(route('system.index'));
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 
