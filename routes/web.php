@@ -520,6 +520,18 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::post('{song}/add-to-event', [\App\Http\Controllers\SongController::class, 'addToEvent'])->name('add-to-event');
     });
 
+    // Resources (files & folders)
+    Route::prefix('resources')->name('resources.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ResourceController::class, 'index'])->name('index');
+        Route::get('folder/{folder}', [\App\Http\Controllers\ResourceController::class, 'index'])->name('folder');
+        Route::post('folder', [\App\Http\Controllers\ResourceController::class, 'createFolder'])->name('folder.create');
+        Route::post('upload', [\App\Http\Controllers\ResourceController::class, 'upload'])->name('upload');
+        Route::get('{resource}/download', [\App\Http\Controllers\ResourceController::class, 'download'])->name('download');
+        Route::put('{resource}/rename', [\App\Http\Controllers\ResourceController::class, 'rename'])->name('rename');
+        Route::put('{resource}/move', [\App\Http\Controllers\ResourceController::class, 'move'])->name('move');
+        Route::delete('{resource}', [\App\Http\Controllers\ResourceController::class, 'destroy'])->name('destroy');
+    });
+
     // Reports (admin and leaders)
     Route::middleware('role:admin,leader')->prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ReportsController::class, 'index'])->name('index');
