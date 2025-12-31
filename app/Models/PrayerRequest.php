@@ -17,6 +17,10 @@ class PrayerRequest extends Model
         'church_id',
         'person_id',
         'user_id',
+        'submitter_name',
+        'submitter_email',
+        'is_from_public',
+        'notify_on_prayer',
         'title',
         'description',
         'is_anonymous',
@@ -32,6 +36,8 @@ class PrayerRequest extends Model
         'is_anonymous' => 'boolean',
         'is_public' => 'boolean',
         'is_urgent' => 'boolean',
+        'is_from_public' => 'boolean',
+        'notify_on_prayer' => 'boolean',
         'answered_at' => 'datetime',
     ];
 
