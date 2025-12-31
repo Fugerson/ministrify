@@ -90,6 +90,17 @@
         }
         .dark body { background-color: #111827; }
 
+        /* Mobile viewport fixes */
+        @supports (height: 100dvh) {
+            .h-dvh { height: 100dvh; }
+            .min-h-dvh { min-height: 100dvh; }
+        }
+
+        /* Fix for mobile bottom nav spacing */
+        @media (max-width: 1023px) {
+            .mobile-safe-bottom { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+        }
+
         /* Custom Scrollbars - Minimalistic Design */
         * {
             scrollbar-width: thin;
@@ -653,6 +664,7 @@
                     </svg>
                     Оголошення
                 </a>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->church_id): ?>
                 <div x-data="pmBadge()" x-init="startPolling()" @pm-read.window="fetchCount()">
                     <a href="<?php echo e(route('pm.index')); ?>" class="flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl <?php echo e(request()->routeIs('pm.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'); ?>">
                         <span class="flex items-center">
@@ -667,6 +679,7 @@
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </a>
                 </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 <a href="<?php echo e(route('prayer-requests.index')); ?>" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl <?php echo e(request()->routeIs('prayer-requests.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'); ?>">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -698,11 +711,11 @@
                     </svg>
                     Звіти
                 </a>
-                <a href="<?php echo e(route('songs.index')); ?>" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl <?php echo e(request()->routeIs('songs.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'); ?>">
+                <a href="<?php echo e(route('resources.index')); ?>" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl <?php echo e(request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'); ?>">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                     </svg>
-                    Пісні
+                    Ресурси
                 </a>
                 <a href="<?php echo e(route('messages.index')); ?>" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl <?php echo e(request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'); ?>">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -735,9 +748,15 @@
                     </svg>
                     Налаштування
                 </a>
+                <a href="<?php echo e(route('website-builder.index')); ?>" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl <?php echo e(request()->routeIs('website-builder.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'); ?>">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                    </svg>
+                    Конструктор сайту
+                </a>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->isSuperAdmin()): ?>
+                <?php if(auth()->user()->isSuperAdmin()): ?>
                 <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
                     <p class="px-3 text-xs font-semibold text-red-400 uppercase tracking-wider">System Admin</p>
                 </div>
@@ -859,8 +878,12 @@
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     Налаштування
                 </a>
+                <a href="<?php echo e(route('website-builder.index')); ?>" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl <?php echo e(request()->routeIs('website-builder.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'); ?>">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                    Конструктор сайту
+                </a>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->isSuperAdmin()): ?>
+                <?php if(auth()->user()->isSuperAdmin()): ?>
                 <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700"><p class="px-4 text-xs font-semibold text-red-400 uppercase">System Admin</p></div>
                 <a href="<?php echo e(route('system.index')); ?>" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
@@ -1217,9 +1240,19 @@
             str_starts_with($routeName, 'boards.show') => 'boards.show',
             str_starts_with($routeName, 'boards') => 'boards',
             str_starts_with($routeName, 'groups') => 'groups',
-            str_starts_with($routeName, 'expenses') => 'expenses',
+            str_starts_with($routeName, 'expenses') || str_starts_with($routeName, 'finances') => 'finances',
             str_starts_with($routeName, 'settings') => 'settings',
             str_starts_with($routeName, 'attendance') => 'attendance',
+            str_starts_with($routeName, 'resources') => 'resources',
+            str_starts_with($routeName, 'messages') => 'messages',
+            str_starts_with($routeName, 'prayer-requests') => 'prayer-requests',
+            str_starts_with($routeName, 'songs') => 'songs',
+            str_starts_with($routeName, 'reports') => 'reports',
+            str_starts_with($routeName, 'announcements') => 'announcements',
+            str_starts_with($routeName, 'private-messages') => 'private-messages',
+            str_starts_with($routeName, 'donations') => 'donations',
+            str_starts_with($routeName, 'rotation') => 'rotation',
+            str_starts_with($routeName, 'security') => 'security',
             default => null,
         };
     ?>

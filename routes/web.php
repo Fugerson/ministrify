@@ -363,17 +363,18 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
 
         // Sections (drag & drop manager)
         Route::get('sections', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'index'])->name('sections.index');
-        Route::post('sections/reorder', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'reorder'])->name('sections.reorder');
+        Route::post('sections', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'update'])->name('sections.update');
         Route::post('sections/{section}/toggle', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'toggle'])->name('sections.toggle');
 
         // Design (colors, fonts, hero, navigation)
         Route::get('design', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'index'])->name('design.index');
-        Route::put('design/colors', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateColors'])->name('design.colors');
-        Route::put('design/fonts', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateFonts'])->name('design.fonts');
-        Route::put('design/hero', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateHero'])->name('design.hero');
-        Route::put('design/navigation', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateNavigation'])->name('design.navigation');
-        Route::put('design/buttons', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateButtons'])->name('design.buttons');
-        Route::put('design/custom-css', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateCustomCss'])->name('design.custom-css');
+        Route::post('design/colors', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateColors'])->name('design.colors');
+        Route::post('design/fonts', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateFonts'])->name('design.fonts');
+        Route::post('design/hero', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateHero'])->name('design.hero');
+        Route::post('design/hero/image', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'uploadHeroImage'])->name('design.hero.image');
+        Route::post('design/navigation', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateNavigation'])->name('design.navigation');
+        Route::post('design/footer', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateFooter'])->name('design.footer');
+        Route::post('design/css', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateCustomCss'])->name('design.css');
 
         // About Us content
         Route::get('about', [\App\Http\Controllers\WebsiteBuilder\AboutController::class, 'edit'])->name('about.edit');
@@ -385,18 +386,25 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
 
         // Sermons management
         Route::resource('sermons', \App\Http\Controllers\WebsiteBuilder\SermonController::class);
-        Route::resource('sermon-series', \App\Http\Controllers\WebsiteBuilder\SermonSeriesController::class);
+        Route::get('sermons-series', [\App\Http\Controllers\WebsiteBuilder\SermonController::class, 'seriesIndex'])->name('sermons.series.index');
+        Route::post('sermons-series', [\App\Http\Controllers\WebsiteBuilder\SermonController::class, 'seriesStore'])->name('sermons.series.store');
+        Route::put('sermons-series/{series}', [\App\Http\Controllers\WebsiteBuilder\SermonController::class, 'seriesUpdate'])->name('sermons.series.update');
+        Route::delete('sermons-series/{series}', [\App\Http\Controllers\WebsiteBuilder\SermonController::class, 'seriesDestroy'])->name('sermons.series.destroy');
 
         // Gallery management
         Route::resource('gallery', \App\Http\Controllers\WebsiteBuilder\GalleryController::class);
         Route::post('gallery/{gallery}/photos', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'uploadPhotos'])->name('gallery.photos.upload');
-        Route::delete('gallery/{gallery}/photos/{photo}', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'deletePhoto'])->name('gallery.photos.delete');
+        Route::delete('gallery/photos/{photo}', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'deletePhoto'])->name('gallery.photos.delete');
         Route::post('gallery/{gallery}/photos/reorder', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'reorderPhotos'])->name('gallery.photos.reorder');
+        Route::post('gallery/reorder', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'reorder'])->name('gallery.reorder');
 
         // Blog management
         Route::resource('blog', \App\Http\Controllers\WebsiteBuilder\BlogController::class);
-        Route::resource('blog-categories', \App\Http\Controllers\WebsiteBuilder\BlogCategoryController::class)->except(['show']);
-        Route::post('blog/{post}/publish', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'publish'])->name('blog.publish');
+        Route::get('blog-categories', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'categoriesIndex'])->name('blog.categories.index');
+        Route::post('blog-categories', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'categoryStore'])->name('blog.categories.store');
+        Route::put('blog-categories/{category}', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'categoryUpdate'])->name('blog.categories.update');
+        Route::delete('blog-categories/{category}', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'categoryDestroy'])->name('blog.categories.destroy');
+        Route::post('blog/{blogPost}/publish', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'publish'])->name('blog.publish');
 
         // FAQ management
         Route::resource('faq', \App\Http\Controllers\WebsiteBuilder\FaqController::class)->except(['show']);

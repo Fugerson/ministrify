@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class AboutController extends Controller
 {
-    public function index()
+    public function edit()
     {
         $church = auth()->user()->church;
         $aboutContent = $church->about_content;
