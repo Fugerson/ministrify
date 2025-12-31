@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Church;
+use App\Models\TelegramMessage;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,6 +44,15 @@ class EnsureChurchContext
 
         // Share church with all views
         view()->share('currentChurch', $church);
+
+        // Share unread Telegram messages count for admins
+        if ($user->isAdmin()) {
+            $unreadTelegramCount = TelegramMessage::where('church_id', $church->id)
+                ->where('direction', 'incoming')
+                ->where('is_read', false)
+                ->count();
+            view()->share('unreadTelegramCount', $unreadTelegramCount);
+        }
 
         return $next($request);
     }
