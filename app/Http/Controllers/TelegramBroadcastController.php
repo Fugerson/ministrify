@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Person;
+use App\Models\TelegramMessage;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 
@@ -49,6 +50,16 @@ class TelegramBroadcastController extends Controller
         foreach ($recipients as $person) {
             try {
                 $telegram->sendMessage($person->telegram_chat_id, $validated['message']);
+
+                // Save outgoing message
+                TelegramMessage::create([
+                    'church_id' => $church->id,
+                    'person_id' => $person->id,
+                    'direction' => 'outgoing',
+                    'message' => $validated['message'],
+                    'is_read' => true,
+                ]);
+
                 $sent++;
             } catch (\Exception $e) {
                 $failed++;

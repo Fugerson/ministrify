@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Church;
 use App\Models\Person;
+use App\Models\TelegramMessage;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -115,6 +116,18 @@ class TelegramController extends Controller
         // Check if this is a linking code
         if (preg_match('/^[A-Z0-9]{6}$/', $text)) {
             return $this->handleLinkingCode($text, $chatId, $message);
+        }
+
+        // Save incoming message if person is linked
+        if ($person && !empty($text)) {
+            TelegramMessage::create([
+                'church_id' => $person->church_id,
+                'person_id' => $person->id,
+                'direction' => 'incoming',
+                'message' => $text,
+                'telegram_message_id' => $message['message_id'] ?? null,
+                'is_read' => false,
+            ]);
         }
 
         return response()->json(['ok' => true]);

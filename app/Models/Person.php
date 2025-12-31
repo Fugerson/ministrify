@@ -631,4 +631,9 @@ class Person extends Model
     {
         return SchedulingPreference::getOrCreate($this->id, $this->church_id);
     }
+
+    public function telegramMessages(): HasMany
+    {
+        return $this->hasMany(TelegramMessage::class);
+    }
 }
