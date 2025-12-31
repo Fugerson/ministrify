@@ -44,7 +44,19 @@ class PublicSiteController extends Controller
             ->where('is_active', true)
             ->get();
 
-        return view('public.church', compact('church', 'upcomingEvents', 'ministries', 'groups', 'campaigns'));
+        // Website builder content
+        $enabledSections = $church->enabled_sections;
+        $staff = $church->public_staff;
+        $sermons = $church->public_sermons;
+        $galleries = $church->public_galleries;
+        $faqs = $church->public_faqs;
+        $testimonials = $church->public_testimonials;
+        $blogPosts = $church->public_blog_posts;
+
+        return view('public.church', compact(
+            'church', 'upcomingEvents', 'ministries', 'groups', 'campaigns',
+            'enabledSections', 'staff', 'sermons', 'galleries', 'faqs', 'testimonials', 'blogPosts'
+        ));
     }
 
     // Events listing
