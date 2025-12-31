@@ -135,7 +135,7 @@
                     @endif
                     <div class="p-5 text-center">
                         <h3 class="font-semibold text-gray-900">{{ $member->name }}</h3>
-                        <p class="text-sm text-primary-600">{{ $member->role }}</p>
+                        <p class="text-sm text-primary-600">{{ $member->title }}</p>
                         @if($member->bio)
                             <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ $member->bio }}</p>
                         @endif

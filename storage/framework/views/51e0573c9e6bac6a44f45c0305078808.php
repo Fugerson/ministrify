@@ -1,0 +1,590 @@
+<?php $__env->startSection('title', 'Повідомлення'); ?>
+
+<?php $__env->startSection('content'); ?>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="messengerApp()">
+    <div class="flex bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden" style="height: calc(100vh - 140px - env(safe-area-inset-bottom, 0px)); min-height: 500px; max-height: calc(100dvh - 140px);">
+
+        <!-- Left Sidebar: Conversations List -->
+        <div class="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 flex flex-col"
+             :class="{ 'hidden md:flex': selectedUser }">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">Повідомлення</h1>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($unreadCount > 0): ?>
+                    <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full">
+                        <?php echo e($unreadCount); ?>
+
+                    </span>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+
+                <!-- Search / New Chat -->
+                <div class="relative">
+                    <input type="text" x-model="searchQuery" @input="filterConversations"
+                           class="w-full pl-10 pr-10 py-2.5 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500"
+                           placeholder="Пошук або почати новий чат...">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <button @click="showNewChat = true" type="button"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Conversations -->
+            <div class="flex-1 overflow-y-auto">
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $conversations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $userId => $lastMessage): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
+                        $otherUser = $lastMessage->sender_id === auth()->id() ? $lastMessage->recipient : $lastMessage->sender;
+                        $isUnread = $lastMessage->recipient_id === auth()->id() && !$lastMessage->read_at;
+                    ?>
+                    <button type="button"
+                        @click="selectUser(<?php echo e($otherUser->id); ?>, '<?php echo e(addslashes($otherUser->name)); ?>', '<?php echo e($otherUser->role); ?>')"
+                        class="w-full flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
+                        :class="{
+                            'bg-primary-50 dark:bg-primary-900/20': selectedUser?.id === <?php echo e($otherUser->id); ?>,
+                            'bg-blue-50 dark:bg-blue-900/10': <?php echo e($isUnread ? 'true' : 'false'); ?> && selectedUser?.id !== <?php echo e($otherUser->id); ?>
+
+                        }">
+                        <!-- Avatar -->
+                        <div class="relative flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-sm">
+                                <span class="text-lg font-semibold text-white"><?php echo e(mb_substr($otherUser->name, 0, 1)); ?></span>
+                            </div>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isUnread): ?>
+                            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-primary-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-1 ml-3 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-900 dark:text-white truncate <?php echo e($isUnread ? 'text-primary-700 dark:text-primary-400' : ''); ?>">
+                                    <?php echo e($otherUser->name); ?>
+
+                                </h3>
+                                <span class="text-xs text-gray-400 ml-2 flex-shrink-0">
+                                    <?php echo e($lastMessage->created_at->isToday() ? $lastMessage->created_at->format('H:i') : $lastMessage->created_at->format('d.m')); ?>
+
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5 <?php echo e($isUnread ? 'font-medium text-gray-700 dark:text-gray-300' : ''); ?>">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lastMessage->sender_id === auth()->id()): ?>
+                                <span class="text-gray-400">Ви:</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php echo e(Str::limit($lastMessage->message, 45)); ?>
+
+                            </p>
+                        </div>
+                    </button>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <div class="px-4 py-8 text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає чатів</p>
+                        <button @click="showNewChat = true" class="mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium">
+                            Почати новий чат
+                        </button>
+                    </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Right: Chat Area -->
+        <div class="flex-1 flex flex-col" :class="{ 'hidden': !selectedUser && window.innerWidth < 768 }">
+            <!-- No chat selected -->
+            <template x-if="!selectedUser">
+                <div class="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                    <div class="text-center px-4">
+                        <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-full flex items-center justify-center">
+                            <svg class="w-12 h-12 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Приватні повідомлення</h2>
+                        <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
+                            Оберіть чат зі списку або почніть нову розмову з членом церкви
+                        </p>
+                        <button @click="showNewChat = true"
+                                class="inline-flex items-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Новий чат
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Chat selected -->
+            <template x-if="selectedUser">
+                <div class="flex flex-col h-full">
+                    <!-- Chat Header -->
+                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center bg-white dark:bg-gray-800">
+                        <button @click="selectedUser = null" class="md:hidden p-2 -ml-2 mr-2 text-gray-400 hover:text-gray-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                            <span class="text-lg font-semibold text-white" x-text="selectedUser.name.charAt(0)"></span>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h2 class="font-semibold text-gray-900 dark:text-white" x-text="selectedUser.name"></h2>
+                            <p class="text-xs text-gray-500" x-text="selectedUser.role === 'admin' ? 'Адміністратор' : (selectedUser.role === 'leader' ? 'Лідер' : 'Служитель')"></p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span x-show="isTyping" class="text-xs text-primary-600 animate-pulse">Друкує...</span>
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-900" x-ref="messagesContainer" id="chatMessages">
+                        <div class="flex justify-center">
+                            <span x-show="loadingMessages" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-500 text-xs rounded-full animate-pulse">
+                                Завантаження...
+                            </span>
+                        </div>
+
+                        <template x-for="(msg, index) in messages" :key="msg.id">
+                            <div>
+                                <!-- Date separator -->
+                                <template x-if="index === 0 || messages[index-1]?.date !== msg.date">
+                                    <div class="flex items-center justify-center my-4">
+                                        <span class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full"
+                                              x-text="msg.date === todayDate ? 'Сьогодні' : msg.date"></span>
+                                    </div>
+                                </template>
+
+                                <!-- Message bubble -->
+                                <div class="flex" :class="msg.is_mine ? 'justify-end' : 'justify-start'">
+                                    <div class="max-w-[70%] group relative"
+                                         :class="msg.is_mine ? 'order-1' : 'order-2'">
+                                        <div class="px-4 py-2.5 rounded-2xl shadow-sm"
+                                             :class="msg.is_mine ? 'bg-primary-600 text-white rounded-br-md' : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-md'">
+                                            <p class="text-sm whitespace-pre-wrap break-words" x-text="msg.message"></p>
+                                            <div class="flex items-center justify-end gap-1 mt-1">
+                                                <span class="text-xs opacity-70" x-text="msg.time"></span>
+                                                <template x-if="msg.is_mine">
+                                                    <svg class="w-4 h-4" :class="msg.read ? 'text-blue-300' : 'text-white/50'" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
+                                                    </svg>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div x-show="messages.length === 0 && !loadingMessages" class="text-center py-8">
+                            <p class="text-gray-500 dark:text-gray-400">Почніть спілкування!</p>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                        <form @submit.prevent="sendMessage" class="flex items-end gap-3">
+                            <div class="flex-1 relative">
+                                <textarea x-model="newMessage"
+                                          x-ref="messageInput"
+                                          @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
+                                          @input="autoResize($el); emitTyping()"
+                                          rows="1"
+                                          placeholder="Написати повідомлення..."
+                                          class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-0 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 resize-none max-h-32"></textarea>
+                            </div>
+                            <button type="submit"
+                                    :disabled="!newMessage.trim() || sending"
+                                    class="p-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-xl transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100">
+                                <svg x-show="!sending" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                </svg>
+                                <svg x-show="sending" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- New Chat Modal -->
+    <div x-show="showNewChat" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-gray-900/50" @click="showNewChat = false"></div>
+            <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <span x-show="!composeMode">Нове повідомлення</span>
+                        <span x-show="composeMode === 'all'">Написати всім</span>
+                        <span x-show="composeMode === 'user'" x-text="'Написати: ' + (composeRecipient?.name || '')"></span>
+                    </h3>
+                    <button @click="showNewChat = false; composeMode = null; composeRecipient = null; composeMessage = ''" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Mode Selection -->
+                <div x-show="!composeMode" class="p-4 space-y-3">
+                    <!-- Search users with dropdown -->
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Оберіть отримувача</label>
+                        <div class="relative">
+                            <input type="text"
+                                   x-model="userSearch"
+                                   @focus="showUserDropdown = true"
+                                   @click="showUserDropdown = true"
+                                   placeholder="Почніть вводити ім'я..."
+                                   class="w-full px-4 py-3 pl-10 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 cursor-pointer"
+                                 @click="showUserDropdown = !showUserDropdown"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+
+                        <!-- Dropdown with users -->
+                        <div x-show="showUserDropdown"
+                             @click.away="showUserDropdown = false"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             class="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg">
+
+                            <!-- Write to All option -->
+                            <button type="button"
+                                    @click="composeMode = 'all'; showUserDropdown = false"
+                                    class="w-full flex items-center px-4 py-3 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors text-left border-b border-gray-100 dark:border-gray-700">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="font-medium text-primary-600 dark:text-primary-400">Написати всім</p>
+                                    <p class="text-xs text-gray-500">Надіслати всім користувачам церкви</p>
+                                </div>
+                            </button>
+
+                            <!-- Users list -->
+                            <?php
+                                // For System Admin: show all users
+                                // For regular users: show users from the same church
+                                if (auth()->user()->is_super_admin) {
+                                    $availableUsers = \App\Models\User::where('id', '!=', auth()->id())
+                                        ->orderBy('name')
+                                        ->get();
+                                } else {
+                                    $availableUsers = \App\Models\User::where('church_id', auth()->user()->church_id)
+                                        ->where('id', '!=', auth()->id())
+                                        ->orderBy('name')
+                                        ->get();
+                                }
+                            ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($availableUsers->isEmpty()): ?>
+                                <div class="px-4 py-6 text-center">
+                                    <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Немає користувачів</p>
+                                </div>
+                            <?php else: ?>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $availableUsers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <button type="button"
+                                            @click="composeMode = 'user'; composeRecipient = { id: <?php echo e($user->id); ?>, name: '<?php echo e(addslashes($user->name)); ?>', role: '<?php echo e($user->role); ?>' }; showUserDropdown = false; userSearch = ''"
+                                            x-show="userSearch === '' || '<?php echo e(mb_strtolower($user->name)); ?>'.indexOf(userSearch.toLowerCase()) !== -1"
+                                            class="w-full flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                                            <span class="text-lg font-semibold text-white"><?php echo e(mb_substr($user->name, 0, 1)); ?></span>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="font-medium text-gray-900 dark:text-white"><?php echo e($user->name); ?></p>
+                                            <p class="text-xs text-gray-500"><?php echo e($user->role === 'admin' ? 'Адміністратор' : ($user->role === 'leader' ? 'Лідер' : 'Служитель')); ?></p>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->is_super_admin && $user->church): ?>
+                                                <p class="text-xs text-gray-400"><?php echo e($user->church->name); ?></p>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </div>
+                                    </button>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compose Message (when mode selected) -->
+                <template x-if="composeMode">
+                    <div class="p-4 space-y-4">
+                        <button @click="composeMode = null; composeRecipient = null" class="flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            Назад
+                        </button>
+
+                        <div x-show="composeMode === 'all'" class="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-xl">
+                            <div class="flex items-center text-primary-700 dark:text-primary-400">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-sm">Повідомлення буде надіслано всім користувачам церкви</span>
+                            </div>
+                        </div>
+
+                        <textarea x-model="composeMessage"
+                                  rows="4"
+                                  placeholder="Введіть повідомлення..."
+                                  class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 resize-none"></textarea>
+
+                        <div class="flex justify-end gap-3">
+                            <button @click="showNewChat = false; composeMode = null; composeRecipient = null; composeMessage = ''"
+                                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                                Скасувати
+                            </button>
+                            <button @click="sendComposeMessage()"
+                                    :disabled="!composeMessage.trim() || composeSending"
+                                    class="px-5 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white font-medium rounded-xl transition-colors flex items-center gap-2">
+                                <svg x-show="!composeSending" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                </svg>
+                                <svg x-show="composeSending" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <span x-text="composeMode === 'all' ? 'Надіслати всім' : 'Надіслати'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function messengerApp() {
+    return {
+        searchQuery: '',
+        showNewChat: false,
+        userSearch: '',
+        selectedUser: null,
+        messages: [],
+        newMessage: '',
+        sending: false,
+        loadingMessages: false,
+        isTyping: false,
+        pollInterval: null,
+        lastMessageId: 0,
+        todayDate: new Date().toLocaleDateString('uk-UA'),
+        // Compose modal
+        composeMode: null, // null, 'all', 'user'
+        composeRecipient: null,
+        composeMessage: '',
+        composeSending: false,
+        showUserDropdown: false,
+
+        init() {
+            // Check if URL has user parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('user');
+            if (userId) {
+                // Load that user's chat
+            }
+        },
+
+        async selectUser(id, name, role) {
+            this.selectedUser = { id, name, role };
+            this.messages = [];
+            this.loadingMessages = true;
+            this.lastMessageId = 0;
+
+            // Stop previous polling
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+            }
+
+            try {
+                const response = await fetch(`/pm/${id}/poll?last_id=0`);
+                const data = await response.json();
+                this.messages = data.messages.map(m => ({
+                    ...m,
+                    time: m.created_at,
+                    read: true
+                }));
+                if (this.messages.length > 0) {
+                    this.lastMessageId = Math.max(...this.messages.map(m => m.id));
+                }
+                this.scrollToBottom();
+                // Update sidebar badge
+                window.dispatchEvent(new CustomEvent('pm-read'));
+            } catch (e) {
+                console.error('Error loading messages:', e);
+            }
+
+            this.loadingMessages = false;
+
+            // Start polling
+            this.pollInterval = setInterval(() => this.pollMessages(), 2000);
+        },
+
+        async pollMessages() {
+            if (!this.selectedUser) return;
+
+            try {
+                const response = await fetch(`/pm/${this.selectedUser.id}/poll?last_id=${this.lastMessageId}`);
+                const data = await response.json();
+
+                if (data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        if (!this.messages.find(m => m.id === msg.id)) {
+                            this.messages.push({
+                                ...msg,
+                                time: msg.created_at,
+                                read: true
+                            });
+                            this.lastMessageId = Math.max(this.lastMessageId, msg.id);
+                        }
+                    });
+                    this.scrollToBottom();
+                }
+            } catch (e) {
+                console.error('Polling error:', e);
+            }
+        },
+
+        async sendMessage() {
+            if (!this.newMessage.trim() || this.sending || !this.selectedUser) return;
+
+            this.sending = true;
+            const messageText = this.newMessage;
+            this.newMessage = '';
+
+            try {
+                const response = await fetch('/pm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        recipient_id: this.selectedUser.id,
+                        message: messageText,
+                    }),
+                });
+
+                if (response.ok) {
+                    // Trigger immediate poll to show message
+                    await this.pollMessages();
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                this.newMessage = messageText;
+            }
+
+            this.sending = false;
+            this.$refs.messageInput.style.height = 'auto';
+        },
+
+        scrollToBottom() {
+            this.$nextTick(() => {
+                const container = this.$refs.messagesContainer;
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
+        },
+
+        autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 128) + 'px';
+        },
+
+        emitTyping() {
+            // Could be used for "typing..." indicator
+        },
+
+        filterConversations() {
+            // Client-side filter handled by CSS
+        },
+
+        async sendComposeMessage() {
+            if (!this.composeMessage.trim() || this.composeSending) return;
+
+            this.composeSending = true;
+            const recipientId = this.composeMode === 'all' ? 'all' : this.composeRecipient?.id;
+
+            try {
+                const response = await fetch('/pm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        recipient_id: recipientId,
+                        message: this.composeMessage,
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.broadcast) {
+                        alert(`Повідомлення надіслано ${data.count} користувачам`);
+                    }
+
+                    // Close modal and reset
+                    this.showNewChat = false;
+                    this.composeMode = null;
+                    this.composeRecipient = null;
+                    this.composeMessage = '';
+
+                    // If individual user, open their chat
+                    if (!data.broadcast && this.composeRecipient) {
+                        this.selectUser(this.composeRecipient.id, this.composeRecipient.name, this.composeRecipient.role);
+                    } else {
+                        // Reload page to see new conversations
+                        window.location.reload();
+                    }
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Помилка надсилання повідомлення');
+            }
+
+            this.composeSending = false;
+        },
+
+        destroy() {
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+            }
+        }
+    };
+}
+</script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /var/www/html/resources/views/private-messages/index.blade.php ENDPATH**/ ?>
