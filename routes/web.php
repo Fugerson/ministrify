@@ -123,6 +123,11 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export');
     Route::post('people-import', [PersonController::class, 'import'])->name('people.import');
 
+    // Family Relationships
+    Route::post('people/{person}/family', [\App\Http\Controllers\FamilyRelationshipController::class, 'store'])->name('family.store');
+    Route::delete('family/{familyRelationship}', [\App\Http\Controllers\FamilyRelationshipController::class, 'destroy'])->name('family.destroy');
+    Route::get('people/{person}/family/search', [\App\Http\Controllers\FamilyRelationshipController::class, 'search'])->name('family.search');
+
     // Migration tools
     Route::prefix('migrate')->name('migration.')->group(function () {
         Route::get('planning-center', [MigrationController::class, 'planningCenter'])->name('planning-center');
@@ -302,6 +307,7 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::put('payments', [SettingsController::class, 'updatePaymentSettings'])->name('payments');
         Route::put('theme-color', [SettingsController::class, 'updateThemeColor'])->name('theme-color');
         Route::put('design-theme', [SettingsController::class, 'updateDesignTheme'])->name('design-theme');
+        Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
 
         // Expense categories
         Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->except(['show']);
@@ -343,6 +349,68 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::post('shepherds', [\App\Http\Controllers\ShepherdController::class, 'store'])->name('shepherds.store');
         Route::delete('shepherds/{person}', [\App\Http\Controllers\ShepherdController::class, 'destroy'])->name('shepherds.destroy');
         Route::post('shepherds/toggle-feature', [\App\Http\Controllers\ShepherdController::class, 'toggleFeature'])->name('shepherds.toggle-feature');
+    });
+
+    // Website Builder (admin only)
+    Route::middleware('role:admin')->prefix('website-builder')->name('website-builder.')->group(function () {
+        // Dashboard
+        Route::get('/', [\App\Http\Controllers\WebsiteBuilder\WebsiteBuilderController::class, 'index'])->name('index');
+        Route::get('preview', [\App\Http\Controllers\WebsiteBuilder\WebsiteBuilderController::class, 'preview'])->name('preview');
+
+        // Templates
+        Route::get('templates', [\App\Http\Controllers\WebsiteBuilder\TemplateController::class, 'index'])->name('templates.index');
+        Route::post('templates/{template}/apply', [\App\Http\Controllers\WebsiteBuilder\TemplateController::class, 'apply'])->name('templates.apply');
+
+        // Sections (drag & drop manager)
+        Route::get('sections', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'index'])->name('sections.index');
+        Route::post('sections/reorder', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'reorder'])->name('sections.reorder');
+        Route::post('sections/{section}/toggle', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'toggle'])->name('sections.toggle');
+
+        // Design (colors, fonts, hero, navigation)
+        Route::get('design', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'index'])->name('design.index');
+        Route::put('design/colors', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateColors'])->name('design.colors');
+        Route::put('design/fonts', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateFonts'])->name('design.fonts');
+        Route::put('design/hero', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateHero'])->name('design.hero');
+        Route::put('design/navigation', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateNavigation'])->name('design.navigation');
+        Route::put('design/buttons', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateButtons'])->name('design.buttons');
+        Route::put('design/custom-css', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'updateCustomCss'])->name('design.custom-css');
+
+        // About Us content
+        Route::get('about', [\App\Http\Controllers\WebsiteBuilder\AboutController::class, 'edit'])->name('about.edit');
+        Route::put('about', [\App\Http\Controllers\WebsiteBuilder\AboutController::class, 'update'])->name('about.update');
+
+        // Staff/Team management
+        Route::resource('team', \App\Http\Controllers\WebsiteBuilder\TeamController::class);
+        Route::post('team/reorder', [\App\Http\Controllers\WebsiteBuilder\TeamController::class, 'reorder'])->name('team.reorder');
+
+        // Sermons management
+        Route::resource('sermons', \App\Http\Controllers\WebsiteBuilder\SermonController::class);
+        Route::resource('sermon-series', \App\Http\Controllers\WebsiteBuilder\SermonSeriesController::class);
+
+        // Gallery management
+        Route::resource('gallery', \App\Http\Controllers\WebsiteBuilder\GalleryController::class);
+        Route::post('gallery/{gallery}/photos', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'uploadPhotos'])->name('gallery.photos.upload');
+        Route::delete('gallery/{gallery}/photos/{photo}', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'deletePhoto'])->name('gallery.photos.delete');
+        Route::post('gallery/{gallery}/photos/reorder', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'reorderPhotos'])->name('gallery.photos.reorder');
+
+        // Blog management
+        Route::resource('blog', \App\Http\Controllers\WebsiteBuilder\BlogController::class);
+        Route::resource('blog-categories', \App\Http\Controllers\WebsiteBuilder\BlogCategoryController::class)->except(['show']);
+        Route::post('blog/{post}/publish', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'publish'])->name('blog.publish');
+
+        // FAQ management
+        Route::resource('faq', \App\Http\Controllers\WebsiteBuilder\FaqController::class)->except(['show']);
+        Route::post('faq/reorder', [\App\Http\Controllers\WebsiteBuilder\FaqController::class, 'reorder'])->name('faq.reorder');
+
+        // Testimonials management
+        Route::resource('testimonials', \App\Http\Controllers\WebsiteBuilder\TestimonialController::class);
+        Route::post('testimonials/reorder', [\App\Http\Controllers\WebsiteBuilder\TestimonialController::class, 'reorder'])->name('testimonials.reorder');
+
+        // Public prayer requests inbox
+        Route::get('prayer-inbox', [\App\Http\Controllers\WebsiteBuilder\PublicPrayerController::class, 'index'])->name('prayer-inbox.index');
+        Route::get('prayer-inbox/{prayerRequest}', [\App\Http\Controllers\WebsiteBuilder\PublicPrayerController::class, 'show'])->name('prayer-inbox.show');
+        Route::put('prayer-inbox/{prayerRequest}/status', [\App\Http\Controllers\WebsiteBuilder\PublicPrayerController::class, 'updateStatus'])->name('prayer-inbox.status');
+        Route::delete('prayer-inbox/{prayerRequest}', [\App\Http\Controllers\WebsiteBuilder\PublicPrayerController::class, 'destroy'])->name('prayer-inbox.destroy');
     });
 
     // My profile (for volunteers)

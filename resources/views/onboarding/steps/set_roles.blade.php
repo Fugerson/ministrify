@@ -174,7 +174,7 @@
                                 class="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all appearance-none cursor-pointer">
                             <option value="admin">Адміністратор</option>
                             <option value="leader">Лідер</option>
-                            <option value="volunteer">Волонтер</option>
+                            <option value="volunteer">Служитель</option>
                         </select>
                     </div>
                 </div>
@@ -239,7 +239,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
                         </div>
-                        <span class="font-semibold text-green-700 dark:text-green-300">Волонтер</span>
+                        <span class="font-semibold text-green-700 dark:text-green-300">Служитель</span>
                     </div>
                     <p class="text-sm text-green-600 dark:text-green-400">Перегляд свого розкладу та завдань</p>
                 </div>

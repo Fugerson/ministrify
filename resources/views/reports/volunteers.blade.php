@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Звіт: Волонтери')
+@section('title', 'Звіт: Служителі')
 
 @section('content')
 <div class="space-y-6">
@@ -24,7 +24,7 @@
 
     <!-- Monthly Chart -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Активність волонтерів по місяцях</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Активність служителів по місяцях</h3>
         <div class="h-64">
             <canvas id="volunteersChart"></canvas>
         </div>
@@ -33,7 +33,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Top Volunteers -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🏆 Топ волонтерів</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🏆 Топ служителів</h3>
             <div class="space-y-3">
                 @foreach($topVolunteers as $index => $person)
                     <div class="flex items-center justify-between p-3 rounded-lg {{ $index < 3 ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-gray-50 dark:bg-gray-700/50' }}">
@@ -87,7 +87,7 @@
             <svg class="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
-            Неактивні волонтери (3+ місяці)
+            Неактивні служителі (3+ місяці)
         </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
             @foreach($inactiveVolunteers as $person)
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderRadius: 4,
                 },
                 {
-                    label: 'Унікальних волонтерів',
+                    label: 'Унікальних служителів',
                     data: data.map(d => d.volunteers),
                     type: 'line',
                     borderColor: 'rgb(249, 115, 22)',

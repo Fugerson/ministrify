@@ -171,7 +171,7 @@
                 </div>
 
                 <!-- Cards Container -->
-                <div class="flex-1 p-2 space-y-2 min-h-[120px] kanban-cards overflow-y-auto max-h-[calc(100vh-320px)]"
+                <div class="flex-1 p-2 space-y-2 min-h-[120px] kanban-cards overflow-y-auto max-h-[50vh] lg:max-h-[calc(100vh-280px)]"
                      data-column-id="{{ $column->id }}">
                     @foreach($column->cards as $card)
                         <div class="kanban-card group bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-3 cursor-pointer hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-150 overflow-hidden
@@ -836,18 +836,70 @@
                                             </select>
                                         </div>
 
-                                        <div>
+                                        <div x-data="{
+                                            open: false,
+                                            search: '',
+                                            get filtered() {
+                                                if (!this.search) return cardPanel.data.people || [];
+                                                return (cardPanel.data.people || []).filter(p => p.name.toLowerCase().includes(this.search.toLowerCase()));
+                                            },
+                                            get selectedPerson() {
+                                                return (cardPanel.data.people || []).find(p => p.id == cardPanel.data.card.assigned_to);
+                                            },
+                                            select(id) {
+                                                cardPanel.data.card.assigned_to = id;
+                                                saveCardField('assigned_to', id);
+                                                this.open = false;
+                                                this.search = '';
+                                            }
+                                        }">
                                             <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                                 Відповідальний
                                             </label>
-                                            <select x-model="cardPanel.data.card.assigned_to" @change="saveCardField('assigned_to', cardPanel.data.card.assigned_to)"
-                                                    class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white">
-                                                <option value="">Не призначено</option>
-                                                <template x-for="person in cardPanel.data.people" :key="person.id">
-                                                    <option :value="person.id" x-text="person.name"></option>
-                                                </template>
-                                            </select>
+                                            <div class="relative">
+                                                <button type="button" @click="open = !open; $nextTick(() => open && $refs.panelSearchInput.focus())"
+                                                        class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-left flex items-center justify-between dark:text-white">
+                                                    <span x-show="!selectedPerson" class="text-gray-500">Не призначено</span>
+                                                    <template x-if="selectedPerson">
+                                                        <span class="flex items-center gap-2">
+                                                            <span class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs text-primary-600 dark:text-primary-400" x-text="selectedPerson.name.charAt(0)"></span>
+                                                            <span x-text="selectedPerson.name" class="truncate"></span>
+                                                        </span>
+                                                    </template>
+                                                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                                    </svg>
+                                                </button>
+
+                                                <div x-show="open" @click.away="open = false" x-transition
+                                                     class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
+                                                    <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                                                        <input type="text" x-model="search" x-ref="panelSearchInput"
+                                                               placeholder="Пошук..."
+                                                               class="w-full px-2 py-1.5 bg-gray-50 dark:bg-gray-700 border-0 rounded text-sm dark:text-white focus:ring-1 focus:ring-primary-500">
+                                                    </div>
+                                                    <div class="max-h-40 overflow-y-auto">
+                                                        <button type="button" @click="select('')"
+                                                                class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                                :class="!cardPanel.data.card.assigned_to ? 'bg-primary-50 dark:bg-primary-900/20' : ''">
+                                                            <span class="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs">—</span>
+                                                            <span class="text-gray-500 dark:text-gray-400">Не призначено</span>
+                                                        </button>
+                                                        <template x-for="person in filtered" :key="person.id">
+                                                            <button type="button" @click="select(person.id)"
+                                                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white flex items-center gap-2"
+                                                                    :class="cardPanel.data.card.assigned_to == person.id ? 'bg-primary-50 dark:bg-primary-900/20' : ''">
+                                                                <span class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs text-primary-600 dark:text-primary-400" x-text="person.name.charAt(0)"></span>
+                                                                <span x-text="person.name" class="truncate"></span>
+                                                            </button>
+                                                        </template>
+                                                        <div x-show="filtered.length === 0" class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                                            Нікого не знайдено
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div>
@@ -1071,15 +1123,77 @@
                         </div>
 
                         <!-- Assignee -->
-                        <div>
+                        <div x-data="{
+                            open: false,
+                            search: '',
+                            people: @js($people->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null])),
+                            get filtered() {
+                                if (!this.search) return this.people;
+                                return this.people.filter(p => p.name.toLowerCase().includes(this.search.toLowerCase()));
+                            },
+                            get selectedPerson() {
+                                return this.people.find(p => p.id == addCardModal.assignedTo);
+                            },
+                            select(id) {
+                                addCardModal.assignedTo = id;
+                                this.open = false;
+                                this.search = '';
+                            }
+                        }">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Виконавець</label>
-                            <select x-model="addCardModal.assignedTo"
-                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
-                                <option value="">Без виконавця</option>
-                                @foreach($people as $person)
-                                    <option value="{{ $person->id }}">{{ $person->full_name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <button type="button" @click="open = !open; $nextTick(() => open && $refs.searchInput.focus())"
+                                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-left flex items-center justify-between dark:text-white">
+                                    <span x-show="!selectedPerson" class="text-gray-500">Оберіть виконавця...</span>
+                                    <template x-if="selectedPerson">
+                                        <span class="flex items-center gap-2">
+                                            <template x-if="selectedPerson.photo">
+                                                <img :src="selectedPerson.photo" class="w-6 h-6 rounded-full object-cover">
+                                            </template>
+                                            <template x-if="!selectedPerson.photo">
+                                                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs text-primary-600 dark:text-primary-400" x-text="selectedPerson.name.charAt(0)"></span>
+                                            </template>
+                                            <span x-text="selectedPerson.name"></span>
+                                        </span>
+                                    </template>
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" @click.away="open = false" x-transition
+                                     class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
+                                    <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                                        <input type="text" x-model="search" x-ref="searchInput"
+                                               placeholder="Пошук..."
+                                               class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="max-h-48 overflow-y-auto">
+                                        <button type="button" @click="select('')"
+                                                class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                :class="!addCardModal.assignedTo ? 'bg-primary-50 dark:bg-primary-900/20' : ''">
+                                            <span class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs">—</span>
+                                            <span class="text-gray-500 dark:text-gray-400">Без виконавця</span>
+                                        </button>
+                                        <template x-for="person in filtered" :key="person.id">
+                                            <button type="button" @click="select(person.id)"
+                                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white flex items-center gap-2"
+                                                    :class="addCardModal.assignedTo == person.id ? 'bg-primary-50 dark:bg-primary-900/20' : ''">
+                                                <template x-if="person.photo">
+                                                    <img :src="person.photo" class="w-6 h-6 rounded-full object-cover">
+                                                </template>
+                                                <template x-if="!person.photo">
+                                                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs text-primary-600 dark:text-primary-400" x-text="person.name.charAt(0)"></span>
+                                                </template>
+                                                <span x-text="person.name"></span>
+                                            </button>
+                                        </template>
+                                        <div x-show="filtered.length === 0" class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                            Нікого не знайдено
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Due Date -->

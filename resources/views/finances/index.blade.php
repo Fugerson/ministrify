@@ -60,6 +60,47 @@
         </div>
     </div>
 
+    <!-- Current Balance Card -->
+    <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-6 text-white">
+        <div class="flex items-center justify-between">
+            <div class="flex-1">
+                <p class="text-indigo-100 text-sm font-medium">Поточний баланс каси</p>
+                <p class="text-4xl font-bold mt-1">{{ number_format($currentBalance, 0, ',', ' ') }} ₴</p>
+                <div class="mt-3 text-sm text-indigo-100 space-y-1">
+                    @if($initialBalance > 0)
+                    <div class="flex justify-between">
+                        <span>Початковий баланс{{ $initialBalanceDate ? ' (' . $initialBalanceDate->format('d.m.Y') . ')' : '' }}:</span>
+                        <span class="font-medium">{{ number_format($initialBalance, 0, ',', ' ') }} ₴</span>
+                    </div>
+                    @endif
+                    <div class="flex justify-between">
+                        <span>+ Всього надходжень:</span>
+                        <span class="font-medium text-green-200">{{ number_format($allTimeIncome, 0, ',', ' ') }} ₴</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>- Всього витрат:</span>
+                        <span class="font-medium text-red-200">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 bg-white bg-opacity-20 rounded-full ml-4">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </div>
+        @if(!$initialBalance && !$initialBalanceDate)
+        <div class="mt-4 pt-4 border-t border-white/20">
+            <a href="{{ route('settings.index') }}#finance" class="text-sm text-white/80 hover:text-white inline-flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Вказати початковий баланс
+            </a>
+        </div>
+        @endif
+    </div>
+
     <!-- Summary cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Total Income -->
@@ -108,12 +149,12 @@
             </div>
         </div>
 
-        <!-- Balance -->
-        <div class="bg-gradient-to-br {{ $balance >= 0 ? 'from-blue-500 to-blue-600' : 'from-orange-500 to-orange-600' }} rounded-xl shadow-lg p-6 text-white">
+        <!-- Period Balance -->
+        <div class="bg-gradient-to-br {{ $periodBalance >= 0 ? 'from-blue-500 to-blue-600' : 'from-orange-500 to-orange-600' }} rounded-xl shadow-lg p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-blue-100 text-sm font-medium">Баланс</p>
-                    <p class="text-3xl font-bold mt-1">{{ $balance >= 0 ? '+' : '' }}{{ number_format($balance, 0, ',', ' ') }} ₴</p>
+                    <p class="text-blue-100 text-sm font-medium">Результат за період</p>
+                    <p class="text-3xl font-bold mt-1">{{ $periodBalance >= 0 ? '+' : '' }}{{ number_format($periodBalance, 0, ',', ' ') }} ₴</p>
                     <p class="text-blue-100 text-sm mt-2">
                         {{ $periodLabel }}
                     </p>

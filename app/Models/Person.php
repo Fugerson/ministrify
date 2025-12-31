@@ -416,6 +416,146 @@ class Person extends Model
         return $query->where('is_shepherd', true);
     }
 
+    // ========== FAMILY RELATIONSHIPS ==========
+
+    /**
+     * Get all family relationships where this person is the primary
+     */
+    public function familyRelationships(): HasMany
+    {
+        return $this->hasMany(FamilyRelationship::class, 'person_id');
+    }
+
+    /**
+     * Get all family relationships where this person is the related person
+     */
+    public function inverseFamilyRelationships(): HasMany
+    {
+        return $this->hasMany(FamilyRelationship::class, 'related_person_id');
+    }
+
+    /**
+     * Get all family members (combined from both sides)
+     */
+    public function getFamilyMembersAttribute(): \Illuminate\Support\Collection
+    {
+        $directRelations = $this->familyRelationships()
+            ->with('relatedPerson')
+            ->get()
+            ->map(function ($rel) {
+                return (object) [
+                    'person' => $rel->relatedPerson,
+                    'relationship_type' => $rel->relationship_type,
+                    'relationship_label' => $rel->getTypeLabel(),
+                    'relationship_id' => $rel->id,
+                ];
+            });
+
+        $inverseRelations = $this->inverseFamilyRelationships()
+            ->with('person')
+            ->get()
+            ->map(function ($rel) {
+                return (object) [
+                    'person' => $rel->person,
+                    'relationship_type' => FamilyRelationship::getInverseType($rel->relationship_type),
+                    'relationship_label' => FamilyRelationship::getTypes()[FamilyRelationship::getInverseType($rel->relationship_type)] ?? $rel->relationship_type,
+                    'relationship_id' => $rel->id,
+                ];
+            });
+
+        return $directRelations->concat($inverseRelations)->unique(fn($item) => $item->person->id);
+    }
+
+    /**
+     * Get spouse
+     */
+    public function getSpouseAttribute(): ?Person
+    {
+        $rel = $this->familyRelationships()
+            ->where('relationship_type', FamilyRelationship::TYPE_SPOUSE)
+            ->with('relatedPerson')
+            ->first();
+
+        if ($rel) {
+            return $rel->relatedPerson;
+        }
+
+        $inverseRel = $this->inverseFamilyRelationships()
+            ->where('relationship_type', FamilyRelationship::TYPE_SPOUSE)
+            ->with('person')
+            ->first();
+
+        return $inverseRel?->person;
+    }
+
+    /**
+     * Get children
+     */
+    public function getChildrenAttribute(): \Illuminate\Support\Collection
+    {
+        $directChildren = $this->familyRelationships()
+            ->where('relationship_type', FamilyRelationship::TYPE_CHILD)
+            ->with('relatedPerson')
+            ->get()
+            ->pluck('relatedPerson');
+
+        $inverseChildren = $this->inverseFamilyRelationships()
+            ->where('relationship_type', FamilyRelationship::TYPE_PARENT)
+            ->with('person')
+            ->get()
+            ->pluck('person');
+
+        return $directChildren->concat($inverseChildren)->unique('id');
+    }
+
+    /**
+     * Get parents
+     */
+    public function getParentsAttribute(): \Illuminate\Support\Collection
+    {
+        $directParents = $this->familyRelationships()
+            ->where('relationship_type', FamilyRelationship::TYPE_PARENT)
+            ->with('relatedPerson')
+            ->get()
+            ->pluck('relatedPerson');
+
+        $inverseParents = $this->inverseFamilyRelationships()
+            ->where('relationship_type', FamilyRelationship::TYPE_CHILD)
+            ->with('person')
+            ->get()
+            ->pluck('person');
+
+        return $directParents->concat($inverseParents)->unique('id');
+    }
+
+    /**
+     * Get siblings
+     */
+    public function getSiblingsAttribute(): \Illuminate\Support\Collection
+    {
+        $directSiblings = $this->familyRelationships()
+            ->where('relationship_type', FamilyRelationship::TYPE_SIBLING)
+            ->with('relatedPerson')
+            ->get()
+            ->pluck('relatedPerson');
+
+        $inverseSiblings = $this->inverseFamilyRelationships()
+            ->where('relationship_type', FamilyRelationship::TYPE_SIBLING)
+            ->with('person')
+            ->get()
+            ->pluck('person');
+
+        return $directSiblings->concat($inverseSiblings)->unique('id');
+    }
+
+    /**
+     * Check if person has any family members
+     */
+    public function getHasFamilyAttribute(): bool
+    {
+        return $this->familyRelationships()->exists() || $this->inverseFamilyRelationships()->exists();
+    }
+
     // ========== VOLUNTEER SCHEDULING ==========
 
     public function blockoutDates(): HasMany

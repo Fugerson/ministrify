@@ -15,8 +15,8 @@ class MessageController extends Controller
 {
     public function index()
     {
-        $templates = MessageTemplate::where('church_id', auth()->user()->church_id)->get();
-        $logs = MessageLog::where('church_id', auth()->user()->church_id)
+        $templates = MessageTemplate::where('church_id', $this->getCurrentChurch()->id)->get();
+        $logs = MessageLog::where('church_id', $this->getCurrentChurch()->id)
             ->with('user')
             ->orderByDesc('created_at')
             ->limit(20)
@@ -27,17 +27,17 @@ class MessageController extends Controller
 
     public function create()
     {
-        $tags = Tag::where('church_id', auth()->user()->church_id)->get();
-        $ministries = Ministry::where('church_id', auth()->user()->church_id)->get();
-        $groups = Group::where('church_id', auth()->user()->church_id)->get();
-        $templates = MessageTemplate::where('church_id', auth()->user()->church_id)->get();
+        $tags = Tag::where('church_id', $this->getCurrentChurch()->id)->get();
+        $ministries = Ministry::where('church_id', $this->getCurrentChurch()->id)->get();
+        $groups = Group::where('church_id', $this->getCurrentChurch()->id)->get();
+        $templates = MessageTemplate::where('church_id', $this->getCurrentChurch()->id)->get();
 
         return view('messages.create', compact('tags', 'ministries', 'groups', 'templates'));
     }
 
     public function preview(Request $request)
     {
-        $churchId = auth()->user()->church_id;
+        $churchId = $this->getCurrentChurch()->id;
         $recipients = $this->getRecipients($request, $churchId);
 
         return response()->json([
@@ -60,7 +60,7 @@ class MessageController extends Controller
             'person_ids' => 'nullable|array',
         ]);
 
-        $churchId = auth()->user()->church_id;
+        $churchId = $this->getCurrentChurch()->id;
         $church = auth()->user()->church;
         $recipients = $this->getRecipients($request, $churchId);
 
@@ -114,7 +114,7 @@ class MessageController extends Controller
         ]);
 
         MessageTemplate::create([
-            'church_id' => auth()->user()->church_id,
+            'church_id' => $this->getCurrentChurch()->id,
             'name' => $validated['name'],
             'content' => $validated['content'],
             'type' => 'telegram',
@@ -125,7 +125,7 @@ class MessageController extends Controller
 
     public function destroyTemplate(MessageTemplate $template)
     {
-        if ($template->church_id !== auth()->user()->church_id) {
+        if ($template->church_id !== $this->getCurrentChurch()->id) {
             abort(403);
         }
 

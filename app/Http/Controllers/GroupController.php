@@ -11,7 +11,7 @@ class GroupController extends Controller
 {
     public function index()
     {
-        $groups = Group::where('church_id', auth()->user()->church_id)
+        $groups = Group::where('church_id', $this->getCurrentChurch()->id)
             ->with(['leader', 'members'])
             ->withCount('members')
             ->orderBy('name')
@@ -22,7 +22,7 @@ class GroupController extends Controller
 
     public function create()
     {
-        $people = Person::where('church_id', auth()->user()->church_id)
+        $people = Person::where('church_id', $this->getCurrentChurch()->id)
             ->orderBy('first_name')
             ->get();
 
@@ -38,7 +38,7 @@ class GroupController extends Controller
             'status' => 'nullable|in:active,paused,vacation',
         ]);
 
-        $validated['church_id'] = auth()->user()->church_id;
+        $validated['church_id'] = $this->getCurrentChurch()->id;
         $validated['status'] = $validated['status'] ?? 'active';
 
         $group = Group::create($validated);
@@ -61,7 +61,7 @@ class GroupController extends Controller
 
         $group->load(['leader', 'members', 'attendances' => fn($q) => $q->orderByDesc('date')->limit(10)]);
 
-        $availablePeople = Person::where('church_id', auth()->user()->church_id)
+        $availablePeople = Person::where('church_id', $this->getCurrentChurch()->id)
             ->whereNotIn('id', $group->members->pluck('id'))
             ->orderBy('first_name')
             ->get();
@@ -81,7 +81,7 @@ class GroupController extends Controller
     {
         $this->authorize('update', $group);
 
-        $people = Person::where('church_id', auth()->user()->church_id)
+        $people = Person::where('church_id', $this->getCurrentChurch()->id)
             ->orderBy('first_name')
             ->get();
 

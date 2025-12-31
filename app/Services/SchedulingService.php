@@ -502,7 +502,6 @@ class SchedulingService
         // Get positions to fill
         if (empty($positionIds)) {
             $positionIds = $ministry->positions()
-                ->where('is_active', true)
                 ->whereDoesntHave('assignments', fn($q) => $q->where('event_id', $event->id))
                 ->pluck('id')
                 ->toArray();
@@ -711,7 +710,7 @@ class SchedulingService
             ->orderBy('date')
             ->get();
 
-        $members = $ministry->members()->where('is_active', true)->get();
+        $members = $ministry->members()->get();
 
         $memberStats = [];
         foreach ($members as $member) {

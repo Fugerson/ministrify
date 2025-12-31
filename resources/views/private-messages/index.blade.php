@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="messengerApp()">
-    <div class="flex bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden" style="height: calc(100vh - 140px); min-height: 500px;">
+    <div class="flex bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden" style="height: calc(100vh - 140px - env(safe-area-inset-bottom, 0px)); min-height: 500px; max-height: calc(100dvh - 140px);">
 
         <!-- Left Sidebar: Conversations List -->
         <div class="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 flex flex-col"
@@ -477,20 +477,6 @@ function messengerApp() {
             const messageText = this.newMessage;
             this.newMessage = '';
 
-            // Optimistic update
-            const tempId = Date.now();
-            const now = new Date();
-            this.messages.push({
-                id: tempId,
-                message: messageText,
-                is_mine: true,
-                time: now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
-                date: now.toLocaleDateString('uk-UA'),
-                read: false,
-                sending: true
-            });
-            this.scrollToBottom();
-
             try {
                 const response = await fetch('/pm', {
                     method: 'POST',
@@ -506,14 +492,11 @@ function messengerApp() {
                 });
 
                 if (response.ok) {
-                    // Mark as sent
-                    const msg = this.messages.find(m => m.id === tempId);
-                    if (msg) msg.sending = false;
+                    // Trigger immediate poll to show message
+                    await this.pollMessages();
                 }
             } catch (error) {
                 console.error('Error sending message:', error);
-                // Remove failed message
-                this.messages = this.messages.filter(m => m.id !== tempId);
                 this.newMessage = messageText;
             }
 

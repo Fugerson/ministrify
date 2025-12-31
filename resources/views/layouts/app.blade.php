@@ -90,6 +90,17 @@
         }
         .dark body { background-color: #111827; }
 
+        /* Mobile viewport fixes */
+        @supports (height: 100dvh) {
+            .h-dvh { height: 100dvh; }
+            .min-h-dvh { min-height: 100dvh; }
+        }
+
+        /* Fix for mobile bottom nav spacing */
+        @media (max-width: 1023px) {
+            .mobile-safe-bottom { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+        }
+
         /* Custom Scrollbars - Minimalistic Design */
         * {
             scrollbar-width: thin;
@@ -702,7 +713,7 @@
                 </a>
                 <a href="{{ route('resources.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                     </svg>
                     Ресурси
                 </a>
@@ -736,6 +747,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     Налаштування
+                </a>
+                <a href="{{ route('website-builder.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('website-builder.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                    </svg>
+                    Конструктор сайту
                 </a>
                 @endadmin
 
@@ -860,6 +877,10 @@
                 <a href="{{ route('settings.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     Налаштування
+                </a>
+                <a href="{{ route('website-builder.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('website-builder.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                    Конструктор сайту
                 </a>
                 @endadmin
                 @if(auth()->user()->isSuperAdmin())
@@ -1219,9 +1240,19 @@
             str_starts_with($routeName, 'boards.show') => 'boards.show',
             str_starts_with($routeName, 'boards') => 'boards',
             str_starts_with($routeName, 'groups') => 'groups',
-            str_starts_with($routeName, 'expenses') => 'expenses',
+            str_starts_with($routeName, 'expenses') || str_starts_with($routeName, 'finances') => 'finances',
             str_starts_with($routeName, 'settings') => 'settings',
             str_starts_with($routeName, 'attendance') => 'attendance',
+            str_starts_with($routeName, 'resources') => 'resources',
+            str_starts_with($routeName, 'messages') => 'messages',
+            str_starts_with($routeName, 'prayer-requests') => 'prayer-requests',
+            str_starts_with($routeName, 'songs') => 'songs',
+            str_starts_with($routeName, 'reports') => 'reports',
+            str_starts_with($routeName, 'announcements') => 'announcements',
+            str_starts_with($routeName, 'private-messages') => 'private-messages',
+            str_starts_with($routeName, 'donations') => 'donations',
+            str_starts_with($routeName, 'rotation') => 'rotation',
+            str_starts_with($routeName, 'security') => 'security',
             default => null,
         };
     @endphp

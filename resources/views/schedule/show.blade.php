@@ -77,7 +77,7 @@
         <!-- Main content -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Positions and assignments -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -272,12 +272,18 @@
                                                  class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-10 overflow-hidden">
                                                 <div class="p-2 max-h-64 overflow-y-auto">
                                                     @php
+                                                        // People with this specific position (priority)
                                                         $qualifiedPeople = $availablePeople->filter(fn($p) => $p->hasPositionInMinistry($event->ministry, $position));
                                                         $availableNow = $qualifiedPeople->filter(fn($p) => !isset($volunteerBlockouts[$p->id]));
                                                         $blockedPeople = $qualifiedPeople->filter(fn($p) => isset($volunteerBlockouts[$p->id]));
+
+                                                        // Other ministry members (if no qualified people)
+                                                        $otherMembers = $qualifiedPeople->isEmpty()
+                                                            ? $availablePeople->filter(fn($p) => !isset($volunteerBlockouts[$p->id]))
+                                                            : collect();
                                                     @endphp
 
-                                                    {{-- Available people first --}}
+                                                    {{-- Available qualified people first --}}
                                                     @foreach($availableNow as $person)
                                                         <form method="POST" action="{{ route('assignments.store', $event) }}">
                                                             @csrf
@@ -333,8 +339,35 @@
                                                         @endforeach
                                                     @endif
 
-                                                    @if($qualifiedPeople->isEmpty())
-                                                        <p class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Немає доступних людей</p>
+                                                    {{-- Other ministry members (fallback when no qualified people) --}}
+                                                    @if($otherMembers->isNotEmpty())
+                                                        @if($qualifiedPeople->isNotEmpty())
+                                                            <div class="border-t border-gray-200 dark:border-gray-600 my-2 pt-2">
+                                                                <p class="px-3 py-1 text-xs text-gray-500 dark:text-gray-400">Інші учасники:</p>
+                                                            </div>
+                                                        @endif
+                                                        @foreach($otherMembers as $person)
+                                                            <form method="POST" action="{{ route('assignments.store', $event) }}">
+                                                                @csrf
+                                                                <input type="hidden" name="position_id" value="{{ $position->id }}">
+                                                                <input type="hidden" name="person_id" value="{{ $person->id }}">
+                                                                <button type="submit"
+                                                                        class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
+                                                                    @if($person->photo)
+                                                                        <img src="{{ Storage::url($person->photo) }}" alt="{{ $person->full_name }}" class="w-6 h-6 rounded-full object-cover">
+                                                                    @else
+                                                                        <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs">
+                                                                            {{ substr($person->first_name, 0, 1) }}
+                                                                        </div>
+                                                                    @endif
+                                                                    <span class="flex-1">{{ $person->full_name }}</span>
+                                                                </button>
+                                                            </form>
+                                                        @endforeach
+                                                    @endif
+
+                                                    @if($qualifiedPeople->isEmpty() && $otherMembers->isEmpty())
+                                                        <p class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Немає учасників в служінні</p>
                                                     @endif
                                                 </div>
                                             </div>

@@ -250,4 +250,23 @@ class SettingsController extends Controller
 
         return back()->with('success', 'Стиль дизайну оновлено!');
     }
+
+    /**
+     * Update finance settings (initial balance)
+     */
+    public function updateFinance(Request $request)
+    {
+        $validated = $request->validate([
+            'initial_balance' => 'required|numeric|min:0',
+            'initial_balance_date' => 'required|date',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $church->update([
+            'initial_balance' => $validated['initial_balance'],
+            'initial_balance_date' => $validated['initial_balance_date'],
+        ]);
+
+        return back()->with('success', 'Початковий баланс оновлено.');
+    }
 }

@@ -51,24 +51,6 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Позиції</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Додайте позиції, на які можна призначати людей</p>
-
-            <div class="space-y-2" id="positions-container">
-                <input type="text" name="positions[]" placeholder="Наприклад: Вокал"
-                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                <input type="text" name="positions[]" placeholder="Наприклад: Гітара"
-                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                <input type="text" name="positions[]" placeholder="Наприклад: Звук"
-                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-            </div>
-
-            <button type="button" onclick="addPosition()" class="mt-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500">
-                + Додати позицію
-            </button>
-        </div>
-
         <div class="flex items-center justify-end space-x-4">
             <a href="{{ route('ministries.index') }}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 Скасувати
@@ -80,17 +62,4 @@
     </form>
 </div>
 
-@push('scripts')
-<script>
-function addPosition() {
-    const container = document.getElementById('positions-container');
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.name = 'positions[]';
-    input.placeholder = 'Назва позиції';
-    input.className = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500';
-    container.appendChild(input);
-}
-</script>
-@endpush
 @endsection

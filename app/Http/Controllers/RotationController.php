@@ -51,11 +51,11 @@ class RotationController extends Controller
             ->orderBy('date')
             ->get();
 
-        // Get members with positions
-        $members = $ministry->members()
-            ->where('is_active', true)
-            ->with('positions')
-            ->get();
+        // Get members (positions are stored in pivot table)
+        $members = $ministry->members()->get();
+
+        // Get all positions for this ministry for display
+        $positions = $ministry->positions()->get()->keyBy('id');
 
         // Get rotation report for last 3 months
         $rotationService = new RotationService($church);
@@ -65,7 +65,7 @@ class RotationController extends Controller
             now()
         );
 
-        return view('rotation.ministry', compact('ministry', 'events', 'members', 'report'));
+        return view('rotation.ministry', compact('ministry', 'events', 'members', 'positions', 'report'));
     }
 
     /**
@@ -201,7 +201,7 @@ class RotationController extends Controller
 
         // Get candidates for each position
         $ministry = $event->ministry;
-        $positions = $ministry->positions()->where('is_active', true)->get();
+        $positions = $ministry->positions()->get();
 
         $preview = [];
 

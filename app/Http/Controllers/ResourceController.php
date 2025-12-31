@@ -14,7 +14,7 @@ class ResourceController extends Controller
      */
     public function index(Request $request, ?Resource $folder = null)
     {
-        $churchId = auth()->user()->church_id;
+        $churchId = $this->getCurrentChurch()->id;
 
         // Validate folder belongs to church
         if ($folder && $folder->church_id !== $churchId) {
@@ -23,6 +23,7 @@ class ResourceController extends Controller
 
         $resources = Resource::where('church_id', $churchId)
             ->where('parent_id', $folder?->id)
+            ->with('creator')
             ->orderByRaw("type = 'folder' DESC")
             ->orderBy('name')
             ->get();
@@ -55,7 +56,7 @@ class ResourceController extends Controller
             'icon' => 'nullable|string|max:10',
         ]);
 
-        $churchId = auth()->user()->church_id;
+        $churchId = $this->getCurrentChurch()->id;
 
         // Validate parent belongs to church
         if ($validated['parent_id']) {
@@ -82,7 +83,12 @@ class ResourceController extends Controller
      */
     public function upload(Request $request)
     {
-        $churchId = auth()->user()->church_id;
+        $churchId = $this->getCurrentChurch()->id;
+
+        // Convert empty string to null for parent_id
+        if ($request->parent_id === '') {
+            $request->merge(['parent_id' => null]);
+        }
 
         $request->validate([
             'file' => [
@@ -97,11 +103,17 @@ class ResourceController extends Controller
 
         // Check mime type
         if (!in_array($file->getMimeType(), Resource::ALLOWED_MIMES)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Цей тип файлу не підтримується'], 422);
+            }
             return back()->with('error', 'Цей тип файлу не підтримується');
         }
 
         // Check church storage limit
         if (!Resource::canUpload($churchId, $file->getSize())) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Перевищено ліміт сховища. Видаліть непотрібні файли.'], 422);
+            }
             return back()->with('error', 'Перевищено ліміт сховища. Видаліть непотрібні файли.');
         }
 
@@ -135,7 +147,7 @@ class ResourceController extends Controller
      */
     public function download(Resource $resource)
     {
-        if ($resource->church_id !== auth()->user()->church_id) {
+        if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
 
@@ -151,7 +163,7 @@ class ResourceController extends Controller
      */
     public function rename(Request $request, Resource $resource)
     {
-        if ($resource->church_id !== auth()->user()->church_id) {
+        if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
 
@@ -169,7 +181,7 @@ class ResourceController extends Controller
      */
     public function destroy(Resource $resource)
     {
-        if ($resource->church_id !== auth()->user()->church_id) {
+        if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
 
@@ -193,7 +205,7 @@ class ResourceController extends Controller
      */
     public function move(Request $request, Resource $resource)
     {
-        if ($resource->church_id !== auth()->user()->church_id) {
+        if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
 
@@ -212,7 +224,7 @@ class ResourceController extends Controller
         // Validate target parent belongs to church
         if ($validated['parent_id']) {
             Resource::where('id', $validated['parent_id'])
-                ->where('church_id', auth()->user()->church_id)
+                ->where('church_id', $this->getCurrentChurch()->id)
                 ->where('type', 'folder')
                 ->firstOrFail();
         }

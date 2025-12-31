@@ -11,18 +11,30 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова подія</h2>
 
             <div class="space-y-4">
-                <div>
-                    <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Служіння *</label>
-                    <select name="ministry_id" id="ministry_id" required
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                        <option value="">Виберіть служіння</option>
-                        @foreach($ministries as $ministry)
-                            <option value="{{ $ministry->id }}" {{ $selectedMinistry == $ministry->id ? 'selected' : '' }}>
-                                {{ $ministry->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                @if($selectedMinistry && $ministries->contains('id', $selectedMinistry))
+                    @php $preselectedMinistry = $ministries->firstWhere('id', $selectedMinistry); @endphp
+                    <input type="hidden" name="ministry_id" value="{{ $selectedMinistry }}">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Служіння</label>
+                        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
+                            @if($preselectedMinistry->color)
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $preselectedMinistry->color }}"></span>
+                            @endif
+                            <span class="text-gray-900 dark:text-white font-medium">{{ $preselectedMinistry->name }}</span>
+                        </div>
+                    </div>
+                @else
+                    <div>
+                        <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Служіння *</label>
+                        <select name="ministry_id" id="ministry_id" required
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="">Виберіть служіння</option>
+                            @foreach($ministries as $ministry)
+                                <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
 
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>

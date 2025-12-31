@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-2xl" x-data="messageForm()">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-        <form method="POST" action="{{ route('messages.send') }}" class="space-y-6">
+        <form method="POST" action="{{ route('messages.send') }}" class="space-y-6" @submit="submitting = true">
             @csrf
 
             <!-- Recipient Type -->
@@ -112,8 +112,15 @@
                 <a href="{{ route('messages.index') }}" class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                     Скасувати
                 </a>
-                <button type="submit" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
-                    Надіслати
+                <button type="submit"
+                        :disabled="submitting"
+                        :class="submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'"
+                        class="px-5 py-2.5 text-white rounded-xl font-medium transition-colors inline-flex items-center gap-2">
+                    <svg x-show="submitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span x-text="submitting ? 'Надсилання...' : 'Надіслати'"></span>
                 </button>
             </div>
         </form>
@@ -125,6 +132,7 @@ function messageForm() {
     return {
         recipientType: 'all',
         message: '',
+        submitting: false,
         templates: @json($templates->pluck('content'))
     }
 }

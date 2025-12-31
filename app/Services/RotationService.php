@@ -56,7 +56,7 @@ class RotationService
             return $results;
         }
 
-        $positions = $ministry->positions()->where('is_active', true)->get();
+        $positions = $ministry->positions()->get();
 
         foreach ($positions as $position) {
             // Check if position already has enough assignments
@@ -150,7 +150,6 @@ class RotationService
         // Get members who can serve in this position
         $members = $ministry->members()
             ->whereHas('positions', fn($q) => $q->where('positions.id', $position->id))
-            ->where('is_active', true)
             ->get();
 
         return $members->map(function ($person) use ($event, $position) {
@@ -385,7 +384,7 @@ class RotationService
             ->orderBy('date')
             ->get();
 
-        $members = $ministry->members()->where('is_active', true)->get();
+        $members = $ministry->members()->get();
 
         $memberStats = [];
         foreach ($members as $member) {

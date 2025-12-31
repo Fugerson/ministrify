@@ -5,16 +5,20 @@ namespace App\Imports;
 use App\Models\Person;
 use App\Models\Tag;
 use App\Models\Ministry;
+use App\Models\FamilyRelationship;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterImport;
 use Carbon\Carbon;
 
-class PeopleImport implements ToModel, WithHeadingRow, WithValidation
+class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvents
 {
     protected int $churchId;
     protected array $tagCache = [];
     protected array $ministryCache = [];
+    protected array $households = []; // Track household -> person_ids
 
     public function __construct(int $churchId)
     {
@@ -31,6 +35,15 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation
         $this->ministryCache = Ministry::where('church_id', $this->churchId)
             ->pluck('id', 'name')
             ->toArray();
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterImport::class => function(AfterImport $event) {
+                $this->createFamilyRelationships();
+            },
+        ];
     }
 
     public function model(array $row)
@@ -51,6 +64,16 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation
                 'notes' => $row['notatky'] ?? $row['notes'] ?? null,
             ]
         );
+
+        // Track household for family relationships
+        $householdName = $row['household_name'] ?? $row['household'] ?? $row['simia'] ?? $row["sim'ia"] ?? $row['rodyna'] ?? null;
+        if (!empty($householdName)) {
+            $householdName = trim($householdName);
+            if (!isset($this->households[$householdName])) {
+                $this->households[$householdName] = [];
+            }
+            $this->households[$householdName][] = $person->id;
+        }
 
         // Sync tags
         if (!empty($row['tehy']) || !empty($row['tags'])) {
@@ -77,6 +100,47 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation
         }
 
         return $person;
+    }
+
+    /**
+     * Create family relationships for people in the same household
+     * All members with the same household name are linked as "family" (siblings by default)
+     */
+    protected function createFamilyRelationships(): void
+    {
+        foreach ($this->households as $householdName => $personIds) {
+            if (count($personIds) < 2) {
+                continue; // Need at least 2 people to form a family
+            }
+
+            // Create sibling relationships between all members of the household
+            // (User can later change to spouse/child/parent in the UI)
+            for ($i = 0; $i < count($personIds); $i++) {
+                for ($j = $i + 1; $j < count($personIds); $j++) {
+                    // Check if relationship already exists
+                    $exists = FamilyRelationship::where('church_id', $this->churchId)
+                        ->where(function ($query) use ($personIds, $i, $j) {
+                            $query->where(function ($q) use ($personIds, $i, $j) {
+                                $q->where('person_id', $personIds[$i])
+                                  ->where('related_person_id', $personIds[$j]);
+                            })->orWhere(function ($q) use ($personIds, $i, $j) {
+                                $q->where('person_id', $personIds[$j])
+                                  ->where('related_person_id', $personIds[$i]);
+                            });
+                        })
+                        ->exists();
+
+                    if (!$exists) {
+                        FamilyRelationship::create([
+                            'church_id' => $this->churchId,
+                            'person_id' => $personIds[$i],
+                            'related_person_id' => $personIds[$j],
+                            'relationship_type' => FamilyRelationship::TYPE_SIBLING, // Default to sibling
+                        ]);
+                    }
+                }
+            }
+        }
     }
 
     protected function parseDate(?string $value): ?Carbon

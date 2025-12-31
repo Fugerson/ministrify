@@ -42,42 +42,56 @@
     </div>
 
     <!-- Tabs -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm"
+         x-data="{
+            activeTab: '{{ $tab }}',
+            setTab(tab) {
+                this.activeTab = tab;
+                const url = new URL(window.location);
+                url.searchParams.set('tab', tab);
+                history.pushState({}, '', url);
+            }
+         }">
         <div class="border-b border-gray-200 dark:border-gray-700">
             <nav class="flex -mb-px">
-                <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'schedule']) }}"
-                   class="px-6 py-3 border-b-2 text-sm font-medium {{ $tab === 'schedule' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' }}">
+                <button @click="setTab('schedule')" type="button"
+                   :class="activeTab === 'schedule' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-6 py-3 border-b-2 text-sm font-medium">
                     Розклад
-                </a>
-                <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'members']) }}"
-                   class="px-6 py-3 border-b-2 text-sm font-medium {{ $tab === 'members' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' }}">
+                </button>
+                <button @click="setTab('members')" type="button"
+                   :class="activeTab === 'members' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-6 py-3 border-b-2 text-sm font-medium">
                     Учасники ({{ $ministry->members->count() }})
-                </a>
-                <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'positions']) }}"
-                   class="px-6 py-3 border-b-2 text-sm font-medium {{ $tab === 'positions' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' }}">
+                </button>
+                <button @click="setTab('positions')" type="button"
+                   :class="activeTab === 'positions' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-6 py-3 border-b-2 text-sm font-medium">
                     Позиції
-                </a>
-                <a href="{{ route('meetings.index', $ministry) }}"
-                   class="px-6 py-3 border-b-2 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 flex items-center gap-1">
+                </button>
+                <button @click="setTab('meetings')" type="button"
+                   :class="activeTab === 'meetings' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     Зустрічі
-                    @if($ministry->upcomingMeetings()->count() > 0)
-                    <span class="ml-1 px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full">{{ $ministry->upcomingMeetings()->count() }}</span>
+                    @if($ministry->meetings->where('date', '>=', now())->count() > 0)
+                    <span class="ml-1 px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full">{{ $ministry->meetings->where('date', '>=', now())->count() }}</span>
                     @endif
-                </a>
+                </button>
                 @can('manage-ministry', $ministry)
-                <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'expenses']) }}"
-                   class="px-6 py-3 border-b-2 text-sm font-medium {{ $tab === 'expenses' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' }}">
+                <button @click="setTab('expenses')" type="button"
+                   :class="activeTab === 'expenses' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-6 py-3 border-b-2 text-sm font-medium">
                     Витрати
-                </a>
+                </button>
                 @endcan
             </nav>
         </div>
 
         <div class="p-6">
-            @if($tab === 'schedule')
+            <div x-show="activeTab === 'schedule'"{{ $tab !== 'schedule' ? ' style="display:none"' : '' }}>
                 <!-- Upcoming events -->
                 @if($ministry->events->count() > 0)
                     <div class="space-y-4">
@@ -115,9 +129,28 @@
                     </a>
                 </div>
                 @endcan
+            </div>
 
-            @elseif($tab === 'members')
+            <div x-show="activeTab === 'members'"{{ $tab !== 'members' ? ' style="display:none"' : '' }}>
+                <!-- Add member form -->
+                @can('manage-ministry', $ministry)
+                @if($availablePeople->count() > 0)
+                <form method="POST" action="{{ route('ministries.members.add', $ministry) }}" class="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    @csrf
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <x-person-select name="person_id" :people="$availablePeople" placeholder="Оберіть людину..." :required="true" :nullable="false" />
+                        </div>
+                        <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg whitespace-nowrap">
+                            Додати
+                        </button>
+                    </div>
+                </form>
+                @endif
+                @endcan
+
                 <!-- Members list -->
+                @if($ministry->members->count() > 0)
                 <div class="space-y-2">
                     @foreach($ministry->members as $member)
                         @php
@@ -153,8 +186,12 @@
                         </div>
                     @endforeach
                 </div>
+                @else
+                <p class="text-center text-gray-500 dark:text-gray-400 py-8">Немає учасників</p>
+                @endif
+            </div>
 
-            @elseif($tab === 'positions')
+            <div x-show="activeTab === 'positions'"{{ $tab !== 'positions' ? ' style="display:none"' : '' }}>
                 <!-- Positions -->
                 <div class="space-y-2">
                     @foreach($ministry->positions as $position)
@@ -186,8 +223,50 @@
                     </button>
                 </form>
                 @endcan
+            </div>
 
-            @elseif($tab === 'expenses')
+            <div x-show="activeTab === 'meetings'"{{ $tab !== 'meetings' ? ' style="display:none"' : '' }}>
+                <!-- Meetings -->
+                @if($ministry->meetings->count() > 0)
+                    <div class="space-y-3">
+                        @foreach($ministry->meetings as $meeting)
+                            <a href="{{ route('meetings.show', [$ministry, $meeting]) }}"
+                               class="block p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $meeting->title }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $meeting->date->format('d.m.Y') }} о {{ $meeting->time->format('H:i') }}
+                                            @if($meeting->location)
+                                                • {{ $meeting->location }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $meeting->attendees->count() }} учасників
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-center text-gray-500 dark:text-gray-400 py-8">Немає запланованих зустрічей</p>
+                @endif
+
+                @can('manage-ministry', $ministry)
+                <div class="mt-4">
+                    <a href="{{ route('meetings.create', $ministry) }}"
+                       class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Створити зустріч
+                    </a>
+                </div>
+                @endcan
+            </div>
+
+            <div x-show="activeTab === 'expenses'"{{ $tab !== 'expenses' ? ' style="display:none"' : '' }}>
                 <!-- Expenses -->
                 @if($ministry->expenses->count() > 0)
                     <div class="space-y-2">
@@ -211,7 +290,7 @@
                 @endif
 
                 <div class="mt-4">
-                    <a href="{{ route('finances.expenses.create') }}"
+                    <a href="{{ route('finances.expenses.create', ['ministry' => $ministry->id]) }}"
                        class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -219,7 +298,7 @@
                         Додати витрату
                     </a>
                 </div>
-            @endif
+            </div>
         </div>
     </div>
 

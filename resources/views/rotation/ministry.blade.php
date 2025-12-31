@@ -216,10 +216,18 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-wrap gap-1">
-                                @foreach($member->positions->where('ministry_id', $ministry->id) as $position)
-                                <span class="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
-                                    {{ $position->name }}
-                                </span>
+                                @php
+                                    $memberPositionIds = $member->pivot->position_ids ?? [];
+                                    if (is_string($memberPositionIds)) {
+                                        $memberPositionIds = json_decode($memberPositionIds, true) ?? [];
+                                    }
+                                @endphp
+                                @foreach($memberPositionIds as $positionId)
+                                    @if(isset($positions[$positionId]))
+                                    <span class="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                                        {{ $positions[$positionId]->name }}
+                                    </span>
+                                    @endif
                                 @endforeach
                             </div>
                         </td>

@@ -132,7 +132,7 @@
                         </svg>
                     </button>
 
-                    <div x-show="open" x-transition
+                    <div x-show="open" x-cloak x-transition
                          class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-50">
                         <div class="py-1">
                             <a href="{{ route('calendar.export') }}"
@@ -426,6 +426,56 @@
                 @endif
             </div>
         </div>
+
+        <!-- Upcoming Events from Next Month -->
+        @if($view === 'month' && isset($upcomingNextMonth) && $upcomingNextMonth->count() > 0)
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
+                <h3 class="font-semibold text-blue-700 dark:text-blue-300 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    </svg>
+                    Найближчі події ({{ $months[$nextMonth - 1] ?? 'наступний місяць' }})
+                </h3>
+            </div>
+            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                @foreach($upcomingNextMonth as $item)
+                    <a href="{{ route('events.show', $item->original) }}"
+                       class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style="background-color: {{ $item->ministry->color ?? '#3b82f6' }}20;">
+                                <span class="text-lg font-bold" style="color: {{ $item->ministry->color ?? '#3b82f6' }};">{{ $item->date->format('d') }}</span>
+                                <span class="text-xs" style="color: {{ $item->ministry->color ?? '#3b82f6' }};">{{ $months[$item->date->month - 1] ?? '' }}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $item->ministry->name ?? 'Без служіння' }}
+                                    @if($item->time)
+                                        &bull; {{ $item->time->format('H:i') }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            @if($item->original->isFullyStaffed())
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
+                                    {{ $item->original->confirmed_assignments_count }}/{{ $item->original->total_positions_count }}
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300">
+                                    {{ $item->original->filled_positions_count }}/{{ $item->original->total_positions_count }}
+                                </span>
+                            @endif
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
     @endif
 </div>
 

@@ -36,8 +36,8 @@ class EventController extends Controller
         $church = $this->getCurrentChurch();
 
         $view = $request->get('view', 'month');
-        $year = $request->get('year', now()->year);
-        $month = $request->get('month', now()->month);
+        $year = (int) $request->get('year', now()->year);
+        $month = (int) $request->get('month', now()->month);
         $week = $request->get('week');
 
         if ($view === 'week') {
@@ -101,11 +101,42 @@ class EventController extends Controller
         // Group by date
         $events = $calendarItems->groupBy(fn($item) => Carbon::parse($item->date)->format('Y-m-d'));
 
+        // Get upcoming events from next month (first 7 days) for month view
+        $upcomingNextMonth = collect();
+        if ($view === 'month') {
+            $nextMonthStart = $endDate->copy()->addDay()->startOfDay();
+            $nextMonthEnd = $nextMonthStart->copy()->addDays(6)->endOfDay();
+
+            $upcomingEvents = Event::where('church_id', $church->id)
+                ->whereBetween('date', [$nextMonthStart, $nextMonthEnd])
+                ->with(['ministry', 'assignments.person', 'assignments.position'])
+                ->orderBy('date')
+                ->orderBy('time')
+                ->get();
+
+            foreach ($upcomingEvents as $event) {
+                $upcomingNextMonth->push((object)[
+                    'type' => 'event',
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'date' => $event->date,
+                    'time' => $event->time,
+                    'ministry' => $event->ministry,
+                    'ministry_id' => $event->ministry_id,
+                    'original' => $event,
+                ]);
+            }
+        }
+
         $ministries = $church->ministries;
+
+        // Calculate next month for display
+        $nextMonth = $month == 12 ? 1 : $month + 1;
+        $nextYear = $month == 12 ? $year + 1 : $year;
 
         return view('schedule.calendar', compact(
             'events', 'year', 'month', 'startDate', 'endDate',
-            'ministries', 'view', 'currentWeek', 'church', 'meetings'
+            'ministries', 'view', 'currentWeek', 'church', 'meetings', 'upcomingNextMonth', 'nextMonth', 'nextYear'
         ));
     }
 

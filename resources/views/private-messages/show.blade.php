@@ -3,7 +3,7 @@
 @section('title', $user->name)
 
 @section('content')
-<div class="max-w-4xl mx-auto flex flex-col h-[calc(100vh-12rem)]" x-data="chatApp()" x-init="$dispatch('pm-read')">
+<div class="max-w-4xl mx-auto flex flex-col h-[calc(100dvh-12rem)] lg:h-[calc(100vh-8rem)]" x-data="chatApp()" x-init="$dispatch('pm-read')">
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 rounded-t-2xl border border-gray-200 dark:border-gray-700 border-b-0 px-6 py-4 flex items-center">
         <a href="{{ route('pm.index') }}" class="p-2 -ml-2 mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 lg:hidden">
@@ -70,7 +70,7 @@
 
     <!-- Input -->
     <div class="bg-white dark:bg-gray-800 rounded-b-2xl border border-gray-200 dark:border-gray-700 border-t-0 p-4">
-        <form @submit.prevent="sendMessage" class="flex items-end gap-3">
+        <div class="flex items-end gap-3">
             <div class="flex-1">
                 <textarea x-model="message"
                           @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
@@ -80,19 +80,23 @@
                           x-ref="messageInput"
                           @input="autoResize($el)"></textarea>
             </div>
-            <button type="submit"
+            <button type="button"
+                    @click="sendMessage()"
                     :disabled="!message.trim() || sending"
                     class="p-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-xl transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                 </svg>
             </button>
-        </form>
+        </div>
     </div>
 </div>
 
 @push('scripts')
 <script>
+// Global lock to prevent any double sends
+window._pmSending = false;
+
 function chatApp() {
     return {
         message: '',
@@ -118,44 +122,51 @@ function chatApp() {
             el.style.height = Math.min(el.scrollHeight, 120) + 'px';
         },
 
-        async sendMessage() {
-            if (!this.message.trim() || this.sending) return;
+        sendMessage() {
+            // Global lock - prevent any double sends
+            if (window._pmSending) {
+                console.log('BLOCKED by global lock');
+                return;
+            }
+            window._pmSending = true;
 
-            this.sending = true;
-            const messageText = this.message;
-            this.message = '';
-
-            try {
-                const response = await fetch('{{ route('pm.store') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        recipient_id: {{ $user->id }},
-                        message: messageText,
-                    }),
-                });
-
-                if (response.ok) {
-                    // Immediately show our message
-                    this.newMessages.push({
-                        id: Date.now(),
-                        message: messageText,
-                        is_mine: true,
-                        created_at: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
-                    });
-                    this.scrollToBottom();
-                }
-            } catch (error) {
-                console.error('Error sending message:', error);
-                this.message = messageText; // Restore message on error
+            const messageText = this.message.trim();
+            if (!messageText) {
+                window._pmSending = false;
+                return;
             }
 
-            this.sending = false;
-            this.$refs.messageInput.style.height = 'auto';
+            this.sending = true;
+            this.message = '';
+
+            fetch('{{ route('pm.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    recipient_id: {{ $user->id }},
+                    message: messageText,
+                }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Don't add locally - let polling fetch it to avoid duplicates
+                    // Force immediate poll to show message faster
+                    setTimeout(() => this.pollMessages(), 500);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                this.message = messageText;
+            })
+            .finally(() => {
+                window._pmSending = false;
+                this.sending = false;
+                this.$refs.messageInput.style.height = 'auto';
+            });
         },
 
         startPolling() {
@@ -169,7 +180,7 @@ function chatApp() {
 
                 if (data.messages.length > 0) {
                     data.messages.forEach(msg => {
-                        // Avoid duplicates
+                        // Avoid duplicates by checking real message ID
                         if (!this.newMessages.find(m => m.id === msg.id)) {
                             this.newMessages.push(msg);
                             this.lastMessageId = Math.max(this.lastMessageId, msg.id);

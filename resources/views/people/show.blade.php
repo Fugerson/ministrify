@@ -351,7 +351,7 @@
                             <select x-model="role" @change="updateRole()"
                                     :disabled="saving || {{ $person->user->id === auth()->id() ? 'true' : 'false' }}"
                                     class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
-                                <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Волонтер</option>
+                                <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Служитель</option>
                                 <option value="leader" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Лідер служіння</option>
                                 <option value="admin" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Адміністратор</option>
                             </select>
@@ -405,7 +405,7 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Рівень доступу</label>
                                         <select x-model="newRole"
                                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white">
-                                            <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Волонтер — перегляд розкладу, підтвердження участі</option>
+                                            <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Служитель — перегляд розкладу, підтвердження участі</option>
                                             <option value="leader" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Лідер — керування своїм служінням</option>
                                             <option value="admin" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Адмін — повний доступ</option>
                                         </select>
@@ -778,6 +778,164 @@
         </div>
     </div>
     @endif
+
+    <!-- Family Relationships -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-6"
+         @if($isAdmin) x-data="familyManager()" @endif>
+        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                <h2 class="font-semibold text-gray-900 dark:text-white">Сім'я</h2>
+            </div>
+            @if($isAdmin)
+            <button @click="showAddModal = true" type="button"
+                    class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Додати
+            </button>
+            @endif
+        </div>
+
+        @php
+            $familyMembers = $person->family_members;
+        @endphp
+
+        @if($familyMembers->count() > 0)
+        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            @foreach($familyMembers as $member)
+            <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <a href="{{ route('people.show', $member->person) }}" class="flex items-center gap-3 flex-1 min-w-0">
+                    @if($member->person->photo)
+                    <img src="{{ Storage::url($member->person->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                    @else
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center flex-shrink-0">
+                        <span class="text-sm font-medium text-white">{{ mb_substr($member->person->first_name, 0, 1) }}</span>
+                    </div>
+                    @endif
+                    <div class="min-w-0">
+                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ $member->person->full_name }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $member->relationship_label }}</p>
+                    </div>
+                </a>
+                @if($isAdmin)
+                <button type="button" @click="deleteRelationship({{ $member->relationship_id }})"
+                        class="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                @endif
+            </div>
+            @endforeach
+        </div>
+        @else
+        <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <p>Немає зв'язаних членів сім'ї</p>
+            @if($isAdmin)
+            <button @click="showAddModal = true" type="button" class="mt-2 text-primary-600 dark:text-primary-400 text-sm hover:underline">
+                Додати члена сім'ї
+            </button>
+            @endif
+        </div>
+        @endif
+
+        @if($isAdmin)
+        <!-- Add Family Modal -->
+        <template x-teleport="body">
+            <div x-show="showAddModal" x-cloak
+                 class="fixed inset-0 z-50 overflow-y-auto"
+                 @keydown.escape.window="showAddModal = false">
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div class="fixed inset-0 bg-black/50" @click="showAddModal = false"></div>
+                    <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Додати члена сім'ї</h3>
+
+                        <div class="space-y-4">
+                            <!-- Person Search -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Людина</label>
+                                <div class="relative" x-data="{ inputFocused: false }">
+                                    <input type="text" x-model="searchQuery"
+                                           @input.debounce.300ms="searchPeople()"
+                                           @focus="inputFocused = true; loadInitialPeople()"
+                                           @blur="setTimeout(() => inputFocused = false, 200)"
+                                           placeholder="Пошук за ім'ям..."
+                                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+
+                                    <!-- Selected person display -->
+                                    <div x-show="selectedPerson" class="absolute inset-y-0 right-2 flex items-center">
+                                        <button @click.prevent="selectedPerson = null; searchQuery = ''; searchResults = []" type="button" class="p-1 text-gray-400 hover:text-gray-600">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Search results dropdown -->
+                                    <div x-show="inputFocused && searchResults.length > 0 && !selectedPerson" x-cloak
+                                         class="absolute z-[100] left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-48 overflow-auto">
+                                        <template x-for="person in searchResults" :key="person.id">
+                                            <div @mousedown.prevent="selectPerson(person)"
+                                                 class="px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-3">
+                                                <template x-if="person.photo">
+                                                    <img :src="person.photo" class="w-8 h-8 rounded-full object-cover">
+                                                </template>
+                                                <template x-if="!person.photo">
+                                                    <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                                        <span class="text-xs text-gray-500" x-text="person.name.charAt(0)"></span>
+                                                    </div>
+                                                </template>
+                                                <span class="text-gray-900 dark:text-white" x-text="person.name"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Relationship Type -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип зв'язку</label>
+                                <select x-model="relationshipType"
+                                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white">
+                                    <option value="">-- Оберіть --</option>
+                                    <option value="spouse">Чоловік/Дружина</option>
+                                    <option value="child">Дитина</option>
+                                    <option value="parent">Батько/Мати</option>
+                                    <option value="sibling">Брат/Сестра</option>
+                                </select>
+                            </div>
+
+                            <p x-show="error" x-text="error" class="text-sm text-red-600"></p>
+                        </div>
+
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" @click="showAddModal = false"
+                                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                Скасувати
+                            </button>
+                            <button type="button" @click="addFamilyMember()"
+                                    :disabled="saving || !selectedPerson || !relationshipType"
+                                    class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center gap-2">
+                                <svg x-show="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span x-text="saving ? 'Збереження...' : 'Додати'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        @endif
+    </div>
 
     <!-- Notes -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mt-6">
@@ -1161,6 +1319,98 @@ function avatarUpload() {
         }
     }
 }
+
+@if($isAdmin)
+function familyManager() {
+    return {
+        showAddModal: false,
+        searchQuery: '',
+        searchResults: [],
+        selectedPerson: null,
+        relationshipType: '',
+        saving: false,
+        error: '',
+
+        async searchPeople() {
+            try {
+                const query = this.searchQuery.trim();
+                const response = await fetch(`{{ route('family.search', $person) }}?q=${encodeURIComponent(query)}`);
+                if (!response.ok) {
+                    console.error('Search failed:', response.status);
+                    return;
+                }
+                const data = await response.json();
+                this.searchResults = data;
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        },
+
+        async loadInitialPeople() {
+            await this.searchPeople();
+        },
+
+        selectPerson(person) {
+            this.selectedPerson = person;
+            this.searchQuery = person.name;
+            this.showResults = false;
+        },
+
+        async addFamilyMember() {
+            if (!this.selectedPerson || !this.relationshipType) return;
+
+            this.saving = true;
+            this.error = '';
+
+            try {
+                const response = await fetch('{{ route('family.store', $person) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        related_person_id: this.selectedPerson.id,
+                        relationship_type: this.relationshipType
+                    })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    this.error = data.message || 'Помилка при збереженні';
+                }
+            } catch (error) {
+                this.error = 'Помилка з\'єднання';
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        async deleteRelationship(relationshipId) {
+            if (!confirm('Видалити цей сімейний зв\'язок?')) return;
+
+            try {
+                const response = await fetch(`/family/${relationshipId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+            }
+        }
+    }
+}
+@endif
 
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('attendanceChart');

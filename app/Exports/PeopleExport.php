@@ -12,10 +12,57 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class PeopleExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected int $churchId;
+    protected array $householdCache = [];
 
     public function __construct(int $churchId)
     {
         $this->churchId = $churchId;
+        $this->buildHouseholdCache();
+    }
+
+    /**
+     * Build a cache of person_id -> household_name based on family relationships
+     */
+    protected function buildHouseholdCache(): void
+    {
+        $people = Person::where('church_id', $this->churchId)
+            ->with(['familyRelationships.relatedPerson', 'inverseFamilyRelationships.person'])
+            ->get();
+
+        $processed = [];
+
+        foreach ($people as $person) {
+            if (isset($processed[$person->id])) {
+                continue;
+            }
+
+            // Get all family members (including this person)
+            $familyMemberIds = [$person->id];
+
+            // Direct relationships
+            foreach ($person->familyRelationships as $rel) {
+                if (!in_array($rel->related_person_id, $familyMemberIds)) {
+                    $familyMemberIds[] = $rel->related_person_id;
+                }
+            }
+
+            // Inverse relationships
+            foreach ($person->inverseFamilyRelationships as $rel) {
+                if (!in_array($rel->person_id, $familyMemberIds)) {
+                    $familyMemberIds[] = $rel->person_id;
+                }
+            }
+
+            if (count($familyMemberIds) > 1) {
+                // Generate household name from last name
+                $householdName = "Сім'я " . $person->last_name;
+
+                foreach ($familyMemberIds as $memberId) {
+                    $this->householdCache[$memberId] = $householdName;
+                    $processed[$memberId] = true;
+                }
+            }
+        }
     }
 
     public function collection()
@@ -41,6 +88,7 @@ class PeopleExport implements FromCollection, WithHeadings, WithMapping, WithSty
             'Служіння',
             'Теги',
             'Нотатки',
+            'Household Name',
         ];
     }
 
@@ -58,6 +106,7 @@ class PeopleExport implements FromCollection, WithHeadings, WithMapping, WithSty
             $person->ministries->pluck('name')->implode(', '),
             $person->tags->pluck('name')->implode(', '),
             $person->notes,
+            $this->householdCache[$person->id] ?? '',
         ];
     }
 

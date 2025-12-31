@@ -356,7 +356,7 @@ class AssignmentController extends Controller
 
     protected function authorizeChurch($model): void
     {
-        if ($model->church_id !== auth()->user()->church_id) {
+        if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
     }

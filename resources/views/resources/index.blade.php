@@ -3,6 +3,7 @@
 @section('title', 'Ресурси')
 
 @section('content')
+<x-page-help page="resources" />
 <div class="space-y-6" x-data="resourcesManager()">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -53,23 +54,25 @@
         </div>
     </div>
 
-    <!-- Storage usage -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Використано сховища</span>
-            <span class="text-sm font-medium text-gray-900 dark:text-white">
-                {{ number_format($storageUsed / 1024 / 1024, 1) }} MB / {{ number_format($storageLimit / 1024 / 1024, 0) }} MB
-            </span>
-        </div>
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div class="h-2 rounded-full transition-all duration-300
-                @if($storagePercent > 90) bg-red-500
-                @elseif($storagePercent > 70) bg-yellow-500
-                @else bg-primary-500
-                @endif"
-                style="width: {{ min($storagePercent, 100) }}%"></div>
+    <!-- Storage warning (only show when approaching limit) -->
+    @if($storagePercent > 70)
+    <div class="rounded-xl p-4 border {{ $storagePercent > 90 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' }}">
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 {{ $storagePercent > 90 ? 'text-red-500' : 'text-yellow-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-medium {{ $storagePercent > 90 ? 'text-red-800 dark:text-red-200' : 'text-yellow-800 dark:text-yellow-200' }}">
+                    @if($storagePercent > 90)
+                        Сховище майже заповнене! Залишилось {{ number_format(($storageLimit - $storageUsed) / 1024 / 1024, 1) }} MB
+                    @else
+                        Використано {{ number_format($storageUsed / 1024 / 1024, 0) }} MB з {{ number_format($storageLimit / 1024 / 1024, 0) }} MB
+                    @endif
+                </p>
+            </div>
         </div>
     </div>
+    @endif
 
     <!-- Resources grid -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">

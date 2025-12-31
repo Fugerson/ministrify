@@ -83,6 +83,7 @@ class MinistryController extends Controller
             'members',
             'events' => fn($q) => $q->upcoming()->with(['ministry.positions', 'assignments'])->limit(10),
             'expenses' => fn($q) => $q->forMonth(now()->year, now()->month)->with('category'),
+            'meetings' => fn($q) => $q->with(['agendaItems', 'attendees.person'])->latest('date')->limit(20),
         ]);
 
         $tab = request('tab', 'schedule');
@@ -92,7 +93,14 @@ class MinistryController extends Controller
             ->where('is_archived', false)
             ->get();
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards'));
+        // Get available people for adding members (always load for client-side tabs)
+        $memberIds = $ministry->members->pluck('id')->toArray();
+        $availablePeople = Person::where('church_id', $church->id)
+            ->whereNotIn('id', $memberIds)
+            ->orderBy('last_name')
+            ->get();
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople'));
     }
 
     public function edit(Ministry $ministry)

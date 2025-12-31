@@ -113,10 +113,9 @@ class Group extends Model
     /**
      * Get all attendances for this group (unified system)
      */
-    public function attendances()
+    public function attendances(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
-        return Attendance::where('attendable_type', self::class)
-            ->where('attendable_id', $this->id);
+        return $this->morphMany(Attendance::class, 'attendable');
     }
 
     /**

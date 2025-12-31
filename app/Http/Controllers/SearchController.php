@@ -14,7 +14,7 @@ class SearchController extends Controller
     public function search(Request $request)
     {
         $query = $request->get('q', '');
-        $churchId = auth()->user()->church_id;
+        $churchId = $this->getCurrentChurch()->id;
 
         if (strlen($query) < 2) {
             return response()->json(['results' => []]);

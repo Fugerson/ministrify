@@ -26,6 +26,8 @@ class Church extends Model
         'payment_settings',
         'calendar_token',
         'public_site_enabled',
+        'public_template',
+        'public_site_settings',
         'public_description',
         'public_email',
         'public_phone',
@@ -39,13 +41,18 @@ class Church extends Model
         'pastor_photo',
         'pastor_message',
         'shepherds_enabled',
+        'initial_balance',
+        'initial_balance_date',
     ];
 
     protected $casts = [
         'settings' => 'array',
         'payment_settings' => 'array',
+        'public_site_settings' => 'array',
         'public_site_enabled' => 'boolean',
         'shepherds_enabled' => 'boolean',
+        'initial_balance' => 'decimal:2',
+        'initial_balance_date' => 'date',
     ];
 
     /**
@@ -163,6 +170,47 @@ class Church extends Model
         return $this->hasMany(EventRegistration::class);
     }
 
+    // Website Builder relationships
+    public function staffMembers(): HasMany
+    {
+        return $this->hasMany(StaffMember::class)->orderBy('sort_order');
+    }
+
+    public function sermons(): HasMany
+    {
+        return $this->hasMany(Sermon::class);
+    }
+
+    public function sermonSeries(): HasMany
+    {
+        return $this->hasMany(SermonSeries::class);
+    }
+
+    public function galleries(): HasMany
+    {
+        return $this->hasMany(Gallery::class);
+    }
+
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(Faq::class);
+    }
+
+    public function testimonials(): HasMany
+    {
+        return $this->hasMany(Testimonial::class);
+    }
+
+    public function blogPosts(): HasMany
+    {
+        return $this->hasMany(BlogPost::class);
+    }
+
+    public function blogCategories(): HasMany
+    {
+        return $this->hasMany(BlogCategory::class);
+    }
+
     public function getPublicEventsAttribute()
     {
         return $this->events()
@@ -276,5 +324,216 @@ class Church extends Model
         $this->calendar_token = \Illuminate\Support\Str::random(32);
         $this->save();
         return $this->calendar_token;
+    }
+
+    /**
+     * Get total income from transactions
+     */
+    public function getTotalIncomeAttribute(): float
+    {
+        return (float) Transaction::where('church_id', $this->id)
+            ->incoming()
+            ->completed()
+            ->sum('amount');
+    }
+
+    /**
+     * Get total expenses from transactions
+     */
+    public function getTotalExpenseAttribute(): float
+    {
+        return (float) Transaction::where('church_id', $this->id)
+            ->outgoing()
+            ->completed()
+            ->sum('amount');
+    }
+
+    /**
+     * Get current balance (initial + income - expenses)
+     */
+    public function getCurrentBalanceAttribute(): float
+    {
+        return (float) $this->initial_balance + $this->total_income - $this->total_expense;
+    }
+
+    /**
+     * Get balance breakdown
+     */
+    public function getBalanceBreakdown(): array
+    {
+        return [
+            'initial_balance' => (float) $this->initial_balance,
+            'initial_balance_date' => $this->initial_balance_date,
+            'total_income' => $this->total_income,
+            'total_expense' => $this->total_expense,
+            'current_balance' => $this->current_balance,
+        ];
+    }
+
+    // ========== Website Builder Public Getters ==========
+
+    public function getPublicStaffAttribute()
+    {
+        return $this->staffMembers()
+            ->where('is_public', true)
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    public function getPublicSermonsAttribute()
+    {
+        return $this->sermons()
+            ->where('is_public', true)
+            ->orderByDesc('sermon_date')
+            ->limit(6)
+            ->get();
+    }
+
+    public function getPublicGalleriesAttribute()
+    {
+        return $this->galleries()
+            ->where('is_public', true)
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    public function getPublicFaqsAttribute()
+    {
+        return $this->faqs()
+            ->where('is_public', true)
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    public function getPublicTestimonialsAttribute()
+    {
+        return $this->testimonials()
+            ->where('is_public', true)
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    public function getPublicBlogPostsAttribute()
+    {
+        return $this->blogPosts()
+            ->published()
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('published_at')
+            ->limit(3)
+            ->get();
+    }
+
+    // ========== Public Site Settings Helpers ==========
+
+    public function getPublicSiteSetting(string $key, $default = null)
+    {
+        return data_get($this->public_site_settings, $key, $default);
+    }
+
+    public function setPublicSiteSetting(string $key, $value): void
+    {
+        $settings = $this->public_site_settings ?? [];
+        data_set($settings, $key, $value);
+        $this->public_site_settings = $settings;
+        $this->save();
+    }
+
+    public function getActiveTemplateAttribute(): string
+    {
+        return $this->public_template ?? 'modern';
+    }
+
+    public function getEnabledSectionsAttribute(): array
+    {
+        $sections = $this->getPublicSiteSetting('sections', $this->getDefaultSections());
+        return collect($sections)
+            ->filter(fn($s) => $s['enabled'] ?? false)
+            ->sortBy('order')
+            ->values()
+            ->all();
+    }
+
+    public function getDefaultSections(): array
+    {
+        return [
+            ['id' => 'hero', 'enabled' => true, 'order' => 0],
+            ['id' => 'service_times', 'enabled' => true, 'order' => 1],
+            ['id' => 'about', 'enabled' => false, 'order' => 2],
+            ['id' => 'pastor_message', 'enabled' => true, 'order' => 3],
+            ['id' => 'leadership', 'enabled' => false, 'order' => 4],
+            ['id' => 'events', 'enabled' => true, 'order' => 5],
+            ['id' => 'sermons', 'enabled' => false, 'order' => 6],
+            ['id' => 'ministries', 'enabled' => true, 'order' => 7],
+            ['id' => 'groups', 'enabled' => true, 'order' => 8],
+            ['id' => 'gallery', 'enabled' => false, 'order' => 9],
+            ['id' => 'testimonials', 'enabled' => false, 'order' => 10],
+            ['id' => 'blog', 'enabled' => false, 'order' => 11],
+            ['id' => 'faq', 'enabled' => false, 'order' => 12],
+            ['id' => 'donations', 'enabled' => true, 'order' => 13],
+            ['id' => 'contact', 'enabled' => true, 'order' => 14],
+        ];
+    }
+
+    public function getTemplateConfig(): array
+    {
+        return config("public_site_templates.templates.{$this->active_template}", []);
+    }
+
+    public function getSiteColorsAttribute(): array
+    {
+        $defaultColors = [
+            'primary' => $this->primary_color ?? '#3b82f6',
+            'secondary' => '#10b981',
+            'accent' => '#f59e0b',
+            'background' => '#ffffff',
+            'text' => '#1f2937',
+            'heading' => '#111827',
+        ];
+
+        return array_merge($defaultColors, $this->getPublicSiteSetting('colors', []));
+    }
+
+    public function getSiteFontsAttribute(): array
+    {
+        $templateConfig = $this->getTemplateConfig();
+        $defaultFonts = $templateConfig['fonts'] ?? ['heading' => 'Inter', 'body' => 'Inter'];
+
+        return array_merge($defaultFonts, $this->getPublicSiteSetting('fonts', []));
+    }
+
+    public function getHeroSettingsAttribute(): array
+    {
+        $templateConfig = $this->getTemplateConfig();
+        $defaults = [
+            'type' => $templateConfig['hero_default'] ?? 'image',
+            'overlay_opacity' => 70,
+            'text_alignment' => 'left',
+            'show_cta' => true,
+        ];
+
+        return array_merge($defaults, $this->getPublicSiteSetting('hero', []));
+    }
+
+    public function getAboutContentAttribute(): array
+    {
+        return $this->getPublicSiteSetting('about', [
+            'mission' => null,
+            'vision' => null,
+            'values' => [],
+            'history' => null,
+        ]);
+    }
+
+    public function getCustomCssAttribute(): ?string
+    {
+        $css = $this->getPublicSiteSetting('custom_css');
+        if (!$css) return null;
+
+        // Sanitize: remove @import, javascript:, expression()
+        $css = preg_replace('/@import\s+/i', '', $css);
+        $css = preg_replace('/javascript\s*:/i', '', $css);
+        $css = preg_replace('/expression\s*\(/i', '', $css);
+
+        return $css;
     }
 }

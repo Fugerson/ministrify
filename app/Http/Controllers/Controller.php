@@ -25,6 +25,11 @@ abstract class Controller extends BaseController
             return Church::findOrFail(session('impersonate_church_id'));
         }
 
+        // Super admin without impersonation - use first church as fallback
+        if ($user->is_super_admin && !$user->church_id) {
+            return Church::first();
+        }
+
         return $user->church;
     }
 

@@ -300,7 +300,7 @@ class MeetingController extends Controller
 
     private function authorizeMinistry(Ministry $ministry): void
     {
-        if ($ministry->church_id !== auth()->user()->church_id) {
+        if ($ministry->church_id !== $this->getCurrentChurch()->id) {
             abort(403);
         }
     }

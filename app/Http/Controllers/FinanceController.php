@@ -36,7 +36,14 @@ class FinanceController extends Controller
 
         $totalIncome = $incomeQuery->sum('amount');
         $totalExpense = $expenseQuery->sum('amount');
-        $balance = $totalIncome - $totalExpense;
+        $periodBalance = $totalIncome - $totalExpense;
+
+        // Overall balance (includes initial balance)
+        $initialBalance = (float) $church->initial_balance;
+        $initialBalanceDate = $church->initial_balance_date;
+        $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount');
+        $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
+        $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
 
         // Monthly data for chart
         $monthlyData = $this->getMonthlyData($church->id, $year);
@@ -129,8 +136,10 @@ class FinanceController extends Controller
             ->get();
 
         return view('finances.index', compact(
-            'year', 'month', 'periodLabel',
-            'totalIncome', 'totalExpense', 'balance',
+            'church', 'year', 'month', 'periodLabel',
+            'totalIncome', 'totalExpense', 'periodBalance',
+            'initialBalance', 'initialBalanceDate', 'currentBalance',
+            'allTimeIncome', 'allTimeExpense',
             'monthlyData',
             'incomeByCategory', 'expenseByCategory', 'expenseByMinistry',
             'recentIncomes', 'recentExpenses',
@@ -319,7 +328,7 @@ class FinanceController extends Controller
         return view('finances.expenses.index', compact('expenses', 'categories', 'year', 'month', 'totals', 'ministries'));
     }
 
-    public function createExpense()
+    public function createExpense(Request $request)
     {
         $church = $this->getCurrentChurch();
         $categories = TransactionCategory::where('church_id', $church->id)
@@ -327,14 +336,15 @@ class FinanceController extends Controller
             ->orderBy('sort_order')
             ->get();
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+        $selectedMinistry = $request->get('ministry');
 
-        return view('finances.expenses.create', compact('categories', 'ministries'));
+        return view('finances.expenses.create', compact('categories', 'ministries', 'selectedMinistry'));
     }
 
     public function storeExpense(Request $request)
     {
         $validated = $request->validate([
-            'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
+            'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
@@ -411,7 +421,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($expense);
 
         $validated = $request->validate([
-            'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
+            'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],

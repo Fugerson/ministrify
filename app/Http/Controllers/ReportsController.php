@@ -24,10 +24,9 @@ class ReportsController extends Controller
             'active_members' => Person::where('church_id', $church->id)
                 ->whereHas('attendanceRecords', fn($q) => $q->where('created_at', '>=', now()->subMonths(3)))
                 ->count(),
-            'total_events' => Event::where('church_id', $church->id)->whereYear('date', now()->year)->count(),
+            'total_events' => Event::where('church_id', $church->id)->where('date', '>=', now()->startOfYear())->count(),
             'total_volunteers' => Person::where('church_id', $church->id)
-                ->whereHas('assignments', fn($q) => $q->whereYear('created_at', now()->year))
-                ->distinct()
+                ->whereHas('ministries')
                 ->count(),
         ];
 

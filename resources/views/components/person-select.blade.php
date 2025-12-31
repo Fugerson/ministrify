@@ -127,7 +127,9 @@ window.personSelectData['{{ $uniqueId }}'] = [
     @foreach($people->sortBy('last_name') as $person)
     @php
         $photoUrl = $person->photo ? \Illuminate\Support\Facades\Storage::url($person->photo) : null;
-        $roleName = $person->churchRoleRelation ? $person->churchRoleRelation->name : ($person->church_role ?? null);
+        $roleName = $person->relationLoaded('churchRoleRelation') && $person->churchRoleRelation
+            ? $person->churchRoleRelation->name
+            : ($person->church_role ?? null);
         $initials = mb_substr($person->first_name, 0, 1) . mb_substr($person->last_name ?? '', 0, 1);
     @endphp
     {
