@@ -25,6 +25,7 @@
 
     <form method="POST" action="{{ route('website-builder.about.update') }}" class="space-y-6">
         @csrf
+        @method('PUT')
 
         <!-- Mission -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
