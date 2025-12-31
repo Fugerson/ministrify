@@ -27,6 +27,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MigrationController;
+use App\Http\Controllers\TelegramBroadcastController;
 use Illuminate\Support\Facades\Route;
 
 // Landing pages (public)
@@ -349,6 +350,12 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::post('shepherds', [\App\Http\Controllers\ShepherdController::class, 'store'])->name('shepherds.store');
         Route::delete('shepherds/{person}', [\App\Http\Controllers\ShepherdController::class, 'destroy'])->name('shepherds.destroy');
         Route::post('shepherds/toggle-feature', [\App\Http\Controllers\ShepherdController::class, 'toggleFeature'])->name('shepherds.toggle-feature');
+    });
+
+    // Telegram Broadcast (admin only)
+    Route::middleware('role:admin')->prefix('telegram')->name('telegram.')->group(function () {
+        Route::get('broadcast', [TelegramBroadcastController::class, 'index'])->name('broadcast.index');
+        Route::post('broadcast', [TelegramBroadcastController::class, 'send'])->name('broadcast.send');
     });
 
     // Website Builder (admin only)
