@@ -86,7 +86,7 @@ class Event extends Model
 
     public function responsibilities(): HasMany
     {
-        return $this->hasMany(EventResponsibility::class);
+        return $this->hasMany(EventResponsibility::class)->orderBy('id');
     }
 
     public function attendance(): HasOne

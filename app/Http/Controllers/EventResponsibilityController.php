@@ -134,6 +134,7 @@ class EventResponsibilityController extends Controller
 
         $responsibilities = $event->responsibilities()
             ->with('person:id,first_name,last_name')
+            ->orderBy('id')
             ->get()
             ->map(fn($r) => [
                 'id' => $r->id,
