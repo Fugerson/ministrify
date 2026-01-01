@@ -12,8 +12,6 @@
 @endsection
 
 @section('content')
-<x-page-help page="people" />
-
 <div x-data="peopleTable()" class="space-y-4">
     <!-- Search & Stats Bar -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">

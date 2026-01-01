@@ -3,8 +3,6 @@
 @section('title', 'Головна')
 
 @section('content')
-<x-page-help page="dashboard" />
-
 <!-- Onboarding Reminder for new admins -->
 <x-onboarding-reminder />
 

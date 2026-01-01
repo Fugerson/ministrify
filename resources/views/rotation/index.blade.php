@@ -3,8 +3,6 @@
 @section('title', 'Ротація служительів')
 
 @section('content')
-<x-page-help page="rotation" />
-
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

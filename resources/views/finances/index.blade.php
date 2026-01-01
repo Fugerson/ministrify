@@ -22,8 +22,6 @@
 @endsection
 
 @section('content')
-<x-page-help page="finances" />
-
 <div x-data="financesDashboard()" class="space-y-6">
     <!-- Period selector -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">

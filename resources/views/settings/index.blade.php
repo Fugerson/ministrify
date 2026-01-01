@@ -3,8 +3,6 @@
 @section('title', 'Налаштування')
 
 @section('content')
-<x-page-help page="settings" />
-
 <div class="max-w-4xl mx-auto space-y-4 md:space-y-6" x-data="{
     activeTab: localStorage.getItem('settings_tab') || 'general',
     setTab(tab) {
