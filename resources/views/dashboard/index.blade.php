@@ -180,7 +180,7 @@
         </a>
     </div>
 
-    <!-- Task Tracker -->
+    {{-- Task Tracker hidden for now
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-4 lg:mt-6">
         <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <h2 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
@@ -205,10 +205,7 @@
                    class="block bg-gray-50 dark:bg-gray-700/50 border-l-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 overflow-hidden
                           {{ $task->priority === 'urgent' ? 'border-l-red-500' : ($task->priority === 'high' ? 'border-l-orange-500' : 'border-l-yellow-500') }}">
                     <div class="p-3">
-                        <!-- Title -->
                         <h4 class="font-medium text-sm text-gray-900 dark:text-white line-clamp-2 mb-2">{{ $task->title }}</h4>
-
-                        <!-- Column badge -->
                         <div class="flex items-center gap-1.5 mb-2">
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                                 {{ $task->column->name }}
@@ -219,8 +216,6 @@
                             </span>
                             @endif
                         </div>
-
-                        <!-- Footer: due date & assignee -->
                         <div class="flex items-center justify-between text-xs">
                             @if($task->due_date)
                             <span class="flex items-center gap-1 {{ $task->isOverdue() ? 'text-red-500 font-medium' : 'text-gray-500 dark:text-gray-400' }}">
@@ -264,6 +259,7 @@
         </div>
         @endif
     </div>
+    --}}
 
     <!-- Birthdays This Month -->
     @if($birthdaysThisMonth->isNotEmpty())
