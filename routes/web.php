@@ -110,6 +110,15 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     Route::post('support/{ticket}/reply', [SystemAdminController::class, 'replySupportTicket'])->name('support.reply');
     Route::put('support/{ticket}', [SystemAdminController::class, 'updateSupportTicket'])->name('support.update');
 
+    // Admin Tasks
+    Route::get('tasks', [SystemAdminController::class, 'tasks'])->name('tasks.index');
+    Route::get('tasks/create', [SystemAdminController::class, 'createTask'])->name('tasks.create');
+    Route::post('tasks', [SystemAdminController::class, 'storeTask'])->name('tasks.store');
+    Route::get('tasks/{task}/edit', [SystemAdminController::class, 'editTask'])->name('tasks.edit');
+    Route::put('tasks/{task}', [SystemAdminController::class, 'updateTask'])->name('tasks.update');
+    Route::patch('tasks/{task}/status', [SystemAdminController::class, 'updateTaskStatus'])->name('tasks.update-status');
+    Route::delete('tasks/{task}', [SystemAdminController::class, 'destroyTask'])->name('tasks.destroy');
+
     // Exit church context
     Route::post('exit-church', [SystemAdminController::class, 'exitChurchContext'])->name('exit-church');
 });

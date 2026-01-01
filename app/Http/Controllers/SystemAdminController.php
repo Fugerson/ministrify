@@ -10,6 +10,7 @@ use App\Models\Event;
 use App\Models\Transaction;
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
+use App\Models\AdminTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -516,5 +517,168 @@ class SystemAdminController extends Controller
 
         return redirect()->route('system.support.show', $ticket)
             ->with('success', 'Тікет оновлено.');
+    }
+
+    /**
+     * Admin tasks list
+     */
+    public function tasks(Request $request)
+    {
+        $query = AdminTask::with(['creator', 'assignee', 'supportTicket']);
+
+        if ($request->status && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->type) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->priority) {
+            $query->where('priority', $request->priority);
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', "%{$request->search}%")
+                  ->orWhere('description', 'like', "%{$request->search}%");
+            });
+        }
+
+        $tasks = $query->orderByRaw("FIELD(priority, 'critical', 'high', 'normal', 'low')")
+            ->orderByRaw("FIELD(status, 'in_progress', 'todo', 'testing', 'backlog', 'done')")
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        $stats = [
+            'backlog' => AdminTask::where('status', 'backlog')->count(),
+            'todo' => AdminTask::where('status', 'todo')->count(),
+            'in_progress' => AdminTask::where('status', 'in_progress')->count(),
+            'testing' => AdminTask::where('status', 'testing')->count(),
+            'done' => AdminTask::where('status', 'done')->count(),
+        ];
+
+        $admins = User::where('is_super_admin', true)->get();
+
+        return view('system-admin.tasks.index', compact('tasks', 'stats', 'admins'));
+    }
+
+    /**
+     * Create task form
+     */
+    public function createTask(Request $request)
+    {
+        $admins = User::where('is_super_admin', true)->get();
+        $supportTicket = null;
+
+        if ($request->from_ticket) {
+            $supportTicket = SupportTicket::find($request->from_ticket);
+        }
+
+        return view('system-admin.tasks.create', compact('admins', 'supportTicket'));
+    }
+
+    /**
+     * Store new task
+     */
+    public function storeTask(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:10000',
+            'type' => 'required|in:bug,feature,improvement,other',
+            'priority' => 'required|in:low,normal,high,critical',
+            'status' => 'required|in:backlog,todo,in_progress,testing,done',
+            'assigned_to' => 'nullable|exists:users,id',
+            'support_ticket_id' => 'nullable|exists:support_tickets,id',
+            'due_date' => 'nullable|date',
+        ]);
+
+        $validated['created_by'] = auth()->id();
+
+        if ($validated['status'] === 'done') {
+            $validated['completed_at'] = now();
+        }
+
+        $task = AdminTask::create($validated);
+
+        return redirect()->route('system.tasks.index')
+            ->with('success', 'Задачу створено!');
+    }
+
+    /**
+     * Edit task form
+     */
+    public function editTask(AdminTask $task)
+    {
+        $admins = User::where('is_super_admin', true)->get();
+        $supportTickets = SupportTicket::whereNull('resolved_at')
+            ->orWhere('resolved_at', '>', now()->subDays(7))
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('system-admin.tasks.edit', compact('task', 'admins', 'supportTickets'));
+    }
+
+    /**
+     * Update task
+     */
+    public function updateTask(Request $request, AdminTask $task)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:10000',
+            'type' => 'required|in:bug,feature,improvement,other',
+            'priority' => 'required|in:low,normal,high,critical',
+            'status' => 'required|in:backlog,todo,in_progress,testing,done',
+            'assigned_to' => 'nullable|exists:users,id',
+            'support_ticket_id' => 'nullable|exists:support_tickets,id',
+            'due_date' => 'nullable|date',
+        ]);
+
+        // Handle completion
+        if ($validated['status'] === 'done' && $task->status !== 'done') {
+            $validated['completed_at'] = now();
+        } elseif ($validated['status'] !== 'done') {
+            $validated['completed_at'] = null;
+        }
+
+        $task->update($validated);
+
+        return redirect()->route('system.tasks.index')
+            ->with('success', 'Задачу оновлено!');
+    }
+
+    /**
+     * Quick update task status
+     */
+    public function updateTaskStatus(Request $request, AdminTask $task)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:backlog,todo,in_progress,testing,done',
+        ]);
+
+        $task->status = $validated['status'];
+
+        if ($validated['status'] === 'done' && !$task->completed_at) {
+            $task->completed_at = now();
+        } elseif ($validated['status'] !== 'done') {
+            $task->completed_at = null;
+        }
+
+        $task->save();
+
+        return back()->with('success', 'Статус оновлено!');
+    }
+
+    /**
+     * Delete task
+     */
+    public function destroyTask(AdminTask $task)
+    {
+        $task->delete();
+
+        return redirect()->route('system.tasks.index')
+            ->with('success', 'Задачу видалено.');
     }
 }

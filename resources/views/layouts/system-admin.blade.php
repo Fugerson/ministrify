@@ -99,6 +99,18 @@
                     @endif
                 </a>
 
+                <a href="{{ route('system.tasks.index') }}"
+                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.tasks.*') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    Задачі
+                    @php $activeTasks = \App\Models\AdminTask::whereIn('status', ['in_progress', 'todo'])->count(); @endphp
+                    @if($activeTasks > 0)
+                        <span class="ml-auto bg-yellow-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $activeTasks }}</span>
+                    @endif
+                </a>
+
             </nav>
 
             <div class="p-4 border-t border-gray-700">
