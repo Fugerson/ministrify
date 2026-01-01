@@ -87,6 +87,18 @@
                     Журнал дій
                 </a>
 
+                <a href="{{ route('system.support.index') }}"
+                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.support.*') ? 'bg-red-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    Підтримка
+                    @php $openTickets = \App\Models\SupportTicket::open()->count(); @endphp
+                    @if($openTickets > 0)
+                        <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $openTickets }}</span>
+                    @endif
+                </a>
+
             </nav>
 
             <div class="p-4 border-t border-gray-700">

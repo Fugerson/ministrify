@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\Person;
 use App\Models\Event;
 use App\Models\Transaction;
+use App\Models\SupportTicket;
+use App\Models\SupportMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -382,5 +384,137 @@ class SystemAdminController extends Controller
 
         return redirect()->route('system.index')
             ->with('success', 'Ви повернулись до системної адмінки.');
+    }
+
+    /**
+     * Support tickets list
+     */
+    public function supportTickets(Request $request)
+    {
+        $query = SupportTicket::with(['user', 'church', 'latestMessage']);
+
+        if ($request->status && $request->status !== 'all') {
+            if ($request->status === 'open') {
+                $query->open();
+            } else {
+                $query->where('status', $request->status);
+            }
+        } else {
+            $query->open(); // Default to open tickets
+        }
+
+        if ($request->category) {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('subject', 'like', "%{$request->search}%")
+                  ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$request->search}%")
+                      ->orWhere('email', 'like', "%{$request->search}%"));
+            });
+        }
+
+        $tickets = $query->orderByDesc('last_reply_at')->paginate(20);
+
+        $stats = [
+            'open' => SupportTicket::open()->count(),
+            'waiting' => SupportTicket::where('status', 'waiting')->count(),
+            'resolved' => SupportTicket::where('status', 'resolved')->count(),
+        ];
+
+        return view('system-admin.support.index', compact('tickets', 'stats'));
+    }
+
+    /**
+     * Show support ticket
+     */
+    public function showSupportTicket(SupportTicket $ticket)
+    {
+        $ticket->load(['user', 'church']);
+
+        // Mark user messages as read
+        $ticket->messages()
+            ->where('is_from_admin', false)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        $messages = $ticket->messages()
+            ->with('user')
+            ->orderBy('created_at')
+            ->get();
+
+        $admins = User::where('is_super_admin', true)->get();
+
+        return view('system-admin.support.show', compact('ticket', 'messages', 'admins'));
+    }
+
+    /**
+     * Reply to support ticket
+     */
+    public function replySupportTicket(Request $request, SupportTicket $ticket)
+    {
+        $validated = $request->validate([
+            'message' => 'required|string|max:10000',
+            'is_internal' => 'boolean',
+            'status' => 'nullable|in:open,in_progress,waiting,resolved,closed',
+        ]);
+
+        SupportMessage::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => auth()->id(),
+            'message' => $validated['message'],
+            'is_from_admin' => true,
+            'is_internal' => $request->boolean('is_internal'),
+        ]);
+
+        $updateData = ['last_reply_at' => now()];
+
+        if ($request->status) {
+            $updateData['status'] = $request->status;
+            if ($request->status === 'resolved') {
+                $updateData['resolved_at'] = now();
+            }
+        } elseif (!$request->boolean('is_internal')) {
+            // If not internal note, set status to waiting for user response
+            $updateData['status'] = 'waiting';
+        }
+
+        $ticket->update($updateData);
+
+        return redirect()->route('system.support.show', $ticket)
+            ->with('success', $request->boolean('is_internal') ? 'Внутрішню нотатку додано.' : 'Відповідь надіслано!');
+    }
+
+    /**
+     * Update ticket status/assignment
+     */
+    public function updateSupportTicket(Request $request, SupportTicket $ticket)
+    {
+        $validated = $request->validate([
+            'status' => 'nullable|in:open,in_progress,waiting,resolved,closed',
+            'priority' => 'nullable|in:low,normal,high,urgent',
+            'assigned_to' => 'nullable|exists:users,id',
+        ]);
+
+        if ($request->has('status')) {
+            $ticket->status = $validated['status'];
+            if ($validated['status'] === 'resolved') {
+                $ticket->resolved_at = now();
+            }
+        }
+
+        if ($request->has('priority')) {
+            $ticket->priority = $validated['priority'];
+        }
+
+        if ($request->has('assigned_to')) {
+            $ticket->assigned_to = $validated['assigned_to'];
+        }
+
+        $ticket->save();
+
+        return redirect()->route('system.support.show', $ticket)
+            ->with('success', 'Тікет оновлено.');
     }
 }

@@ -28,6 +28,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MigrationController;
 use App\Http\Controllers\TelegramBroadcastController;
 use App\Http\Controllers\TelegramChatController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 
 // Landing pages (public)
@@ -102,6 +103,12 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
 
     // Audit Logs
     Route::get('audit-logs', [SystemAdminController::class, 'auditLogs'])->name('audit-logs');
+
+    // Support Tickets
+    Route::get('support', [SystemAdminController::class, 'supportTickets'])->name('support.index');
+    Route::get('support/{ticket}', [SystemAdminController::class, 'showSupportTicket'])->name('support.show');
+    Route::post('support/{ticket}/reply', [SystemAdminController::class, 'replySupportTicket'])->name('support.reply');
+    Route::put('support/{ticket}', [SystemAdminController::class, 'updateSupportTicket'])->name('support.update');
 
     // Exit church context
     Route::post('exit-church', [SystemAdminController::class, 'exitChurchContext'])->name('exit-church');
@@ -453,6 +460,16 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::delete('my-profile/unavailable/{unavailableDate}', [PersonController::class, 'removeUnavailableDate'])->name('my-profile.unavailable.remove');
     Route::post('my-profile/telegram/generate-code', [PersonController::class, 'generateTelegramCode'])->name('my-profile.telegram.generate');
     Route::delete('my-profile/telegram/unlink', [PersonController::class, 'unlinkTelegram'])->name('my-profile.telegram.unlink');
+
+    // Support
+    Route::prefix('support')->name('support.')->group(function () {
+        Route::get('/', [SupportController::class, 'index'])->name('index');
+        Route::get('create', [SupportController::class, 'create'])->name('create');
+        Route::post('/', [SupportController::class, 'store'])->name('store');
+        Route::get('{ticket}', [SupportController::class, 'show'])->name('show');
+        Route::post('{ticket}/reply', [SupportController::class, 'reply'])->name('reply');
+        Route::post('{ticket}/close', [SupportController::class, 'close'])->name('close');
+    });
 
     // Blockout Dates (volunteer availability)
     Route::prefix('blockouts')->name('blockouts.')->group(function () {
