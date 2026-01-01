@@ -85,9 +85,13 @@
                 </div>
 
                 <ul class="space-y-4 mb-8">
+                    <li class="flex items-start text-yellow-300 font-semibold">
+                        <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Все з Free +</span>
+                    </li>
                     <li class="flex items-start text-white">
                         <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span><strong>До 200 членів</strong></span>
+                        <span><strong>До 200 людей</strong></span>
                     </li>
                     <li class="flex items-start text-primary-100">
                         <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -100,10 +104,6 @@
                     <li class="flex items-start text-primary-100">
                         <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Фінанси та облік</span>
-                    </li>
-                    <li class="flex items-start text-primary-100">
-                        <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Форми</span>
                     </li>
                     <li class="flex items-start text-primary-100">
                         <svg class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -132,13 +132,13 @@
                 </div>
 
                 <ul class="space-y-4 mb-8">
-                    <li class="flex items-start text-gray-600 dark:text-gray-300">
-                        <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span><strong>Без обмежень</strong></span>
+                    <li class="flex items-start text-primary-600 dark:text-primary-400 font-semibold">
+                        <svg class="w-5 h-5 text-primary-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Все з Basic +</span>
                     </li>
                     <li class="flex items-start text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Все з Basic</span>
+                        <span><strong>Без обмежень людей</strong></span>
                     </li>
                     <li class="flex items-start text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
