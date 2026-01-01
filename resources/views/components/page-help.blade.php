@@ -500,9 +500,12 @@ $storageKey = "help_seen_{$page}";
         if (this.firstVisit) {
             setTimeout(() => {
                 this.open = true;
-                localStorage.setItem('{{ $storageKey }}', '1');
             }, 500);
         }
+    },
+    dismiss() {
+        this.open = false;
+        localStorage.setItem('{{ $storageKey }}', '1');
     }
 }"
 @open-page-help.window="open = true"
@@ -516,10 +519,10 @@ x-cloak>
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 overflow-y-auto"
-         @keydown.escape.window="open = false">
+         @keydown.escape.window="dismiss()">
         <div class="flex items-center justify-center min-h-screen p-4">
             <!-- Backdrop -->
-            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="open = false"></div>
+            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="dismiss()"></div>
 
             <!-- Modal -->
             <div x-show="open"
@@ -544,7 +547,7 @@ x-cloak>
                             <p class="text-primary-100 text-sm">Як користуватися цим розділом</p>
                         </div>
                     </div>
-                    <button @click="open = false"
+                    <button @click="dismiss()"
                             class="absolute top-4 right-4 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -578,7 +581,7 @@ x-cloak>
                             </svg>
                             Натисніть ? у хедері для повторного перегляду
                         </p>
-                        <button @click="open = false"
+                        <button @click="dismiss()"
                                 class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
                             Зрозуміло
                         </button>
