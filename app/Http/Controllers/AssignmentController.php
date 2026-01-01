@@ -29,8 +29,8 @@ class AssignmentController extends Controller
             'blockout_override' => 'boolean',
         ]);
 
-        // Check if event date has passed
-        if ($event->date && $event->date->isPast()) {
+        // Check if event date has passed (compare dates, not datetime)
+        if ($event->date && $event->date->lt(today())) {
             return back()->with('error', 'Неможливо призначити на минулу подію.');
         }
         $position = $event->ministry->positions()->findOrFail($validated['position_id']);
