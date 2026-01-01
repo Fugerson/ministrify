@@ -122,6 +122,39 @@ class EventResponsibilityController extends Controller
         return back()->with('success', 'Сповіщення надіслано повторно.');
     }
 
+    /**
+     * Poll for responsibility status updates (AJAX endpoint)
+     */
+    public function poll(Event $event, Request $request)
+    {
+        $this->authorizeChurch($event);
+
+        $lastCheck = $request->get('since');
+        $lastCheckTime = $lastCheck ? \Carbon\Carbon::parse($lastCheck) : now()->subMinutes(5);
+
+        $responsibilities = $event->responsibilities()
+            ->with('person:id,first_name,last_name')
+            ->get()
+            ->map(fn($r) => [
+                'id' => $r->id,
+                'name' => $r->name,
+                'status' => $r->status,
+                'status_label' => $r->status_label,
+                'person_name' => $r->person?->full_name,
+                'responded_at' => $r->responded_at?->toIso8601String(),
+                'is_new_response' => $r->responded_at && $r->responded_at->gt($lastCheckTime),
+            ]);
+
+        // Check for new responses to show notifications
+        $newResponses = $responsibilities->filter(fn($r) => $r['is_new_response']);
+
+        return response()->json([
+            'responsibilities' => $responsibilities,
+            'new_responses' => $newResponses->values(),
+            'server_time' => now()->toIso8601String(),
+        ]);
+    }
+
     private function sendNotification(EventResponsibility $responsibility): void
     {
         $person = $responsibility->person;

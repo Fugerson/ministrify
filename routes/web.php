@@ -191,6 +191,7 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     // Event Responsibilities
     Route::prefix('events/{event}/responsibilities')->name('events.responsibilities.')->group(function () {
         Route::post('/', [\App\Http\Controllers\EventResponsibilityController::class, 'store'])->name('store');
+        Route::get('/poll', [\App\Http\Controllers\EventResponsibilityController::class, 'poll'])->name('poll');
     });
     Route::prefix('responsibilities')->name('responsibilities.')->group(function () {
         Route::post('{responsibility}/assign', [\App\Http\Controllers\EventResponsibilityController::class, 'assign'])->name('assign');

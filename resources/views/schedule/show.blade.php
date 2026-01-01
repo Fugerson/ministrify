@@ -88,29 +88,30 @@
                     </div>
                 </div>
 
-                <div class="p-4 space-y-3">
+                <div class="p-4 space-y-3" id="responsibilities-list">
                     @forelse($event->responsibilities as $responsibility)
-                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl responsibility-row" data-id="{{ $responsibility->id }}">
                             <div class="flex-1">
-                                <p class="font-medium text-gray-900 dark:text-white">{{ $responsibility->name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white responsibility-name">{{ $responsibility->name }}</p>
                                 @if($responsibility->person)
-                                    <div class="mt-1 flex items-center gap-2">
+                                    <div class="mt-1 flex items-center gap-2 responsibility-person">
                                         <div class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                                             <span class="text-primary-600 dark:text-primary-400 text-xs font-medium">
                                                 {{ substr($responsibility->person->first_name, 0, 1) }}
                                             </span>
                                         </div>
-                                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ $responsibility->person->full_name }}</span>
-                                        <span class="text-xs px-2 py-0.5 rounded-full
+                                        <span class="text-sm text-gray-600 dark:text-gray-400 person-name">{{ $responsibility->person->full_name }}</span>
+                                        <span class="text-xs px-2 py-0.5 rounded-full status-badge
                                             @if($responsibility->isConfirmed()) bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
                                             @elseif($responsibility->isPending()) bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
                                             @elseif($responsibility->isDeclined()) bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
-                                            @else bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300 @endif">
-                                            {{ $responsibility->status_icon }} {{ $responsibility->status_label }}
+                                            @else bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300 @endif"
+                                            data-status="{{ $responsibility->status }}">
+                                            {{ $responsibility->status_icon }} <span class="status-label">{{ $responsibility->status_label }}</span>
                                         </span>
                                     </div>
                                 @else
-                                    <p class="mt-1 text-sm text-gray-400">Не призначено</p>
+                                    <p class="mt-1 text-sm text-gray-400 responsibility-person">Не призначено</p>
                                 @endif
                             </div>
 
@@ -266,4 +267,147 @@
         </div>
     </div>
 </div>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+@push('scripts')
+<script>
+(function() {
+    const pollUrl = "{{ route('events.responsibilities.poll', $event) }}";
+    let lastCheck = new Date().toISOString();
+    let pollInterval = null;
+
+    // Status badge classes
+    const statusClasses = {
+        'confirmed': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+        'pending': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+        'declined': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+        'open': 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
+    };
+
+    const statusIcons = {
+        'confirmed': '✅',
+        'pending': '⏳',
+        'declined': '❌',
+        'open': '📋'
+    };
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+
+        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+
+        toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 transform translate-x-full transition-transform duration-300`;
+        toast.innerHTML = `
+            <span class="text-lg">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+            <span>${message}</span>
+        `;
+
+        container.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    }
+
+    function updateStatusBadge(row, status, statusLabel) {
+        const badge = row.querySelector('.status-badge');
+        if (!badge) return;
+
+        // Remove all status classes
+        Object.values(statusClasses).forEach(cls => {
+            cls.split(' ').forEach(c => badge.classList.remove(c));
+        });
+
+        // Add new status classes
+        statusClasses[status]?.split(' ').forEach(c => badge.classList.add(c));
+
+        // Update text
+        badge.dataset.status = status;
+        const labelSpan = badge.querySelector('.status-label');
+        if (labelSpan) {
+            labelSpan.textContent = statusLabel;
+        }
+        badge.innerHTML = `${statusIcons[status] || ''} <span class="status-label">${statusLabel}</span>`;
+
+        // Flash animation
+        row.classList.add('ring-2', 'ring-primary-500');
+        setTimeout(() => row.classList.remove('ring-2', 'ring-primary-500'), 1000);
+    }
+
+    async function pollResponsibilities() {
+        try {
+            const response = await fetch(`${pollUrl}?since=${encodeURIComponent(lastCheck)}`);
+            if (!response.ok) return;
+
+            const data = await response.json();
+            lastCheck = data.server_time;
+
+            // Update each responsibility row
+            data.responsibilities.forEach(resp => {
+                const row = document.querySelector(`.responsibility-row[data-id="${resp.id}"]`);
+                if (!row) return;
+
+                const currentStatus = row.querySelector('.status-badge')?.dataset.status;
+                if (currentStatus && currentStatus !== resp.status) {
+                    updateStatusBadge(row, resp.status, resp.status_label);
+                }
+            });
+
+            // Show toast for new responses
+            if (data.new_responses && data.new_responses.length > 0) {
+                data.new_responses.forEach(resp => {
+                    const emoji = resp.status === 'confirmed' ? '✅' : '❌';
+                    const action = resp.status === 'confirmed' ? 'підтвердив' : 'відхилив';
+                    showToast(`${emoji} ${resp.person_name} ${action}: ${resp.name}`, resp.status === 'confirmed' ? 'success' : 'error');
+                });
+
+                // Play notification sound (optional)
+                try {
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleR8EMLra4IpgFgk7nODeeWAfEjig4NlrSxcXO5ve2V9EHUA+neDWWz0W');
+                    audio.volume = 0.3;
+                    audio.play().catch(() => {});
+                } catch(e) {}
+            }
+
+        } catch (error) {
+            console.error('Poll error:', error);
+        }
+    }
+
+    // Start polling
+    function startPolling() {
+        if (pollInterval) return;
+        pollInterval = setInterval(pollResponsibilities, 5000);
+    }
+
+    // Stop polling when page is hidden
+    function stopPolling() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+    }
+
+    // Handle visibility change
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopPolling();
+        } else {
+            startPolling();
+        }
+    });
+
+    // Start polling on page load
+    startPolling();
+})();
+</script>
+@endpush
 @endsection
