@@ -72,19 +72,19 @@
                         <span class="ml-4 text-sm text-gray-500 dark:text-gray-400">ministrify.one/dashboard</span>
                     </div>
                     <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6 aspect-video">
-                        {{-- Mock dashboard --}}
+                        {{-- Mock dashboard with demo data --}}
                         <div class="grid grid-cols-3 gap-4 mb-4">
                             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                                <div class="text-2xl font-bold text-primary-600">{{ $stats['members'] ?? '247' }}</div>
-                                <div class="text-xs text-gray-500">Членів</div>
+                                <div class="text-2xl font-bold text-primary-600">247</div>
+                                <div class="text-xs text-gray-500">Людей</div>
                             </div>
                             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                                <div class="text-2xl font-bold text-green-600">{{ $stats['events'] ?? '12' }}</div>
+                                <div class="text-2xl font-bold text-green-600">18</div>
                                 <div class="text-xs text-gray-500">Подій</div>
                             </div>
                             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                                <div class="text-2xl font-bold text-purple-600">₴45K</div>
-                                <div class="text-xs text-gray-500">Пожертв</div>
+                                <div class="text-2xl font-bold text-purple-600">8</div>
+                                <div class="text-xs text-gray-500">Служінь</div>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm h-32">
