@@ -16,10 +16,10 @@ class SubscriptionPlanSeeder extends Seeder
                 'description' => 'Для початку роботи',
                 'price_monthly' => 0,
                 'price_yearly' => 0,
-                'max_people' => 30,
-                'max_ministries' => 2,
-                'max_events_per_month' => 5,
-                'max_users' => 2,
+                'max_people' => 50,
+                'max_ministries' => 3,
+                'max_events_per_month' => 10,
+                'max_users' => 3,
                 'has_telegram_bot' => false,
                 'has_finances' => false,
                 'has_forms' => true,
@@ -33,8 +33,8 @@ class SubscriptionPlanSeeder extends Seeder
                 'slug' => 'basic',
                 'name' => 'Basic',
                 'description' => 'Для зростаючих церков',
-                'price_monthly' => 14900, // 149 грн
-                'price_yearly' => 149900, // 1499 грн (економія ~16%)
+                'price_monthly' => 9900, // 99 грн
+                'price_yearly' => 83200, // 832 грн (економія 30%)
                 'max_people' => 200,
                 'max_ministries' => 10,
                 'max_events_per_month' => 30,
@@ -52,8 +52,8 @@ class SubscriptionPlanSeeder extends Seeder
                 'slug' => 'pro',
                 'name' => 'Pro',
                 'description' => 'Повний функціонал без обмежень',
-                'price_monthly' => 29900, // 299 грн
-                'price_yearly' => 299900, // 2999 грн (економія ~17%)
+                'price_monthly' => 24900, // 249 грн
+                'price_yearly' => 209200, // 2092 грн (економія 30%)
                 'max_people' => 0, // unlimited
                 'max_ministries' => 0,
                 'max_events_per_month' => 0,
