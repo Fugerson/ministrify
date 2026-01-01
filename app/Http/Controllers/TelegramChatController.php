@@ -13,6 +13,11 @@ class TelegramChatController extends Controller
     {
         $church = auth()->user()->church;
 
+        if (!$church) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Telegram чат доступний тільки для користувачів з церквою.');
+        }
+
         // Get people with Telegram linked, with their latest message
         $conversations = Person::where('church_id', $church->id)
             ->whereNotNull('telegram_chat_id')
@@ -39,6 +44,11 @@ class TelegramChatController extends Controller
     public function show(Person $person)
     {
         $church = auth()->user()->church;
+
+        if (!$church) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Telegram чат доступний тільки для користувачів з церквою.');
+        }
 
         // Ensure person belongs to this church
         if ($person->church_id !== $church->id) {
@@ -70,6 +80,11 @@ class TelegramChatController extends Controller
         ]);
 
         $church = auth()->user()->church;
+
+        if (!$church) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Telegram чат доступний тільки для користувачів з церквою.');
+        }
 
         // Ensure person belongs to this church
         if ($person->church_id !== $church->id) {
