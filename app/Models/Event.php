@@ -84,6 +84,11 @@ class Event extends Model
         return $this->hasMany(Assignment::class);
     }
 
+    public function responsibilities(): HasMany
+    {
+        return $this->hasMany(EventResponsibility::class);
+    }
+
     public function attendance(): HasOne
     {
         return $this->hasOne(Attendance::class);

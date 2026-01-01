@@ -189,6 +189,19 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
     Route::get('calendar', [EventController::class, 'calendar'])->name('calendar');
 
+    // Event Responsibilities
+    Route::prefix('events/{event}/responsibilities')->name('events.responsibilities.')->group(function () {
+        Route::post('/', [\App\Http\Controllers\EventResponsibilityController::class, 'store'])->name('store');
+    });
+    Route::prefix('responsibilities')->name('responsibilities.')->group(function () {
+        Route::post('{responsibility}/assign', [\App\Http\Controllers\EventResponsibilityController::class, 'assign'])->name('assign');
+        Route::post('{responsibility}/unassign', [\App\Http\Controllers\EventResponsibilityController::class, 'unassign'])->name('unassign');
+        Route::post('{responsibility}/confirm', [\App\Http\Controllers\EventResponsibilityController::class, 'confirm'])->name('confirm');
+        Route::post('{responsibility}/decline', [\App\Http\Controllers\EventResponsibilityController::class, 'decline'])->name('decline');
+        Route::post('{responsibility}/resend', [\App\Http\Controllers\EventResponsibilityController::class, 'resend'])->name('resend');
+        Route::delete('{responsibility}', [\App\Http\Controllers\EventResponsibilityController::class, 'destroy'])->name('destroy');
+    });
+
     // Service Plan
     Route::prefix('events/{event}/plan')->name('events.plan.')->group(function () {
         Route::get('/', [ServicePlanController::class, 'index'])->name('index');

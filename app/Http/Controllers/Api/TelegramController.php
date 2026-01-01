@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Church;
+use App\Models\EventResponsibility;
 use App\Models\Person;
 use App\Models\TelegramMessage;
 use App\Services\TelegramService;
@@ -105,6 +106,54 @@ class TelegramController extends Controller
 
                 $telegram = new TelegramService($church->telegram_bot_token);
                 $telegram->sendMessage($chatId, '❌ Ви відхилили участь. Повідомлення надіслано лідеру.');
+            }
+        } elseif (str_starts_with($data, 'resp_confirm_')) {
+            $responsibilityId = (int) str_replace('resp_confirm_', '', $data);
+            $responsibility = EventResponsibility::find($responsibilityId);
+
+            if ($responsibility && $responsibility->person_id === $person->id) {
+                $responsibility->confirm();
+
+                $church = $person->church;
+                if ($church?->telegram_bot_token) {
+                    $event = $responsibility->event;
+
+                    // Save response to chat history
+                    TelegramMessage::create([
+                        'church_id' => $church->id,
+                        'person_id' => $person->id,
+                        'direction' => 'incoming',
+                        'message' => "✅ Візьму на себе: {$event->title} - {$responsibility->name}",
+                        'is_read' => false,
+                    ]);
+
+                    $telegram = new TelegramService($church->telegram_bot_token);
+                    $telegram->sendMessage($chatId, "✅ Супер! Ви берете на себе: {$responsibility->name}");
+                }
+            }
+        } elseif (str_starts_with($data, 'resp_decline_')) {
+            $responsibilityId = (int) str_replace('resp_decline_', '', $data);
+            $responsibility = EventResponsibility::find($responsibilityId);
+
+            if ($responsibility && $responsibility->person_id === $person->id) {
+                $responsibility->decline();
+
+                $church = $person->church;
+                if ($church?->telegram_bot_token) {
+                    $event = $responsibility->event;
+
+                    // Save response to chat history
+                    TelegramMessage::create([
+                        'church_id' => $church->id,
+                        'person_id' => $person->id,
+                        'direction' => 'incoming',
+                        'message' => "❌ Не може: {$event->title} - {$responsibility->name}",
+                        'is_read' => false,
+                    ]);
+
+                    $telegram = new TelegramService($church->telegram_bot_token);
+                    $telegram->sendMessage($chatId, "😔 Зрозуміло, пошукаємо когось іншого.");
+                }
             }
         }
 

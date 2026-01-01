@@ -207,6 +207,7 @@ class EventController extends Controller
             'assignments.position',
             'checklist.items.completedByUser',
             'planItems',
+            'responsibilities.person',
         ]);
 
         // Get available people for unfilled positions (only if ministry exists)
