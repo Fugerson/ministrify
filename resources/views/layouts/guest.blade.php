@@ -108,9 +108,17 @@
             </div>
 
             <!-- Footer -->
-            <p class="mt-8 text-center text-sm text-gray-400">
-                &copy; {{ date('Y') }} Ministrify. Для церков України
-            </p>
+            <div class="mt-8 text-center space-y-2">
+                <a href="{{ route('landing.home') }}" class="inline-flex items-center text-sm text-primary-600 hover:text-primary-700 font-medium">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    На головну
+                </a>
+                <p class="text-sm text-gray-400">
+                    &copy; {{ date('Y') }} Ministrify. Для церков України
+                </p>
+            </div>
         </div>
     </div>
 </body>
