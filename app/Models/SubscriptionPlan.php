@@ -23,6 +23,7 @@ class SubscriptionPlan extends Model
         'has_website_builder',
         'has_custom_domain',
         'has_api_access',
+        'has_boards',
         'is_active',
         'sort_order',
     ];
@@ -40,6 +41,7 @@ class SubscriptionPlan extends Model
         'has_website_builder' => 'boolean',
         'has_custom_domain' => 'boolean',
         'has_api_access' => 'boolean',
+        'has_boards' => 'boolean',
         'is_active' => 'boolean',
     ];
 

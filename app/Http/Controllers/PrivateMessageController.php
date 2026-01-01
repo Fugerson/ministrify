@@ -2,19 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\PrivateMessage;
 use App\Models\User;
 use Illuminate\Http\Request;
 
 class PrivateMessageController extends Controller
 {
+    use RequiresChurch;
+
     /**
      * Display inbox - list of conversations
      */
     public function index()
     {
         $user = auth()->user();
-        $church = $user->church;
+        $church = $this->getChurchOrFail();
 
         // Get all conversations
         $conversations = PrivateMessage::conversationsForUser($church->id, $user->id);
@@ -31,7 +34,7 @@ class PrivateMessageController extends Controller
     public function show(User $user)
     {
         $currentUser = auth()->user();
-        $church = $currentUser->church;
+        $church = $this->getChurchOrFail();
 
         // Make sure target user is from same church
         if ($user->church_id !== $church->id) {
@@ -65,7 +68,7 @@ class PrivateMessageController extends Controller
     public function create()
     {
         $currentUser = auth()->user();
-        $church = $currentUser->church;
+        $church = $this->getChurchOrFail();
 
         $users = User::where('church_id', $church->id)
             ->where('id', '!=', $currentUser->id)
@@ -81,7 +84,7 @@ class PrivateMessageController extends Controller
     public function store(Request $request)
     {
         $currentUser = auth()->user();
-        $church = $currentUser->church;
+        $church = $this->getChurchOrFail();
 
         // Check if broadcast to all
         if ($request->input('recipient_id') === 'all') {
@@ -153,7 +156,7 @@ class PrivateMessageController extends Controller
     public function poll(User $user, Request $request)
     {
         $currentUser = auth()->user();
-        $church = $currentUser->church;
+        $church = $this->getChurchOrFail();
 
         $lastId = $request->input('last_id', 0);
 
