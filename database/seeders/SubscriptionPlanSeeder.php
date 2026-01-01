@@ -12,14 +12,14 @@ class SubscriptionPlanSeeder extends Seeder
         $plans = [
             [
                 'slug' => 'free',
-                'name' => 'Free',
-                'description' => 'Для початку роботи',
+                'name' => 'Старт',
+                'description' => 'Для малих церков',
                 'price_monthly' => 0,
                 'price_yearly' => 0,
                 'max_people' => 50,
-                'max_ministries' => 3,
+                'max_ministries' => 1,
                 'max_events_per_month' => 10,
-                'max_users' => 3,
+                'max_users' => 2,
                 'has_telegram_bot' => false,
                 'has_finances' => false,
                 'has_forms' => true,
@@ -30,15 +30,15 @@ class SubscriptionPlanSeeder extends Seeder
                 'sort_order' => 0,
             ],
             [
-                'slug' => 'basic',
-                'name' => 'Basic',
+                'slug' => 'church',
+                'name' => 'Церква',
                 'description' => 'Для зростаючих церков',
-                'price_monthly' => 9900, // 99 грн
-                'price_yearly' => 83200, // 832 грн (економія 30%)
-                'max_people' => 200,
-                'max_ministries' => 10,
-                'max_events_per_month' => 30,
-                'max_users' => 10,
+                'price_monthly' => 49900, // 499 грн
+                'price_yearly' => 419200, // 4192 грн (економія 30%)
+                'max_people' => 500,
+                'max_ministries' => 0, // unlimited
+                'max_events_per_month' => 0, // unlimited
+                'max_users' => 0, // unlimited
                 'has_telegram_bot' => true,
                 'has_finances' => true,
                 'has_forms' => true,
@@ -49,11 +49,11 @@ class SubscriptionPlanSeeder extends Seeder
                 'sort_order' => 1,
             ],
             [
-                'slug' => 'pro',
-                'name' => 'Pro',
-                'description' => 'Повний функціонал без обмежень',
-                'price_monthly' => 24900, // 249 грн
-                'price_yearly' => 209200, // 2092 грн (економія 30%)
+                'slug' => 'cathedral',
+                'name' => 'Собор',
+                'description' => 'Для великих церков',
+                'price_monthly' => 99900, // 999 грн
+                'price_yearly' => 839200, // 8392 грн (економія 30%)
                 'max_people' => 0, // unlimited
                 'max_ministries' => 0,
                 'max_events_per_month' => 0,
