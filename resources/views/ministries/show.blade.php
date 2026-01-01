@@ -13,9 +13,6 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Linked Tasks -->
-    <x-linked-cards entityType="ministry" :entityId="$ministry->id" :boards="$boards" />
-
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <div class="flex items-center justify-between">
@@ -301,6 +298,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Linked Tasks -->
+    <x-linked-cards entityType="ministry" :entityId="$ministry->id" :boards="$boards" />
 
     <a href="{{ route('ministries.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
