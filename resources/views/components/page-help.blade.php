@@ -495,20 +495,26 @@ $storageKey = "help_seen_{$page}";
 @if($help)
 <div x-data="{
     open: false,
-    firstVisit: !localStorage.getItem('{{ $storageKey }}'),
+    dismissed: false,
     init() {
-        if (this.firstVisit) {
+        if (!localStorage.getItem('{{ $storageKey }}')) {
             setTimeout(() => {
-                this.open = true;
+                if (!this.dismissed) {
+                    this.open = true;
+                }
             }, 500);
         }
     },
     dismiss() {
         this.open = false;
+        this.dismissed = true;
         localStorage.setItem('{{ $storageKey }}', '1');
+    },
+    showHelp() {
+        this.open = true;
     }
 }"
-@open-page-help.window="open = true"
+@open-page-help.window="showHelp()"
 x-cloak>
     <!-- Modal Overlay -->
     <div x-show="open"
