@@ -21,6 +21,12 @@ class BoardController extends Controller
     {
         $church = $this->getCurrentChurch();
 
+        // Check if church has access to boards feature
+        if (!$church->hasFeature('boards')) {
+            return redirect()->route('billing.index')
+                ->with('warning', 'Трекер завдань доступний у планах Basic та Pro. Оберіть план для доступу до цієї функції.');
+        }
+
         // Get or create the main church task tracker
         $board = Board::firstOrCreate(
             ['church_id' => $church->id, 'name' => 'Трекер завдань'],
