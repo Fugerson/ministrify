@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use Illuminate\Http\Request;
 
 class SectionController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $availableSections = config('public_site_templates.sections', []);
         $currentSections = $church->getPublicSiteSetting('sections', $church->getDefaultSections());
 
@@ -27,7 +30,7 @@ class SectionController extends Controller
 
     public function update(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'sections' => 'required|array',
@@ -55,7 +58,7 @@ class SectionController extends Controller
 
     public function toggle(Request $request, string $sectionId)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $sections = $church->getPublicSiteSetting('sections', $church->getDefaultSections());
 
         $sections = collect($sections)

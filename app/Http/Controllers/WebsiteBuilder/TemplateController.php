@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use Illuminate\Http\Request;
 
 class TemplateController extends Controller
 {
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $templates = config('public_site_templates.templates', []);
         $currentTemplate = $church->active_template;
 
@@ -18,7 +19,7 @@ class TemplateController extends Controller
 
     public function apply(Request $request, string $template)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $templates = config('public_site_templates.templates', []);
 
         if (!isset($templates[$template])) {

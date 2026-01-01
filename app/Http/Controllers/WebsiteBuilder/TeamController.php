@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\StaffMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class TeamController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $staffMembers = $church->staffMembers()->orderBy('sort_order')->get();
         $roleCategories = StaffMember::ROLE_CATEGORIES;
 
@@ -20,7 +23,7 @@ class TeamController extends Controller
 
     public function create()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $roleCategories = StaffMember::ROLE_CATEGORIES;
 
         return view('website-builder.team.create', compact('church', 'roleCategories'));
@@ -28,7 +31,7 @@ class TeamController extends Controller
 
     public function store(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -59,7 +62,7 @@ class TeamController extends Controller
     public function edit(StaffMember $staffMember)
     {
         $this->authorize('view', $staffMember);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $roleCategories = StaffMember::ROLE_CATEGORIES;
 
         return view('website-builder.team.edit', compact('church', 'staffMember', 'roleCategories'));

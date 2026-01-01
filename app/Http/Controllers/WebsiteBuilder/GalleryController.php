@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Gallery;
 use App\Models\GalleryPhoto;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ class GalleryController extends Controller
 {
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $galleries = $church->galleries()->withCount('photos')->orderBy('sort_order')->get();
 
         return view('website-builder.gallery.index', compact('church', 'galleries'));
@@ -20,13 +21,13 @@ class GalleryController extends Controller
 
     public function create()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         return view('website-builder.gallery.create', compact('church'));
     }
 
     public function store(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -51,7 +52,7 @@ class GalleryController extends Controller
     public function show(Gallery $gallery)
     {
         $this->authorize('view', $gallery);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $photos = $gallery->photos()->orderBy('sort_order')->get();
 
         return view('website-builder.gallery.show', compact('church', 'gallery', 'photos'));
@@ -60,7 +61,7 @@ class GalleryController extends Controller
     public function edit(Gallery $gallery)
     {
         $this->authorize('update', $gallery);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         return view('website-builder.gallery.edit', compact('church', 'gallery'));
     }
@@ -68,7 +69,7 @@ class GalleryController extends Controller
     public function update(Request $request, Gallery $gallery)
     {
         $this->authorize('update', $gallery);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -140,7 +141,7 @@ class GalleryController extends Controller
             'photos.*' => 'image|max:5120', // 5MB per photo
         ]);
 
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $maxOrder = $gallery->photos()->max('sort_order') ?? 0;
 
         foreach ($request->file('photos') as $index => $file) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Person;
 use App\Models\TelegramMessage;
 use App\Services\TelegramService;
@@ -9,9 +10,11 @@ use Illuminate\Http\Request;
 
 class TelegramBroadcastController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $recipients = Person::where('church_id', $church->id)
             ->whereNotNull('telegram_chat_id')
@@ -31,7 +34,7 @@ class TelegramBroadcastController extends Controller
             'recipients.*' => 'exists:people,id',
         ]);
 
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         if (empty($church->telegram_bot_token)) {
             return back()->with('error', 'Telegram бот не налаштований');

@@ -72,7 +72,7 @@
                     Свідчення відповіді
                 </h3>
                 <p class="text-green-700 dark:text-green-400 whitespace-pre-wrap">{{ $prayerRequest->answer_testimony }}</p>
-                <p class="text-sm text-green-600 dark:text-green-500 mt-2">{{ $prayerRequest->answered_at->format('d.m.Y') }}</p>
+                <p class="text-sm text-green-600 dark:text-green-500 mt-2">{{ $prayerRequest->answered_at?->format('d.m.Y') }}</p>
             </div>
         @endif
 

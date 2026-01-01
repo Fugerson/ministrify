@@ -294,7 +294,7 @@
                     @if($card->is_completed)
                         <div class="flex items-center justify-between text-green-600 dark:text-green-400">
                             <span>Завершено</span>
-                            <span>{{ $card->completed_at->format('d.m.Y H:i') }}</span>
+                            <span>{{ $card->completed_at?->format('d.m.Y H:i') }}</span>
                         </div>
                     @endif
                 </div>

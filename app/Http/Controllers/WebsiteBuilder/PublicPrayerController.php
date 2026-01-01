@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\PrayerRequest;
 use Illuminate\Http\Request;
 
@@ -10,7 +11,7 @@ class PublicPrayerController extends Controller
 {
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $prayerRequests = PrayerRequest::where('church_id', $church->id)
             ->where('is_from_public', true)
             ->latest()

@@ -3,18 +3,16 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use Illuminate\Http\Request;
 
 class WebsiteBuilderController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
-        $church = auth()->user()->church;
-
-        if (!$church) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Конструктор сайту доступний тільки для користувачів з церквою.');
-        }
+        $church = $this->getChurchOrFail();
 
         $stats = [
             'events_count' => $church->events()->where('is_public', true)->count(),
@@ -36,13 +34,7 @@ class WebsiteBuilderController extends Controller
 
     public function preview()
     {
-        $church = auth()->user()->church;
-
-        if (!$church) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Конструктор сайту доступний тільки для користувачів з церквою.');
-        }
-
+        $church = $this->getChurchOrFail();
         return redirect()->route('public.church', $church->slug);
     }
 }

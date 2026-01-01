@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +12,7 @@ class TestimonialController extends Controller
 {
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $testimonials = $church->testimonials()->orderBy('sort_order')->get();
 
         return view('website-builder.testimonials.index', compact('church', 'testimonials'));
@@ -19,7 +20,7 @@ class TestimonialController extends Controller
 
     public function store(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'author_name' => 'required|string|max:255',
@@ -47,7 +48,7 @@ class TestimonialController extends Controller
     public function update(Request $request, Testimonial $testimonial)
     {
         $this->authorize('update', $testimonial);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'author_name' => 'required|string|max:255',

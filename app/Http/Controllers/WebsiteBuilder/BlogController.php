@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\BlogPost;
 use App\Models\BlogCategory;
 use Illuminate\Http\Request;
@@ -11,9 +12,11 @@ use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
+    use RequiresChurch;
+
     public function index(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $posts = $church->blogPosts()
             ->with('category', 'author')
@@ -30,7 +33,7 @@ class BlogController extends Controller
 
     public function create()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $categories = $church->blogCategories()->ordered()->get();
 
         return view('website-builder.blog.create', compact('church', 'categories'));
@@ -38,7 +41,7 @@ class BlogController extends Controller
 
     public function store(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -90,7 +93,7 @@ class BlogController extends Controller
     public function edit(BlogPost $blogPost)
     {
         $this->authorize('view', $blogPost);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $categories = $church->blogCategories()->ordered()->get();
 
         return view('website-builder.blog.edit', compact('church', 'blogPost', 'categories'));
@@ -99,7 +102,7 @@ class BlogController extends Controller
     public function update(Request $request, BlogPost $blogPost)
     {
         $this->authorize('update', $blogPost);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -161,7 +164,7 @@ class BlogController extends Controller
     // Categories
     public function categoriesIndex()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $categories = $church->blogCategories()->withCount('posts')->ordered()->get();
 
         return view('website-builder.blog.categories.index', compact('church', 'categories'));
@@ -169,7 +172,7 @@ class BlogController extends Controller
 
     public function categoryStore(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',

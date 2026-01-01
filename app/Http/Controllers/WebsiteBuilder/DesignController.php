@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class DesignController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $fonts = config('public_site_templates.fonts', []);
         $buttonStyles = config('public_site_templates.button_styles', []);
         $heroTypes = config('public_site_templates.hero_types', []);
@@ -23,7 +26,7 @@ class DesignController extends Controller
 
     public function updateColors(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'primary' => 'nullable|string|max:7',
@@ -46,7 +49,7 @@ class DesignController extends Controller
 
     public function updateFonts(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $availableFonts = array_keys(config('public_site_templates.fonts', []));
 
         $validated = $request->validate([
@@ -61,7 +64,7 @@ class DesignController extends Controller
 
     public function updateHero(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'type' => 'nullable|string|in:image,video,gradient,slideshow,split',
@@ -85,7 +88,7 @@ class DesignController extends Controller
 
     public function updateNavigation(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'style' => 'nullable|string|in:transparent,solid,minimal',
@@ -101,7 +104,7 @@ class DesignController extends Controller
 
     public function updateFooter(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'style' => 'nullable|string|in:simple,centered,multi-column',
@@ -117,7 +120,7 @@ class DesignController extends Controller
 
     public function updateCustomCss(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'custom_css' => 'nullable|string|max:50000',
@@ -134,7 +137,7 @@ class DesignController extends Controller
             'hero_image' => 'required|image|max:5120', // 5MB max
         ]);
 
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $path = $request->file('hero_image')->store("churches/{$church->id}/hero", 'public');
 
         $heroSettings = $church->getPublicSiteSetting('hero', []);
@@ -150,7 +153,7 @@ class DesignController extends Controller
             'slide_image' => 'required|image|max:5120',
         ]);
 
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $path = $request->file('slide_image')->store("churches/{$church->id}/hero/slides", 'public');
 
         $heroSettings = $church->getPublicSiteSetting('hero', []);
@@ -164,7 +167,7 @@ class DesignController extends Controller
 
     public function deleteHeroSlide(Request $request, int $index)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $heroSettings = $church->getPublicSiteSetting('hero', []);
         $slides = $heroSettings['slides'] ?? [];
 

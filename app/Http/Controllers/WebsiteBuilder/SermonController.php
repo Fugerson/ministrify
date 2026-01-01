@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Sermon;
 use App\Models\SermonSeries;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ class SermonController extends Controller
 {
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $sermons = $church->sermons()->with('series', 'speaker')->latest('sermon_date')->paginate(20);
         $series = $church->sermonSeries()->orderBy('sort_order')->get();
 
@@ -21,7 +22,7 @@ class SermonController extends Controller
 
     public function create()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $series = $church->sermonSeries()->orderBy('sort_order')->get();
         $speakers = $church->staffMembers()->orderBy('name')->get();
 
@@ -30,7 +31,7 @@ class SermonController extends Controller
 
     public function store(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -67,7 +68,7 @@ class SermonController extends Controller
     public function edit(Sermon $sermon)
     {
         $this->authorize('view', $sermon);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $series = $church->sermonSeries()->orderBy('sort_order')->get();
         $speakers = $church->staffMembers()->orderBy('name')->get();
 
@@ -77,7 +78,7 @@ class SermonController extends Controller
     public function update(Request $request, Sermon $sermon)
     {
         $this->authorize('update', $sermon);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -134,7 +135,7 @@ class SermonController extends Controller
     // Series management
     public function seriesIndex()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $series = $church->sermonSeries()->withCount('sermons')->orderBy('sort_order')->get();
 
         return view('website-builder.sermons.series.index', compact('church', 'series'));
@@ -142,7 +143,7 @@ class SermonController extends Controller
 
     public function seriesStore(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -167,7 +168,7 @@ class SermonController extends Controller
     public function seriesUpdate(Request $request, SermonSeries $series)
     {
         $this->authorize('update', $series);
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',

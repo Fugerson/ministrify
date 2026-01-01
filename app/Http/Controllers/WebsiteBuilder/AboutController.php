@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use Illuminate\Http\Request;
 
 class AboutController extends Controller
 {
+    use RequiresChurch;
+
     public function edit()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $aboutContent = $church->about_content;
 
         return view('website-builder.about.index', compact('church', 'aboutContent'));
@@ -17,7 +20,7 @@ class AboutController extends Controller
 
     public function update(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'mission' => 'nullable|string|max:2000',

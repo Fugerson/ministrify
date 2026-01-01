@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Faq;
 use Illuminate\Http\Request;
 
@@ -10,7 +11,7 @@ class FaqController extends Controller
 {
     public function index()
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
         $faqs = $church->faqs()->orderBy('category')->orderBy('sort_order')->get();
 
         // Group by category
@@ -21,7 +22,7 @@ class FaqController extends Controller
 
     public function store(Request $request)
     {
-        $church = auth()->user()->church;
+        $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'question' => 'required|string|max:500',
