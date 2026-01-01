@@ -299,6 +299,16 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::resource('attendance', AttendanceController::class);
     Route::get('attendance-stats', [AttendanceController::class, 'stats'])->name('attendance.stats');
 
+    // Billing (admin only)
+    Route::middleware('role:admin')->prefix('billing')->name('billing.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\BillingController::class, 'index'])->name('index');
+        Route::get('upgrade/{plan}', [\App\Http\Controllers\BillingController::class, 'upgrade'])->name('upgrade');
+        Route::post('pay/{plan}', [\App\Http\Controllers\BillingController::class, 'pay'])->name('pay');
+        Route::get('callback', [\App\Http\Controllers\BillingController::class, 'callback'])->name('callback');
+        Route::post('downgrade', [\App\Http\Controllers\BillingController::class, 'downgrade'])->name('downgrade');
+        Route::get('history', [\App\Http\Controllers\BillingController::class, 'history'])->name('history');
+    });
+
     // Settings (admin only)
     Route::middleware('role:admin')->prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');

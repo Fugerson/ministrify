@@ -17,6 +17,11 @@ Route::prefix('webhooks')->name('api.webhooks.')->middleware('throttle:60,1')->g
     Route::post('liqpay', [PublicSiteController::class, 'liqpayCallback'])->name('liqpay');
 });
 
+// LiqPay subscription webhook
+Route::post('liqpay/webhook', [\App\Http\Controllers\Api\LiqPayWebhookController::class, 'handle'])
+    ->name('api.liqpay.webhook')
+    ->middleware('throttle:60,1');
+
 // Calendar API (public, token-based auth)
 Route::prefix('calendar')->name('api.calendar.')->middleware('throttle:60,1')->group(function () {
     // iCal feed for subscriptions (Google Calendar, Apple Calendar, etc.)

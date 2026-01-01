@@ -1,0 +1,62 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\SubscriptionPlan;
+use Illuminate\Database\Seeder;
+
+class SubscriptionPlanSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $plans = [
+            [
+                'slug' => 'free',
+                'name' => 'Безкоштовний',
+                'description' => 'Для невеликих церков та груп',
+                'price_monthly' => 0,
+                'price_yearly' => 0,
+                'max_people' => 50,
+                'max_ministries' => 3,
+                'max_events_per_month' => 10,
+                'max_users' => 3,
+                'has_telegram_bot' => false,
+                'has_finances' => false,
+                'has_forms' => true,
+                'has_website_builder' => false,
+                'has_custom_domain' => false,
+                'has_api_access' => false,
+                'is_active' => true,
+                'sort_order' => 0,
+            ],
+            [
+                'slug' => 'pro',
+                'name' => 'Pro',
+                'description' => 'Повний функціонал для активних церков',
+                'price_monthly' => 29900, // 299 грн
+                'price_yearly' => 299900, // 2999 грн (економія ~17%)
+                'max_people' => 0, // unlimited
+                'max_ministries' => 0,
+                'max_events_per_month' => 0,
+                'max_users' => 0,
+                'has_telegram_bot' => true,
+                'has_finances' => true,
+                'has_forms' => true,
+                'has_website_builder' => true,
+                'has_custom_domain' => true,
+                'has_api_access' => true,
+                'is_active' => true,
+                'sort_order' => 1,
+            ],
+        ];
+
+        foreach ($plans as $planData) {
+            SubscriptionPlan::updateOrCreate(
+                ['slug' => $planData['slug']],
+                $planData
+            );
+        }
+
+        $this->command->info('Subscription plans seeded successfully.');
+    }
+}

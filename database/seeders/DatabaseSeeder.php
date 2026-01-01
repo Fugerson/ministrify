@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Seed subscription plans first
+        $this->call(SubscriptionPlanSeeder::class);
+
         // Create demo church
         $church = Church::create([
             'name' => 'Церква "Благодать"',

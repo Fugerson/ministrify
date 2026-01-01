@@ -10,4 +10,10 @@ return [
         'private_key' => env('VAPID_PRIVATE_KEY'),
         'subject' => env('VAPID_SUBJECT', 'mailto:admin@ministrify.app'),
     ],
+
+    'liqpay' => [
+        'public_key' => env('LIQPAY_PUBLIC_KEY'),
+        'private_key' => env('LIQPAY_PRIVATE_KEY'),
+        'sandbox' => env('LIQPAY_SANDBOX', false),
+    ],
 ];
