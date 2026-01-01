@@ -64,6 +64,20 @@ class EventResponsibilityController extends Controller
         return back()->with('success', 'Призначення знято.');
     }
 
+    public function update(Request $request, EventResponsibility $responsibility)
+    {
+        $event = $responsibility->event;
+        $this->authorizeChurch($event);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $responsibility->update($validated);
+
+        return back()->with('success', 'Відповідальність оновлено.');
+    }
+
     public function destroy(EventResponsibility $responsibility)
     {
         $event = $responsibility->event;

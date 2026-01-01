@@ -199,6 +199,7 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::post('{responsibility}/confirm', [\App\Http\Controllers\EventResponsibilityController::class, 'confirm'])->name('confirm');
         Route::post('{responsibility}/decline', [\App\Http\Controllers\EventResponsibilityController::class, 'decline'])->name('decline');
         Route::post('{responsibility}/resend', [\App\Http\Controllers\EventResponsibilityController::class, 'resend'])->name('resend');
+        Route::put('{responsibility}', [\App\Http\Controllers\EventResponsibilityController::class, 'update'])->name('update');
         Route::delete('{responsibility}', [\App\Http\Controllers\EventResponsibilityController::class, 'destroy'])->name('destroy');
     });
 

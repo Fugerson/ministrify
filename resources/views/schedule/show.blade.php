@@ -90,9 +90,20 @@
 
                 <div class="p-4 space-y-3" id="responsibilities-list">
                     @forelse($event->responsibilities as $responsibility)
-                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl responsibility-row" data-id="{{ $responsibility->id }}">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl responsibility-row" data-id="{{ $responsibility->id }}" x-data="{ editing: false }">
                             <div class="flex-1">
-                                <p class="font-medium text-gray-900 dark:text-white responsibility-name">{{ $responsibility->name }}</p>
+                                <p x-show="!editing" @dblclick="editing = true" class="font-medium text-gray-900 dark:text-white responsibility-name cursor-pointer" title="Подвійний клік для редагування">{{ $responsibility->name }}</p>
+                                <form x-show="editing" x-cloak method="POST" action="{{ route('responsibilities.update', $responsibility) }}" class="flex gap-2" @submit="editing = false">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="text" name="name" value="{{ $responsibility->name }}" required
+                                           class="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                                           @keydown.escape="editing = false"
+                                           x-ref="editInput"
+                                           x-init="$watch('editing', value => { if(value) setTimeout(() => $refs.editInput.focus(), 50) })">
+                                    <button type="submit" class="px-2 py-1 bg-primary-600 text-white text-xs rounded">OK</button>
+                                    <button type="button" @click="editing = false" class="px-2 py-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs rounded">X</button>
+                                </form>
                                 @if($responsibility->person)
                                     <div class="mt-1 flex items-center gap-2 responsibility-person">
                                         <div class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
