@@ -129,7 +129,7 @@
                 @forelse($recentEvents as $event)
                 <div class="px-6 py-3">
                     <p class="font-medium text-white">{{ $event->title }}</p>
-                    <p class="text-sm text-gray-400">{{ $event->start_date->format('d.m.Y H:i') }}</p>
+                    <p class="text-sm text-gray-400">{{ $event->start_date?->format('d.m.Y H:i') ?? '-' }}</p>
                 </div>
                 @empty
                 <p class="px-6 py-4 text-gray-400">Немає подій</p>

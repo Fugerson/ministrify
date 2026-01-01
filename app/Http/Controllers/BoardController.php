@@ -312,7 +312,7 @@ class BoardController extends Controller
         $maxPosition = $column->cards()->max('position') ?? -1;
 
         $card = $column->cards()->create([
-            'title' => $validated['title'] ?: $entityData['title'],
+            'title' => ($validated['title'] ?? null) ?: $entityData['title'],
             'description' => $entityData['description'],
             'priority' => $entityData['priority'] ?? 'medium',
             'due_date' => $entityData['due_date'] ?? null,
