@@ -642,17 +642,17 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::get('export/attendance', [\App\Http\Controllers\ReportsController::class, 'exportAttendance'])->name('export-attendance');
     });
 
-    // Prayer Requests
-    Route::prefix('prayer-requests')->name('prayer-requests.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\PrayerRequestController::class, 'index'])->name('index');
-        Route::get('wall', [\App\Http\Controllers\PrayerRequestController::class, 'wall'])->name('wall');
-        Route::get('create', [\App\Http\Controllers\PrayerRequestController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\PrayerRequestController::class, 'store'])->name('store');
-        Route::get('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'show'])->name('show');
-        Route::get('{prayerRequest}/edit', [\App\Http\Controllers\PrayerRequestController::class, 'edit'])->name('edit');
-        Route::put('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'update'])->name('update');
-        Route::delete('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'destroy'])->name('destroy');
-        Route::post('{prayerRequest}/pray', [\App\Http\Controllers\PrayerRequestController::class, 'pray'])->name('pray');
-        Route::post('{prayerRequest}/answered', [\App\Http\Controllers\PrayerRequestController::class, 'markAnswered'])->name('mark-answered');
-    });
+    // Prayer Requests - временно отключено
+    // Route::prefix('prayer-requests')->name('prayer-requests.')->group(function () {
+    //     Route::get('/', [\App\Http\Controllers\PrayerRequestController::class, 'index'])->name('index');
+    //     Route::get('wall', [\App\Http\Controllers\PrayerRequestController::class, 'wall'])->name('wall');
+    //     Route::get('create', [\App\Http\Controllers\PrayerRequestController::class, 'create'])->name('create');
+    //     Route::post('/', [\App\Http\Controllers\PrayerRequestController::class, 'store'])->name('store');
+    //     Route::get('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'show'])->name('show');
+    //     Route::get('{prayerRequest}/edit', [\App\Http\Controllers\PrayerRequestController::class, 'edit'])->name('edit');
+    //     Route::put('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'update'])->name('update');
+    //     Route::delete('{prayerRequest}', [\App\Http\Controllers\PrayerRequestController::class, 'destroy'])->name('destroy');
+    //     Route::post('{prayerRequest}/pray', [\App\Http\Controllers\PrayerRequestController::class, 'pray'])->name('pray');
+    //     Route::post('{prayerRequest}/answered', [\App\Http\Controllers\PrayerRequestController::class, 'markAnswered'])->name('mark-answered');
+    // });
 });
