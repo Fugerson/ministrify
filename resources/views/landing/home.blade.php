@@ -306,7 +306,7 @@
             {{-- Free --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all hover:shadow-lg">
                 <div class="text-center mb-8">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Старт</h3>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Free</h3>
                     <div class="text-4xl font-bold text-gray-900 dark:text-white">₴0</div>
                     <div class="text-gray-500 dark:text-gray-400">/місяць</div>
                 </div>
@@ -317,11 +317,11 @@
                     </li>
                     <li class="flex items-center text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Базові функції
+                        До 3 служінь
                     </li>
                     <li class="flex items-center text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Email підтримка
+                        Базові функції
                     </li>
                 </ul>
                 <a href="{{ url('/register-church') }}" class="block w-full py-3 px-4 text-center bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
@@ -329,32 +329,32 @@
                 </a>
             </div>
 
-            {{-- Pro - Featured --}}
+            {{-- Basic - Featured --}}
             <div class="bg-primary-600 rounded-2xl p-8 relative transform md:scale-105 shadow-xl shadow-primary-600/25">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full">
                     Популярний
                 </div>
                 <div class="text-center mb-8">
-                    <h3 class="text-xl font-bold text-white mb-2">Церква</h3>
-                    <div class="text-4xl font-bold text-white">₴499</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Basic</h3>
+                    <div class="text-4xl font-bold text-white">₴99</div>
                     <div class="text-primary-200">/місяць</div>
                 </div>
                 <ul class="space-y-4 mb-8">
                     <li class="flex items-center text-primary-100">
                         <svg class="w-5 h-5 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        До 500 членів
+                        До 200 членів
                     </li>
                     <li class="flex items-center text-primary-100">
                         <svg class="w-5 h-5 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Всі функції
+                        Telegram бот
                     </li>
                     <li class="flex items-center text-primary-100">
                         <svg class="w-5 h-5 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Онлайн-пожертви
+                        Фінанси
                     </li>
                     <li class="flex items-center text-primary-100">
                         <svg class="w-5 h-5 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Пріоритетна підтримка
+                        Економія 30% при оплаті за рік
                     </li>
                 </ul>
                 <a href="{{ url('/register-church') }}" class="block w-full py-3 px-4 text-center bg-white text-primary-600 font-semibold rounded-xl hover:bg-primary-50 transition-colors">
@@ -362,21 +362,21 @@
                 </a>
             </div>
 
-            {{-- Enterprise --}}
+            {{-- Pro --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all hover:shadow-lg">
                 <div class="text-center mb-8">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Собор</h3>
-                    <div class="text-4xl font-bold text-gray-900 dark:text-white">₴999</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Pro</h3>
+                    <div class="text-4xl font-bold text-gray-900 dark:text-white">₴249</div>
                     <div class="text-gray-500 dark:text-gray-400">/місяць</div>
                 </div>
                 <ul class="space-y-4 mb-8">
                     <li class="flex items-center text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Безліміт членів
+                        Без обмежень
                     </li>
                     <li class="flex items-center text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Мультицеркви
+                        Конструктор сайту
                     </li>
                     <li class="flex items-center text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -384,11 +384,11 @@
                     </li>
                     <li class="flex items-center text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Виділена підтримка
+                        Власний домен
                     </li>
                 </ul>
-                <a href="{{ url('/contact') }}" class="block w-full py-3 px-4 text-center bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                    Зв'язатися
+                <a href="{{ url('/register-church') }}" class="block w-full py-3 px-4 text-center bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                    Обрати Pro
                 </a>
             </div>
         </div>
