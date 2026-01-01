@@ -117,6 +117,12 @@ class EventResponsibilityController extends Controller
             return back()->with('error', 'Немає призначеної людини.');
         }
 
+        // Reset status to pending
+        $responsibility->update([
+            'status' => EventResponsibility::STATUS_PENDING,
+            'responded_at' => null,
+        ]);
+
         $this->sendNotification($responsibility);
 
         return back()->with('success', 'Сповіщення надіслано повторно.');
