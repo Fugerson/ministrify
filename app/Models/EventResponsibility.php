@@ -16,6 +16,7 @@ class EventResponsibility extends Model
         'event_id',
         'person_id',
         'name',
+        'notes',
         'status',
         'notified_at',
         'responded_at',

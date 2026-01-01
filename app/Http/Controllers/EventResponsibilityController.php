@@ -17,10 +17,12 @@ class EventResponsibilityController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         $event->responsibilities()->create([
             'name' => $validated['name'],
+            'notes' => $validated['notes'] ?? null,
             'status' => EventResponsibility::STATUS_OPEN,
         ]);
 
@@ -71,6 +73,7 @@ class EventResponsibilityController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         $responsibility->update($validated);
