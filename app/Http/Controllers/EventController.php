@@ -19,7 +19,7 @@ class EventController extends Controller
         $church = $this->getCurrentChurch();
 
         $query = Event::where('church_id', $church->id)
-            ->with(['ministry', 'assignments.person', 'assignments.position']);
+            ->with(['ministry', 'responsibilities.person']);
 
         if ($ministryId = $request->get('ministry')) {
             $query->where('ministry_id', $ministryId);
@@ -56,7 +56,7 @@ class EventController extends Controller
 
         $events = Event::where('church_id', $church->id)
             ->whereBetween('date', [$startDate, $endDate])
-            ->with(['ministry', 'assignments.person', 'assignments.position'])
+            ->with(['ministry', 'responsibilities.person'])
             ->orderBy('date')
             ->orderBy('time')
             ->get();
@@ -109,7 +109,7 @@ class EventController extends Controller
 
             $upcomingEvents = Event::where('church_id', $church->id)
                 ->whereBetween('date', [$nextMonthStart, $nextMonthEnd])
-                ->with(['ministry', 'assignments.person', 'assignments.position'])
+                ->with(['ministry', 'responsibilities.person'])
                 ->orderBy('date')
                 ->orderBy('time')
                 ->get();
@@ -202,9 +202,7 @@ class EventController extends Controller
         $church = $this->getCurrentChurch();
 
         $event->load([
-            'ministry.positions',
-            'assignments.person',
-            'assignments.position',
+            'ministry',
             'checklist.items.completedByUser',
             'planItems',
             'responsibilities.person',
@@ -311,13 +309,13 @@ class EventController extends Controller
                 ->with('error', 'Ваш профіль не знайдено.');
         }
 
-        $assignments = $user->person->assignments()
-            ->with(['event.ministry', 'position'])
+        $responsibilities = $user->person->responsibilities()
+            ->with(['event.ministry'])
             ->whereHas('event', fn($q) => $q->where('date', '>=', now()))
             ->get()
-            ->sortBy(fn($a) => $a->event->date);
+            ->sortBy(fn($r) => $r->event->date);
 
-        return view('schedule.my-schedule', compact('assignments'));
+        return view('schedule.my-schedule', compact('responsibilities'));
     }
 
     private function generateRecurringEvents(Event $parentEvent, string $rule): void

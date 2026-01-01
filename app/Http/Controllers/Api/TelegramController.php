@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Assignment;
 use App\Models\Church;
 use App\Models\EventResponsibility;
 use App\Models\Person;
@@ -45,69 +44,7 @@ class TelegramController extends Controller
         }
 
         // Parse callback data
-        if (str_starts_with($data, 'confirm_')) {
-            $assignmentId = (int) str_replace('confirm_', '', $data);
-            $assignment = Assignment::find($assignmentId);
-
-            if ($assignment && $assignment->person_id === $person->id) {
-                $assignment->confirm();
-
-                $church = $person->church;
-                if ($church?->telegram_bot_token) {
-                    $event = $assignment->event;
-                    $position = $assignment->position;
-
-                    // Save response to chat history
-                    TelegramMessage::create([
-                        'church_id' => $church->id,
-                        'person_id' => $person->id,
-                        'direction' => 'incoming',
-                        'message' => "✅ Підтвердив участь: {$event->date->format('d.m.Y')} - {$position->name}",
-                        'is_read' => false,
-                    ]);
-
-                    $telegram = new TelegramService($church->telegram_bot_token);
-                    $telegram->sendMessage($chatId, '✅ Дякуємо! Ви підтвердили участь.');
-                }
-            }
-        } elseif (str_starts_with($data, 'decline_')) {
-            $assignmentId = (int) str_replace('decline_', '', $data);
-            $assignment = Assignment::find($assignmentId);
-
-            if ($assignment && $assignment->person_id === $person->id) {
-                $assignment->decline();
-
-                $church = $person->church;
-                if (!$church?->telegram_bot_token) {
-                    return response()->json(['ok' => true]);
-                }
-
-                $event = $assignment->event;
-                $position = $assignment->position;
-
-                // Save response to chat history
-                TelegramMessage::create([
-                    'church_id' => $church->id,
-                    'person_id' => $person->id,
-                    'direction' => 'incoming',
-                    'message' => "❌ Відхилив участь: {$event->date->format('d.m.Y')} - {$position->name}",
-                    'is_read' => false,
-                ]);
-
-                $settings = $church->settings ?? [];
-
-                if (!empty($settings['notifications']['notify_leader_on_decline'])) {
-                    $leader = $assignment->event?->ministry?->leader;
-                    if ($leader && $leader->telegram_chat_id) {
-                        $telegram = new TelegramService($church->telegram_bot_token);
-                        $telegram->sendDeclineNotification($assignment, $leader);
-                    }
-                }
-
-                $telegram = new TelegramService($church->telegram_bot_token);
-                $telegram->sendMessage($chatId, '❌ Ви відхилили участь. Повідомлення надіслано лідеру.');
-            }
-        } elseif (str_starts_with($data, 'resp_confirm_')) {
+        if (str_starts_with($data, 'resp_confirm_')) {
             $responsibilityId = (int) str_replace('resp_confirm_', '', $data);
             $responsibility = EventResponsibility::find($responsibilityId);
 

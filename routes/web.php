@@ -16,7 +16,6 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ServicePlanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagController;
-use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\UserPreferencesController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\BoardController;
@@ -228,17 +227,6 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::post('calendar/google-settings', [EventController::class, 'saveGoogleSettings'])->name('calendar.google-settings');
     Route::delete('calendar/google-settings', [EventController::class, 'removeGoogleSettings'])->name('calendar.google-settings.remove');
     Route::get('events/{event}/google', [EventController::class, 'addToGoogle'])->name('events.google');
-
-    // Assignments
-    Route::post('events/{event}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
-    Route::put('assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
-    Route::delete('assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
-    Route::post('assignments/{assignment}/confirm', [AssignmentController::class, 'confirm'])->name('assignments.confirm');
-    Route::post('assignments/{assignment}/decline', [AssignmentController::class, 'decline'])->name('assignments.decline');
-    Route::post('events/{event}/notify-all', [AssignmentController::class, 'notifyAll'])->name('assignments.notify-all');
-    Route::post('events/{event}/confirm-all', [AssignmentController::class, 'confirmAll'])->name('assignments.confirm-all');
-    Route::post('events/{event}/mark-all-attended', [AssignmentController::class, 'markAllAttended'])->name('assignments.mark-all-attended');
-    Route::patch('assignments/{assignment}/status', [AssignmentController::class, 'updateStatus'])->name('assignments.update-status');
 
     // Rotation
     Route::prefix('rotation')->name('rotation.')->group(function () {

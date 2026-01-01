@@ -149,6 +149,11 @@ class Person extends Model
         return $this->hasMany(Assignment::class);
     }
 
+    public function responsibilities(): HasMany
+    {
+        return $this->hasMany(EventResponsibility::class);
+    }
+
     public function unavailableDates(): HasMany
     {
         return $this->hasMany(UnavailableDate::class);
