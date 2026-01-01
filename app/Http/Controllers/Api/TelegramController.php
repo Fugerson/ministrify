@@ -53,6 +53,18 @@ class TelegramController extends Controller
 
                 $church = $person->church;
                 if ($church?->telegram_bot_token) {
+                    $event = $assignment->event;
+                    $position = $assignment->position;
+
+                    // Save response to chat history
+                    TelegramMessage::create([
+                        'church_id' => $church->id,
+                        'person_id' => $person->id,
+                        'direction' => 'incoming',
+                        'message' => "✅ Підтвердив участь: {$event->date->format('d.m.Y')} - {$position->name}",
+                        'is_read' => false,
+                    ]);
+
                     $telegram = new TelegramService($church->telegram_bot_token);
                     $telegram->sendMessage($chatId, '✅ Дякуємо! Ви підтвердили участь.');
                 }
@@ -64,11 +76,22 @@ class TelegramController extends Controller
             if ($assignment && $assignment->person_id === $person->id) {
                 $assignment->decline();
 
-                // Notify leader
                 $church = $person->church;
                 if (!$church?->telegram_bot_token) {
                     return response()->json(['ok' => true]);
                 }
+
+                $event = $assignment->event;
+                $position = $assignment->position;
+
+                // Save response to chat history
+                TelegramMessage::create([
+                    'church_id' => $church->id,
+                    'person_id' => $person->id,
+                    'direction' => 'incoming',
+                    'message' => "❌ Відхилив участь: {$event->date->format('d.m.Y')} - {$position->name}",
+                    'is_read' => false,
+                ]);
 
                 $settings = $church->settings ?? [];
 
