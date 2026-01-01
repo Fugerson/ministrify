@@ -30,7 +30,14 @@ abstract class Controller extends BaseController
             return Church::first();
         }
 
-        return $user->church;
+        $church = $user->church;
+
+        if (!$church) {
+            abort(redirect()->route('dashboard')
+                ->with('error', 'Ця функція доступна тільки для користувачів з церквою.'));
+        }
+
+        return $church;
     }
 
     /**
