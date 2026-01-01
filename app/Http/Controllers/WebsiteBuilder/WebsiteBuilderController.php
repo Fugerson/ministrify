@@ -11,6 +11,11 @@ class WebsiteBuilderController extends Controller
     {
         $church = auth()->user()->church;
 
+        if (!$church) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Конструктор сайту доступний тільки для користувачів з церквою.');
+        }
+
         $stats = [
             'events_count' => $church->events()->where('is_public', true)->count(),
             'ministries_count' => $church->ministries()->where('is_public', true)->count(),
@@ -32,6 +37,12 @@ class WebsiteBuilderController extends Controller
     public function preview()
     {
         $church = auth()->user()->church;
+
+        if (!$church) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Конструктор сайту доступний тільки для користувачів з церквою.');
+        }
+
         return redirect()->route('public.church', $church->slug);
     }
 }
