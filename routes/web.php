@@ -29,7 +29,11 @@ use App\Http\Controllers\MigrationController;
 use App\Http\Controllers\TelegramBroadcastController;
 use App\Http\Controllers\TelegramChatController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\QrCheckinController;
 use Illuminate\Support\Facades\Route;
+
+// QR Check-in (public with optional auth)
+Route::get('checkin/{token}', [QrCheckinController::class, 'show'])->name('checkin.show');
 
 // Landing pages (public)
 Route::get('/', [LandingController::class, 'home'])->name('landing.home');
@@ -203,6 +207,9 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::resource('events', EventController::class);
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
     Route::get('calendar', [EventController::class, 'calendar'])->name('calendar');
+    Route::get('qr-scanner', [QrCheckinController::class, 'scanner'])->name('qr-scanner');
+    Route::post('events/{event}/toggle-qr-checkin', [QrCheckinController::class, 'toggleQrCheckin'])->name('events.toggle-qr-checkin');
+    Route::post('events/{event}/generate-qr', [QrCheckinController::class, 'generateQr'])->name('events.generate-qr');
 
     // Event Responsibilities
     Route::prefix('events/{event}/responsibilities')->name('events.responsibilities.')->group(function () {

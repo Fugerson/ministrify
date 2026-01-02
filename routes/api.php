@@ -43,3 +43,17 @@ Route::prefix('push')->name('api.push.')->group(function () {
         Route::post('test', [PushSubscriptionController::class, 'test'])->name('test');
     });
 });
+
+// PWA Offline API (requires auth via web session)
+Route::prefix('pwa')->name('api.pwa.')->middleware(['web', 'auth'])->group(function () {
+    Route::get('my-schedule', [\App\Http\Controllers\Api\MyScheduleController::class, 'index'])->name('my-schedule');
+    Route::post('responsibilities/{id}/confirm', [\App\Http\Controllers\Api\MyScheduleController::class, 'confirm'])->name('responsibilities.confirm');
+    Route::post('responsibilities/{id}/decline', [\App\Http\Controllers\Api\MyScheduleController::class, 'decline'])->name('responsibilities.decline');
+});
+
+// QR Check-in API
+Route::prefix('checkin')->name('api.checkin.')->middleware(['web'])->group(function () {
+    Route::post('{token}', [\App\Http\Controllers\QrCheckinController::class, 'checkin'])->name('checkin')->middleware('auth');
+    Route::get('today-events', [\App\Http\Controllers\QrCheckinController::class, 'todayEvents'])->name('today-events')->middleware('auth');
+    Route::post('admin', [\App\Http\Controllers\QrCheckinController::class, 'adminCheckin'])->name('admin')->middleware('auth');
+});

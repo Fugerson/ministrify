@@ -30,6 +30,8 @@ class Event extends Model
         'public_description',
         'location',
         'cover_image',
+        'checkin_token',
+        'qr_checkin_enabled',
         'is_service',
         'service_type',
     ];
@@ -41,6 +43,7 @@ class Event extends Model
         'is_service' => 'boolean',
         'allow_registration' => 'boolean',
         'registration_deadline' => 'datetime',
+        'qr_checkin_enabled' => 'boolean',
     ];
 
     // Service types
@@ -255,5 +258,63 @@ class Event extends Model
     public function scopeOfServiceType($query, string $type)
     {
         return $query->where('service_type', $type);
+    }
+
+    // ==================
+    // QR Check-in Methods
+    // ==================
+
+    /**
+     * Generate a unique check-in token for QR code
+     */
+    public function generateCheckinToken(): string
+    {
+        $token = bin2hex(random_bytes(16));
+        $this->update(['checkin_token' => $token]);
+        return $token;
+    }
+
+    /**
+     * Get or generate check-in token
+     */
+    public function getOrCreateCheckinToken(): string
+    {
+        if (!$this->checkin_token) {
+            return $this->generateCheckinToken();
+        }
+        return $this->checkin_token;
+    }
+
+    /**
+     * Get the QR check-in URL
+     */
+    public function getCheckinUrlAttribute(): string
+    {
+        $token = $this->getOrCreateCheckinToken();
+        return url("/checkin/{$token}");
+    }
+
+    /**
+     * Check if QR check-in is available for this event
+     */
+    public function canQrCheckin(): bool
+    {
+        if (!$this->qr_checkin_enabled) {
+            return false;
+        }
+
+        // Allow check-in on the event day or day before
+        $today = now()->startOfDay();
+        $eventDay = $this->date->startOfDay();
+
+        return $today->diffInDays($eventDay, false) >= -1 && $today->diffInDays($eventDay, false) <= 0;
+    }
+
+    /**
+     * Find event by check-in token
+     */
+    public static function findByCheckinToken(string $token): ?self
+    {
+        return static::where('checkin_token', $token)->first();
     }
 }

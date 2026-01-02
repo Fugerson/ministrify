@@ -86,8 +86,11 @@
             </svg>
         </div>
         <h1>Ви офлайн</h1>
-        <p>Немає підключення до інтернету. Перевірте з'єднання та спробуйте знову.</p>
-        <button onclick="window.location.reload()">Спробувати знову</button>
+        <p>Немає підключення до інтернету. Деякі сторінки доступні офлайн.</p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.location.href='/my-schedule'">Мій розклад</button>
+            <button onclick="window.location.reload()" style="background: #6b7280;">Оновити</button>
+        </div>
         <div class="status" id="status"></div>
     </div>
 

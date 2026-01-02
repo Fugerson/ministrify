@@ -1378,19 +1378,157 @@
         }
     </script>
 
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Service Worker Registration & Install Prompt -->
     <script>
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
                         console.log('SW registered:', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available
+                                    if (confirm('Доступна нова версія. Оновити?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
                     })
                     .catch(error => {
                         console.log('SW registration failed:', error);
                     });
             });
         }
+
+        // PWA Install Prompt
+        window.pwaInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.pwaInstallPrompt = e;
+            window.dispatchEvent(new CustomEvent('pwa-installable'));
+        });
+
+        window.addEventListener('appinstalled', () => {
+            window.pwaInstallPrompt = null;
+            localStorage.setItem('pwa-installed', 'true');
+        });
     </script>
+
+    <!-- PWA Install Banner -->
+    @auth
+    <div x-data="pwaInstallBanner()" x-show="showBanner" x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform translate-y-full"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0 transform translate-y-full"
+         class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg md:bottom-4 md:left-4 md:right-auto md:max-w-sm md:rounded-2xl">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <img src="/icons/icon-72x72.png" alt="Ministrify" class="w-8 h-8">
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-semibold">Встановити додаток</h3>
+                <p class="text-sm opacity-90 mt-1">Швидкий доступ з головного екрану вашого пристрою</p>
+                <div class="flex gap-2 mt-3">
+                    <button @click="install()"
+                            class="px-4 py-2 bg-white text-primary-700 font-semibold rounded-lg hover:bg-white/90 transition-colors text-sm">
+                        Встановити
+                    </button>
+                    <button @click="dismiss()"
+                            class="px-4 py-2 text-white/80 hover:text-white transition-colors text-sm">
+                        Не зараз
+                    </button>
+                </div>
+            </div>
+            <button @click="dismiss()" class="flex-shrink-0 p-1 text-white/60 hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- iOS instructions --}}
+        <div x-show="isIOS && !canInstall" class="mt-4 p-3 bg-white/10 rounded-xl text-sm">
+            <p class="font-medium mb-2">Для iOS:</p>
+            <ol class="list-decimal list-inside space-y-1 opacity-90">
+                <li>Натисніть <svg class="inline w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L12 14M12 2L8 6M12 2L16 6M4 12V20H20V12"/></svg> (Поділитися)</li>
+                <li>Виберіть "На Початковий екран"</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+    function pwaInstallBanner() {
+        return {
+            showBanner: false,
+            canInstall: false,
+            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+
+            init() {
+                // Check if already installed or dismissed
+                if (localStorage.getItem('pwa-installed') === 'true') return;
+                if (localStorage.getItem('pwa-banner-dismissed')) {
+                    const dismissed = new Date(localStorage.getItem('pwa-banner-dismissed'));
+                    const daysSince = (Date.now() - dismissed.getTime()) / (1000 * 60 * 60 * 24);
+                    if (daysSince < 7) return; // Don't show for 7 days after dismiss
+                }
+
+                // Check if running as PWA already
+                if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+                // Listen for install prompt
+                window.addEventListener('pwa-installable', () => {
+                    this.canInstall = true;
+                    this.showAfterDelay();
+                });
+
+                // Check if prompt already captured
+                if (window.pwaInstallPrompt) {
+                    this.canInstall = true;
+                    this.showAfterDelay();
+                }
+
+                // For iOS, show instructions
+                if (this.isIOS && !window.navigator.standalone) {
+                    this.showAfterDelay();
+                }
+            },
+
+            showAfterDelay() {
+                // Show after 30 seconds on the page
+                setTimeout(() => {
+                    this.showBanner = true;
+                }, 30000);
+            },
+
+            async install() {
+                if (window.pwaInstallPrompt) {
+                    window.pwaInstallPrompt.prompt();
+                    const result = await window.pwaInstallPrompt.userChoice;
+                    if (result.outcome === 'accepted') {
+                        localStorage.setItem('pwa-installed', 'true');
+                    }
+                    window.pwaInstallPrompt = null;
+                }
+                this.showBanner = false;
+            },
+
+            dismiss() {
+                localStorage.setItem('pwa-banner-dismissed', new Date().toISOString());
+                this.showBanner = false;
+            }
+        };
+    }
+    </script>
+    @endauth
 </body>
 </html>
