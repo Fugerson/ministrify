@@ -1317,7 +1317,7 @@
             str_starts_with($routeName, 'songs') => 'songs',
             str_starts_with($routeName, 'reports') => 'reports',
             str_starts_with($routeName, 'announcements') => 'announcements',
-            str_starts_with($routeName, 'private-messages') => 'private-messages',
+            str_starts_with($routeName, 'private-messages') || str_starts_with($routeName, 'pm.') => 'private-messages',
             str_starts_with($routeName, 'donations') => 'donations',
             str_starts_with($routeName, 'rotation') => 'rotation',
             str_starts_with($routeName, 'security') => 'security',
