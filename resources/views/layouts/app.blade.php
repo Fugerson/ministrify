@@ -981,7 +981,7 @@
         <!-- Main Content -->
         <div class="flex-1 lg:pl-64 overflow-x-hidden">
             <!-- Mobile Header -->
-            <header class="lg:hidden sticky {{ session('impersonating_from') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
+            <header class="lg:hidden sticky {{ session('impersonating_from') ? 'top-11' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
                 <div class="flex items-center justify-between h-14 px-3">
                     <button @click="sidebarOpen = true" class="w-11 h-11 flex items-center justify-center -ml-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -1006,7 +1006,7 @@
             </header>
 
             <!-- Desktop Header -->
-            <header class="hidden lg:flex sticky {{ session('impersonating_from') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
+            <header class="hidden lg:flex sticky {{ session('impersonating_from') ? 'top-11' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
                 <h1 class="text-lg font-semibold text-gray-900 dark:text-white">@yield('title', 'Головна')</h1>
                 <div class="flex items-center space-x-4">
                     <!-- Help Button -->
