@@ -100,7 +100,7 @@
             </h2>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                @foreach(\App\Models\BlockoutDate::REASON_OPTIONS as $value => $label)
+                @foreach(\App\Models\BlockoutDate::REASONS as $value => $label)
                 <label class="relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all
                               {{ old('reason', $blockout->reason) === $value ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
                     <input type="radio" name="reason" value="{{ $value }}"
