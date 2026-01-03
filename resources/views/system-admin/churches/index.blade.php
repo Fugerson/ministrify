@@ -12,15 +12,80 @@
 <div class="space-y-6">
     <!-- Search -->
     <div class="bg-gray-800 rounded-xl p-4 border border-gray-700">
-        <form method="GET" class="flex gap-4">
+        <form method="GET" class="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук церкви..."
                    class="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent">
             <button type="submit" class="px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg">Шукати</button>
         </form>
     </div>
 
-    <!-- Churches Table -->
-    <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+    <!-- Mobile Cards (visible on small screens) -->
+    <div class="lg:hidden space-y-4">
+        @forelse($churches as $church)
+        <div class="bg-gray-800 rounded-xl border border-gray-700 p-4">
+            <!-- Header with logo and name -->
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center">
+                    @if($church->logo)
+                    <img src="/storage/{{ $church->logo }}" alt="{{ $church->name }}" class="w-12 h-12 rounded-lg object-cover mr-3">
+                    @else
+                    <div class="w-12 h-12 rounded-lg bg-blue-600/20 flex items-center justify-center mr-3">
+                        <span class="text-xl">⛪</span>
+                    </div>
+                    @endif
+                    <div>
+                        <p class="font-medium text-white">{{ $church->name }}</p>
+                        <p class="text-sm text-gray-400">{{ $church->city }}</p>
+                    </div>
+                </div>
+                @if($church->public_site_enabled)
+                <span class="px-2 py-1 bg-green-600/20 text-green-400 text-xs rounded-full whitespace-nowrap">Публ. сайт</span>
+                @endif
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-4 gap-2 mb-4">
+                <div class="bg-gray-700/50 rounded-lg p-2 text-center">
+                    <p class="text-lg font-semibold text-white">{{ $church->users_count }}</p>
+                    <p class="text-xs text-gray-400">Юзери</p>
+                </div>
+                <div class="bg-gray-700/50 rounded-lg p-2 text-center">
+                    <p class="text-lg font-semibold text-white">{{ $church->people_count }}</p>
+                    <p class="text-xs text-gray-400">Люди</p>
+                </div>
+                <div class="bg-gray-700/50 rounded-lg p-2 text-center">
+                    <p class="text-lg font-semibold text-white">{{ $church->ministries_count }}</p>
+                    <p class="text-xs text-gray-400">Служ.</p>
+                </div>
+                <div class="bg-gray-700/50 rounded-lg p-2 text-center">
+                    <p class="text-lg font-semibold text-white">{{ $church->events_count }}</p>
+                    <p class="text-xs text-gray-400">Події</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 pt-3 border-t border-gray-700">
+                <a href="{{ route('system.churches.show', $church) }}"
+                   class="flex-1 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white text-sm text-center rounded-lg">
+                    Переглянути
+                </a>
+                <form method="POST" action="{{ route('system.churches.switch', $church) }}" class="flex-1">
+                    @csrf
+                    <button type="submit" class="w-full py-2 px-3 bg-green-600/20 hover:bg-green-600/30 text-green-400 text-sm rounded-lg">
+                        Увійти
+                    </button>
+                </form>
+            </div>
+        </div>
+        @empty
+        <div class="bg-gray-800 rounded-xl border border-gray-700 p-8 text-center text-gray-400">
+            Церкви не знайдено
+        </div>
+        @endforelse
+    </div>
+
+    <!-- Desktop Table (hidden on small screens) -->
+    <div class="hidden lg:block bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-700/50">
@@ -100,5 +165,12 @@
         </div>
         @endif
     </div>
+
+    <!-- Mobile Pagination -->
+    @if($churches->hasPages())
+    <div class="lg:hidden">
+        {{ $churches->links() }}
+    </div>
+    @endif
 </div>
 @endsection
