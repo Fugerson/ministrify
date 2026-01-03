@@ -84,6 +84,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .safe-top { padding-top: env(safe-area-inset-top); }
         input:focus, select:focus, textarea:focus { outline: none; }
         @media screen and (max-width: 768px) {
             input, select, textarea { font-size: 16px !important; }
@@ -840,7 +841,7 @@
                x-transition:leave="transform transition ease-in duration-200"
                x-transition:leave-start="translate-x-0"
                x-transition:leave-end="-translate-x-full"
-               class="lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-xl flex flex-col">
+               class="lg:hidden fixed inset-y-0 left-0 z-50 w-[calc(100vw-3rem)] max-w-72 bg-white dark:bg-gray-800 shadow-xl flex flex-col">
             <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
@@ -980,23 +981,23 @@
         <!-- Main Content -->
         <div class="flex-1 lg:pl-64 overflow-x-hidden">
             <!-- Mobile Header -->
-            <header class="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-                <div class="flex items-center justify-between h-14 px-4">
-                    <button @click="sidebarOpen = true" class="p-2 -ml-2 text-gray-600 dark:text-gray-300">
+            <header class="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
+                <div class="flex items-center justify-between h-14 px-3">
+                    <button @click="sidebarOpen = true" class="w-11 h-11 flex items-center justify-center -ml-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
-                    <button @click="searchOpen = true" class="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <button @click="searchOpen = true" class="flex-1 mx-2 flex items-center justify-center space-x-2 h-10 px-3 bg-gray-100 dark:bg-gray-700 rounded-xl active:bg-gray-200 dark:active:bg-gray-600">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <span class="text-sm text-gray-500 dark:text-gray-400">Пошук...</span>
                     </button>
-                    <div class="flex items-center space-x-1">
-                        <button @click="$dispatch('open-page-help')" class="p-2 text-gray-400 hover:text-primary-600">
+                    <div class="flex items-center">
+                        <button @click="$dispatch('open-page-help')" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </button>
-                        <a href="{{ route('my-profile') }}" class="p-2 -mr-2">
-                            <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                        <a href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center -mr-2">
+                            <div class="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
                                 <span class="text-sm font-medium text-primary-600 dark:text-primary-300">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
                             </div>
                         </a>

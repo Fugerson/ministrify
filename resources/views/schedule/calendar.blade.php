@@ -48,35 +48,35 @@
             </div>
 
             <!-- Date Navigation -->
-            <div class="flex items-center justify-between sm:justify-center gap-4">
+            <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
                 @if($view === 'week')
                     <a href="{{ route('schedule', ['view' => 'week', 'year' => $prevWeekYear, 'week' => $prevWeek]) }}"
-                       class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
                         <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
                     </a>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white min-w-[200px] text-center">
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center">
                         {{ $startDate->format('d.m') }} - {{ $endDate->format('d.m.Y') }}
                     </h2>
                     <a href="{{ route('schedule', ['view' => 'week', 'year' => $nextWeekYear, 'week' => $nextWeek]) }}"
-                       class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
                         <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
                     </a>
                 @else
                     <a href="{{ route('schedule', ['view' => 'month', 'year' => $prevYear, 'month' => $prevMonth]) }}"
-                       class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
                         <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
                     </a>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white min-w-[180px] text-center">
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[180px] text-center">
                         {{ $months[$month - 1] }} {{ $year }}
                     </h2>
                     <a href="{{ route('schedule', ['view' => 'month', 'year' => $nextYear, 'month' => $nextMonth]) }}"
-                       class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
                         <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>

@@ -319,32 +319,32 @@
                 <span class="hidden sm:inline">записів</span>
             </div>
 
-            <div class="flex items-center gap-0.5 sm:gap-1">
+            <div class="flex items-center gap-0.5">
                 <button @click="currentPage = 1" :disabled="currentPage === 1"
-                    class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed active:bg-gray-200 dark:active:bg-gray-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
                 </button>
                 <button @click="currentPage--" :disabled="currentPage === 1"
-                    class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed active:bg-gray-200 dark:active:bg-gray-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
 
-                <span class="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+                <span class="px-2 sm:px-3 py-1 text-sm text-gray-700 dark:text-gray-300 min-w-[4rem] text-center">
                     <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
                 </span>
 
                 <button @click="currentPage++" :disabled="currentPage >= totalPages"
-                    class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed active:bg-gray-200 dark:active:bg-gray-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
                 <button @click="currentPage = totalPages" :disabled="currentPage >= totalPages"
-                    class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed active:bg-gray-200 dark:active:bg-gray-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
                     </svg>

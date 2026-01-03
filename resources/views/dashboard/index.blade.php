@@ -309,7 +309,7 @@
                         <div class="flex gap-2 flex-shrink-0">
                             <form method="POST" action="{{ route('assignments.confirm', $assignment) }}">
                                 @csrf
-                                <button type="submit" class="w-9 h-9 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400 rounded-lg flex items-center justify-center hover:bg-green-200 dark:hover:bg-green-800 transition-colors">
+                                <button type="submit" class="w-11 h-11 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400 rounded-xl flex items-center justify-center hover:bg-green-200 dark:hover:bg-green-800 active:bg-green-300 dark:active:bg-green-700 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
@@ -317,7 +317,7 @@
                             </form>
                             <form method="POST" action="{{ route('assignments.decline', $assignment) }}">
                                 @csrf
-                                <button type="submit" class="w-9 h-9 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-400 rounded-lg flex items-center justify-center hover:bg-red-200 dark:hover:bg-red-800 transition-colors">
+                                <button type="submit" class="w-11 h-11 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-400 rounded-xl flex items-center justify-center hover:bg-red-200 dark:hover:bg-red-800 active:bg-red-300 dark:active:bg-red-700 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
