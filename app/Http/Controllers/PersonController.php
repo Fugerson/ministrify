@@ -10,6 +10,7 @@ use App\Exports\PeopleExport;
 use App\Imports\PeopleImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -640,10 +641,15 @@ class PersonController extends Controller
         // Link person to user
         $person->update(['user_id' => $user->id]);
 
+        // Send password setup email
+        $token = Password::createToken($user);
+        $user->sendPasswordResetNotification($token);
+
         return response()->json([
             'success' => true,
-            'message' => 'Обліковий запис створено',
+            'message' => 'Обліковий запис створено. Лист для встановлення пароля надіслано на email.',
             'password' => $password,
+            'email_sent' => true,
         ]);
     }
 
@@ -663,9 +669,14 @@ class PersonController extends Controller
         $password = Str::random(10);
         $person->user->update(['password' => Hash::make($password)]);
 
+        // Send password reset email
+        $token = Password::createToken($person->user);
+        $person->user->sendPasswordResetNotification($token);
+
         return response()->json([
             'success' => true,
             'password' => $password,
+            'email_sent' => true,
         ]);
     }
 
