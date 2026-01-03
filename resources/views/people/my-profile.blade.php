@@ -4,23 +4,23 @@
 
 @section('content')
 <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-gray-900">Мій профіль</h1>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Мій профіль</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Profile info -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                 <div class="flex items-center space-x-4 mb-6">
                     @if($person->photo)
                     <img src="{{ Storage::url($person->photo) }}" alt="{{ $person->full_name }}" class="w-20 h-20 rounded-full object-cover">
                     @else
-                    <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                        <span class="text-2xl text-gray-500">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
+                    <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <span class="text-2xl text-gray-500 dark:text-gray-400">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
                     </div>
                     @endif
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-900">{{ $person->full_name }}</h2>
-                        <p class="text-gray-500">{{ auth()->user()->role === 'admin' ? 'Адміністратор' : (auth()->user()->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $person->full_name }}</h2>
+                        <p class="text-gray-500 dark:text-gray-400">{{ auth()->user()->role === 'admin' ? 'Адміністратор' : (auth()->user()->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
                     </div>
                 </div>
 
@@ -28,34 +28,34 @@
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Телефон</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Телефон</label>
                             <input type="text" name="phone" value="{{ old('phone', $person->phone) }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                             <input type="email" name="email" value="{{ old('email', $person->email) }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Telegram</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telegram</label>
                             <input type="text" name="telegram_username" value="{{ old('telegram_username', $person->telegram_username) }}" placeholder="@username"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Адреса</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Адреса</label>
                             <input type="text" name="address" value="{{ old('address', $person->address) }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <button type="submit" class="px-4 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-medium transition-colors">
                             Зберегти
                         </button>
                     </div>
@@ -395,17 +395,17 @@
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- Upcoming assignments -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Мої служіння</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Мої служіння</h3>
                 @if($upcomingAssignments->isEmpty())
-                <p class="text-gray-500">Немає запланованих служінь</p>
+                <p class="text-gray-500 dark:text-gray-400">Немає запланованих служінь</p>
                 @else
                 <div class="space-y-3">
                     @foreach($upcomingAssignments->take(5) as $assignment)
-                    <div class="flex items-center justify-between py-2 border-b last:border-0">
+                    <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                         <div>
-                            <p class="text-sm font-medium text-gray-900">{{ $assignment->event->date->format('d.m') }} - {{ $assignment->event->ministry->name }}</p>
-                            <p class="text-xs text-gray-500">{{ $assignment->position->name }}</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignment->event->date->format('d.m') }} - {{ $assignment->event->ministry->name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->position->name }}</p>
                         </div>
                         <span class="text-lg">
                             @if($assignment->status === 'confirmed') ✅
