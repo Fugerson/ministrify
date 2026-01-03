@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" x-data="{ darkMode: localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-bind:class="{ 'dark': darkMode }">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -16,9 +16,11 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
 
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -69,7 +71,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gradient-to-br from-primary-50 via-white to-blue-50 min-h-screen">
+<body class="font-sans antialiased bg-gradient-to-br from-primary-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 min-h-screen">
     <div class="min-h-screen flex flex-col justify-center px-4 py-8 sm:py-12">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <!-- Logo -->
@@ -79,14 +81,14 @@
                         <span class="text-3xl">⛪</span>
                     </div>
                 </a>
-                <h1 class="mt-4 text-2xl font-bold text-gray-900">Ministrify</h1>
-                <p class="mt-1 text-gray-500">Управління церквою просто</p>
+                <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Ministrify</h1>
+                <p class="mt-1 text-gray-500 dark:text-gray-400">Управління церквою просто</p>
             </div>
 
             <!-- Card -->
-            <div class="bg-white/80 backdrop-blur-sm shadow-xl shadow-gray-200/50 rounded-3xl p-6 sm:p-8 border border-white">
+            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl shadow-gray-200/50 dark:shadow-gray-900/50 rounded-3xl p-6 sm:p-8 border border-white dark:border-gray-700">
                 @if(session('status'))
-                    <div class="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 rounded-2xl text-sm flex items-start">
+                    <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 text-green-700 dark:text-green-400 rounded-2xl text-sm flex items-start">
                         <svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -95,7 +97,7 @@
                 @endif
 
                 @if($errors->any())
-                    <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-700 rounded-2xl text-sm">
+                    <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 text-red-700 dark:text-red-400 rounded-2xl text-sm">
                         <div class="flex items-start">
                             <svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -120,7 +122,7 @@
                     </svg>
                     На головну
                 </a>
-                <p class="text-sm text-gray-400">
+                <p class="text-sm text-gray-400 dark:text-gray-500">
                     &copy; {{ date('Y') }} Ministrify. Для церков України
                 </p>
             </div>
