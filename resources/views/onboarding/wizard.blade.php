@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="uk" x-data="{ darkMode: localStorage.getItem('theme') === 'dark' }" :class="{ 'dark': darkMode }">
+<html lang="uk" x-data="{ darkMode: localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) }" :class="{ 'dark': darkMode }">
 <head>
     <script>
         (function() {
             const theme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (theme === 'dark' || (!theme && prefersDark)) {
+            if (theme === 'dark' || (theme === 'auto' && prefersDark)) {
                 document.documentElement.classList.add('dark');
             }
         })();
