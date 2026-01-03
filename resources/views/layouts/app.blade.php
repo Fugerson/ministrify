@@ -1037,7 +1037,7 @@
             </header>
 
             <!-- Page Content -->
-            <main class="p-4 pt-16 lg:pt-6 pb-24 lg:pb-6">
+            <main class="p-4 {{ session('impersonating_from') ? 'pt-28' : 'pt-16' }} lg:pt-6 pb-24 lg:pb-6">
                 @if(session('success'))
                 <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-xl flex items-start">
                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
