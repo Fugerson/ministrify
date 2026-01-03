@@ -220,7 +220,7 @@ class SystemAdminController extends Controller
         auth()->login($user);
 
         return redirect()->route('dashboard')
-            ->with('success', "Ви увійшли як {$user->name}. Натисніть 'Повернутись' у верхній панелі.");
+            ->with('success', "Ви увійшли як {$user->name}. Натисніть «Повернутись» у верхній панелі.");
     }
 
     /**
