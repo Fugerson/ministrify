@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 
 class SermonController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
         $church = $this->getChurchOrFail();

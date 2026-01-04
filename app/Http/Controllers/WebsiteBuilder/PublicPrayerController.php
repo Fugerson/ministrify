@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 
 class PublicPrayerController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
         $church = $this->getChurchOrFail();

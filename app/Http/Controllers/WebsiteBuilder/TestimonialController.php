@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class TestimonialController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
         $church = $this->getChurchOrFail();

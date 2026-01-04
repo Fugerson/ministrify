@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 
 class TemplateController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
         $church = $this->getChurchOrFail();

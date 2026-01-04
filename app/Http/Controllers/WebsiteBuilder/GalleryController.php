@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 
 class GalleryController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
         $church = $this->getChurchOrFail();
