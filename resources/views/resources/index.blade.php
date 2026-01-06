@@ -160,7 +160,7 @@
                         {{ $resource->created_at->format('d.m.Y') }}
                     </td>
                     <td class="px-4 py-3 text-right">
-                        <button @click.stop="openMenu({{ $resource->id }}, $event)"
+                        <button @click.stop="openMenu({{ $resource->id }}, '{{ addslashes($resource->name) }}', $event)"
                                 class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
@@ -212,7 +212,7 @@
          :style="`top: ${menuY}px; left: ${menuX}px`"
          @click.away="menuOpen = false"
          class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-48">
-        <button @click="renameItem()" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+        <button @click="showRenameModal()" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
@@ -224,6 +224,33 @@
             </svg>
             Видалити
         </button>
+    </div>
+
+    <!-- Rename modal -->
+    <div x-show="showRename" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 flex items-center justify-center">
+            <div class="fixed inset-0 bg-black/50" @click="showRename = false"></div>
+            <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Перейменувати</h3>
+                <form @submit.prevent="submitRename()">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Нова назва</label>
+                        <input type="text" x-model="renameName" required x-ref="renameInput"
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
+                               placeholder="Назва...">
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" @click="showRename = false"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
+                            Скасувати
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                            Зберегти
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- File preview modal -->
@@ -313,18 +340,37 @@
 function resourcesManager() {
     return {
         showCreateFolder: false,
+        showRename: false,
+        renameName: '',
         menuOpen: false,
         menuX: 0,
         menuY: 0,
         selectedId: null,
+        selectedName: '',
         previewFile: null,
 
-        openMenu(id, event) {
+        openMenu(id, name, event) {
             event.stopPropagation();
             this.selectedId = id;
+            this.selectedName = name;
             this.menuX = Math.min(event.clientX, window.innerWidth - 200);
             this.menuY = Math.min(event.clientY, window.innerHeight - 100);
             this.menuOpen = true;
+        },
+
+        showRenameModal() {
+            this.menuOpen = false;
+            this.renameName = this.selectedName;
+            this.showRename = true;
+            this.$nextTick(() => this.$refs.renameInput.focus());
+        },
+
+        submitRename() {
+            if (!this.renameName.trim()) return;
+            const form = document.getElementById('renameForm');
+            form.action = `/resources/${this.selectedId}/rename`;
+            document.getElementById('renameInput').value = this.renameName;
+            form.submit();
         },
 
         showPreview(file) {
@@ -359,17 +405,6 @@ function resourcesManager() {
             }
 
             event.target.value = '';
-        },
-
-        renameItem() {
-            this.menuOpen = false;
-            const newName = prompt('Нова назва:');
-            if (!newName) return;
-
-            const form = document.getElementById('renameForm');
-            form.action = `/resources/${this.selectedId}/rename`;
-            document.getElementById('renameInput').value = newName;
-            form.submit();
         },
 
         deleteItem() {
