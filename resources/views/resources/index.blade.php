@@ -124,9 +124,7 @@
                     ]) }})"
                     @endif>
                     <td class="px-4 py-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">
-                            @if($resource->isFolder())📁 @endif{{ $resource->name }}
-                        </span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $resource->name }}</span>
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
                         {{ $resource->isFile() ? $resource->formatted_size : '—' }}
@@ -165,18 +163,6 @@
                             <input type="text" name="name" required autofocus
                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
                                    placeholder="Назва папки...">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Іконка (опційно)</label>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach(['📁', '📂', '🎵', '🎬', '📷', '📚', '📝', '🎤', '⛪', '🙏', '👥', '📅'] as $emoji)
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="icon" value="{{ $emoji }}" class="sr-only peer">
-                                    <span class="text-2xl p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 peer-checked:bg-primary-100 dark:peer-checked:bg-primary-900/30 peer-checked:ring-2 peer-checked:ring-primary-500 inline-block">{{ $emoji }}</span>
-                                </label>
-                                @endforeach
-                            </div>
                         </div>
                     </div>
 
