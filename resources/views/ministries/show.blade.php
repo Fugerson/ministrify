@@ -84,6 +84,14 @@
                     Витрати
                 </button>
                 @endcan
+                <button @click="setTab('rotation')" type="button"
+                   :class="activeTab === 'rotation' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Ротація
+                </button>
             </nav>
         </div>
 
@@ -296,6 +304,42 @@
                     </a>
                 </div>
             </div>
+
+            <div x-show="activeTab === 'rotation'"{{ $tab !== 'rotation' ? ' style="display:none"' : '' }}>
+                <!-- Rotation Info -->
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800 p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-white">Автоматичний розподіл</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                Система враховує навантаження, навички та доступність служителів.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{{ route('rotation.ministry', $ministry) }}"
+                       class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Переглянути розклад
+                    </a>
+                    <button type="button" onclick="autoAssignMinistry({{ $ministry->id }}, '{{ $ministry->name }}')"
+                            class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Авто-розподіл
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -309,4 +353,96 @@
         Назад до списку
     </a>
 </div>
+
+<!-- Auto-Assign Modal -->
+<div id="autoAssignModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAutoAssignModal()"></div>
+    <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modalTitle">Авто-розподіл</h3>
+            <button onclick="closeAutoAssignModal()" class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="p-6">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+let currentMinistryId = null;
+
+function autoAssignMinistry(ministryId, ministryName) {
+    currentMinistryId = ministryId;
+    document.getElementById('modalTitle').textContent = 'Авто-розподіл: ' + ministryName;
+    document.getElementById('modalContent').innerHTML = `
+        <div class="space-y-4">
+            <p class="text-gray-600 dark:text-gray-400">Система автоматично призначить служителів на всі події.</p>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Період</label>
+                <select id="weeksSelect" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl">
+                    <option value="1">1 тиждень</option>
+                    <option value="2">2 тижні</option>
+                    <option value="4" selected>4 тижні</option>
+                </select>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeAutoAssignModal()" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl">Скасувати</button>
+                <button onclick="runAutoAssign()" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl">Запустити</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('autoAssignModal').classList.remove('hidden');
+}
+
+function closeAutoAssignModal() {
+    document.getElementById('autoAssignModal').classList.add('hidden');
+}
+
+async function runAutoAssign() {
+    const weeks = document.getElementById('weeksSelect').value;
+    document.getElementById('modalContent').innerHTML = `
+        <div class="flex flex-col items-center justify-center py-8">
+            <svg class="animate-spin h-10 w-10 text-primary-500 mb-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <p class="text-gray-600 dark:text-gray-400">Виконується розподіл...</p>
+        </div>
+    `;
+    try {
+        const response = await fetch(`/rotation/ministry/${currentMinistryId}/auto-assign`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
+            body: JSON.stringify({ weeks: parseInt(weeks) }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('modalContent').innerHTML = `
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Розподіл завершено!</h4>
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl"><p class="text-2xl font-bold">${data.summary.events}</p><p class="text-xs text-gray-500">Подій</p></div>
+                        <div class="text-center p-3 bg-green-50 dark:bg-green-900/30 rounded-xl"><p class="text-2xl font-bold text-green-600">${data.summary.assigned}</p><p class="text-xs text-gray-500">Призначено</p></div>
+                        <div class="text-center p-3 bg-amber-50 dark:bg-amber-900/30 rounded-xl"><p class="text-2xl font-bold text-amber-600">${data.summary.unassigned}</p><p class="text-xs text-gray-500">Не заповнено</p></div>
+                    </div>
+                    <button onclick="closeAutoAssignModal()" class="w-full px-4 py-2 bg-primary-600 text-white font-medium rounded-xl">Закрити</button>
+                </div>
+            `;
+        } else {
+            document.getElementById('modalContent').innerHTML = `<div class="text-center py-4"><p class="text-red-600">Помилка при розподілі</p><button onclick="closeAutoAssignModal()" class="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl">Закрити</button></div>`;
+        }
+    } catch (error) {
+        document.getElementById('modalContent').innerHTML = `<div class="text-center py-4"><p class="text-red-600">Помилка з'єднання</p><button onclick="closeAutoAssignModal()" class="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl">Закрити</button></div>`;
+    }
+}
+</script>
+@endpush
 @endsection
