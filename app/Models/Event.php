@@ -32,6 +32,7 @@ class Event extends Model
         'cover_image',
         'checkin_token',
         'qr_checkin_enabled',
+        'track_attendance',
         'is_service',
         'service_type',
     ];
@@ -44,6 +45,7 @@ class Event extends Model
         'allow_registration' => 'boolean',
         'registration_deadline' => 'datetime',
         'qr_checkin_enabled' => 'boolean',
+        'track_attendance' => 'boolean',
     ];
 
     // Service types

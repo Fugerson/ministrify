@@ -210,6 +210,7 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     Route::get('qr-scanner', [QrCheckinController::class, 'scanner'])->name('qr-scanner');
     Route::post('events/{event}/toggle-qr-checkin', [QrCheckinController::class, 'toggleQrCheckin'])->name('events.toggle-qr-checkin');
     Route::post('events/{event}/generate-qr', [QrCheckinController::class, 'generateQr'])->name('events.generate-qr');
+    Route::post('events/{event}/attendance', [EventController::class, 'saveAttendance'])->name('events.attendance.save');
 
     // Event Responsibilities
     Route::prefix('events/{event}/responsibilities')->name('events.responsibilities.')->group(function () {

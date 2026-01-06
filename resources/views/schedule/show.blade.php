@@ -207,6 +207,122 @@
                     </form>
                 </div>
             </div>
+
+            <!-- Attendance Section -->
+            @if($event->track_attendance)
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700" x-data="attendanceManager()">
+                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                            <h2 class="font-semibold text-gray-900 dark:text-white">Відвідуваність</h2>
+                        </div>
+                        @php
+                            $presentCount = $event->attendance?->records->where('present', true)->count() ?? 0;
+                            $totalPeople = $allPeople->count();
+                        @endphp
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $presentCount }}/{{ $totalPeople }}</span>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    @php
+                        $presentIds = $event->attendance?->records->where('present', true)->pluck('person_id')->toArray() ?? [];
+                    @endphp
+
+                    <!-- Search -->
+                    <div class="mb-4">
+                        <input type="text" x-model="search" placeholder="Пошук..."
+                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500">
+                    </div>
+
+                    <!-- People List -->
+                    <div class="space-y-2 max-h-96 overflow-y-auto">
+                        @foreach($allPeople as $person)
+                        <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                             x-show="!search || '{{ strtolower($person->full_name) }}'.includes(search.toLowerCase())">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                    <span class="text-primary-600 dark:text-primary-400 text-xs font-medium">
+                                        {{ substr($person->first_name, 0, 1) }}{{ substr($person->last_name, 0, 1) }}
+                                    </span>
+                                </div>
+                                <span class="text-sm text-gray-900 dark:text-white">{{ $person->full_name }}</span>
+                            </div>
+                            <button type="button"
+                                    @click="toggleAttendance({{ $person->id }})"
+                                    :class="attending.includes({{ $person->id }}) ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'"
+                                    class="p-1.5 rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Guests count -->
+                    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm text-gray-700 dark:text-gray-300">Гості</label>
+                            <input type="number" x-model="guestsCount" min="0"
+                                   @change="saveAttendance()"
+                                   class="w-20 px-2 py-1 text-sm text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Всього присутніх:</span>
+                            <span class="font-semibold text-gray-900 dark:text-white" x-text="attending.length + parseInt(guestsCount || 0)"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @push('scripts')
+            <script>
+            function attendanceManager() {
+                return {
+                    search: '',
+                    attending: @json($presentIds),
+                    guestsCount: {{ $event->attendance?->guests_count ?? 0 }},
+
+                    async toggleAttendance(personId) {
+                        const index = this.attending.indexOf(personId);
+                        if (index > -1) {
+                            this.attending.splice(index, 1);
+                        } else {
+                            this.attending.push(personId);
+                        }
+                        await this.saveAttendance();
+                    },
+
+                    async saveAttendance() {
+                        try {
+                            await fetch('{{ route("events.attendance.save", $event) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    present: this.attending,
+                                    guests_count: this.guestsCount
+                                })
+                            });
+                        } catch (error) {
+                            console.error('Error saving attendance:', error);
+                        }
+                    }
+                }
+            }
+            </script>
+            @endpush
+            @endif
         </div>
 
         <!-- Sidebar -->

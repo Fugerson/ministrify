@@ -98,6 +98,21 @@
                         </select>
                     </div>
                 </div>
+
+                <!-- Attendance Tracking Option -->
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="track_attendance" id="track_attendance" value="1"
+                               {{ old('track_attendance') ? 'checked' : '' }}
+                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
+                        <label for="track_attendance" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Відстежувати відвідуваність
+                        </label>
+                    </div>
+                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                        Увімкніть, щоб відмічати хто був на цій події
+                    </p>
+                </div>
             </div>
         </div>
 

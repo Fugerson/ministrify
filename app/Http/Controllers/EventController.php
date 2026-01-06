@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
+use App\Models\AttendanceRecord;
 use App\Models\Board;
 use App\Models\Event;
 use App\Models\Ministry;
@@ -174,9 +176,11 @@ class EventController extends Controller
             'recurrence_rule' => 'nullable|string',
             'is_service' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
+            'track_attendance' => 'nullable|boolean',
         ]);
 
         $validated['is_service'] = $request->boolean('is_service');
+        $validated['track_attendance'] = $request->boolean('track_attendance');
 
         $church = $this->getCurrentChurch();
         $ministry = Ministry::findOrFail($validated['ministry_id']);
@@ -206,6 +210,7 @@ class EventController extends Controller
             'checklist.items.completedByUser',
             'planItems',
             'responsibilities.person',
+            'attendance.records.person',
         ]);
 
         // Get available people for unfilled positions (only if ministry exists)
@@ -236,7 +241,16 @@ class EventController extends Controller
             ->where('is_archived', false)
             ->get();
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards'));
+        // Get all church members for attendance tracking
+        $allPeople = collect();
+        if ($event->track_attendance) {
+            $allPeople = \App\Models\Person::where('church_id', $church->id)
+                ->orderBy('last_name')
+                ->orderBy('first_name')
+                ->get();
+        }
+
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople'));
     }
 
     public function edit(Event $event)
@@ -275,9 +289,11 @@ class EventController extends Controller
             'notes' => 'nullable|string',
             'is_service' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
+            'track_attendance' => 'nullable|boolean',
         ]);
 
         $validated['is_service'] = $request->boolean('is_service');
+        $validated['track_attendance'] = $request->boolean('track_attendance');
         $event->update($validated);
 
         return redirect()->route('events.show', $event)
@@ -298,6 +314,61 @@ class EventController extends Controller
         $event->delete();
 
         return back()->with('success', 'Подію видалено.');
+    }
+
+    public function saveAttendance(Request $request, Event $event)
+    {
+        $this->authorizeChurch($event);
+
+        if (!$event->track_attendance) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'present' => 'nullable|array',
+            'present.*' => 'integer|exists:people,id',
+            'guests_count' => 'nullable|integer|min:0',
+        ]);
+
+        $church = $this->getCurrentChurch();
+
+        // Get or create attendance record for this event
+        $attendance = Attendance::firstOrCreate(
+            [
+                'attendable_type' => Event::class,
+                'attendable_id' => $event->id,
+            ],
+            [
+                'church_id' => $church->id,
+                'type' => Attendance::TYPE_EVENT,
+                'date' => $event->date,
+                'time' => $event->time,
+                'recorded_by' => auth()->id(),
+            ]
+        );
+
+        // Update guests count
+        $attendance->update([
+            'guests_count' => $validated['guests_count'] ?? 0,
+        ]);
+
+        // Delete existing records and create new ones
+        $attendance->records()->delete();
+
+        $presentIds = $validated['present'] ?? [];
+        foreach ($presentIds as $personId) {
+            AttendanceRecord::create([
+                'attendance_id' => $attendance->id,
+                'person_id' => $personId,
+                'present' => true,
+                'checked_in_at' => now()->format('H:i'),
+            ]);
+        }
+
+        // Recalculate counts
+        $attendance->recalculateCounts();
+
+        return response()->json(['success' => true]);
     }
 
     public function mySchedule()
