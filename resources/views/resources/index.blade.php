@@ -96,53 +96,56 @@
             </div>
         </div>
         @else
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1 p-2">
-            @foreach($resources as $resource)
-            <div class="group relative p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
-                 @if($resource->isFolder())
-                 @click="window.location.href='{{ route('resources.folder', $resource) }}'"
-                 @else
-                 @click="showPreview({{ json_encode([
-                     'id' => $resource->id,
-                     'name' => $resource->name,
-                     'icon' => $resource->icon,
-                     'size' => $resource->formatted_size,
-                     'mime' => $resource->mime_type,
-                     'url' => Storage::url($resource->file_path),
-                     'downloadUrl' => route('resources.download', $resource),
-                     'createdAt' => $resource->created_at->format('d.m.Y H:i'),
-                     'creator' => $resource->creator?->name,
-                 ]) }})"
-                 @endif>
-                <!-- Icon -->
-                <div class="text-5xl text-center mb-2">
-                    {{ $resource->icon }}
-                </div>
-
-                <!-- Name -->
-                <p class="text-sm text-center text-gray-900 dark:text-white truncate" title="{{ $resource->name }}">
-                    {{ $resource->name }}
-                </p>
-
-                <!-- Size (for files) -->
-                @if($resource->isFile())
-                <p class="text-xs text-center text-gray-500 dark:text-gray-400">
-                    {{ $resource->formatted_size }}
-                </p>
-                @endif
-
-                <!-- Actions menu -->
-                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button @click.stop="openMenu({{ $resource->id }}, $event)"
-                            class="p-1.5 bg-white dark:bg-gray-700 rounded-lg shadow hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            @endforeach
-        </div>
+        <table class="w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Назва</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Розмір</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Дата</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-16"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                @foreach($resources as $resource)
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
+                    @if($resource->isFolder())
+                    @click="window.location.href='{{ route('resources.folder', $resource) }}'"
+                    @else
+                    @click="showPreview({{ json_encode([
+                        'id' => $resource->id,
+                        'name' => $resource->name,
+                        'icon' => $resource->icon,
+                        'size' => $resource->formatted_size,
+                        'mime' => $resource->mime_type,
+                        'url' => Storage::url($resource->file_path),
+                        'downloadUrl' => route('resources.download', $resource),
+                        'createdAt' => $resource->created_at->format('d.m.Y H:i'),
+                        'creator' => $resource->creator?->name,
+                    ]) }})"
+                    @endif>
+                    <td class="px-4 py-3">
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">
+                            @if($resource->isFolder())📁 @endif{{ $resource->name }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                        {{ $resource->isFile() ? $resource->formatted_size : '—' }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                        {{ $resource->created_at->format('d.m.Y') }}
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <button @click.stop="openMenu({{ $resource->id }}, $event)"
+                                class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
         @endif
     </div>
 
