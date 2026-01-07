@@ -6,7 +6,7 @@
 <div class="space-y-6">
     <!-- Header -->
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">📊 Звіти та аналітика</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Звіти та аналітика</h1>
         <p class="text-gray-600 dark:text-gray-400">Огляд ключових показників вашої церкви</p>
     </div>
 

@@ -15,7 +15,7 @@
         <div>
             <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ім'я</label>
             <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required
-                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('name') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
             @error('name')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -24,7 +24,7 @@
         <div>
             <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
             <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required
-                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('email') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
             @error('email')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -33,7 +33,7 @@
         <div>
             <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль</label>
             <select name="role" id="role" required
-                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('role') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
                 <option value="volunteer" {{ old('role', $user->role) === 'volunteer' ? 'selected' : '' }}>Служитель</option>
                 <option value="leader" {{ old('role', $user->role) === 'leader' ? 'selected' : '' }}>Лідер</option>
                 <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Адмін</option>
@@ -67,7 +67,7 @@
 
         <div class="flex items-center justify-end space-x-3">
             <a href="{{ route('settings.users.index') }}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Скасувати</a>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">
+            <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700">
                 Зберегти
             </button>
         </div>

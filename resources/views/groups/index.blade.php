@@ -141,7 +141,7 @@
                             </span>
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
-                            <a href="{{ route('groups.show', $group) }}" class="p-1.5 inline-flex text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
+                            <a href="{{ route('groups.show', $group) }}" class="p-2 inline-flex text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +18,14 @@ class SettingsController extends Controller
         $users = $church->users()->with('person')->get();
         $ministries = $church->ministries()->orderBy('name')->get();
 
-        return view('settings.index', compact('church', 'expenseCategories', 'tags', 'users', 'ministries'));
+        // Audit logs
+        $auditLogs = AuditLog::where('church_id', $church->id)
+            ->with('user')
+            ->orderByDesc('created_at')
+            ->limit(100)
+            ->get();
+
+        return view('settings.index', compact('church', 'expenseCategories', 'tags', 'users', 'ministries', 'auditLogs'));
     }
 
     public function updateChurch(Request $request)

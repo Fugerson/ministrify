@@ -43,15 +43,15 @@
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 Фінанси
             </button>
-            <button @click="setTab('payments')"
-                    :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'payments' }"
-                    class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Платежі
-            </button>
             <button @click="setTab('users')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'users' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 Користувачі
+            </button>
+            <button @click="setTab('audit')"
+                    :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'audit' }"
+                    class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
+                Журнал дій
             </button>
         </div>
     </div>
@@ -177,6 +177,7 @@
             </button>
         </div>
     </div>
+
     </div>
 
     <!-- Theme Tab -->
@@ -551,6 +552,108 @@
                 </button>
             </div>
         </div>
+    </form>
+
+    <!-- Payment Settings for Public Site -->
+    @php
+        $paymentSettings = $church->payment_settings ?? [];
+    @endphp
+
+    <form method="POST" action="{{ route('settings.payments') }}" class="space-y-6">
+        @csrf
+        @method('PUT')
+
+        <!-- LiqPay -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">LiqPay</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Прийом пожертв Visa/Mastercard на публічному сайті</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="liqpay_enabled" value="1"
+                           {{ !empty($paymentSettings['liqpay_enabled']) ? 'checked' : '' }}
+                           class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <p class="text-sm text-blue-800 dark:text-blue-300">
+                        Для налаштування LiqPay, зареєструйтеся на
+                        <a href="https://www.liqpay.ua/uk/adminbusiness" target="_blank" class="underline font-medium">liqpay.ua</a>
+                        та отримайте ключі API в особистому кабінеті.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Public Key</label>
+                    <input type="text" name="liqpay_public_key"
+                           value="{{ old('liqpay_public_key', $paymentSettings['liqpay_public_key'] ?? '') }}"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
+                           placeholder="sandbox_XXXXXXXXXXXX">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Private Key</label>
+                    <input type="password" name="liqpay_private_key"
+                           value="{{ old('liqpay_private_key', $paymentSettings['liqpay_private_key'] ?? '') }}"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
+                           placeholder="sandbox_XXXXXXXXXXXX">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Зберігається в зашифрованому вигляді</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monobank -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-black flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">mono</span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Monobank</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Банка для збору пожертв</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="monobank_enabled" value="1"
+                           {{ !empty($paymentSettings['monobank_enabled']) ? 'checked' : '' }}
+                           class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                        Створіть банку для збору в додатку Monobank і вставте посилання або ID банки.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID банки або посилання</label>
+                    <input type="text" name="monobank_jar_id"
+                           value="{{ old('monobank_jar_id', $paymentSettings['monobank_jar_id'] ?? '') }}"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                           placeholder="https://send.monobank.ua/jar/XXXXXXXXX або jar/XXXXXXXXX">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Наприклад: https://send.monobank.ua/jar/ABC123def або просто ABC123def</p>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+            Зберегти налаштування платежів
+        </button>
     </form>
     </div>
 
@@ -1025,110 +1128,6 @@
         </form>
     </div>
 
-    <!-- Payments Tab -->
-    <div x-show="activeTab === 'payments'" x-cloak class="space-y-6">
-    @php
-        $paymentSettings = $church->payment_settings ?? [];
-    @endphp
-
-    <form method="POST" action="{{ route('settings.payments') }}" class="space-y-6">
-        @csrf
-        @method('PUT')
-
-        <!-- LiqPay -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">LiqPay</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Прийом платежів Visa/Mastercard</p>
-                    </div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="liqpay_enabled" value="1"
-                           {{ !empty($paymentSettings['liqpay_enabled']) ? 'checked' : '' }}
-                           class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                </label>
-            </div>
-
-            <div class="p-6 space-y-4">
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                    <p class="text-sm text-blue-800 dark:text-blue-300">
-                        Для налаштування LiqPay, зареєструйтеся на
-                        <a href="https://www.liqpay.ua/uk/adminbusiness" target="_blank" class="underline font-medium">liqpay.ua</a>
-                        та отримайте ключі API в особистому кабінеті.
-                    </p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Public Key</label>
-                    <input type="text" name="liqpay_public_key"
-                           value="{{ old('liqpay_public_key', $paymentSettings['liqpay_public_key'] ?? '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
-                           placeholder="sandbox_XXXXXXXXXXXX">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Private Key</label>
-                    <input type="password" name="liqpay_private_key"
-                           value="{{ old('liqpay_private_key', $paymentSettings['liqpay_private_key'] ?? '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
-                           placeholder="sandbox_XXXXXXXXXXXX">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Зберігається в зашифрованому вигляді</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Monobank -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-black flex items-center justify-center">
-                        <span class="text-white font-bold text-sm">mono</span>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Monobank</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Банка для збору коштів</p>
-                    </div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="monobank_enabled" value="1"
-                           {{ !empty($paymentSettings['monobank_enabled']) ? 'checked' : '' }}
-                           class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                </label>
-            </div>
-
-            <div class="p-6 space-y-4">
-                <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                    <p class="text-sm text-gray-700 dark:text-gray-300">
-                        Створіть банку для збору в додатку Monobank і вставте посилання або ID банки.
-                    </p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID банки або посилання</label>
-                    <input type="text" name="monobank_jar_id"
-                           value="{{ old('monobank_jar_id', $paymentSettings['monobank_jar_id'] ?? '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                           placeholder="https://send.monobank.ua/jar/XXXXXXXXX або jar/XXXXXXXXX">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Наприклад: https://send.monobank.ua/jar/ABC123def або просто ABC123def</p>
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-            Зберегти налаштування платежів
-        </button>
-    </form>
-    </div>
-
     <!-- Users Tab -->
     <div x-show="activeTab === 'users'" x-cloak class="space-y-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -1193,7 +1192,7 @@
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm font-medium">
                                 @admin
                                 @if($user->id !== auth()->id())
-                                <a href="{{ route('settings.users.edit', $user) }}" class="p-1.5 inline-flex text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg">
+                                <a href="{{ route('settings.users.edit', $user) }}" class="p-2 inline-flex text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
@@ -1201,7 +1200,7 @@
                                 <form action="{{ route('settings.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Ви впевнені?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="p-1.5 inline-flex text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                                    <button type="submit" class="p-2 inline-flex text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -1217,6 +1216,86 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- Audit Log Tab -->
+    <div x-show="activeTab === 'audit'" x-cloak class="space-y-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Журнал дій</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Останні 100 змін у системі</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Дата</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Користувач</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Дія</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Тип</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Об'єкт</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @forelse($auditLogs as $log)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                                    {{ $log->created_at->format('d.m.Y H:i') }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        @if($log->user)
+                                            <div class="w-7 h-7 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                                <span class="text-xs font-medium text-primary-600 dark:text-primary-400">
+                                                    {{ mb_substr($log->user->name, 0, 1) }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                        <span class="text-sm text-gray-900 dark:text-white">{{ $log->user_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    @php
+                                        $color = $log->action_color;
+                                        $colorClasses = match($color) {
+                                            'green' => 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300',
+                                            'blue' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+                                            'red' => 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
+                                            'purple' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
+                                            default => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+                                        };
+                                    @endphp
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium {{ $colorClasses }}">
+                                        {{ $log->action_label }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                                    {{ $log->model_label }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">
+                                    {{ Str::limit($log->model_name, 30) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    Записів не знайдено
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if($auditLogs->count() >= 100)
+                <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 text-center">
+                    <a href="{{ route('settings.audit-logs.index') }}" class="text-primary-600 dark:text-primary-400 hover:underline text-sm">
+                        Показати всі записи з фільтрами →
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
 </div>
