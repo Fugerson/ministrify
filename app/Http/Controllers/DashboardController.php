@@ -36,29 +36,35 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Detailed People Stats
-        $allPeople = Person::where('church_id', $church->id)->get();
-        $totalPeople = $allPeople->count();
-        $leadersCount = Person::where('church_id', $church->id)
+        // Detailed People Stats - optimized with DB queries instead of loading all people
+        $peopleQuery = Person::where('church_id', $church->id);
+        $totalPeople = (clone $peopleQuery)->count();
+        $leadersCount = (clone $peopleQuery)
             ->where(function ($q) {
                 $q->whereHas('leadingMinistries')
                   ->orWhereHas('leadingGroups');
             })->count();
-        $volunteersCount = Person::where('church_id', $church->id)
+        $volunteersCount = (clone $peopleQuery)
             ->whereHas('ministries')
             ->count();
-        $newThisMonth = Person::where('church_id', $church->id)
+        $newThisMonth = (clone $peopleQuery)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
 
-        // Age statistics
+        // Age statistics - calculated at DB level using birth_date
+        $today = now();
         $ageStats = [
-            'children' => $allPeople->filter(fn($p) => $p->age !== null && $p->age <= 12)->count(),
-            'teens' => $allPeople->filter(fn($p) => $p->age !== null && $p->age >= 13 && $p->age <= 17)->count(),
-            'youth' => $allPeople->filter(fn($p) => $p->age !== null && $p->age >= 18 && $p->age <= 35)->count(),
-            'adults' => $allPeople->filter(fn($p) => $p->age !== null && $p->age >= 36 && $p->age <= 59)->count(),
-            'seniors' => $allPeople->filter(fn($p) => $p->age !== null && $p->age >= 60)->count(),
+            'children' => (clone $peopleQuery)->whereNotNull('birth_date')
+                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12', [$today])->count(),
+            'teens' => (clone $peopleQuery)->whereNotNull('birth_date')
+                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17', [$today])->count(),
+            'youth' => (clone $peopleQuery)->whereNotNull('birth_date')
+                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35', [$today])->count(),
+            'adults' => (clone $peopleQuery)->whereNotNull('birth_date')
+                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59', [$today])->count(),
+            'seniors' => (clone $peopleQuery)->whereNotNull('birth_date')
+                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60', [$today])->count(),
         ];
 
         // People trend (last 3 months)
@@ -68,9 +74,12 @@ class DashboardController extends Controller
             ->count();
         $peopleTrend = $newPeopleLastThreeMonths;
 
+        // Cache ministry IDs to avoid repeated queries
+        $ministryIds = $church->ministries()->pluck('id');
+
         // Volunteers trend (last 3 months) - count people who joined ministries
         $volunteersThreeMonthsAgo = \DB::table('ministry_person')
-            ->whereIn('ministry_id', $church->ministries()->pluck('id'))
+            ->whereIn('ministry_id', $ministryIds)
             ->where('created_at', '<', $threeMonthsAgo)
             ->distinct('person_id')
             ->count('person_id');
@@ -80,7 +89,7 @@ class DashboardController extends Controller
         $ministriesList = $church->ministries()->withCount('members')->orderByDesc('members_count')->get();
         $totalMinistries = $ministriesList->count();
         $activeVolunteers = \DB::table('ministry_person')
-            ->whereIn('ministry_id', $church->ministries()->pluck('id'))
+            ->whereIn('ministry_id', $ministryIds)
             ->distinct('person_id')
             ->count('person_id');
         $ministriesWithEvents = $church->ministries()
@@ -140,23 +149,21 @@ class DashboardController extends Controller
                 ->thisMonth()
                 ->sum('amount');
 
-            $expensesByCategory = Transaction::where('church_id', $church->id)
+            // Optimized: aggregate at DB level instead of loading all transactions
+            $expensesByCategory = Transaction::where('transactions.church_id', $church->id)
                 ->outgoing()
                 ->completed()
                 ->thisMonth()
-                ->with('category')
+                ->leftJoin('transaction_categories', 'transactions.category_id', '=', 'transaction_categories.id')
+                ->selectRaw('transaction_categories.name as category_name, SUM(transactions.amount) as total_amount, COUNT(*) as transaction_count')
+                ->groupBy('transactions.category_id', 'transaction_categories.name')
+                ->orderByDesc('total_amount')
                 ->get()
-                ->groupBy('category_id')
-                ->map(function ($transactions, $categoryId) {
-                    $category = $transactions->first()->category;
-                    return [
-                        'name' => $category?->name ?? 'Без категорії',
-                        'amount' => $transactions->sum('amount'),
-                        'count' => $transactions->count(),
-                    ];
-                })
-                ->sortByDesc('amount')
-                ->values();
+                ->map(fn($row) => [
+                    'name' => $row->category_name ?? 'Без категорії',
+                    'amount' => $row->total_amount,
+                    'count' => $row->transaction_count,
+                ]);
         }
 
         // Attendance chart data (last 4 weeks)

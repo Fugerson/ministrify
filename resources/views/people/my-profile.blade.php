@@ -4,7 +4,17 @@
 
 @section('content')
 <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Мій профіль</h1>
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Мій профіль</h1>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('my-schedule') }}" class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Мій розклад
+            </a>
+            <a href="{{ route('my-giving') }}" class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Мої пожертви
+            </a>
+        </div>
+    </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Profile info -->

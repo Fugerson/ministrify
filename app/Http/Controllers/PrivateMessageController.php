@@ -86,8 +86,13 @@ class PrivateMessageController extends Controller
         $currentUser = auth()->user();
         $church = $this->getChurchOrFail();
 
-        // Check if broadcast to all
+        // Check if broadcast to all - only admins can broadcast
         if ($request->input('recipient_id') === 'all') {
+            // Only admins can send broadcast messages
+            if (!$currentUser->isAdmin()) {
+                abort(403, 'Тільки адміністратори можуть надсилати масові повідомлення');
+            }
+
             $request->validate([
                 'message' => 'required|string|max:5000',
             ]);

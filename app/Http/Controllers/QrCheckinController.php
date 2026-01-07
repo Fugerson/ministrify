@@ -66,6 +66,14 @@ class QrCheckinController extends Controller
             ], 401);
         }
 
+        // Verify person belongs to the same church as the event
+        if ($person->church_id !== $event->church_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ви не є членом цієї церкви',
+            ], 403);
+        }
+
         // Get or create attendance record for this event
         $attendance = Attendance::firstOrCreate(
             [

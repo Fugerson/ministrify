@@ -461,6 +461,85 @@ class PersonController extends Controller
         return view('people.my-profile', compact('person', 'upcomingAssignments'));
     }
 
+    public function myGiving(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user->person) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Ваш профіль не знайдено.');
+        }
+
+        $person = $user->person;
+        $church = $this->getCurrentChurch();
+
+        // Get transactions (donations) for this person
+        $query = \App\Models\Transaction::where('church_id', $church->id)
+            ->where('person_id', $person->id)
+            ->incoming()
+            ->completed()
+            ->with('category')
+            ->orderByDesc('date');
+
+        // Filter by year
+        $year = $request->get('year', now()->year);
+        if ($year !== 'all') {
+            $query->whereYear('date', $year);
+        }
+
+        $transactions = $query->paginate(20);
+
+        // Calculate statistics
+        $stats = [
+            'total_this_year' => \App\Models\Transaction::where('church_id', $church->id)
+                ->where('person_id', $person->id)
+                ->incoming()
+                ->completed()
+                ->whereYear('date', now()->year)
+                ->sum('amount'),
+            'total_this_month' => \App\Models\Transaction::where('church_id', $church->id)
+                ->where('person_id', $person->id)
+                ->incoming()
+                ->completed()
+                ->whereYear('date', now()->year)
+                ->whereMonth('date', now()->month)
+                ->sum('amount'),
+            'total_lifetime' => \App\Models\Transaction::where('church_id', $church->id)
+                ->where('person_id', $person->id)
+                ->incoming()
+                ->completed()
+                ->sum('amount'),
+            'donations_count' => \App\Models\Transaction::where('church_id', $church->id)
+                ->where('person_id', $person->id)
+                ->incoming()
+                ->completed()
+                ->count(),
+        ];
+
+        // Get available years for filter
+        $years = \App\Models\Transaction::where('church_id', $church->id)
+            ->where('person_id', $person->id)
+            ->incoming()
+            ->selectRaw('YEAR(date) as year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year');
+
+        // Monthly breakdown for current year
+        $monthlyData = \App\Models\Transaction::where('church_id', $church->id)
+            ->where('person_id', $person->id)
+            ->incoming()
+            ->completed()
+            ->whereYear('date', now()->year)
+            ->selectRaw('MONTH(date) as month, SUM(amount) as total')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        return view('people.my-giving', compact('person', 'transactions', 'stats', 'years', 'year', 'monthlyData'));
+    }
+
     public function updateMyProfile(Request $request)
     {
         $user = auth()->user();

@@ -96,6 +96,16 @@ class Person extends Model
 
     protected $appends = ['full_name'];
 
+    protected static function booted(): void
+    {
+        static::created(function (Person $person) {
+            // Create follow-up tasks for new guests
+            if ($person->membership_status === self::STATUS_GUEST) {
+                app(\App\Services\VisitorFollowupService::class)->createFollowupTasks($person);
+            }
+        });
+    }
+
     public function church(): BelongsTo
     {
         return $this->belongsTo(Church::class);

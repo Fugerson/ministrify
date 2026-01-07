@@ -348,6 +348,13 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::put('design-theme', [SettingsController::class, 'updateDesignTheme'])->name('design-theme');
         Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
 
+        // Google Calendar integration
+        Route::get('google-calendar/redirect', [\App\Http\Controllers\GoogleCalendarController::class, 'redirect'])->name('google-calendar.redirect');
+        Route::get('google-calendar/callback', [\App\Http\Controllers\GoogleCalendarController::class, 'callback'])->name('google-calendar.callback');
+        Route::post('google-calendar/disconnect', [\App\Http\Controllers\GoogleCalendarController::class, 'disconnect'])->name('google-calendar.disconnect');
+        Route::get('google-calendar/calendars', [\App\Http\Controllers\GoogleCalendarController::class, 'calendars'])->name('google-calendar.calendars');
+        Route::post('google-calendar/sync', [\App\Http\Controllers\GoogleCalendarController::class, 'sync'])->name('google-calendar.sync');
+
         // Expense categories
         Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->except(['show']);
 
@@ -472,6 +479,7 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     // My profile (for volunteers)
     Route::get('my-schedule', [EventController::class, 'mySchedule'])->name('my-schedule');
     Route::get('my-profile', [PersonController::class, 'myProfile'])->name('my-profile');
+    Route::get('my-giving', [PersonController::class, 'myGiving'])->name('my-giving');
     Route::put('my-profile', [PersonController::class, 'updateMyProfile'])->name('my-profile.update');
     Route::post('my-profile/unavailable', [PersonController::class, 'addUnavailableDate'])->name('my-profile.unavailable.add');
     Route::delete('my-profile/unavailable/{unavailableDate}', [PersonController::class, 'removeUnavailableDate'])->name('my-profile.unavailable.remove');
