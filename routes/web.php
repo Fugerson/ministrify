@@ -348,6 +348,12 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::put('design-theme', [SettingsController::class, 'updateDesignTheme'])->name('design-theme');
         Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
 
+        // Role permissions management
+        Route::get('permissions', [\App\Http\Controllers\RolePermissionController::class, 'index'])->name('permissions.index');
+        Route::put('permissions', [\App\Http\Controllers\RolePermissionController::class, 'update'])->name('permissions.update');
+        Route::post('permissions/reset', [\App\Http\Controllers\RolePermissionController::class, 'reset'])->name('permissions.reset');
+        Route::get('permissions/{role}', [\App\Http\Controllers\RolePermissionController::class, 'get'])->name('permissions.get');
+
         // Google Calendar integration
         Route::get('google-calendar/redirect', [\App\Http\Controllers\GoogleCalendarController::class, 'redirect'])->name('google-calendar.redirect');
         Route::get('google-calendar/callback', [\App\Http\Controllers\GoogleCalendarController::class, 'callback'])->name('google-calendar.callback');

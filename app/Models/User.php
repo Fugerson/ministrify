@@ -96,6 +96,54 @@ class User extends Authenticatable
         return in_array($this->role, $roles);
     }
 
+    /**
+     * Check if user has permission for module and action
+     */
+    public function hasPermission(string $module, string $action = 'view'): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if (!$this->church_id) {
+            return false;
+        }
+
+        return RolePermission::hasPermission($this->church_id, $this->role, $module, $action);
+    }
+
+    /**
+     * Check if user can view module
+     */
+    public function canView(string $module): bool
+    {
+        return $this->hasPermission($module, 'view');
+    }
+
+    /**
+     * Check if user can create in module
+     */
+    public function canCreate(string $module): bool
+    {
+        return $this->hasPermission($module, 'create');
+    }
+
+    /**
+     * Check if user can edit in module
+     */
+    public function canEdit(string $module): bool
+    {
+        return $this->hasPermission($module, 'edit');
+    }
+
+    /**
+     * Check if user can delete in module
+     */
+    public function canDelete(string $module): bool
+    {
+        return $this->hasPermission($module, 'delete');
+    }
+
     public function canManageMinistry(Ministry $ministry): bool
     {
         if ($this->isAdmin()) {
