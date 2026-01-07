@@ -138,6 +138,14 @@ class ChecklistController extends Controller
             'template_id' => 'nullable|exists:checklist_templates,id',
         ]);
 
+        // Verify template belongs to church
+        if (!empty($validated['template_id'])) {
+            $template = ChecklistTemplate::with('items')->find($validated['template_id']);
+            if (!$template || $template->church_id !== $church->id) {
+                abort(403);
+            }
+        }
+
         // Create checklist for event
         $checklist = EventChecklist::create([
             'event_id' => $event->id,
@@ -146,8 +154,6 @@ class ChecklistController extends Controller
 
         // If template selected, copy items from template
         if (!empty($validated['template_id'])) {
-            $template = ChecklistTemplate::with('items')->find($validated['template_id']);
-
             foreach ($template->items as $item) {
                 $checklist->items()->create([
                     'title' => $item->title,
@@ -163,6 +169,8 @@ class ChecklistController extends Controller
 
     public function addItem(Request $request, EventChecklist $checklist)
     {
+        $this->authorizeEventChecklist($checklist);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -183,6 +191,8 @@ class ChecklistController extends Controller
 
     public function toggleItem(EventChecklistItem $item)
     {
+        $this->authorizeChecklistItem($item);
+
         $item->update([
             'is_completed' => !$item->is_completed,
             'completed_by' => $item->is_completed ? null : auth()->id(),
@@ -202,6 +212,8 @@ class ChecklistController extends Controller
 
     public function updateItem(Request $request, EventChecklistItem $item)
     {
+        $this->authorizeChecklistItem($item);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -215,6 +227,8 @@ class ChecklistController extends Controller
 
     public function deleteItem(EventChecklistItem $item)
     {
+        $this->authorizeChecklistItem($item);
+
         $item->delete();
 
         if (request()->wantsJson()) {
@@ -226,6 +240,8 @@ class ChecklistController extends Controller
 
     public function deleteChecklist(EventChecklist $checklist)
     {
+        $this->authorizeEventChecklist($checklist);
+
         $event = $checklist->event;
         $checklist->delete();
 
@@ -237,6 +253,22 @@ class ChecklistController extends Controller
     {
         $church = $this->getCurrentChurch();
         if ($model->church_id !== $church->id) {
+            abort(403);
+        }
+    }
+
+    private function authorizeEventChecklist(EventChecklist $checklist)
+    {
+        $church = $this->getCurrentChurch();
+        if ($checklist->event->church_id !== $church->id) {
+            abort(403);
+        }
+    }
+
+    private function authorizeChecklistItem(EventChecklistItem $item)
+    {
+        $church = $this->getCurrentChurch();
+        if ($item->eventChecklist->event->church_id !== $church->id) {
             abort(403);
         }
     }

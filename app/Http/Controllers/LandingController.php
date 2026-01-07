@@ -57,7 +57,15 @@ class LandingController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
-        // TODO: Send email or save to database
+        // Log contact message
+        \Log::channel('single')->info('Contact form submission', [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'church' => $validated['church'] ?? null,
+            'message' => $validated['message'],
+            'ip' => $request->ip(),
+            'submitted_at' => now()->toDateTimeString(),
+        ]);
 
         return back()->with('success', 'Дякуємо! Ми зв\'яжемося з вами найближчим часом.');
     }

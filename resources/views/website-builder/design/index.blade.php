@@ -334,11 +334,6 @@
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Показувати логотип</span>
                     </label>
 
-                    <label class="flex items-center">
-                        <input type="checkbox" name="show_social" value="1" {{ ($navSettings['show_social'] ?? false) ? 'checked' : '' }}
-                               class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Показувати соціальні мережі</span>
-                    </label>
                 </div>
             </div>
 
@@ -375,12 +370,6 @@
                 </div>
 
                 <div class="space-y-3">
-                    <label class="flex items-center">
-                        <input type="checkbox" name="show_social" value="1" {{ ($footerSettings['show_social'] ?? true) ? 'checked' : '' }}
-                               class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Показувати соціальні мережі</span>
-                    </label>
-
                     <label class="flex items-center">
                         <input type="checkbox" name="show_contact" value="1" {{ ($footerSettings['show_contact'] ?? true) ? 'checked' : '' }}
                                class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">

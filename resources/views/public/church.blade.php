@@ -33,6 +33,7 @@
                     </svg>
                     Наші події
                 </a>
+                {{-- TODO: Розкоментувати після бета-тестування
                 <a href="{{ route('public.donate', $church->slug) }}"
                    class="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-400 transition-colors border-2 border-white/20">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,6 +41,7 @@
                     </svg>
                     Підтримати
                 </a>
+                --}}
             </div>
         </div>
     </div>
@@ -531,10 +533,12 @@
                             </div>
                         </div>
                     @endif
+                    {{-- TODO: Розкоментувати після бета-тестування
                     <a href="{{ route('public.donate', $church->slug) }}?campaign={{ $campaign->name }}"
                        class="mt-4 block w-full py-2.5 text-center text-sm font-medium text-primary-600 hover:text-primary-700 border border-primary-200 hover:border-primary-300 rounded-xl transition-colors">
                         Пожертвувати
                     </a>
+                    --}}
                 </div>
             @endforeach
         </div>

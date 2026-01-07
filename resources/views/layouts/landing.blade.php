@@ -141,7 +141,9 @@
                 {{-- Desktop Menu --}}
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Можливості</a>
+                    {{-- TODO: Розкоментувати після бета-тестування
                     <a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Ціни</a>
+                    --}}
                     <a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Контакти</a>
                 </div>
 
@@ -186,7 +188,9 @@
         <div x-show="mobileMenu" x-cloak x-transition class="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
             <div class="px-4 py-4 space-y-3">
                 <a href="{{ url('/features') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Можливості</a>
+                {{-- TODO: Розкоментувати після бета-тестування
                 <a href="{{ url('/pricing') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Ціни</a>
+                --}}
                 <a href="{{ url('/contact') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Контакти</a>
                 <hr class="border-gray-200 dark:border-gray-800">
                 {{-- Theme Toggle --}}
@@ -245,7 +249,9 @@
                     <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Продукт</h4>
                     <ul class="space-y-2 text-sm">
                         <li><a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Можливості</a></li>
+                        {{-- TODO: Розкоментувати після бета-тестування
                         <li><a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Ціни</a></li>
+                        --}}
                         <li><a href="{{ url('/register-church') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Реєстрація</a></li>
                     </ul>
                 </div>

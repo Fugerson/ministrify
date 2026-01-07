@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Board;
 use App\Models\BoardCard;
-use App\Models\BoardColumn;
 use App\Models\Person;
 
 class VisitorFollowupService

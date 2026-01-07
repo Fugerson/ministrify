@@ -940,7 +940,7 @@ class BoardController extends Controller
         $exists = $card->relatedCards()->where('related_card_id', $validated['related_card_id'])->exists()
             || $card->relatedFrom()->where('card_id', $validated['related_card_id'])->exists();
 
-        $relatedCard = BoardCard::with('column')->find($validated['related_card_id']);
+        $relatedCard = BoardCard::with('column')->findOrFail($validated['related_card_id']);
 
         if (!$exists) {
             $card->relatedCards()->attach($validated['related_card_id'], ['relation_type' => 'related']);
