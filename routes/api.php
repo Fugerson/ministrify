@@ -6,11 +6,11 @@ use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\PushSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
-// Telegram webhook with rate limiting
-Route::middleware('throttle:120,1')->group(function () {
+// Telegram webhook with rate limiting and validation
+Route::middleware(['throttle:120,1', 'telegram.webhook'])->group(function () {
     Route::post('telegram/webhook', [TelegramController::class, 'webhook']);
-    Route::get('telegram/link/{code}', [TelegramController::class, 'link'])->name('telegram.link')->middleware('throttle:10,1');
 });
+Route::get('telegram/link/{code}', [TelegramController::class, 'link'])->name('telegram.link')->middleware('throttle:10,1');
 
 // Payment webhooks
 Route::prefix('webhooks')->name('api.webhooks.')->middleware('throttle:60,1')->group(function () {

@@ -40,38 +40,24 @@ class PushSubscriptionController extends Controller
 
         $user = auth()->user();
 
-        // Check if subscription already exists
-        $existing = PushSubscription::where('endpoint', $validated['endpoint'])->first();
-
-        if ($existing) {
-            // Update existing subscription
-            $existing->update([
+        // Atomic upsert to prevent race conditions
+        $subscription = PushSubscription::updateOrCreate(
+            ['endpoint' => $validated['endpoint']],
+            [
                 'user_id' => $user->id,
                 'p256dh_key' => $validated['keys']['p256dh'],
                 'auth_key' => $validated['keys']['auth'],
                 'user_agent' => $request->userAgent(),
                 'is_active' => true,
-            ]);
+            ]
+        );
 
-            return response()->json([
-                'message' => 'Підписку оновлено',
-                'subscription_id' => $existing->id,
-            ]);
-        }
-
-        // Create new subscription
-        $subscription = PushSubscription::create([
-            'user_id' => $user->id,
-            'endpoint' => $validated['endpoint'],
-            'p256dh_key' => $validated['keys']['p256dh'],
-            'auth_key' => $validated['keys']['auth'],
-            'user_agent' => $request->userAgent(),
-        ]);
+        $wasRecentlyCreated = $subscription->wasRecentlyCreated;
 
         return response()->json([
-            'message' => 'Підписку створено',
+            'message' => $wasRecentlyCreated ? 'Підписку створено' : 'Підписку оновлено',
             'subscription_id' => $subscription->id,
-        ], 201);
+        ], $wasRecentlyCreated ? 201 : 200);
     }
 
     /**

@@ -166,17 +166,23 @@ class DashboardController extends Controller
                 ]);
         }
 
-        // Attendance chart data (last 4 weeks)
+        // Attendance chart data (last 4 weeks) - optimized single query
+        $fourWeeksAgo = now()->subWeeks(3)->startOfWeek(Carbon::SUNDAY);
+        $attendanceRaw = Attendance::where('church_id', $church->id)
+            ->where('date', '>=', $fourWeeksAgo)
+            ->selectRaw('YEARWEEK(date, 1) as week_key, MIN(date) as week_start, SUM(total_count) as total')
+            ->groupBy('week_key')
+            ->orderBy('week_key')
+            ->get()
+            ->keyBy('week_key');
+
         $attendanceData = [];
         for ($i = 3; $i >= 0; $i--) {
             $date = now()->subWeeks($i)->startOfWeek(Carbon::SUNDAY);
-            $attendance = Attendance::where('church_id', $church->id)
-                ->whereBetween('date', [$date, $date->copy()->endOfWeek()])
-                ->sum('total_count');
-
+            $weekKey = $date->format('oW'); // ISO week format
             $attendanceData[] = [
                 'date' => $date->format('d.m'),
-                'count' => $attendance,
+                'count' => $attendanceRaw[$weekKey]->total ?? 0,
             ];
         }
 
@@ -251,55 +257,61 @@ class DashboardController extends Controller
             ->get();
         }
 
-        // Growth stats (for admins)
+        // Growth stats (for admins) - optimized single query
         $growthData = [];
         if ($user->isAdmin()) {
-            // Members joined per month (last 6 months)
+            $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+            $growthRaw = Person::where('church_id', $church->id)
+                ->where('joined_date', '>=', $sixMonthsAgo)
+                ->selectRaw('YEAR(joined_date) as year, MONTH(joined_date) as month, COUNT(*) as count')
+                ->groupBy('year', 'month')
+                ->orderBy('year')
+                ->orderBy('month')
+                ->get()
+                ->keyBy(fn($item) => $item->year . '-' . $item->month);
+
             for ($i = 5; $i >= 0; $i--) {
                 $month = now()->subMonths($i);
-                $count = Person::where('church_id', $church->id)
-                    ->whereYear('joined_date', $month->year)
-                    ->whereMonth('joined_date', $month->month)
-                    ->count();
-
+                $key = $month->year . '-' . $month->month;
                 $growthData[] = [
                     'month' => $month->translatedFormat('M'),
-                    'count' => $count,
+                    'count' => $growthRaw[$key]->count ?? 0,
                 ];
             }
         }
 
-        // Financial overview (for admins)
+        // Financial overview (for admins) - optimized single query
         $financialData = [];
         if ($user->isAdmin()) {
+            $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+            $financialRaw = Transaction::where('church_id', $church->id)
+                ->completed()
+                ->where('date', '>=', $sixMonthsAgo)
+                ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(amount) as total')
+                ->groupBy('year', 'month', 'direction')
+                ->orderBy('year')
+                ->orderBy('month')
+                ->get();
+
+            // Group by year-month
+            $financialGrouped = $financialRaw->groupBy(fn($item) => $item->year . '-' . $item->month);
+
             for ($i = 5; $i >= 0; $i--) {
                 $month = now()->subMonths($i);
-
-                $income = Transaction::where('church_id', $church->id)
-                    ->incoming()
-                    ->completed()
-                    ->forMonth($month->year, $month->month)
-                    ->sum('amount');
-
-                $expenses = Transaction::where('church_id', $church->id)
-                    ->outgoing()
-                    ->completed()
-                    ->forMonth($month->year, $month->month)
-                    ->sum('amount');
+                $key = $month->year . '-' . $month->month;
+                $monthData = $financialGrouped[$key] ?? collect();
 
                 $financialData[] = [
                     'month' => $month->translatedFormat('M'),
-                    'income' => $income,
-                    'expenses' => $expenses,
+                    'income' => $monthData->where('direction', 'in')->sum('total'),
+                    'expenses' => $monthData->where('direction', 'out')->sum('total'),
                 ];
             }
 
-            // Current month totals
-            $stats['income_this_month'] = Transaction::where('church_id', $church->id)
-                ->incoming()
-                ->completed()
-                ->thisMonth()
-                ->sum('amount');
+            // Current month totals - already in financialData
+            $currentKey = now()->year . '-' . now()->month;
+            $currentMonthData = $financialGrouped[$currentKey] ?? collect();
+            $stats['income_this_month'] = $currentMonthData->where('direction', 'in')->sum('total');
         }
 
         return view('dashboard.index', compact(
@@ -347,17 +359,22 @@ class DashboardController extends Controller
 
     private function getAttendanceChartData($church): array
     {
+        // Optimized: single query with groupBy instead of 12 queries
+        $twelveMonthsAgo = now()->subMonths(11)->startOfMonth();
+        $attendanceRaw = Attendance::where('church_id', $church->id)
+            ->where('date', '>=', $twelveMonthsAgo)
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, AVG(total_count) as avg_count')
+            ->groupBy('year', 'month')
+            ->get()
+            ->keyBy(fn($item) => $item->year . '-' . $item->month);
+
         $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $attendance = Attendance::where('church_id', $church->id)
-                ->whereYear('date', $month->year)
-                ->whereMonth('date', $month->month)
-                ->avg('total_count') ?? 0;
-
+            $key = $month->year . '-' . $month->month;
             $data[] = [
                 'label' => $month->translatedFormat('M'),
-                'value' => round($attendance),
+                'value' => round($attendanceRaw[$key]->avg_count ?? 0),
             ];
         }
         return $data;
@@ -365,17 +382,25 @@ class DashboardController extends Controller
 
     private function getGrowthChartData($church): array
     {
-        $data = [];
+        // Optimized: single query with groupBy instead of 12 queries
+        $twelveMonthsAgo = now()->subMonths(11)->startOfMonth();
+
         $cumulative = Person::where('church_id', $church->id)
-            ->where('joined_date', '<', now()->subMonths(11)->startOfMonth())
+            ->where('joined_date', '<', $twelveMonthsAgo)
             ->count();
 
+        $growthRaw = Person::where('church_id', $church->id)
+            ->where('joined_date', '>=', $twelveMonthsAgo)
+            ->selectRaw('YEAR(joined_date) as year, MONTH(joined_date) as month, COUNT(*) as count')
+            ->groupBy('year', 'month')
+            ->get()
+            ->keyBy(fn($item) => $item->year . '-' . $item->month);
+
+        $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $joined = Person::where('church_id', $church->id)
-                ->whereYear('joined_date', $month->year)
-                ->whereMonth('joined_date', $month->month)
-                ->count();
+            $key = $month->year . '-' . $month->month;
+            $joined = $growthRaw[$key]->count ?? 0;
 
             $cumulative += $joined;
 
@@ -390,21 +415,25 @@ class DashboardController extends Controller
 
     private function getFinancialChartData($church): array
     {
+        // Optimized: single query with groupBy instead of 24 queries
+        $twelveMonthsAgo = now()->subMonths(11)->startOfMonth();
+
+        $financialRaw = Transaction::where('church_id', $church->id)
+            ->completed()
+            ->where('date', '>=', $twelveMonthsAgo)
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(amount) as total')
+            ->groupBy('year', 'month', 'direction')
+            ->get()
+            ->groupBy(fn($item) => $item->year . '-' . $item->month);
+
         $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
+            $key = $month->year . '-' . $month->month;
+            $monthData = $financialRaw[$key] ?? collect();
 
-            $income = Transaction::where('church_id', $church->id)
-                ->incoming()
-                ->completed()
-                ->forMonth($month->year, $month->month)
-                ->sum('amount');
-
-            $expenses = Transaction::where('church_id', $church->id)
-                ->outgoing()
-                ->completed()
-                ->forMonth($month->year, $month->month)
-                ->sum('amount');
+            $income = $monthData->where('direction', 'in')->sum('total');
+            $expenses = $monthData->where('direction', 'out')->sum('total');
 
             $data[] = [
                 'label' => $month->translatedFormat('M'),

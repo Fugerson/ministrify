@@ -33,11 +33,14 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              class="fixed inset-0 z-50 overflow-y-auto"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="delete-dialog-title"
              @keydown.escape.window="open = false"
              style="display: none;">
 
             {{-- Backdrop --}}
-            <div class="fixed inset-0 bg-black/50 dark:bg-black/70" @click="open = false"></div>
+            <div class="fixed inset-0 bg-black/50 dark:bg-black/70" @click="open = false" aria-hidden="true"></div>
 
             {{-- Modal Content --}}
             <div class="flex min-h-full items-center justify-center p-4">
@@ -49,7 +52,8 @@
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      @click.stop
-                     class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
+                     class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6"
+                     x-trap.inert.noscroll="open">
 
                     {{-- Warning Icon --}}
                     <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
@@ -59,7 +63,7 @@
                     </div>
 
                     {{-- Title --}}
-                    <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">
+                    <h3 id="delete-dialog-title" class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">
                         {{ $title }}
                     </h3>
 

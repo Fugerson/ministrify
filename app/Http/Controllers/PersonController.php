@@ -62,13 +62,20 @@ class PersonController extends Controller
         $ministries = $church->ministries;
         $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
-        // Calculate statistics
-        $allPeople = Person::where('church_id', $church->id)->with(['ministries', 'churchRoleRelation'])->get();
+        // Calculate statistics using database aggregation (optimized)
+        $today = now();
+        $statsQuery = Person::where('church_id', $church->id);
 
-        // Age statistics
+        // Total count
+        $totalCount = (clone $statsQuery)->count();
+
+        // Age statistics - calculated at DB level
         $ageStats = [];
         foreach (Person::AGE_CATEGORIES as $key => $category) {
-            $count = $allPeople->filter(fn($p) => $p->age_category === $key)->count();
+            $count = (clone $statsQuery)->whereNotNull('birth_date')
+                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) >= ?', [$today, $category['min']])
+                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) <= ?', [$today, $category['max']])
+                ->count();
             $ageStats[$key] = [
                 'label' => $category['label'],
                 'count' => $count,
@@ -77,22 +84,26 @@ class PersonController extends Controller
         }
         $ageStats['unknown'] = [
             'label' => 'Невідомо',
-            'count' => $allPeople->filter(fn($p) => $p->age_category === null)->count(),
+            'count' => (clone $statsQuery)->whereNull('birth_date')->count(),
             'color' => '#9ca3af',
         ];
 
-        // Church role statistics (using dynamic roles)
+        // Church role statistics - single query with groupBy
+        $roleCountsRaw = Person::where('church_id', $church->id)
+            ->selectRaw('church_role_id, COUNT(*) as count')
+            ->groupBy('church_role_id')
+            ->pluck('count', 'church_role_id');
+
         $roleStats = [];
         foreach ($churchRoles as $role) {
-            $count = $allPeople->where('church_role_id', $role->id)->count();
             $roleStats[$role->id] = [
                 'label' => $role->name,
-                'count' => $count,
+                'count' => $roleCountsRaw[$role->id] ?? 0,
                 'color' => $role->color,
             ];
         }
         // Count those without role
-        $noRoleCount = $allPeople->whereNull('church_role_id')->count();
+        $noRoleCount = $roleCountsRaw[null] ?? $roleCountsRaw[''] ?? 0;
         if ($noRoleCount > 0) {
             $roleStats['none'] = [
                 'label' => 'Не вказано',
@@ -101,15 +112,24 @@ class PersonController extends Controller
             ];
         }
 
-        // Ministry stats (how many serve)
-        $servingCount = $allPeople->filter(fn($p) => $p->ministries->isNotEmpty())->count();
+        // Ministry stats - single query
+        $servingCount = \DB::table('ministry_person')
+            ->whereIn('ministry_id', $ministries->pluck('id'))
+            ->distinct('person_id')
+            ->count('person_id');
+
+        // New this month - single query
+        $newThisMonth = (clone $statsQuery)
+            ->whereMonth('created_at', $today->month)
+            ->whereYear('created_at', $today->year)
+            ->count();
 
         $stats = [
-            'total' => $allPeople->count(),
+            'total' => $totalCount,
             'age' => $ageStats,
             'roles' => $roleStats,
             'serving' => $servingCount,
-            'new_this_month' => $allPeople->filter(fn($p) => $p->created_at->isCurrentMonth())->count(),
+            'new_this_month' => $newThisMonth,
         ];
 
         // Get shepherds list if feature is enabled

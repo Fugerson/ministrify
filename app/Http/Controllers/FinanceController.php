@@ -48,58 +48,70 @@ class FinanceController extends Controller
         // Monthly data for chart
         $monthlyData = $this->getMonthlyData($church->id, $year);
 
-        // Income by category
-        $incomeByCategory = TransactionCategory::where('church_id', $church->id)
+        // Income by category - optimized single query with JOIN
+        $incomeByCategoryRaw = TransactionCategory::where('transaction_categories.church_id', $church->id)
             ->forIncome()
-            ->get()
-            ->map(function ($cat) use ($year, $month) {
-                $query = $cat->transactions()->incoming()->completed();
+            ->leftJoin('transactions', function ($join) use ($church, $year, $month) {
+                $join->on('transaction_categories.id', '=', 'transactions.category_id')
+                    ->where('transactions.church_id', $church->id)
+                    ->where('transactions.direction', 'in')
+                    ->where('transactions.status', 'completed');
                 if ($month) {
-                    $query->forMonth($year, $month);
+                    $join->whereYear('transactions.date', $year)
+                        ->whereMonth('transactions.date', $month);
                 } else {
-                    $query->forYear($year);
+                    $join->whereYear('transactions.date', $year);
                 }
-                $cat->total_amount = $query->sum('amount');
-                return $cat;
             })
-            ->sortByDesc('total_amount')
-            ->filter(fn($c) => $c->total_amount > 0);
+            ->selectRaw('transaction_categories.*, COALESCE(SUM(transactions.amount), 0) as total_amount')
+            ->groupBy('transaction_categories.id')
+            ->orderByDesc('total_amount')
+            ->get();
 
-        // Expense by category
-        $expenseByCategory = TransactionCategory::where('church_id', $church->id)
+        $incomeByCategory = $incomeByCategoryRaw->filter(fn($c) => $c->total_amount > 0);
+
+        // Expense by category - optimized single query with JOIN
+        $expenseByCategoryRaw = TransactionCategory::where('transaction_categories.church_id', $church->id)
             ->forExpense()
-            ->get()
-            ->map(function ($cat) use ($year, $month) {
-                $query = $cat->transactions()->outgoing()->completed();
+            ->leftJoin('transactions', function ($join) use ($church, $year, $month) {
+                $join->on('transaction_categories.id', '=', 'transactions.category_id')
+                    ->where('transactions.church_id', $church->id)
+                    ->where('transactions.direction', 'out')
+                    ->where('transactions.status', 'completed');
                 if ($month) {
-                    $query->forMonth($year, $month);
+                    $join->whereYear('transactions.date', $year)
+                        ->whereMonth('transactions.date', $month);
                 } else {
-                    $query->forYear($year);
+                    $join->whereYear('transactions.date', $year);
                 }
-                $cat->total_amount = $query->sum('amount');
-                return $cat;
             })
-            ->sortByDesc('total_amount')
-            ->filter(fn($c) => $c->total_amount > 0);
+            ->selectRaw('transaction_categories.*, COALESCE(SUM(transactions.amount), 0) as total_amount')
+            ->groupBy('transaction_categories.id')
+            ->orderByDesc('total_amount')
+            ->get();
 
-        // Expense by ministry
-        $expenseByMinistry = Ministry::where('church_id', $church->id)
-            ->get()
-            ->map(function ($ministry) use ($year, $month, $church) {
-                $query = Transaction::where('church_id', $church->id)
-                    ->where('ministry_id', $ministry->id)
-                    ->outgoing()
-                    ->completed();
+        $expenseByCategory = $expenseByCategoryRaw->filter(fn($c) => $c->total_amount > 0);
+
+        // Expense by ministry - optimized single query with JOIN
+        $expenseByMinistryRaw = Ministry::where('ministries.church_id', $church->id)
+            ->leftJoin('transactions', function ($join) use ($church, $year, $month) {
+                $join->on('ministries.id', '=', 'transactions.ministry_id')
+                    ->where('transactions.church_id', $church->id)
+                    ->where('transactions.direction', 'out')
+                    ->where('transactions.status', 'completed');
                 if ($month) {
-                    $query->forMonth($year, $month);
+                    $join->whereYear('transactions.date', $year)
+                        ->whereMonth('transactions.date', $month);
                 } else {
-                    $query->forYear($year);
+                    $join->whereYear('transactions.date', $year);
                 }
-                $ministry->total_expense = $query->sum('amount');
-                return $ministry;
             })
-            ->sortByDesc('total_expense')
-            ->filter(fn($m) => $m->total_expense > 0);
+            ->selectRaw('ministries.*, COALESCE(SUM(transactions.amount), 0) as total_expense')
+            ->groupBy('ministries.id')
+            ->orderByDesc('total_expense')
+            ->get();
+
+        $expenseByMinistry = $expenseByMinistryRaw->filter(fn($m) => $m->total_expense > 0);
 
         // Recent transactions
         $recentIncomes = Transaction::where('church_id', $church->id)
@@ -571,25 +583,27 @@ class FinanceController extends Controller
     // Private helpers
     private function getMonthlyData(int $churchId, int $year): array
     {
+        // Optimized: single query with groupBy instead of 24 queries
+        $monthlyRaw = Transaction::where('church_id', $churchId)
+            ->completed()
+            ->whereYear('date', $year)
+            ->selectRaw('MONTH(date) as month, direction, SUM(amount) as total')
+            ->groupBy('month', 'direction')
+            ->get();
+
+        $grouped = $monthlyRaw->groupBy('month');
+
         $months = [];
         for ($m = 1; $m <= 12; $m++) {
-            $income = Transaction::where('church_id', $churchId)
-                ->incoming()
-                ->completed()
-                ->forMonth($year, $m)
-                ->sum('amount');
-
-            $expense = Transaction::where('church_id', $churchId)
-                ->outgoing()
-                ->completed()
-                ->forMonth($year, $m)
-                ->sum('amount');
+            $monthData = $grouped[$m] ?? collect();
+            $income = (float) $monthData->where('direction', 'in')->sum('total');
+            $expense = (float) $monthData->where('direction', 'out')->sum('total');
 
             $months[] = [
                 'month' => $this->getMonthName($m),
-                'income' => (float) $income,
-                'expense' => (float) $expense,
-                'balance' => (float) ($income - $expense),
+                'income' => $income,
+                'expense' => $expense,
+                'balance' => $income - $expense,
             ];
         }
         return $months;
