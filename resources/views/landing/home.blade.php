@@ -289,8 +289,8 @@
     </div>
 </section>
 
-{{-- Pricing Preview - HIDDEN
-<section id="pricing" class="py-20 bg-gray-50 dark:bg-gray-900">
+{{-- Pricing Preview - HIDDEN --}}
+{{-- <section id="pricing" class="py-20 bg-gray-50 dark:bg-gray-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
             <span class="inline-block px-4 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">Тарифи</span>
