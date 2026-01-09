@@ -44,6 +44,28 @@ class Person extends Model
         self::STATUS_ACTIVE => ['label' => 'Активний член', 'color' => '#10b981', 'icon' => 'badge-check'],
     ];
 
+    // Gender
+    public const GENDER_MALE = 'male';
+    public const GENDER_FEMALE = 'female';
+
+    public const GENDERS = [
+        self::GENDER_MALE => 'Чоловік',
+        self::GENDER_FEMALE => 'Жінка',
+    ];
+
+    // Marital status
+    public const MARITAL_SINGLE = 'single';
+    public const MARITAL_MARRIED = 'married';
+    public const MARITAL_WIDOWED = 'widowed';
+    public const MARITAL_DIVORCED = 'divorced';
+
+    public const MARITAL_STATUSES = [
+        self::MARITAL_SINGLE => 'Неодружений/а',
+        self::MARITAL_MARRIED => 'Одружений/а',
+        self::MARITAL_WIDOWED => 'Вдівець/вдова',
+        self::MARITAL_DIVORCED => 'Розлучений/а',
+    ];
+
     // Age categories
     public const AGE_CHILD = 'child';        // 0-12
     public const AGE_TEEN = 'teen';          // 13-17
@@ -66,11 +88,14 @@ class Person extends Model
         'last_name',
         'phone',
         'email',
+        'gender',
+        'marital_status',
         'telegram_username',
         'telegram_chat_id',
         'photo',
         'address',
         'birth_date',
+        'anniversary',
         'first_visit_date',
         'joined_date',
         'baptism_date',
@@ -87,6 +112,7 @@ class Person extends Model
 
     protected $casts = [
         'birth_date' => 'date',
+        'anniversary' => 'date',
         'first_visit_date' => 'date',
         'joined_date' => 'date',
         'baptism_date' => 'date',
@@ -331,6 +357,29 @@ class Person extends Model
     public function getIsBaptizedAttribute(): bool
     {
         return $this->baptism_date !== null;
+    }
+
+    public function getGenderLabelAttribute(): ?string
+    {
+        return $this->gender ? self::GENDERS[$this->gender] ?? null : null;
+    }
+
+    public function getMaritalStatusLabelAttribute(): ?string
+    {
+        return $this->marital_status ? self::MARITAL_STATUSES[$this->marital_status] ?? null : null;
+    }
+
+    public function getIsMarriedAttribute(): bool
+    {
+        return $this->marital_status === self::MARITAL_MARRIED;
+    }
+
+    public function getAnniversaryYearsAttribute(): ?int
+    {
+        if (!$this->anniversary) {
+            return null;
+        }
+        return $this->anniversary->diffInYears(now());
     }
 
     public function getDaysSinceFirstVisitAttribute(): ?int

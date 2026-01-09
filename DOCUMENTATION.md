@@ -1119,10 +1119,12 @@ app/Models/
 
 ## Додаток A: Команди Artisan
 
+### Безпечні команди
+
 ```bash
-# Міграції
+# Міграції (ТІЛЬКИ для локальної розробки або продакшн з --force)
 php artisan migrate
-php artisan migrate:fresh --seed
+php artisan migrate --force    # На продакшні
 
 # Кеш
 php artisan config:cache
@@ -1140,6 +1142,18 @@ php artisan schedule:run
 # Custom
 php artisan storage:link
 ```
+
+### НЕБЕЗПЕЧНІ КОМАНДИ - НЕ ВИКОРИСТОВУВАТИ НА ПРОДАКШН!
+
+```bash
+# ВИДАЛЯЄ ВСІ ДАНІ БЕЗ МОЖЛИВОСТІ ВІДНОВЛЕННЯ!!!
+php artisan migrate:fresh    # ЗАБОРОНЕНО
+php artisan migrate:fresh --seed  # ЗАБОРОНЕНО
+php artisan migrate:reset    # ЗАБОРОНЕНО
+php artisan db:wipe          # ЗАБОРОНЕНО
+```
+
+Ці команди ЗНИЩУЮТЬ всю базу даних. Використовуйте лише на локальному середовищі!
 
 ## Додаток B: Troubleshooting
 

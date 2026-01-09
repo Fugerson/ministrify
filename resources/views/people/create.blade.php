@@ -68,6 +68,34 @@
                 </div>
 
                 <div>
+                    <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Стать</label>
+                    <select name="gender" id="gender"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <option value="">-- Не вказано --</option>
+                        @foreach(\App\Models\Person::GENDERS as $value => $label)
+                        <option value="{{ $value }}" {{ old('gender') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="marital_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сімейний стан</label>
+                    <select name="marital_status" id="marital_status"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <option value="">-- Не вказано --</option>
+                        @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
+                        <option value="{{ $value }}" {{ old('marital_status') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="anniversary" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Річниця весілля</label>
+                    <input type="date" name="anniversary" id="anniversary" value="{{ old('anniversary') }}"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                </div>
+
+                <div>
                     <label for="joined_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата приходу в церкву</label>
                     <input type="date" name="joined_date" id="joined_date" value="{{ old('joined_date') }}"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">

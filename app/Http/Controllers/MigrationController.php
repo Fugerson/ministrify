@@ -19,11 +19,12 @@ class MigrationController extends Controller
         'email' => ['Home Email', 'Work Email', 'Other Email'],
         'phone' => ['Mobile', 'Home phone', 'Work phone'],
         'birth_date' => ['Birthdate'],
+        'anniversary' => ['Anniversary', 'Wedding Date', 'Marriage Date'],
         'address' => ['Home Address Street Line 1'],
         'city' => ['Home Address City'],
         'notes' => ['Membership'],
         'gender' => ['Gender'],
-        'marital_status' => ['Status'],
+        'marital_status' => ['Status', 'Marital Status'],
     ];
 
     public function planningCenter()
@@ -82,9 +83,11 @@ class MigrationController extends Controller
             'email' => ['email', 'home email', 'work email', 'пошта', 'почта'],
             'phone' => ['mobile', 'phone', 'home phone', 'cell', 'телефон', 'мобільний'],
             'birth_date' => ['birthdate', 'birthday', 'birth date', 'дата народження', 'день народження'],
+            'anniversary' => ['anniversary', 'wedding date', 'marriage date', 'річниця', 'дата весілля', 'річниця весілля'],
             'address' => ['address', 'street', 'home address street line 1', 'адреса'],
             'city' => ['city', 'home address city', 'місто'],
             'gender' => ['gender', 'стать', 'пол'],
+            'marital_status' => ['marital status', 'status', 'сімейний стан', 'семейное положение'],
             'notes' => ['notes', 'membership', 'нотатки', 'примітки'],
         ];
 
@@ -107,15 +110,36 @@ class MigrationController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:10240',
-            'mappings' => 'required|array',
-            'clear_existing' => 'boolean',
-        ]);
-
         $church = $this->getCurrentChurch();
-        $mappings = $request->input('mappings');
         $clearExisting = $request->boolean('clear_existing');
+
+        // SAFETY: Require explicit confirmation for mass delete
+        if ($clearExisting) {
+            $request->validate([
+                'file' => 'required|file|mimes:csv,txt|max:10240',
+                'mappings' => 'required|array',
+                'clear_existing' => 'boolean',
+                'confirm_delete' => 'required|in:DELETE',
+            ], [
+                'confirm_delete.required' => 'Для видалення всіх людей введіть "DELETE"',
+                'confirm_delete.in' => 'Для підтвердження введіть слово "DELETE"',
+            ]);
+
+            $deleteCount = Person::where('church_id', $church->id)->count();
+            logger()->warning("Mass delete requested", [
+                'church_id' => $church->id,
+                'user_id' => auth()->id(),
+                'count' => $deleteCount,
+            ]);
+        } else {
+            $request->validate([
+                'file' => 'required|file|mimes:csv,txt|max:10240',
+                'mappings' => 'required|array',
+                'clear_existing' => 'boolean',
+            ]);
+        }
+
+        $mappings = $request->input('mappings');
 
         $file = $request->file('file');
         $content = file_get_contents($file->getRealPath());
@@ -132,9 +156,15 @@ class MigrationController extends Controller
 
         DB::beginTransaction();
         try {
-            // Clear existing data if requested
+            // Clear existing data if requested (with confirmed safety check)
             if ($clearExisting) {
+                $deletedCount = Person::where('church_id', $church->id)->count();
                 Person::where('church_id', $church->id)->delete();
+                logger()->warning("Mass delete executed", [
+                    'church_id' => $church->id,
+                    'user_id' => auth()->id(),
+                    'deleted_count' => $deletedCount,
+                ]);
             }
 
             $imported = 0;
@@ -165,6 +195,9 @@ class MigrationController extends Controller
                     // Parse birth date
                     $birthDate = $this->parseDate($this->getValue($row, $mappings, 'birth_date'));
 
+                    // Parse anniversary date
+                    $anniversary = $this->parseDate($this->getValue($row, $mappings, 'anniversary'));
+
                     // Parse gender
                     $gender = $this->parseGender($this->getValue($row, $mappings, 'gender'));
 
@@ -182,6 +215,7 @@ class MigrationController extends Controller
                             'phone' => $this->formatPhone($this->getValue($row, $mappings, 'phone')),
                             'address' => $address ?: null,
                             'birth_date' => $birthDate,
+                            'anniversary' => $anniversary,
                             'gender' => $gender,
                             'marital_status' => $maritalStatus,
                             'notes' => $this->getValue($row, $mappings, 'notes'),

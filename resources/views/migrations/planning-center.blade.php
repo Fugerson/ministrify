@@ -75,6 +75,27 @@
                     Очистити всі існуючі дані перед імпортом
                 </span>
             </label>
+
+            <!-- Delete Confirmation -->
+            <div x-show="clearExisting" x-cloak class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div class="flex-1">
+                        <p class="font-bold text-red-800 dark:text-red-200">⚠️ УВАГА! Це видалить ВСІ існуючі дані!</p>
+                        <p class="text-sm text-red-700 dark:text-red-300 mt-1 mb-3">
+                            Ви втратите <strong>{{ $existingCount }}</strong> людей без можливості відновлення.
+                        </p>
+                        <label class="block">
+                            <span class="text-sm text-red-700 dark:text-red-300">Для підтвердження введіть <strong>DELETE</strong>:</span>
+                            <input type="text" x-model="confirmDelete"
+                                   placeholder="Введіть DELETE"
+                                   class="mt-1 block w-48 rounded-lg border-red-300 dark:border-red-600 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-sm focus:ring-red-500 focus:border-red-500">
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Drop Zone -->
@@ -306,6 +327,7 @@ function migrationWizard() {
         dragOver: false,
         loading: false,
         clearExisting: false,
+        confirmDelete: '',
         errorMessage: '',
 
         headers: [],
@@ -318,9 +340,11 @@ function migrationWizard() {
             email: '',
             phone: '',
             birth_date: '',
+            anniversary: '',
             address: '',
             city: '',
             gender: '',
+            marital_status: '',
             notes: '',
         },
 
@@ -330,9 +354,11 @@ function migrationWizard() {
             email: { label: 'Email', required: false },
             phone: { label: 'Телефон', required: false },
             birth_date: { label: 'Дата народження', required: false },
+            anniversary: { label: 'Річниця весілля', required: false },
             address: { label: 'Адреса', required: false },
             city: { label: 'Місто', required: false },
             gender: { label: 'Стать', required: false },
+            marital_status: { label: 'Сімейний стан', required: false },
             notes: { label: 'Примітки', required: false },
         },
 
@@ -407,12 +433,21 @@ function migrationWizard() {
                 return;
             }
 
+            // Safety check: require DELETE confirmation for mass delete
+            if (this.clearExisting && this.confirmDelete !== 'DELETE') {
+                this.errorMessage = "Для видалення існуючих даних введіть 'DELETE'";
+                return;
+            }
+
             this.loading = true;
             this.errorMessage = '';
 
             const formData = new FormData();
             formData.append('file', this.file);
             formData.append('clear_existing', this.clearExisting ? '1' : '0');
+            if (this.clearExisting) {
+                formData.append('confirm_delete', this.confirmDelete);
+            }
             formData.append('_token', '{{ csrf_token() }}');
 
             for (const [key, value] of Object.entries(this.mappings)) {
