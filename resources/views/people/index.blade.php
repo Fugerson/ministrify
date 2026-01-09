@@ -109,6 +109,30 @@
                         </th>
                         <th class="px-4 py-3 text-left hidden xl:table-cell">
                             <div class="space-y-2">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Стать</span>
+                                <select x-model="filters.gender"
+                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
+                                    <option value="" class="bg-white dark:bg-gray-800">Всі</option>
+                                    @foreach(\App\Models\Person::GENDERS as $value => $label)
+                                    <option value="{{ $value }}" class="bg-white dark:bg-gray-800">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </th>
+                        <th class="px-4 py-3 text-left hidden xl:table-cell">
+                            <div class="space-y-2">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Сім. стан</span>
+                                <select x-model="filters.marital_status"
+                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
+                                    <option value="" class="bg-white dark:bg-gray-800">Всі</option>
+                                    @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
+                                    <option value="{{ $value }}" class="bg-white dark:bg-gray-800">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </th>
+                        <th class="px-4 py-3 text-left hidden xl:table-cell">
+                            <div class="space-y-2">
                                 <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Роль</span>
                                 <select x-model="filters.role"
                                     class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
@@ -153,6 +177,8 @@
                             'email' => $person->email ?? '',
                             'birth_date' => $person->birth_date?->format('Y-m-d') ?? '',
                             'ministry' => $person->ministries->pluck('name')->join(', '),
+                            'gender' => $person->gender ?? '',
+                            'marital_status' => $person->marital_status ?? '',
                             'role' => $person->churchRoleRelation?->name ?? '',
                             'shepherd' => $person->shepherd?->full_name ?? '',
                         ]))"
@@ -221,6 +247,22 @@
                             <span class="text-gray-400">—</span>
                             @endif
                         </td>
+                        <!-- Gender -->
+                        <td class="px-4 py-3 hidden xl:table-cell">
+                            @if($person->gender)
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">{{ $person->gender_label }}</span>
+                            @else
+                            <span class="text-gray-400">—</span>
+                            @endif
+                        </td>
+                        <!-- Marital Status -->
+                        <td class="px-4 py-3 hidden xl:table-cell">
+                            @if($person->marital_status)
+                            <span class="text-gray-600 dark:text-gray-300 text-sm">{{ $person->marital_status_label }}</span>
+                            @else
+                            <span class="text-gray-400">—</span>
+                            @endif
+                        </td>
                         <!-- Role -->
                         <td class="px-4 py-3 hidden xl:table-cell">
                             @if($person->churchRoleRelation)
@@ -264,7 +306,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-12 text-center">
+                        <td colspan="10" class="px-4 py-12 text-center">
                             <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
@@ -611,6 +653,8 @@ function peopleTable() {
             birth_to: '',
             dateRangeDisplay: '',
             ministry: '',
+            gender: '',
+            marital_status: '',
             role: '',
             shepherd: ''
         },
@@ -618,7 +662,7 @@ function peopleTable() {
         filteredCount: {{ $people->count() }},
         perPage: 25,
         currentPage: 1,
-        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'role' => $p->churchRoleRelation?->name ?? '', 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
+        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
         filteredIndices: [],
 
         init() {
@@ -694,7 +738,8 @@ function peopleTable() {
         get hasFilters() {
             return this.filters.search || this.filters.name || this.filters.phone || this.filters.email ||
                    this.filters.birth_from || this.filters.birth_to ||
-                   this.filters.ministry || this.filters.role || this.filters.shepherd;
+                   this.filters.ministry || this.filters.gender || this.filters.marital_status ||
+                   this.filters.role || this.filters.shepherd;
         },
 
         matchesFilters(person) {
@@ -719,8 +764,15 @@ function peopleTable() {
                 this.matchText(person.email, this.filters.email) &&
                 this.matchDateRange(person.birth_date, this.filters.birth_from, this.filters.birth_to) &&
                 this.matchText(person.ministry, this.filters.ministry) &&
+                this.matchExact(person.gender, this.filters.gender) &&
+                this.matchExact(person.marital_status, this.filters.marital_status) &&
                 this.matchText(person.role, this.filters.role)
             );
+        },
+
+        matchExact(value, filter) {
+            if (!filter) return true;
+            return value === filter;
         },
 
         matchText(value, filter) {
@@ -748,6 +800,8 @@ function peopleTable() {
                 birth_to: '',
                 dateRangeDisplay: '',
                 ministry: '',
+                gender: '',
+                marital_status: '',
                 role: '',
                 shepherd: ''
             };
