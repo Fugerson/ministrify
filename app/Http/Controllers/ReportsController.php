@@ -36,6 +36,11 @@ class ReportsController extends Controller
     public function attendance(Request $request)
     {
         $church = $this->getCurrentChurch();
+
+        if (!$church->attendance_enabled) {
+            abort(403, 'Функцію відвідуваності вимкнено для вашої церкви.');
+        }
+
         $year = $request->get('year', now()->year);
         $ministryId = $request->get('ministry_id');
 

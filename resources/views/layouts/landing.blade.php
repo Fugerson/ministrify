@@ -140,7 +140,7 @@
 
                 {{-- Desktop Menu --}}
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Можливості</a>
+                    <a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Огляд функцій</a>
                     {{-- TODO: Розкоментувати після бета-тестування
                     <a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Ціни</a>
                     --}}
@@ -187,7 +187,7 @@
         {{-- Mobile Menu --}}
         <div x-show="mobileMenu" x-cloak x-transition class="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
             <div class="px-4 py-4 space-y-3">
-                <a href="{{ url('/features') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Можливості</a>
+                <a href="{{ url('/features') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Огляд функцій</a>
                 {{-- TODO: Розкоментувати після бета-тестування
                 <a href="{{ url('/pricing') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Ціни</a>
                 --}}
@@ -248,7 +248,7 @@
                 <div>
                     <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Продукт</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Можливості</a></li>
+                        <li><a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Огляд функцій</a></li>
                         {{-- TODO: Розкоментувати після бета-тестування
                         <li><a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Ціни</a></li>
                         --}}
@@ -261,8 +261,8 @@
                     <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Підтримка</h4>
                     <ul class="space-y-2 text-sm">
                         <li><a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Контакти</a></li>
-                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Документація</a></li>
-                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">FAQ</a></li>
+                        <li><a href="{{ url('/docs') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Документація</a></li>
+                        <li><a href="{{ url('/faq') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">FAQ</a></li>
                     </ul>
                 </div>
 
@@ -270,8 +270,8 @@
                 <div>
                     <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Правова інформація</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Умови використання</a></li>
-                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Політика приватності</a></li>
+                        <li><a href="{{ url('/terms') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Умови використання</a></li>
+                        <li><a href="{{ url('/privacy') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Політика приватності</a></li>
                     </ul>
                 </div>
             </div>
@@ -280,6 +280,7 @@
                 <p class="text-gray-500 dark:text-gray-400 text-sm">
                     © {{ date('Y') }} Ministrify. Всі права захищені.
                 </p>
+{{-- Приховано: соціальні мережі
                 <div class="flex items-center space-x-4 mt-4 md:mt-0">
                     <a href="#" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -291,6 +292,7 @@
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                     </a>
                 </div>
+                --}}
             </div>
         </div>
     </footer>

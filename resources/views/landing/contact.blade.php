@@ -122,6 +122,7 @@
 
             <!-- Contact Info -->
             <div class="lg:pl-8">
+                {{-- Приховано: Інші способи зв'язку
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                     Інші способи зв'язку
                 </h2>
@@ -169,16 +170,17 @@
                         </div>
                     </div>
                 </div>
+                --}}
 
                 <!-- FAQ Link -->
-                <div class="mt-8 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
+                <div class="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
                         Часті питання
                     </h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-4">
-                        Можливо, відповідь на ваше питання вже є на сторінці з тарифами.
+                        Можливо, відповідь на ваше питання вже є у розділі FAQ.
                     </p>
-                    <a href="{{ route('landing.pricing') }}#faq"
+                    <a href="{{ route('landing.faq') }}"
                        class="inline-flex items-center text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300">
                         Переглянути FAQ
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

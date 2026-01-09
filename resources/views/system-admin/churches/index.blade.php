@@ -3,7 +3,7 @@
 @section('title', 'Церкви')
 
 @section('actions')
-<a href="{{ route('system.churches.create') }}" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg">
+<a href="{{ route('system.churches.create') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg">
     + Додати церкву
 </a>
 @endsection
@@ -14,7 +14,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
         <form method="GET" class="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук церкви..."
-                   class="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                   class="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
             <button type="submit" class="px-6 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">Шукати</button>
         </form>
     </div>

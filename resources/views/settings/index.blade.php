@@ -948,6 +948,46 @@
         </div>
     </div>
 
+    <!-- Attendance -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="{ enabled: {{ $church->attendance_enabled ? 'true' : 'false' }}, saving: false }">
+        <div class="p-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Відвідуваність богослужінь</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Відстежуйте присутність на богослужіннях та подіях</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Toggle -->
+                <button type="button"
+                        @click="enabled = !enabled; saving = true; fetch('{{ route("settings.attendance.toggle-feature") }}', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                            body: JSON.stringify({ enabled: enabled })
+                        }).finally(() => saving = false)"
+                        :class="enabled ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-700'"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2">
+                    <span class="sr-only">Увімкнути відвідуваність</span>
+                    <span :class="enabled ? 'translate-x-5' : 'translate-x-0'"
+                          class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
+                    </span>
+                </button>
+                <!-- Link to stats -->
+                <a x-show="enabled" href="{{ route('attendance.stats') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Expense categories -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">

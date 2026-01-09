@@ -57,17 +57,56 @@ class LandingController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
-        // Log contact message
-        \Log::channel('single')->info('Contact form submission', [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'church' => $validated['church'] ?? null,
+        // Create support ticket
+        $ticket = \App\Models\SupportTicket::create([
+            'guest_name' => $validated['name'],
+            'guest_email' => $validated['email'],
+            'subject' => 'Повідомлення з контактної форми' . ($validated['church'] ? ' — ' . $validated['church'] : ''),
+            'category' => 'question',
+            'priority' => 'normal',
+            'status' => 'open',
+        ]);
+
+        // Add the message
+        \App\Models\SupportMessage::create([
+            'ticket_id' => $ticket->id,
             'message' => $validated['message'],
-            'ip' => $request->ip(),
-            'submitted_at' => now()->toDateTimeString(),
+            'is_from_admin' => false,
         ]);
 
         return back()->with('success', 'Дякуємо! Ми зв\'яжемося з вами найближчим часом.');
+    }
+
+    /**
+     * Documentation page
+     */
+    public function docs()
+    {
+        return view('landing.docs');
+    }
+
+    /**
+     * FAQ page
+     */
+    public function faq()
+    {
+        return view('landing.faq');
+    }
+
+    /**
+     * Terms of service page
+     */
+    public function terms()
+    {
+        return view('landing.terms');
+    }
+
+    /**
+     * Privacy policy page
+     */
+    public function privacy()
+    {
+        return view('landing.privacy');
     }
 
     /**

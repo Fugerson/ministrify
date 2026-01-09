@@ -14,6 +14,8 @@ use App\Models\AdminTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SupportTicketReply;
 
 class SystemAdminController extends Controller
 {
@@ -461,7 +463,7 @@ class SystemAdminController extends Controller
             'status' => 'nullable|in:open,in_progress,waiting,resolved,closed',
         ]);
 
-        SupportMessage::create([
+        $message = SupportMessage::create([
             'ticket_id' => $ticket->id,
             'user_id' => auth()->id(),
             'message' => $validated['message'],
@@ -483,8 +485,16 @@ class SystemAdminController extends Controller
 
         $ticket->update($updateData);
 
+        // Send email notification (not for internal notes)
+        if (!$request->boolean('is_internal')) {
+            $recipientEmail = $ticket->guest_email ?? $ticket->user?->email;
+            if ($recipientEmail) {
+                Mail::to($recipientEmail)->send(new SupportTicketReply($ticket, $message));
+            }
+        }
+
         return redirect()->route('system.support.show', $ticket)
-            ->with('success', $request->boolean('is_internal') ? 'Внутрішню нотатку додано.' : 'Відповідь надіслано!');
+            ->with('success', $request->boolean('is_internal') ? 'Внутрішню нотатку додано.' : 'Відповідь надіслано на email!');
     }
 
     /**

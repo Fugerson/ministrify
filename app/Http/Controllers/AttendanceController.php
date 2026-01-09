@@ -11,8 +11,17 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    protected function checkAttendanceEnabled(): void
+    {
+        $church = $this->getCurrentChurch();
+        if (!$church->attendance_enabled) {
+            abort(403, 'Функцію відвідуваності вимкнено для вашої церкви.');
+        }
+    }
+
     public function index(Request $request)
     {
+        $this->checkAttendanceEnabled();
         $church = $this->getCurrentChurch();
 
         $year = $request->get('year', now()->year);
@@ -29,6 +38,7 @@ class AttendanceController extends Controller
 
     public function create(Request $request)
     {
+        $this->checkAttendanceEnabled();
         $church = $this->getCurrentChurch();
 
         $eventId = $request->get('event');
@@ -50,6 +60,7 @@ class AttendanceController extends Controller
 
     public function store(Request $request)
     {
+        $this->checkAttendanceEnabled();
         $validated = $request->validate([
             'date' => 'required|date',
             'event_id' => 'nullable|exists:events,id',
@@ -93,6 +104,7 @@ class AttendanceController extends Controller
 
     public function show(Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
 
         $attendance->load(['event.ministry', 'records.person']);
@@ -102,6 +114,7 @@ class AttendanceController extends Controller
 
     public function edit(Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
 
         $church = $this->getCurrentChurch();
@@ -118,6 +131,7 @@ class AttendanceController extends Controller
 
     public function update(Request $request, Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
 
         $validated = $request->validate([
@@ -150,6 +164,7 @@ class AttendanceController extends Controller
 
     public function destroy(Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
 
         $attendance->delete();
@@ -157,8 +172,22 @@ class AttendanceController extends Controller
         return back()->with('success', 'Запис видалено.');
     }
 
+    public function toggleFeature(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'enabled' => 'required|boolean',
+        ]);
+
+        $church->update(['attendance_enabled' => $validated['enabled']]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function stats(Request $request)
     {
+        $this->checkAttendanceEnabled();
         $church = $this->getCurrentChurch();
 
         $year = $request->get('year', now()->year);

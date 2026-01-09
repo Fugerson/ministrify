@@ -100,6 +100,7 @@
                 </div>
 
                 <!-- Attendance Tracking Option -->
+                @if($currentChurch->attendance_enabled)
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
                     <div class="flex items-center">
                         <input type="checkbox" name="track_attendance" id="track_attendance" value="1"
@@ -113,6 +114,7 @@
                         Увімкніть, щоб відмічати хто був на цій події
                     </p>
                 </div>
+                @endif
             </div>
         </div>
 

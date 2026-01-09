@@ -209,7 +209,7 @@
             </div>
 
             <!-- Attendance Section -->
-            @if($event->track_attendance)
+            @if($event->track_attendance && $currentChurch->attendance_enabled)
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700" x-data="attendanceManager()">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
                     <div class="flex items-center justify-between">

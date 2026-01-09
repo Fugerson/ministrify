@@ -10,8 +10,17 @@ use Illuminate\Support\Facades\DB;
 
 class GroupAttendanceController extends Controller
 {
+    protected function checkAttendanceEnabled(): void
+    {
+        $church = $this->getCurrentChurch();
+        if (!$church->attendance_enabled) {
+            abort(403, 'Функцію відвідуваності вимкнено для вашої церкви.');
+        }
+    }
+
     public function index(Group $group)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('view', $group);
 
         $attendances = $group->attendances()
@@ -36,6 +45,7 @@ class GroupAttendanceController extends Controller
 
     public function create(Group $group)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
         $group->load('members');
@@ -48,6 +58,7 @@ class GroupAttendanceController extends Controller
 
     public function store(Request $request, Group $group)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
         $validated = $request->validate([
@@ -103,6 +114,7 @@ class GroupAttendanceController extends Controller
 
     public function show(Group $group, Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('view', $group);
 
         $attendance->load(['records.person', 'recorder']);
@@ -112,6 +124,7 @@ class GroupAttendanceController extends Controller
 
     public function edit(Group $group, Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
         $group->load('members');
@@ -124,6 +137,7 @@ class GroupAttendanceController extends Controller
 
     public function update(Request $request, Group $group, Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
         $validated = $request->validate([
@@ -173,6 +187,7 @@ class GroupAttendanceController extends Controller
 
     public function destroy(Group $group, Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
         $attendance->delete();
@@ -185,6 +200,7 @@ class GroupAttendanceController extends Controller
      */
     public function quickCheckin(Group $group)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
         $group->load('members');
@@ -220,6 +236,7 @@ class GroupAttendanceController extends Controller
      */
     public function togglePresence(Request $request, Group $group, Attendance $attendance)
     {
+        $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
         $validated = $request->validate([

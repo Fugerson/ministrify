@@ -8,10 +8,10 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
         <form method="GET" class="flex flex-wrap gap-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук за іменем або email..."
-                   class="flex-1 min-w-64 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                   class="flex-1 min-w-64 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
 
             <select name="church_id"
-                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 <option value="">Всі церкви</option>
                 @foreach($churches as $church)
                 <option value="{{ $church->id }}" {{ request('church_id') == $church->id ? 'selected' : '' }}>
@@ -21,7 +21,7 @@
             </select>
 
             <select name="role"
-                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 <option value="">Всі ролі</option>
                 <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Адміністратор</option>
                 <option value="leader" {{ request('role') == 'leader' ? 'selected' : '' }}>Лідер</option>
@@ -30,7 +30,7 @@
 
             <label class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white cursor-pointer">
                 <input type="checkbox" name="super_admin" value="1" {{ request()->has('super_admin') ? 'checked' : '' }}
-                       class="rounded bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-red-600 focus:ring-red-500">
+                       class="rounded bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-red-600 focus:ring-indigo-500">
                 <span>Super Admin</span>
             </label>
 
@@ -58,7 +58,7 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full {{ $user->is_super_admin ? 'bg-red-600' : 'bg-gray-400 dark:bg-gray-600' }} flex items-center justify-center mr-3">
+                                <div class="w-10 h-10 rounded-full {{ $user->is_super_admin ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-600' }} flex items-center justify-center mr-3">
                                     <span class="text-sm font-medium text-white">{{ mb_substr($user->name, 0, 1) }}</span>
                                 </div>
                                 <div>
@@ -85,7 +85,7 @@
                         </td>
                         <td class="px-6 py-4 text-center">
                             @if($user->is_super_admin)
-                            <span class="px-2 py-1 bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400 text-xs rounded-full">Super Admin</span>
+                            <span class="px-2 py-1 bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 text-xs rounded-full">Super Admin</span>
                             @else
                             <span class="px-2 py-1 bg-gray-100 dark:bg-gray-600/20 text-gray-600 dark:text-gray-400 text-xs rounded-full">Звичайний</span>
                             @endif

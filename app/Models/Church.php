@@ -42,6 +42,7 @@ class Church extends Model
         'pastor_photo',
         'pastor_message',
         'shepherds_enabled',
+        'attendance_enabled',
         'initial_balance',
         'initial_balance_date',
     ];
@@ -52,6 +53,7 @@ class Church extends Model
         'public_site_settings' => 'array',
         'public_site_enabled' => 'boolean',
         'shepherds_enabled' => 'boolean',
+        'attendance_enabled' => 'boolean',
         'initial_balance' => 'decimal:2',
         'initial_balance_date' => 'date',
         'subscription_ends_at' => 'datetime',

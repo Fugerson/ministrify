@@ -43,6 +43,10 @@ Route::get('contact', [LandingController::class, 'contact'])->name('landing.cont
 Route::post('contact', [LandingController::class, 'sendContact'])->name('landing.contact.send')->middleware('throttle:5,1');
 Route::get('register-church', [LandingController::class, 'register'])->name('landing.register');
 Route::post('register-church', [LandingController::class, 'processRegistration'])->name('landing.register.process')->middleware('throttle:3,1');
+Route::get('docs', [LandingController::class, 'docs'])->name('landing.docs');
+Route::get('faq', [LandingController::class, 'faq'])->name('landing.faq');
+Route::get('terms', [LandingController::class, 'terms'])->name('landing.terms');
+Route::get('privacy', [LandingController::class, 'privacy'])->name('landing.privacy');
 
 // Public church mini-sites with rate limiting for forms
 Route::prefix('c/{slug}')->name('public.')->middleware('throttle:60,1')->group(function () {
@@ -401,6 +405,9 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::post('shepherds', [\App\Http\Controllers\ShepherdController::class, 'store'])->name('shepherds.store');
         Route::delete('shepherds/{person}', [\App\Http\Controllers\ShepherdController::class, 'destroy'])->name('shepherds.destroy');
         Route::post('shepherds/toggle-feature', [\App\Http\Controllers\ShepherdController::class, 'toggleFeature'])->name('shepherds.toggle-feature');
+
+        // Attendance
+        Route::post('attendance/toggle-feature', [\App\Http\Controllers\AttendanceController::class, 'toggleFeature'])->name('attendance.toggle-feature');
     });
 
     // Telegram (admin only)

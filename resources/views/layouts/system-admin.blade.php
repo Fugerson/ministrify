@@ -93,7 +93,7 @@
                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
             <div class="h-16 flex items-center justify-between px-6 border-b border-gray-200 dark:border-gray-700">
                 <span class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
                     <span class="hidden sm:inline">System Admin</span>
@@ -108,7 +108,7 @@
 
             <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                 <a href="{{ route('system.index') }}" @click="sidebarOpen = false"
-                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.index') ? 'bg-red-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.index') ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
@@ -116,7 +116,7 @@
                 </a>
 
                 <a href="{{ route('system.churches.index') }}" @click="sidebarOpen = false"
-                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.churches.*') ? 'bg-red-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.churches.*') ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
@@ -124,7 +124,7 @@
                 </a>
 
                 <a href="{{ route('system.users.index') }}" @click="sidebarOpen = false"
-                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.users.*') ? 'bg-red-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.users.*') ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
@@ -132,7 +132,7 @@
                 </a>
 
                 <a href="{{ route('system.audit-logs') }}" @click="sidebarOpen = false"
-                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.audit-logs') ? 'bg-red-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.audit-logs') ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
@@ -140,19 +140,19 @@
                 </a>
 
                 <a href="{{ route('system.support.index') }}" @click="sidebarOpen = false"
-                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.support.*') ? 'bg-red-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.support.*') ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                     Підтримка
                     @php $openTickets = \App\Models\SupportTicket::open()->count(); @endphp
                     @if($openTickets > 0)
-                        <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $openTickets }}</span>
+                        <span class="ml-auto bg-indigo-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $openTickets }}</span>
                     @endif
                 </a>
 
                 <a href="{{ route('system.tasks.index') }}" @click="sidebarOpen = false"
-                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.tasks.*') ? 'bg-red-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                   class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('system.tasks.*') ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
@@ -188,7 +188,7 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
                         <span class="text-white font-bold">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
                     </div>
                     <div class="flex-1 min-w-0">

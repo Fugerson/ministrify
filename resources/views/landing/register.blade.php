@@ -23,17 +23,17 @@
 @endsection
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 flex items-center justify-center py-12 px-4" x-data="{ showPassword: false }">
+<div class="relative min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 flex items-center justify-center pt-24 pb-12 px-4 overflow-hidden" x-data="{ showPassword: false }">
     <!-- Background Pattern -->
-    <div class="absolute inset-0 bg-grid-white/10"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+    <div class="absolute inset-0 bg-grid-white/10 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
 
     <!-- Floating Elements -->
-    <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-    <div class="absolute top-40 right-10 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-    <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob pointer-events-none"></div>
+    <div class="absolute top-40 right-10 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000 pointer-events-none"></div>
+    <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000 pointer-events-none"></div>
 
-    <div class="relative w-full max-w-lg">
+    <div class="relative z-10 w-full max-w-lg">
         <!-- Logo -->
         <div class="text-center mb-8">
             <a href="{{ route('landing.home') }}" class="inline-flex items-center space-x-2">

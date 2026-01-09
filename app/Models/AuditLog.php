@@ -63,8 +63,46 @@ class AuditLog extends Model
             'exported' => 'Експортовано',
             'imported' => 'Імпортовано',
             'sent' => 'Надіслано',
+            'impersonate' => 'Увійшов як',
+            'stop_impersonate' => 'Вийшов з',
+            'assigned' => 'Призначено',
+            'unassigned' => 'Знято',
+            'approved' => 'Підтверджено',
+            'rejected' => 'Відхилено',
+            'completed' => 'Завершено',
             default => $this->action,
         };
+    }
+
+    /**
+     * Get human-readable description
+     */
+    public function getDescriptionAttribute(): string
+    {
+        $modelLabel = $this->model_label;
+        $modelName = $this->model_name;
+        $actionLabel = $this->action_label;
+
+        // Special cases
+        if ($this->action === 'impersonate') {
+            return "Увійшов як користувач: {$modelName}";
+        }
+        if ($this->action === 'stop_impersonate') {
+            return "Вийшов з режиму імперсонації: {$modelName}";
+        }
+        if ($this->action === 'login') {
+            return 'Вхід в систему';
+        }
+        if ($this->action === 'logout') {
+            return 'Вихід з системи';
+        }
+
+        // Default: "Action ModelType: ModelName"
+        if ($modelName) {
+            return "{$actionLabel} {$modelLabel}: {$modelName}";
+        }
+
+        return "{$actionLabel} {$modelLabel}";
     }
 
     /**

@@ -56,6 +56,7 @@
     <!-- Report Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Attendance Report -->
+        @if($currentChurch->attendance_enabled)
         <a href="{{ route('reports.attendance') }}" class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-lg transition-all hover:-translate-y-1">
             <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,6 +67,7 @@
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Тренди відвідуваності, хто перестав ходити, топ відвідувачів</p>
             <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:underline">Переглянути →</span>
         </a>
+        @endif
 
         <!-- Finances Report -->
         <a href="{{ route('reports.finances') }}" class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-lg transition-all hover:-translate-y-1">

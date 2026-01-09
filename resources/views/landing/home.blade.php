@@ -13,7 +13,7 @@
             <div class="text-center lg:text-left">
                 <div class="inline-flex items-center px-3 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium mb-6">
                     <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                    Безкоштовно до 50 членів
+                    Система управління церквою
                 </div>
 
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
@@ -241,15 +241,15 @@
             </div>
 
             {{-- Feature 6 --}}
-            <div class="group bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div class="w-14 h-14 bg-pink-100 dark:bg-pink-900/50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            <div class="group bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Молитовні потреби</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Трекер завдань</h3>
                 <p class="text-gray-600 dark:text-gray-400">
-                    Збирайте та відстежуйте молитовні потреби. Публічна стіна молитов та приватні запити.
+                    Kanban-дошка для управління завданнями церкви. Призначайте відповідальних, встановлюйте дедлайни.
                 </p>
             </div>
         </div>
@@ -289,7 +289,7 @@
     </div>
 </section>
 
-{{-- Pricing Preview --}}
+{{-- Pricing Preview - HIDDEN
 <section id="pricing" class="py-20 bg-gray-50 dark:bg-gray-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
@@ -303,7 +303,7 @@
         </div>
 
         <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {{-- Free --}}
+            <!-- Free -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all hover:shadow-lg">
                 <div class="text-center mb-8">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Free</h3>
@@ -333,7 +333,7 @@
                 </a>
             </div>
 
-            {{-- Basic - Featured --}}
+            <!-- Basic - Featured -->
             <div class="bg-primary-600 rounded-2xl p-8 relative transform md:scale-105 shadow-xl shadow-primary-600/25">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full">
                     Популярний
@@ -370,7 +370,7 @@
                 </a>
             </div>
 
-            {{-- Pro --}}
+            <!-- Pro -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all hover:shadow-lg">
                 <div class="text-center mb-8">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Pro</h3>
@@ -406,6 +406,7 @@
         </div>
     </div>
 </section>
+--}}
 
 {{-- CTA Section --}}
 <section class="py-20 bg-white dark:bg-gray-950">
@@ -414,7 +415,7 @@
             Готові спростити управління церквою?
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
-            Приєднуйтесь до церков, які вже використовують Ministrify. Безкоштовно до 50 членів.
+            Приєднуйтесь до церков, які вже використовують Ministrify.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ url('/register-church') }}" class="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary-600/25 hover:shadow-primary-600/40">
@@ -424,7 +425,7 @@
                 </svg>
             </a>
             <a href="{{ url('/contact') }}" class="inline-flex items-center justify-center px-8 py-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
-                Запитати демо
+                Зв'язатися з нами
             </a>
         </div>
     </div>
