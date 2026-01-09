@@ -28,6 +28,7 @@ class ServicePlanItem extends Model
     // Statuses
     const STATUS_PLANNED = 'planned';
     const STATUS_CONFIRMED = 'confirmed';
+    const STATUS_DECLINED = 'declined';
     const STATUS_COMPLETED = 'completed';
 
     // Default durations in minutes by type
@@ -100,6 +101,7 @@ class ServicePlanItem extends Model
         return [
             self::STATUS_PLANNED => 'Заплановано',
             self::STATUS_CONFIRMED => 'Підтверджено',
+            self::STATUS_DECLINED => 'Відхилено',
             self::STATUS_COMPLETED => 'Виконано',
         ];
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Church;
 use App\Models\EventResponsibility;
 use App\Models\Person;
+use App\Models\ServicePlanItem;
 use App\Models\TelegramMessage;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
@@ -90,6 +91,50 @@ class TelegramController extends Controller
 
                     $telegram = new TelegramService($church->telegram_bot_token);
                     $telegram->sendMessage($chatId, "😔 Зрозуміло, пошукаємо когось іншого.");
+                }
+            }
+        } elseif (str_starts_with($data, 'plan_confirm_')) {
+            // Service Plan Item confirmation
+            $itemId = (int) str_replace('plan_confirm_', '', $data);
+            $item = ServicePlanItem::with('event')->find($itemId);
+
+            if ($item && $item->responsible_id === $person->id) {
+                $item->update(['status' => 'confirmed']);
+
+                $church = $person->church;
+                if ($church?->telegram_bot_token) {
+                    TelegramMessage::create([
+                        'church_id' => $church->id,
+                        'person_id' => $person->id,
+                        'direction' => 'incoming',
+                        'message' => "✅ Підтверджено: {$item->title}",
+                        'is_read' => false,
+                    ]);
+
+                    $telegram = new TelegramService($church->telegram_bot_token);
+                    $telegram->sendMessage($chatId, "✅ Чудово! Ви підтвердили участь у: {$item->title}");
+                }
+            }
+        } elseif (str_starts_with($data, 'plan_decline_')) {
+            // Service Plan Item decline
+            $itemId = (int) str_replace('plan_decline_', '', $data);
+            $item = ServicePlanItem::with('event')->find($itemId);
+
+            if ($item && $item->responsible_id === $person->id) {
+                $item->update(['status' => 'declined']);
+
+                $church = $person->church;
+                if ($church?->telegram_bot_token) {
+                    TelegramMessage::create([
+                        'church_id' => $church->id,
+                        'person_id' => $person->id,
+                        'direction' => 'incoming',
+                        'message' => "❌ Відхилено: {$item->title}",
+                        'is_read' => false,
+                    ]);
+
+                    $telegram = new TelegramService($church->telegram_bot_token);
+                    $telegram->sendMessage($chatId, "😔 Зрозуміло, пошукаємо когось іншого для: {$item->title}");
                 }
             }
         }

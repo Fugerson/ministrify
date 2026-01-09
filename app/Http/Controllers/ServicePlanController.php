@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Person;
 use App\Models\ServicePlanItem;
 use App\Rules\BelongsToChurch;
+use App\Services\TelegramService;
 use Illuminate\Http\Request;
 
 class ServicePlanController extends Controller
@@ -94,8 +95,16 @@ class ServicePlanController extends Controller
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'responsible_names' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
-            'status' => 'nullable|string|in:planned,confirmed,completed',
+            'status' => 'nullable|string|in:planned,confirmed,declined,completed',
         ]);
+
+        // Convert empty strings to null
+        if (empty($validated['responsible_id'])) {
+            $validated['responsible_id'] = null;
+        }
+        if (empty($validated['responsible_names'])) {
+            $validated['responsible_names'] = null;
+        }
 
         $item->update($validated);
 
@@ -268,7 +277,7 @@ class ServicePlanController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|string|in:planned,confirmed,completed',
+            'status' => 'required|string|in:planned,confirmed,declined,completed',
         ]);
 
         $item->update(['status' => $validated['status']]);
@@ -533,5 +542,77 @@ class ServicePlanController extends Controller
             'message' => "Додано {$createdCount} пунктів",
             'count' => $createdCount,
         ]);
+    }
+
+    /**
+     * Send Telegram notification to responsible person
+     */
+    public function sendNotification(Request $request, Event $event, ServicePlanItem $item)
+    {
+        $this->authorize('managePlan', $event);
+
+        if ($item->event_id !== $event->id) {
+            abort(403);
+        }
+
+        if (!$item->responsible_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Немає призначеної людини',
+            ], 422);
+        }
+
+        $person = $item->responsible;
+
+        if (!$person->telegram_chat_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'У цієї людини не підключений Telegram',
+            ], 422);
+        }
+
+        $token = config('services.telegram.bot_token');
+        if (!$token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Telegram бот не налаштований',
+            ], 500);
+        }
+
+        $telegram = new TelegramService($token);
+
+        $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : 'час уточнюється';
+        $message = "📋 <b>Запит на участь</b>\n\n"
+            . "📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
+            . "⏰ {$timeStr}\n"
+            . "📝 {$item->title}\n\n"
+            . "Чи можете ви взяти участь?";
+
+        $keyboard = [
+            [
+                ['text' => '✅ Так, зможу', 'callback_data' => "plan_confirm_{$item->id}"],
+                ['text' => '❌ Не можу', 'callback_data' => "plan_decline_{$item->id}"],
+            ],
+        ];
+
+        $sent = $telegram->sendMessage($person->telegram_chat_id, $message, $keyboard);
+
+        if ($sent) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Запит надіслано в Telegram',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Не вдалося надіслати повідомлення',
+        ], 500);
+    }
+
+    private function getDayName(\DateTime $date): string
+    {
+        $days = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота'];
+        return $days[$date->format('w')];
     }
 }

@@ -208,7 +208,7 @@ class EventController extends Controller
         $event->load([
             'ministry',
             'checklist.items.completedByUser',
-            'planItems',
+            'planItems.responsible',
             'responsibilities.person',
             'attendance.records.person',
         ]);
@@ -241,14 +241,11 @@ class EventController extends Controller
             ->where('is_archived', false)
             ->get();
 
-        // Get all church members for attendance tracking
-        $allPeople = collect();
-        if ($event->track_attendance) {
-            $allPeople = \App\Models\Person::where('church_id', $church->id)
-                ->orderBy('last_name')
-                ->orderBy('first_name')
-                ->get();
-        }
+        // Get all church members for attendance tracking and plan item assignment
+        $allPeople = \App\Models\Person::where('church_id', $church->id)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
 
         return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople'));
     }

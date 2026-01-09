@@ -669,7 +669,9 @@ function servicePlan() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     title: this.inlineForm.title,
@@ -678,12 +680,24 @@ function servicePlan() {
                     responsible_names: this.inlineForm.responsible_names || null
                 })
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) {
+                    return r.text().then(text => {
+                        console.error('Server error:', r.status, text);
+                        alert('Помилка: ' + r.status + ' - перевірте консоль');
+                        throw new Error('Server error');
+                    });
+                }
+                return r.json();
+            })
             .then(data => {
                 if (data.success) {
                     window.location.reload();
+                } else if (data.errors) {
+                    alert('Помилка валідації: ' + Object.values(data.errors).flat().join(', '));
                 }
-            });
+            })
+            .catch(err => console.error('Fetch error:', err));
         },
 
         // Apply template
@@ -692,16 +706,22 @@ function servicePlan() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ template: template })
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('Server error: ' + r.status);
+                return r.json();
+            })
             .then(data => {
                 if (data.success) {
                     window.location.reload();
                 }
-            });
+            })
+            .catch(err => { console.error(err); alert('Помилка: ' + err.message); });
         },
 
         // Bulk add multiple types
@@ -712,16 +732,22 @@ function servicePlan() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ types: types })
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('Server error: ' + r.status);
+                return r.json();
+            })
             .then(data => {
                 if (data.success) {
                     window.location.reload();
                 }
-            });
+            })
+            .catch(err => { console.error(err); alert('Помилка: ' + err.message); });
         },
 
         // Parse text and add items
@@ -732,16 +758,22 @@ function servicePlan() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ text: this.parseText })
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('Server error: ' + r.status);
+                return r.json();
+            })
             .then(data => {
                 if (data.success) {
                     window.location.reload();
                 }
-            });
+            })
+            .catch(err => { console.error(err); alert('Помилка: ' + err.message); });
         },
 
         quickAdd(type) {
@@ -749,16 +781,22 @@ function servicePlan() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ type: type })
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('Server error: ' + r.status);
+                return r.json();
+            })
             .then(data => {
                 if (data.success) {
                     window.location.reload();
                 }
-            });
+            })
+            .catch(err => { console.error(err); alert('Помилка: ' + err.message); });
         },
 
         handleDragStart(e, id) {
@@ -788,16 +826,22 @@ function servicePlan() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ items: items })
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('Server error: ' + r.status);
+                return r.json();
+            })
             .then(data => {
                 if (data.success) {
                     window.location.reload();
                 }
-            });
+            })
+            .catch(err => { console.error(err); alert('Помилка: ' + err.message); });
 
             this.draggedId = null;
         }

@@ -245,6 +245,7 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
         Route::put('/{item}', [ServicePlanController::class, 'update'])->name('update');
         Route::delete('/{item}', [ServicePlanController::class, 'destroy'])->name('destroy');
         Route::post('/{item}/status', [ServicePlanController::class, 'updateStatus'])->name('status');
+        Route::post('/{item}/notify', [ServicePlanController::class, 'sendNotification'])->name('notify');
     });
 
     // Calendar Export/Import
