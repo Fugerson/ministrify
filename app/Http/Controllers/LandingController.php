@@ -30,14 +30,6 @@ class LandingController extends Controller
     }
 
     /**
-     * Pricing page
-     */
-    public function pricing()
-    {
-        return view('landing.pricing');
-    }
-
-    /**
      * Contact page
      */
     public function contact()

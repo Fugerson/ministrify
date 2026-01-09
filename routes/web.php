@@ -38,7 +38,6 @@ Route::get('checkin/{token}', [QrCheckinController::class, 'show'])->name('check
 // Landing pages (public)
 Route::get('/', [LandingController::class, 'home'])->name('landing.home');
 Route::get('features', [LandingController::class, 'features'])->name('landing.features');
-Route::get('pricing', [LandingController::class, 'pricing'])->name('landing.pricing');
 Route::get('contact', [LandingController::class, 'contact'])->name('landing.contact');
 Route::post('contact', [LandingController::class, 'sendContact'])->name('landing.contact.send')->middleware('throttle:5,1');
 Route::get('register-church', [LandingController::class, 'register'])->name('landing.register');
@@ -326,16 +325,6 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
     // Attendance
     Route::resource('attendance', AttendanceController::class);
     Route::get('attendance-stats', [AttendanceController::class, 'stats'])->name('attendance.stats');
-
-    // Billing (admin only)
-    Route::middleware('role:admin')->prefix('billing')->name('billing.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\BillingController::class, 'index'])->name('index');
-        Route::get('upgrade/{plan}', [\App\Http\Controllers\BillingController::class, 'upgrade'])->name('upgrade');
-        Route::post('pay/{plan}', [\App\Http\Controllers\BillingController::class, 'pay'])->name('pay');
-        Route::get('callback', [\App\Http\Controllers\BillingController::class, 'callback'])->name('callback');
-        Route::post('downgrade', [\App\Http\Controllers\BillingController::class, 'downgrade'])->name('downgrade');
-        Route::get('history', [\App\Http\Controllers\BillingController::class, 'history'])->name('history');
-    });
 
     // Settings (admin only)
     Route::middleware('role:admin')->prefix('settings')->name('settings.')->group(function () {

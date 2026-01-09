@@ -12,15 +12,10 @@ Route::middleware(['throttle:120,1', 'telegram.webhook'])->group(function () {
 });
 Route::get('telegram/link/{code}', [TelegramController::class, 'link'])->name('telegram.link')->middleware('throttle:10,1');
 
-// Payment webhooks
+// Payment webhooks (for donations)
 Route::prefix('webhooks')->name('api.webhooks.')->middleware('throttle:60,1')->group(function () {
     Route::post('liqpay', [PublicSiteController::class, 'liqpayCallback'])->name('liqpay');
 });
-
-// LiqPay subscription webhook
-Route::post('liqpay/webhook', [\App\Http\Controllers\Api\LiqPayWebhookController::class, 'handle'])
-    ->name('api.liqpay.webhook')
-    ->middleware('throttle:60,1');
 
 // Calendar API (public, token-based auth)
 Route::prefix('calendar')->name('api.calendar.')->middleware('throttle:60,1')->group(function () {
