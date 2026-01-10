@@ -943,6 +943,13 @@
                         <kbd class="hidden sm:inline-flex items-center px-2 py-0.5 text-xs text-gray-400 bg-gray-200 dark:bg-gray-600 rounded">/</kbd>
                     </button>
                     @yield('actions')
+                    <!-- Profile Link -->
+                    <a href="{{ route('my-profile') }}" class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors" title="Мій профіль">
+                        <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                            <span class="text-sm font-medium text-primary-600 dark:text-primary-300">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                        </div>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ auth()->user()->name }}</span>
+                    </a>
                 </div>
             </header>
 
