@@ -449,26 +449,15 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Пароль згенеровано</h3>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Запрошення надіслано</h3>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                        Збережіть або передайте цей пароль користувачу. Він більше не буде показаний.
+                                        Лист з посиланням для встановлення пароля надіслано на email користувача.
                                     </p>
 
-                                    <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-4">
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Пароль:</p>
-                                        <p class="text-2xl font-mono font-bold text-gray-900 dark:text-white tracking-wider" x-text="generatedPassword"></p>
-                                    </div>
-
-                                    <div class="flex gap-3">
-                                        <button type="button" @click="copyPassword()" id="copyPasswordBtn"
-                                                class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium">
-                                            Скопіювати
-                                        </button>
-                                        <button type="button" @click="closePasswordModal()"
-                                                class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
-                                            Готово
-                                        </button>
-                                    </div>
+                                    <button type="button" @click="closePasswordModal()"
+                                            class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                                        Готово
+                                    </button>
                                 </div>
                             </div>
                         </div>
