@@ -232,7 +232,6 @@ Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
 
     // Service Plan
     Route::prefix('events/{event}/plan')->name('events.plan.')->group(function () {
-        Route::get('/', [ServicePlanController::class, 'index'])->name('index');
         Route::post('/', [ServicePlanController::class, 'store'])->name('store');
         Route::get('/print', [ServicePlanController::class, 'print'])->name('print');
         Route::post('/reorder', [ServicePlanController::class, 'reorder'])->name('reorder');
