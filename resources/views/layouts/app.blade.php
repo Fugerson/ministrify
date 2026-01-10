@@ -608,12 +608,7 @@
     <div x-data="{ sidebarOpen: false }" class="min-h-screen flex"
          @keydown.window.prevent.cmd.k="searchOpen = true"
          @keydown.window.prevent.ctrl.k="searchOpen = true"
-         @keydown.window.escape="searchOpen = false; fabOpen = false"
-         @keydown.window.191="if(!searchOpen && event.shiftKey && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) $dispatch('open-page-help')"
-         @keydown.window.prevent.n="if(!searchOpen && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) window.location.href='{{ route('people.create') }}'"
-         @keydown.window.prevent.e="if(!searchOpen && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) window.location.href='{{ route('events.create') }}'"
-         @keydown.window.prevent.g="if(!searchOpen && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) window.location.href='{{ route('groups.create') }}'"
-         {{-- @keydown.window.prevent.b="if(!searchOpen) window.location.href='{{ route('boards.create') }}'" --}}>
+         @keydown.window.escape="searchOpen = false; fabOpen = false">
 
         <!-- Desktop Sidebar -->
         <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 {{ session('impersonating_from') ? 'pt-10' : '' }}">
