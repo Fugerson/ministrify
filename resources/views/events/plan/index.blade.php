@@ -346,35 +346,20 @@
             <!-- Inline Add Row -->
             <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
                 <form @submit.prevent="inlineAdd()" class="flex items-center gap-3">
-                    <div class="w-28 flex-shrink-0">
-                        <input type="time" x-model="inlineForm.start_time"
-                               class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                    </div>
-                    <div class="w-36 flex-shrink-0">
-                        <select x-model="inlineForm.type"
-                                class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                            <option value="">Тип...</option>
-                            @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
-                                <option value="{{ $type }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="flex-1">
-                        <input type="text" x-model="inlineForm.title" required
-                               placeholder="Назва пункту (Enter для додавання)"
-                               @keydown.enter.prevent="inlineAdd()"
-                               class="w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                    </div>
-                    <div class="w-40 flex-shrink-0">
-                        <input type="text" x-model="inlineForm.responsible_names"
-                               placeholder="Відповідальні"
-                               class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                    </div>
-                    <button type="submit" :disabled="!inlineForm.title"
-                            class="p-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-lg transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
+                    <select x-model="inlineForm.type"
+                            class="w-40 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <option value="">Оберіть тип</option>
+                        @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
+                            <option value="{{ $type }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <input type="text" x-model="inlineForm.title"
+                           placeholder="або введіть назву вручну"
+                           @keydown.enter.prevent="inlineAdd()"
+                           class="flex-1 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    <button type="submit" :disabled="!inlineForm.type && !inlineForm.title"
+                            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors">
+                        Додати
                     </button>
                 </form>
             </div>
@@ -389,26 +374,26 @@
 
                 <!-- Inline Add for Empty State -->
                 <div class="max-w-xl mx-auto bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Швидко додайте перший пункт:</p>
-                    <form @submit.prevent="inlineAdd()" class="flex items-center gap-2">
+                    <form @submit.prevent="inlineAdd()" class="flex items-center gap-3">
                         <select x-model="inlineForm.type"
-                                class="px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                            <option value="">Тип...</option>
+                                class="w-40 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <option value="">Оберіть тип</option>
                             @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
                                 <option value="{{ $type }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <input type="text" x-model="inlineForm.title" required
-                               placeholder="Назва пункту"
-                               class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                        <button type="submit" :disabled="!inlineForm.title"
-                                class="px-4 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors">
+                        <input type="text" x-model="inlineForm.title"
+                               placeholder="або введіть назву вручну"
+                               @keydown.enter.prevent="inlineAdd()"
+                               class="flex-1 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <button type="submit" :disabled="!inlineForm.type && !inlineForm.title"
+                                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors">
                             Додати
                         </button>
                     </form>
                 </div>
 
-                <p class="text-sm text-gray-400 dark:text-gray-500">або використайте шаблон чи копіювання з попереднього служіння</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500">або використайте шаблон чи копіювання з попередньої події</p>
             </div>
         @endif
     </div>
@@ -663,7 +648,16 @@ function servicePlan() {
 
         // Inline add
         inlineAdd() {
-            if (!this.inlineForm.title.trim()) return;
+            const typeLabels = @json(\App\Models\ServicePlanItem::typeLabels());
+            let title = this.inlineForm.title.trim();
+            let type = this.inlineForm.type;
+
+            // If type selected but no title, use type label as title
+            if (type && !title) {
+                title = typeLabels[type] || type;
+            }
+
+            if (!title && !type) return;
 
             fetch('{{ route('events.plan.store', $event) }}', {
                 method: 'POST',
@@ -674,10 +668,10 @@ function servicePlan() {
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
-                    title: this.inlineForm.title,
-                    type: this.inlineForm.type || null,
-                    start_time: this.inlineForm.start_time || null,
-                    responsible_names: this.inlineForm.responsible_names || null
+                    title: title,
+                    type: type || null,
+                    start_time: null,
+                    responsible_names: null
                 })
             })
             .then(r => {
