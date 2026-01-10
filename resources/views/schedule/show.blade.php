@@ -67,9 +67,9 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main content -->
-        <div class="lg:col-span-2 space-y-6">
+    <div class="space-y-6">
+        <!-- Main content (full width) -->
+        <div class="space-y-6">
             <!-- План події -->
             @if($event->is_service)
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700" x-data="planEditor()">
@@ -370,8 +370,8 @@
             @endif
         </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-6">
+        <!-- Secondary content (grid for sidebar items) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Linked Tasks from Boards -->
             <x-linked-cards entityType="event" :entityId="$event->id" :boards="$boards" />
 
