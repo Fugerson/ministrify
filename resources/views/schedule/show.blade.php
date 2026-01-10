@@ -94,11 +94,11 @@
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
-                                <th class="px-3 py-4 text-left w-24">Час</th>
+                                <th class="px-3 py-4 text-left w-20">Час</th>
                                 <th class="px-3 py-4 text-left">Що відбувається</th>
-                                <th class="px-3 py-4 text-left w-44">Відповідальний</th>
-                                <th class="px-3 py-4 text-left">Коментарі</th>
-                                <th class="px-2 py-4 w-16"></th>
+                                <th class="px-3 py-4 text-left whitespace-nowrap">Відповідальний</th>
+                                <th class="px-3 py-4 text-left w-32">Коментарі</th>
+                                <th class="px-2 py-4 w-10"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -121,7 +121,7 @@
                                                class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
                                     {{-- Відповідальний --}}
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700"
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 whitespace-nowrap"
                                         x-data="{
                                             open: false,
                                             value: '{{ addslashes($item->responsible_names ?? ($item->responsible?->full_name ?? '')) }}',
@@ -153,8 +153,8 @@
                                                 }
                                             }
                                         }">
-                                        <div class="flex items-center gap-1">
-                                            <div class="relative flex-1">
+                                        <div class="flex items-center gap-2 flex-nowrap">
+                                            <div class="relative min-w-[100px]">
                                                 <input type="text"
                                                        x-model="value"
                                                        @focus="open = true"
@@ -181,14 +181,14 @@
                                             {{-- Status and Actions --}}
                                             @if($item->responsible_id)
                                                 @if($item->status === 'confirmed')
-                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg font-medium">
+                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg font-medium shrink-0">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                         </svg>
                                                         Підтвердив
                                                     </span>
                                                 @elseif($item->status === 'declined')
-                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg font-medium">
+                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg font-medium shrink-0">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                         </svg>
@@ -204,7 +204,7 @@
                                                         </button>
                                                     @endif
                                                 @elseif($item->status === 'pending')
-                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-lg font-medium">
+                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-lg font-medium shrink-0">
                                                         <svg class="w-3.5 h-3.5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
                                                             <circle cx="12" cy="12" r="10"/>
                                                         </svg>
@@ -215,14 +215,14 @@
                                                     @if($item->responsible?->telegram_chat_id)
                                                         <button type="button"
                                                                 onclick="askInTelegram({{ $item->id }}, '{{ addslashes($item->responsible->full_name) }}')"
-                                                                class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded-lg font-medium transition-colors">
+                                                                class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded-lg font-medium transition-colors shrink-0">
                                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                             </svg>
                                                             Запитати в Telegram
                                                         </button>
                                                     @else
-                                                        <span class="inline-flex items-center gap-1 text-xs px-2 py-1 text-gray-400 dark:text-gray-500" title="У цієї людини не підключений Telegram">
+                                                        <span class="inline-flex items-center gap-1 text-xs px-2 py-1 text-gray-400 dark:text-gray-500 shrink-0" title="У цієї людини не підключений Telegram">
                                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                             </svg>
