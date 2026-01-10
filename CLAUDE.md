@@ -7,18 +7,21 @@ ChurchHub (Ministrify) - система управління церквою. Lar
 
 ## DEPLOYMENT - ВАЖЛИВО!!!
 
-Коли користувач каже "диплой" або "деплой" - ЗАВЖДИ виконуй SSH на продакшн сервер:
+**IP сервера:** `49.12.100.17` (root@49.12.100.17)
+
+Коли користувач каже "диплой" або "деплой" - ЗАВЖДИ виконуй повний rebuild:
 
 ```bash
-ssh root@ministrify.app "cd /var/www/ministrify && ./deploy.sh"
+ssh root@49.12.100.17 "cd /var/www/ministrify && git pull && docker compose -f docker-compose.prod.yml down && docker compose -f docker-compose.prod.yml up -d --build && sleep 15 && docker compose -f docker-compose.prod.yml exec -T app php artisan optimize:clear"
 ```
 
-**НЕ запускай локальний Docker** - це не продакшн!
+**ВАЖЛИВО:** Просто `view:clear` або `config:clear` НЕ ДОСТАТНЬО!
+Треба робити повний `down` + `up --build` щоб зміни в blade файлах застосувались!
 
 Повний процес "комміт пуш диплой":
 1. `git add -A && git commit -m "message"`
-2. `git push`
-3. `ssh root@ministrify.app "cd /var/www/ministrify && ./deploy.sh"`
+2. `git push origin main`
+3. SSH і повний rebuild (команда вище)
 
 ---
 
