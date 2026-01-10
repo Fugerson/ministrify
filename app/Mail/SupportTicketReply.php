@@ -4,16 +4,14 @@ namespace App\Mail;
 
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SupportTicketReply extends Mailable implements ShouldQueue
+class SupportTicketReply extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     /**
      * Create a new message instance.

@@ -13,7 +13,7 @@
 
 @section('content')
 <div x-data="peopleTable()" class="space-y-4">
-    <!-- Search & Stats Bar -->
+    <!-- Search & Filter Bar -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search -->
@@ -21,7 +21,7 @@
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" x-model="filters.search" placeholder="Пошук по всіх полях..."
+                <input type="text" x-model="filters.search" placeholder="Пошук за ім'ям, телефоном, email..."
                     class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20">
                 <button x-show="filters.search" @click="filters.search = ''" x-cloak
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -30,24 +30,186 @@
                     </svg>
                 </button>
             </div>
+
+            <!-- Filter Button -->
+            <button @click="showFilters = !showFilters"
+                :class="{'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800': hasFilters || showFilters, 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600': !hasFilters && !showFilters}"
+                class="inline-flex items-center px-4 py-2.5 border rounded-xl font-medium transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                Фільтри
+                <span x-show="activeFilterCount > 0" x-text="activeFilterCount"
+                    class="ml-2 px-2 py-0.5 text-xs font-semibold bg-primary-600 text-white rounded-full"></span>
+            </button>
+
             <!-- Stats -->
             <div class="flex flex-wrap items-center gap-4 text-sm">
                 <div class="flex items-center gap-2">
-                    <span class="text-gray-500 dark:text-gray-400">Всього:</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">{{ $stats['total'] }}</span>
+                    <span class="font-semibold text-gray-900 dark:text-white" x-text="filteredCount"></span>
+                    <span class="text-gray-500 dark:text-gray-400">з {{ $stats['total'] }}</span>
                 </div>
-                <div class="w-px h-4 bg-gray-200 dark:bg-gray-700"></div>
-                <div class="flex items-center gap-2">
-                    <span class="text-gray-500 dark:text-gray-400">Показано:</span>
-                    <span class="font-semibold text-primary-600" x-text="filteredCount"></span>
+            </div>
+        </div>
+
+        <!-- Active Filters Chips -->
+        <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <template x-if="filters.gender">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
+                    <span x-text="filters.gender === 'male' ? 'Чоловіки' : 'Жінки'"></span>
+                    <button @click="filters.gender = ''" class="hover:text-blue-900 dark:hover:text-blue-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            </template>
+            <template x-if="filters.marital_status">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-lg text-sm">
+                    <span x-text="maritalStatusLabels[filters.marital_status]"></span>
+                    <button @click="filters.marital_status = ''" class="hover:text-pink-900 dark:hover:text-pink-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            </template>
+            <template x-if="filters.ministry">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm">
+                    <span x-text="filters.ministry"></span>
+                    <button @click="filters.ministry = ''" class="hover:text-green-900 dark:hover:text-green-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            </template>
+            <template x-if="filters.role">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm">
+                    <span x-text="filters.role"></span>
+                    <button @click="filters.role = ''" class="hover:text-purple-900 dark:hover:text-purple-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            </template>
+            @if($church->shepherds_enabled)
+            <template x-if="filters.shepherd">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-sm">
+                    <span x-text="filters.shepherd === 'none' ? 'Без опікуна' : filters.shepherd"></span>
+                    <button @click="filters.shepherd = ''" class="hover:text-amber-900 dark:hover:text-amber-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            </template>
+            @endif
+            <template x-if="filters.birth_from || filters.birth_to">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg text-sm">
+                    <span x-text="filters.dateRangeDisplay || 'Дата народження'"></span>
+                    <button @click="clearDateFilter()" class="hover:text-orange-900 dark:hover:text-orange-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            </template>
+
+            <button @click="clearFilters()" class="text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 font-medium">
+                Очистити все
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div x-show="showFilters" x-cloak x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+            <!-- Gender -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Стать</label>
+                <div class="flex flex-wrap gap-2">
+                    <button @click="filters.gender = filters.gender === 'male' ? '' : 'male'"
+                        :class="filters.gender === 'male' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
+                        class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
+                        Чоловіки
+                    </button>
+                    <button @click="filters.gender = filters.gender === 'female' ? '' : 'female'"
+                        :class="filters.gender === 'female' ? 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
+                        class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
+                        Жінки
+                    </button>
                 </div>
-                @if($stats['serving'] > 0)
-                <div class="w-px h-4 bg-gray-200 dark:bg-gray-700"></div>
-                <div class="flex items-center gap-2">
-                    <span class="text-gray-500 dark:text-gray-400">Служать:</span>
-                    <span class="font-semibold text-green-600">{{ $stats['serving'] }}</span>
+            </div>
+
+            <!-- Marital Status -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Сімейний стан</label>
+                <select x-model="filters.marital_status"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
+                    <option value="">Всі</option>
+                    @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
+                    <option value="{{ $value }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Ministry -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Служіння</label>
+                <select x-model="filters.ministry"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
+                    <option value="">Всі</option>
+                    @foreach($ministries as $ministry)
+                    <option value="{{ $ministry->name }}">{{ $ministry->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Role -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Роль в церкві</label>
+                <select x-model="filters.role"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
+                    <option value="">Всі</option>
+                    @foreach($churchRoles as $role)
+                    <option value="{{ $role->name }}">{{ $role->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            @if($church->shepherds_enabled)
+            <!-- Shepherd -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Опікун</label>
+                <select x-model="filters.shepherd"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
+                    <option value="">Всі</option>
+                    @foreach($shepherds as $shepherd)
+                    <option value="{{ $shepherd->full_name }}">{{ $shepherd->full_name }}</option>
+                    @endforeach
+                    <option value="none">Без опікуна</option>
+                </select>
+            </div>
+            @endif
+
+            <!-- Birth Date Range -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Дата народження</label>
+                <div class="relative">
+                    <input type="text" x-ref="dateRange" x-model="filters.dateRangeDisplay" placeholder="Виберіть діапазон..." readonly
+                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 cursor-pointer">
+                    <button type="button" x-show="filters.birth_from || filters.birth_to" @click="clearDateFilter()"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
                 </div>
-                @endif
             </div>
         </div>
     </div>
@@ -59,114 +221,27 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-3 md:px-4 py-3 text-left">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ім'я</span>
-                                <input type="text" x-model="filters.name" placeholder="Фільтр..."
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                            </div>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Ім'я
                         </th>
-                        <th class="px-3 md:px-4 py-3 text-left hidden sm:table-cell">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Телефон</span>
-                                <input type="text" x-model="filters.phone" placeholder="Фільтр..."
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                            </div>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
+                            Контакти
                         </th>
-                        <th class="px-3 md:px-4 py-3 text-left hidden md:table-cell">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</span>
-                                <input type="text" x-model="filters.email" placeholder="Фільтр..."
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                            </div>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
+                            Дата народження
                         </th>
-                        <th class="px-4 py-3 text-left hidden lg:table-cell">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дата народження</span>
-                                <div class="relative">
-                                    <input type="text" x-ref="dateRange" x-model="filters.dateRangeDisplay" placeholder="Виберіть дати..." readonly
-                                        class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 cursor-pointer">
-                                    <button type="button" x-show="filters.birth_from || filters.birth_to" @click="clearDateFilter()"
-                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
+                            Служіння
                         </th>
-                        <th class="px-4 py-3 text-left hidden md:table-cell">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Служіння</span>
-                                <select x-model="filters.ministry"
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                                    <option value="">Всі</option>
-                                    @foreach($ministries as $ministry)
-                                    <option value="{{ $ministry->name }}">{{ $ministry->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </th>
-                        <th class="px-4 py-3 text-left hidden xl:table-cell">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Стать</span>
-                                <select x-model="filters.gender"
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
-                                    <option value="" class="bg-white dark:bg-gray-800">Всі</option>
-                                    @foreach(\App\Models\Person::GENDERS as $value => $label)
-                                    <option value="{{ $value }}" class="bg-white dark:bg-gray-800">{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </th>
-                        <th class="px-4 py-3 text-left hidden xl:table-cell">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Сім. стан</span>
-                                <select x-model="filters.marital_status"
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
-                                    <option value="" class="bg-white dark:bg-gray-800">Всі</option>
-                                    @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
-                                    <option value="{{ $value }}" class="bg-white dark:bg-gray-800">{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </th>
-                        <th class="px-4 py-3 text-left hidden xl:table-cell">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Роль</span>
-                                <select x-model="filters.role"
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
-                                    <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Всі</option>
-                                    @foreach($churchRoles as $role)
-                                    <option value="{{ $role->name }}" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $role->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden xl:table-cell">
+                            Роль
                         </th>
                         @if($church->shepherds_enabled)
-                        <th class="px-4 py-3 text-left hidden xl:table-cell">
-                            <div class="space-y-2">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Опікун</span>
-                                <select x-model="filters.shepherd"
-                                    class="w-full px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white">
-                                    <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Всі</option>
-                                    @foreach($shepherds as $shepherd)
-                                    <option value="{{ $shepherd->full_name }}" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $shepherd->full_name }}</option>
-                                    @endforeach
-                                    <option value="none" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Без опікуна</option>
-                                </select>
-                            </div>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden xl:table-cell">
+                            Опікун
                         </th>
                         @endif
-                        <th class="px-2 md:px-4 py-3 w-10">
-                            <button @click="clearFilters()" x-show="hasFilters" x-cloak
-                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                title="Очистити фільтри">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </th>
+                        <th class="px-4 py-3 w-10"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -188,45 +263,63 @@
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
                         onclick="window.location='{{ route('people.show', $person) }}'">
                         <!-- Name -->
-                        <td class="px-3 md:px-4 py-3">
+                        <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 @if($person->photo)
                                 <img src="{{ Storage::url($person->photo) }}" alt=""
-                                     class="w-9 h-9 rounded-lg object-cover flex-shrink-0">
+                                     class="w-10 h-10 rounded-xl object-cover flex-shrink-0">
                                 @else
-                                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
-                                    <span class="text-xs font-semibold text-white">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
+                                    <span class="text-sm font-semibold text-white">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
                                 </div>
                                 @endif
                                 <div class="min-w-0">
-                                    <div class="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
+                                    <div class="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                                         {{ $person->full_name ?: '—' }}
                                     </div>
-                                    <!-- Mobile: show phone/email under name -->
-                                    <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                        @if($person->gender)
+                                        <span>{{ $person->gender_label }}</span>
+                                        @endif
+                                        @if($person->gender && $person->marital_status)
+                                        <span>•</span>
+                                        @endif
+                                        @if($person->marital_status)
+                                        <span>{{ $person->marital_status_label }}</span>
+                                        @endif
+                                    </div>
+                                    <!-- Mobile: show phone under name -->
+                                    <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
                                         {{ $person->phone ?: $person->email ?: '' }}
                                     </div>
-                                    @if($person->telegram_username)
-                                    <div class="text-xs text-gray-400 hidden sm:block">{{ $person->telegram_username }}</div>
-                                    @endif
                                 </div>
                             </div>
                         </td>
-                        <!-- Phone -->
-                        <td class="px-3 md:px-4 py-3 hidden sm:table-cell">
-                            <span class="text-gray-600 dark:text-gray-300">{{ $person->phone ?: '—' }}</span>
-                        </td>
-                        <!-- Email -->
-                        <td class="px-3 md:px-4 py-3 hidden md:table-cell">
-                            <span class="text-gray-600 dark:text-gray-300 text-sm">{{ $person->email ?: '—' }}</span>
+                        <!-- Contacts -->
+                        <td class="px-4 py-3 hidden sm:table-cell">
+                            <div class="space-y-0.5">
+                                @if($person->phone)
+                                <div class="text-sm text-gray-900 dark:text-white">{{ $person->phone }}</div>
+                                @endif
+                                @if($person->email)
+                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{{ $person->email }}</div>
+                                @endif
+                                @if(!$person->phone && !$person->email)
+                                <span class="text-gray-400">—</span>
+                                @endif
+                            </div>
                         </td>
                         <!-- Birth Date -->
                         <td class="px-4 py-3 hidden lg:table-cell">
-                            <span class="text-gray-600 dark:text-gray-300">
-                                {{ $person->birth_date?->format('d.m.Y') ?: '—' }}
-                            </span>
                             @if($person->birth_date)
-                            <span class="text-xs text-gray-400 ml-1">({{ $person->birth_date->age }} р.)</span>
+                            <div class="text-sm text-gray-900 dark:text-white">
+                                {{ $person->birth_date->format('d.m.Y') }}
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ $person->birth_date->age }} років
+                            </div>
+                            @else
+                            <span class="text-gray-400">—</span>
                             @endif
                         </td>
                         <!-- Ministries -->
@@ -243,22 +336,6 @@
                                 <span class="text-xs text-gray-400">+{{ $person->ministries->count() - 2 }}</span>
                                 @endif
                             </div>
-                            @else
-                            <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                        <!-- Gender -->
-                        <td class="px-4 py-3 hidden xl:table-cell">
-                            @if($person->gender)
-                            <span class="text-gray-600 dark:text-gray-300 text-sm">{{ $person->gender_label }}</span>
-                            @else
-                            <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                        <!-- Marital Status -->
-                        <td class="px-4 py-3 hidden xl:table-cell">
-                            @if($person->marital_status)
-                            <span class="text-gray-600 dark:text-gray-300 text-sm">{{ $person->marital_status_label }}</span>
                             @else
                             <span class="text-gray-400">—</span>
                             @endif
@@ -294,7 +371,7 @@
                         </td>
                         @endif
                         <!-- Action -->
-                        <td class="px-2 md:px-4 py-3">
+                        <td class="px-4 py-3">
                             <a href="{{ route('people.show', $person) }}"
                                class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors inline-block"
                                onclick="event.stopPropagation()">
@@ -348,7 +425,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-3 md:px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <span class="hidden sm:inline">Показувати</span>
                 <select x-model.number="perPage" @change="currentPage = 1"
@@ -363,30 +440,30 @@
 
             <div class="flex items-center gap-0.5">
                 <button @click="currentPage = 1" :disabled="currentPage === 1"
-                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed active:bg-gray-200 dark:active:bg-gray-600">
+                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
                 </button>
                 <button @click="currentPage--" :disabled="currentPage === 1"
-                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed active:bg-gray-200 dark:active:bg-gray-600">
+                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
 
-                <span class="px-2 sm:px-3 py-1 text-sm text-gray-700 dark:text-gray-300 min-w-[4rem] text-center">
+                <span class="px-3 py-1 text-sm text-gray-700 dark:text-gray-300 min-w-[4rem] text-center">
                     <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
                 </span>
 
                 <button @click="currentPage++" :disabled="currentPage >= totalPages"
-                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed active:bg-gray-200 dark:active:bg-gray-600">
+                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
                 <button @click="currentPage = totalPages" :disabled="currentPage >= totalPages"
-                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed active:bg-gray-200 dark:active:bg-gray-600">
+                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
                     </svg>
@@ -397,15 +474,15 @@
 
     <!-- Export/Import -->
     @admin
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-3 md:p-4">
-        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <a href="{{ route('people.export') }}" class="inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="{{ route('people.export') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
                 Експорт Excel
             </a>
-            <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors text-sm">
+            <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors text-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                 </svg>
@@ -420,235 +497,68 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/uk.js"></script>
 
 <style>
-/* Flatpickr base styles (inlined to avoid CSP issues) */
 .flatpickr-calendar {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     border: 1px solid #e5e7eb;
-    display: none;
     font-family: inherit;
-    font-size: 14px;
-    line-height: 24px;
-    opacity: 0;
-    padding: 0;
-    position: absolute;
-    text-align: center;
-    touch-action: manipulation;
-    visibility: hidden;
-    width: 307.875px;
     z-index: 9999;
 }
-.flatpickr-calendar.open, .flatpickr-calendar.inline {
-    opacity: 1;
-    visibility: visible;
-    display: block;
-}
-.flatpickr-calendar.animate.open {
-    animation: fpFadeInDown 200ms ease-out;
-}
+.flatpickr-calendar.open { opacity: 1; visibility: visible; display: block; }
+.flatpickr-calendar.animate.open { animation: fpFadeInDown 200ms ease-out; }
 @keyframes fpFadeInDown {
     from { opacity: 0; transform: translate3d(0, -10px, 0); }
     to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
-
-.flatpickr-months {
-    display: flex;
-    align-items: center;
-    padding: 8px 4px;
+.flatpickr-months { display: flex; align-items: center; padding: 8px 4px; }
+.flatpickr-months .flatpickr-month { flex: 1; height: 34px; display: flex; align-items: center; justify-content: center; }
+.flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month {
+    cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px;
 }
-.flatpickr-months .flatpickr-month {
-    flex: 1;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.flatpickr-months .flatpickr-prev-month,
-.flatpickr-months .flatpickr-next-month {
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: background 0.15s;
-}
-.flatpickr-months .flatpickr-prev-month:hover,
-.flatpickr-months .flatpickr-next-month:hover {
-    background: #f3f4f6;
-}
-.flatpickr-months .flatpickr-prev-month svg,
-.flatpickr-months .flatpickr-next-month svg {
-    width: 14px;
-    height: 14px;
-    fill: #6b7280;
-}
-.flatpickr-months .flatpickr-prev-month:hover svg,
-.flatpickr-months .flatpickr-next-month:hover svg {
-    fill: #111827;
-}
-
-.flatpickr-current-month {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-}
+.flatpickr-months .flatpickr-prev-month:hover, .flatpickr-months .flatpickr-next-month:hover { background: #f3f4f6; }
+.flatpickr-months .flatpickr-prev-month svg, .flatpickr-months .flatpickr-next-month svg { width: 14px; height: 14px; fill: #6b7280; }
+.flatpickr-current-month { display: flex; align-items: center; justify-content: center; gap: 4px; }
 .flatpickr-current-month .flatpickr-monthDropdown-months {
-    appearance: none;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 4px 8px;
-    color: #111827;
-}
-.flatpickr-current-month .flatpickr-monthDropdown-months:hover {
-    background: #f3f4f6;
-}
-.flatpickr-current-month .numInputWrapper {
-    display: inline-flex;
-    align-items: center;
+    appearance: none; background: transparent; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 14px; font-weight: 600; padding: 4px 8px; color: #111827;
 }
 .flatpickr-current-month input.cur-year {
-    appearance: none;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    cursor: text;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 4px 8px;
-    width: 60px;
-    color: #111827;
+    appearance: none; background: transparent; border: none; border-radius: 6px; cursor: text;
+    font-size: 14px; font-weight: 600; padding: 4px 8px; width: 60px; color: #111827;
 }
-.flatpickr-current-month .numInputWrapper span {
-    display: none;
-}
-
-.flatpickr-weekdays {
-    display: flex;
-    padding: 0 12px;
-    height: 28px;
-    align-items: center;
-}
-.flatpickr-weekdaycontainer {
-    display: flex;
-    flex: 1;
-}
-.flatpickr-weekday {
-    flex: 1;
-    font-size: 11px;
-    font-weight: 600;
-    color: #9ca3af;
-    text-transform: uppercase;
-}
-
-.flatpickr-days {
-    padding: 4px 12px 12px;
-}
-.dayContainer {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    gap: 2px;
-}
+.flatpickr-current-month .numInputWrapper span { display: none; }
+.flatpickr-weekdays { display: flex; padding: 0 12px; height: 28px; align-items: center; }
+.flatpickr-weekdaycontainer { display: flex; flex: 1; }
+.flatpickr-weekday { flex: 1; font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; }
+.flatpickr-days { padding: 4px 12px 12px; }
+.dayContainer { display: flex; flex-wrap: wrap; width: 100%; gap: 2px; }
 .flatpickr-day {
-    width: calc(100% / 7 - 2px);
-    max-width: 39px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: #374151;
-    border: 1px solid transparent;
-    transition: all 0.15s;
+    width: calc(100% / 7 - 2px); max-width: 39px; height: 36px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #374151; border: 1px solid transparent;
 }
-.flatpickr-day:hover {
-    background: #f3f4f6;
-}
-.flatpickr-day.today {
-    border-color: #4f46e5;
-}
-.flatpickr-day.selected,
-.flatpickr-day.startRange,
-.flatpickr-day.endRange {
-    background: #4f46e5;
-    color: #fff;
-    border-color: #4f46e5;
-}
-.flatpickr-day.inRange {
-    background: #eef2ff;
-    border-color: #eef2ff;
-}
-.flatpickr-day.prevMonthDay,
-.flatpickr-day.nextMonthDay {
-    color: #d1d5db;
-}
-.flatpickr-day.disabled {
-    color: #d1d5db;
-    cursor: not-allowed;
-}
-
-/* Dark mode */
-.dark .flatpickr-calendar {
-    background: #1f2937;
-    border-color: #374151;
-}
-.dark .flatpickr-months .flatpickr-prev-month:hover,
-.dark .flatpickr-months .flatpickr-next-month:hover {
-    background: #374151;
-}
-.dark .flatpickr-months .flatpickr-prev-month svg,
-.dark .flatpickr-months .flatpickr-next-month svg {
-    fill: #9ca3af;
-}
-.dark .flatpickr-months .flatpickr-prev-month:hover svg,
-.dark .flatpickr-months .flatpickr-next-month:hover svg {
-    fill: #fff;
-}
-.dark .flatpickr-current-month .flatpickr-monthDropdown-months,
-.dark .flatpickr-current-month input.cur-year {
-    color: #fff;
-}
-.dark .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
-    background: #374151;
-}
-.dark .flatpickr-weekday {
-    color: #6b7280;
-}
-.dark .flatpickr-day {
-    color: #e5e7eb;
-}
-.dark .flatpickr-day:hover {
-    background: #374151;
-}
-.dark .flatpickr-day.inRange {
-    background: #312e81;
-    border-color: #312e81;
-}
-.dark .flatpickr-day.prevMonthDay,
-.dark .flatpickr-day.nextMonthDay {
-    color: #6b7280;
-}
+.flatpickr-day:hover { background: #f3f4f6; }
+.flatpickr-day.today { border-color: #4f46e5; }
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+.flatpickr-day.inRange { background: #eef2ff; border-color: #eef2ff; }
+.flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color: #d1d5db; }
+.dark .flatpickr-calendar { background: #1f2937; border-color: #374151; }
+.dark .flatpickr-months .flatpickr-prev-month:hover, .dark .flatpickr-months .flatpickr-next-month:hover { background: #374151; }
+.dark .flatpickr-months .flatpickr-prev-month svg, .dark .flatpickr-months .flatpickr-next-month svg { fill: #9ca3af; }
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months, .dark .flatpickr-current-month input.cur-year { color: #fff; }
+.dark .flatpickr-weekday { color: #6b7280; }
+.dark .flatpickr-day { color: #e5e7eb; }
+.dark .flatpickr-day:hover { background: #374151; }
+.dark .flatpickr-day.inRange { background: #312e81; border-color: #312e81; }
+.dark .flatpickr-day.prevMonthDay, .dark .flatpickr-day.nextMonthDay { color: #6b7280; }
 </style>
 
 <script>
 function peopleTable() {
     return {
+        showFilters: false,
         filters: {
             search: '',
-            name: '',
-            phone: '',
-            email: '',
             birth_from: '',
             birth_to: '',
             dateRangeDisplay: '',
@@ -658,6 +568,7 @@ function peopleTable() {
             role: '',
             shepherd: ''
         },
+        maritalStatusLabels: @js(\App\Models\Person::MARITAL_STATUSES),
         flatpickrInstance: null,
         filteredCount: {{ $people->count() }},
         perPage: 25,
@@ -667,7 +578,6 @@ function peopleTable() {
 
         init() {
             this.$nextTick(() => {
-                this.initDatePicker();
                 this.updateFilteredIndices();
             });
 
@@ -675,9 +585,17 @@ function peopleTable() {
                 this.updateFilteredIndices();
                 this.currentPage = 1;
             }, { deep: true });
+
+            // Initialize datepicker when filter panel opens
+            this.$watch('showFilters', (value) => {
+                if (value && !this.flatpickrInstance) {
+                    this.$nextTick(() => this.initDatePicker());
+                }
+            });
         },
 
         initDatePicker() {
+            if (!this.$refs.dateRange || this.flatpickrInstance) return;
             this.flatpickrInstance = flatpickr(this.$refs.dateRange, {
                 mode: 'range',
                 dateFormat: 'd.m.Y',
@@ -707,6 +625,17 @@ function peopleTable() {
             this.filteredCount = this.filteredIndices.length;
         },
 
+        get activeFilterCount() {
+            let count = 0;
+            if (this.filters.gender) count++;
+            if (this.filters.marital_status) count++;
+            if (this.filters.ministry) count++;
+            if (this.filters.role) count++;
+            if (this.filters.shepherd) count++;
+            if (this.filters.birth_from || this.filters.birth_to) count++;
+            return count;
+        },
+
         get totalPages() {
             if (this.perPage === 0) return 1;
             return Math.max(1, Math.ceil(this.filteredCount / this.perPage));
@@ -714,7 +643,6 @@ function peopleTable() {
 
         shouldShowRow(index, person) {
             if (!this.matchesFilters(person)) return false;
-
             if (this.perPage === 0) return true;
 
             const positionInFiltered = this.filteredIndices.indexOf(index);
@@ -736,8 +664,7 @@ function peopleTable() {
         },
 
         get hasFilters() {
-            return this.filters.search || this.filters.name || this.filters.phone || this.filters.email ||
-                   this.filters.birth_from || this.filters.birth_to ||
+            return this.filters.search || this.filters.birth_from || this.filters.birth_to ||
                    this.filters.ministry || this.filters.gender || this.filters.marital_status ||
                    this.filters.role || this.filters.shepherd;
         },
@@ -749,7 +676,6 @@ function peopleTable() {
                 if (!allText.includes(searchLower)) return false;
             }
 
-            // Special handling for shepherd filter
             if (this.filters.shepherd) {
                 if (this.filters.shepherd === 'none') {
                     if (person.shepherd) return false;
@@ -759,9 +685,6 @@ function peopleTable() {
             }
 
             return (
-                this.matchText(person.name, this.filters.name) &&
-                this.matchText(person.phone, this.filters.phone) &&
-                this.matchText(person.email, this.filters.email) &&
                 this.matchDateRange(person.birth_date, this.filters.birth_from, this.filters.birth_to) &&
                 this.matchText(person.ministry, this.filters.ministry) &&
                 this.matchExact(person.gender, this.filters.gender) &&
@@ -793,9 +716,6 @@ function peopleTable() {
         clearFilters() {
             this.filters = {
                 search: '',
-                name: '',
-                phone: '',
-                email: '',
                 birth_from: '',
                 birth_to: '',
                 dateRangeDisplay: '',
