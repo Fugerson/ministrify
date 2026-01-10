@@ -106,11 +106,18 @@
                                 <tr class="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group" data-id="{{ $item->id }}">
                                     {{-- Час --}}
                                     <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
-                                        <input type="text"
-                                               value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
-                                               placeholder="--:--"
-                                               @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
-                                               class="w-full px-1 py-1 text-sm font-semibold text-primary-600 dark:text-primary-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
+                                        <select @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
+                                                class="w-full px-1 py-1 text-sm font-semibold text-primary-600 dark:text-primary-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded cursor-pointer">
+                                            <option value="">--:--</option>
+                                            @for ($h = 6; $h <= 23; $h++)
+                                                @foreach ([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55] as $m)
+                                                    @php $timeVal = sprintf('%02d:%02d', $h, $m); @endphp
+                                                    <option value="{{ $timeVal }}" {{ ($item->start_time && \Carbon\Carbon::parse($item->start_time)->format('H:i') === $timeVal) ? 'selected' : '' }}>
+                                                        {{ $timeVal }}
+                                                    </option>
+                                                @endforeach
+                                            @endfor
+                                        </select>
                                     </td>
                                     {{-- Що відбувається --}}
                                     <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
@@ -345,8 +352,15 @@
                 {{-- Add new row --}}
                 <div class="p-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
                     <form @submit.prevent="addItem()" class="flex items-center gap-2">
-                        <input type="text" x-model="newItem.start_time" placeholder="Час"
-                               class="w-20 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <select x-model="newItem.start_time"
+                                class="w-24 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer">
+                            <option value="">Час</option>
+                            @for ($h = 6; $h <= 23; $h++)
+                                @foreach ([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55] as $m)
+                                    <option value="{{ sprintf('%02d:%02d', $h, $m) }}">{{ sprintf('%02d:%02d', $h, $m) }}</option>
+                                @endforeach
+                            @endfor
+                        </select>
                         <input type="text" x-model="newItem.title" placeholder="Що відбувається..." required
                                class="flex-1 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <input type="text" x-model="newItem.responsible_names" placeholder="Відповідальний"
