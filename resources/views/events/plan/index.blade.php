@@ -488,32 +488,28 @@
                     </template>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
-                        <input type="text" name="title" x-model="formData.title" required
-                               placeholder="Прославлення, Проповідь, тощо"
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип</label>
+                        <select name="type" x-model="formData.type"
+                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <option value="">Оберіть тип</option>
+                            @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
+                                <option value="{{ $type }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва (якщо інша)</label>
+                        <input type="text" name="title" x-model="formData.title"
+                               placeholder="Або введіть свою назву"
                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип (підказка)</label>
-                            <select name="type" x-model="formData.type"
-                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                                <option value="">-- Без типу --</option>
-                                @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
-                                    <option value="{{ $type }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Статус</label>
-                            <select name="status" x-model="formData.status"
-                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                                @foreach(\App\Models\ServicePlanItem::statusLabels() as $status => $label)
-                                    <option value="{{ $status }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Відповідальний</label>
+                        <input type="text" name="responsible_names" x-model="formData.responsible_names"
+                               placeholder="Ім'я або імена через кому"
+                               class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -530,35 +526,13 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Відповідальні</label>
-                        <input type="text" name="responsible_names" x-model="formData.responsible_names"
-                               placeholder="Ненсі/Віка, Команда прославлення"
-                               class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Вільний текст для кількох відповідальних</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Або виберіть з бази</label>
-                        <select name="responsible_id" x-model="formData.responsible_id"
-                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                            <option value="">-- Не вибрано --</option>
-                            @foreach($availablePeople as $person)
-                                <option value="{{ $person->id }}">{{ $person->full_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
-                        <textarea name="description" x-model="formData.description" rows="2"
-                                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки (внутрішні)</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
                         <textarea name="notes" x-model="formData.notes" rows="2"
+                                  placeholder="Додаткова інформація"
                                   class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
                     </div>
+
+                    <input type="hidden" name="status" value="planned">
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <button type="button" @click="closeModal()"
