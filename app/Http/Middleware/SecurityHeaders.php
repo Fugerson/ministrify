@@ -36,7 +36,7 @@ class SecurityHeaders
             $response->headers->set('Content-Security-Policy',
                 "default-src 'self'; " .
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com; " .
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net; " .
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net; " .
                 "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:; " .
                 "img-src 'self' data: https: blob:; " .
                 "connect-src 'self' https://cdn.jsdelivr.net wss: https:; " .
