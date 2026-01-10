@@ -143,4 +143,48 @@ class AuthController extends Controller
             ? redirect()->route('login')->with('status', __($status))
             : back()->withErrors(['email' => [__($status)]]);
     }
+
+    /**
+     * Show email verification notice
+     */
+    public function verificationNotice(Request $request)
+    {
+        return $request->user()->hasVerifiedEmail()
+            ? redirect()->intended(route('dashboard'))
+            : view('auth.verify-email');
+    }
+
+    /**
+     * Verify email
+     */
+    public function verifyEmail(Request $request)
+    {
+        $user = \App\Models\User::findOrFail($request->route('id'));
+
+        if (!hash_equals(sha1($user->getEmailForVerification()), (string) $request->route('hash'))) {
+            return redirect()->route('verification.notice')->with('error', 'Невірне посилання для верифікації.');
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->intended(route('dashboard'))->with('success', 'Email вже підтверджено.');
+        }
+
+        $user->markEmailAsVerified();
+
+        return redirect()->intended(route('dashboard'))->with('success', 'Email успішно підтверджено!');
+    }
+
+    /**
+     * Resend verification email
+     */
+    public function resendVerification(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->intended(route('dashboard'));
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('status', 'Лист для підтвердження надіслано!');
+    }
 }

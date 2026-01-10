@@ -37,6 +37,21 @@
             <button type="submit" class="px-6 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">Фільтрувати</button>
             <a href="{{ route('system.users.index') }}" class="px-6 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg">Скинути</a>
         </form>
+
+        @if($deletedCount > 0)
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center gap-4">
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Видалених: {{ $deletedCount }}
+            </span>
+            <a href="{{ route('system.users.index', ['only_deleted' => 1]) }}"
+               class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium">
+                Показати видалених →
+            </a>
+        </div>
+        @endif
     </div>
 
     <!-- Users Table -->
@@ -55,15 +70,18 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($users as $user)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 {{ $user->trashed() ? 'bg-red-50 dark:bg-red-900/10' : '' }}">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full {{ $user->is_super_admin ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-600' }} flex items-center justify-center mr-3">
+                                <div class="w-10 h-10 rounded-full {{ $user->trashed() ? 'bg-red-400' : ($user->is_super_admin ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-600') }} flex items-center justify-center mr-3">
                                     <span class="text-sm font-medium text-white">{{ mb_substr($user->name, 0, 1) }}</span>
                                 </div>
                                 <div>
-                                    <p class="font-medium text-gray-900 dark:text-white">{{ $user->name }}</p>
+                                    <p class="font-medium {{ $user->trashed() ? 'text-red-600 dark:text-red-400 line-through' : 'text-gray-900 dark:text-white' }}">{{ $user->name }}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
+                                    @if($user->trashed())
+                                    <p class="text-xs text-red-500 mt-1">Видалено: {{ $user->deleted_at->format('d.m.Y H:i') }}</p>
+                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -95,33 +113,56 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                @if($user->id !== auth()->id())
-                                <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="inline">
-                                    @csrf
-                                    <button type="submit" class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Увійти як {{ $user->name }}">
+                                @if($user->trashed())
+                                    <!-- Restore button -->
+                                    <form method="POST" action="{{ route('system.users.restore', $user->id) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="Відновити">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    <!-- Force delete button -->
+                                    <form method="POST" action="{{ route('system.users.forceDelete', $user->id) }}"
+                                          onsubmit="return confirm('УВАГА! Видалити користувача {{ $user->name }} НАЗАВЖДИ? Цю дію неможливо скасувати!')" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити назавжди">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @else
+                                    @if($user->id !== auth()->id())
+                                    <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Увійти як {{ $user->name }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    @endif
+                                    <a href="{{ route('system.users.edit', $user) }}"
+                                       class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Редагувати">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
-                                    </button>
-                                </form>
-                                @endif
-                                <a href="{{ route('system.users.edit', $user) }}"
-                                   class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Редагувати">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </a>
-                                @if($user->id !== auth()->id())
-                                <form method="POST" action="{{ route('system.users.destroy', $user) }}"
-                                      onsubmit="return confirm('Видалити користувача {{ $user->name }}?')" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Видалити">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
+                                    </a>
+                                    @if($user->id !== auth()->id())
+                                    <form method="POST" action="{{ route('system.users.destroy', $user) }}"
+                                          onsubmit="return confirm('Видалити користувача {{ $user->name }}? (можна буде відновити)')" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Видалити">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    @endif
                                 @endif
                             </div>
                         </td>

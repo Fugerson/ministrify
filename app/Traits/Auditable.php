@@ -25,13 +25,13 @@ trait Auditable
             }
         });
 
-        // Log deletion
+        // Log deletion (capture FULL data for recovery)
         static::deleted(function ($model) {
             $model->logAudit('deleted', $model->getOriginal(), null);
         });
 
         // Log restoration (if using SoftDeletes)
-        if (method_exists(static::class, 'restored')) {
+        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive(static::class))) {
             static::restored(function ($model) {
                 $model->logAudit('restored', null, $model->getAttributes());
             });
@@ -50,15 +50,21 @@ trait Auditable
 
         $user = auth()->user();
 
+        // ALWAYS log deletions, even for super admin!
+        $criticalActions = ['deleted', 'restored'];
+        $isCritical = in_array($action, $criticalActions);
+
         // Skip logging for super admin in invisible mode (impersonating church)
-        if ($user->isSuperAdmin() && session('impersonate_church_id')) {
+        // BUT never skip critical actions like delete/restore
+        if (!$isCritical && $user->isSuperAdmin() && session('impersonate_church_id')) {
             return;
         }
 
         // Get church_id from model or user
         $churchId = $this->church_id ?? $user->church_id ?? null;
 
-        if (!$churchId) {
+        // For critical actions, always log even without church_id
+        if (!$churchId && !$isCritical) {
             return;
         }
 

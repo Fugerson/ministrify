@@ -8,6 +8,7 @@ use App\Models\ExpenseCategory;
 use App\Models\Tag;
 use App\Models\User;
 use App\Rules\SecurePassword;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -96,9 +97,12 @@ class RegisterController extends Controller
                 ]);
             }
 
+            // Fire registered event to send verification email
+            event(new Registered($user));
+
             Auth::login($user);
         });
 
-        return redirect()->route('dashboard');
+        return redirect()->route('verification.notice');
     }
 }

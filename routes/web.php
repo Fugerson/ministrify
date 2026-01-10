@@ -78,6 +78,17 @@ Route::middleware('guest')->group(function () {
 Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 Route::post('stop-impersonating', [SystemAdminController::class, 'stopImpersonating'])->name('stop-impersonating')->middleware('auth');
 
+// Email Verification
+Route::middleware('auth')->group(function () {
+    Route::get('email/verify', [AuthController::class, 'verificationNotice'])->name('verification.notice');
+    Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+    Route::post('email/verification-notification', [AuthController::class, 'resendVerification'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+});
+
 // Two-Factor Authentication
 Route::get('two-factor/challenge', [\App\Http\Controllers\TwoFactorController::class, 'challenge'])->name('two-factor.challenge');
 Route::post('two-factor/verify', [\App\Http\Controllers\TwoFactorController::class, 'verify'])->name('two-factor.verify');
@@ -107,6 +118,8 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     Route::put('users/{user}', [SystemAdminController::class, 'updateUser'])->name('users.update');
     Route::delete('users/{user}', [SystemAdminController::class, 'destroyUser'])->name('users.destroy');
     Route::post('users/{user}/impersonate', [SystemAdminController::class, 'impersonateUser'])->name('users.impersonate');
+    Route::post('users/{id}/restore', [SystemAdminController::class, 'restoreUser'])->name('users.restore');
+    Route::delete('users/{id}/force-delete', [SystemAdminController::class, 'forceDeleteUser'])->name('users.forceDelete');
 
     // Audit Logs
     Route::get('audit-logs', [SystemAdminController::class, 'auditLogs'])->name('audit-logs');
@@ -130,8 +143,8 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     Route::post('exit-church', [SystemAdminController::class, 'exitChurchContext'])->name('exit-church');
 });
 
-// Protected routes
-Route::middleware(['auth', 'church', 'onboarding'])->group(function () {
+// Protected routes (require verified email)
+Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/charts', [DashboardController::class, 'chartData'])->name('dashboard.charts');

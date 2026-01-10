@@ -110,6 +110,16 @@ class SystemAdminController extends Controller
     {
         $query = User::with('church');
 
+        // Include deleted users if requested
+        if ($request->show_deleted) {
+            $query->withTrashed();
+        }
+
+        // Show only deleted users
+        if ($request->only_deleted) {
+            $query->onlyTrashed();
+        }
+
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
@@ -132,7 +142,10 @@ class SystemAdminController extends Controller
         $users = $query->latest()->paginate(20);
         $churches = Church::orderBy('name')->get();
 
-        return view('system-admin.users.index', compact('users', 'churches'));
+        // Count deleted users
+        $deletedCount = User::onlyTrashed()->count();
+
+        return view('system-admin.users.index', compact('users', 'churches', 'deletedCount'));
     }
 
     /**
@@ -175,7 +188,7 @@ class SystemAdminController extends Controller
     }
 
     /**
-     * Delete user
+     * Delete user (soft delete)
      */
     public function destroyUser(User $user)
     {
@@ -186,7 +199,38 @@ class SystemAdminController extends Controller
         $user->delete();
 
         return redirect()->route('system.users.index')
-            ->with('success', 'Користувача видалено.');
+            ->with('success', "Користувача {$user->name} ({$user->email}) видалено. Можна відновити.");
+    }
+
+    /**
+     * Restore deleted user
+     */
+    public function restoreUser($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->restore();
+
+        return redirect()->route('system.users.index')
+            ->with('success', "Користувача {$user->name} ({$user->email}) відновлено!");
+    }
+
+    /**
+     * Permanently delete user
+     */
+    public function forceDeleteUser($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Неможливо видалити себе.');
+        }
+
+        $userName = $user->name;
+        $userEmail = $user->email;
+        $user->forceDelete();
+
+        return redirect()->route('system.users.index')
+            ->with('success', "Користувача {$userName} ({$userEmail}) видалено назавжди.");
     }
 
     /**
