@@ -95,9 +95,9 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
                                 <th class="px-3 py-4 text-left" style="width: 70px;">Час</th>
-                                <th class="px-3 py-4 text-left">Що відбувається</th>
+                                <th class="px-3 py-4 text-left" style="width: 40%;">Що відбувається</th>
                                 <th class="px-3 py-4 text-left whitespace-nowrap" style="width: 1px;">Відповідальний</th>
-                                <th class="px-3 py-4 text-left" style="width: 100px;">Коментарі</th>
+                                <th class="px-3 py-4 text-left" style="width: 25%;">Коментарі</th>
                                 <th class="px-2 py-4" style="width: 40px;"></th>
                             </tr>
                         </thead>
@@ -112,12 +112,12 @@
                                                class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
                                     </td>
                                     {{-- Що відбувається --}}
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
-                                        <input type="text"
-                                               value="{{ $item->title }}"
-                                               placeholder="Опис пункту..."
-                                               @change="updateField({{ $item->id }}, 'title', $event.target.value)"
-                                               class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                                        <textarea placeholder="Опис пункту..."
+                                                  @change="updateField({{ $item->id }}, 'title', $event.target.value)"
+                                                  rows="1"
+                                                  class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none"
+                                                  oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">{{ $item->title }}</textarea>
                                     </td>
                                     {{-- Відповідальний (multiple people with statuses) --}}
                                     @php
@@ -311,12 +311,12 @@
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
-                                        <input type="text"
-                                               value="{{ $item->notes }}"
-                                               placeholder="Примітки..."
-                                               @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
-                                               class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                                        <textarea placeholder="Примітки..."
+                                                  @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
+                                                  rows="1"
+                                                  class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none"
+                                                  oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">{{ $item->notes }}</textarea>
                                     </td>
                                     {{-- Actions --}}
                                     <td class="px-3 py-3 text-center">
