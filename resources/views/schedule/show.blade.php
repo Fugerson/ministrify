@@ -91,12 +91,12 @@
                 </div>
 
                 <div class="overflow-x-auto" style="min-height: 300px;">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm table-auto">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
                                 <th class="px-3 py-4 text-left w-20">Час</th>
                                 <th class="px-3 py-4 text-left">Що відбувається</th>
-                                <th class="px-3 py-4 text-left whitespace-nowrap">Відповідальний</th>
+                                <th class="px-3 py-4 text-left whitespace-nowrap" style="min-width: 180px;">Відповідальний</th>
                                 <th class="px-3 py-4 text-left w-32">Коментарі</th>
                                 <th class="px-2 py-4 w-10"></th>
                             </tr>
@@ -153,7 +153,7 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700"
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top"
                                         x-data="{
                                             open: false,
                                             search: '',
