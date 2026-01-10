@@ -558,31 +558,23 @@
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
-    <!-- Invisible mode indicator - only small icon in corner -->
-    <div class="fixed bottom-4 left-4 z-50" x-data="{ show: false }">
-        <button @click="show = !show"
-                class="w-10 h-10 bg-gray-900/80 hover:bg-red-600 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
-                title="System Admin Mode">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+    <!-- Church context banner -->
+    <div class="sticky top-0 z-50 bg-indigo-600 text-white text-center py-2 px-4 flex items-center justify-center gap-4">
+        <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
-        </button>
-        <div x-show="show" x-cloak @click.away="show = false"
-             class="absolute bottom-12 left-0 w-64 bg-gray-900 text-white rounded-xl shadow-2xl p-4 text-sm">
-            <p class="text-gray-400 text-xs mb-2">INVISIBLE MODE</p>
-            <p class="font-medium">{{ $currentChurch->name }}</p>
-            <p class="text-gray-400 text-xs mt-1">{{ $currentChurch->city }}</p>
-            <form method="POST" action="{{ route('system.exit-church') }}" class="mt-3">
-                @csrf
-                <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm">
-                    Вийти з церкви
-                </button>
-            </form>
-            <a href="{{ route('system.index') }}" class="block text-center mt-2 text-gray-400 hover:text-white text-xs">
-                System Admin Panel →
-            </a>
-        </div>
+            Ви в контексті церкви: <strong>{{ $currentChurch->name }}</strong>
+        </span>
+        <form method="POST" action="{{ route('system.exit-church') }}" class="inline">
+            @csrf
+            <button type="submit" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                ← Вийти
+            </button>
+        </form>
+        <a href="{{ route('system.index') }}" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
+            System Admin
+        </a>
     </div>
     @endif
 
@@ -611,7 +603,7 @@
          @keydown.window.escape="searchOpen = false; fabOpen = false">
 
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 {{ session('impersonating_from') ? 'pt-10' : '' }}">
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 {{ session('impersonating_from') || session('impersonate_church_id') ? 'pt-10' : '' }}">
             <div class="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
@@ -908,7 +900,7 @@
         <!-- Main Content -->
         <div class="flex-1 lg:pl-64 overflow-clip">
             <!-- Mobile Header -->
-            <header class="lg:hidden sticky {{ session('impersonating_from') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
+            <header class="lg:hidden sticky {{ session('impersonating_from') || session('impersonate_church_id') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
                 <div class="flex items-center justify-between h-14 px-3">
                     <button @click="sidebarOpen = true" class="w-11 h-11 flex items-center justify-center -ml-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -933,7 +925,7 @@
             </header>
 
             <!-- Desktop Header -->
-            <header class="hidden lg:flex sticky {{ session('impersonating_from') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
+            <header class="hidden lg:flex sticky {{ session('impersonating_from') || session('impersonate_church_id') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
                 <h1 class="text-lg font-semibold text-gray-900 dark:text-white">@yield('title', 'Головна')</h1>
                 <div class="flex items-center space-x-4">
                     <!-- Help Button -->
