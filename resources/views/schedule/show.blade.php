@@ -257,7 +257,7 @@
                                                     </span>
 
                                                     {{-- Remove button --}}
-                                                    <button type="button" @click="removePerson(index)" class="opacity-50 hover:opacity-100 hover:text-red-500">
+                                                    <button type="button" @click="removePerson(index)" class="text-gray-400 hover:text-red-500">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                         </svg>
@@ -322,7 +322,7 @@
                                     <td class="px-3 py-3 text-center">
                                         <button type="button"
                                                 @click="deleteItem({{ $item->id }})"
-                                                class="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                class="p-1 text-gray-400 hover:text-red-500 transition-colors"
                                                 title="Видалити">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
