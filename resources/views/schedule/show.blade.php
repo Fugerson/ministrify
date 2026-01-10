@@ -95,9 +95,9 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
                                 <th class="px-3 py-4 text-left w-20">Час</th>
-                                <th class="px-3 py-4 text-left">Що відбувається</th>
-                                <th class="px-3 py-4 text-left whitespace-nowrap" style="min-width: 180px;">Відповідальний</th>
-                                <th class="px-3 py-4 text-left w-32">Коментарі</th>
+                                <th class="px-3 py-4 text-left w-1/2">Що відбувається</th>
+                                <th class="px-3 py-4 text-left whitespace-nowrap w-48">Відповідальний</th>
+                                <th class="px-3 py-4 text-left w-28">Коментарі</th>
                                 <th class="px-2 py-4 w-10"></th>
                             </tr>
                         </thead>
