@@ -91,14 +91,14 @@
                 </div>
 
                 <div class="overflow-x-auto" style="min-height: 300px;">
-                    <table class="w-full text-sm table-auto">
+                    <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
-                                <th class="px-3 py-4 text-left w-20">Час</th>
-                                <th class="px-3 py-4 text-left w-1/2">Що відбувається</th>
-                                <th class="px-3 py-4 text-left whitespace-nowrap w-0">Відповідальний</th>
-                                <th class="px-3 py-4 text-left w-28">Коментарі</th>
-                                <th class="px-2 py-4 w-10"></th>
+                                <th class="px-3 py-4 text-left" style="width: 70px;">Час</th>
+                                <th class="px-3 py-4 text-left">Що відбувається</th>
+                                <th class="px-3 py-4 text-left whitespace-nowrap" style="width: 1px;">Відповідальний</th>
+                                <th class="px-3 py-4 text-left" style="width: 100px;">Коментарі</th>
+                                <th class="px-2 py-4" style="width: 40px;"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
