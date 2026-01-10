@@ -90,22 +90,22 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto" style="min-height: 300px;">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
-                                <th class="px-2 py-2 text-left w-20">Час</th>
-                                <th class="px-2 py-2 text-left">Що відбувається</th>
-                                <th class="px-2 py-2 text-left w-40">Відповідальний</th>
-                                <th class="px-2 py-2 text-left">Коментарі</th>
-                                <th class="px-2 py-2 w-16"></th>
+                                <th class="px-3 py-4 text-left w-24">Час</th>
+                                <th class="px-3 py-4 text-left">Що відбувається</th>
+                                <th class="px-3 py-4 text-left w-44">Відповідальний</th>
+                                <th class="px-3 py-4 text-left">Коментарі</th>
+                                <th class="px-2 py-4 w-16"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                             @forelse($event->planItems->sortBy('sort_order') as $item)
                                 <tr class="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group" data-id="{{ $item->id }}">
                                     {{-- Час --}}
-                                    <td class="px-2 py-1 border-r border-gray-100 dark:border-gray-700">
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
                                         <input type="text"
                                                value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
                                                placeholder="--:--"
@@ -113,7 +113,7 @@
                                                class="w-full px-1 py-1 text-sm font-semibold text-primary-600 dark:text-primary-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
                                     {{-- Що відбувається --}}
-                                    <td class="px-2 py-1 border-r border-gray-100 dark:border-gray-700">
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
                                         <input type="text"
                                                value="{{ $item->title }}"
                                                placeholder="Опис пункту..."
@@ -121,7 +121,7 @@
                                                class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
                                     {{-- Відповідальний --}}
-                                    <td class="px-2 py-1 border-r border-gray-100 dark:border-gray-700">
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
                                         <div class="flex items-center gap-1">
                                             <div class="relative flex-1" x-data="{ open: false, search: '{{ $item->responsible_names ?? ($item->responsible?->full_name ?? '') }}' }">
                                                 <input type="text"
@@ -166,7 +166,7 @@
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
-                                    <td class="px-2 py-1 border-r border-gray-100 dark:border-gray-700">
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
                                         <input type="text"
                                                value="{{ $item->notes }}"
                                                placeholder="Примітки..."
@@ -174,7 +174,7 @@
                                                class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
                                     {{-- Actions --}}
-                                    <td class="px-2 py-1 text-center">
+                                    <td class="px-3 py-3 text-center">
                                         <button type="button"
                                                 @click="deleteItem({{ $item->id }})"
                                                 class="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
