@@ -91,6 +91,8 @@
                             <span class="text-sm text-red-700 dark:text-red-300">Для підтвердження введіть <strong>DELETE</strong>:</span>
                             <input type="text" x-model="confirmDelete"
                                    placeholder="Введіть DELETE"
+                                   @keydown.stop
+                                   @keyup.stop
                                    class="mt-1 block w-48 rounded-lg border-red-300 dark:border-red-600 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-sm focus:ring-red-500 focus:border-red-500">
                         </label>
                     </div>
