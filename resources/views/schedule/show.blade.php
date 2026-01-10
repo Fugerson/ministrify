@@ -71,208 +71,169 @@
         <!-- Main content -->
         <div class="lg:col-span-2 space-y-6">
             <!-- План події -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            @if($event->is_service)
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700" x-data="planEditor()">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
-                            <h2 class="font-semibold text-gray-900 dark:text-white">{{ $event->is_service ? 'План події' : 'Відповідальності' }}</h2>
+                            <h2 class="font-semibold text-gray-900 dark:text-white">План події</h2>
                         </div>
-                        @php
-                            $allItems = $event->is_service ? $event->planItems : collect();
-                            $responsibilities = $event->responsibilities;
-                            $totalItems = $allItems->count() + $responsibilities->count();
-                            $confirmedResp = $responsibilities->where('status', 'confirmed')->count();
-                            $totalMinutes = $allItems->sum('duration_minutes');
-                        @endphp
-                        <div class="flex items-center gap-3">
-                            @if($totalItems > 0)
-                                <span class="text-sm text-gray-500 dark:text-gray-400">
-                                    @if($responsibilities->isNotEmpty())
-                                        {{ $confirmedResp }}/{{ $responsibilities->count() }} підтв.
-                                    @endif
-                                    @if($allItems->isNotEmpty() && $totalMinutes > 0)
-                                        @php $h = floor($totalMinutes/60); $m = $totalMinutes % 60; @endphp
-                                        · @if($h > 0){{ $h }}год @endif{{ $m }}хв
-                                    @endif
-                                </span>
-                            @endif
-                            @if($event->is_service)
-                                <a href="{{ route('events.plan.print', $event) }}" target="_blank"
-                                   class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Друк">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                                    </svg>
-                                </a>
-                            @endif
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('events.plan.print', $event) }}" target="_blank"
+                               class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Друк">
+                                🖨️ Друк
+                            </a>
                         </div>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm" id="plan-items-list">
+                    <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
-                                <th class="px-3 py-2 text-left w-16">Час</th>
-                                <th class="px-3 py-2 text-left">Пункт</th>
-                                <th class="px-3 py-2 text-left w-32">Відповідальний</th>
-                                <th class="px-3 py-2 text-left">Примітка</th>
-                                <th class="px-3 py-2 w-20"></th>
+                                <th class="px-2 py-2 text-left w-20">Час</th>
+                                <th class="px-2 py-2 text-left">Що відбувається</th>
+                                <th class="px-2 py-2 text-left w-40">Відповідальний</th>
+                                <th class="px-2 py-2 text-left">Коментарі</th>
+                                <th class="px-2 py-2 w-16"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @if($event->is_service)
-                        @foreach($event->planItems->sortBy('sort_order') as $item)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 group" data-plan-id="{{ $item->id }}" x-data="{ editing: false }">
-                                {{-- View Mode --}}
-                                <template x-if="!editing">
-                                    <td class="px-3 py-2 font-semibold text-primary-600 dark:text-primary-400 whitespace-nowrap">
-                                        {{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}
+                            @forelse($event->planItems->sortBy('sort_order') as $item)
+                                <tr class="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group" data-id="{{ $item->id }}">
+                                    {{-- Час --}}
+                                    <td class="px-2 py-1 border-r border-gray-100 dark:border-gray-700">
+                                        <input type="text"
+                                               value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
+                                               placeholder="--:--"
+                                               @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
+                                               class="w-full px-1 py-1 text-sm font-semibold text-primary-600 dark:text-primary-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
-                                </template>
-                                <template x-if="!editing">
-                                    <td class="px-3 py-2 font-medium text-gray-900 dark:text-white" @dblclick="editing = true" title="Подвійний клік для редагування">
-                                        {{ $item->title }}
+                                    {{-- Що відбувається --}}
+                                    <td class="px-2 py-1 border-r border-gray-100 dark:border-gray-700">
+                                        <input type="text"
+                                               value="{{ $item->title }}"
+                                               placeholder="Опис пункту..."
+                                               @change="updateField({{ $item->id }}, 'title', $event.target.value)"
+                                               class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
-                                </template>
-                                <template x-if="!editing">
-                                    <td class="px-3 py-2 text-gray-600 dark:text-gray-400">
-                                        @if($item->responsible_display)
-                                            <div class="flex items-center gap-2">
-                                                <span class="flex items-center gap-1">
-                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                    </svg>
-                                                    {{ $item->responsible_display }}
-                                                </span>
-                                                {{-- Status badge --}}
-                                                @if($item->status === 'confirmed')
-                                                    <span class="text-green-500" title="Підтверджено">✅</span>
-                                                @elseif($item->status === 'declined')
-                                                    <span class="text-red-500" title="Відхилено">❌</span>
-                                                @endif
-                                                {{-- Telegram button --}}
-                                                @if($item->responsible_id)
-                                                    @if($item->responsible?->telegram_chat_id)
-                                                        <button type="button" onclick="sendTelegramNotify({{ $item->id }}, this)"
-                                                                class="p-0.5 text-blue-400 hover:text-blue-600" title="Надіслати запит в Telegram">
-                                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                                            </svg>
+                                    {{-- Відповідальний --}}
+                                    <td class="px-2 py-1 border-r border-gray-100 dark:border-gray-700">
+                                        <div class="flex items-center gap-1">
+                                            <div class="relative flex-1" x-data="{ open: false, search: '{{ $item->responsible_names ?? ($item->responsible?->full_name ?? '') }}' }">
+                                                <input type="text"
+                                                       x-model="search"
+                                                       @focus="open = true"
+                                                       @blur="setTimeout(() => open = false, 200)"
+                                                       @change="updateField({{ $item->id }}, 'responsible_names', search)"
+                                                       placeholder="Ім'я..."
+                                                       class="w-full px-1 py-1 text-sm text-gray-700 dark:text-gray-300 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
+                                                {{-- Dropdown with people --}}
+                                                <div x-show="open && search.length > 0" x-cloak
+                                                     class="absolute z-10 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                                                    @foreach($allPeople as $person)
+                                                        <button type="button"
+                                                                x-show="'{{ strtolower($person->full_name) }}'.includes(search.toLowerCase())"
+                                                                @click="search = '{{ $person->full_name }}'; updateField({{ $item->id }}, 'responsible_names', '{{ $person->full_name }}'); updateField({{ $item->id }}, 'responsible_id', {{ $person->id }}); open = false"
+                                                                class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                            @if($person->telegram_chat_id)
+                                                                <span class="text-blue-500">📱</span>
+                                                            @endif
+                                                            {{ $person->full_name }}
                                                         </button>
-                                                    @else
-                                                        <span class="text-gray-300 cursor-help" title="Telegram не підключений">
-                                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                                            </svg>
-                                                        </span>
-                                                    @endif
-                                                @endif
+                                                    @endforeach
+                                                </div>
                                             </div>
-                                        @else
-                                            <span class="text-gray-400 italic">—</span>
-                                        @endif
-                                    </td>
-                                </template>
-                                <template x-if="!editing">
-                                    <td class="px-3 py-2 text-gray-500 dark:text-gray-400 text-xs">
-                                        @if($item->notes)
-                                            <span class="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded">{{ $item->notes }}</span>
-                                        @endif
-                                    </td>
-                                </template>
-                                <template x-if="!editing">
-                                    <td class="px-3 py-2 text-right">
-                                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button type="button" @click="editing = true" class="p-1 text-gray-400 hover:text-primary-600" title="Редагувати">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                            </button>
-                                            <form method="POST" action="{{ route('events.plan.destroy', [$event, $item]) }}" class="inline" onsubmit="return confirm('Видалити?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="p-1 text-gray-400 hover:text-red-600" title="Видалити">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            {{-- Telegram button --}}
+                                            @if($item->responsible_id && $item->responsible?->telegram_chat_id)
+                                                <button type="button"
+                                                        @click="askInTelegram({{ $item->id }}, '{{ $item->title }}', '{{ $item->responsible?->full_name }}')"
+                                                        class="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                                                        title="Запитати в Telegram">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                     </svg>
                                                 </button>
-                                            </form>
+                                            @endif
+                                            @if($item->status === 'confirmed')
+                                                <span class="text-green-500" title="Підтверджено">✓</span>
+                                            @elseif($item->status === 'declined')
+                                                <span class="text-red-500" title="Відхилено">✗</span>
+                                            @endif
                                         </div>
                                     </td>
-                                </template>
-
-                                {{-- Edit Mode --}}
-                                <template x-if="editing">
-                                    <td colspan="5" class="px-3 py-2">
-                                        <form method="POST" action="{{ route('events.plan.update', [$event, $item]) }}" class="flex flex-wrap gap-2 items-center" @submit="editing = false">
-                                            @csrf
-                                            @method('PUT')
-                                            <select name="type" class="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                                <option value="">Тип</option>
-                                                @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
-                                                    <option value="{{ $type }}" {{ $item->type == $type ? 'selected' : '' }}>{{ $label }}</option>
-                                                @endforeach
-                                            </select>
-                                            <input type="text" name="title" value="{{ $item->title }}" placeholder="Назва"
-                                                   class="flex-1 min-w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                                   @keydown.escape="editing = false">
-                                            <input type="text" name="responsible_names" value="{{ $item->responsible_names }}" placeholder="Відповідальний"
-                                                   class="w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                            <button type="submit" class="px-3 py-1 bg-primary-600 text-white text-sm rounded hover:bg-primary-700">OK</button>
-                                            <button type="button" @click="editing = false" class="px-3 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded">✕</button>
-                                        </form>
+                                    {{-- Коментарі --}}
+                                    <td class="px-2 py-1 border-r border-gray-100 dark:border-gray-700">
+                                        <input type="text"
+                                               value="{{ $item->notes }}"
+                                               placeholder="Примітки..."
+                                               @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
+                                               class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
-                                </template>
-                            </tr>
-                        @endforeach
-                    @endif
-
-                    {{-- Empty state --}}
-                    @if($event->is_service && $event->planItems->isEmpty())
-                        <tr>
-                            <td colspan="5" class="px-3 py-6 text-center text-gray-500 dark:text-gray-400 text-sm">
-                                План порожній. Додайте перший пункт нижче.
-                            </td>
-                        </tr>
-                    @endif
+                                    {{-- Actions --}}
+                                    <td class="px-2 py-1 text-center">
+                                        <button type="button"
+                                                @click="deleteItem({{ $item->id }})"
+                                                class="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Видалити">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr id="empty-row">
+                                    <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-sm">
+                                        Почніть додавати пункти плану нижче
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Quick Add Form -->
+                {{-- Add new row --}}
                 <div class="p-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
-                    @if($event->is_service)
-                        {{-- Service Plan form --}}
-                        <form method="POST" action="{{ route('events.plan.store', $event) }}" class="flex flex-wrap items-center gap-2">
-                            @csrf
-                            <select name="type" class="w-40 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-                                <option value="">Оберіть тип</option>
-                                @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
-                                    <option value="{{ $type }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            <input type="text" name="title" placeholder="або своя назва"
-                                   class="flex-1 min-w-32 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-                            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium">
-                                Додати
-                            </button>
-                        </form>
-                    @else
-                        {{-- Simple responsibility form --}}
-                        <form method="POST" action="{{ route('events.responsibilities.store', $event) }}" class="flex gap-2">
-                            @csrf
-                            <input type="text" name="name" required placeholder="Нова відповідальність"
-                                   class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                            <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg">
-                                Додати
-                            </button>
-                        </form>
-                    @endif
+                    <form @submit.prevent="addItem()" class="flex items-center gap-2">
+                        <input type="text" x-model="newItem.start_time" placeholder="Час"
+                               class="w-20 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <input type="text" x-model="newItem.title" placeholder="Що відбувається..." required
+                               class="flex-1 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <input type="text" x-model="newItem.responsible_names" placeholder="Відповідальний"
+                               class="w-36 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <input type="text" x-model="newItem.notes" placeholder="Коментар"
+                               class="w-32 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium">
+                            + Додати
+                        </button>
+                    </form>
+                </div>
+
+                {{-- Status message --}}
+                <div x-show="message" x-cloak x-transition
+                     class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-sm"
+                     :class="messageType === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+                    <span x-text="message"></span>
                 </div>
             </div>
+            @else
+            {{-- Simple responsibility form for non-service events --}}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+                <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Відповідальності</h2>
+                <form method="POST" action="{{ route('events.responsibilities.store', $event) }}" class="flex gap-2">
+                    @csrf
+                    <input type="text" name="name" required placeholder="Нова відповідальність"
+                           class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                    <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg">
+                        Додати
+                    </button>
+                </form>
+            </div>
+            @endif
 
             <!-- Attendance Section -->
             @if($event->track_attendance && $currentChurch->attendance_enabled)
@@ -455,6 +416,131 @@
 
 @push('scripts')
 <script>
+// Plan Editor - Spreadsheet-like inline editing
+function planEditor() {
+    return {
+        message: '',
+        messageType: 'success',
+        newItem: {
+            start_time: '',
+            title: '',
+            responsible_names: '',
+            notes: ''
+        },
+
+        async updateField(itemId, field, value) {
+            try {
+                const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${itemId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ [field]: value })
+                });
+
+                if (response.ok) {
+                    this.showMessage('Збережено', 'success');
+                } else {
+                    this.showMessage('Помилка збереження', 'error');
+                }
+            } catch (err) {
+                console.error('Update error:', err);
+                this.showMessage('Помилка з\'єднання', 'error');
+            }
+        },
+
+        async addItem() {
+            if (!this.newItem.title.trim()) return;
+
+            try {
+                const response = await fetch('{{ route("events.plan.store", $event) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        title: this.newItem.title,
+                        start_time: this.newItem.start_time || null,
+                        responsible_names: this.newItem.responsible_names || null,
+                        notes: this.newItem.notes || null
+                    })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    this.showMessage('Помилка додавання', 'error');
+                }
+            } catch (err) {
+                console.error('Add error:', err);
+                this.showMessage('Помилка з\'єднання', 'error');
+            }
+        },
+
+        async deleteItem(id) {
+            if (!confirm('Видалити цей пункт?')) return;
+
+            try {
+                const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    this.showMessage('Помилка видалення', 'error');
+                }
+            } catch (err) {
+                console.error('Delete error:', err);
+                this.showMessage('Помилка з\'єднання', 'error');
+            }
+        },
+
+        async askInTelegram(itemId, title, personName) {
+            try {
+                const response = await fetch(`/events/{{ $event->id }}/plan/${itemId}/notify`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.showMessage(`Запит надіслано ${personName}`, 'success');
+                } else {
+                    this.showMessage(data.message || 'Помилка надсилання', 'error');
+                }
+            } catch (err) {
+                console.error('Telegram error:', err);
+                this.showMessage('Помилка надсилання', 'error');
+            }
+        },
+
+        showMessage(msg, type) {
+            this.message = msg;
+            this.messageType = type;
+            setTimeout(() => {
+                this.message = '';
+            }, 3000);
+        }
+    };
+}
+
 // Service Plan Manager
 function servicePlanManager() {
     return {

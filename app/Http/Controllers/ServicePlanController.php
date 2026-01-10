@@ -86,11 +86,12 @@ class ServicePlanController extends Controller
             abort(403);
         }
 
+        // Support partial updates - all fields optional
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'type' => 'nullable|string|in:' . implode(',', array_keys(ServicePlanItem::typeLabels())),
-            'start_time' => 'nullable|date_format:H:i',
+            'start_time' => 'nullable|string|max:10',
             'end_time' => 'nullable|date_format:H:i',
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'responsible_names' => 'nullable|string|max:255',
@@ -99,10 +100,10 @@ class ServicePlanController extends Controller
         ]);
 
         // Convert empty strings to null
-        if (empty($validated['responsible_id'])) {
+        if (array_key_exists('responsible_id', $validated) && empty($validated['responsible_id'])) {
             $validated['responsible_id'] = null;
         }
-        if (empty($validated['responsible_names'])) {
+        if (array_key_exists('responsible_names', $validated) && empty($validated['responsible_names'])) {
             $validated['responsible_names'] = null;
         }
 
