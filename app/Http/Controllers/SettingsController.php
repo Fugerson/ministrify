@@ -58,7 +58,32 @@ class SettingsController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
+        $oldToken = $church->telegram_bot_token;
         $church->update($validated);
+
+        // Auto-setup webhook if token was added or changed
+        if ($validated['telegram_bot_token'] && $validated['telegram_bot_token'] !== $oldToken) {
+            try {
+                $telegram = new TelegramService($validated['telegram_bot_token']);
+
+                // First verify the token is valid
+                $botInfo = $telegram->getMe();
+
+                // Set webhook
+                $webhookUrl = url('/api/telegram/webhook');
+                $webhookResult = $telegram->setWebhook($webhookUrl);
+
+                if ($webhookResult) {
+                    return back()->with('success', "Бот @{$botInfo['username']} підключено та webhook налаштовано!");
+                } else {
+                    return back()->with('warning', "Бот підключено, але не вдалося налаштувати webhook. Спробуйте вручну.");
+                }
+            } catch (\Exception $e) {
+                \Log::error('Telegram setup error', ['error' => $e->getMessage()]);
+                // Token saved but webhook failed - still inform user
+                return back()->with('error', 'Помилка підключення. Перевірте токен та спробуйте ще раз.');
+            }
+        }
 
         return back()->with('success', 'Налаштування Telegram оновлено.');
     }
