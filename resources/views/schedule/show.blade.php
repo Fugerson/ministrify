@@ -121,23 +121,41 @@
                                                class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
                                     {{-- Відповідальний --}}
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700"
+                                        x-data="{
+                                            open: false,
+                                            value: '{{ addslashes($item->responsible_names ?? ($item->responsible?->full_name ?? '')) }}',
+                                            originalValue: '{{ addslashes($item->responsible_names ?? ($item->responsible?->full_name ?? '')) }}',
+                                            save() {
+                                                if (this.value !== this.originalValue) {
+                                                    updateField({{ $item->id }}, 'responsible_names', this.value);
+                                                    this.originalValue = this.value;
+                                                }
+                                            },
+                                            selectPerson(name, id) {
+                                                this.value = name;
+                                                updateField({{ $item->id }}, 'responsible_names', name);
+                                                updateField({{ $item->id }}, 'responsible_id', id);
+                                                this.originalValue = name;
+                                                this.open = false;
+                                            }
+                                        }">
                                         <div class="flex items-center gap-1">
-                                            <div class="relative flex-1" x-data="{ open: false, search: '{{ $item->responsible_names ?? ($item->responsible?->full_name ?? '') }}' }">
+                                            <div class="relative flex-1">
                                                 <input type="text"
-                                                       x-model="search"
+                                                       x-model="value"
                                                        @focus="open = true"
-                                                       @blur="setTimeout(() => open = false, 200)"
-                                                       @change="updateField({{ $item->id }}, 'responsible_names', search)"
+                                                       @blur="setTimeout(() => { open = false; save(); }, 200)"
+                                                       @keydown.enter="open = false; save(); $el.blur()"
                                                        placeholder="Ім'я..."
                                                        class="w-full px-1 py-1 text-sm text-gray-700 dark:text-gray-300 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                                 {{-- Dropdown with people --}}
-                                                <div x-show="open && search.length > 0" x-cloak
+                                                <div x-show="open" x-cloak
                                                      class="absolute z-10 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-40 overflow-y-auto">
                                                     @foreach($allPeople as $person)
                                                         <button type="button"
-                                                                x-show="'{{ strtolower($person->full_name) }}'.includes(search.toLowerCase())"
-                                                                @click="search = '{{ $person->full_name }}'; updateField({{ $item->id }}, 'responsible_names', '{{ $person->full_name }}'); updateField({{ $item->id }}, 'responsible_id', {{ $person->id }}); open = false"
+                                                                x-show="!value || '{{ strtolower($person->full_name) }}'.includes(value.toLowerCase())"
+                                                                @click="selectPerson('{{ addslashes($person->full_name) }}', {{ $person->id }})"
                                                                 class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                                             @if($person->telegram_chat_id)
                                                                 <span class="text-blue-500">📱</span>
@@ -150,7 +168,7 @@
                                             {{-- Telegram button --}}
                                             @if($item->responsible_id && $item->responsible?->telegram_chat_id)
                                                 <button type="button"
-                                                        @click="askInTelegram({{ $item->id }}, '{{ $item->title }}', '{{ $item->responsible?->full_name }}')"
+                                                        @click="askInTelegram({{ $item->id }}, '{{ addslashes($item->title) }}', '{{ addslashes($item->responsible?->full_name) }}')"
                                                         class="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
                                                         title="Запитати в Telegram">
                                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
