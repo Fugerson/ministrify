@@ -326,7 +326,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
-                        <input type="text" name="name" required class="input w-full" placeholder="Наприклад: Збір на ремонт">
+                        <input type="text" name="name" required class="input w-full">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
@@ -334,7 +334,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ціль (грн)</label>
-                        <input type="number" name="goal_amount" min="0" step="100" class="input w-full" placeholder="100000">
+                        <input type="number" name="goal_amount" min="0" step="100" class="input w-full">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>

@@ -14,7 +14,6 @@
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва *</label>
                     <input type="text" name="name" id="name" required value="{{ old('name') }}"
-                           placeholder="Наприклад: Підготовка до Різдва"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

@@ -21,7 +21,7 @@
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Назва церкви *</label>
                 <input type="text" name="name" value="{{ old('name') }}" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                       placeholder="Наприклад: Церква Благодаті">
+                       >
                 @error('name')
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
@@ -31,7 +31,7 @@
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Місто *</label>
                 <input type="text" name="city" value="{{ old('city') }}" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                       placeholder="Наприклад: Київ">
+                       >
                 @error('city')
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
@@ -41,7 +41,7 @@
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Адреса</label>
                 <input type="text" name="address" value="{{ old('address') }}"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                       placeholder="Наприклад: вул. Хрещатик, 1">
+                       >
                 @error('address')
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
@@ -57,7 +57,7 @@
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Ім'я адміністратора *</label>
                 <input type="text" name="admin_name" value="{{ old('admin_name') }}" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                       placeholder="Наприклад: Іван Петренко">
+                       >
                 @error('admin_name')
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
@@ -67,7 +67,7 @@
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Email адміністратора *</label>
                 <input type="email" name="admin_email" value="{{ old('admin_email') }}" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                       placeholder="admin@church.com">
+                       >
                 @error('admin_email')
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
@@ -77,7 +77,7 @@
                 <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Пароль *</label>
                 <input type="password" name="admin_password" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                       placeholder="Мінімум 8 символів">
+                       >
                 @error('admin_password')
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror

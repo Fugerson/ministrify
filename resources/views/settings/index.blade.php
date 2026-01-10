@@ -453,7 +453,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Розклад богослужінь</label>
                     <input type="text" name="service_times" value="{{ old('service_times', $church->service_times) }}"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                           placeholder="Неділя 10:00, Середа 19:00">
+                           >
                 </div>
             </div>
         </div>
@@ -470,13 +470,13 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Публічний Email</label>
                         <input type="email" name="public_email" value="{{ old('public_email', $church->public_email) }}"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                               placeholder="info@church.com">
+                               >
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Публічний телефон</label>
                         <input type="text" name="public_phone" value="{{ old('public_phone', $church->public_phone) }}"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                               placeholder="+380 XX XXX XX XX">
+                               >
                     </div>
                 </div>
             </div>

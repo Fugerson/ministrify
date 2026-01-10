@@ -9,14 +9,12 @@
     <div>
         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
         <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
-               placeholder="your@email.com"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
     </div>
 
     <div>
         <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Пароль</label>
         <input type="password" name="password" id="password" required
-               placeholder="••••••••"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
     </div>
 

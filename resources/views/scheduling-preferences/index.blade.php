@@ -98,7 +98,6 @@
                         Додаткові примітки
                     </label>
                     <textarea name="scheduling_notes" id="scheduling_notes" rows="3"
-                              placeholder="Наприклад: не призначайте на ранкові служіння, бо працюю до 9:00"
                               class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">{{ old('scheduling_notes', $preference->scheduling_notes) }}</textarea>
                 </div>
             </div>

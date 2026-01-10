@@ -83,7 +83,7 @@
                         <input type="text" id="church_name" name="church_name" required
                                value="{{ old('church_name') }}"
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                               placeholder="Церква 'Благодать'">
+                               >
                     </div>
 
                     <div>
@@ -93,7 +93,7 @@
                         <input type="text" id="city" name="city" required
                                value="{{ old('city') }}"
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                               placeholder="Київ">
+                               >
                     </div>
                 </div>
 
@@ -110,7 +110,7 @@
                         <input type="text" id="admin_name" name="admin_name" required
                                value="{{ old('admin_name') }}"
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                               placeholder="Іван Петренко">
+                               >
                     </div>
 
                     <div>
@@ -120,7 +120,7 @@
                         <input type="email" id="email" name="email" required
                                value="{{ old('email') }}"
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                               placeholder="admin@church.ua">
+                               >
                     </div>
 
                     <div>
@@ -130,7 +130,7 @@
                         <input type="tel" id="phone" name="phone"
                                value="{{ old('phone') }}"
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                               placeholder="+380 XX XXX XX XX">
+                               >
                     </div>
 
                     <div>
@@ -140,7 +140,7 @@
                         <div class="relative">
                             <input :type="showPassword ? 'text' : 'password'" id="password" name="password" required minlength="8"
                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all pr-12"
-                                   placeholder="Мінімум 8 символів">
+                                   >
                             <button type="button" @click="showPassword = !showPassword"
                                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                                 <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +160,7 @@
                         </label>
                         <input :type="showPassword ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" required
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                               placeholder="Повторіть пароль">
+                               >
                     </div>
                 </div>
 

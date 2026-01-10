@@ -397,7 +397,7 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email для входу</label>
                                         <input type="email" x-model="newEmail"
                                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 dark:text-white"
-                                               placeholder="email@example.com">
+                                               >
                                         <p x-show="createError" x-text="createError" class="mt-1 text-sm text-red-600"></p>
                                     </div>
 

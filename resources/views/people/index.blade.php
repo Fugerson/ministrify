@@ -580,6 +580,7 @@ function peopleTable() {
         init() {
             this.$nextTick(() => {
                 this.updateFilteredIndices();
+                this.initDatePicker();
             });
 
             this.$watch('filters', () => {
@@ -588,36 +589,40 @@ function peopleTable() {
             }, { deep: true });
         },
 
-        openDatePicker() {
-            if (typeof flatpickr === 'undefined') {
-                console.error('Flatpickr not loaded');
+        initDatePicker() {
+            if (typeof flatpickr === 'undefined' || !this.$refs.dateRange) {
                 return;
             }
 
-            if (!this.flatpickrInstance) {
-                this.flatpickrInstance = flatpickr(this.$refs.dateRange, {
-                    mode: 'range',
-                    dateFormat: 'd.m.Y',
-                    locale: 'uk',
-                    allowInput: false,
-                    clickOpens: false,
-                    disableMobile: true,
-                    appendTo: document.body,
-                    onChange: (dates, dateStr) => {
-                        if (dates.length === 2) {
-                            this.filters.birth_from = dates[0].toISOString().split('T')[0];
-                            this.filters.birth_to = dates[1].toISOString().split('T')[0];
-                            this.filters.dateRangeDisplay = dateStr;
-                        } else if (dates.length === 1) {
-                            this.filters.birth_from = dates[0].toISOString().split('T')[0];
-                            this.filters.birth_to = '';
-                            this.filters.dateRangeDisplay = dateStr;
-                        }
+            this.flatpickrInstance = flatpickr(this.$refs.dateRange, {
+                mode: 'range',
+                dateFormat: 'd.m.Y',
+                locale: 'uk',
+                allowInput: false,
+                clickOpens: false,
+                disableMobile: true,
+                appendTo: document.body,
+                onChange: (dates, dateStr) => {
+                    if (dates.length === 2) {
+                        this.filters.birth_from = dates[0].toISOString().split('T')[0];
+                        this.filters.birth_to = dates[1].toISOString().split('T')[0];
+                        this.filters.dateRangeDisplay = dateStr;
+                    } else if (dates.length === 1) {
+                        this.filters.birth_from = dates[0].toISOString().split('T')[0];
+                        this.filters.birth_to = '';
+                        this.filters.dateRangeDisplay = dateStr;
                     }
-                });
-            }
+                }
+            });
+        },
 
-            this.flatpickrInstance.open();
+        openDatePicker() {
+            if (!this.flatpickrInstance) {
+                this.initDatePicker();
+            }
+            if (this.flatpickrInstance) {
+                this.flatpickrInstance.open();
+            }
         },
 
         updateFilteredIndices() {

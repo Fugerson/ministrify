@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\ResetPassword;
+use App\Notifications\VerifyEmail;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -314,5 +315,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token, bool $isInvite = false): void
     {
         $this->notify(new ResetPassword($token, $isInvite));
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmail());
     }
 }

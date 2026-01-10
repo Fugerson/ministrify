@@ -138,7 +138,6 @@
                 </label>
                 <input type="text" name="reason_note" id="reason_note"
                        value="{{ old('reason_note', $blockout->reason_note) }}"
-                       placeholder="Наприклад: поїздка до батьків"
                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">
             </div>
         </div>

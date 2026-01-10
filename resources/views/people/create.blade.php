@@ -39,7 +39,7 @@
                     <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Телефон</label>
                     <input type="tel" name="phone" id="phone" value="{{ old('phone') }}"
                            class="w-full px-3 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                           placeholder="+380 67 123 4567">
+                           >
                 </div>
 
                 <div>
@@ -52,7 +52,7 @@
                     <label for="telegram_username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telegram</label>
                     <input type="text" name="telegram_username" id="telegram_username" value="{{ old('telegram_username') }}"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                           placeholder="@username">
+                           >
                 </div>
 
                 <div>

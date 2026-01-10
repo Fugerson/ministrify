@@ -131,7 +131,7 @@
                            @blur="validateField('public_email')"
                            :class="{'ring-2 ring-red-500 border-red-500': errors.public_email}"
                            class="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                           placeholder="info@church.ua">
+                           >
                 </div>
                 <p x-show="errors.public_email" x-cloak class="mt-2 text-sm text-red-500" x-text="errors.public_email"></p>
             </div>
@@ -143,7 +143,7 @@
                     </span>
                     <input type="tel" name="public_phone" x-model="form.public_phone"
                            class="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                           placeholder="+380 XX XXX XX XX">
+                           >
                 </div>
             </div>
         </div>
