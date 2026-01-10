@@ -96,7 +96,7 @@
                             <tr>
                                 <th class="px-3 py-4 text-left w-20">Час</th>
                                 <th class="px-3 py-4 text-left w-1/2">Що відбувається</th>
-                                <th class="px-3 py-4 text-left whitespace-nowrap">Відповідальний</th>
+                                <th class="px-3 py-4 text-left whitespace-nowrap w-0">Відповідальний</th>
                                 <th class="px-3 py-4 text-left w-28">Коментарі</th>
                                 <th class="px-2 py-4 w-10"></th>
                             </tr>
@@ -153,7 +153,7 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top"
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top whitespace-nowrap"
                                         x-data="{
                                             open: false,
                                             search: '',
