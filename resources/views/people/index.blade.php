@@ -202,7 +202,7 @@
                 <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Дата народження</label>
                 <div class="relative">
                     <input type="text" x-ref="dateRange" x-model="filters.dateRangeDisplay" placeholder="Виберіть діапазон..." readonly
-                        @click="initDatePicker(); $nextTick(() => flatpickrInstance && flatpickrInstance.open())"
+                        @click="openDatePicker()"
                         class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 cursor-pointer">
                     <button type="button" x-show="filters.birth_from || filters.birth_to" @click="clearDateFilter()"
                         class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500">
@@ -588,28 +588,36 @@ function peopleTable() {
             }, { deep: true });
         },
 
-        initDatePicker() {
-            if (!this.$refs.dateRange || this.flatpickrInstance) return;
-            this.flatpickrInstance = flatpickr(this.$refs.dateRange, {
-                mode: 'range',
-                dateFormat: 'd.m.Y',
-                locale: 'uk',
-                allowInput: false,
-                clickOpens: true,
-                disableMobile: true,
-                appendTo: document.body,
-                onChange: (dates, dateStr) => {
-                    if (dates.length === 2) {
-                        this.filters.birth_from = dates[0].toISOString().split('T')[0];
-                        this.filters.birth_to = dates[1].toISOString().split('T')[0];
-                        this.filters.dateRangeDisplay = dateStr;
-                    } else if (dates.length === 1) {
-                        this.filters.birth_from = dates[0].toISOString().split('T')[0];
-                        this.filters.birth_to = '';
-                        this.filters.dateRangeDisplay = dateStr;
+        openDatePicker() {
+            if (typeof flatpickr === 'undefined') {
+                console.error('Flatpickr not loaded');
+                return;
+            }
+
+            if (!this.flatpickrInstance) {
+                this.flatpickrInstance = flatpickr(this.$refs.dateRange, {
+                    mode: 'range',
+                    dateFormat: 'd.m.Y',
+                    locale: 'uk',
+                    allowInput: false,
+                    clickOpens: false,
+                    disableMobile: true,
+                    appendTo: document.body,
+                    onChange: (dates, dateStr) => {
+                        if (dates.length === 2) {
+                            this.filters.birth_from = dates[0].toISOString().split('T')[0];
+                            this.filters.birth_to = dates[1].toISOString().split('T')[0];
+                            this.filters.dateRangeDisplay = dateStr;
+                        } else if (dates.length === 1) {
+                            this.filters.birth_from = dates[0].toISOString().split('T')[0];
+                            this.filters.birth_to = '';
+                            this.filters.dateRangeDisplay = dateStr;
+                        }
                     }
-                }
-            });
+                });
+            }
+
+            this.flatpickrInstance.open();
         },
 
         updateFilteredIndices() {
