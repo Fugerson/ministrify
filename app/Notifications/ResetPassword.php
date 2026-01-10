@@ -5,7 +5,6 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\DB;
 
 class ResetPassword extends Notification
 {
@@ -32,13 +31,11 @@ class ResetPassword extends Notification
             'email' => $notifiable->getEmailForPasswordReset(),
         ], false));
 
-        // Check if user has ever logged in (has sessions)
-        $hasLoggedIn = DB::table('sessions')
-            ->where('user_id', $notifiable->id)
-            ->exists();
+        // Check if user has ever set their password
+        $hasSetPassword = $notifiable->password_set_at !== null;
 
-        // If explicitly marked as invite OR user never logged in - it's an invitation
-        $isInvitation = $this->isInvite || !$hasLoggedIn;
+        // If explicitly marked as invite OR user never set password - it's an invitation
+        $isInvitation = $this->isInvite || !$hasSetPassword;
 
         if ($isInvitation) {
             return (new MailMessage)
