@@ -282,6 +282,40 @@
                 </div>
                 @endif
             </div>
+
+            <!-- Personal Details -->
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Стать</p>
+                    <select name="gender"
+                            class="w-full font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border-0 p-0 focus:ring-0 text-sm cursor-pointer">
+                        <option value="" class="bg-white dark:bg-gray-800">-- Не вказано --</option>
+                        @foreach(\App\Models\Person::GENDERS as $value => $label)
+                            <option value="{{ $value }}" {{ $person->gender === $value ? 'selected' : '' }} class="bg-white dark:bg-gray-800">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Сімейний стан</p>
+                    <select name="marital_status"
+                            class="w-full font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border-0 p-0 focus:ring-0 text-sm cursor-pointer">
+                        <option value="" class="bg-white dark:bg-gray-800">-- Не вказано --</option>
+                        @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
+                            <option value="{{ $value }}" {{ $person->marital_status === $value ? 'selected' : '' }} class="bg-white dark:bg-gray-800">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Річниця весілля</p>
+                    <input type="date" name="anniversary" value="{{ old('anniversary', $person->anniversary?->format('Y-m-d')) }}"
+                           class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm">
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Дата хрещення</p>
+                    <input type="date" name="baptism_date" value="{{ old('baptism_date', $person->baptism_date?->format('Y-m-d')) }}"
+                           class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm">
+                </div>
+            </div>
             <input type="hidden" name="joined_date" value="{{ $person->joined_date?->format('Y-m-d') }}">
 
             <!-- User Account & System Access -->
