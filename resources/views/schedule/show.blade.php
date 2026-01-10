@@ -178,31 +178,58 @@
                                                     @endforeach
                                                 </div>
                                             </div>
-                                            {{-- Telegram button - показуємо якщо є responsible_id і є telegram --}}
-                                            @if($item->responsible_id && $item->responsible?->telegram_chat_id)
-                                                <button type="button"
-                                                        onclick="askInTelegram({{ $item->id }}, '{{ addslashes($item->responsible->full_name) }}')"
-                                                        class="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
-                                                        title="Запитати в Telegram">
-                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                                    </svg>
-                                                </button>
-                                            @elseif($item->responsible_id && !$item->responsible?->telegram_chat_id)
-                                                {{-- No Telegram indicator --}}
-                                                <span class="p-1.5 text-gray-400 cursor-help" title="Telegram не підключено">
-                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                                    </svg>
-                                                </span>
-                                            @endif
-                                            {{-- Status indicators --}}
-                                            @if($item->status === 'confirmed')
-                                                <span class="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded font-medium">Так</span>
-                                            @elseif($item->status === 'declined')
-                                                <span class="text-xs px-1.5 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded font-medium">Ні</span>
-                                            @elseif($item->status === 'pending')
-                                                <span class="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded font-medium">Очікує</span>
+                                            {{-- Status and Actions --}}
+                                            @if($item->responsible_id)
+                                                @if($item->status === 'confirmed')
+                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg font-medium">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                        Підтвердив
+                                                    </span>
+                                                @elseif($item->status === 'declined')
+                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg font-medium">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                        </svg>
+                                                        Відмовив
+                                                    </span>
+                                                    {{-- Можна запитати ще раз --}}
+                                                    @if($item->responsible?->telegram_chat_id)
+                                                        <button type="button"
+                                                                onclick="askInTelegram({{ $item->id }}, '{{ addslashes($item->responsible->full_name) }}')"
+                                                                class="text-xs px-2 py-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                                                                title="Запитати ще раз">
+                                                            Запитати ще
+                                                        </button>
+                                                    @endif
+                                                @elseif($item->status === 'pending')
+                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-lg font-medium">
+                                                        <svg class="w-3.5 h-3.5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                                                            <circle cx="12" cy="12" r="10"/>
+                                                        </svg>
+                                                        Очікує відповіді
+                                                    </span>
+                                                @else
+                                                    {{-- Статус planned або немає - можна запитати --}}
+                                                    @if($item->responsible?->telegram_chat_id)
+                                                        <button type="button"
+                                                                onclick="askInTelegram({{ $item->id }}, '{{ addslashes($item->responsible->full_name) }}')"
+                                                                class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded-lg font-medium transition-colors">
+                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
+                                                            </svg>
+                                                            Запитати в Telegram
+                                                        </button>
+                                                    @else
+                                                        <span class="inline-flex items-center gap-1 text-xs px-2 py-1 text-gray-400 dark:text-gray-500" title="У цієї людини не підключений Telegram">
+                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
+                                                            </svg>
+                                                            Немає Telegram
+                                                        </span>
+                                                    @endif
+                                                @endif
                                             @endif
                                         </div>
                                     </td>
