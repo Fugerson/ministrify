@@ -434,6 +434,138 @@ class SystemAdminController extends Controller
     }
 
     /**
+     * Delete church and all related data
+     */
+    public function destroyChurch(Church $church)
+    {
+        $churchName = $church->name;
+        $churchId = $church->id;
+
+        DB::beginTransaction();
+
+        try {
+            // Delete all related data in order (respecting foreign key constraints)
+
+            // 1. Website builder content
+            $church->blogPosts()->delete();
+            $church->blogCategories()->delete();
+            $church->testimonials()->delete();
+            $church->faqs()->delete();
+            $church->sermons()->delete();
+            $church->sermonSeries()->delete();
+            $church->staffMembers()->delete();
+
+            // Delete gallery images
+            foreach ($church->galleries as $gallery) {
+                $gallery->images()->delete();
+            }
+            $church->galleries()->delete();
+
+            // 2. Events related
+            foreach ($church->events as $event) {
+                $event->checklists()->delete();
+                $event->planItems()->delete();
+                $event->songs()->delete();
+                $event->volunteers()->delete();
+            }
+            $church->events()->forceDelete();
+            $church->eventRegistrations()->delete();
+
+            // 3. Ministries related
+            foreach ($church->ministries as $ministry) {
+                // Detach people from ministries
+                $ministry->people()->detach();
+                // Delete ministry meetings
+                if (method_exists($ministry, 'meetings')) {
+                    $ministry->meetings()->delete();
+                }
+            }
+            $church->ministries()->delete();
+            $church->ministryTypes()->delete();
+
+            // 4. Groups related
+            foreach ($church->groups as $group) {
+                $group->members()->detach();
+                $group->meetings()->delete();
+            }
+            $church->groups()->delete();
+
+            // 5. People related
+            foreach ($church->people as $person) {
+                // Delete person relationships
+                DB::table('family_relationships')
+                    ->where('person_id', $person->id)
+                    ->orWhere('relative_id', $person->id)
+                    ->delete();
+                // Detach tags
+                $person->tags()->detach();
+            }
+            $church->people()->forceDelete();
+
+            // 6. Financial data
+            $church->donations()->delete();
+            $church->donationCampaigns()->delete();
+            $church->expenses()->delete();
+            $church->expenseCategories()->delete();
+            DB::table('incomes')->where('church_id', $churchId)->delete();
+            DB::table('income_categories')->where('church_id', $churchId)->delete();
+            DB::table('transactions')->where('church_id', $churchId)->delete();
+
+            // 7. Boards (Kanban)
+            foreach ($church->boards as $board) {
+                foreach ($board->columns as $column) {
+                    $column->cards()->delete();
+                }
+                $board->columns()->delete();
+            }
+            $church->boards()->delete();
+
+            // 8. Other church data
+            $church->checklistTemplates()->delete();
+            $church->messageTemplates()->delete();
+            $church->attendances()->delete();
+            $church->tags()->delete();
+
+            // 9. Church roles and permissions
+            foreach ($church->churchRoles ?? [] as $role) {
+                $role->permissions()->delete();
+            }
+            DB::table('church_roles')->where('church_id', $churchId)->delete();
+            DB::table('role_permissions')->where('church_id', $churchId)->delete();
+
+            // 10. Other tables
+            DB::table('prayer_requests')->where('church_id', $churchId)->delete();
+            DB::table('songs')->where('church_id', $churchId)->delete();
+            DB::table('resources')->where('church_id', $churchId)->delete();
+            DB::table('announcements')->where('church_id', $churchId)->delete();
+            DB::table('private_messages')->where('church_id', $churchId)->delete();
+            DB::table('telegram_messages')->where('church_id', $churchId)->delete();
+            DB::table('volunteer_schedules')->where('church_id', $churchId)->delete();
+            DB::table('volunteer_availabilities')->where('church_id', $churchId)->delete();
+
+            // 11. Audit logs
+            AuditLog::where('church_id', $churchId)->delete();
+
+            // 12. Users (soft delete then force delete)
+            User::where('church_id', $churchId)->forceDelete();
+
+            // 13. Finally, delete the church
+            $church->forceDelete();
+
+            DB::commit();
+
+            return redirect()->route('system.churches.index')
+                ->with('success', "Церкву \"{$churchName}\" та всі пов'язані дані видалено назавжди.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->route('system.churches.index')
+                ->with('error', "Помилка при видаленні церкви: {$e->getMessage()}");
+        }
+    }
+
+    /**
      * Support tickets list
      */
     public function supportTickets(Request $request)

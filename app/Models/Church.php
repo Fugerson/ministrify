@@ -214,6 +214,11 @@ class Church extends Model
         return $this->hasMany(BlogCategory::class);
     }
 
+    public function churchRoles(): HasMany
+    {
+        return $this->hasMany(ChurchRole::class);
+    }
+
     public function getPublicEventsAttribute()
     {
         return $this->events()

@@ -111,6 +111,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     Route::post('churches', [SystemAdminController::class, 'storeChurch'])->name('churches.store');
     Route::get('churches/{church}', [SystemAdminController::class, 'showChurch'])->name('churches.show');
     Route::post('churches/{church}/switch', [SystemAdminController::class, 'switchToChurch'])->name('churches.switch');
+    Route::delete('churches/{church}', [SystemAdminController::class, 'destroyChurch'])->name('churches.destroy');
 
     // Users
     Route::get('users', [SystemAdminController::class, 'users'])->name('users.index');
