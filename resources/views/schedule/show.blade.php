@@ -181,7 +181,6 @@
                                             {{-- Telegram button (dynamic) --}}
                                             <button type="button"
                                                     x-show="selectedPersonId && hasTelegram"
-                                                    x-cloak
                                                     @click="askTelegram()"
                                                     class="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
                                                     title="Запитати в Telegram">
@@ -191,7 +190,6 @@
                                             </button>
                                             {{-- No Telegram indicator --}}
                                             <span x-show="selectedPersonId && !hasTelegram"
-                                                  x-cloak
                                                   class="p-1 text-gray-300 dark:text-gray-600 cursor-help"
                                                   title="Telegram не підключено">
                                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -201,7 +199,8 @@
                                             {{-- Status indicators --}}
                                             <span x-show="status === 'confirmed'" class="text-green-500" title="Підтверджено">✓</span>
                                             <span x-show="status === 'declined'" class="text-red-500" title="Відхилено">✗</span>
-                                            <span x-show="status === 'pending'" x-cloak class="text-yellow-500" title="Очікує відповіді">⏳</span>
+                                            <span x-show="status === 'pending'" class="text-yellow-500" title="Очікує відповіді">⏳</span>
+                                            <span x-show="status === 'planned'" class="text-blue-400" title="Заплановано">📋</span>
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
@@ -455,6 +454,56 @@
 
 @push('scripts')
 <script>
+// Toast notification helper
+function showGlobalToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+
+    toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 transform translate-x-full transition-transform duration-300`;
+    toast.innerHTML = `
+        <span class="text-lg">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// Global function to update a plan item field
+async function updateField(itemId, field, value) {
+    try {
+        const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${itemId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ [field]: value })
+        });
+
+        if (response.ok) {
+            showGlobalToast('Збережено', 'success');
+            return true;
+        } else {
+            showGlobalToast('Помилка збереження', 'error');
+            return false;
+        }
+    } catch (err) {
+        console.error('Update error:', err);
+        showGlobalToast('Помилка з\'єднання', 'error');
+        return false;
+    }
+}
+
 // Global function to ask via Telegram
 async function askInTelegram(itemId, personName) {
     try {
@@ -483,27 +532,6 @@ async function askInTelegram(itemId, personName) {
     }
 }
 
-function showGlobalToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-
-    const toast = document.createElement('div');
-    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
-
-    toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 transform translate-x-full transition-transform duration-300`;
-    toast.innerHTML = `
-        <span class="text-lg">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-        <span>${message}</span>
-    `;
-
-    container.appendChild(toast);
-    setTimeout(() => toast.classList.remove('translate-x-full'), 10);
-    setTimeout(() => {
-        toast.classList.add('translate-x-full');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
-
 // Plan Editor - Spreadsheet-like inline editing
 function planEditor() {
     return {
@@ -514,30 +542,6 @@ function planEditor() {
             title: '',
             responsible_names: '',
             notes: ''
-        },
-
-        async updateField(itemId, field, value) {
-            try {
-                const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${itemId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({ [field]: value })
-                });
-
-                if (response.ok) {
-                    this.showMessage('Збережено', 'success');
-                } else {
-                    this.showMessage('Помилка збереження', 'error');
-                }
-            } catch (err) {
-                console.error('Update error:', err);
-                this.showMessage('Помилка з\'єднання', 'error');
-            }
         },
 
         async addItem() {
