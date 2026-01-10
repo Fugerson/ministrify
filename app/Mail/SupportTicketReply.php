@@ -7,6 +7,7 @@ use App\Models\SupportMessage;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 class SupportTicketReply extends Mailable
@@ -22,12 +23,27 @@ class SupportTicketReply extends Mailable
     ) {}
 
     /**
+     * Get the message headers.
+     */
+    public function headers(): Headers
+    {
+        return new Headers(
+            messageId: "ticket-{$this->ticket->id}-reply-{$this->reply->id}@ministrify.app",
+            text: [
+                'X-Priority' => '3',
+                'X-Mailer' => 'Ministrify',
+            ],
+        );
+    }
+
+    /**
      * Get the message envelope.
      */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Re: {$this->ticket->subject} — Ministrify",
+            subject: "Відповідь на звернення: {$this->ticket->subject}",
+            replyTo: ['support@ministrify.app'],
         );
     }
 
@@ -38,6 +54,7 @@ class SupportTicketReply extends Mailable
     {
         return new Content(
             view: 'emails.support-reply',
+            text: 'emails.support-reply-text',
         );
     }
 
