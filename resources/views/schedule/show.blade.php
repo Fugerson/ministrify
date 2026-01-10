@@ -120,117 +120,125 @@
                                                @change="updateField({{ $item->id }}, 'title', $event.target.value)"
                                                class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
-                                    {{-- Відповідальний --}}
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 whitespace-nowrap"
+                                    {{-- Відповідальний (multiple people) --}}
+                                    @php
+                                        // Parse existing responsible people
+                                        $existingPeople = [];
+                                        if ($item->responsible_id && $item->responsible) {
+                                            $existingPeople[] = [
+                                                'id' => $item->responsible->id,
+                                                'name' => $item->responsible->full_name,
+                                                'hasTelegram' => (bool)$item->responsible->telegram_chat_id
+                                            ];
+                                        } elseif ($item->responsible_names) {
+                                            // Parse comma-separated names and try to match with people
+                                            $names = array_map('trim', explode(',', $item->responsible_names));
+                                            foreach ($names as $name) {
+                                                $person = $allPeople->first(fn($p) => $p->full_name === $name);
+                                                $existingPeople[] = [
+                                                    'id' => $person?->id,
+                                                    'name' => $name,
+                                                    'hasTelegram' => (bool)($person?->telegram_chat_id)
+                                                ];
+                                            }
+                                        }
+                                    @endphp
+                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700"
                                         x-data="{
                                             open: false,
-                                            value: '{{ addslashes($item->responsible_names ?? ($item->responsible?->full_name ?? '')) }}',
-                                            originalValue: '{{ addslashes($item->responsible_names ?? ($item->responsible?->full_name ?? '')) }}',
-                                            selectedPersonId: {{ $item->responsible_id ?? 'null' }},
-                                            hasTelegram: {{ ($item->responsible?->telegram_chat_id) ? 'true' : 'false' }},
+                                            search: '',
                                             itemId: {{ $item->id }},
-                                            status: '{{ $item->status ?? 'pending' }}',
-                                            save() {
-                                                if (this.value !== this.originalValue) {
-                                                    updateField(this.itemId, 'responsible_names', this.value);
-                                                    this.originalValue = this.value;
-                                                }
-                                            },
-                                            selectPerson(name, id, hasTg) {
-                                                this.value = name;
-                                                this.selectedPersonId = id;
-                                                this.hasTelegram = hasTg;
-                                                updateField(this.itemId, 'responsible_names', name);
-                                                updateField(this.itemId, 'responsible_id', id);
-                                                this.originalValue = name;
+                                            people: {{ json_encode($existingPeople) }},
+
+                                            addPerson(id, name, hasTg) {
+                                                if (this.people.find(p => p.name === name)) return;
+                                                this.people.push({ id, name, hasTelegram: hasTg });
+                                                this.save();
+                                                this.search = '';
                                                 this.open = false;
                                             },
-                                            async askTelegram() {
-                                                if (!this.selectedPersonId || !this.hasTelegram) return;
-                                                const result = await askInTelegram(this.itemId, this.value);
-                                                if (result) {
-                                                    this.status = 'pending';
-                                                }
+                                            removePerson(index) {
+                                                this.people.splice(index, 1);
+                                                this.save();
+                                            },
+                                            save() {
+                                                const names = this.people.map(p => p.name).join(', ');
+                                                const primaryId = this.people.length > 0 ? this.people[0].id : null;
+                                                updateField(this.itemId, 'responsible_names', names);
+                                                updateField(this.itemId, 'responsible_id', primaryId);
+                                            },
+                                            async askPerson(person) {
+                                                if (!person.id || !person.hasTelegram) return;
+                                                await askInTelegram(this.itemId, person.name);
                                             }
                                         }">
-                                        <div class="flex items-center gap-2 flex-nowrap">
-                                            <div class="relative min-w-[100px]">
-                                                <input type="text"
-                                                       x-model="value"
-                                                       @focus="open = true"
-                                                       @blur="setTimeout(() => { open = false; save(); }, 200)"
-                                                       @keydown.enter="open = false; save(); $el.blur()"
-                                                       placeholder="Ім'я..."
-                                                       class="w-full px-1 py-1 text-sm text-gray-700 dark:text-gray-300 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
-                                                {{-- Dropdown with people --}}
-                                                <div x-show="open" x-cloak
-                                                     class="absolute z-10 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                                                    @foreach($allPeople as $person)
-                                                        <button type="button"
-                                                                x-show="!value || '{{ mb_strtolower($person->full_name) }}'.includes(value.toLowerCase())"
-                                                                @click="selectPerson('{{ addslashes($person->full_name) }}', {{ $person->id }}, {{ $person->telegram_chat_id ? 'true' : 'false' }})"
-                                                                class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                                                            @if($person->telegram_chat_id)
-                                                                <span class="text-blue-500">📱</span>
-                                                            @endif
-                                                            {{ $person->full_name }}
-                                                        </button>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                            {{-- Status and Actions --}}
-                                            @if($item->responsible_id)
-                                                @if($item->status === 'confirmed')
-                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg font-medium shrink-0">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        <div class="flex flex-wrap items-center gap-1">
+                                            {{-- Selected people as tags --}}
+                                            <template x-for="(person, index) in people" :key="index">
+                                                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg">
+                                                    <span x-text="person.name"></span>
+                                                    {{-- Telegram button --}}
+                                                    <button type="button"
+                                                            x-show="person.hasTelegram"
+                                                            @click="askPerson(person)"
+                                                            class="text-blue-500 hover:text-blue-700"
+                                                            title="Запитати в Telegram">
+                                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                         </svg>
-                                                        Підтвердив
+                                                    </button>
+                                                    {{-- No telegram indicator --}}
+                                                    <span x-show="person.id && !person.hasTelegram" class="text-gray-400" title="Немає Telegram">
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
+                                                        </svg>
                                                     </span>
-                                                @elseif($item->status === 'declined')
-                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg font-medium shrink-0">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    {{-- Remove button --}}
+                                                    <button type="button" @click="removePerson(index)" class="text-gray-400 hover:text-red-500">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                         </svg>
-                                                        Відмовив
-                                                    </span>
-                                                    {{-- Можна запитати ще раз --}}
-                                                    @if($item->responsible?->telegram_chat_id)
-                                                        <button type="button"
-                                                                onclick="askInTelegram({{ $item->id }}, '{{ addslashes($item->responsible->full_name) }}')"
-                                                                class="text-xs px-2 py-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
-                                                                title="Запитати ще раз">
-                                                            Запитати ще
-                                                        </button>
-                                                    @endif
-                                                @elseif($item->status === 'pending')
-                                                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-lg font-medium shrink-0">
-                                                        <svg class="w-3.5 h-3.5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                                                            <circle cx="12" cy="12" r="10"/>
-                                                        </svg>
-                                                        Очікує відповіді
-                                                    </span>
-                                                @else
-                                                    {{-- Статус planned або немає - можна запитати --}}
-                                                    @if($item->responsible?->telegram_chat_id)
-                                                        <button type="button"
-                                                                onclick="askInTelegram({{ $item->id }}, '{{ addslashes($item->responsible->full_name) }}')"
-                                                                class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded-lg font-medium transition-colors shrink-0">
-                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                                            </svg>
-                                                            Запитати в Telegram
-                                                        </button>
-                                                    @else
-                                                        <span class="inline-flex items-center gap-1 text-xs px-2 py-1 text-gray-400 dark:text-gray-500 shrink-0" title="У цієї людини не підключений Telegram">
-                                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                                            </svg>
-                                                            Немає Telegram
-                                                        </span>
-                                                    @endif
-                                                @endif
-                                            @endif
+                                                    </button>
+                                                </span>
+                                            </template>
+
+                                            {{-- Add person button/input --}}
+                                            <div class="relative">
+                                                <button type="button"
+                                                        @click="open = !open"
+                                                        class="inline-flex items-center gap-1 text-xs px-2 py-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                    </svg>
+                                                    <span x-show="people.length === 0">Додати</span>
+                                                </button>
+
+                                                {{-- Dropdown --}}
+                                                <div x-show="open" x-cloak @click.outside="open = false"
+                                                     class="absolute z-20 left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                                                    <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                                                        <input type="text" x-model="search" placeholder="Пошук..."
+                                                               class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                    </div>
+                                                    <div class="max-h-48 overflow-y-auto">
+                                                        @foreach($allPeople as $person)
+                                                            <button type="button"
+                                                                    x-show="!search || '{{ mb_strtolower($person->full_name) }}'.includes(search.toLowerCase())"
+                                                                    @click="addPerson({{ $person->id }}, '{{ addslashes($person->full_name) }}', {{ $person->telegram_chat_id ? 'true' : 'false' }})"
+                                                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                                @if($person->telegram_chat_id)
+                                                                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
+                                                                    </svg>
+                                                                @else
+                                                                    <span class="w-4"></span>
+                                                                @endif
+                                                                {{ $person->full_name }}
+                                                            </button>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
