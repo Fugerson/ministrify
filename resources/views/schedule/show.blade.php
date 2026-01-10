@@ -96,7 +96,7 @@
                             <tr>
                                 <th class="px-3 py-4 text-left w-20">Час</th>
                                 <th class="px-3 py-4 text-left w-1/2">Що відбувається</th>
-                                <th class="px-3 py-4 text-left whitespace-nowrap w-48">Відповідальний</th>
+                                <th class="px-3 py-4 text-left whitespace-nowrap">Відповідальний</th>
                                 <th class="px-3 py-4 text-left w-28">Коментарі</th>
                                 <th class="px-2 py-4 w-10"></th>
                             </tr>
@@ -204,7 +204,7 @@
                                                 return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
                                             }
                                         }">
-                                        <div class="flex flex-wrap items-center gap-1.5">
+                                        <div class="flex flex-col gap-1">
                                             {{-- Selected people as tags --}}
                                             <template x-for="(person, index) in people" :key="index">
                                                 <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg" :class="getTagClass(person.status)">
