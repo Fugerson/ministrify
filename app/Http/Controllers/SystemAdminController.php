@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use App\Mail\SupportTicketReply;
 
 class SystemAdminController extends Controller
@@ -493,10 +494,12 @@ class SystemAdminController extends Controller
             // 5. People related
             foreach ($church->people as $person) {
                 // Delete person relationships
-                DB::table('family_relationships')
-                    ->where('person_id', $person->id)
-                    ->orWhere('relative_id', $person->id)
-                    ->delete();
+                if (Schema::hasTable('family_relationships')) {
+                    DB::table('family_relationships')
+                        ->where('person_id', $person->id)
+                        ->orWhere('relative_id', $person->id)
+                        ->delete();
+                }
                 // Detach tags
                 $person->tags()->detach();
             }
@@ -507,9 +510,15 @@ class SystemAdminController extends Controller
             $church->donationCampaigns()->delete();
             $church->expenses()->delete();
             $church->expenseCategories()->delete();
-            DB::table('incomes')->where('church_id', $churchId)->delete();
-            DB::table('income_categories')->where('church_id', $churchId)->delete();
-            DB::table('transactions')->where('church_id', $churchId)->delete();
+            if (Schema::hasTable('incomes')) {
+                DB::table('incomes')->where('church_id', $churchId)->delete();
+            }
+            if (Schema::hasTable('income_categories')) {
+                DB::table('income_categories')->where('church_id', $churchId)->delete();
+            }
+            if (Schema::hasTable('transactions')) {
+                DB::table('transactions')->where('church_id', $churchId)->delete();
+            }
 
             // 7. Boards (Kanban)
             foreach ($church->boards as $board) {
@@ -527,21 +536,35 @@ class SystemAdminController extends Controller
             $church->tags()->delete();
 
             // 9. Church roles and permissions
-            foreach ($church->churchRoles ?? [] as $role) {
-                $role->permissions()->delete();
+            if (Schema::hasTable('church_role_permissions')) {
+                foreach ($church->churchRoles ?? [] as $role) {
+                    $role->permissions()->delete();
+                }
             }
-            DB::table('church_roles')->where('church_id', $churchId)->delete();
-            DB::table('role_permissions')->where('church_id', $churchId)->delete();
+            if (Schema::hasTable('church_roles')) {
+                DB::table('church_roles')->where('church_id', $churchId)->delete();
+            }
+            if (Schema::hasTable('role_permissions')) {
+                DB::table('role_permissions')->where('church_id', $churchId)->delete();
+            }
 
-            // 10. Other tables
-            DB::table('prayer_requests')->where('church_id', $churchId)->delete();
-            DB::table('songs')->where('church_id', $churchId)->delete();
-            DB::table('resources')->where('church_id', $churchId)->delete();
-            DB::table('announcements')->where('church_id', $churchId)->delete();
-            DB::table('private_messages')->where('church_id', $churchId)->delete();
-            DB::table('telegram_messages')->where('church_id', $churchId)->delete();
-            DB::table('volunteer_schedules')->where('church_id', $churchId)->delete();
-            DB::table('volunteer_availabilities')->where('church_id', $churchId)->delete();
+            // 10. Other tables (check if they exist first)
+            $optionalTables = [
+                'prayer_requests',
+                'songs',
+                'resources',
+                'announcements',
+                'private_messages',
+                'telegram_messages',
+                'volunteer_schedules',
+                'volunteer_availabilities',
+            ];
+
+            foreach ($optionalTables as $table) {
+                if (Schema::hasTable($table)) {
+                    DB::table($table)->where('church_id', $churchId)->delete();
+                }
+            }
 
             // 11. Audit logs
             AuditLog::where('church_id', $churchId)->delete();
