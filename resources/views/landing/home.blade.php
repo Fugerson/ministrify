@@ -283,7 +283,7 @@
             </div>
             <div>
                 <div class="text-4xl md:text-5xl font-bold text-white mb-2">99.9%</div>
-                <div class="text-primary-100">Uptime</div>
+                <div class="text-primary-100">Доступність</div>
             </div>
         </div>
     </div>
