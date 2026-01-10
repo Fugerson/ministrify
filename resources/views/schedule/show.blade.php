@@ -210,25 +210,17 @@
                                         <form method="POST" action="{{ route('events.plan.update', [$event, $item]) }}" class="flex flex-wrap gap-2 items-center" @submit="editing = false">
                                             @csrf
                                             @method('PUT')
-                                            <input type="time" name="start_time" value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
-                                                   class="w-28 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                            <input type="text" name="title" value="{{ $item->title }}" required placeholder="Назва"
-                                                   class="flex-1 min-w-40 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                                   @keydown.escape="editing = false">
-
-                                            {{-- Person: select from list OR type manually --}}
-                                            <select name="responsible_id" class="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                                <option value="">-- зі списку --</option>
-                                                @foreach($allPeople as $person)
-                                                    <option value="{{ $person->id }}" {{ $item->responsible_id == $person->id ? 'selected' : '' }}>{{ $person->full_name }}</option>
+                                            <select name="type" class="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                <option value="">Тип</option>
+                                                @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
+                                                    <option value="{{ $type }}" {{ $item->type == $type ? 'selected' : '' }}>{{ $label }}</option>
                                                 @endforeach
                                             </select>
-                                            <span class="text-gray-400 text-xs">або</span>
-                                            <input type="text" name="responsible_names" value="{{ $item->responsible_names }}" placeholder="вручну"
-                                                   class="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-
-                                            <input type="text" name="notes" value="{{ $item->notes }}" placeholder="Примітка"
-                                                   class="flex-1 min-w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            <input type="text" name="title" value="{{ $item->title }}" placeholder="Назва"
+                                                   class="flex-1 min-w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                   @keydown.escape="editing = false">
+                                            <input type="text" name="responsible_names" value="{{ $item->responsible_names }}" placeholder="Відповідальний"
+                                                   class="w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                             <button type="submit" class="px-3 py-1 bg-primary-600 text-white text-sm rounded hover:bg-primary-700">OK</button>
                                             <button type="button" @click="editing = false" class="px-3 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded">✕</button>
                                         </form>
@@ -256,25 +248,15 @@
                         {{-- Service Plan form --}}
                         <form method="POST" action="{{ route('events.plan.store', $event) }}" class="flex flex-wrap items-center gap-2">
                             @csrf
-                            <input type="time" name="start_time" value="{{ now()->format('H:i') }}"
-                                   class="w-28 px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-                            <input type="text" name="title" required placeholder="Назва пункту"
-                                   class="flex-1 min-w-40 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-
-                            {{-- Person: select OR manual --}}
-                            <select name="responsible_id" class="w-40 px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-                                <option value="">-- зі списку --</option>
-                                @foreach($allPeople as $person)
-                                    <option value="{{ $person->id }}">{{ $person->full_name }}</option>
+                            <select name="type" class="w-40 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+                                <option value="">Оберіть тип</option>
+                                @foreach(\App\Models\ServicePlanItem::typeLabels() as $type => $label)
+                                    <option value="{{ $type }}">{{ $label }}</option>
                                 @endforeach
                             </select>
-                            <span class="text-gray-400 text-xs">або</span>
-                            <input type="text" name="responsible_names" placeholder="вручну"
-                                   class="w-24 px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-
-                            <input type="text" name="notes" placeholder="Примітка"
-                                   class="w-28 px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-                            <button type="submit" class="px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium">
+                            <input type="text" name="title" placeholder="або своя назва"
+                                   class="flex-1 min-w-32 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+                            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium">
                                 Додати
                             </button>
                         </form>
