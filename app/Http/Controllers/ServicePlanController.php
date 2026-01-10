@@ -572,15 +572,15 @@ class ServicePlanController extends Controller
             ], 422);
         }
 
-        $token = config('services.telegram.bot_token');
-        if (!$token) {
+        $church = $event->church;
+        if (!$church->telegram_bot_token) {
             return response()->json([
                 'success' => false,
-                'message' => 'Telegram бот не налаштований',
+                'message' => 'Telegram бот не налаштований для цієї церкви',
             ], 500);
         }
 
-        $telegram = new TelegramService($token);
+        $telegram = new TelegramService($church->telegram_bot_token);
 
         $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : 'час уточнюється';
         $message = "📋 <b>Запит на участь</b>\n\n"
