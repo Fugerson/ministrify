@@ -43,6 +43,12 @@
                     <template x-if="!editing">
                         <div class="flex items-center gap-2">
                             <span class="font-medium text-gray-900 dark:text-white" @dblclick="editing = true">{{ $role->name }}</span>
+                            @if($role->is_admin_role)
+                            <span class="px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-full flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                Повний доступ
+                            </span>
+                            @endif
                             @if($role->is_default)
                             <span class="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full">
                                 за замовчуванням
@@ -68,6 +74,22 @@
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <!-- Toggle Admin -->
+                    <button @click="toggleAdmin({{ $role->id }})"
+                            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 {{ $role->is_admin_role ? 'text-red-600 dark:text-red-400' : 'text-gray-400 hover:text-red-600 dark:hover:text-red-400' }}"
+                            title="{{ $role->is_admin_role ? 'Прибрати повний доступ' : 'Надати повний доступ' }}">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <!-- Permissions -->
+                    @if(!$role->is_admin_role)
+                    <button @click="openPermissions({{ $role->id }}, '{{ $role->name }}')"
+                            class="p-2 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                            title="Налаштувати права доступу">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </button>
+                    @endif
                     <button @click="editing = true; $nextTick(() => $refs.nameInput?.focus())"
                             class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,6 +160,72 @@
         </svg>
         Назад до налаштувань
     </a>
+
+    <!-- Permissions Modal -->
+    <template x-teleport="body">
+        <div x-show="showPermissionsModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="fixed inset-0 bg-black/50" @click="showPermissionsModal = false"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Права доступу: <span x-text="permissionsRoleName"></span>
+                        </h3>
+                        <button @click="showPermissionsModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto max-h-96">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left border-b border-gray-200 dark:border-gray-700">
+                                    <th class="pb-2 font-medium text-gray-900 dark:text-white">Модуль</th>
+                                    <th class="pb-2 font-medium text-gray-900 dark:text-white text-center w-20">Перегляд</th>
+                                    <th class="pb-2 font-medium text-gray-900 dark:text-white text-center w-20">Створ.</th>
+                                    <th class="pb-2 font-medium text-gray-900 dark:text-white text-center w-20">Редаг.</th>
+                                    <th class="pb-2 font-medium text-gray-900 dark:text-white text-center w-20">Видал.</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <template x-for="(module, key) in modules" :key="key">
+                                    <tr>
+                                        <td class="py-2 text-gray-700 dark:text-gray-300" x-text="module.label"></td>
+                                        <template x-for="action in ['view', 'create', 'edit', 'delete']" :key="action">
+                                            <td class="py-2 text-center">
+                                                <input type="checkbox"
+                                                       :checked="permissions[key]?.includes(action)"
+                                                       @change="togglePermission(key, action)"
+                                                       class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button @click="showPermissionsModal = false"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                            Скасувати
+                        </button>
+                        <button @click="savePermissions()"
+                                :disabled="savingPermissions"
+                                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2">
+                            <svg x-show="savingPermissions" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span x-text="savingPermissions ? 'Збереження...' : 'Зберегти'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
 
 @push('scripts')
@@ -145,6 +233,26 @@
 <script>
 function churchRolesManager() {
     return {
+        showPermissionsModal: false,
+        permissionsRoleId: null,
+        permissionsRoleName: '',
+        permissions: {},
+        savingPermissions: false,
+        modules: {
+            dashboard: { label: 'Головна' },
+            people: { label: 'Люди' },
+            groups: { label: 'Домашні групи' },
+            ministries: { label: 'Служіння' },
+            events: { label: 'Розклад' },
+            finances: { label: 'Фінанси' },
+            reports: { label: 'Звіти' },
+            resources: { label: 'Ресурси' },
+            boards: { label: 'Дошки завдань' },
+            announcements: { label: 'Комунікації' },
+            website: { label: 'Веб-сайт' },
+            settings: { label: 'Налаштування' }
+        },
+
         init() {
             // Initialize drag and drop
             const list = this.$refs.rolesList;
@@ -156,6 +264,86 @@ function churchRolesManager() {
                         this.saveOrder();
                     }
                 });
+            }
+        },
+
+        async toggleAdmin(id) {
+            try {
+                const response = await fetch(`/settings/church-roles/${id}/toggle-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Помилка');
+                }
+            } catch (error) {
+                alert('Помилка з\'єднання');
+            }
+        },
+
+        async openPermissions(id, name) {
+            this.permissionsRoleId = id;
+            this.permissionsRoleName = name;
+
+            try {
+                const response = await fetch(`/settings/church-roles/${id}/permissions`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.permissions = data.permissions;
+                    this.showPermissionsModal = true;
+                }
+            } catch (error) {
+                alert('Помилка завантаження прав');
+            }
+        },
+
+        togglePermission(module, action) {
+            if (!this.permissions[module]) {
+                this.permissions[module] = [];
+            }
+
+            const idx = this.permissions[module].indexOf(action);
+            if (idx > -1) {
+                this.permissions[module].splice(idx, 1);
+            } else {
+                this.permissions[module].push(action);
+            }
+        },
+
+        async savePermissions() {
+            this.savingPermissions = true;
+
+            try {
+                const response = await fetch(`/settings/church-roles/${this.permissionsRoleId}/permissions`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ permissions: this.permissions })
+                });
+
+                if (response.ok) {
+                    this.showPermissionsModal = false;
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Помилка збереження');
+                }
+            } catch (error) {
+                alert('Помилка з\'єднання');
+            } finally {
+                this.savingPermissions = false;
             }
         },
 

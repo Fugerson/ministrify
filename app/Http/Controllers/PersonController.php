@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChurchRole;
 use App\Models\Person;
 use App\Models\Tag;
 use App\Models\User;
@@ -723,25 +724,30 @@ class PersonController extends Controller
 
         $validated = $request->validate([
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:admin,leader,volunteer',
+            'church_role_id' => 'required|exists:church_roles,id',
         ]);
+
+        // Verify church role belongs to this church
+        $church = $this->getCurrentChurch();
+        $churchRole = ChurchRole::findOrFail($validated['church_role_id']);
+        if ($churchRole->church_id !== $church->id) {
+            return response()->json(['message' => 'Невірна роль'], 400);
+        }
 
         if ($person->user) {
             return response()->json(['message' => 'Користувач вже має обліковий запис'], 400);
         }
 
-        $church = $this->getCurrentChurch();
-
         // Generate random password
         $password = Str::random(10);
 
-        // Create user
+        // Create user with church_role_id
         $user = User::create([
             'church_id' => $church->id,
             'name' => $person->full_name,
             'email' => $validated['email'],
             'password' => Hash::make($password),
-            'role' => $validated['role'],
+            'church_role_id' => $validated['church_role_id'],
             'onboarding_completed' => true,
         ]);
 

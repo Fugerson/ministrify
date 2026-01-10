@@ -25,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role',
+        'church_role_id',
         'is_super_admin',
         'theme',
         'preferences',
@@ -61,6 +62,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Person::class);
     }
 
+    public function churchRole(): BelongsTo
+    {
+        return $this->belongsTo(ChurchRole::class);
+    }
+
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
@@ -78,6 +84,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
+        // Check new church role system first
+        if ($this->churchRole?->is_admin_role) {
+            return true;
+        }
+
+        // Fallback to legacy role
         return $this->role === 'admin';
     }
 
@@ -113,7 +125,17 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
-        return RolePermission::hasPermission($this->church_id, $this->role, $module, $action);
+        // New church role system
+        if ($this->church_role_id && $this->churchRole) {
+            return $this->churchRole->hasPermission($module, $action);
+        }
+
+        // Fallback to legacy role system
+        if ($this->role) {
+            return RolePermission::hasPermission($this->church_id, $this->role, $module, $action);
+        }
+
+        return false;
     }
 
     /**

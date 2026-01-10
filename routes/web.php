@@ -400,6 +400,9 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('church-roles/{churchRole}', [\App\Http\Controllers\ChurchRoleController::class, 'update'])->name('church-roles.update');
         Route::delete('church-roles/{churchRole}', [\App\Http\Controllers\ChurchRoleController::class, 'destroy'])->name('church-roles.destroy');
         Route::post('church-roles/{churchRole}/set-default', [\App\Http\Controllers\ChurchRoleController::class, 'setDefault'])->name('church-roles.set-default');
+        Route::post('church-roles/{churchRole}/toggle-admin', [\App\Http\Controllers\ChurchRoleController::class, 'toggleAdmin'])->name('church-roles.toggle-admin');
+        Route::get('church-roles/{churchRole}/permissions', [\App\Http\Controllers\ChurchRolePermissionController::class, 'getPermissions'])->name('church-roles.permissions');
+        Route::put('church-roles/{churchRole}/permissions', [\App\Http\Controllers\ChurchRolePermissionController::class, 'update'])->name('church-roles.permissions.update');
         Route::post('church-roles/reorder', [\App\Http\Controllers\ChurchRoleController::class, 'reorder'])->name('church-roles.reorder');
         Route::post('church-roles/reset', [\App\Http\Controllers\ChurchRoleController::class, 'resetToDefaults'])->name('church-roles.reset');
 

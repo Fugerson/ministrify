@@ -83,9 +83,42 @@ class ChurchRoleController extends Controller
             return response()->json(['message' => 'Роль використовується. Спочатку змініть роль у людей.'], 400);
         }
 
+        if ($churchRole->users()->count() > 0) {
+            return response()->json(['message' => 'Роль має користувачів з доступом. Спочатку змініть їх роль.'], 400);
+        }
+
         $churchRole->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    public function toggleAdmin(ChurchRole $churchRole)
+    {
+        $this->authorizeChurch($churchRole);
+
+        $church = $this->getCurrentChurch();
+
+        if ($churchRole->is_admin_role) {
+            // Check if this is the only admin role
+            $adminRolesCount = ChurchRole::where('church_id', $church->id)
+                ->where('is_admin_role', true)
+                ->count();
+
+            if ($adminRolesCount <= 1) {
+                return response()->json([
+                    'message' => 'Потрібна хоча б одна роль з повним доступом'
+                ], 400);
+            }
+
+            $churchRole->update(['is_admin_role' => false]);
+        } else {
+            $churchRole->update(['is_admin_role' => true]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'is_admin_role' => $churchRole->is_admin_role,
+        ]);
     }
 
     public function setDefault(ChurchRole $churchRole)

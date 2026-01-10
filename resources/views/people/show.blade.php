@@ -437,11 +437,14 @@
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Рівень доступу</label>
-                                        <select x-model="newRole"
+                                        <select x-model="newChurchRoleId"
                                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white">
-                                            <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Служитель — перегляд розкладу, підтвердження участі</option>
-                                            <option value="leader" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Лідер — керування своїм служінням</option>
-                                            <option value="admin" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Адмін — повний доступ</option>
+                                            <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Оберіть роль...</option>
+                                            @foreach($churchRoles as $role)
+                                            <option value="{{ $role->id }}" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                                {{ $role->name }}@if($role->is_admin_role) (Повний доступ)@endif
+                                            </option>
+                                            @endforeach
                                         </select>
                                     </div>
 
@@ -456,7 +459,7 @@
                                         Скасувати
                                     </button>
                                     <button type="button" @click="createAccount()"
-                                            :disabled="creating || !newEmail"
+                                            :disabled="creating || !newEmail || !newChurchRoleId"
                                             class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-2">
                                         <svg x-show="creating" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1057,13 +1060,14 @@ function personProfile() {
 function userRoleManager() {
     return {
         role: '{{ $person->user?->role ?? "volunteer" }}',
+        churchRoleId: {{ $person->user?->church_role_id ?? 'null' }},
         saving: false,
         saved: false,
         showCreateModal: false,
         showPasswordModal: false,
         generatedPassword: '',
         newEmail: '{{ $person->email ?? "" }}',
-        newRole: 'volunteer',
+        newChurchRoleId: '',
         creating: false,
         createError: '',
         editingEmail: false,
@@ -1179,7 +1183,7 @@ function userRoleManager() {
                     },
                     body: JSON.stringify({
                         email: this.newEmail,
-                        role: this.newRole
+                        church_role_id: this.newChurchRoleId
                     })
                 });
 
