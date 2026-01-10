@@ -154,7 +154,7 @@
                                                      class="absolute z-10 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-40 overflow-y-auto">
                                                     @foreach($allPeople as $person)
                                                         <button type="button"
-                                                                x-show="!value || '{{ strtolower($person->full_name) }}'.includes(value.toLowerCase())"
+                                                                x-show="!value || '{{ mb_strtolower($person->full_name) }}'.includes(value.toLowerCase())"
                                                                 @click="selectPerson('{{ addslashes($person->full_name) }}', {{ $person->id }})"
                                                                 class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                                             @if($person->telegram_chat_id)
@@ -287,7 +287,7 @@
                     <div class="space-y-2 max-h-96 overflow-y-auto">
                         @foreach($allPeople as $person)
                         <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                             x-show="!search || '{{ strtolower($person->full_name) }}'.includes(search.toLowerCase())">
+                             x-show="!search || '{{ mb_strtolower($person->full_name) }}'.includes(search.toLowerCase())">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                                     <span class="text-primary-600 dark:text-primary-400 text-xs font-medium">
