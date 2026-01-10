@@ -556,14 +556,24 @@ class ServicePlanController extends Controller
             abort(403);
         }
 
-        if (!$item->responsible_id) {
+        // Get person - either from request (specific person) or fallback to responsible_id
+        $personId = $request->input('person_id') ?? $item->responsible_id;
+
+        if (!$personId) {
             return response()->json([
                 'success' => false,
                 'message' => 'Немає призначеної людини',
             ], 422);
         }
 
-        $person = $item->responsible;
+        $person = Person::find($personId);
+
+        if (!$person) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Людину не знайдено',
+            ], 422);
+        }
 
         if (!$person->telegram_chat_id) {
             return response()->json([
@@ -589,16 +599,20 @@ class ServicePlanController extends Controller
             . "📝 {$item->title}\n\n"
             . "Чи можете ви взяти участь?";
 
+        // Include person_id in callback for tracking individual responses
         $keyboard = [
             [
-                ['text' => '✅ Так, зможу', 'callback_data' => "plan_confirm_{$item->id}"],
-                ['text' => '❌ Не можу', 'callback_data' => "plan_decline_{$item->id}"],
+                ['text' => '✅ Так, зможу', 'callback_data' => "plan_confirm_{$item->id}_{$personId}"],
+                ['text' => '❌ Не можу', 'callback_data' => "plan_decline_{$item->id}_{$personId}"],
             ],
         ];
 
         $sent = $telegram->sendMessage($person->telegram_chat_id, $message, $keyboard);
 
         if ($sent) {
+            // Set person status to pending
+            $item->setPersonStatus($personId, 'pending');
+
             return response()->json([
                 'success' => true,
                 'message' => 'Запит надіслано в Telegram',

@@ -120,28 +120,39 @@
                                                @change="updateField({{ $item->id }}, 'title', $event.target.value)"
                                                class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded">
                                     </td>
-                                    {{-- Відповідальний (multiple people) --}}
+                                    {{-- Відповідальний (multiple people with statuses) --}}
                                     @php
-                                        // Parse existing responsible people
+                                        // Parse existing responsible people with statuses
                                         $existingPeople = [];
-                                        if ($item->responsible_id && $item->responsible) {
-                                            $existingPeople[] = [
-                                                'id' => $item->responsible->id,
-                                                'name' => $item->responsible->full_name,
-                                                'hasTelegram' => (bool)$item->responsible->telegram_chat_id
-                                            ];
-                                        } elseif ($item->responsible_names) {
-                                            // Parse comma-separated names and try to match with people
+                                        $statuses = $item->responsible_statuses ?? [];
+
+                                        if ($item->responsible_names) {
                                             $names = array_map('trim', explode(',', $item->responsible_names));
                                             foreach ($names as $name) {
                                                 $person = $allPeople->first(fn($p) => $p->full_name === $name);
+                                                $personId = $person?->id;
                                                 $existingPeople[] = [
-                                                    'id' => $person?->id,
+                                                    'id' => $personId,
                                                     'name' => $name,
-                                                    'hasTelegram' => (bool)($person?->telegram_chat_id)
+                                                    'hasTelegram' => (bool)($person?->telegram_chat_id),
+                                                    'status' => $personId ? ($statuses[$personId] ?? null) : null
                                                 ];
                                             }
+                                        } elseif ($item->responsible_id && $item->responsible) {
+                                            $existingPeople[] = [
+                                                'id' => $item->responsible->id,
+                                                'name' => $item->responsible->full_name,
+                                                'hasTelegram' => (bool)$item->responsible->telegram_chat_id,
+                                                'status' => $statuses[$item->responsible->id] ?? null
+                                            ];
                                         }
+
+                                        // Calculate stats
+                                        $totalPeople = count($existingPeople);
+                                        $confirmedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'confirmed'));
+                                        $pendingCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'pending'));
+                                        $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
+                                        $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
                                     <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700"
                                         x-data="{
@@ -152,7 +163,7 @@
 
                                             addPerson(id, name, hasTg) {
                                                 if (this.people.find(p => p.name === name)) return;
-                                                this.people.push({ id, name, hasTelegram: hasTg });
+                                                this.people.push({ id, name, hasTelegram: hasTg, status: null });
                                                 this.save();
                                                 this.search = '';
                                                 this.open = false;
@@ -167,34 +178,87 @@
                                                 updateField(this.itemId, 'responsible_names', names);
                                                 updateField(this.itemId, 'responsible_id', primaryId);
                                             },
-                                            async askPerson(person) {
+                                            async askPerson(person, index) {
                                                 if (!person.id || !person.hasTelegram) return;
-                                                await askInTelegram(this.itemId, person.name);
+                                                const result = await askInTelegram(this.itemId, person.name, person.id);
+                                                if (result) {
+                                                    this.people[index].status = 'pending';
+                                                }
+                                            },
+                                            async askAll() {
+                                                for (let i = 0; i < this.people.length; i++) {
+                                                    const p = this.people[i];
+                                                    if (p.hasTelegram && (!p.status || p.status === 'declined')) {
+                                                        await this.askPerson(p, i);
+                                                    }
+                                                }
+                                            },
+                                            getStats() {
+                                                const total = this.people.length;
+                                                const confirmed = this.people.filter(p => p.status === 'confirmed').length;
+                                                return { total, confirmed };
+                                            },
+                                            getTagClass(status) {
+                                                if (status === 'confirmed') return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+                                                if (status === 'declined') return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+                                                if (status === 'pending') return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
+                                                return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
                                             }
                                         }">
-                                        <div class="flex flex-wrap items-center gap-1">
+                                        <div class="flex flex-wrap items-center gap-1.5">
                                             {{-- Selected people as tags --}}
                                             <template x-for="(person, index) in people" :key="index">
-                                                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg">
+                                                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg" :class="getTagClass(person.status)">
+                                                    {{-- Status icon --}}
+                                                    <template x-if="person.status === 'confirmed'">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                    </template>
+                                                    <template x-if="person.status === 'declined'">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                        </svg>
+                                                    </template>
+                                                    <template x-if="person.status === 'pending'">
+                                                        <svg class="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                                                            <circle cx="12" cy="12" r="4"/>
+                                                        </svg>
+                                                    </template>
+
                                                     <span x-text="person.name"></span>
-                                                    {{-- Telegram button --}}
+
+                                                    {{-- Запитати button (show if not asked or declined) --}}
                                                     <button type="button"
-                                                            x-show="person.hasTelegram"
-                                                            @click="askPerson(person)"
+                                                            x-show="person.hasTelegram && (!person.status || person.status === 'declined')"
+                                                            @click="askPerson(person, index)"
                                                             class="text-blue-500 hover:text-blue-700"
-                                                            title="Запитати в Telegram">
+                                                            :title="person.status === 'declined' ? 'Запитати ще раз' : 'Запитати в Telegram'">
                                                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                         </svg>
                                                     </button>
+
+                                                    {{-- Нагадати button (show if pending) --}}
+                                                    <button type="button"
+                                                            x-show="person.hasTelegram && person.status === 'pending'"
+                                                            @click="askPerson(person, index)"
+                                                            class="text-yellow-600 hover:text-yellow-700"
+                                                            title="Нагадати">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                                        </svg>
+                                                    </button>
+
                                                     {{-- No telegram indicator --}}
-                                                    <span x-show="person.id && !person.hasTelegram" class="text-gray-400" title="Немає Telegram">
-                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <span x-show="person.id && !person.hasTelegram && !person.status" class="text-gray-400" title="Немає Telegram">
+                                                        <svg class="w-3 h-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                         </svg>
                                                     </span>
+
                                                     {{-- Remove button --}}
-                                                    <button type="button" @click="removePerson(index)" class="text-gray-400 hover:text-red-500">
+                                                    <button type="button" @click="removePerson(index)" class="opacity-50 hover:opacity-100 hover:text-red-500">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                         </svg>
@@ -202,7 +266,7 @@
                                                 </span>
                                             </template>
 
-                                            {{-- Add person button/input --}}
+                                            {{-- Add person button --}}
                                             <div class="relative">
                                                 <button type="button"
                                                         @click="open = !open"
@@ -231,7 +295,7 @@
                                                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                                     </svg>
                                                                 @else
-                                                                    <span class="w-4"></span>
+                                                                    <span class="w-4 h-4"></span>
                                                                 @endif
                                                                 {{ $person->full_name }}
                                                             </button>
@@ -239,6 +303,12 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {{-- Overall stats (show if multiple people) --}}
+                                            <template x-if="people.length > 1 && people.some(p => p.status)">
+                                                <span class="text-xs text-gray-500 dark:text-gray-400 ml-1"
+                                                      x-text="getStats().confirmed + '/' + getStats().total"></span>
+                                            </template>
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
@@ -543,15 +613,18 @@ async function updateField(itemId, field, value) {
 }
 
 // Global function to ask via Telegram
-async function askInTelegram(itemId, personName) {
+async function askInTelegram(itemId, personName, personId = null) {
     try {
+        const body = personId ? JSON.stringify({ person_id: personId }) : null;
         const response = await fetch(`/events/{{ $event->id }}/plan/${itemId}/notify`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
+                'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'X-Requested-With': 'XMLHttpRequest'
-            }
+            },
+            body: body
         });
 
         const data = await response.json();

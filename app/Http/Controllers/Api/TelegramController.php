@@ -94,12 +94,17 @@ class TelegramController extends Controller
                 }
             }
         } elseif (str_starts_with($data, 'plan_confirm_')) {
-            // Service Plan Item confirmation
-            $itemId = (int) str_replace('plan_confirm_', '', $data);
+            // Service Plan Item confirmation - format: plan_confirm_{itemId}_{personId}
+            $parts = explode('_', str_replace('plan_confirm_', '', $data));
+            $itemId = (int) $parts[0];
+            $targetPersonId = isset($parts[1]) ? (int) $parts[1] : null;
+
             $item = ServicePlanItem::with('event')->find($itemId);
 
-            if ($item && $item->responsible_id === $person->id) {
-                $item->update(['status' => 'confirmed']);
+            // Verify the person responding matches the target person
+            if ($item && ($targetPersonId === $person->id || $item->responsible_id === $person->id)) {
+                // Use per-person status tracking
+                $item->setPersonStatus($person->id, 'confirmed');
 
                 $church = $person->church;
                 if ($church?->telegram_bot_token) {
@@ -116,12 +121,17 @@ class TelegramController extends Controller
                 }
             }
         } elseif (str_starts_with($data, 'plan_decline_')) {
-            // Service Plan Item decline
-            $itemId = (int) str_replace('plan_decline_', '', $data);
+            // Service Plan Item decline - format: plan_decline_{itemId}_{personId}
+            $parts = explode('_', str_replace('plan_decline_', '', $data));
+            $itemId = (int) $parts[0];
+            $targetPersonId = isset($parts[1]) ? (int) $parts[1] : null;
+
             $item = ServicePlanItem::with('event')->find($itemId);
 
-            if ($item && $item->responsible_id === $person->id) {
-                $item->update(['status' => 'declined']);
+            // Verify the person responding matches the target person
+            if ($item && ($targetPersonId === $person->id || $item->responsible_id === $person->id)) {
+                // Use per-person status tracking
+                $item->setPersonStatus($person->id, 'declined');
 
                 $church = $person->church;
                 if ($church?->telegram_bot_token) {

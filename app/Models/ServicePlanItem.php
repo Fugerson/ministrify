@@ -63,6 +63,7 @@ class ServicePlanItem extends Model
         'end_time',
         'responsible_id',
         'responsible_names',
+        'responsible_statuses',
         'sort_order',
         'notes',
         'status',
@@ -71,7 +72,46 @@ class ServicePlanItem extends Model
     protected $casts = [
         'start_time' => 'datetime:H:i',
         'end_time' => 'datetime:H:i',
+        'responsible_statuses' => 'array',
     ];
+
+    /**
+     * Get status for a specific person
+     */
+    public function getPersonStatus(int $personId): ?string
+    {
+        return $this->responsible_statuses[$personId] ?? null;
+    }
+
+    /**
+     * Set status for a specific person
+     */
+    public function setPersonStatus(int $personId, string $status): void
+    {
+        $statuses = $this->responsible_statuses ?? [];
+        $statuses[$personId] = $status;
+        $this->responsible_statuses = $statuses;
+        $this->save();
+    }
+
+    /**
+     * Get confirmation stats (confirmed/total)
+     */
+    public function getConfirmationStats(): array
+    {
+        $statuses = $this->responsible_statuses ?? [];
+        $total = count($statuses);
+        $confirmed = count(array_filter($statuses, fn($s) => $s === 'confirmed'));
+        $declined = count(array_filter($statuses, fn($s) => $s === 'declined'));
+        $pending = count(array_filter($statuses, fn($s) => $s === 'pending'));
+
+        return [
+            'total' => $total,
+            'confirmed' => $confirmed,
+            'declined' => $declined,
+            'pending' => $pending,
+        ];
+    }
 
     /**
      * Get type labels in Ukrainian
