@@ -542,6 +542,19 @@ class SystemAdminController extends Controller
     }
 
     /**
+     * Delete support ticket
+     */
+    public function destroySupportTicket(SupportTicket $ticket)
+    {
+        $subject = $ticket->subject;
+        $ticket->messages()->delete();
+        $ticket->delete();
+
+        return redirect()->route('system.support.index')
+            ->with('success', "Тікет \"{$subject}\" видалено.");
+    }
+
+    /**
      * Update ticket status/assignment
      */
     public function updateSupportTicket(Request $request, SupportTicket $ticket)
