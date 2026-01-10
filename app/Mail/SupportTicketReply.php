@@ -18,7 +18,7 @@ class SupportTicketReply extends Mailable
      */
     public function __construct(
         public SupportTicket $ticket,
-        public SupportMessage $message
+        public SupportMessage $reply
     ) {}
 
     /**

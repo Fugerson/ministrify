@@ -48,7 +48,7 @@
                                 <p style="margin: 0 0 10px; color: #4f46e5; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                                     Наша відповідь
                                 </p>
-                                <div style="margin: 0; color: #374151; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">{{ $message->message }}</div>
+                                <div style="margin: 0; color: #374151; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">{{ $reply->message }}</div>
                             </div>
 
                             <p style="margin: 0 0 20px; color: #6b7280; font-size: 14px;">
