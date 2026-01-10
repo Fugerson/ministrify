@@ -609,10 +609,10 @@
          @keydown.window.prevent.cmd.k="searchOpen = true"
          @keydown.window.prevent.ctrl.k="searchOpen = true"
          @keydown.window.escape="searchOpen = false; fabOpen = false"
-         @keydown.window.191="if(!searchOpen && event.shiftKey) $dispatch('open-page-help')"
-         @keydown.window.prevent.n="if(!searchOpen) window.location.href='{{ route('people.create') }}'"
-         @keydown.window.prevent.e="if(!searchOpen) window.location.href='{{ route('events.create') }}'"
-         @keydown.window.prevent.g="if(!searchOpen) window.location.href='{{ route('groups.create') }}'"
+         @keydown.window.191="if(!searchOpen && event.shiftKey && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) $dispatch('open-page-help')"
+         @keydown.window.prevent.n="if(!searchOpen && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) window.location.href='{{ route('people.create') }}'"
+         @keydown.window.prevent.e="if(!searchOpen && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) window.location.href='{{ route('events.create') }}'"
+         @keydown.window.prevent.g="if(!searchOpen && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) window.location.href='{{ route('groups.create') }}'"
          {{-- @keydown.window.prevent.b="if(!searchOpen) window.location.href='{{ route('boards.create') }}'" --}}>
 
         <!-- Desktop Sidebar -->
