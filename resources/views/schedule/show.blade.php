@@ -197,10 +197,9 @@
                                                 </svg>
                                             </span>
                                             {{-- Status indicators --}}
-                                            <span x-show="status === 'confirmed'" class="text-green-500" title="Підтверджено">✓</span>
-                                            <span x-show="status === 'declined'" class="text-red-500" title="Відхилено">✗</span>
-                                            <span x-show="status === 'pending'" class="text-yellow-500" title="Очікує відповіді">⏳</span>
-                                            <span x-show="status === 'planned'" class="text-blue-400" title="Заплановано">📋</span>
+                                            <span x-show="status === 'confirmed'" class="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded">Так</span>
+                                            <span x-show="status === 'declined'" class="text-xs px-1.5 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded">Ні</span>
+                                            <span x-show="status === 'pending'" class="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded">Очікує</span>
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
