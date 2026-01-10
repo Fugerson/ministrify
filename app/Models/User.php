@@ -308,8 +308,8 @@ class User extends Authenticatable
         return in_array($hint, $hints);
     }
 
-    public function sendPasswordResetNotification($token): void
+    public function sendPasswordResetNotification($token, bool $isInvite = false): void
     {
-        $this->notify(new ResetPassword($token));
+        $this->notify(new ResetPassword($token, $isInvite));
     }
 }

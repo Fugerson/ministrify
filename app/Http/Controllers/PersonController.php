@@ -746,9 +746,9 @@ class PersonController extends Controller
         // Link person to user
         $person->update(['user_id' => $user->id]);
 
-        // Send password setup email
+        // Send invitation email
         $token = Password::createToken($user);
-        $user->sendPasswordResetNotification($token);
+        $user->sendPasswordResetNotification($token, isInvite: true);
 
         return response()->json([
             'success' => true,
