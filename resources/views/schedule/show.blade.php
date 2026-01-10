@@ -126,18 +126,31 @@
                                             open: false,
                                             value: '{{ addslashes($item->responsible_names ?? ($item->responsible?->full_name ?? '')) }}',
                                             originalValue: '{{ addslashes($item->responsible_names ?? ($item->responsible?->full_name ?? '')) }}',
+                                            selectedPersonId: {{ $item->responsible_id ?? 'null' }},
+                                            hasTelegram: {{ ($item->responsible?->telegram_chat_id) ? 'true' : 'false' }},
+                                            itemId: {{ $item->id }},
+                                            status: '{{ $item->status ?? 'pending' }}',
                                             save() {
                                                 if (this.value !== this.originalValue) {
-                                                    updateField({{ $item->id }}, 'responsible_names', this.value);
+                                                    updateField(this.itemId, 'responsible_names', this.value);
                                                     this.originalValue = this.value;
                                                 }
                                             },
-                                            selectPerson(name, id) {
+                                            selectPerson(name, id, hasTg) {
                                                 this.value = name;
-                                                updateField({{ $item->id }}, 'responsible_names', name);
-                                                updateField({{ $item->id }}, 'responsible_id', id);
+                                                this.selectedPersonId = id;
+                                                this.hasTelegram = hasTg;
+                                                updateField(this.itemId, 'responsible_names', name);
+                                                updateField(this.itemId, 'responsible_id', id);
                                                 this.originalValue = name;
                                                 this.open = false;
+                                            },
+                                            async askTelegram() {
+                                                if (!this.selectedPersonId || !this.hasTelegram) return;
+                                                const result = await askInTelegram(this.itemId, this.value);
+                                                if (result) {
+                                                    this.status = 'pending';
+                                                }
                                             }
                                         }">
                                         <div class="flex items-center gap-1">
@@ -155,7 +168,7 @@
                                                     @foreach($allPeople as $person)
                                                         <button type="button"
                                                                 x-show="!value || '{{ mb_strtolower($person->full_name) }}'.includes(value.toLowerCase())"
-                                                                @click="selectPerson('{{ addslashes($person->full_name) }}', {{ $person->id }})"
+                                                                @click="selectPerson('{{ addslashes($person->full_name) }}', {{ $person->id }}, {{ $person->telegram_chat_id ? 'true' : 'false' }})"
                                                                 class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                                             @if($person->telegram_chat_id)
                                                                 <span class="text-blue-500">📱</span>
@@ -165,22 +178,21 @@
                                                     @endforeach
                                                 </div>
                                             </div>
-                                            {{-- Telegram button --}}
-                                            @if($item->responsible_id && $item->responsible?->telegram_chat_id)
-                                                <button type="button"
-                                                        @click="askInTelegram({{ $item->id }}, '{{ addslashes($item->title) }}', '{{ addslashes($item->responsible?->full_name) }}')"
-                                                        class="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
-                                                        title="Запитати в Telegram">
-                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                                    </svg>
-                                                </button>
-                                            @endif
-                                            @if($item->status === 'confirmed')
-                                                <span class="text-green-500" title="Підтверджено">✓</span>
-                                            @elseif($item->status === 'declined')
-                                                <span class="text-red-500" title="Відхилено">✗</span>
-                                            @endif
+                                            {{-- Telegram button (dynamic) --}}
+                                            <button type="button"
+                                                    x-show="selectedPersonId && hasTelegram"
+                                                    x-cloak
+                                                    @click="askTelegram()"
+                                                    class="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                                                    title="Запитати в Telegram">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
+                                                </svg>
+                                            </button>
+                                            {{-- Status indicators --}}
+                                            <span x-show="status === 'confirmed'" class="text-green-500" title="Підтверджено">✓</span>
+                                            <span x-show="status === 'declined'" class="text-red-500" title="Відхилено">✗</span>
+                                            <span x-show="status === 'pending'" x-cloak class="text-yellow-500" title="Очікує відповіді">⏳</span>
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
@@ -434,6 +446,55 @@
 
 @push('scripts')
 <script>
+// Global function to ask via Telegram
+async function askInTelegram(itemId, personName) {
+    try {
+        const response = await fetch(`/events/{{ $event->id }}/plan/${itemId}/notify`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showGlobalToast(`Запит надіслано: ${personName}`, 'success');
+            return true;
+        } else {
+            showGlobalToast(data.message || 'Помилка надсилання', 'error');
+            return false;
+        }
+    } catch (err) {
+        console.error('Telegram error:', err);
+        showGlobalToast('Помилка надсилання', 'error');
+        return false;
+    }
+}
+
+function showGlobalToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+
+    toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 transform translate-x-full transition-transform duration-300`;
+    toast.innerHTML = `
+        <span class="text-lg">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
 // Plan Editor - Spreadsheet-like inline editing
 function planEditor() {
     return {
@@ -525,29 +586,6 @@ function planEditor() {
             }
         },
 
-        async askInTelegram(itemId, title, personName) {
-            try {
-                const response = await fetch(`/events/{{ $event->id }}/plan/${itemId}/notify`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    this.showMessage(`Запит надіслано ${personName}`, 'success');
-                } else {
-                    this.showMessage(data.message || 'Помилка надсилання', 'error');
-                }
-            } catch (err) {
-                console.error('Telegram error:', err);
-                this.showMessage('Помилка надсилання', 'error');
-            }
-        },
 
         showMessage(msg, type) {
             this.message = msg;
