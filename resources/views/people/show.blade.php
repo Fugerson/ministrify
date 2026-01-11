@@ -6,6 +6,16 @@
     use Illuminate\Support\Facades\Storage;
     $isAdmin = auth()->user()->isAdmin();
     $personMinistries = $person->ministries->keyBy('id');
+    $familyMembersData = $person->family_members->map(function($m) {
+        return [
+            'relationship_id' => $m->relationship_id,
+            'person_id' => $m->person->id,
+            'full_name' => $m->person->full_name,
+            'first_name' => $m->person->first_name,
+            'photo' => $m->person->photo ? Storage::url($m->person->photo) : null,
+            'relationship_label' => $m->relationship_label,
+        ];
+    });
 @endphp
 
 @section('content')
@@ -1384,14 +1394,7 @@ function familyManager() {
         relationshipType: '',
         saving: false,
         error: '',
-        familyMembers: @json($person->family_members->map(fn($m) => [
-            'relationship_id' => $m->relationship_id,
-            'person_id' => $m->person->id,
-            'full_name' => $m->person->full_name,
-            'first_name' => $m->person->first_name,
-            'photo' => $m->person->photo ? Storage::url($m->person->photo) : null,
-            'relationship_label' => $m->relationship_label,
-        ])),
+        familyMembers: @json($familyMembersData),
 
         async searchPeople() {
             try {
