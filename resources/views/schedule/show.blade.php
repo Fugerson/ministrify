@@ -607,6 +607,62 @@
                 <x-event-checklist :event="$event" :templates="$checklistTemplates" />
             @endcan
 
+            <!-- Reminders -->
+            @if($currentChurch->telegram_bot_token)
+            @can('manage-ministry', $event->ministry)
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5"
+                 x-data="reminderManager()">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        Нагадування
+                    </h3>
+                    <span x-show="saving" class="text-xs text-gray-400">Збереження...</span>
+                </div>
+
+                <div class="space-y-2">
+                    <template x-for="(reminder, index) in reminders" :key="index">
+                        <div class="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <select x-model="reminder.type" @change="updateReminder(index)"
+                                    class="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                <option value="days">За днів</option>
+                                <option value="hours">За годин</option>
+                            </select>
+                            <input type="number" x-model="reminder.value" min="1" max="30" @change="saveReminders()"
+                                   class="w-14 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                            <template x-if="reminder.type === 'days'">
+                                <input type="time" x-model="reminder.time" @change="saveReminders()"
+                                       class="w-24 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </template>
+                            <button type="button" @click="removeReminder(index)"
+                                    class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+
+                    <template x-if="reminders.length === 0">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                            Нагадування не налаштовані
+                        </p>
+                    </template>
+                </div>
+
+                <button type="button" @click="addReminder()"
+                        class="mt-3 w-full flex items-center justify-center gap-1 px-3 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Додати нагадування
+                </button>
+            </div>
+            @endcan
+            @endif
+
             <!-- Quick Actions -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Швидкі дії</h3>
@@ -1428,6 +1484,83 @@ async function sendTelegramNotify(itemId, button) {
     // Start polling on page load
     startPolling();
 })();
+
+// Reminder Manager
+function reminderManager() {
+    return {
+        reminders: @json($event->reminder_settings ?? []),
+        saving: false,
+
+        addReminder() {
+            this.reminders.push({
+                type: 'days',
+                value: 1,
+                time: '18:00'
+            });
+            this.saveReminders();
+        },
+
+        removeReminder(index) {
+            this.reminders.splice(index, 1);
+            this.saveReminders();
+        },
+
+        updateReminder(index) {
+            if (this.reminders[index].type === 'hours') {
+                this.reminders[index].time = null;
+            } else {
+                this.reminders[index].time = '18:00';
+            }
+            this.saveReminders();
+        },
+
+        async saveReminders() {
+            this.saving = true;
+            try {
+                const remindersData = this.reminders.map((r, i) => ({
+                    [`reminders[${i}][type]`]: r.type,
+                    [`reminders[${i}][value]`]: r.value,
+                    [`reminders[${i}][time]`]: r.time || ''
+                }));
+
+                const formData = new FormData();
+                this.reminders.forEach((r, i) => {
+                    formData.append(`reminders[${i}][type]`, r.type);
+                    formData.append(`reminders[${i}][value]`, r.value);
+                    formData.append(`reminders[${i}][time]`, r.time || '');
+                });
+
+                const response = await fetch('{{ route("events.update", $event) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: new URLSearchParams([
+                        ['_method', 'PUT'],
+                        ...this.reminders.flatMap((r, i) => [
+                            [`reminders[${i}][type]`, r.type],
+                            [`reminders[${i}][value]`, r.value],
+                            [`reminders[${i}][time]`, r.time || '']
+                        ])
+                    ])
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showGlobalToast('Нагадування збережено', 'success');
+                } else {
+                    showGlobalToast(data.message || 'Помилка', 'error');
+                }
+            } catch (err) {
+                console.error('Save reminders error:', err);
+                showGlobalToast('Помилка збереження', 'error');
+            } finally {
+                this.saving = false;
+            }
+        }
+    };
+}
 </script>
 @endpush
 @endsection
