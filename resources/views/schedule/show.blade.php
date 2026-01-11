@@ -116,7 +116,9 @@
                                         <textarea placeholder="Опис пункту..."
                                                   @change="updateField({{ $item->id }}, 'title', $event.target.value)"
                                                   rows="1"
-                                                  class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none"
+                                                  class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                                                  style="word-wrap: break-word; overflow-wrap: break-word;"
+                                                  x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; })"
                                                   oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">{{ $item->title }}</textarea>
                                     </td>
                                     {{-- Відповідальний (multiple people with statuses) --}}
@@ -315,7 +317,9 @@
                                         <textarea placeholder="Примітки..."
                                                   @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
                                                   rows="1"
-                                                  class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none"
+                                                  class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                                                  style="word-wrap: break-word; overflow-wrap: break-word;"
+                                                  x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; })"
                                                   oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">{{ $item->notes }}</textarea>
                                     </td>
                                     {{-- Actions --}}
