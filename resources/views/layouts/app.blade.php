@@ -1005,6 +1005,7 @@
         </nav>
 
         <!-- FAB (Quick Actions) -->
+        @if(auth()->user()->canCreate('people') || auth()->user()->canCreate('events') || auth()->user()->canCreate('groups') || auth()->user()->canCreate('finances'))
         <div class="fixed right-4 bottom-20 lg:bottom-6 z-50" x-data="{ open: false }">
             <div x-show="open" x-cloak
                  x-transition:enter="transition ease-out duration-200"
@@ -1014,24 +1015,30 @@
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
                  class="absolute bottom-16 right-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                @if(auth()->user()->canCreate('people'))
                 <a href="{{ route('people.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова людина</span>
                 </a>
+                @endif
+                @if(auth()->user()->canCreate('events'))
                 <a href="{{ route('events.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова подія</span>
                 </a>
+                @endif
+                @if(auth()->user()->canCreate('groups'))
                 <a href="{{ route('groups.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова група</span>
                 </a>
-                @leader
+                @endif
+                @if(auth()->user()->canCreate('finances'))
                 <a href="{{ route('expenses.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова витрата</span>
                 </a>
-                @endleader
+                @endif
             </div>
             <button @click="open = !open"
                     class="w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg shadow-primary-500/30 flex items-center justify-center transition-all duration-200"
@@ -1041,6 +1048,7 @@
                 </svg>
             </button>
         </div>
+        @endif
 
         <!-- Global Search Modal -->
         <div x-show="searchOpen" x-cloak
