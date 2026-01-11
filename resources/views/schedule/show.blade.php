@@ -622,26 +622,61 @@
                     <span x-show="saving" class="text-xs text-gray-400">Збереження...</span>
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-3">
                     <template x-for="(reminder, index) in reminders" :key="index">
-                        <div class="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <select x-model="reminder.type" @change="updateReminder(index)"
-                                    class="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                <option value="days">За днів</option>
-                                <option value="hours">За годин</option>
-                            </select>
-                            <input type="number" x-model="reminder.value" min="1" max="30" @change="saveReminders()"
-                                   class="w-14 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
-                            <template x-if="reminder.type === 'days'">
-                                <input type="time" x-model="reminder.time" @change="saveReminders()"
-                                       class="w-24 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-2">
+                            <!-- Time settings row -->
+                            <div class="flex items-center gap-2">
+                                <select x-model="reminder.type" @change="updateReminder(index)"
+                                        class="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="days">За днів</option>
+                                    <option value="hours">За годин</option>
+                                </select>
+                                <input type="number" x-model="reminder.value" min="1" max="30" @change="saveReminders()"
+                                       class="w-14 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                <template x-if="reminder.type === 'days'">
+                                    <input type="time" x-model="reminder.time" @change="saveReminders()"
+                                           class="w-24 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                </template>
+                                <button type="button" @click="removeReminder(index)"
+                                        class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Recipients row -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-500 dark:text-gray-400 shrink-0">Кому:</span>
+                                <select x-model="reminder.recipients" @change="saveReminders()"
+                                        class="flex-1 px-2 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="all">Всім призначеним</option>
+                                    <option value="confirmed">Тільки підтвердженим</option>
+                                    <option value="pending">Тільки очікуючим</option>
+                                    <option value="custom">Вибрати людей...</option>
+                                </select>
+                            </div>
+
+                            <!-- Custom people selector -->
+                            <template x-if="reminder.recipients === 'custom'">
+                                <div class="pt-1">
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="person in availablePeople" :key="person.id">
+                                            <label class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full cursor-pointer transition-colors"
+                                                   :class="isPersonSelected(index, person.id) ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300' : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-500'">
+                                                <input type="checkbox" class="hidden"
+                                                       :checked="isPersonSelected(index, person.id)"
+                                                       @change="togglePerson(index, person.id)">
+                                                <span x-text="person.name"></span>
+                                            </label>
+                                        </template>
+                                    </div>
+                                    <p x-show="availablePeople.length === 0" class="text-xs text-gray-400 italic">
+                                        Немає призначених людей
+                                    </p>
+                                </div>
                             </template>
-                            <button type="button" @click="removeReminder(index)"
-                                    class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
                         </div>
                     </template>
 
@@ -1488,14 +1523,21 @@ async function sendTelegramNotify(itemId, button) {
 // Reminder Manager
 function reminderManager() {
     return {
-        reminders: @json($event->reminder_settings ?? []),
+        reminders: @json($event->reminder_settings ?? []).map(r => ({
+            ...r,
+            recipients: r.recipients || 'all',
+            person_ids: r.person_ids || []
+        })),
         saving: false,
+        availablePeople: @json($event->responsibilities->map(fn($r) => ['id' => $r->person_id, 'name' => $r->person?->full_name ?? 'Невідомий'])->unique('id')->values()),
 
         addReminder() {
             this.reminders.push({
                 type: 'days',
                 value: 1,
-                time: '18:00'
+                time: '18:00',
+                recipients: 'all',
+                person_ids: []
             });
             this.saveReminders();
         },
@@ -1514,20 +1556,38 @@ function reminderManager() {
             this.saveReminders();
         },
 
+        isPersonSelected(reminderIndex, personId) {
+            return this.reminders[reminderIndex].person_ids?.includes(personId) ?? false;
+        },
+
+        togglePerson(reminderIndex, personId) {
+            const reminder = this.reminders[reminderIndex];
+            if (!reminder.person_ids) reminder.person_ids = [];
+
+            const idx = reminder.person_ids.indexOf(personId);
+            if (idx === -1) {
+                reminder.person_ids.push(personId);
+            } else {
+                reminder.person_ids.splice(idx, 1);
+            }
+            this.saveReminders();
+        },
+
         async saveReminders() {
             this.saving = true;
             try {
-                const remindersData = this.reminders.map((r, i) => ({
-                    [`reminders[${i}][type]`]: r.type,
-                    [`reminders[${i}][value]`]: r.value,
-                    [`reminders[${i}][time]`]: r.time || ''
-                }));
+                const params = [['_method', 'PUT']];
 
-                const formData = new FormData();
                 this.reminders.forEach((r, i) => {
-                    formData.append(`reminders[${i}][type]`, r.type);
-                    formData.append(`reminders[${i}][value]`, r.value);
-                    formData.append(`reminders[${i}][time]`, r.time || '');
+                    params.push([`reminders[${i}][type]`, r.type]);
+                    params.push([`reminders[${i}][value]`, r.value]);
+                    params.push([`reminders[${i}][time]`, r.time || '']);
+                    params.push([`reminders[${i}][recipients]`, r.recipients || 'all']);
+                    if (r.person_ids && r.person_ids.length > 0) {
+                        r.person_ids.forEach(pid => {
+                            params.push([`reminders[${i}][person_ids][]`, pid]);
+                        });
+                    }
                 });
 
                 const response = await fetch('{{ route("events.update", $event) }}', {
@@ -1536,14 +1596,7 @@ function reminderManager() {
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: new URLSearchParams([
-                        ['_method', 'PUT'],
-                        ...this.reminders.flatMap((r, i) => [
-                            [`reminders[${i}][type]`, r.type],
-                            [`reminders[${i}][value]`, r.value],
-                            [`reminders[${i}][time]`, r.time || '']
-                        ])
-                    ])
+                    body: new URLSearchParams(params)
                 });
 
                 const data = await response.json();

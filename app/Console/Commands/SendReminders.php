@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Assignment;
 use App\Models\Event;
+use App\Models\EventResponsibility;
 use App\Services\TelegramService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -22,10 +23,9 @@ class SendReminders extends Command
         $events = Event::whereNotNull('reminder_settings')
             ->where('date', '>=', $now->copy()->startOfDay())
             ->where('date', '<=', $now->copy()->addDays(30)->endOfDay())
-            ->with(['assignments' => function ($query) {
-                $query->where('status', 'confirmed')
-                    ->whereNull('reminded_at')
-                    ->with(['person.church', 'position']);
+            ->with(['responsibilities' => function ($query) {
+                $query->whereNull('reminded_at')
+                    ->with(['person.church']);
             }, 'ministry'])
             ->get();
 
@@ -42,24 +42,27 @@ class SendReminders extends Command
                 if ($this->shouldSendReminder($event, $reminder, $now)) {
                     $this->info("  Event #{$event->id}: {$event->title} - sending reminders");
 
-                    foreach ($event->assignments as $assignment) {
-                        $church = $assignment->person->church ?? null;
+                    // Filter responsibilities based on recipients setting
+                    $responsibilities = $this->filterRecipients($event->responsibilities, $reminder);
 
-                        if (!$church || !$church->telegram_bot_token || !$assignment->person->telegram_chat_id) {
+                    foreach ($responsibilities as $responsibility) {
+                        $church = $responsibility->person->church ?? null;
+
+                        if (!$church || !$church->telegram_bot_token || !$responsibility->person->telegram_chat_id) {
                             continue;
                         }
 
                         try {
                             $telegram = new TelegramService($church->telegram_bot_token);
-                            $telegram->sendReminder($assignment);
+                            $telegram->sendResponsibilityReminder($responsibility);
 
-                            $assignment->update(['reminded_at' => now()]);
+                            $responsibility->update(['reminded_at' => now()]);
                             $sent++;
 
-                            $this->line("    Sent reminder to {$assignment->person->full_name}");
+                            $this->line("    Sent reminder to {$responsibility->person->full_name}");
                         } catch (\Exception $e) {
                             $failed++;
-                            $this->error("    Failed to send to {$assignment->person->full_name}: {$e->getMessage()}");
+                            $this->error("    Failed to send to {$responsibility->person->full_name}: {$e->getMessage()}");
                         }
                     }
                 }
@@ -69,6 +72,29 @@ class SendReminders extends Command
         $this->info("Done! Sent: {$sent}, Failed: {$failed}");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Filter responsibilities based on reminder recipients setting
+     */
+    private function filterRecipients($responsibilities, array $reminder)
+    {
+        $recipientsType = $reminder['recipients'] ?? 'all';
+        $personIds = $reminder['person_ids'] ?? [];
+
+        return $responsibilities->filter(function ($resp) use ($recipientsType, $personIds) {
+            switch ($recipientsType) {
+                case 'confirmed':
+                    return $resp->status === 'confirmed';
+                case 'pending':
+                    return $resp->status === 'pending';
+                case 'custom':
+                    return in_array($resp->person_id, $personIds);
+                case 'all':
+                default:
+                    return true;
+            }
+        });
     }
 
     /**

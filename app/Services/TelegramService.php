@@ -110,6 +110,28 @@ class TelegramService
         return $this->sendMessage($person->telegram_chat_id, $message);
     }
 
+    public function sendResponsibilityReminder(\App\Models\EventResponsibility $responsibility): bool
+    {
+        $person = $responsibility->person;
+        $event = $responsibility->event;
+
+        if (!$person->telegram_chat_id) {
+            return false;
+        }
+
+        $isToday = $event->date->isToday();
+        $prefix = $isToday ? '⏰ <b>Нагадування!</b>' : '⏰ <b>Нагадування на завтра!</b>';
+
+        $message = "{$prefix}\n\n"
+            . ($isToday ? "Сьогодні" : "Завтра") . " ти служиш:\n"
+            . "📅 {$event->date->format('d.m.Y')}, {$event->time->format('H:i')}\n"
+            . "⛪ {$event->ministry->name}\n"
+            . "🎯 {$responsibility->name}\n\n"
+            . "Не забудь! 🙏";
+
+        return $this->sendMessage($person->telegram_chat_id, $message);
+    }
+
     public function sendDeclineNotification(Assignment $assignment, Person $leader): bool
     {
         if (!$leader->telegram_chat_id) {

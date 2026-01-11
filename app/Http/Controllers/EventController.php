@@ -181,6 +181,8 @@ class EventController extends Controller
             'reminders.*.type' => 'required_with:reminders|in:days,hours',
             'reminders.*.value' => 'required_with:reminders|integer|min:1|max:30',
             'reminders.*.time' => 'nullable|date_format:H:i',
+            'reminders.*.recipients' => 'nullable|in:all,confirmed,pending,custom',
+            'reminders.*.person_ids' => 'nullable|array',
         ]);
 
         $validated['is_service'] = $request->boolean('is_service');
@@ -193,6 +195,8 @@ class EventController extends Controller
                     'type' => $reminder['type'],
                     'value' => (int) $reminder['value'],
                     'time' => $reminder['time'] ?? null,
+                    'recipients' => $reminder['recipients'] ?? 'all',
+                    'person_ids' => isset($reminder['person_ids']) ? array_map('intval', $reminder['person_ids']) : [],
                 ];
             }, $validated['reminders']));
         }
@@ -311,6 +315,8 @@ class EventController extends Controller
             'reminders.*.type' => 'required_with:reminders|in:days,hours',
             'reminders.*.value' => 'required_with:reminders|integer|min:1|max:30',
             'reminders.*.time' => 'nullable|date_format:H:i',
+            'reminders.*.recipients' => 'nullable|in:all,confirmed,pending,custom',
+            'reminders.*.person_ids' => 'nullable|array',
         ];
 
         $validated = $request->validate($rules);
@@ -330,6 +336,8 @@ class EventController extends Controller
                         'type' => $reminder['type'],
                         'value' => (int) $reminder['value'],
                         'time' => $reminder['time'] ?? null,
+                        'recipients' => $reminder['recipients'] ?? 'all',
+                        'person_ids' => isset($reminder['person_ids']) ? array_map('intval', $reminder['person_ids']) : [],
                     ];
                 }, $validated['reminders']));
             } else {

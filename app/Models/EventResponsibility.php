@@ -20,11 +20,13 @@ class EventResponsibility extends Model
         'status',
         'notified_at',
         'responded_at',
+        'reminded_at',
     ];
 
     protected $casts = [
         'notified_at' => 'datetime',
         'responded_at' => 'datetime',
+        'reminded_at' => 'datetime',
     ];
 
     public function event(): BelongsTo
