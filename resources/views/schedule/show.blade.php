@@ -51,11 +51,13 @@
                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                 <span class="text-sm text-gray-600 dark:text-gray-400">Служіння з планом</span>
             </label>
+            @if($currentChurch->attendance_enabled)
             <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" x-model="trackAttendance" @change="saveField('track_attendance', trackAttendance)"
                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                 <span class="text-sm text-gray-600 dark:text-gray-400">Відвідуваність</span>
             </label>
+            @endif
         </div>
 
         <!-- Quick stats -->
