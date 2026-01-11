@@ -679,7 +679,13 @@ function planEditor() {
                 });
 
                 if (response.ok) {
-                    window.location.reload();
+                    const data = await response.json();
+                    if (data.success && data.item) {
+                        this.insertNewRow(data.item);
+                        // Clear form
+                        this.newItem = { start_time: '', title: '', responsible_names: '', notes: '' };
+                        showGlobalToast('Пункт додано', 'success');
+                    }
                 } else {
                     this.showMessage('Помилка додавання', 'error');
                 }
@@ -687,6 +693,65 @@ function planEditor() {
                 console.error('Add error:', err);
                 this.showMessage('Помилка з\'єднання', 'error');
             }
+        },
+
+        insertNewRow(item) {
+            const tbody = document.querySelector('table tbody');
+            // Remove empty row if exists
+            const emptyRow = document.getElementById('empty-row');
+            if (emptyRow) emptyRow.remove();
+
+            const startTime = item.start_time ? item.start_time.substring(0, 5) : '';
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group';
+            row.dataset.id = item.id;
+            row.innerHTML = `
+                <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
+                    <input type="time"
+                           value="${startTime}"
+                           onchange="updateField(${item.id}, 'start_time', this.value)"
+                           class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                </td>
+                <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                    <textarea placeholder="Опис пункту..."
+                              onchange="updateField(${item.id}, 'title', this.value)"
+                              rows="1"
+                              class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                              style="word-wrap: break-word; overflow-wrap: break-word;"
+                              oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.title || ''}</textarea>
+                </td>
+                <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top whitespace-nowrap">
+                    <input type="text"
+                           value="${item.responsible_names || ''}"
+                           placeholder="Відповідальний"
+                           onchange="updateField(${item.id}, 'responsible_names', this.value)"
+                           class="px-2 py-1 text-sm text-gray-900 dark:text-white bg-transparent border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-primary-500">
+                </td>
+                <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                    <textarea placeholder="Примітки..."
+                              onchange="updateField(${item.id}, 'notes', this.value)"
+                              rows="1"
+                              class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                              style="word-wrap: break-word; overflow-wrap: break-word;"
+                              oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.notes || ''}</textarea>
+                </td>
+                <td class="px-3 py-3 text-center">
+                    <button type="button"
+                            onclick="window.planEditorDeleteItem(${item.id})"
+                            class="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                            title="Видалити">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            // Auto-resize textareas
+            row.querySelectorAll('textarea').forEach(ta => {
+                ta.style.height = 'auto';
+                ta.style.height = ta.scrollHeight + 'px';
+            });
         },
 
         async deleteItem(id) {
@@ -703,7 +768,21 @@ function planEditor() {
                 });
 
                 if (response.ok) {
-                    window.location.reload();
+                    // Remove row from DOM
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        row.remove();
+                        showGlobalToast('Пункт видалено', 'success');
+                    }
+                    // Check if table is empty
+                    const tbody = document.querySelector('table tbody');
+                    if (tbody && tbody.children.length === 0) {
+                        tbody.innerHTML = `<tr id="empty-row">
+                            <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-sm">
+                                Почніть додавати пункти плану нижче
+                            </td>
+                        </tr>`;
+                    }
                 } else {
                     this.showMessage('Помилка видалення', 'error');
                 }
@@ -724,7 +803,102 @@ function planEditor() {
     };
 }
 
-// Service Plan Manager
+// Global function to insert new plan row
+window.insertPlanRow = function(item) {
+    const tbody = document.querySelector('table tbody');
+    const emptyRow = document.getElementById('empty-row');
+    if (emptyRow) emptyRow.remove();
+
+    const startTime = item.start_time ? item.start_time.substring(0, 5) : '';
+    const row = document.createElement('tr');
+    row.className = 'hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group';
+    row.dataset.id = item.id;
+    row.innerHTML = `
+        <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
+            <input type="time"
+                   value="${startTime}"
+                   onchange="updateField(${item.id}, 'start_time', this.value)"
+                   class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+        </td>
+        <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+            <textarea placeholder="Опис пункту..."
+                      onchange="updateField(${item.id}, 'title', this.value)"
+                      rows="1"
+                      class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                      style="word-wrap: break-word; overflow-wrap: break-word;"
+                      oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.title || ''}</textarea>
+        </td>
+        <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top whitespace-nowrap">
+            <input type="text"
+                   value="${item.responsible_names || ''}"
+                   placeholder="Відповідальний"
+                   onchange="updateField(${item.id}, 'responsible_names', this.value)"
+                   class="px-2 py-1 text-sm text-gray-900 dark:text-white bg-transparent border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-primary-500">
+        </td>
+        <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+            <textarea placeholder="Примітки..."
+                      onchange="updateField(${item.id}, 'notes', this.value)"
+                      rows="1"
+                      class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                      style="word-wrap: break-word; overflow-wrap: break-word;"
+                      oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.notes || ''}</textarea>
+        </td>
+        <td class="px-3 py-3 text-center">
+            <button type="button"
+                    onclick="window.planEditorDeleteItem(${item.id})"
+                    class="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    title="Видалити">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </td>
+    `;
+    tbody.appendChild(row);
+    row.querySelectorAll('textarea').forEach(ta => {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+    });
+};
+
+// Global delete function for dynamically added rows
+window.planEditorDeleteItem = async function(id) {
+    if (!confirm('Видалити цей пункт?')) return;
+
+    try {
+        const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (response.ok) {
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            if (row) {
+                row.remove();
+                showGlobalToast('Пункт видалено', 'success');
+            }
+            const tbody = document.querySelector('table tbody');
+            if (tbody && tbody.children.length === 0) {
+                tbody.innerHTML = `<tr id="empty-row">
+                    <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-sm">
+                        Почніть додавати пункти плану нижче
+                    </td>
+                </tr>`;
+            }
+        } else {
+            showGlobalToast('Помилка видалення', 'error');
+        }
+    } catch (err) {
+        console.error('Delete error:', err);
+        showGlobalToast('Помилка з\'єднання', 'error');
+    }
+};
+
+// Service Plan Manager (legacy, kept for compatibility)
 function servicePlanManager() {
     return {
         showTextModal: false,
@@ -759,39 +933,30 @@ function servicePlanManager() {
                 if (!response.ok) {
                     const text = await response.text();
                     console.error('Error:', response.status, text);
-                    alert('Помилка: ' + response.status);
+                    showGlobalToast('Помилка: ' + response.status, 'error');
                     return;
                 }
 
                 const data = await response.json();
-                if (data.success) {
-                    window.location.reload();
+                if (data.success && data.item) {
+                    // Use global insertNewRow function
+                    window.insertPlanRow(data.item);
+                    this.newItem = {
+                        start_time: '{{ $event->time ? $event->time->format("H:i") : "10:00" }}',
+                        type: '',
+                        title: '',
+                        responsible_names: ''
+                    };
+                    showGlobalToast('Пункт додано', 'success');
                 }
             } catch (err) {
                 console.error('Fetch error:', err);
-                alert('Помилка з\'єднання');
+                showGlobalToast('Помилка з\'єднання', 'error');
             }
         },
 
         async deleteItem(id) {
-            if (!confirm('Видалити цей пункт?')) return;
-
-            try {
-                const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                if (response.ok) {
-                    window.location.reload();
-                }
-            } catch (err) {
-                console.error(err);
-            }
+            window.planEditorDeleteItem(id);
         },
 
         async applyTemplate(template) {
