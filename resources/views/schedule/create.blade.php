@@ -104,6 +104,60 @@
                     </p>
                 </div>
                 @endif
+
+                <!-- Reminder Settings -->
+                @if($currentChurch->telegram_bot_token)
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-600" x-data="reminderSettings()">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Нагадування в Telegram
+                    </label>
+
+                    <div class="space-y-2">
+                        <template x-for="(reminder, index) in reminders" :key="index">
+                            <div class="flex items-center gap-2">
+                                <select x-model="reminder.type" @change="updateReminder(index)"
+                                        class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option value="days">За днів до</option>
+                                    <option value="hours">За годин до</option>
+                                </select>
+                                <input type="number" x-model="reminder.value" min="1" max="30"
+                                       class="w-20 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                <template x-if="reminder.type === 'days'">
+                                    <input type="time" x-model="reminder.time"
+                                           class="w-28 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                </template>
+                                <button type="button" @click="removeReminder(index)"
+                                        class="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+
+                    <button type="button" @click="addReminder()"
+                            class="mt-3 inline-flex items-center gap-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Додати нагадування
+                    </button>
+
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        Нагадування надсилатимуться призначеним служителям
+                    </p>
+
+                    <!-- Hidden inputs for form submission -->
+                    <template x-for="(reminder, index) in reminders" :key="'input-'+index">
+                        <div>
+                            <input type="hidden" :name="'reminders['+index+'][type]'" :value="reminder.type">
+                            <input type="hidden" :name="'reminders['+index+'][value]'" :value="reminder.value">
+                            <input type="hidden" :name="'reminders['+index+'][time]'" :value="reminder.time || ''">
+                        </div>
+                    </template>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -118,3 +172,30 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function reminderSettings(initial = []) {
+    return {
+        reminders: initial.length ? initial : [],
+        addReminder() {
+            this.reminders.push({
+                type: 'days',
+                value: 1,
+                time: '18:00'
+            });
+        },
+        removeReminder(index) {
+            this.reminders.splice(index, 1);
+        },
+        updateReminder(index) {
+            if (this.reminders[index].type === 'hours') {
+                this.reminders[index].time = null;
+            } else {
+                this.reminders[index].time = '18:00';
+            }
+        }
+    }
+}
+</script>
+@endpush

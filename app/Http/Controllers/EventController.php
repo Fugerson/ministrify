@@ -177,10 +177,26 @@ class EventController extends Controller
             'is_service' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
             'track_attendance' => 'nullable|boolean',
+            'reminders' => 'nullable|array',
+            'reminders.*.type' => 'required_with:reminders|in:days,hours',
+            'reminders.*.value' => 'required_with:reminders|integer|min:1|max:30',
+            'reminders.*.time' => 'nullable|date_format:H:i',
         ]);
 
         $validated['is_service'] = $request->boolean('is_service');
         $validated['track_attendance'] = $request->boolean('track_attendance');
+
+        // Process reminder settings
+        if (!empty($validated['reminders'])) {
+            $validated['reminder_settings'] = array_values(array_map(function ($reminder) {
+                return [
+                    'type' => $reminder['type'],
+                    'value' => (int) $reminder['value'],
+                    'time' => $reminder['time'] ?? null,
+                ];
+            }, $validated['reminders']));
+        }
+        unset($validated['reminders']);
 
         $church = $this->getCurrentChurch();
         $ministry = Ministry::findOrFail($validated['ministry_id']);
@@ -291,6 +307,10 @@ class EventController extends Controller
             'is_service' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
             'track_attendance' => 'nullable|boolean',
+            'reminders' => 'nullable|array',
+            'reminders.*.type' => 'required_with:reminders|in:days,hours',
+            'reminders.*.value' => 'required_with:reminders|integer|min:1|max:30',
+            'reminders.*.time' => 'nullable|date_format:H:i',
         ];
 
         $validated = $request->validate($rules);
@@ -300,6 +320,22 @@ class EventController extends Controller
         }
         if ($request->has('track_attendance')) {
             $validated['track_attendance'] = $request->boolean('track_attendance');
+        }
+
+        // Process reminder settings
+        if ($request->has('reminders')) {
+            if (!empty($validated['reminders'])) {
+                $validated['reminder_settings'] = array_values(array_map(function ($reminder) {
+                    return [
+                        'type' => $reminder['type'],
+                        'value' => (int) $reminder['value'],
+                        'time' => $reminder['time'] ?? null,
+                    ];
+                }, $validated['reminders']));
+            } else {
+                $validated['reminder_settings'] = null;
+            }
+            unset($validated['reminders']);
         }
 
         $event->update($validated);

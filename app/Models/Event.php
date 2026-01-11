@@ -35,6 +35,7 @@ class Event extends Model
         'track_attendance',
         'is_service',
         'service_type',
+        'reminder_settings',
     ];
 
     protected $casts = [
@@ -46,6 +47,7 @@ class Event extends Model
         'registration_deadline' => 'datetime',
         'qr_checkin_enabled' => 'boolean',
         'track_attendance' => 'boolean',
+        'reminder_settings' => 'array',
     ];
 
     // Service types
@@ -318,5 +320,39 @@ class Event extends Model
     public static function findByCheckinToken(string $token): ?self
     {
         return static::where('checkin_token', $token)->first();
+    }
+
+    /**
+     * Check if event has reminders enabled
+     */
+    public function hasReminders(): bool
+    {
+        return !empty($this->reminder_settings);
+    }
+
+    /**
+     * Get reminders for this event
+     */
+    public function getReminders(): array
+    {
+        return $this->reminder_settings ?? [];
+    }
+
+    /**
+     * Check if reminder should be sent for given offset
+     */
+    public function shouldSendReminder(string $type, int $value): bool
+    {
+        if (!$this->hasReminders()) {
+            return false;
+        }
+
+        foreach ($this->reminder_settings as $reminder) {
+            if ($reminder['type'] === $type && $reminder['value'] == $value) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

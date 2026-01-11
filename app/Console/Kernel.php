@@ -9,15 +9,10 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-        // Send reminders for tomorrow's events
-        $schedule->command('app:send-reminders --days=1')
-            ->dailyAt('18:00')
-            ->description('Send reminders for tomorrow\'s events');
-
-        // Send reminders for today's events (2 hours before)
-        $schedule->command('app:send-reminders --hours=2')
-            ->everyThirtyMinutes()
-            ->description('Send reminders 2 hours before events');
+        // Send reminders based on event-level settings
+        $schedule->command('app:send-reminders')
+            ->everyFifteenMinutes()
+            ->description('Send event reminders based on each event\'s settings');
 
         // Generate recurring events
         $schedule->command('app:generate-recurring-events')

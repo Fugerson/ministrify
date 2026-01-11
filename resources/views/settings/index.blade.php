@@ -111,47 +111,6 @@
         </div>
     </form>
 
-    <!-- Notifications -->
-    <form method="POST" action="{{ route('settings.notifications') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        @csrf
-        @method('PUT')
-
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Сповіщення</h2>
-        </div>
-
-        <div class="p-6 space-y-4">
-            @php $notifications = $church->settings['notifications'] ?? []; @endphp
-
-            <label class="flex items-center">
-                <input type="checkbox" name="reminder_day_before" value="1"
-                       {{ $notifications['reminder_day_before'] ?? false ? 'checked' : '' }}
-                       class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Надсилати нагадування за 1 день до події</span>
-            </label>
-
-            <label class="flex items-center">
-                <input type="checkbox" name="reminder_same_day" value="1"
-                       {{ $notifications['reminder_same_day'] ?? false ? 'checked' : '' }}
-                       class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Надсилати нагадування в день події (за 2 години)</span>
-            </label>
-
-            <label class="flex items-center">
-                <input type="checkbox" name="notify_leader_on_decline" value="1"
-                       {{ $notifications['notify_leader_on_decline'] ?? false ? 'checked' : '' }}
-                       class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Сповіщати лідера про відмови</span>
-            </label>
-        </div>
-
-        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                Зберегти
-            </button>
-        </div>
-    </form>
-
     <!-- Onboarding -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
          x-data="{ restarting: false }">
@@ -796,52 +755,35 @@
         </div>
     </div>
 
-    <!-- Notification settings -->
+    <!-- Notification settings info -->
     @if($church->telegram_bot_token)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Налаштування сповіщень</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Коли надсилати нагадування</p>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Нагадування</h2>
         </div>
 
-        <form method="POST" action="{{ route('settings.notifications') }}" class="p-6 space-y-4">
-            @csrf
-            @method('PUT')
-
-            <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                <input type="checkbox" name="reminder_day_before" value="1"
-                       {{ ($church->settings['notifications']['reminder_day_before'] ?? false) ? 'checked' : '' }}
-                       class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                <div>
-                    <p class="font-medium text-gray-900 dark:text-white">Нагадування за день до</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Надсилати о 18:00 напередодні події</p>
+        <div class="p-6">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
                 </div>
-            </label>
-
-            <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                <input type="checkbox" name="reminder_same_day" value="1"
-                       {{ ($church->settings['notifications']['reminder_same_day'] ?? false) ? 'checked' : '' }}
-                       class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
                 <div>
-                    <p class="font-medium text-gray-900 dark:text-white">Нагадування в день події</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Надсилати за 2 години до початку</p>
+                    <p class="text-gray-900 dark:text-white font-medium">Налаштування на рівні події</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Нагадування тепер налаштовуються індивідуально для кожної події.
+                        При створенні або редагуванні події ви можете вказати коли надсилати нагадування служителям.
+                    </p>
+                    <a href="{{ route('schedule') }}" class="inline-flex items-center gap-1 mt-3 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                        Перейти до розкладу
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
                 </div>
-            </label>
-
-            <label class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                <input type="checkbox" name="notify_leader_on_decline" value="1"
-                       {{ ($church->settings['notifications']['notify_leader_on_decline'] ?? false) ? 'checked' : '' }}
-                       class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                <div>
-                    <p class="font-medium text-gray-900 dark:text-white">Повідомлення лідеру при відмові</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Коли служитель відхиляє призначення</p>
-                </div>
-            </label>
-
-            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                Зберегти налаштування
-            </button>
-        </form>
+            </div>
+        </div>
     </div>
     @endif
     </div>
