@@ -163,6 +163,21 @@ class ChecklistController extends Controller
             }
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'checklist' => [
+                    'id' => $checklist->id,
+                    'items' => $checklist->items->map(fn($i) => [
+                        'id' => $i->id,
+                        'title' => $i->title,
+                        'description' => $i->description,
+                        'is_completed' => $i->is_completed,
+                    ]),
+                ],
+            ]);
+        }
+
         return redirect()->route('events.show', $event)
             ->with('success', 'Чеклист додано до події.');
     }
@@ -179,12 +194,24 @@ class ChecklistController extends Controller
 
         $maxOrder = $checklist->items()->max('order') ?? -1;
 
-        $checklist->items()->create([
+        $item = $checklist->items()->create([
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'assigned_to' => $validated['assigned_to'] ?? null,
             'order' => $maxOrder + 1,
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'item' => [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'is_completed' => false,
+                ],
+            ]);
+        }
 
         return back()->with('success', 'Пункт додано.');
     }
@@ -244,6 +271,10 @@ class ChecklistController extends Controller
 
         $event = $checklist->event;
         $checklist->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('events.show', $event)
             ->with('success', 'Чеклист видалено.');
