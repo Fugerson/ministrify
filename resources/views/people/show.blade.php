@@ -826,10 +826,48 @@
             @endif
         </div>
 
-        @php
-            $familyMembers = $person->family_members;
-        @endphp
-
+        @if($isAdmin)
+        <template x-if="familyMembers.length > 0">
+            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                <template x-for="member in familyMembers" :key="member.relationship_id">
+                    <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <a :href="'/people/' + member.person_id" class="flex items-center gap-3 flex-1 min-w-0">
+                            <template x-if="member.photo">
+                                <img :src="member.photo" alt="" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                            </template>
+                            <template x-if="!member.photo">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center flex-shrink-0">
+                                    <span class="text-sm font-medium text-white" x-text="member.first_name.charAt(0)"></span>
+                                </div>
+                            </template>
+                            <div class="min-w-0">
+                                <p class="font-medium text-gray-900 dark:text-white truncate" x-text="member.full_name"></p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" x-text="member.relationship_label"></p>
+                            </div>
+                        </a>
+                        <button type="button" @click="deleteRelationship(member.relationship_id)"
+                                class="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template x-if="familyMembers.length === 0">
+            <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <p>Немає зв'язаних членів сім'ї</p>
+                <button @click="showAddModal = true" type="button" class="mt-2 text-primary-600 dark:text-primary-400 text-sm hover:underline">
+                    Додати члена сім'ї
+                </button>
+            </div>
+        </template>
+        @else
+        @php $familyMembers = $person->family_members; @endphp
         @if($familyMembers->count() > 0)
         <div class="divide-y divide-gray-100 dark:divide-gray-700">
             @foreach($familyMembers as $member)
@@ -847,14 +885,6 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ $member->relationship_label }}</p>
                     </div>
                 </a>
-                @if($isAdmin)
-                <button type="button" @click="deleteRelationship({{ $member->relationship_id }})"
-                        class="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-                @endif
             </div>
             @endforeach
         </div>
@@ -864,12 +894,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
             <p>Немає зв'язаних членів сім'ї</p>
-            @if($isAdmin)
-            <button @click="showAddModal = true" type="button" class="mt-2 text-primary-600 dark:text-primary-400 text-sm hover:underline">
-                Додати члена сім'ї
-            </button>
-            @endif
         </div>
+        @endif
         @endif
 
         @if($isAdmin)
@@ -1357,6 +1383,14 @@ function familyManager() {
         relationshipType: '',
         saving: false,
         error: '',
+        familyMembers: @json($person->family_members->map(fn($m) => [
+            'relationship_id' => $m->relationship_id,
+            'person_id' => $m->person->id,
+            'full_name' => $m->person->full_name,
+            'first_name' => $m->person->first_name,
+            'photo' => $m->person->photo ? Storage::url($m->person->photo) : null,
+            'relationship_label' => $m->relationship_label,
+        ])),
 
         async searchPeople() {
             try {
@@ -1404,10 +1438,18 @@ function familyManager() {
                 });
 
                 if (response.ok) {
-                    window.location.reload();
+                    const data = await response.json();
+                    if (data.success && data.member) {
+                        this.familyMembers.push(data.member);
+                        this.showAddModal = false;
+                        this.selectedPerson = null;
+                        this.searchQuery = '';
+                        this.relationshipType = '';
+                        if (window.showGlobalToast) showGlobalToast('Члена сім\'ї додано', 'success');
+                    }
                 } else {
                     const data = await response.json();
-                    this.error = data.message || 'Помилка при збереженні';
+                    this.error = data.error || data.message || 'Помилка при збереженні';
                 }
             } catch (error) {
                 this.error = 'Помилка з\'єднання';
@@ -1429,10 +1471,12 @@ function familyManager() {
                 });
 
                 if (response.ok) {
-                    window.location.reload();
+                    this.familyMembers = this.familyMembers.filter(m => m.relationship_id !== relationshipId);
+                    if (window.showGlobalToast) showGlobalToast('Зв\'язок видалено', 'success');
                 }
             } catch (error) {
                 console.error('Delete error:', error);
+                if (window.showGlobalToast) showGlobalToast('Помилка видалення', 'error');
             }
         }
     }

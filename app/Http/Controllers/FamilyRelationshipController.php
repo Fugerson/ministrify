@@ -33,6 +33,9 @@ class FamilyRelationshipController extends Controller
 
         // Prevent self-relationship
         if ($person->id === $relatedPerson->id) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Не можна створити зв\'язок з самим собою'], 422);
+            }
             return back()->with('error', 'Не можна створити зв\'язок з самим собою');
         }
 
@@ -53,6 +56,9 @@ class FamilyRelationshipController extends Controller
             ->exists();
 
         if ($existingRelationship) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Цей зв\'язок вже існує'], 422);
+            }
             return back()->with('error', 'Цей зв\'язок вже існує');
         }
 
@@ -75,20 +81,42 @@ class FamilyRelationshipController extends Controller
                 ->exists();
 
             if ($personHasSpouse) {
-                return back()->with('error', $person->full_name . ' вже має чоловіка/дружину');
+                $error = $person->full_name . ' вже має чоловіка/дружину';
+                if ($request->wantsJson()) {
+                    return response()->json(['success' => false, 'error' => $error], 422);
+                }
+                return back()->with('error', $error);
             }
 
             if ($relatedHasSpouse) {
-                return back()->with('error', $relatedPerson->full_name . ' вже має чоловіка/дружину');
+                $error = $relatedPerson->full_name . ' вже має чоловіка/дружину';
+                if ($request->wantsJson()) {
+                    return response()->json(['success' => false, 'error' => $error], 422);
+                }
+                return back()->with('error', $error);
             }
         }
 
-        FamilyRelationship::create([
+        $relationship = FamilyRelationship::create([
             'church_id' => $church->id,
             'person_id' => $person->id,
             'related_person_id' => $relatedPerson->id,
             'relationship_type' => $validated['relationship_type'],
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'member' => [
+                    'relationship_id' => $relationship->id,
+                    'person_id' => $relatedPerson->id,
+                    'full_name' => $relatedPerson->full_name,
+                    'first_name' => $relatedPerson->first_name,
+                    'photo' => $relatedPerson->photo ? Storage::url($relatedPerson->photo) : null,
+                    'relationship_label' => FamilyRelationship::relationshipLabels()[$validated['relationship_type']] ?? $validated['relationship_type'],
+                ],
+            ]);
+        }
 
         return back()->with('success', 'Зв\'язок успішно створено');
     }
@@ -96,7 +124,7 @@ class FamilyRelationshipController extends Controller
     /**
      * Remove a family relationship
      */
-    public function destroy(FamilyRelationship $familyRelationship)
+    public function destroy(Request $request, FamilyRelationship $familyRelationship)
     {
         $church = $this->getCurrentChurch();
 
@@ -105,6 +133,10 @@ class FamilyRelationshipController extends Controller
         }
 
         $familyRelationship->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Зв\'язок успішно видалено');
     }

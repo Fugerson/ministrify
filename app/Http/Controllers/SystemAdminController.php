@@ -475,7 +475,7 @@ class SystemAdminController extends Controller
             // 3. Ministries related
             foreach ($church->ministries as $ministry) {
                 // Detach people from ministries
-                $ministry->people()->detach();
+                $ministry->members()->detach();
                 // Delete ministry meetings
                 if (method_exists($ministry, 'meetings')) {
                     $ministry->meetings()->delete();

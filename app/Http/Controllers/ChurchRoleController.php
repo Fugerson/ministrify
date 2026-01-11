@@ -30,7 +30,7 @@ class ChurchRoleController extends Controller
         // Get max sort order
         $maxOrder = ChurchRole::where('church_id', $church->id)->max('sort_order') ?? 0;
 
-        ChurchRole::create([
+        $role = ChurchRole::create([
             'church_id' => $church->id,
             'name' => $validated['name'],
             'slug' => Str::slug($validated['name']),
@@ -39,7 +39,17 @@ class ChurchRoleController extends Controller
         ]);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'role' => [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'color' => $role->color,
+                    'is_admin_role' => $role->is_admin_role ?? false,
+                    'is_default' => $role->is_default ?? false,
+                    'people_count' => 0,
+                ],
+            ]);
         }
 
         return back()->with('success', 'Роль додано');

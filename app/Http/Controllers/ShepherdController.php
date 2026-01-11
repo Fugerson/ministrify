@@ -62,13 +62,18 @@ class ShepherdController extends Controller
         $person->update(['is_shepherd' => true]);
 
         if ($request->wantsJson()) {
+            $person->load('churchRoleRelation');
             return response()->json([
                 'success' => true,
                 'shepherd' => [
                     'id' => $person->id,
                     'full_name' => $person->full_name,
-                    'photo' => $person->photo,
+                    'first_name' => $person->first_name,
+                    'last_name' => $person->last_name,
+                    'photo' => $person->photo ? \Storage::url($person->photo) : null,
+                    'role' => $person->churchRoleRelation?->name,
                     'sheep_count' => 0,
+                    'initials' => mb_substr($person->first_name, 0, 1) . mb_substr($person->last_name, 0, 1),
                 ],
             ]);
         }
