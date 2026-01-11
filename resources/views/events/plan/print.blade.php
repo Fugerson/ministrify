@@ -100,6 +100,9 @@
 
         .content-column {
             flex: 1;
+            min-width: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .item-type {
@@ -114,17 +117,23 @@
             font-size: 13pt;
             font-weight: 600;
             margin-bottom: 4px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .item-description {
             font-size: 10pt;
             color: #666;
             margin-bottom: 4px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .item-responsible {
             font-size: 10pt;
             color: #444;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .item-notes {
@@ -135,6 +144,9 @@
             padding: 4px 8px;
             background: #f5f5f5;
             border-radius: 4px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
         }
 
         .assignments-section {
