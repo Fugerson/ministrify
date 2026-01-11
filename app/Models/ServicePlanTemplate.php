@@ -37,7 +37,7 @@ class ServicePlanTemplate extends Model
         $sortOrder = 0;
 
         // Delete existing plan items for this event
-        $event->servicePlanItems()->delete();
+        $event->planItems()->delete();
 
         foreach ($this->items as $item) {
             $duration = $item['duration_minutes'] ?? ServicePlanItem::getDefaultDuration($item['type'] ?? 'other');
@@ -64,7 +64,7 @@ class ServicePlanTemplate extends Model
      */
     public static function createFromEvent(Event $event, string $name, bool $includeResponsible = false, ?string $description = null): self
     {
-        $items = $event->servicePlanItems()->ordered()->get()->map(function ($item) use ($includeResponsible) {
+        $items = $event->planItems()->ordered()->get()->map(function ($item) use ($includeResponsible) {
             $templateItem = [
                 'title' => $item->title,
                 'type' => $item->type,
