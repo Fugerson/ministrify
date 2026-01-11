@@ -5,9 +5,10 @@
 @section('content')
 <!-- Tabs -->
 @php
+$announcementUnreadCount = \App\Models\Announcement::unreadCount(auth()->user()->church_id, auth()->id());
 $commTabs = [
-    ['route' => 'announcements.index', 'label' => 'Оголошення', 'active' => 'announcements.*', 'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>'],
-    ['route' => 'pm.index', 'label' => 'Чат', 'active' => 'pm.*', 'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>'],
+    ['route' => 'announcements.index', 'label' => 'Оголошення', 'active' => 'announcements.*', 'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>', 'badge' => $announcementUnreadCount],
+    ['route' => 'pm.index', 'label' => 'Чат', 'active' => 'pm.*', 'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>', 'badge' => $unreadCount, 'badgeId' => 'pm-badge'],
 ];
 if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
     $commTabs[] = ['route' => 'messages.index', 'label' => 'Розсилка', 'active' => 'messages.*', 'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>'];
@@ -17,12 +18,18 @@ if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
     <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-fit" aria-label="Tabs">
         @foreach($commTabs as $tab)
             <a href="{{ route($tab['route']) }}"
-               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all
+               class="relative flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all
                       {{ request()->routeIs($tab['active'] ?? $tab['route'])
                          ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50' }}">
                 <span class="mr-2">{!! $tab['icon'] !!}</span>
                 {{ $tab['label'] }}
+                @if(isset($tab['badge']) && $tab['badge'] > 0)
+                <span @if(isset($tab['badgeId'])) id="{{ $tab['badgeId'] }}" @endif
+                      class="ml-2 px-1.5 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full min-w-[1.25rem] text-center">
+                    {{ $tab['badge'] > 9 ? '9+' : $tab['badge'] }}
+                </span>
+                @endif
             </a>
         @endforeach
     </nav>
@@ -38,11 +45,9 @@ if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-4">
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white">Повідомлення</h1>
-                    @if($unreadCount > 0)
-                    <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full">
-                        {{ $unreadCount }}
+                    <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full {{ $unreadCount > 0 ? '' : 'hidden' }}">
+                        <span class="header-unread-count">{{ $unreadCount }}</span>
                     </span>
-                    @endif
                 </div>
 
                 <!-- Search / New Chat -->
@@ -63,40 +68,39 @@ if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
             </div>
 
             <!-- Conversations -->
-            <div class="flex-1 overflow-y-auto">
-                @forelse($conversations as $userId => $lastMessage)
+            <div class="flex-1 overflow-y-auto" id="conversations-list">
+                @forelse($conversations as $oderId => $lastMessage)
                     @php
                         $otherUser = $lastMessage->sender_id === auth()->id() ? $lastMessage->recipient : $lastMessage->sender;
                         $isUnread = $lastMessage->recipient_id === auth()->id() && !$lastMessage->read_at;
                     @endphp
                     <button type="button"
-                        @click="selectUser({{ $otherUser->id }}, '{{ addslashes($otherUser->name) }}', '{{ $otherUser->role }}')"
-                        class="w-full flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
+                        data-user-id="{{ $otherUser->id }}"
+                        data-unread="{{ $isUnread ? 'true' : 'false' }}"
+                        @click="selectUser({{ $otherUser->id }}, '{{ addslashes($otherUser->name) }}', '{{ $otherUser->role }}', $el)"
+                        class="conversation-btn w-full flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
                         :class="{
-                            'bg-primary-50 dark:bg-primary-900/20': selectedUser?.id === {{ $otherUser->id }},
-                            'bg-blue-50 dark:bg-blue-900/10': {{ $isUnread ? 'true' : 'false' }} && selectedUser?.id !== {{ $otherUser->id }}
+                            'bg-primary-50 dark:bg-primary-900/20': selectedUser?.id === {{ $otherUser->id }}
                         }">
                         <!-- Avatar -->
                         <div class="relative flex-shrink-0">
                             <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-sm">
                                 <span class="text-lg font-semibold text-white">{{ mb_substr($otherUser->name, 0, 1) }}</span>
                             </div>
-                            @if($isUnread)
-                            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-primary-500 rounded-full border-2 border-white dark:border-gray-800"></span>
-                            @endif
+                            <span class="unread-dot absolute bottom-0 right-0 w-3.5 h-3.5 bg-primary-500 rounded-full border-2 border-white dark:border-gray-800 {{ $isUnread ? '' : 'hidden' }}"></span>
                         </div>
 
                         <!-- Content -->
                         <div class="flex-1 ml-3 min-w-0">
                             <div class="flex items-center justify-between">
-                                <h3 class="font-semibold text-gray-900 dark:text-white truncate {{ $isUnread ? 'text-primary-700 dark:text-primary-400' : '' }}">
+                                <h3 class="conv-name font-semibold text-gray-900 dark:text-white truncate">
                                     {{ $otherUser->name }}
                                 </h3>
                                 <span class="text-xs text-gray-400 ml-2 flex-shrink-0">
                                     {{ $lastMessage->created_at->isToday() ? $lastMessage->created_at->format('H:i') : $lastMessage->created_at->format('d.m') }}
                                 </span>
                             </div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5 {{ $isUnread ? 'font-medium text-gray-700 dark:text-gray-300' : '' }}">
+                            <p class="conv-preview text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
                                 @if($lastMessage->sender_id === auth()->id())
                                 <span class="text-gray-400">Ви:</span>
                                 @endif
@@ -435,7 +439,7 @@ function messengerApp() {
             }
         },
 
-        async selectUser(id, name, role) {
+        async selectUser(id, name, role, btnEl = null) {
             this.selectedUser = { id, name, role };
             this.messages = [];
             this.loadingMessages = true;
@@ -444,6 +448,14 @@ function messengerApp() {
             // Stop previous polling
             if (this.pollInterval) {
                 clearInterval(this.pollInterval);
+            }
+
+            // Remove unread indicator from clicked conversation
+            if (btnEl) {
+                const dot = btnEl.querySelector('.unread-dot');
+                if (dot) dot.classList.add('hidden');
+                btnEl.dataset.unread = 'false';
+                btnEl.classList.remove('bg-blue-50', 'dark:bg-blue-900/10');
             }
 
             try {
@@ -458,8 +470,9 @@ function messengerApp() {
                     this.lastMessageId = Math.max(...this.messages.map(m => m.id));
                 }
                 this.scrollToBottom();
-                // Update sidebar badge
-                window.dispatchEvent(new CustomEvent('pm-read'));
+
+                // Update unread counts
+                this.updateUnreadBadges();
             } catch (e) {
                 console.error('Error loading messages:', e);
             }
@@ -597,6 +610,37 @@ function messengerApp() {
             }
 
             this.composeSending = false;
+        },
+
+        async updateUnreadBadges() {
+            try {
+                const response = await fetch('/pm/unread-count');
+                const data = await response.json();
+
+                // Update tab badge
+                const pmBadge = document.getElementById('pm-badge');
+                if (pmBadge) {
+                    if (data.count > 0) {
+                        pmBadge.textContent = data.count > 9 ? '9+' : data.count;
+                        pmBadge.classList.remove('hidden');
+                    } else {
+                        pmBadge.classList.add('hidden');
+                    }
+                }
+
+                // Update header badge
+                const headerBadge = document.querySelector('.header-unread-count');
+                if (headerBadge) {
+                    if (data.count > 0) {
+                        headerBadge.textContent = data.count;
+                        headerBadge.parentElement.classList.remove('hidden');
+                    } else {
+                        headerBadge.parentElement.classList.add('hidden');
+                    }
+                }
+            } catch (e) {
+                console.error('Error fetching unread count:', e);
+            }
         },
 
         destroy() {
