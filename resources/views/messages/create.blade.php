@@ -11,7 +11,9 @@
             <!-- Recipient Type -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Отримувачі</label>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
+                <!-- Basic filters -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                     <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer transition-colors"
                            :class="recipientType === 'all' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
                         <input type="radio" name="recipient_type" value="all" x-model="recipientType" class="sr-only">
@@ -31,6 +33,40 @@
                            :class="recipientType === 'group' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
                         <input type="radio" name="recipient_type" value="group" x-model="recipientType" class="sr-only">
                         <span class="text-sm font-medium" :class="recipientType === 'group' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'">Група</span>
+                    </label>
+                </div>
+
+                <!-- Advanced filters -->
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    <label class="relative flex items-center justify-center px-3 py-2.5 border rounded-xl cursor-pointer transition-colors"
+                           :class="recipientType === 'gender' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                        <input type="radio" name="recipient_type" value="gender" x-model="recipientType" class="sr-only">
+                        <span class="text-xs font-medium" :class="recipientType === 'gender' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400'">Стать</span>
+                    </label>
+                    <label class="relative flex items-center justify-center px-3 py-2.5 border rounded-xl cursor-pointer transition-colors"
+                           :class="recipientType === 'role' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                        <input type="radio" name="recipient_type" value="role" x-model="recipientType" class="sr-only">
+                        <span class="text-xs font-medium" :class="recipientType === 'role' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400'">Роль</span>
+                    </label>
+                    <label class="relative flex items-center justify-center px-3 py-2.5 border rounded-xl cursor-pointer transition-colors"
+                           :class="recipientType === 'birthday' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                        <input type="radio" name="recipient_type" value="birthday" x-model="recipientType" class="sr-only">
+                        <span class="text-xs font-medium" :class="recipientType === 'birthday' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400'">Іменинники</span>
+                    </label>
+                    <label class="relative flex items-center justify-center px-3 py-2.5 border rounded-xl cursor-pointer transition-colors"
+                           :class="recipientType === 'membership' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                        <input type="radio" name="recipient_type" value="membership" x-model="recipientType" class="sr-only">
+                        <span class="text-xs font-medium" :class="recipientType === 'membership' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400'">Статус</span>
+                    </label>
+                    <label class="relative flex items-center justify-center px-3 py-2.5 border rounded-xl cursor-pointer transition-colors"
+                           :class="recipientType === 'age' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                        <input type="radio" name="recipient_type" value="age" x-model="recipientType" class="sr-only">
+                        <span class="text-xs font-medium" :class="recipientType === 'age' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400'">Вік</span>
+                    </label>
+                    <label class="relative flex items-center justify-center px-3 py-2.5 border rounded-xl cursor-pointer transition-colors"
+                           :class="recipientType === 'new_members' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                        <input type="radio" name="recipient_type" value="new_members" x-model="recipientType" class="sr-only">
+                        <span class="text-xs font-medium" :class="recipientType === 'new_members' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400'">Нові</span>
                     </label>
                 </div>
             </div>
@@ -66,6 +102,68 @@
                     <option value="{{ $group->id }}">{{ $group->name }}</option>
                     @endforeach
                 </select>
+            </div>
+
+            <!-- Gender Select -->
+            <div x-show="recipientType === 'gender'" x-cloak>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Оберіть стать</label>
+                <select name="gender" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
+                    <option value="">Оберіть...</option>
+                    <option value="male">Чоловіки</option>
+                    <option value="female">Жінки</option>
+                </select>
+            </div>
+
+            <!-- Role Select -->
+            <div x-show="recipientType === 'role'" x-cloak>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Оберіть роль</label>
+                <select name="church_role_id" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
+                    <option value="">Оберіть...</option>
+                    @foreach($roles as $role)
+                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Birthday info -->
+            <div x-show="recipientType === 'birthday'" x-cloak>
+                <div class="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4">
+                    <p class="text-sm text-amber-700 dark:text-amber-300">
+                        Буде надіслано всім, хто має день народження у {{ \Carbon\Carbon::now()->translatedFormat('F') }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Membership Status Select -->
+            <div x-show="recipientType === 'membership'" x-cloak>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус членства</label>
+                <select name="membership_status" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
+                    <option value="">Оберіть...</option>
+                    <option value="member">Члени церкви</option>
+                    <option value="regular">Регулярні відвідувачі</option>
+                    <option value="guest">Гості</option>
+                    <option value="inactive">Неактивні</option>
+                </select>
+            </div>
+
+            <!-- Age Group Select -->
+            <div x-show="recipientType === 'age'" x-cloak>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Вікова група</label>
+                <select name="age_group" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
+                    <option value="">Оберіть...</option>
+                    <option value="youth">Молодь (14-30 років)</option>
+                    <option value="adults">Дорослі (30-60 років)</option>
+                    <option value="seniors">Старші (60+ років)</option>
+                </select>
+            </div>
+
+            <!-- New Members info -->
+            <div x-show="recipientType === 'new_members'" x-cloak>
+                <div class="bg-green-50 dark:bg-green-900/30 rounded-xl p-4">
+                    <p class="text-sm text-green-700 dark:text-green-300">
+                        Буде надіслано всім, хто приєднався за останні 30 днів
+                    </p>
+                </div>
             </div>
 
             <!-- Template Select -->

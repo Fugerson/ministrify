@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChurchRole;
 use App\Models\Group;
 use App\Models\MessageLog;
 use App\Models\MessageTemplate;
@@ -27,12 +28,14 @@ class MessageController extends Controller
 
     public function create()
     {
-        $tags = Tag::where('church_id', $this->getCurrentChurch()->id)->get();
-        $ministries = Ministry::where('church_id', $this->getCurrentChurch()->id)->get();
-        $groups = Group::where('church_id', $this->getCurrentChurch()->id)->get();
-        $templates = MessageTemplate::where('church_id', $this->getCurrentChurch()->id)->get();
+        $churchId = $this->getCurrentChurch()->id;
+        $tags = Tag::where('church_id', $churchId)->get();
+        $ministries = Ministry::where('church_id', $churchId)->get();
+        $groups = Group::where('church_id', $churchId)->get();
+        $templates = MessageTemplate::where('church_id', $churchId)->get();
+        $roles = ChurchRole::where('church_id', $churchId)->orderBy('sort_order')->get();
 
-        return view('messages.create', compact('tags', 'ministries', 'groups', 'templates'));
+        return view('messages.create', compact('tags', 'ministries', 'groups', 'templates', 'roles'));
     }
 
     public function preview(Request $request)
@@ -53,11 +56,15 @@ class MessageController extends Controller
     {
         $validated = $request->validate([
             'message' => 'required|string|max:4000',
-            'recipient_type' => 'required|in:all,tag,ministry,group,custom',
+            'recipient_type' => 'required|in:all,tag,ministry,group,custom,gender,birthday,membership,age,new_members,role',
             'tag_id' => 'nullable|exists:tags,id',
             'ministry_id' => 'nullable|exists:ministries,id',
             'group_id' => 'nullable|exists:groups,id',
             'person_ids' => 'nullable|array',
+            'gender' => 'nullable|in:male,female',
+            'membership_status' => 'nullable|string',
+            'age_group' => 'nullable|in:youth,adults,seniors',
+            'church_role_id' => 'nullable|exists:church_roles,id',
         ]);
 
         $churchId = $this->getCurrentChurch()->id;
@@ -152,6 +159,53 @@ class MessageController extends Controller
             case 'custom':
                 if ($request->person_ids) {
                     $query->whereIn('id', $request->person_ids);
+                }
+                break;
+            case 'gender':
+                if ($request->gender) {
+                    $query->where('gender', $request->gender);
+                }
+                break;
+            case 'birthday':
+                // Birthday this month
+                $query->whereMonth('birth_date', now()->month);
+                break;
+            case 'membership':
+                if ($request->membership_status) {
+                    $query->where('membership_status', $request->membership_status);
+                }
+                break;
+            case 'age':
+                if ($request->age_group) {
+                    $now = now();
+                    switch ($request->age_group) {
+                        case 'youth': // 14-30
+                            $query->whereNotNull('birth_date')
+                                ->whereDate('birth_date', '<=', $now->copy()->subYears(14))
+                                ->whereDate('birth_date', '>=', $now->copy()->subYears(30));
+                            break;
+                        case 'adults': // 30-60
+                            $query->whereNotNull('birth_date')
+                                ->whereDate('birth_date', '<=', $now->copy()->subYears(30))
+                                ->whereDate('birth_date', '>=', $now->copy()->subYears(60));
+                            break;
+                        case 'seniors': // 60+
+                            $query->whereNotNull('birth_date')
+                                ->whereDate('birth_date', '<=', $now->copy()->subYears(60));
+                            break;
+                    }
+                }
+                break;
+            case 'new_members':
+                // Joined in last 30 days
+                $query->where(function ($q) {
+                    $q->whereDate('joined_date', '>=', now()->subDays(30))
+                        ->orWhereDate('created_at', '>=', now()->subDays(30));
+                });
+                break;
+            case 'role':
+                if ($request->church_role_id) {
+                    $query->where('church_role_id', $request->church_role_id);
                 }
                 break;
         }
