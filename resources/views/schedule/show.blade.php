@@ -81,11 +81,109 @@
                             </svg>
                             <h2 class="font-semibold text-gray-900 dark:text-white">План події</h2>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2" x-data="planTemplatesManager()">
+                            {{-- Apply Template Dropdown --}}
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" type="button"
+                                        class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-1">
+                                    📋 Шаблон
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-cloak @click.outside="open = false"
+                                     class="absolute right-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
+                                    {{-- Custom templates --}}
+                                    <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Мої шаблони</p>
+                                        <template x-if="customTemplates.length === 0">
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 py-1">Немає шаблонів</p>
+                                        </template>
+                                        <template x-for="tpl in customTemplates" :key="tpl.id">
+                                            <div class="flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                                                <button type="button" @click="applyCustomTemplate(tpl.id); open = false"
+                                                        class="flex-1 text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300">
+                                                    <span x-text="tpl.name"></span>
+                                                    <span class="text-xs text-gray-400" x-text="'(' + tpl.items_count + ')'"></span>
+                                                </button>
+                                                <button type="button" @click.stop="deleteTemplate(tpl.id)"
+                                                        class="p-1 text-gray-400 hover:text-red-500" title="Видалити">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    {{-- Base templates --}}
+                                    <div class="p-2">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Базові</p>
+                                        <button type="button" @click="applyBaseTemplate('sunday'); open = false"
+                                                class="w-full text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                                            Неділя (стандарт)
+                                        </button>
+                                        <button type="button" @click="applyBaseTemplate('prayer'); open = false"
+                                                class="w-full text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                                            Молитва
+                                        </button>
+                                        <button type="button" @click="applyBaseTemplate('communion'); open = false"
+                                                class="w-full text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                                            Причастя
+                                        </button>
+                                        <button type="button" @click="applyBaseTemplate('baptism'); open = false"
+                                                class="w-full text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                                            Хрещення
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Save as Template Button --}}
+                            <button type="button" @click="showSaveModal = true"
+                                    class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Зберегти як шаблон">
+                                💾 Зберегти
+                            </button>
+
                             <a href="{{ route('events.plan.print', $event) }}" target="_blank"
                                class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Друк">
                                 🖨️ Друк
                             </a>
+
+                            {{-- Save Template Modal --}}
+                            <div x-show="showSaveModal" x-cloak
+                                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                                 @keydown.escape.window="showSaveModal = false">
+                                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4" @click.outside="showSaveModal = false">
+                                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Зберегти план як шаблон</h3>
+                                    </div>
+                                    <div class="p-6 space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва шаблону</label>
+                                            <input type="text" x-model="templateName" placeholder="Наприклад: Недільне служіння"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500">
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" id="includeResponsible" x-model="includeResponsible"
+                                                   class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                                            <label for="includeResponsible" class="text-sm text-gray-700 dark:text-gray-300">
+                                                Включити відповідальних
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
+                                        <button type="button" @click="showSaveModal = false"
+                                                class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                            Скасувати
+                                        </button>
+                                        <button type="button" @click="saveAsTemplate()"
+                                                :disabled="!templateName.trim()"
+                                                class="px-4 py-2 text-sm bg-primary-600 hover:bg-primary-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                            Зберегти
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -585,6 +683,143 @@ function showGlobalToast(message, type = 'success') {
         toast.classList.add('translate-x-full');
         setTimeout(() => toast.remove(), 300);
     }, 4000);
+}
+
+// Plan Templates Manager
+function planTemplatesManager() {
+    return {
+        showSaveModal: false,
+        templateName: '',
+        includeResponsible: false,
+        customTemplates: [],
+
+        async init() {
+            await this.loadTemplates();
+        },
+
+        async loadTemplates() {
+            try {
+                const response = await fetch('{{ route("service-plan-templates.index") }}', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    this.customTemplates = data.templates || [];
+                }
+            } catch (err) {
+                console.error('Error loading templates:', err);
+            }
+        },
+
+        async saveAsTemplate() {
+            if (!this.templateName.trim()) return;
+
+            try {
+                const response = await fetch('{{ route("service-plan-templates.store", $event) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        name: this.templateName,
+                        include_responsible: this.includeResponsible
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showGlobalToast('Шаблон збережено', 'success');
+                    this.showSaveModal = false;
+                    this.templateName = '';
+                    this.includeResponsible = false;
+                    this.customTemplates.push(data.template);
+                } else {
+                    showGlobalToast(data.message || 'Помилка', 'error');
+                }
+            } catch (err) {
+                console.error('Save template error:', err);
+                showGlobalToast('Помилка збереження', 'error');
+            }
+        },
+
+        async applyCustomTemplate(templateId) {
+            if (!confirm('Застосувати шаблон? Поточний план буде замінено.')) return;
+
+            try {
+                const response = await fetch(`/service-plan-templates/apply/{{ $event->id }}/${templateId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showGlobalToast('Шаблон застосовано', 'success');
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    showGlobalToast(data.message || 'Помилка', 'error');
+                }
+            } catch (err) {
+                console.error('Apply template error:', err);
+                showGlobalToast('Помилка застосування', 'error');
+            }
+        },
+
+        async applyBaseTemplate(template) {
+            if (!confirm('Застосувати базовий шаблон? Пункти будуть додані до існуючих.')) return;
+
+            try {
+                const response = await fetch('{{ route("events.plan.apply-template", $event) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ template })
+                });
+
+                if (response.ok) {
+                    showGlobalToast('Шаблон застосовано', 'success');
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    showGlobalToast('Помилка застосування', 'error');
+                }
+            } catch (err) {
+                console.error('Apply base template error:', err);
+                showGlobalToast('Помилка застосування', 'error');
+            }
+        },
+
+        async deleteTemplate(templateId) {
+            if (!confirm('Видалити цей шаблон?')) return;
+
+            try {
+                const response = await fetch(`/service-plan-templates/${templateId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showGlobalToast('Шаблон видалено', 'success');
+                    this.customTemplates = this.customTemplates.filter(t => t.id !== templateId);
+                } else {
+                    showGlobalToast(data.message || 'Помилка', 'error');
+                }
+            } catch (err) {
+                console.error('Delete template error:', err);
+                showGlobalToast('Помилка видалення', 'error');
+            }
+        }
+    };
 }
 
 // Global function to update a plan item field

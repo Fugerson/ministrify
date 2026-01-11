@@ -14,6 +14,7 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ServicePlanController;
+use App\Http\Controllers\ServicePlanTemplateController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserPreferencesController;
@@ -260,6 +261,14 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::delete('/{item}', [ServicePlanController::class, 'destroy'])->name('destroy');
         Route::post('/{item}/status', [ServicePlanController::class, 'updateStatus'])->name('status');
         Route::post('/{item}/notify', [ServicePlanController::class, 'sendNotification'])->name('notify');
+    });
+
+    // Service Plan Templates
+    Route::prefix('service-plan-templates')->name('service-plan-templates.')->group(function () {
+        Route::get('/', [ServicePlanTemplateController::class, 'index'])->name('index');
+        Route::post('/from-event/{event}', [ServicePlanTemplateController::class, 'store'])->name('store');
+        Route::post('/apply/{event}/{template}', [ServicePlanTemplateController::class, 'apply'])->name('apply');
+        Route::delete('/{template}', [ServicePlanTemplateController::class, 'destroy'])->name('destroy');
     });
 
     // Calendar Export/Import
