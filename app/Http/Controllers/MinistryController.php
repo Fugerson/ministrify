@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Ministry;
 use App\Models\Person;
+use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -113,7 +114,16 @@ class MinistryController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople'));
+        // Get resources for this ministry (root level only)
+        $resources = Resource::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->whereNull('parent_id')
+            ->with('creator')
+            ->orderByRaw("type = 'folder' DESC")
+            ->orderBy('name')
+            ->get();
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources'));
     }
 
     public function edit(Ministry $ministry)
