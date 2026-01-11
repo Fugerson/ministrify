@@ -28,6 +28,12 @@ class EventChecklistItem extends Model
         return $this->belongsTo(EventChecklist::class, 'event_checklist_id');
     }
 
+    // Alias for checklist() - used in controllers
+    public function eventChecklist(): BelongsTo
+    {
+        return $this->checklist();
+    }
+
     public function assignedPerson(): BelongsTo
     {
         return $this->belongsTo(Person::class, 'assigned_to');
