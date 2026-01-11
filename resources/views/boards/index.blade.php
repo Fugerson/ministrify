@@ -1502,8 +1502,12 @@ function churchBoard() {
                 });
 
                 if (response.ok) {
-                    this.addCardModal.open = false;
-                    window.location.reload();
+                    const data = await response.json();
+                    if (data.success && data.card) {
+                        this.insertNewCard(data.card, this.addCardModal.columnId);
+                        this.addCardModal.open = false;
+                        if (window.showGlobalToast) showGlobalToast('Завдання створено', 'success');
+                    }
                 } else {
                     const data = await response.json();
                     alert(data.message || 'Помилка при створенні завдання');
@@ -1514,6 +1518,44 @@ function churchBoard() {
             } finally {
                 this.addCardModal.loading = false;
             }
+        },
+
+        insertNewCard(card, columnId) {
+            const column = document.querySelector(`.kanban-cards[data-column-id="${columnId}"]`);
+            if (!column) return;
+
+            const priorityBorder = {
+                'urgent': 'border-l-4 border-l-red-500',
+                'high': 'border-l-4 border-l-orange-500',
+                'medium': 'border-l-4 border-l-yellow-500'
+            }[card.priority] || '';
+
+            const priorityBadge = {
+                'urgent': '<span class="priority-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">Терміново</span>',
+                'high': '<span class="priority-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">Високий</span>',
+                'medium': '<span class="priority-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300">Середній</span>'
+            }[card.priority] || '';
+
+            const cardHtml = `
+                <div class="kanban-card bg-white dark:bg-gray-700 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-600 cursor-pointer hover:shadow-md transition-all ${priorityBorder}"
+                     draggable="true"
+                     data-card-id="${card.id}"
+                     data-priority="${card.priority || 'low'}"
+                     data-assignee="${card.assigned_to || 'unassigned'}"
+                     data-ministry="${card.ministry_id || ''}"
+                     data-due="${card.due_date || ''}"
+                     data-title="${(card.title || '').toLowerCase()}"
+                     onclick="document.querySelector('[x-data]').__x.$data.openCard(${card.id})">
+                    <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                        <span class="text-[10px] font-mono text-gray-400 dark:text-gray-500">#${card.id}</span>
+                        ${priorityBadge}
+                    </div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">${card.title}</p>
+                </div>
+            `;
+
+            column.insertAdjacentHTML('afterbegin', cardHtml);
+            this.updateColumnCount(columnId);
         },
 
         // Card Panel Methods
@@ -1847,18 +1889,26 @@ function churchBoard() {
             if (!this.cardPanel.data) return;
 
             const cardId = this.cardPanel.data.card.id;
-            const response = await fetch(`/boards/cards/${cardId}/duplicate`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': this.csrfToken,
-                    'Accept': 'application/json'
-                }
-            });
+            const columnId = this.cardPanel.data.card.column_id;
 
-            const result = await response.json();
-            if (result.success) {
-                this.closePanel();
-                window.location.reload();
+            try {
+                const response = await fetch(`/boards/cards/${cardId}/duplicate`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                if (result.success && result.card) {
+                    this.insertNewCard(result.card, columnId);
+                    this.closePanel();
+                    if (window.showGlobalToast) showGlobalToast('Завдання дубльовано', 'success');
+                }
+            } catch (error) {
+                console.error('Duplicate error:', error);
+                if (window.showGlobalToast) showGlobalToast('Помилка дублювання', 'error');
             }
         },
 
@@ -1891,12 +1941,35 @@ function churchBoard() {
             }
         },
 
-        deleteCard(cardId) {
-            if (confirm('Видалити завдання?')) {
-                fetch(`/boards/cards/${cardId}`, {
+        async deleteCard(cardId) {
+            if (!confirm('Видалити завдання?')) return;
+
+            try {
+                const response = await fetch(`/boards/cards/${cardId}`, {
                     method: 'DELETE',
-                    headers: { 'X-CSRF-TOKEN': this.csrfToken }
-                }).then(() => window.location.reload());
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Remove card from DOM
+                    const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+                    if (cardEl) {
+                        const columnId = cardEl.closest('.kanban-cards')?.dataset.columnId;
+                        cardEl.remove();
+                        if (columnId) this.updateColumnCount(columnId);
+                    }
+                    // Close panel if open
+                    if (this.cardPanel.cardId === cardId) {
+                        this.closePanel();
+                    }
+                    if (window.showGlobalToast) showGlobalToast('Завдання видалено', 'success');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                if (window.showGlobalToast) showGlobalToast('Помилка видалення', 'error');
             }
         }
     }
