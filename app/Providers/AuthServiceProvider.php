@@ -34,6 +34,11 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-ministry', function (User $user, Ministry $ministry) {
+            // All users with view permission can see ministries in their church
+            if ($user->canView('ministries') && $user->church_id === $ministry->church_id) {
+                return true;
+            }
+
             if ($user->canManageMinistry($ministry)) {
                 return true;
             }
