@@ -25,6 +25,13 @@ class MinistryController extends Controller
 
         $ministries = $query->get();
 
+        // Filter private ministries - show only to members/admins
+        if (!$user->isAdmin() && !$user->isManager()) {
+            $ministries = $ministries->filter(function ($ministry) {
+                return $ministry->canAccess();
+            });
+        }
+
         return view('ministries.index', compact('ministries'));
     }
 
@@ -75,6 +82,12 @@ class MinistryController extends Controller
     {
         $this->authorizeChurch($ministry);
         Gate::authorize('view-ministry', $ministry);
+
+        // Check private access
+        if (!$ministry->canAccess()) {
+            abort(403, 'Ця команда приватна. Доступ тільки для учасників.');
+        }
+
         $church = $this->getCurrentChurch();
 
         $ministry->load([
@@ -191,6 +204,21 @@ class MinistryController extends Controller
         ]);
 
         return back()->with('success', 'Позиції оновлено.');
+    }
+
+    public function togglePrivacy(Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('manage-ministry', $ministry);
+
+        $ministry->update([
+            'is_private' => !$ministry->is_private,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'is_private' => $ministry->is_private,
+        ]);
     }
 
     protected function authorizeChurch($model): void

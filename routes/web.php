@@ -184,6 +184,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('ministries/{ministry}/members', [MinistryController::class, 'addMember'])->name('ministries.members.add');
     Route::delete('ministries/{ministry}/members/{person}', [MinistryController::class, 'removeMember'])->name('ministries.members.remove');
     Route::put('ministries/{ministry}/members/{person}', [MinistryController::class, 'updateMemberPositions'])->name('ministries.members.update');
+    Route::post('ministries/{ministry}/toggle-privacy', [MinistryController::class, 'togglePrivacy'])->name('ministries.toggle-privacy');
 
     // Ministry Resources
     Route::get('ministries/{ministry}/resources', [ResourceController::class, 'ministryIndex'])->name('ministries.resources');

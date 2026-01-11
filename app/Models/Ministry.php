@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\User;
 
 class Ministry extends Model
 {
@@ -28,12 +29,14 @@ class Ministry extends Model
         'public_description',
         'cover_image',
         'allow_registrations',
+        'is_private',
     ];
 
     protected $casts = [
         'monthly_budget' => 'decimal:2',
         'is_public' => 'boolean',
         'allow_registrations' => 'boolean',
+        'is_private' => 'boolean',
     ];
 
     public function church(): BelongsTo
@@ -175,5 +178,54 @@ class Ministry extends Model
     public function getPublicUrlAttribute(): string
     {
         return route('public.ministry', [$this->church->slug, $this->slug]);
+    }
+
+    /**
+     * Check if user can access this ministry page
+     */
+    public function canAccess(?User $user = null): bool
+    {
+        $user = $user ?? auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        // If not private - everyone can access
+        if (!$this->is_private) {
+            return true;
+        }
+
+        // Admins and managers can always access
+        if ($user->isAdmin() || $user->isManager()) {
+            return true;
+        }
+
+        // Leaders of ministry can access
+        if ($user->person && $this->leader_id === $user->person->id) {
+            return true;
+        }
+
+        // Members can access
+        if ($user->person && $this->members()->where('person_id', $user->person->id)->exists()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user is a member of this ministry
+     */
+    public function isMember(?User $user = null): bool
+    {
+        $user = $user ?? auth()->user();
+
+        if (!$user || !$user->person) {
+            return false;
+        }
+
+        return $this->leader_id === $user->person->id
+            || $this->members()->where('person_id', $user->person->id)->exists();
     }
 }

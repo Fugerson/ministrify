@@ -4,10 +4,38 @@
 
 @section('actions')
 @can('manage-ministry', $ministry)
-<a href="{{ route('ministries.edit', $ministry) }}"
-   class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
-    Налаштування
-</a>
+<div class="flex items-center gap-3">
+    <!-- Privacy Toggle -->
+    <div x-data="{ isPrivate: {{ $ministry->is_private ? 'true' : 'false' }}, loading: false }"
+         class="flex items-center gap-2">
+        <button type="button"
+                @click="if(!loading) {
+                    loading = true;
+                    fetch('{{ route('ministries.toggle-privacy', $ministry) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => { isPrivate = data.is_private; loading = false; })
+                    .catch(() => loading = false);
+                }"
+                :class="isPrivate ? 'bg-amber-500' : 'bg-gray-300 dark:bg-gray-600'"
+                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            <span :class="isPrivate ? 'translate-x-5' : 'translate-x-0'"
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+        </button>
+        <span class="text-sm text-gray-600 dark:text-gray-400" x-text="isPrivate ? 'Приватна' : 'Відкрита'"></span>
+    </div>
+
+    <a href="{{ route('ministries.edit', $ministry) }}"
+       class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
+        Налаштування
+    </a>
+</div>
 @endcan
 @endsection
 
@@ -21,7 +49,17 @@
                     <div class="w-4 h-4 rounded-full" style="background-color: {{ $ministry->color }}"></div>
                 @endif
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
+                        @if($ministry->is_private)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                Приватна
+                            </span>
+                        @endif
+                    </div>
                     @if($ministry->leader)
                         <p class="text-gray-500 dark:text-gray-400">Лідер: {{ $ministry->leader->full_name }}</p>
                     @endif
