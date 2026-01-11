@@ -497,7 +497,7 @@ class SystemAdminController extends Controller
                 if (Schema::hasTable('family_relationships')) {
                     DB::table('family_relationships')
                         ->where('person_id', $person->id)
-                        ->orWhere('relative_id', $person->id)
+                        ->orWhere('related_person_id', $person->id)
                         ->delete();
                 }
                 // Detach tags
