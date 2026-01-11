@@ -94,7 +94,7 @@
                                 <div x-show="open" x-cloak @click.outside="open = false"
                                      class="absolute right-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
                                     {{-- Custom templates --}}
-                                    <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                                    <div class="p-2">
                                         <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Мої шаблони</p>
                                         <template x-if="customTemplates.length === 0">
                                             <p class="text-xs text-gray-400 dark:text-gray-500 py-1">Немає шаблонів</p>
@@ -114,26 +114,6 @@
                                                 </button>
                                             </div>
                                         </template>
-                                    </div>
-                                    {{-- Base templates --}}
-                                    <div class="p-2">
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Базові</p>
-                                        <button type="button" @click="applyBaseTemplate('sunday'); open = false"
-                                                class="w-full text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
-                                            Неділя (стандарт)
-                                        </button>
-                                        <button type="button" @click="applyBaseTemplate('prayer'); open = false"
-                                                class="w-full text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
-                                            Молитва
-                                        </button>
-                                        <button type="button" @click="applyBaseTemplate('communion'); open = false"
-                                                class="w-full text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
-                                            Причастя
-                                        </button>
-                                        <button type="button" @click="applyBaseTemplate('baptism'); open = false"
-                                                class="w-full text-left px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
-                                            Хрещення
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -765,32 +745,6 @@ function planTemplatesManager() {
                 }
             } catch (err) {
                 console.error('Apply template error:', err);
-                showGlobalToast('Помилка застосування', 'error');
-            }
-        },
-
-        async applyBaseTemplate(template) {
-            if (!confirm('Застосувати базовий шаблон? Пункти будуть додані до існуючих.')) return;
-
-            try {
-                const response = await fetch('{{ route("events.plan.apply-template", $event) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ template })
-                });
-
-                if (response.ok) {
-                    showGlobalToast('Шаблон застосовано', 'success');
-                    setTimeout(() => window.location.reload(), 500);
-                } else {
-                    showGlobalToast('Помилка застосування', 'error');
-                }
-            } catch (err) {
-                console.error('Apply base template error:', err);
                 showGlobalToast('Помилка застосування', 'error');
             }
         },
