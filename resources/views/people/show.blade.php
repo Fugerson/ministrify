@@ -3,6 +3,7 @@
 @section('title', $person->full_name)
 
 @php
+    use Illuminate\Support\Facades\Storage;
     $isAdmin = auth()->user()->isAdmin();
     $personMinistries = $person->ministries->keyBy('id');
 @endphp
