@@ -13,6 +13,7 @@ class Resource extends Model
 
     protected $fillable = [
         'church_id',
+        'ministry_id',
         'parent_id',
         'created_by',
         'name',
@@ -62,6 +63,11 @@ class Resource extends Model
     public function church(): BelongsTo
     {
         return $this->belongsTo(Church::class);
+    }
+
+    public function ministry(): BelongsTo
+    {
+        return $this->belongsTo(Ministry::class);
     }
 
     public function parent(): BelongsTo

@@ -92,6 +92,13 @@
                     </svg>
                     Ротація
                 </button>
+                <a href="{{ route('ministries.resources', $ministry) }}"
+                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                    </svg>
+                    Ресурси
+                </a>
             </nav>
         </div>
 

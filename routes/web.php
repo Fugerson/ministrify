@@ -184,6 +184,12 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::delete('ministries/{ministry}/members/{person}', [MinistryController::class, 'removeMember'])->name('ministries.members.remove');
     Route::put('ministries/{ministry}/members/{person}', [MinistryController::class, 'updateMemberPositions'])->name('ministries.members.update');
 
+    // Ministry Resources
+    Route::get('ministries/{ministry}/resources', [ResourceController::class, 'ministryIndex'])->name('ministries.resources');
+    Route::get('ministries/{ministry}/resources/folder/{folder}', [ResourceController::class, 'ministryIndex'])->name('ministries.resources.folder');
+    Route::post('ministries/{ministry}/resources/folder', [ResourceController::class, 'ministryCreateFolder'])->name('ministries.resources.folder.create');
+    Route::post('ministries/{ministry}/resources/upload', [ResourceController::class, 'ministryUpload'])->name('ministries.resources.upload');
+
     // Positions
     Route::post('ministries/{ministry}/positions', [PositionController::class, 'store'])->name('positions.store');
     Route::put('positions/{position}', [PositionController::class, 'update'])->name('positions.update');

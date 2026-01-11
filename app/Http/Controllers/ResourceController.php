@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ministry;
 use App\Models\Resource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\File;
 
@@ -11,17 +13,19 @@ class ResourceController extends Controller
 {
     /**
      * Display resources (root or folder contents)
+     * Only shows church-wide resources (ministry_id IS NULL)
      */
     public function index(Request $request, ?Resource $folder = null)
     {
         $churchId = $this->getCurrentChurch()->id;
 
-        // Validate folder belongs to church
-        if ($folder && $folder->church_id !== $churchId) {
+        // Validate folder belongs to church and is a general resource (not ministry-specific)
+        if ($folder && ($folder->church_id !== $churchId || $folder->ministry_id !== null)) {
             abort(404);
         }
 
         $resources = Resource::where('church_id', $churchId)
+            ->whereNull('ministry_id')
             ->where('parent_id', $folder?->id)
             ->with('creator')
             ->orderByRaw("type = 'folder' DESC")
@@ -261,5 +265,148 @@ class ResourceController extends Controller
             $current = $current->parent;
         }
         return false;
+    }
+
+    // ==================== Ministry Resources ====================
+
+    /**
+     * Display ministry resources
+     */
+    public function ministryIndex(Ministry $ministry, ?Resource $folder = null)
+    {
+        Gate::authorize('view-ministry', $ministry);
+
+        $churchId = $this->getCurrentChurch()->id;
+
+        // Validate folder belongs to this ministry
+        if ($folder && ($folder->church_id !== $churchId || $folder->ministry_id !== $ministry->id)) {
+            abort(404);
+        }
+
+        $resources = Resource::where('church_id', $churchId)
+            ->where('ministry_id', $ministry->id)
+            ->where('parent_id', $folder?->id)
+            ->with('creator')
+            ->orderByRaw("type = 'folder' DESC")
+            ->orderBy('name')
+            ->get();
+
+        $breadcrumbs = $folder ? $folder->getBreadcrumbs() : [];
+
+        // Calculate storage usage for ministry
+        $storageUsed = Resource::where('ministry_id', $ministry->id)->where('type', 'file')->sum('file_size') ?? 0;
+        $storageLimit = Resource::MAX_CHURCH_STORAGE;
+        $storagePercent = $storageLimit > 0 ? round(($storageUsed / $storageLimit) * 100, 1) : 0;
+
+        return view('ministries.resources', compact(
+            'ministry',
+            'resources',
+            'folder',
+            'breadcrumbs',
+            'storageUsed',
+            'storageLimit',
+            'storagePercent'
+        ));
+    }
+
+    /**
+     * Create folder in ministry resources
+     */
+    public function ministryCreateFolder(Request $request, Ministry $ministry)
+    {
+        Gate::authorize('manage-ministry', $ministry);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'parent_id' => 'nullable|exists:resources,id',
+            'icon' => 'nullable|string|max:10',
+        ]);
+
+        $churchId = $this->getCurrentChurch()->id;
+
+        // Validate parent belongs to ministry
+        if ($validated['parent_id']) {
+            Resource::where('id', $validated['parent_id'])
+                ->where('church_id', $churchId)
+                ->where('ministry_id', $ministry->id)
+                ->where('type', 'folder')
+                ->firstOrFail();
+        }
+
+        Resource::create([
+            'church_id' => $churchId,
+            'ministry_id' => $ministry->id,
+            'parent_id' => $validated['parent_id'] ?? null,
+            'created_by' => auth()->id(),
+            'name' => $validated['name'],
+            'type' => 'folder',
+            'icon' => $validated['icon'] ?? null,
+        ]);
+
+        return back()->with('success', 'Папку створено');
+    }
+
+    /**
+     * Upload file to ministry resources
+     */
+    public function ministryUpload(Request $request, Ministry $ministry)
+    {
+        Gate::authorize('manage-ministry', $ministry);
+
+        $churchId = $this->getCurrentChurch()->id;
+
+        if ($request->parent_id === '') {
+            $request->merge(['parent_id' => null]);
+        }
+
+        $request->validate([
+            'file' => [
+                'required',
+                'file',
+                'max:' . (Resource::MAX_FILE_SIZE / 1024),
+            ],
+            'parent_id' => 'nullable|exists:resources,id',
+        ]);
+
+        $file = $request->file('file');
+
+        if (!in_array($file->getMimeType(), Resource::ALLOWED_MIMES)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Цей тип файлу не підтримується'], 422);
+            }
+            return back()->with('error', 'Цей тип файлу не підтримується');
+        }
+
+        if (!Resource::canUpload($churchId, $file->getSize())) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Перевищено ліміт сховища'], 422);
+            }
+            return back()->with('error', 'Перевищено ліміт сховища');
+        }
+
+        // Validate parent belongs to ministry
+        if ($request->parent_id) {
+            Resource::where('id', $request->parent_id)
+                ->where('church_id', $churchId)
+                ->where('ministry_id', $ministry->id)
+                ->where('type', 'folder')
+                ->firstOrFail();
+        }
+
+        $path = $file->store("resources/{$churchId}/ministry-{$ministry->id}", 'public');
+
+        Resource::create([
+            'church_id' => $churchId,
+            'ministry_id' => $ministry->id,
+            'parent_id' => $request->parent_id,
+            'created_by' => auth()->id(),
+            'name' => $file->getClientOriginalName(),
+            'type' => 'file',
+            'file_path' => $path,
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+        ]);
+
+        return back()->with('success', 'Файл завантажено');
     }
 }
