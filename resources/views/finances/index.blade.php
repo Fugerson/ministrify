@@ -215,7 +215,7 @@
         <!-- Expense by ministry -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Витрати по служіннях</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Витрати по командах</h3>
                 <a href="{{ route('finances.expenses.index') }}" class="text-sm text-primary-600 hover:text-primary-500">Усі →</a>
             </div>
             <div class="p-6">

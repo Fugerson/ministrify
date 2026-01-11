@@ -230,7 +230,7 @@
                         </div>
                         <span class="font-semibold text-amber-700 dark:text-amber-300">Лідер</span>
                     </div>
-                    <p class="text-sm text-amber-600 dark:text-amber-400">Управління своїм служінням та командою</p>
+                    <p class="text-sm text-amber-600 dark:text-amber-400">Управління своєю командою</p>
                 </div>
                 <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-200/50 dark:border-green-700/30">
                     <div class="flex items-center gap-3 mb-2">

@@ -39,10 +39,10 @@
 
             <div class="space-y-4">
                 <div>
-                    <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Служіння <span class="text-red-500">*</span></label>
+                    <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда <span class="text-red-500">*</span></label>
                     <select name="ministry_id" id="ministry_id" required
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">Виберіть служіння</option>
+                        <option value="">Виберіть команду</option>
                         @foreach($ministries as $ministry)
                             <option value="{{ $ministry->id }}" {{ old('ministry_id') == $ministry->id ? 'selected' : '' }}>
                                 {{ $ministry->name }}

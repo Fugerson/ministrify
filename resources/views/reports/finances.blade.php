@@ -98,7 +98,7 @@
 
         <!-- Expense by Ministry -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 Витрати по служіннях</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 Витрати по командах</h3>
             @if($expenseByMinistry->count() > 0)
                 @php $totalExpense = $expenseByMinistry->sum('total'); @endphp
                 <div class="space-y-3">
@@ -106,7 +106,7 @@
                         @php $percent = $totalExpense > 0 ? ($item->total / $totalExpense * 100) : 0; @endphp
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->ministry?->name ?? 'Без служіння' }}</span>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->ministry?->name ?? 'Без команди' }}</span>
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($item->total, 0, ',', ' ') }} ₴</span>
                             </div>
                             <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Створити служіння')
+@section('title', 'Створити команду')
 
 @section('content')
 <div class="max-w-2xl mx-auto">

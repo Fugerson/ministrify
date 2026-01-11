@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати служіння')
+@section('title', 'Редагувати команду')
 
 @section('content')
 <div class="max-w-2xl mx-auto">
@@ -16,7 +16,7 @@
         @method('PUT')
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редагувати служіння</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редагувати команду</h2>
 
             <div class="space-y-4">
                 <div>
@@ -45,11 +45,11 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <form method="POST" action="{{ route('ministries.destroy', $ministry) }}" onsubmit="return confirm('Видалити служіння? Ця дія незворотна.')">
+            <form method="POST" action="{{ route('ministries.destroy', $ministry) }}" onsubmit="return confirm('Видалити команду? Ця дія незворотна.')">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
-                    Видалити служіння
+                    Видалити команду
                 </button>
             </form>
 

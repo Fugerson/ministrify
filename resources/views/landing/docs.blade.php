@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            {{-- Служіння --}}
+            {{-- Команди --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mr-4">
@@ -56,11 +56,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                         </svg>
                     </div>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Служіння та події</h2>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Команди та події</h2>
                 </div>
                 <div class="text-gray-600 dark:text-gray-400 space-y-3">
-                    <p><strong class="text-gray-900 dark:text-white">Створення служіння:</strong> Налаштування → Служіння. Вкажіть назву, колір, лідера.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Позиції:</strong> Додайте позиції (вокал, звук, камера тощо) для кожного служіння.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Створення команди:</strong> Налаштування → Команди. Вкажіть назву, колір, лідера.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Позиції:</strong> Додайте позиції (вокал, звук, камера тощо) для кожної команди.</p>
                     <p><strong class="text-gray-900 dark:text-white">Планування:</strong> Створіть подію в календарі та призначте волонтерів на позиції.</p>
                 </div>
             </div>

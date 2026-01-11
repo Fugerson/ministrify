@@ -86,7 +86,7 @@
                                 <span>{{ $blockout->ministries->pluck('name')->join(', ') }}</span>
                                 @else
                                 <span>•</span>
-                                <span>Всі служіння</span>
+                                <span>Всі команди</span>
                                 @endif
                             </div>
                         </div>
@@ -165,7 +165,7 @@
     <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
         <h3 class="font-medium text-blue-800 dark:text-blue-200 mb-2">Як це працює?</h3>
         <ul class="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-            <li>• Вкажіть дати, коли ви недоступні для служіння</li>
+            <li>• Вкажіть дати, коли ви недоступні для подій</li>
             <li>• Система автоматично врахує це при плануванні</li>
             <li>• Лідери побачать попередження, якщо спробують вас призначити</li>
             <li>• Незатверджені призначення на ці дати будуть автоматично відхилені</li>

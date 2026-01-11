@@ -8,7 +8,7 @@
     {{-- Primary Meta Tags --}}
     <title>@yield('title', 'Ministrify — Система управління церквою')</title>
     <meta name="title" content="@yield('title', 'Ministrify — Система управління церквою')">
-    <meta name="description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, служіння. Українська мова, LiqPay та Monobank.')">
+    <meta name="description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди. Українська мова, LiqPay та Monobank.')">
     <meta name="keywords" content="@yield('keywords', 'церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви')">
     <meta name="author" content="Ministrify">
     <meta name="robots" content="index, follow">
@@ -18,7 +18,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="@yield('title', 'Ministrify — Система управління церквою')">
-    <meta property="og:description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, служіння.')">
+    <meta property="og:description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди.')">
     <meta property="og:image" content="@yield('og_image', asset('images/og-image.jpg'))">
     <meta property="og:locale" content="uk_UA">
     <meta property="og:site_name" content="Ministrify">
@@ -97,7 +97,7 @@
         "name": "Ministrify",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "description": "Сучасна платформа для управління церквою: члени, події, пожертви, групи, служіння.",
+        "description": "Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди.",
         "url": "{{ url('/') }}",
         "author": {
             "@type": "Organization",

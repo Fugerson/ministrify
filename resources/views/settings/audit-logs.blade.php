@@ -46,7 +46,7 @@
                             {{ match($model) {
                                 'Person' => 'Члени',
                                 'Event' => 'Події',
-                                'Ministry' => 'Служіння',
+                                'Ministry' => 'Команда',
                                 'Group' => 'Групи',
                                 'Expense' => 'Витрати',
                                 'Income' => 'Доходи',

@@ -377,7 +377,7 @@
                                                 </div>
                                                 <div>
                                                     <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry->name ?? 'Без служіння' }} &bull; {{ $item->time ? $item->time->format('H:i') : '-' }}</p>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry->name ?? 'Без команди' }} &bull; {{ $item->time ? $item->time->format('H:i') : '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-2">
@@ -448,7 +448,7 @@
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $item->ministry->name ?? 'Без служіння' }}
+                                    {{ $item->ministry->name ?? 'Без команди' }}
                                     @if($item->time)
                                         &bull; {{ $item->time->format('H:i') }}
                                     @endif
@@ -628,11 +628,11 @@
                 <!-- Ministry -->
                 <div>
                     <label for="google_ministry" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Служіння для імпортованих подій
+                        Команда для імпортованих подій
                     </label>
                     <select name="ministry_id" id="google_ministry" required
                             class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Виберіть служіння...</option>
+                        <option value="">Виберіть команду...</option>
                         @foreach($ministries as $ministry)
                             <option value="{{ $ministry->id }}" {{ $church->getSetting('google_calendar_ministry_id') == $ministry->id ? 'selected' : '' }}>
                                 {{ $ministry->name }}

@@ -25,7 +25,7 @@
                     <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer transition-colors"
                            :class="recipientType === 'ministry' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
                         <input type="radio" name="recipient_type" value="ministry" x-model="recipientType" class="sr-only">
-                        <span class="text-sm font-medium" :class="recipientType === 'ministry' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'">Служіння</span>
+                        <span class="text-sm font-medium" :class="recipientType === 'ministry' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'">Команда</span>
                     </label>
                     <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer transition-colors"
                            :class="recipientType === 'group' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
@@ -48,7 +48,7 @@
 
             <!-- Ministry Select -->
             <div x-show="recipientType === 'ministry'" x-cloak>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Оберіть служіння</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Оберіть команду</label>
                 <select name="ministry_id" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
                     <option value="">Оберіть...</option>
                     @foreach($ministries as $ministry)

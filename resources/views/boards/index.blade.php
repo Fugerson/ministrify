@@ -10,7 +10,7 @@
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
                 <h1 class="text-xl font-bold text-gray-900 dark:text-white">Трекер завдань</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Всі завдання служінь в одному місці</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Всі завдання команд в одному місці</p>
             </div>
 
             <!-- Quick Stats -->
@@ -96,7 +96,7 @@
             <!-- Ministry Filter -->
             <select x-model="filters.ministry"
                     class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                <option value="">Всі служіння</option>
+                <option value="">Всі команди</option>
                 @foreach($ministries as $ministry)
                     <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                 @endforeach
@@ -1112,10 +1112,10 @@
 
                         <!-- Ministry -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Служіння</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Команда</label>
                             <select x-model="addCardModal.ministryId"
                                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
-                                <option value="">Без служіння</option>
+                                <option value="">Без команди</option>
                                 @foreach($ministries as $ministry)
                                     <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                                 @endforeach

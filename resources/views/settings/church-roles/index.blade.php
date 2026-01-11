@@ -254,7 +254,7 @@ function churchRolesManager() {
             dashboard: { label: 'Головна' },
             people: { label: 'Люди' },
             groups: { label: 'Домашні групи' },
-            ministries: { label: 'Служіння' },
+            ministries: { label: 'Команди' },
             events: { label: 'Розклад' },
             finances: { label: 'Фінанси' },
             reports: { label: 'Звіти' },

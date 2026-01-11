@@ -18,7 +18,7 @@
         @endif
 
         <p class="text-xl text-gray-600 mb-8 max-w-lg mx-auto">
-            Ваша пожертва допоможе нам продовжувати служіння та підтримувати громаду. Нехай Бог благословить вас!
+            Ваша пожертва допоможе нам продовжувати працю та підтримувати громаду. Нехай Бог благословить вас!
         </p>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
@@ -40,7 +40,7 @@
                     <svg class="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span>Приєднуйтесь до наших подій та служінь</span>
+                    <span>Приєднуйтесь до наших подій та команд</span>
                 </li>
             </ul>
         </div>

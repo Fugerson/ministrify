@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Служіння')
+@section('title', 'Команди')
 
 @section('actions')
 @admin
@@ -62,10 +62,10 @@
         </div>
     @empty
         <div class="col-span-full text-center py-8 md:py-12">
-            <p class="text-gray-500 dark:text-gray-400">Ще немає служінь.</p>
+            <p class="text-gray-500 dark:text-gray-400">Ще немає команд.</p>
             @admin
             <a href="{{ route('ministries.create') }}" class="mt-2 inline-block text-primary-600 dark:text-primary-400 hover:text-primary-500">
-                Створити перше служіння
+                Створити першу команду
             </a>
             @endadmin
         </div>

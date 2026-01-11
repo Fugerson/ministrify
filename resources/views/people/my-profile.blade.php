@@ -117,7 +117,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Telegram бот</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Сповіщення про служіння</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Сповіщення про події</p>
                     </div>
                 </div>
 
@@ -141,7 +141,7 @@
                         <p class="mb-2"><strong>Доступні команди:</strong></p>
                         <ul class="space-y-1">
                             <li><code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">/schedule</code> — ваш розклад</li>
-                            <li><code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">/next</code> — наступне служіння</li>
+                            <li><code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">/next</code> — наступна подія</li>
                             <li><code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">/help</code> — допомога</li>
                         </ul>
                     </div>
@@ -158,7 +158,7 @@
                     <!-- Not connected state -->
                     <div class="space-y-4">
                         <p class="text-gray-600 dark:text-gray-400">
-                            Підключіть Telegram, щоб отримувати сповіщення про призначення на служіння, нагадування та важливі повідомлення.
+                            Підключіть Telegram, щоб отримувати сповіщення про призначення на події, нагадування та важливі повідомлення.
                         </p>
 
                         <!-- Error message -->
@@ -406,9 +406,9 @@
         <div class="space-y-6">
             <!-- Upcoming assignments -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Мої служіння</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Мої події</h3>
                 @if($upcomingAssignments->isEmpty())
-                <p class="text-gray-500 dark:text-gray-400">Немає запланованих служінь</p>
+                <p class="text-gray-500 dark:text-gray-400">Немає запланованих подій</p>
                 @else
                 <div class="space-y-3">
                     @foreach($upcomingAssignments->take(5) as $assignment)
@@ -492,7 +492,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Налаштування планування</h3>
                 </div>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    Вкажіть бажану частоту служіння та інші параметри
+                    Вкажіть бажану частоту подій та інші параметри
                 </p>
                 <a href="{{ route('scheduling-preferences.index') }}"
                    class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 text-sm font-medium transition-colors">

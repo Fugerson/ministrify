@@ -44,7 +44,7 @@
                         @endif
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500">Лідер служіння</p>
+                        <p class="text-sm text-gray-500">Лідер команди</p>
                         <p class="font-semibold text-gray-900">{{ $ministry->leader->full_name }}</p>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
 
             @if($ministry->positions->count() > 0)
                 <div class="mb-8">
-                    <h3 class="font-semibold text-gray-900 mb-4">Напрямки служіння</h3>
+                    <h3 class="font-semibold text-gray-900 mb-4">Позиції в команді</h3>
                     <div class="flex flex-wrap gap-2">
                         @foreach($ministry->positions as $position)
                             <span class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm">{{ $position->name }}</span>
@@ -70,7 +70,7 @@
             <!-- Upcoming Events -->
             @if($upcomingEvents->count() > 0)
                 <div class="mb-8">
-                    <h3 class="font-semibold text-gray-900 mb-4">Найближчі події служіння</h3>
+                    <h3 class="font-semibold text-gray-900 mb-4">Найближчі події команди</h3>
                     <div class="space-y-3">
                         @foreach($upcomingEvents as $event)
                             <a href="{{ route('public.event', [$church->slug, $event]) }}"
@@ -98,7 +98,7 @@
                     <div class="bg-primary-50 rounded-2xl p-6">
                         <div class="flex items-center justify-between mb-4">
                             <div>
-                                <h3 class="font-semibold text-gray-900">Приєднатися до служіння</h3>
+                                <h3 class="font-semibold text-gray-900">Приєднатися до команди</h3>
                                 <p class="text-sm text-gray-600">Заповніть форму і ми зв'яжемося з вами</p>
                             </div>
                             <button @click="showForm = !showForm"

@@ -48,7 +48,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $person->assignments_count }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">служінь</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">подій</p>
                         </div>
                     </div>
                 @endforeach
@@ -57,7 +57,7 @@
 
         <!-- By Ministry -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Розподіл по служіннях</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Розподіл по командах</h3>
             @if($byMinistry->count() > 0)
                 @php $totalAssignments = $byMinistry->sum('count'); @endphp
                 <div class="space-y-3">

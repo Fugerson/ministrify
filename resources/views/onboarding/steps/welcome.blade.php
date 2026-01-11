@@ -36,7 +36,7 @@
                 </svg>
             </div>
             <h3 class="font-bold text-gray-900 dark:text-white mb-2">Календар подій</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Планування та розклад служінь</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Планування та розклад подій</p>
         </div>
 
         <div class="group p-6 bg-gradient-to-br from-amber-50 to-orange-100/50 dark:from-amber-900/20 dark:to-orange-800/10 rounded-2xl border border-amber-100 dark:border-amber-800/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300">

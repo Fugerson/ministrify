@@ -34,7 +34,7 @@
             <form method="GET" class="flex items-center gap-2">
                 <select name="ministry" onchange="this.form.submit()"
                         class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
-                    <option value="">Всі служіння</option>
+                    <option value="">Всі команди</option>
                     @foreach($ministries as $ministry)
                         <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
                             {{ $ministry->name }}

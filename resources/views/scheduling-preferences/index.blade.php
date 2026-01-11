@@ -13,7 +13,7 @@
         </a>
         <div>
             <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Налаштування планування</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Вкажіть ваші бажані параметри для розкладу служіння</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Вкажіть ваші бажані параметри для розкладу подій</p>
         </div>
     </div>
 
@@ -53,7 +53,7 @@
                                value="{{ old('preferred_times_per_month', $preference->preferred_times_per_month) }}"
                                min="0" max="30" placeholder="Не вказано"
                                class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Ідеальна кількість служінь</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Ідеальна кількість подій</p>
                     </div>
                 </div>
 
@@ -119,10 +119,10 @@
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
-            Налаштування за служіннями
+            Налаштування за командами
         </h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Встановіть окремі ліміти для кожного служіння (перезаписує загальні налаштування)
+            Встановіть окремі ліміти для кожної команди (перезаписує загальні налаштування)
         </p>
 
         <div class="space-y-4">

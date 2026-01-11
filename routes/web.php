@@ -31,6 +31,7 @@ use App\Http\Controllers\TelegramBroadcastController;
 use App\Http\Controllers\TelegramChatController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\QrCheckinController;
+use App\Http\Controllers\ResourceController;
 use Illuminate\Support\Facades\Route;
 
 // QR Check-in (public with optional auth)

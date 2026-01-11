@@ -79,7 +79,7 @@
                     <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Покажіть на екрані під час служіння
+                    Покажіть на екрані під час богослужіння
                 </li>
                 <li class="flex items-start gap-2">
                     <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@
     <div id="printTemplate" class="hidden">
         <div style="text-align: center; padding: 40px; font-family: Arial, sans-serif;">
             <h1 style="font-size: 24px; margin-bottom: 10px;">{{ $church->name }}</h1>
-            <p style="font-size: 16px; color: #666; margin-bottom: 30px;">Підтримати служіння</p>
+            <p style="font-size: 16px; color: #666; margin-bottom: 30px;">Підтримати церкву</p>
             <div id="qrPrint" style="display: inline-block; padding: 20px; border: 3px solid #e5e7eb; border-radius: 16px;"></div>
             <p style="margin-top: 20px; font-size: 12px; color: #999;">Скануйте QR-код камерою телефону</p>
             <p style="font-size: 10px; color: #ccc; margin-top: 10px;">{{ $donateUrl }}</p>

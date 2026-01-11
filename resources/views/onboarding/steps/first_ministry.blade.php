@@ -40,7 +40,7 @@
             </div>
             <div>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">КРОК 3 - ОПЦІЙНО</p>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Виберіть служіння</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Виберіть команду</h2>
             </div>
         </div>
     </div>
@@ -54,7 +54,7 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="font-semibold text-green-800 dark:text-green-200">У вас вже є {{ $ministries->count() }} {{ trans_choice('служіння|служіння|служінь', $ministries->count()) }}</p>
+                    <p class="font-semibold text-green-800 dark:text-green-200">У вас вже є {{ $ministries->count() }} {{ trans_choice('команда|команди|команд', $ministries->count()) }}</p>
                     <p class="text-sm text-green-600 dark:text-green-300">Ви можете пропустити цей крок або додати ще</p>
                 </div>
             </div>
@@ -69,7 +69,7 @@
                 </div>
                 <div>
                     <p class="font-semibold text-blue-800 dark:text-blue-200">Цей крок необов'язковий</p>
-                    <p class="text-sm text-blue-600 dark:text-blue-300">Можете пропустити і створити служіння пізніше</p>
+                    <p class="text-sm text-blue-600 dark:text-blue-300">Можете пропустити і створити команду пізніше</p>
                 </div>
             </div>
         </div>
@@ -89,7 +89,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                 </div>
-                Оберіть служіння
+                Оберіть команду
                 <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(можна декілька)</span>
             </h4>
 
@@ -97,7 +97,7 @@
                 @foreach([
                     ['name' => 'Прославлення', 'icon' => '🎸'],
                     ['name' => 'Звук та техніка', 'icon' => '🎧'],
-                    ['name' => 'Дитяче служіння', 'icon' => '👶'],
+                    ['name' => 'Дитяча церква', 'icon' => '👶'],
                     ['name' => 'Привітання', 'icon' => '👋'],
                     ['name' => 'Молодь', 'icon' => '🔥'],
                     ['name' => 'Медіа', 'icon' => '📸'],
@@ -137,7 +137,7 @@
                        x-model="customMinistry"
                        @keydown.enter.prevent="addCustom()"
                        class="flex-1 px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                       placeholder="Назва служіння...">
+                       placeholder="Назва команди...">
                 <button type="button"
                         @click="addCustom()"
                         :disabled="!customMinistry.trim()"
@@ -155,7 +155,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Обрано служінь: <span x-text="selectedMinistries.length"></span>
+                    Обрано команд: <span x-text="selectedMinistries.length"></span>
                 </h4>
             </div>
             <div class="flex flex-wrap gap-2">

@@ -11,9 +11,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
             </svg>
         </div>
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">Підтримати служіння</h1>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Підтримати церкву</h1>
         <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            Ваша пожертва допомагає нам продовжувати служіння та підтримувати громаду
+            Ваша пожертва допомагає нам продовжувати працю та підтримувати громаду
         </p>
     </div>
 
@@ -212,7 +212,7 @@
                         <svg class="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span>Підтримка служінь та програм</span>
+                        <span>Підтримка команд та програм</span>
                     </li>
                     <li class="flex items-start gap-2">
                         <svg class="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

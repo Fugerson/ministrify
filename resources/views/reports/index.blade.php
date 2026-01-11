@@ -77,7 +77,7 @@
                 </svg>
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Фінанси</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Порівняння років, доходи по категоріях, витрати по служіннях</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Порівняння років, доходи по категоріях, витрати по командах</p>
             <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:underline">Переглянути →</span>
         </a>
 
@@ -89,7 +89,7 @@
                 </svg>
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Служителі</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Топ служителів, активність по місяцях, розподіл по служіннях</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Топ служителів, активність по місяцях, розподіл по командах</p>
             <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:underline">Переглянути →</span>
         </a>
     </div>

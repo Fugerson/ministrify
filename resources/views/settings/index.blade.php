@@ -127,14 +127,14 @@
                 <input type="checkbox" name="reminder_day_before" value="1"
                        {{ $notifications['reminder_day_before'] ?? false ? 'checked' : '' }}
                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Надсилати нагадування за 1 день до служіння</span>
+                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Надсилати нагадування за 1 день до події</span>
             </label>
 
             <label class="flex items-center">
                 <input type="checkbox" name="reminder_same_day" value="1"
                        {{ $notifications['reminder_same_day'] ?? false ? 'checked' : '' }}
                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Надсилати нагадування в день служіння (за 2 години)</span>
+                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Надсилати нагадування в день події (за 2 години)</span>
             </label>
 
             <label class="flex items-center">
@@ -851,7 +851,7 @@
     <!-- Ministries -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Служіння</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Команди</h2>
         </div>
 
         <div class="p-6">
@@ -865,7 +865,7 @@
                             <span class="text-gray-900 dark:text-white">{{ $ministry->name }}</span>
                         </a>
                         <form method="POST" action="{{ route('settings.ministries.destroy', $ministry) }}"
-                              onsubmit="return confirm('Видалити служіння?')">
+                              onsubmit="return confirm('Видалити команду?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
@@ -874,7 +874,7 @@
                         </form>
                     </div>
                 @empty
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Служінь ще немає</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Команд ще немає</p>
                 @endforelse
             </div>
 
@@ -882,7 +882,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Додати служіння
+                Додати команду
             </a>
         </div>
     </div>

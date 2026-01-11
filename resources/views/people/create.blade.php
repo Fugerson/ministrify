@@ -130,7 +130,7 @@
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Служіння</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Команди</h2>
 
             <div class="space-y-4">
                 @foreach($ministries as $ministry)

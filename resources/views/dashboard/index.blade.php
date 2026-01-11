@@ -502,7 +502,7 @@
         @if(count($ministryBudgets) > 0)
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <h2 class="font-semibold text-gray-900 dark:text-white">Бюджети служінь</h2>
+                <h2 class="font-semibold text-gray-900 dark:text-white">Бюджети команд</h2>
                 <a href="{{ route('finances.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Звіт</a>
             </div>
             <div class="p-4 lg:p-5 space-y-4">

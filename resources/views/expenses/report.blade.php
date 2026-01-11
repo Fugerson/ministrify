@@ -36,7 +36,7 @@
         <!-- By ministry -->
         <div class="bg-white rounded-lg shadow">
             <div class="px-6 py-4 border-b">
-                <h3 class="text-lg font-semibold text-gray-900">По служіннях</h3>
+                <h3 class="text-lg font-semibold text-gray-900">По командах</h3>
             </div>
             <div class="p-6 space-y-4">
                 @foreach($byMinistry as $ministry)
@@ -89,7 +89,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Служіння</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Команда</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Опис</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Сума</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Хто</th>

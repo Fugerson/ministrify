@@ -24,7 +24,7 @@
                 <h3 class="font-semibold text-gray-900 dark:text-white">Як працює ротація?</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Система аналізує навантаження служительів, їх навички та доступність, щоб справедливо розподілити призначення.
-                    Враховується мінімальний відпочинок між служіннями та максимальна кількість на місяць.
+                    Враховується мінімальний відпочинок між подіями та максимальна кількість на місяць.
                 </p>
                 <div class="flex flex-wrap gap-4 mt-3">
                     <div class="flex items-center gap-2 text-sm">
@@ -110,13 +110,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Немає служінь</h3>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">Створіть служіння для використання ротації</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Немає команд</h3>
+                <p class="text-gray-500 dark:text-gray-400 mt-1">Створіть команду для використання ротації</p>
                 <a href="{{ route('ministries.create') }}" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Створити служіння
+                    Створити команду
                 </a>
             </div>
         </div>
@@ -154,7 +154,7 @@ function autoAssignMinistry(ministryId, ministryName) {
     document.getElementById('modalContent').innerHTML = `
         <div class="space-y-4">
             <p class="text-gray-600 dark:text-gray-400">
-                Система автоматично призначить служительів на всі події цього служіння на найближчі тижні.
+                Система автоматично призначить служителів на всі події цієї команди на найближчі тижні.
             </p>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Період</label>

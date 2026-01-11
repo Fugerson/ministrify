@@ -1,7 +1,7 @@
 @extends('layouts.landing')
 
 @section('title', 'Ministrify — Система управління церквою | Українська CRM для церков')
-@section('description', 'Безкоштовна українська платформа для управління церквою: члени, події, пожертви, групи, служіння. Інтеграція з LiqPay, Monobank та Telegram.')
+@section('description', 'Безкоштовна українська платформа для управління церквою: члени, події, пожертви, групи, команди. Інтеграція з LiqPay, Monobank та Telegram.')
 @section('keywords', 'церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви, українська CRM, безкоштовно')
 
 @section('content')
@@ -22,7 +22,7 @@
                 </h1>
 
                 <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
-                    Сучасна українська платформа для управління церквою: члени, події, пожертви, групи, служіння — все в одному місці.
+                    Сучасна українська платформа для управління церквою: члени, події, пожертви, групи, команди — все в одному місці.
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -84,7 +84,7 @@
                             </div>
                             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
                                 <div class="text-2xl font-bold text-purple-600">8</div>
-                                <div class="text-xs text-gray-500">Служінь</div>
+                                <div class="text-xs text-gray-500">Команд</div>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm h-32">
@@ -221,9 +221,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Служіння та групи</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Команди та групи</h3>
                 <p class="text-gray-600 dark:text-gray-400">
-                    Організуйте служіння, домашні групи та команди. Відстежуйте участь та координуйте служителів.
+                    Організуйте команди та домашні групи. Відстежуйте участь та координуйте служителів.
                 </p>
             </div>
 
@@ -317,7 +317,7 @@
                     </li>
                     <li class="flex items-center text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        До 3 служінь
+                        До 3 команд
                     </li>
                     <li class="flex items-center text-gray-600 dark:text-gray-300">
                         <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -354,7 +354,7 @@
                     </li>
                     <li class="flex items-center text-primary-100">
                         <svg class="w-5 h-5 text-white mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        До 10 служінь
+                        До 10 команд
                     </li>
                     <li class="flex items-center text-primary-100">
                         <svg class="w-5 h-5 text-white mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>

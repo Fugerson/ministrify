@@ -272,7 +272,7 @@
 
     @if($event->assignments->isNotEmpty())
         <div class="assignments-section">
-            <div class="section-title">Команда служіння</div>
+            <div class="section-title">Команда події</div>
             <div class="assignments-grid">
                 @foreach($event->assignments as $assignment)
                     <div class="assignment-item">

@@ -1,7 +1,7 @@
 @extends('layouts.landing')
 
 @section('title', 'Можливості — Ministrify | Функції системи управління церквою')
-@section('description', 'Повний список можливостей Ministrify: управління членами, події, пожертви, групи, служіння, Telegram бот, звіти та багато іншого.')
+@section('description', 'Повний список можливостей Ministrify: управління членами, події, пожертви, групи, команди, Telegram бот, звіти та багато іншого.')
 
 @section('content')
 {{-- Hero --}}
@@ -32,7 +32,7 @@
                     </div>
                     <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Повна база ваших людей</h2>
                     <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
-                        Зберігайте всю інформацію про членів церкви в одному місці. Контакти, сім'ї, дні народження, участь у служіннях.
+                        Зберігайте всю інформацію про членів церкви в одному місці. Контакти, сім'ї, дні народження, участь у командах.
                     </p>
                     <ul class="space-y-3">
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
@@ -90,7 +90,7 @@
                     </div>
                     <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Повний фінансовий облік</h2>
                     <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
-                        Ведіть облік пожертв, десятин та витрат. Детальні звіти по категоріях та служіннях. Бюджетування та аналітика.
+                        Ведіть облік пожертв, десятин та витрат. Детальні звіти по категоріях та командах. Бюджетування та аналітика.
                     </p>
                     <ul class="space-y-3">
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
@@ -99,7 +99,7 @@
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Витрати по служіннях
+                            Витрати по командах
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -120,7 +120,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         Календар
                     </div>
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Події та розклад служінь</h2>
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Події та розклад</h2>
                     <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
                         Плануйте богослужіння, зустрічі груп та заходи. Автоматичні нагадування та синхронізація з Google Calendar.
                     </p>
@@ -139,7 +139,7 @@
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Планування служіння
+                            Планування подій
                         </li>
                     </ul>
                 </div>
@@ -193,7 +193,7 @@
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Нагадування про служіння
+                            Нагадування про події
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -219,15 +219,15 @@
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {{-- Служіння --}}
+            {{-- Команди --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
                 <div class="w-14 h-14 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center mb-6">
                     <svg class="w-7 h-7 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Служіння</h3>
-                <p class="text-gray-600 dark:text-gray-400">Організуйте служіння, позиції та призначайте волонтерів</p>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Команди</h3>
+                <p class="text-gray-600 dark:text-gray-400">Організуйте команди, позиції та призначайте волонтерів</p>
             </div>
 
             {{-- Малі групи --}}

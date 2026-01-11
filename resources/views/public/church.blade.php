@@ -236,8 +236,8 @@
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Наші служіння</h2>
-            <p class="text-gray-600 mt-2">Знайдіть своє місце в служінні</p>
+            <h2 class="text-3xl font-bold text-gray-900">Наші команди</h2>
+            <p class="text-gray-600 mt-2">Знайдіть своє місце в команді</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

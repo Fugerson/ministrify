@@ -161,8 +161,8 @@
                            class="mt-0.5 text-primary-600 focus:ring-primary-500"
                            onchange="toggleMinistrySelection()">
                     <div>
-                        <span class="font-medium text-gray-900 dark:text-white">Всі служіння</span>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Я недоступний для будь-якого служіння</p>
+                        <span class="font-medium text-gray-900 dark:text-white">Всі команди</span>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Я недоступний для будь-якої команди</p>
                     </div>
                 </label>
 
@@ -173,8 +173,8 @@
                            class="mt-0.5 text-primary-600 focus:ring-primary-500"
                            onchange="toggleMinistrySelection()">
                     <div>
-                        <span class="font-medium text-gray-900 dark:text-white">Окремі служіння</span>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Я недоступний тільки для вибраних служінь</p>
+                        <span class="font-medium text-gray-900 dark:text-white">Окремі команди</span>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Я недоступний тільки для вибраних команд</p>
                     </div>
                 </label>
             </div>
@@ -194,7 +194,7 @@
                     @endforeach
                 </div>
                 @else
-                <p class="text-sm text-gray-500 dark:text-gray-400 italic">Ви не належите до жодного служіння</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 italic">Ви не належите до жодної команди</p>
                 @endif
             </div>
         </div>

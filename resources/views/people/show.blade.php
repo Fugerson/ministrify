@@ -386,7 +386,7 @@
                                     :disabled="saving || {{ $person->user->id === auth()->id() ? 'true' : 'false' }}"
                                     class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
                                 <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Служитель</option>
-                                <option value="leader" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Лідер служіння</option>
+                                <option value="leader" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Лідер команди</option>
                                 <option value="admin" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Адміністратор</option>
                             </select>
                             <span x-show="saving" class="text-purple-600 dark:text-purple-400">
@@ -530,7 +530,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['services_this_month'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Служінь цього місяця</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Подій цього місяця</p>
                 </div>
             </div>
         </div>
@@ -558,7 +558,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['services_total'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Всього служінь</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Всього подій</p>
                 </div>
             </div>
         </div>
@@ -572,7 +572,7 @@
 
     <!-- Ministries (Admin editable) -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mt-6">
-        <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Служіння</h2>
+        <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Команди</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             @foreach($ministries as $ministry)
                 @php
@@ -619,7 +619,7 @@
             <!-- Ministries (View only for non-admins) -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
-                    <h2 class="font-semibold text-gray-900 dark:text-white">Служіння</h2>
+                    <h2 class="font-semibold text-gray-900 dark:text-white">Команди</h2>
                 </div>
                 @if($person->ministries->count() > 0)
                     <div class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -652,7 +652,7 @@
                     </div>
                 @else
                     <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                        Не бере участь у служіннях
+                        Не бере участь у командах
                     </div>
                 @endif
             </div>
