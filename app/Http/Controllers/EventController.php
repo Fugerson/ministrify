@@ -247,7 +247,10 @@ class EventController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople'));
+        // Get ministries for inline editing
+        $ministries = Ministry::where('church_id', $church->id)->get();
+
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries'));
     }
 
     public function edit(Event $event)
@@ -278,20 +281,47 @@ class EventController extends Controller
             abort(403, 'Тільки адміністратор може редагувати події без служіння.');
         }
 
-        $validated = $request->validate([
-            'ministry_id' => ['required', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
-            'title' => 'required|string|max:255',
-            'date' => 'required|date',
-            'time' => 'required|date_format:H:i',
+        // Support partial updates for AJAX
+        $rules = [
+            'ministry_id' => ['sometimes', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
+            'title' => 'sometimes|string|max:255',
+            'date' => 'sometimes|date',
+            'time' => 'sometimes|date_format:H:i',
             'notes' => 'nullable|string',
             'is_service' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
             'track_attendance' => 'nullable|boolean',
-        ]);
+        ];
 
-        $validated['is_service'] = $request->boolean('is_service');
-        $validated['track_attendance'] = $request->boolean('track_attendance');
+        $validated = $request->validate($rules);
+
+        if ($request->has('is_service')) {
+            $validated['is_service'] = $request->boolean('is_service');
+        }
+        if ($request->has('track_attendance')) {
+            $validated['track_attendance'] = $request->boolean('track_attendance');
+        }
+
         $event->update($validated);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Подію оновлено',
+                'event' => [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'date' => $event->date?->format('Y-m-d'),
+                    'time' => $event->time?->format('H:i'),
+                    'notes' => $event->notes,
+                    'ministry_id' => $event->ministry_id,
+                    'ministry_name' => $event->ministry?->name,
+                    'ministry_color' => $event->ministry?->color,
+                    'is_service' => $event->is_service,
+                    'track_attendance' => $event->track_attendance,
+                ],
+            ]);
+        }
 
         return redirect()->route('events.show', $event)
             ->with('success', 'Подію оновлено.');

@@ -3,44 +3,60 @@
 @section('title', $event->title)
 
 @section('actions')
-@if($event->ministry)
-@can('manage-ministry', $event->ministry)
-<a href="{{ route('events.edit', $event) }}"
-   class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
-    Редагувати
-</a>
-@endcan
-@endif
 @endsection
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
-    <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-        <div class="flex items-start justify-between">
-            <div class="flex items-center">
-                <div class="w-14 h-14 rounded-xl flex items-center justify-center"
-                     style="background-color: {{ $event->ministry?->color ?? '#3b82f6' }}20;">
-                    <svg class="w-7 h-7" style="color: {{ $event->ministry?->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Header (Editable) -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6" x-data="eventEditor()">
+        <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center flex-1">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                     :style="'background-color: ' + (ministryColor || '#3b82f6') + '20'">
+                    <svg class="w-7 h-7" :style="'color: ' + (ministryColor || '#3b82f6')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $event->title }}</h1>
-                    <p class="text-gray-500 dark:text-gray-400">{{ $event->ministry?->name ?? 'Без служіння' }}</p>
+                <div class="ml-4 flex-1">
+                    <input type="text" x-model="title" @change="saveField('title', title)"
+                           class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 w-full p-0 pb-1">
+                    <select x-model="ministryId" @change="saveMinistry()"
+                            class="text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 p-0 pb-1 text-sm cursor-pointer">
+                        @foreach($ministries as $ministry)
+                            <option value="{{ $ministry->id }}" data-color="{{ $ministry->color }}">{{ $ministry->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
-            <div class="text-right">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $event->date?->format('d.m.Y') ?? '-' }}</p>
-                <p class="text-gray-500 dark:text-gray-400">{{ $event->time?->format('H:i') ?? '-' }}</p>
+            <div class="text-right shrink-0">
+                <input type="date" x-model="date" @change="saveField('date', date)"
+                       class="text-xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 p-0 pb-1 text-right cursor-pointer">
+                <input type="time" x-model="time" @change="saveField('time', time)"
+                       class="text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 p-0 pb-1 text-right block ml-auto cursor-pointer">
             </div>
         </div>
 
-        @if($event->notes)
-            <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                <p class="text-sm text-gray-600 dark:text-gray-300">{{ $event->notes }}</p>
-            </div>
-        @endif
+        <!-- Notes -->
+        <div class="mt-4">
+            <textarea x-model="notes" @change="saveField('notes', notes)"
+                      placeholder="Додати примітки..."
+                      rows="2"
+                      class="w-full px-3 py-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-primary-500 focus:border-primary-500 resize-none"></textarea>
+        </div>
+
+        <!-- Toggles -->
+        <div class="mt-4 flex items-center gap-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" x-model="isService" @change="saveField('is_service', isService)"
+                       class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Служіння з планом</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" x-model="trackAttendance" @change="saveField('track_attendance', trackAttendance)"
+                       class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Відвідуваність</span>
+            </label>
+        </div>
 
         <!-- Quick stats -->
         <div class="mt-4 flex items-center gap-4 text-sm">
@@ -611,14 +627,6 @@
                     </a>
 
                     @can('manage-ministry', $event->ministry)
-                        <a href="{{ route('events.edit', $event) }}"
-                           class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            <span>Редагувати подію</span>
-                        </a>
-
                         <x-delete-confirm
                             :action="route('events.destroy', $event)"
                             title="Видалити подію?"
@@ -663,6 +671,52 @@ function showGlobalToast(message, type = 'success') {
         toast.classList.add('translate-x-full');
         setTimeout(() => toast.remove(), 300);
     }, 4000);
+}
+
+// Event Editor for inline editing
+function eventEditor() {
+    return {
+        title: @json($event->title),
+        date: @json($event->date?->format('Y-m-d')),
+        time: @json($event->time?->format('H:i')),
+        notes: @json($event->notes ?? ''),
+        ministryId: @json($event->ministry_id),
+        ministryColor: @json($event->ministry?->color ?? '#3b82f6'),
+        isService: {{ $event->is_service ? 'true' : 'false' }},
+        trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }},
+        ministries: @json($ministries->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'color' => $m->color])),
+
+        async saveField(field, value) {
+            try {
+                const response = await fetch('{{ route("events.update", $event) }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ [field]: value })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showGlobalToast('Збережено', 'success');
+                } else {
+                    showGlobalToast(data.message || 'Помилка', 'error');
+                }
+            } catch (err) {
+                console.error('Save error:', err);
+                showGlobalToast('Помилка збереження', 'error');
+            }
+        },
+
+        async saveMinistry() {
+            const ministry = this.ministries.find(m => m.id == this.ministryId);
+            if (ministry) {
+                this.ministryColor = ministry.color;
+            }
+            await this.saveField('ministry_id', this.ministryId);
+        }
+    };
 }
 
 // Plan Templates Manager
