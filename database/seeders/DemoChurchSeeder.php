@@ -894,23 +894,27 @@ class DemoChurchSeeder extends Seeder
         // Active campaign
         DonationCampaign::create([
             'church_id' => $this->church->id,
-            'title' => 'Ремонт церковного приміщення',
+            'name' => 'Ремонт церковного приміщення',
+            'slug' => 'remont-prymishchennya',
             'description' => 'Збираємо кошти на капітальний ремонт нашого приміщення: заміна вікон, оновлення системи опалення та косметичний ремонт.',
             'goal_amount' => 150000,
+            'collected_amount' => 67500,
             'start_date' => Carbon::now()->subMonths(2),
             'end_date' => Carbon::now()->addMonths(4),
-            'status' => 'active',
+            'is_active' => true,
         ]);
 
         // Completed campaign
         DonationCampaign::create([
             'church_id' => $this->church->id,
-            'title' => 'Нове звукове обладнання',
+            'name' => 'Нове звукове обладнання',
+            'slug' => 'zvukove-obladnannya',
             'description' => 'Збір на оновлення звукового обладнання для покращення якості богослужінь.',
             'goal_amount' => 50000,
+            'collected_amount' => 50000,
             'start_date' => Carbon::now()->subMonths(6),
             'end_date' => Carbon::now()->subMonths(2),
-            'status' => 'completed',
+            'is_active' => false,
         ]);
     }
 
