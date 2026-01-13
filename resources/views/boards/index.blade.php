@@ -348,7 +348,7 @@
                                     <div class="flex items-center gap-2 mb-2">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                                               :class="{
-                                                  'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': cardPanel.data.column_name === 'Беклог',
+                                                  'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': cardPanel.data.column_name === 'Нові',
                                                   'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300': cardPanel.data.column_name === 'До виконання',
                                                   'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300': cardPanel.data.column_name === 'В процесі',
                                                   'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300': cardPanel.data.column_name === 'Завершено'

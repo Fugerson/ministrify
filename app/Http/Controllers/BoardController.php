@@ -34,7 +34,7 @@ class BoardController extends Controller
         // Create default columns if they don't exist
         if ($board->columns()->count() === 0) {
             $defaultColumns = [
-                ['name' => 'Беклог', 'color' => 'gray', 'position' => 0],
+                ['name' => 'Нові', 'color' => 'gray', 'position' => 0],
                 ['name' => 'До виконання', 'color' => 'blue', 'position' => 1],
                 ['name' => 'В процесі', 'color' => 'yellow', 'position' => 2],
                 ['name' => 'Завершено', 'color' => 'green', 'position' => 3],
