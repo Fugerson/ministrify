@@ -490,7 +490,7 @@ class DemoChurchSeeder extends Seeder
                 'leader_id' => $this->people[$data['leader']]->id,
                 'meeting_day' => $data['meeting_day'],
                 'meeting_time' => $data['meeting_time'],
-                'meeting_location' => $data['location'],
+                'location' => $data['location'],
                 'color' => $data['color'],
                 'is_public' => $data['is_public'],
                 'slug' => Str::slug($data['name']),
@@ -977,7 +977,7 @@ class DemoChurchSeeder extends Seeder
                     'type' => Attendance::TYPE_GROUP,
                     'date' => $date,
                     'time' => $group->meeting_time,
-                    'location' => $group->meeting_location,
+                    'location' => $group->location,
                     'guests_count' => rand(0, 2),
                     'recorded_by' => $this->admin->id,
                 ]);
