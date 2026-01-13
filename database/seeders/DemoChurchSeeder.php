@@ -1085,6 +1085,7 @@ class DemoChurchSeeder extends Seeder
         foreach ($families as $rel) {
             if (isset($this->people[$rel['person']]) && isset($this->people[$rel['related']])) {
                 FamilyRelationship::create([
+                    'church_id' => $this->church->id,
                     'person_id' => $this->people[$rel['person']]->id,
                     'related_person_id' => $this->people[$rel['related']]->id,
                     'relationship_type' => $rel['type'],
