@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\Attendance;
+use App\Models\Board;
+use App\Models\BoardCard;
+use App\Models\BoardColumn;
 use App\Models\AttendanceRecord;
 use App\Models\Church;
 use App\Models\ChurchRole;
@@ -91,6 +94,9 @@ class DemoChurchSeeder extends Seeder
 
         // 16. Create Family Relationships
         $this->createFamilyRelationships();
+
+        // 17. Create Boards with Tasks
+        $this->createBoards();
 
         $this->command->info('Demo Church created successfully!');
         $this->command->info('');
@@ -1091,6 +1097,175 @@ class DemoChurchSeeder extends Seeder
                     'relationship_type' => $rel['type'],
                 ]);
             }
+        }
+    }
+
+    private function createBoards(): void
+    {
+        $this->command->info('Creating boards with tasks...');
+
+        // Board 1: Church Planning
+        $planningBoard = Board::create([
+            'church_id' => $this->church->id,
+            'name' => 'Планування церкви',
+            'description' => 'Загальне планування та координація діяльності церкви',
+            'color' => '#3b82f6',
+        ]);
+
+        $planningColumns = [
+            ['name' => 'Ідеї', 'color' => '#6b7280', 'position' => 0],
+            ['name' => 'До виконання', 'color' => '#f59e0b', 'position' => 1],
+            ['name' => 'В процесі', 'color' => '#3b82f6', 'position' => 2],
+            ['name' => 'На перевірці', 'color' => '#8b5cf6', 'position' => 3],
+            ['name' => 'Завершено', 'color' => '#10b981', 'position' => 4],
+        ];
+
+        $planningColumnModels = [];
+        foreach ($planningColumns as $col) {
+            $planningColumnModels[$col['name']] = BoardColumn::create(array_merge($col, ['board_id' => $planningBoard->id]));
+        }
+
+        // Tasks for Planning Board
+        $planningTasks = [
+            // Ideas
+            ['column' => 'Ідеї', 'title' => 'Організувати літній табір для дітей', 'priority' => 'medium', 'description' => 'Розглянути можливість проведення літнього дитячого табору'],
+            ['column' => 'Ідеї', 'title' => 'Створити онлайн курс з вивчення Біблії', 'priority' => 'low', 'description' => 'Записати серію відео-уроків для новоприєднаних'],
+            ['column' => 'Ідеї', 'title' => 'Запустити подкаст церкви', 'priority' => 'low', 'description' => 'Щотижневі випуски з проповідями та інтерв\'ю'],
+
+            // To Do
+            ['column' => 'До виконання', 'title' => 'Підготувати Великодню програму', 'priority' => 'high', 'due_date' => Carbon::now()->addWeeks(6), 'assigned_to' => 'Мельник_Катерина'],
+            ['column' => 'До виконання', 'title' => 'Оновити церковний сайт', 'priority' => 'medium', 'due_date' => Carbon::now()->addWeeks(3), 'assigned_to' => 'Олійник_Сергій'],
+            ['column' => 'До виконання', 'title' => 'Закупити нові стільці для залу', 'priority' => 'medium', 'due_date' => Carbon::now()->addWeeks(2)],
+
+            // In Progress
+            ['column' => 'В процесі', 'title' => 'Ремонт дитячої кімнати', 'priority' => 'high', 'due_date' => Carbon::now()->addDays(10), 'assigned_to' => 'Ткаченко_Віктор'],
+            ['column' => 'В процесі', 'title' => 'Підготовка до конференції', 'priority' => 'urgent', 'due_date' => Carbon::now()->addMonths(2), 'assigned_to' => 'Петренко_Олександр'],
+            ['column' => 'В процесі', 'title' => 'Набір волонтерів для недільної школи', 'priority' => 'high', 'assigned_to' => 'Петренко_Наталія'],
+
+            // Review
+            ['column' => 'На перевірці', 'title' => 'Новий дизайн бюлетеня', 'priority' => 'low', 'assigned_to' => 'Савченко_Марія'],
+            ['column' => 'На перевірці', 'title' => 'План молодіжного ретріту', 'priority' => 'medium', 'assigned_to' => 'Бондаренко_Дмитро'],
+
+            // Done
+            ['column' => 'Завершено', 'title' => 'Встановити нову звукову систему', 'priority' => 'high', 'is_completed' => true],
+            ['column' => 'Завершено', 'title' => 'Провести навчання для служителів', 'priority' => 'medium', 'is_completed' => true],
+            ['column' => 'Завершено', 'title' => 'Оновити базу контактів членів', 'priority' => 'medium', 'is_completed' => true],
+        ];
+
+        foreach ($planningTasks as $task) {
+            BoardCard::create([
+                'column_id' => $planningColumnModels[$task['column']]->id,
+                'title' => $task['title'],
+                'description' => $task['description'] ?? null,
+                'priority' => $task['priority'] ?? 'medium',
+                'due_date' => $task['due_date'] ?? null,
+                'assigned_to' => isset($task['assigned_to']) ? $this->people[$task['assigned_to']]->id : null,
+                'created_by' => $this->admin->id,
+                'is_completed' => $task['is_completed'] ?? false,
+                'completed_at' => ($task['is_completed'] ?? false) ? Carbon::now()->subDays(rand(1, 14)) : null,
+                'position' => 0,
+            ]);
+        }
+
+        // Board 2: Youth Ministry
+        $youthBoard = Board::create([
+            'church_id' => $this->church->id,
+            'name' => 'Молодіжне служіння',
+            'description' => 'Планування молодіжних заходів та активностей',
+            'color' => '#8b5cf6',
+        ]);
+
+        $youthColumns = [
+            ['name' => 'Backlog', 'color' => '#6b7280', 'position' => 0],
+            ['name' => 'Цього місяця', 'color' => '#f59e0b', 'position' => 1],
+            ['name' => 'Цього тижня', 'color' => '#3b82f6', 'position' => 2],
+            ['name' => 'Готово', 'color' => '#10b981', 'position' => 3],
+        ];
+
+        $youthColumnModels = [];
+        foreach ($youthColumns as $col) {
+            $youthColumnModels[$col['name']] = BoardColumn::create(array_merge($col, ['board_id' => $youthBoard->id]));
+        }
+
+        $youthTasks = [
+            ['column' => 'Backlog', 'title' => 'Організувати поїздку на природу', 'priority' => 'medium'],
+            ['column' => 'Backlog', 'title' => 'Запросити спікера на тему кар\'єри', 'priority' => 'low'],
+            ['column' => 'Backlog', 'title' => 'Провести турнір з настільних ігор', 'priority' => 'low'],
+
+            ['column' => 'Цього місяця', 'title' => 'Підготувати тему "Віра та сучасність"', 'priority' => 'high', 'assigned_to' => 'Бондаренко_Дмитро'],
+            ['column' => 'Цього місяця', 'title' => 'Знайти нове місце для зустрічей', 'priority' => 'medium'],
+            ['column' => 'Цього місяця', 'title' => 'Оновити плейлист прославлення', 'priority' => 'low', 'assigned_to' => 'Марченко_Софія'],
+
+            ['column' => 'Цього тижня', 'title' => 'Підготувати анонс в соцмережах', 'priority' => 'high', 'due_date' => Carbon::now()->addDays(2), 'assigned_to' => 'Павленко_Юлія'],
+            ['column' => 'Цього тижня', 'title' => 'Закупити снеки для зустрічі', 'priority' => 'medium', 'due_date' => Carbon::now()->addDays(3)],
+
+            ['column' => 'Готово', 'title' => 'Провести опитування інтересів', 'priority' => 'medium', 'is_completed' => true],
+            ['column' => 'Готово', 'title' => 'Створити групу в Telegram', 'priority' => 'high', 'is_completed' => true],
+        ];
+
+        foreach ($youthTasks as $task) {
+            BoardCard::create([
+                'column_id' => $youthColumnModels[$task['column']]->id,
+                'title' => $task['title'],
+                'priority' => $task['priority'] ?? 'medium',
+                'due_date' => $task['due_date'] ?? null,
+                'assigned_to' => isset($task['assigned_to']) ? $this->people[$task['assigned_to']]->id : null,
+                'created_by' => $this->admin->id,
+                'ministry_id' => $this->ministries['Молодіжне служіння']->id,
+                'is_completed' => $task['is_completed'] ?? false,
+                'completed_at' => ($task['is_completed'] ?? false) ? Carbon::now()->subDays(rand(1, 7)) : null,
+                'position' => 0,
+            ]);
+        }
+
+        // Board 3: Technical Team
+        $techBoard = Board::create([
+            'church_id' => $this->church->id,
+            'name' => 'Технічна команда',
+            'description' => 'Завдання технічного служіння',
+            'color' => '#6366f1',
+        ]);
+
+        $techColumns = [
+            ['name' => 'Запити', 'color' => '#ef4444', 'position' => 0],
+            ['name' => 'В роботі', 'color' => '#f59e0b', 'position' => 1],
+            ['name' => 'Тестування', 'color' => '#3b82f6', 'position' => 2],
+            ['name' => 'Виконано', 'color' => '#10b981', 'position' => 3],
+        ];
+
+        $techColumnModels = [];
+        foreach ($techColumns as $col) {
+            $techColumnModels[$col['name']] = BoardColumn::create(array_merge($col, ['board_id' => $techBoard->id]));
+        }
+
+        $techTasks = [
+            ['column' => 'Запити', 'title' => 'Мікрофон шумить на сцені', 'priority' => 'urgent', 'description' => 'Потрібно перевірити кабелі та роз\'єми'],
+            ['column' => 'Запити', 'title' => 'Додати субтитри до проекції', 'priority' => 'medium'],
+            ['column' => 'Запити', 'title' => 'Налаштувати автозапуск трансляції', 'priority' => 'low'],
+
+            ['column' => 'В роботі', 'title' => 'Оновити прошивку мікшера', 'priority' => 'high', 'assigned_to' => 'Олійник_Сергій'],
+            ['column' => 'В роботі', 'title' => 'Встановити нові лампи для сцени', 'priority' => 'medium', 'assigned_to' => 'Бойко_Максим'],
+
+            ['column' => 'Тестування', 'title' => 'Новий проектор - тест якості', 'priority' => 'high', 'assigned_to' => 'Олійник_Сергій'],
+
+            ['column' => 'Виконано', 'title' => 'Заміна кабелів на сцені', 'priority' => 'high', 'is_completed' => true],
+            ['column' => 'Виконано', 'title' => 'Налаштування стрімінгу YouTube', 'priority' => 'urgent', 'is_completed' => true],
+            ['column' => 'Виконано', 'title' => 'Бекап всіх презентацій', 'priority' => 'medium', 'is_completed' => true],
+        ];
+
+        foreach ($techTasks as $task) {
+            BoardCard::create([
+                'column_id' => $techColumnModels[$task['column']]->id,
+                'title' => $task['title'],
+                'description' => $task['description'] ?? null,
+                'priority' => $task['priority'] ?? 'medium',
+                'assigned_to' => isset($task['assigned_to']) ? $this->people[$task['assigned_to']]->id : null,
+                'created_by' => $this->admin->id,
+                'ministry_id' => $this->ministries['Технічне служіння']->id,
+                'is_completed' => $task['is_completed'] ?? false,
+                'completed_at' => ($task['is_completed'] ?? false) ? Carbon::now()->subDays(rand(1, 10)) : null,
+                'position' => 0,
+            ]);
         }
     }
 }
