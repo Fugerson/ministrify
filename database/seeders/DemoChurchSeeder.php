@@ -719,19 +719,19 @@ class DemoChurchSeeder extends Seeder
 
         $categories = [
             // Income
-            ['name' => 'Десятина', 'direction' => 'in', 'sort_order' => 1],
-            ['name' => 'Пожертва', 'direction' => 'in', 'sort_order' => 2],
-            ['name' => 'Цільовий збір', 'direction' => 'in', 'sort_order' => 3],
-            ['name' => 'Інші надходження', 'direction' => 'in', 'sort_order' => 4],
+            ['name' => 'Десятина', 'type' => TransactionCategory::TYPE_INCOME, 'is_tithe' => true, 'sort_order' => 1, 'icon' => 'heart', 'color' => '#10b981'],
+            ['name' => 'Пожертва', 'type' => TransactionCategory::TYPE_INCOME, 'is_offering' => true, 'sort_order' => 2, 'icon' => 'gift', 'color' => '#3b82f6'],
+            ['name' => 'Цільовий збір', 'type' => TransactionCategory::TYPE_INCOME, 'sort_order' => 3, 'icon' => 'collection', 'color' => '#8b5cf6'],
+            ['name' => 'Інші надходження', 'type' => TransactionCategory::TYPE_INCOME, 'sort_order' => 4, 'icon' => 'dots-horizontal', 'color' => '#6b7280'],
             // Expenses
-            ['name' => 'Оренда приміщення', 'direction' => 'out', 'sort_order' => 1],
-            ['name' => 'Комунальні послуги', 'direction' => 'out', 'sort_order' => 2],
-            ['name' => 'Зарплата', 'direction' => 'out', 'sort_order' => 3],
-            ['name' => 'Обладнання', 'direction' => 'out', 'sort_order' => 4],
-            ['name' => 'Канцтовари', 'direction' => 'out', 'sort_order' => 5],
-            ['name' => 'Благодійність', 'direction' => 'out', 'sort_order' => 6],
-            ['name' => 'Служіння', 'direction' => 'out', 'sort_order' => 7],
-            ['name' => 'Інші витрати', 'direction' => 'out', 'sort_order' => 8],
+            ['name' => 'Оренда приміщення', 'type' => TransactionCategory::TYPE_EXPENSE, 'sort_order' => 1, 'icon' => 'home', 'color' => '#ef4444'],
+            ['name' => 'Комунальні послуги', 'type' => TransactionCategory::TYPE_EXPENSE, 'sort_order' => 2, 'icon' => 'lightning-bolt', 'color' => '#f59e0b'],
+            ['name' => 'Зарплата', 'type' => TransactionCategory::TYPE_EXPENSE, 'sort_order' => 3, 'icon' => 'cash', 'color' => '#14b8a6'],
+            ['name' => 'Обладнання', 'type' => TransactionCategory::TYPE_EXPENSE, 'sort_order' => 4, 'icon' => 'desktop-computer', 'color' => '#6366f1'],
+            ['name' => 'Канцтовари', 'type' => TransactionCategory::TYPE_EXPENSE, 'sort_order' => 5, 'icon' => 'pencil', 'color' => '#ec4899'],
+            ['name' => 'Благодійність', 'type' => TransactionCategory::TYPE_EXPENSE, 'sort_order' => 6, 'icon' => 'heart', 'color' => '#f43f5e'],
+            ['name' => 'Служіння', 'type' => TransactionCategory::TYPE_EXPENSE, 'sort_order' => 7, 'icon' => 'users', 'color' => '#a855f7'],
+            ['name' => 'Інші витрати', 'type' => TransactionCategory::TYPE_EXPENSE, 'sort_order' => 8, 'icon' => 'dots-horizontal', 'color' => '#6b7280'],
         ];
 
         foreach ($categories as $cat) {
@@ -744,12 +744,12 @@ class DemoChurchSeeder extends Seeder
         $this->command->info('Creating transactions...');
 
         $incomeCategories = TransactionCategory::where('church_id', $this->church->id)
-            ->where('direction', 'in')
+            ->forIncome()
             ->get()
             ->keyBy('name');
 
         $expenseCategories = TransactionCategory::where('church_id', $this->church->id)
-            ->where('direction', 'out')
+            ->forExpense()
             ->get()
             ->keyBy('name');
 
