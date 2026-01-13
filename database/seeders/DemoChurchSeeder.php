@@ -273,9 +273,8 @@ class DemoChurchSeeder extends Seeder
             $this->people[$person->last_name . '_' . $person->first_name] = $person;
         }
 
-        // Link admin user to pastor
+        // Link admin user to pastor (Person has user_id, not User has person_id)
         $pastor = $this->people['Петренко_Олександр'];
-        $this->admin->update(['person_id' => $pastor->id]);
         $pastor->update(['user_id' => $this->admin->id]);
 
         // Assign tags
