@@ -627,15 +627,15 @@ class DemoChurchSeeder extends Seeder
     private function createServicePlan(Event $event): void
     {
         $planItems = [
-            ['title' => 'Вступне слово', 'type' => 'announcement', 'duration_minutes' => 5, 'sort_order' => 1],
-            ['title' => 'Прославлення (блок 1)', 'type' => 'song', 'duration_minutes' => 15, 'sort_order' => 2],
-            ['title' => 'Молитва', 'type' => 'prayer', 'duration_minutes' => 5, 'sort_order' => 3],
-            ['title' => 'Прославлення (блок 2)', 'type' => 'song', 'duration_minutes' => 10, 'sort_order' => 4],
-            ['title' => 'Оголошення', 'type' => 'announcement', 'duration_minutes' => 5, 'sort_order' => 5],
-            ['title' => 'Десятина та пожертви', 'type' => 'offering', 'duration_minutes' => 5, 'sort_order' => 6],
-            ['title' => 'Проповідь', 'type' => 'sermon', 'duration_minutes' => 40, 'sort_order' => 7],
-            ['title' => 'Заключна молитва', 'type' => 'prayer', 'duration_minutes' => 5, 'sort_order' => 8],
-            ['title' => 'Благословення', 'type' => 'blessing', 'duration_minutes' => 2, 'sort_order' => 9],
+            ['title' => 'Вступне слово', 'type' => 'announcement', 'duration' => 5, 'sort_order' => 1],
+            ['title' => 'Прославлення (блок 1)', 'type' => 'song', 'duration' => 15, 'sort_order' => 2],
+            ['title' => 'Молитва', 'type' => 'prayer', 'duration' => 5, 'sort_order' => 3],
+            ['title' => 'Прославлення (блок 2)', 'type' => 'song', 'duration' => 10, 'sort_order' => 4],
+            ['title' => 'Оголошення', 'type' => 'announcement', 'duration' => 5, 'sort_order' => 5],
+            ['title' => 'Десятина та пожертви', 'type' => 'offering', 'duration' => 5, 'sort_order' => 6],
+            ['title' => 'Проповідь', 'type' => 'sermon', 'duration' => 40, 'sort_order' => 7],
+            ['title' => 'Заключна молитва', 'type' => 'prayer', 'duration' => 5, 'sort_order' => 8],
+            ['title' => 'Благословення', 'type' => 'blessing', 'duration' => 2, 'sort_order' => 9],
         ];
 
         $startTime = Carbon::parse($event->time);
@@ -645,14 +645,13 @@ class DemoChurchSeeder extends Seeder
                 'event_id' => $event->id,
                 'title' => $item['title'],
                 'type' => $item['type'],
-                'duration_minutes' => $item['duration_minutes'],
                 'start_time' => $startTime->format('H:i'),
-                'end_time' => $startTime->copy()->addMinutes($item['duration_minutes'])->format('H:i'),
+                'end_time' => $startTime->copy()->addMinutes($item['duration'])->format('H:i'),
                 'sort_order' => $item['sort_order'],
                 'status' => 'planned',
                 'responsible_id' => $item['type'] === 'sermon' ? $this->people['Петренко_Олександр']->id : null,
             ]);
-            $startTime->addMinutes($item['duration_minutes']);
+            $startTime->addMinutes($item['duration']);
         }
     }
 
