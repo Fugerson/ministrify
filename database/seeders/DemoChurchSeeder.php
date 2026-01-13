@@ -37,6 +37,7 @@ class DemoChurchSeeder extends Seeder
     private array $groups = [];
     private array $events = [];
     private array $tags = [];
+    private array $ministryTypes = [];
     private User $admin;
 
     public function run(): void
@@ -306,8 +307,9 @@ class DemoChurchSeeder extends Seeder
             ['name' => 'Молитовне служіння', 'sort_order' => 6],
         ];
 
-        foreach ($types as $type) {
-            MinistryType::create(array_merge($type, ['church_id' => $this->church->id]));
+        foreach ($types as $index => $type) {
+            $ministryType = MinistryType::create(array_merge($type, ['church_id' => $this->church->id]));
+            $this->ministryTypes[$index + 1] = $ministryType;
         }
     }
 
@@ -402,7 +404,7 @@ class DemoChurchSeeder extends Seeder
         foreach ($ministryData as $data) {
             $ministry = Ministry::create([
                 'church_id' => $this->church->id,
-                'type_id' => $data['type'],
+                'type_id' => $this->ministryTypes[$data['type']]->id,
                 'name' => $data['name'],
                 'description' => $data['description'],
                 'icon' => $data['icon'],
