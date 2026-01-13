@@ -583,6 +583,7 @@ class DemoChurchSeeder extends Seeder
         $wednesdayDate = Carbon::now()->next('Wednesday');
         Event::create([
             'church_id' => $this->church->id,
+            'ministry_id' => $this->ministries['Прославлення']->id,
             'title' => 'Молитовна зустріч',
             'date' => $wednesdayDate,
             'time' => '19:00',
@@ -596,6 +597,7 @@ class DemoChurchSeeder extends Seeder
         // Special event - Conference
         Event::create([
             'church_id' => $this->church->id,
+            'ministry_id' => $this->ministries['Прославлення']->id,
             'title' => 'Весняна конференція "Нове життя"',
             'date' => Carbon::now()->addMonths(2),
             'time' => '10:00',
@@ -612,6 +614,7 @@ class DemoChurchSeeder extends Seeder
         // Baptism
         Event::create([
             'church_id' => $this->church->id,
+            'ministry_id' => $this->ministries['Прославлення']->id,
             'title' => 'Хрещення',
             'date' => Carbon::now()->addMonths(1)->endOfMonth()->previous('Sunday'),
             'time' => '11:00',
