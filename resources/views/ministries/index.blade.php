@@ -42,19 +42,6 @@
                 <div class="mt-4">
                     <p class="text-sm text-gray-600 dark:text-gray-400">Учасників: {{ $ministry->members->count() }}</p>
                 </div>
-
-                @if($ministry->monthly_budget)
-                    <div class="mt-4">
-                        <div class="flex items-center justify-between text-sm mb-1">
-                            <span class="text-gray-500 dark:text-gray-400">Бюджет</span>
-                            <span class="text-gray-900 dark:text-white">{{ number_format($ministry->spent_this_month, 0, ',', ' ') }} / {{ number_format($ministry->monthly_budget, 0, ',', ' ') }} ₴</span>
-                        </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div class="h-2 rounded-full {{ $ministry->budget_usage_percent > 90 ? 'bg-red-500' : ($ministry->budget_usage_percent > 70 ? 'bg-yellow-500' : 'bg-green-500') }}"
-                                 style="width: {{ min(100, $ministry->budget_usage_percent) }}%"></div>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             <div class="px-4 md:px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">

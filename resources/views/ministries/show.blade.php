@@ -65,14 +65,6 @@
                     @endif
                 </div>
             </div>
-
-            @if($ministry->monthly_budget)
-                <div class="text-right">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Бюджет на місяць</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($ministry->monthly_budget, 0, ',', ' ') }} ₴</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Витрачено: {{ number_format($ministry->spent_this_month, 0, ',', ' ') }} ₴</p>
-                </div>
-            @endif
         </div>
     </div>
 
