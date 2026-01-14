@@ -160,6 +160,187 @@ class AuditLog extends Model
     }
 
     /**
+     * Human-readable field names
+     */
+    protected static array $fieldLabels = [
+        // Common
+        'name' => 'Назва',
+        'title' => 'Заголовок',
+        'description' => 'Опис',
+        'email' => 'Email',
+        'phone' => 'Телефон',
+        'address' => 'Адреса',
+        'status' => 'Статус',
+        'notes' => 'Примітки',
+        'color' => 'Колір',
+        'is_active' => 'Активний',
+
+        // Person
+        'first_name' => 'Ім\'я',
+        'last_name' => 'Прізвище',
+        'middle_name' => 'По батькові',
+        'birth_date' => 'Дата народження',
+        'gender' => 'Стать',
+        'marital_status' => 'Сімейний стан',
+        'membership_status' => 'Членство',
+        'membership_date' => 'Дата членства',
+        'baptism_date' => 'Дата хрещення',
+        'city' => 'Місто',
+        'occupation' => 'Професія',
+
+        // Event
+        'start_date' => 'Початок',
+        'end_date' => 'Кінець',
+        'start_time' => 'Час початку',
+        'end_time' => 'Час завершення',
+        'location' => 'Місце',
+        'is_recurring' => 'Повторювана',
+        'recurrence_pattern' => 'Шаблон повторення',
+        'all_day' => 'Весь день',
+        'ministry_id' => 'Служіння',
+
+        // Ministry
+        'leader_id' => 'Лідер',
+        'meeting_day' => 'День зустрічі',
+        'meeting_time' => 'Час зустрічі',
+
+        // Group
+        'max_members' => 'Макс. учасників',
+        'meeting_frequency' => 'Частота зустрічей',
+
+        // User
+        'role' => 'Роль',
+        'theme' => 'Тема',
+        'church_role_id' => 'Церковна роль',
+
+        // Finance
+        'amount' => 'Сума',
+        'category' => 'Категорія',
+        'date' => 'Дата',
+        'payment_method' => 'Спосіб оплати',
+        'person_id' => 'Особа',
+
+        // Board/Cards
+        'position' => 'Позиція',
+        'due_date' => 'Термін',
+        'priority' => 'Пріоритет',
+        'board_id' => 'Дошка',
+        'column_id' => 'Колонка',
+        'assigned_to' => 'Призначено',
+    ];
+
+    /**
+     * Get human-readable field label
+     */
+    public static function getFieldLabel(string $field): string
+    {
+        return self::$fieldLabels[$field] ?? ucfirst(str_replace('_', ' ', $field));
+    }
+
+    /**
+     * Format value for display
+     */
+    protected function formatValue($value, string $field): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        // Boolean fields
+        if (is_bool($value) || in_array($field, ['is_active', 'is_recurring', 'all_day'])) {
+            return $value ? 'Так' : 'Ні';
+        }
+
+        // Date fields
+        if (str_contains($field, '_date') || str_contains($field, '_at') || $field === 'date') {
+            try {
+                return \Carbon\Carbon::parse($value)->format('d.m.Y');
+            } catch (\Exception $e) {
+                return $value;
+            }
+        }
+
+        // Time fields
+        if (str_contains($field, '_time') || $field === 'time') {
+            try {
+                return \Carbon\Carbon::parse($value)->format('H:i');
+            } catch (\Exception $e) {
+                return $value;
+            }
+        }
+
+        // Gender
+        if ($field === 'gender') {
+            return match($value) {
+                'male' => 'Чоловік',
+                'female' => 'Жінка',
+                default => $value,
+            };
+        }
+
+        // Status fields
+        if ($field === 'status' || $field === 'membership_status') {
+            return match($value) {
+                'active' => 'Активний',
+                'inactive' => 'Неактивний',
+                'member' => 'Член',
+                'regular' => 'Постійний відвідувач',
+                'visitor' => 'Гість',
+                'new' => 'Новий',
+                'pending' => 'Очікує',
+                'completed' => 'Завершено',
+                'cancelled' => 'Скасовано',
+                default => $value,
+            };
+        }
+
+        // Marital status
+        if ($field === 'marital_status') {
+            return match($value) {
+                'single' => 'Неодружений/а',
+                'married' => 'Одружений/а',
+                'divorced' => 'Розлучений/а',
+                'widowed' => 'Вдівець/вдова',
+                default => $value,
+            };
+        }
+
+        // Role
+        if ($field === 'role') {
+            return match($value) {
+                'admin' => 'Адміністратор',
+                'leader' => 'Лідер',
+                'volunteer' => 'Волонтер',
+                'member' => 'Учасник',
+                default => $value,
+            };
+        }
+
+        // Priority
+        if ($field === 'priority') {
+            return match($value) {
+                'low' => 'Низький',
+                'medium' => 'Середній',
+                'high' => 'Високий',
+                'urgent' => 'Терміновий',
+                default => $value,
+            };
+        }
+
+        // Amount (money)
+        if ($field === 'amount') {
+            return number_format((float)$value, 2, '.', ' ') . ' ₴';
+        }
+
+        // Arrays/JSON
+        if (is_array($value)) {
+            return json_encode($value, JSON_UNESCAPED_UNICODE);
+        }
+
+        return (string) $value;
+    }
+
+    /**
      * Get changes summary
      */
     public function getChangesSummaryAttribute(): array
@@ -173,7 +354,7 @@ class AuditLog extends Model
         $new = $this->new_values ?? [];
 
         // Skip technical fields
-        $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token'];
+        $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at'];
 
         foreach ($new as $key => $value) {
             if (in_array($key, $skip)) continue;
@@ -181,9 +362,9 @@ class AuditLog extends Model
             $oldValue = $old[$key] ?? null;
             if ($oldValue !== $value) {
                 $changes[] = [
-                    'field' => $key,
-                    'old' => $oldValue,
-                    'new' => $value,
+                    'field' => self::getFieldLabel($key),
+                    'old' => $this->formatValue($oldValue, $key),
+                    'new' => $this->formatValue($value, $key),
                 ];
             }
         }

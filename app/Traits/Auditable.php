@@ -50,13 +50,8 @@ trait Auditable
 
         $user = auth()->user();
 
-        // ALWAYS log deletions, even for super admin!
-        $criticalActions = ['deleted', 'restored'];
-        $isCritical = in_array($action, $criticalActions);
-
-        // Skip logging for super admin in invisible mode (impersonating church)
-        // BUT never skip critical actions like delete/restore
-        if (!$isCritical && $user->isSuperAdmin() && session('impersonate_church_id')) {
+        // Skip ALL logging for super admin - they are invisible in audit logs
+        if ($user->isSuperAdmin()) {
             return;
         }
 
@@ -153,8 +148,8 @@ trait Auditable
 
         $user = auth()->user();
 
-        // Skip logging for super admin in invisible mode
-        if ($user->isSuperAdmin() && session('impersonate_church_id')) {
+        // Skip ALL logging for super admin - they are invisible in audit logs
+        if ($user->isSuperAdmin()) {
             return;
         }
 

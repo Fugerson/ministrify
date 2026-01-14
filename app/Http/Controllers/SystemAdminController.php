@@ -240,25 +240,6 @@ class SystemAdminController extends Controller
     public function impersonateUser(User $user)
     {
         $adminId = auth()->id();
-        $adminName = auth()->user()->name;
-
-        // Log the impersonation action BEFORE switching users
-        AuditLog::create([
-            'user_id' => $adminId,
-            'church_id' => $user->church_id,
-            'action' => 'impersonate',
-            'model_type' => User::class,
-            'model_id' => $user->id,
-            'changes' => [
-                'admin_id' => $adminId,
-                'admin_name' => $adminName,
-                'target_user_id' => $user->id,
-                'target_user_name' => $user->name,
-                'target_user_email' => $user->email,
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ],
-        ]);
 
         // Store original admin ID in session
         session(['impersonating_from' => $adminId]);
@@ -276,27 +257,10 @@ class SystemAdminController extends Controller
     public function stopImpersonating()
     {
         $originalUserId = session('impersonating_from');
-        $impersonatedUser = auth()->user();
 
         if ($originalUserId) {
             $originalUser = User::find($originalUserId);
             if ($originalUser && $originalUser->is_super_admin) {
-                // Log the end of impersonation
-                AuditLog::create([
-                    'user_id' => $originalUserId,
-                    'church_id' => $impersonatedUser->church_id ?? null,
-                    'action' => 'stop_impersonate',
-                    'model_type' => User::class,
-                    'model_id' => $impersonatedUser->id,
-                    'changes' => [
-                        'admin_id' => $originalUserId,
-                        'admin_name' => $originalUser->name,
-                        'impersonated_user_id' => $impersonatedUser->id,
-                        'impersonated_user_name' => $impersonatedUser->name,
-                        'ip_address' => request()->ip(),
-                    ],
-                ]);
-
                 auth()->login($originalUser);
                 session()->forget('impersonating_from');
 
