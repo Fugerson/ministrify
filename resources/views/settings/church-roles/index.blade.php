@@ -235,14 +235,7 @@
 <script>
 function churchRolesManager() {
     return {
-        roles: @json($roles->map(fn($r) => [
-            'id' => $r->id,
-            'name' => $r->name,
-            'color' => $r->color,
-            'is_admin_role' => $r->is_admin_role,
-            'is_default' => $r->is_default,
-            'people_count' => $r->people_count ?? $r->people()->count(),
-        ])),
+        roles: @json($rolesJson),
         newName: '',
         newColor: '#6b7280',
         showPermissionsModal: false,

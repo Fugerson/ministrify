@@ -13,9 +13,22 @@ class ChurchRoleController extends Controller
         $church = $this->getCurrentChurch();
         $roles = ChurchRole::where('church_id', $church->id)
             ->orderBy('sort_order')
+            ->withCount('people')
             ->get();
 
-        return view('settings.church-roles.index', compact('roles'));
+        // Prepare data for JSON (avoid arrow functions in blade)
+        $rolesJson = $roles->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'name' => $r->name,
+                'color' => $r->color,
+                'is_admin_role' => $r->is_admin_role ?? false,
+                'is_default' => $r->is_default ?? false,
+                'people_count' => $r->people_count ?? 0,
+            ];
+        });
+
+        return view('settings.church-roles.index', compact('roles', 'rolesJson'));
     }
 
     public function store(Request $request)
