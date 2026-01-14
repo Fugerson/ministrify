@@ -384,7 +384,7 @@ class EventController extends Controller
 
         $event->delete();
 
-        return back()->with('success', 'Подію видалено.');
+        return redirect()->route('schedule')->with('success', 'Подію видалено.');
     }
 
     public function saveAttendance(Request $request, Event $event)
