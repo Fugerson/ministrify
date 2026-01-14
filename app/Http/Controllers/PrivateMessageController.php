@@ -183,7 +183,7 @@ class PrivateMessageController extends Controller
                     'id' => $msg->id,
                     'message' => $msg->message,
                     'sender_id' => $msg->sender_id,
-                    'sender_name' => $msg->sender->name,
+                    'sender_name' => $msg->sender?->name ?? 'Видалений користувач',
                     'is_mine' => $msg->sender_id === $currentUser->id,
                     'created_at' => $msg->created_at->format('H:i'),
                     'date' => $msg->created_at->format('d.m.Y'),

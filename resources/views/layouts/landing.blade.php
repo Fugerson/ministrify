@@ -19,7 +19,7 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="@yield('title', 'Ministrify — Система управління церквою')">
     <meta property="og:description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди.')">
-    <meta property="og:image" content="@yield('og_image', asset('images/og-image.jpg'))">
+    <meta property="og:image" content="@yield('og_image', asset('icon-512x512.png'))">
     <meta property="og:locale" content="uk_UA">
     <meta property="og:site_name" content="Ministrify">
 
@@ -28,7 +28,7 @@
     <meta name="twitter:url" content="{{ url()->current() }}">
     <meta name="twitter:title" content="@yield('title', 'Ministrify — Система управління церквою')">
     <meta name="twitter:description" content="@yield('description', 'Сучасна платформа для управління церквою.')">
-    <meta name="twitter:image" content="@yield('og_image', asset('images/og-image.jpg'))">
+    <meta name="twitter:image" content="@yield('og_image', asset('icon-512x512.png'))">
 
     {{-- Favicon --}}
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">

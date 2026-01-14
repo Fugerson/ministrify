@@ -13,43 +13,6 @@ use Illuminate\Support\Str;
 class DonationController extends Controller
 {
     /**
-     * Public donation page
-     */
-    public function publicPage(string $slug)
-    {
-        $church = Church::where('slug', $slug)
-            ->where('public_site_enabled', true)
-            ->firstOrFail();
-
-        $campaigns = DonationCampaign::where('church_id', $church->id)
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($campaign) {
-                $campaign->raised = Transaction::where('church_id', $campaign->church_id)
-                    ->where('source_type', Transaction::SOURCE_DONATION)
-                    ->where('status', Transaction::STATUS_COMPLETED)
-                    ->where('campaign_id', $campaign->id)
-                    ->sum('amount');
-                $campaign->progress = $campaign->goal_amount > 0
-                    ? min(100, round(($campaign->raised / $campaign->goal_amount) * 100))
-                    : 0;
-                $campaign->donors_count = Transaction::where('church_id', $campaign->church_id)
-                    ->where('source_type', Transaction::SOURCE_DONATION)
-                    ->where('status', Transaction::STATUS_COMPLETED)
-                    ->where('campaign_id', $campaign->id)
-                    ->whereNotNull('donor_email')
-                    ->distinct()
-                    ->count('donor_email');
-                return $campaign;
-            });
-
-        $paymentSettings = $church->payment_settings ?? [];
-
-        return view('public.donate', compact('church', 'campaigns', 'paymentSettings'));
-    }
-
-    /**
      * Process donation - create LiqPay payment
      */
     public function process(Request $request, string $slug)

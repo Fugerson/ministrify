@@ -22,9 +22,9 @@
         <div class="lg:col-span-2">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                 <form action="{{ route('public.donate.process', $church->slug) }}" method="POST" x-data="{
-                    amount: {{ request('amount', 100) }},
+                    amount: {{ (int) request('amount', 100) }},
                     customAmount: false,
-                    purpose: '{{ request('campaign', '') }}'
+                    purpose: @json(request('campaign', ''))
                 }">
                     @csrf
 
