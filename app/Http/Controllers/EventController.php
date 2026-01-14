@@ -371,7 +371,7 @@ class EventController extends Controller
             ->with('success', 'Подію оновлено.');
     }
 
-    public function destroy(Event $event)
+    public function destroy(Request $request, Event $event)
     {
         $this->authorizeChurch($event);
 
@@ -380,6 +380,21 @@ class EventController extends Controller
             Gate::authorize('manage-ministry', $event->ministry);
         } elseif (!$this->isAdmin()) {
             abort(403, 'Тільки адміністратор може видаляти події без служіння.');
+        }
+
+        $deleteSeries = $request->boolean('delete_series');
+
+        if ($deleteSeries) {
+            // Delete all events in the series
+            $parentId = $event->parent_event_id ?? $event->id;
+
+            // Delete child events
+            Event::where('parent_event_id', $parentId)->delete();
+
+            // Delete parent event
+            Event::where('id', $parentId)->delete();
+
+            return redirect()->route('schedule')->with('success', 'Серію подій видалено.');
         }
 
         $event->delete();
