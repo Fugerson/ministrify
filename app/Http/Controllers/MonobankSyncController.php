@@ -45,10 +45,10 @@ class MonobankSyncController extends Controller
             'last_sync' => $church->monobank_last_sync,
         ];
 
-        // Get donation category for quick import
+        // Get donation category for quick import (prefer donation category, then any income)
         $donationCategory = TransactionCategory::where('church_id', $church->id)
             ->where('type', 'income')
-            ->orderByDesc('is_default')
+            ->orderByDesc('is_donation')
             ->first();
 
         return view('finances.monobank.index', compact(
