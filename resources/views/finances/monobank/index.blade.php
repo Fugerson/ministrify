@@ -243,7 +243,7 @@
             @endif
 
             {{-- Transactions Table --}}
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto" x-data="tableFilters()">
                 <table class="w-full">
                     {{-- Table Header with Filters --}}
                     <thead class="bg-gray-50 dark:bg-gray-800/50">
@@ -257,7 +257,7 @@
                                 <div class="space-y-2">
                                     <a href="{{ route('finances.monobank.index', array_merge(request()->except(['sort', 'dir']), ['tab' => $tab, 'sort' => 'mono_time', 'dir' => ($sortField === 'mono_time' && $sortDir === 'desc') ? 'asc' : 'desc'])) }}"
                                        class="flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hover:text-primary-600">
-                                        Дата/Час
+                                        Дата
                                         @if($sortField === 'mono_time')
                                             <svg class="w-4 h-4 {{ $sortDir === 'asc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -265,9 +265,9 @@
                                         @endif
                                     </a>
                                     <div class="flex gap-1">
-                                        <input type="date" form="tableFilters" name="date_from" value="{{ request('date_from') }}"
+                                        <input type="date" x-model="filters.date_from" @change="applyFilters()"
                                                class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                        <input type="date" form="tableFilters" name="date_to" value="{{ request('date_to') }}"
+                                        <input type="date" x-model="filters.date_to" @change="applyFilters()"
                                                class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     </div>
                                 </div>
@@ -276,14 +276,14 @@
                                 <div class="space-y-2">
                                     <a href="{{ route('finances.monobank.index', array_merge(request()->except(['sort', 'dir']), ['tab' => $tab, 'sort' => 'counterpart_name', 'dir' => ($sortField === 'counterpart_name' && $sortDir === 'asc') ? 'desc' : 'asc'])) }}"
                                        class="flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hover:text-primary-600">
-                                        Відправник/Опис
+                                        Опис
                                         @if($sortField === 'counterpart_name')
                                             <svg class="w-4 h-4 {{ $sortDir === 'asc' ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                             </svg>
                                         @endif
                                     </a>
-                                    <input type="text" form="tableFilters" name="search" value="{{ request('search') }}" placeholder="Пошук..."
+                                    <input type="text" x-model="filters.search" @input.debounce.500ms="applyFilters()" placeholder="Пошук..."
                                            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                 </div>
                             </th>
@@ -298,10 +298,10 @@
                                             </svg>
                                         @endif
                                     </a>
-                                    <select form="tableFilters" name="mcc_category" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <select x-model="filters.mcc_category" @change="applyFilters()" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                         <option value="">Усі</option>
                                         @foreach($mccCategories as $key => $label)
-                                            <option value="{{ $key }}" {{ request('mcc_category') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                            <option value="{{ $key }}">{{ $label }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -318,9 +318,9 @@
                                         @endif
                                     </a>
                                     <div class="flex gap-1">
-                                        <input type="number" form="tableFilters" name="amount_min" value="{{ request('amount_min') }}" placeholder="Від" step="0.01"
+                                        <input type="number" x-model="filters.amount_min" @input.debounce.500ms="applyFilters()" placeholder="Від" step="1"
                                                class="w-16 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                        <input type="number" form="tableFilters" name="amount_max" value="{{ request('amount_max') }}" placeholder="До" step="0.01"
+                                        <input type="number" x-model="filters.amount_max" @input.debounce.500ms="applyFilters()" placeholder="До" step="1"
                                                class="w-16 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     </div>
                                 </div>
@@ -329,10 +329,10 @@
                                 <div class="space-y-2">
                                     <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Статус</span>
                                     @if($tab === 'imported')
-                                        <select form="tableFilters" name="category_id" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        <select x-model="filters.category_id" @change="applyFilters()" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                             <option value="">Усі</option>
                                             @foreach($categories as $category)
-                                                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                     @else
@@ -343,15 +343,12 @@
                             <th class="px-3 py-3 text-center">
                                 <div class="space-y-2">
                                     <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Дії</span>
-                                    <div class="flex gap-1 justify-center">
-                                        <button type="submit" form="tableFilters" class="px-2 py-1 bg-primary-600 hover:bg-primary-700 text-white text-xs rounded">
-                                            Фільтр
+                                    <div class="h-6 flex items-center justify-center">
+                                        <button type="button" @click="clearFilters()" x-show="hasFilters()" class="px-2 py-1 text-gray-500 hover:text-gray-700 text-xs" title="Скинути фільтри">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
                                         </button>
-                                        @if(request()->hasAny(['search', 'date_from', 'date_to', 'amount_min', 'amount_max', 'category_id', 'mcc_category']))
-                                            <a href="{{ route('finances.monobank.index', ['tab' => $tab]) }}" class="px-2 py-1 bg-gray-400 hover:bg-gray-500 text-white text-xs rounded">
-                                                Скинути
-                                            </a>
-                                        @endif
                                     </div>
                                 </div>
                             </th>
@@ -530,12 +527,6 @@
                     </tbody>
                 </table>
 
-                {{-- Hidden form for filters --}}
-                <form id="tableFilters" action="{{ route('finances.monobank.index') }}" method="GET">
-                    <input type="hidden" name="tab" value="{{ $tab }}">
-                    <input type="hidden" name="sort" value="{{ $sortField }}">
-                    <input type="hidden" name="dir" value="{{ $sortDir }}">
-                </form>
             </div>
 
             {{-- Pagination --}}
@@ -560,6 +551,60 @@ function monobankPage() {
             } else {
                 this.selectedIds = [];
             }
+        }
+    }
+}
+
+function tableFilters() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        filters: {
+            date_from: params.get('date_from') || '',
+            date_to: params.get('date_to') || '',
+            search: params.get('search') || '',
+            mcc_category: params.get('mcc_category') || '',
+            amount_min: params.get('amount_min') || '',
+            amount_max: params.get('amount_max') || '',
+            category_id: params.get('category_id') || '',
+        },
+        applyFilters() {
+            const url = new URL(window.location.href);
+            // Keep tab, sort, dir
+            const tab = url.searchParams.get('tab') || 'new';
+            const sort = url.searchParams.get('sort') || 'mono_time';
+            const dir = url.searchParams.get('dir') || 'desc';
+
+            // Clear all params
+            url.search = '';
+
+            // Re-add tab, sort, dir
+            url.searchParams.set('tab', tab);
+            url.searchParams.set('sort', sort);
+            url.searchParams.set('dir', dir);
+
+            // Add filters
+            Object.entries(this.filters).forEach(([key, value]) => {
+                if (value && value.toString().trim() !== '') {
+                    url.searchParams.set(key, value);
+                }
+            });
+
+            window.location.href = url.toString();
+        },
+        clearFilters() {
+            this.filters = {
+                date_from: '',
+                date_to: '',
+                search: '',
+                mcc_category: '',
+                amount_min: '',
+                amount_max: '',
+                category_id: '',
+            };
+            this.applyFilters();
+        },
+        hasFilters() {
+            return Object.values(this.filters).some(v => v && v.toString().trim() !== '');
         }
     }
 }
