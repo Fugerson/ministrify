@@ -31,6 +31,7 @@ class ChurchRole extends Model
 
     // Default roles to seed for new churches
     public const DEFAULT_ROLES = [
+        ['name' => 'Адміністратор церкви', 'slug' => 'admin', 'color' => '#dc2626', 'sort_order' => 0, 'is_admin_role' => true],
         ['name' => 'Член церкви', 'slug' => 'member', 'color' => '#6b7280', 'sort_order' => 1, 'is_default' => true],
         ['name' => 'Служитель', 'slug' => 'servant', 'color' => '#3b82f6', 'sort_order' => 2],
         ['name' => 'Лідер служіння', 'slug' => 'ministry-leader', 'color' => '#ec4899', 'sort_order' => 3],
