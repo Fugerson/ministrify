@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use App\Services\LiqPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DonationController extends Controller
@@ -155,28 +156,40 @@ class DonationController extends Controller
             'amount' => $decodedData['amount'] ?? null,
         ]);
 
-        $transaction = Transaction::where('order_id', $orderId)->first();
+        // Use transaction with lock to prevent race conditions
+        return DB::transaction(function () use ($orderId, $status) {
+            $transaction = Transaction::where('order_id', $orderId)->lockForUpdate()->first();
 
-        if (!$transaction) {
-            Log::warning('LiqPay callback: transaction not found', ['order_id' => $orderId]);
-            return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
-        }
+            if (!$transaction) {
+                Log::warning('LiqPay callback: transaction not found', ['order_id' => $orderId]);
+                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+            }
 
-        // Map LiqPay status to Transaction status constants
-        $newStatus = match ($status) {
-            'success', 'sandbox' => Transaction::STATUS_COMPLETED,
-            'failure', 'error' => Transaction::STATUS_FAILED,
-            'reversed' => Transaction::STATUS_REFUNDED,
-            default => Transaction::STATUS_PENDING,
-        };
+            // Skip if already processed (idempotency)
+            if ($transaction->status !== Transaction::STATUS_PENDING) {
+                Log::info('LiqPay callback: transaction already processed', [
+                    'order_id' => $orderId,
+                    'current_status' => $transaction->status,
+                ]);
+                return response()->json(['status' => 'ok', 'message' => 'Already processed']);
+            }
 
-        $transaction->update([
-            'status' => $newStatus,
-            'notes' => "LiqPay status: {$status}",
-            'paid_at' => $newStatus === Transaction::STATUS_COMPLETED ? now() : null,
-        ]);
+            // Map LiqPay status to Transaction status constants
+            $newStatus = match ($status) {
+                'success', 'sandbox' => Transaction::STATUS_COMPLETED,
+                'failure', 'error' => Transaction::STATUS_FAILED,
+                'reversed' => Transaction::STATUS_REFUNDED,
+                default => Transaction::STATUS_PENDING,
+            };
 
-        return response()->json(['status' => 'ok']);
+            $transaction->update([
+                'status' => $newStatus,
+                'notes' => "LiqPay status: {$status}",
+                'paid_at' => $newStatus === Transaction::STATUS_COMPLETED ? now() : null,
+            ]);
+
+            return response()->json(['status' => 'ok']);
+        });
     }
 
     /**

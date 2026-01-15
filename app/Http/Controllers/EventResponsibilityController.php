@@ -34,11 +34,16 @@ class EventResponsibilityController extends Controller
         $event = $responsibility->event;
         $this->authorizeChurch($event);
 
+        $church = $this->getCurrentChurch();
+
         $validated = $request->validate([
             'person_id' => 'required|exists:people,id',
         ]);
 
-        $person = Person::find($validated['person_id']);
+        // Ensure person belongs to this church
+        $person = Person::where('id', $validated['person_id'])
+            ->where('church_id', $church->id)
+            ->firstOrFail();
 
         $responsibility->update([
             'person_id' => $person->id,
@@ -183,7 +188,12 @@ class EventResponsibilityController extends Controller
     {
         $person = $responsibility->person;
         $event = $responsibility->event;
-        $church = $event->church;
+        $church = $event?->church;
+
+        // Null checks before accessing properties
+        if (!$person || !$event || !$church) {
+            return;
+        }
 
         if (!$person->telegram_chat_id || !$church->telegram_bot_token) {
             return;

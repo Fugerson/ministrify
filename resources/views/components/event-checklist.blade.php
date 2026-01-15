@@ -19,7 +19,7 @@
                     </div>
                     <span class="text-sm text-gray-500 dark:text-gray-400" x-text="progress + '%'"></span>
                 </div>
-                <button type="button" @click="deleteChecklist()" class="p-1 text-gray-400 hover:text-red-500 transition-colors">
+                <button type="button" @click="deleteChecklist()" class="p-1 text-gray-500 hover:text-red-500 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
@@ -44,16 +44,16 @@
 
                         <div class="flex-1 min-w-0">
                             <p class="font-medium text-gray-900 dark:text-white"
-                               :class="item.is_completed ? 'line-through text-gray-400 dark:text-gray-500' : ''"
+                               :class="item.is_completed ? 'line-through text-gray-500 dark:text-gray-400' : ''"
                                x-text="item.title"></p>
                             <p x-show="item.description" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5" x-text="item.description"></p>
-                            <p x-show="item.is_completed && item.completed_by_name" class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                            <p x-show="item.is_completed && item.completed_by_name" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                 <span x-text="item.completed_by_name"></span> &bull; <span x-text="item.completed_at"></span>
                             </p>
                         </div>
 
                         <button type="button" @click="deleteItem(item)"
-                                class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-500">
+                                class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-500 hover:text-red-500">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
@@ -81,7 +81,7 @@
                             <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
                                 Додати
                             </button>
-                            <button type="button" @click="adding = false; newTitle = ''" class="p-2 text-gray-400 hover:text-gray-600">
+                            <button type="button" @click="adding = false; newTitle = ''" class="p-2 text-gray-500 hover:text-gray-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
@@ -98,7 +98,7 @@
         <div class="p-6">
             <div class="text-center">
                 <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                 </div>

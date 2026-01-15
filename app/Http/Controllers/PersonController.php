@@ -55,8 +55,11 @@ class PersonController extends Controller
             $query->where('church_role', $role);
         }
 
+        // Limit to prevent memory issues on large churches
+        // Client-side filtering requires all data, so we limit instead of paginate
         $people = $query->orderBy('last_name')
             ->orderBy('first_name')
+            ->limit(1000)
             ->get();
 
         $tags = Tag::where('church_id', $church->id)->get();

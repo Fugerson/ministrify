@@ -11,6 +11,7 @@ use App\Models\Person;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -18,6 +19,7 @@ class DashboardController extends Controller
     {
         $church = $this->getCurrentChurch();
         $user = auth()->user();
+        $cacheKey = "dashboard_stats_{$church->id}";
 
         // Birthdays this month
         $birthdaysThisMonth = Person::where('church_id', $church->id)
@@ -36,108 +38,97 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Detailed People Stats - optimized with DB queries instead of loading all people
-        $peopleQuery = Person::where('church_id', $church->id);
-        $totalPeople = (clone $peopleQuery)->count();
-        $leadersCount = (clone $peopleQuery)
-            ->where(function ($q) {
-                $q->whereHas('leadingMinistries')
-                  ->orWhereHas('leadingGroups');
-            })->count();
-        $volunteersCount = (clone $peopleQuery)
-            ->whereHas('ministries')
-            ->count();
-        $newThisMonth = (clone $peopleQuery)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
+        // Cache heavy statistics for 30 minutes
+        $cachedStats = Cache::remember($cacheKey, 1800, function () use ($church) {
+            $peopleQuery = Person::where('church_id', $church->id);
+            $today = now();
+            $threeMonthsAgo = now()->subMonths(3);
+            $ministryIds = $church->ministries()->pluck('id');
 
-        // Age statistics - calculated at DB level using birth_date
-        $today = now();
-        $ageStats = [
-            'children' => (clone $peopleQuery)->whereNotNull('birth_date')
-                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12', [$today])->count(),
-            'teens' => (clone $peopleQuery)->whereNotNull('birth_date')
-                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17', [$today])->count(),
-            'youth' => (clone $peopleQuery)->whereNotNull('birth_date')
-                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35', [$today])->count(),
-            'adults' => (clone $peopleQuery)->whereNotNull('birth_date')
-                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59', [$today])->count(),
-            'seniors' => (clone $peopleQuery)->whereNotNull('birth_date')
-                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60', [$today])->count(),
-        ];
+            // People stats
+            $totalPeople = (clone $peopleQuery)->count();
+            $leadersCount = (clone $peopleQuery)
+                ->where(function ($q) {
+                    $q->whereHas('leadingMinistries')
+                      ->orWhereHas('leadingGroups');
+                })->count();
+            $volunteersCount = (clone $peopleQuery)->whereHas('ministries')->count();
+            $newThisMonth = (clone $peopleQuery)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
 
-        // People trend (last 3 months)
-        $threeMonthsAgo = now()->subMonths(3);
-        $newPeopleLastThreeMonths = Person::where('church_id', $church->id)
-            ->where('created_at', '>=', $threeMonthsAgo)
-            ->count();
-        $peopleTrend = $newPeopleLastThreeMonths;
+            // Age statistics
+            $ageStats = [
+                'children' => (clone $peopleQuery)->whereNotNull('birth_date')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12', [$today])->count(),
+                'teens' => (clone $peopleQuery)->whereNotNull('birth_date')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17', [$today])->count(),
+                'youth' => (clone $peopleQuery)->whereNotNull('birth_date')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35', [$today])->count(),
+                'adults' => (clone $peopleQuery)->whereNotNull('birth_date')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59', [$today])->count(),
+                'seniors' => (clone $peopleQuery)->whereNotNull('birth_date')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60', [$today])->count(),
+            ];
 
-        // Cache ministry IDs to avoid repeated queries
-        $ministryIds = $church->ministries()->pluck('id');
+            // Trends
+            $peopleTrend = Person::where('church_id', $church->id)
+                ->where('created_at', '>=', $threeMonthsAgo)->count();
+            $volunteersThreeMonthsAgo = \DB::table('ministry_person')
+                ->whereIn('ministry_id', $ministryIds)
+                ->where('created_at', '<', $threeMonthsAgo)
+                ->distinct('person_id')->count('person_id');
 
-        // Volunteers trend (last 3 months) - count people who joined ministries
-        $volunteersThreeMonthsAgo = \DB::table('ministry_person')
-            ->whereIn('ministry_id', $ministryIds)
-            ->where('created_at', '<', $threeMonthsAgo)
-            ->distinct('person_id')
-            ->count('person_id');
-        $volunteersTrend = $volunteersCount - $volunteersThreeMonthsAgo;
+            // Ministry stats
+            $ministriesList = $church->ministries()->withCount('members')->orderByDesc('members_count')->get();
+            $activeVolunteers = \DB::table('ministry_person')
+                ->whereIn('ministry_id', $ministryIds)
+                ->distinct('person_id')->count('person_id');
+            $ministriesWithEvents = $church->ministries()
+                ->whereHas('events', fn($q) => $q->where('date', '>=', now()))->count();
 
-        // Detailed Ministry Stats
-        $ministriesList = $church->ministries()->withCount('members')->orderByDesc('members_count')->get();
-        $totalMinistries = $ministriesList->count();
-        $activeVolunteers = \DB::table('ministry_person')
-            ->whereIn('ministry_id', $ministryIds)
-            ->distinct('person_id')
-            ->count('person_id');
-        $ministriesWithEvents = $church->ministries()
-            ->whereHas('events', fn($q) => $q->where('date', '>=', now()))
-            ->count();
+            // Group stats
+            $activeGroupIds = Group::where('church_id', $church->id)->where('status', 'active')->pluck('id');
+            $totalGroups = Group::where('church_id', $church->id)->count();
+            $activeGroups = $activeGroupIds->count();
+            $pausedGroups = Group::where('church_id', $church->id)->where('status', 'paused')->count();
+            $vacationGroups = Group::where('church_id', $church->id)->where('status', 'vacation')->count();
+            $totalGroupMembers = $activeGroups > 0
+                ? \DB::table('group_person')->whereIn('group_id', $activeGroupIds)->distinct('person_id')->count('person_id')
+                : 0;
 
-        // Detailed Group Stats
-        $activeGroupIds = Group::where('church_id', $church->id)->where('status', 'active')->pluck('id');
-        $totalGroups = Group::where('church_id', $church->id)->count();
-        $activeGroups = $activeGroupIds->count();
-        $pausedGroups = Group::where('church_id', $church->id)->where('status', 'paused')->count();
-        $vacationGroups = Group::where('church_id', $church->id)->where('status', 'vacation')->count();
-        $totalGroupMembers = $activeGroups > 0
-            ? \DB::table('group_person')->whereIn('group_id', $activeGroupIds)->distinct('person_id')->count('person_id')
-            : 0;
+            // Event stats
+            $eventsThisMonth = Event::where('church_id', $church->id)
+                ->whereMonth('date', now()->month)->whereYear('date', now()->year)->count();
+            $upcomingEventsCount = Event::where('church_id', $church->id)
+                ->where('date', '>=', now())->where('date', '<=', now()->endOfMonth())->count();
 
-        // Detailed Event Stats
-        $eventsThisMonth = Event::where('church_id', $church->id)
-            ->whereMonth('date', now()->month)
-            ->whereYear('date', now()->year)
-            ->count();
-        $upcomingEventsCount = Event::where('church_id', $church->id)
-            ->where('date', '>=', now())
-            ->where('date', '<=', now()->endOfMonth())
-            ->count();
-        $pastEventsThisMonth = $eventsThisMonth - $upcomingEventsCount;
+            return [
+                'total_people' => $totalPeople,
+                'leaders_count' => $leadersCount,
+                'volunteers_count' => $volunteersCount,
+                'new_people_this_month' => $newThisMonth,
+                'people_trend' => $peopleTrend,
+                'volunteers_trend' => $volunteersCount - $volunteersThreeMonthsAgo,
+                'age_stats' => $ageStats,
+                'total_ministries' => $ministriesList->count(),
+                'ministries_list' => $ministriesList,
+                'active_volunteers' => $activeVolunteers,
+                'ministries_with_events' => $ministriesWithEvents,
+                'total_groups' => $totalGroups,
+                'active_groups' => $activeGroups,
+                'paused_groups' => $pausedGroups,
+                'vacation_groups' => $vacationGroups,
+                'total_group_members' => $totalGroupMembers,
+                'events_this_month' => $eventsThisMonth,
+                'upcoming_events' => $upcomingEventsCount,
+                'past_events' => $eventsThisMonth - $upcomingEventsCount,
+            ];
+        });
 
-        $stats = [
-            'total_people' => $totalPeople,
-            'leaders_count' => $leadersCount,
-            'volunteers_count' => $volunteersCount,
-            'new_people_this_month' => $newThisMonth,
-            'people_trend' => $peopleTrend,
-            'volunteers_trend' => $volunteersTrend,
-            'age_stats' => $ageStats,
-            'total_ministries' => $totalMinistries,
-            'ministries_list' => $ministriesList,
-            'active_volunteers' => $activeVolunteers,
-            'ministries_with_events' => $ministriesWithEvents,
-            'total_groups' => $totalGroups,
-            'active_groups' => $activeGroups,
-            'paused_groups' => $pausedGroups,
-            'vacation_groups' => $vacationGroups,
-            'total_group_members' => $totalGroupMembers,
-            'events_this_month' => $eventsThisMonth,
-            'upcoming_events' => $upcomingEventsCount,
-            'past_events' => $pastEventsThisMonth,
-        ];
+        // Use cached stats
+        $stats = $cachedStats;
 
         // Expenses this month (for admins)
         // Expenses breakdown by category (for admins)

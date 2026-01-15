@@ -252,10 +252,15 @@ class EventController extends Controller
                 }])
                 ->get();
 
-            // Build blockout info for each person
+            // Build blockout info using already loaded blockoutDates (no extra queries)
             foreach ($availablePeople as $person) {
-                if ($person->hasBlockoutOn($event->date, $event->ministry_id)) {
-                    $volunteerBlockouts[$person->id] = $person->getBlockoutReasonFor($event->date, $event->ministry_id);
+                // Filter loaded blockouts for this ministry or all ministries
+                $blockout = $person->blockoutDates->first(function ($b) use ($event) {
+                    return $b->ministry_id === null || $b->ministry_id === $event->ministry_id;
+                });
+
+                if ($blockout) {
+                    $volunteerBlockouts[$person->id] = $blockout->reason_label;
                 }
             }
         }
