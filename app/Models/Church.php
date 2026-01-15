@@ -50,6 +50,11 @@ class Church extends Model
         'monobank_auto_sync',
         'monobank_last_sync',
         'monobank_webhook_secret',
+        'privatbank_merchant_id',
+        'privatbank_password',
+        'privatbank_card_number',
+        'privatbank_auto_sync',
+        'privatbank_last_sync',
     ];
 
     protected $casts = [
@@ -63,6 +68,8 @@ class Church extends Model
         'initial_balance_date' => 'date',
         'monobank_auto_sync' => 'boolean',
         'monobank_last_sync' => 'datetime',
+        'privatbank_auto_sync' => 'boolean',
+        'privatbank_last_sync' => 'datetime',
     ];
 
     /**
@@ -99,6 +106,8 @@ class Church extends Model
         'telegram_bot_token',
         'calendar_token',
         'monobank_token',
+        'privatbank_merchant_id',
+        'privatbank_password',
     ];
 
     public function users(): HasMany

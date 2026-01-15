@@ -23,6 +23,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('monobank:sync')
             ->hourly()
             ->description('Sync Monobank transactions automatically');
+
+        // Sync PrivatBank transactions for churches with auto-sync enabled
+        $schedule->command('privatbank:sync')
+            ->hourly()
+            ->description('Sync PrivatBank transactions automatically');
     }
 
     protected function commands(): void

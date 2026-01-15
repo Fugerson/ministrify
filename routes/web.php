@@ -33,6 +33,7 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\QrCheckinController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\MonobankSyncController;
+use App\Http\Controllers\PrivatbankSyncController;
 use Illuminate\Support\Facades\Route;
 
 // QR Check-in (public with optional auth)
@@ -370,6 +371,20 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
             Route::post('bulk-import', [MonobankSyncController::class, 'bulkImport'])->name('bulk-import');
             Route::post('bulk-ignore', [MonobankSyncController::class, 'bulkIgnore'])->name('bulk-ignore');
             Route::get('transactions', [MonobankSyncController::class, 'getTransactions'])->name('transactions');
+        });
+
+        // PrivatBank Integration
+        Route::prefix('privatbank')->name('privatbank.')->group(function () {
+            Route::get('/', [PrivatbankSyncController::class, 'index'])->name('index');
+            Route::post('connect', [PrivatbankSyncController::class, 'connect'])->name('connect');
+            Route::delete('disconnect', [PrivatbankSyncController::class, 'disconnect'])->name('disconnect');
+            Route::post('sync', [PrivatbankSyncController::class, 'sync'])->name('sync');
+            Route::post('toggle-auto-sync', [PrivatbankSyncController::class, 'toggleAutoSync'])->name('toggle-auto-sync');
+            Route::post('{privatTransaction}/import', [PrivatbankSyncController::class, 'import'])->name('import');
+            Route::post('{privatTransaction}/ignore', [PrivatbankSyncController::class, 'ignore'])->name('ignore');
+            Route::post('{privatTransaction}/restore', [PrivatbankSyncController::class, 'restore'])->name('restore');
+            Route::post('bulk-import', [PrivatbankSyncController::class, 'bulkImport'])->name('bulk-import');
+            Route::post('bulk-ignore', [PrivatbankSyncController::class, 'bulkIgnore'])->name('bulk-ignore');
         });
     });
 
