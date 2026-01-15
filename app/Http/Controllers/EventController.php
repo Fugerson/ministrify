@@ -83,7 +83,6 @@ class EventController extends Controller
                 'time' => $event->time,
                 'ministry' => $event->ministry,
                 'ministry_id' => $event->ministry_id,
-                'ministry_label' => $event->ministry_label,
                 'ministry_display_name' => $event->ministry_display_name,
                 'ministry_display_color' => $event->ministry_display_color,
                 'original' => $event,
@@ -128,7 +127,6 @@ class EventController extends Controller
                     'time' => $event->time,
                     'ministry' => $event->ministry,
                     'ministry_id' => $event->ministry_id,
-                    'ministry_label' => $event->ministry_label,
                     'ministry_display_name' => $event->ministry_display_name,
                     'ministry_display_color' => $event->ministry_display_color,
                     'original' => $event,
@@ -175,7 +173,6 @@ class EventController extends Controller
     {
         $validated = $request->validate([
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
-            'ministry_label' => 'nullable|string|max:255',
             'title' => 'required|string|max:255',
             'date' => 'required|date',
             'time' => 'required|date_format:H:i',
@@ -214,16 +211,10 @@ class EventController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        // If ministry selected, authorize; otherwise allow for admins or with custom label
+        // If ministry selected, authorize
         if (!empty($validated['ministry_id'])) {
             $ministry = Ministry::findOrFail($validated['ministry_id']);
             Gate::authorize('manage-ministry', $ministry);
-            $validated['ministry_label'] = null; // Clear label if ministry selected
-        } else {
-            // No ministry - must be admin or have a custom label
-            if (!$this->isAdmin() && empty($validated['ministry_label'])) {
-                abort(403, 'Необхідно вибрати команду або ввести назву.');
-            }
         }
 
         $validated['church_id'] = $church->id;
@@ -333,7 +324,6 @@ class EventController extends Controller
         // Support partial updates for AJAX
         $rules = [
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
-            'ministry_label' => 'nullable|string|max:255',
             'title' => 'sometimes|string|max:255',
             'date' => 'sometimes|date',
             'time' => 'sometimes|date_format:H:i',
@@ -518,7 +508,6 @@ class EventController extends Controller
             Event::create([
                 'church_id' => $parentEvent->church_id,
                 'ministry_id' => $parentEvent->ministry_id,
-                'ministry_label' => $parentEvent->ministry_label,
                 'title' => $parentEvent->title,
                 'date' => $date,
                 'time' => $parentEvent->time,

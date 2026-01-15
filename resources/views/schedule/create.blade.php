@@ -11,51 +11,6 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова подія</h2>
 
             <div class="space-y-4">
-                <div x-data="{ useCustomLabel: {{ ($selectedMinistry && $ministries->contains('id', $selectedMinistry)) ? 'false' : 'false' }} }">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
-
-                    @if($selectedMinistry && $ministries->contains('id', $selectedMinistry))
-                        @php $preselectedMinistry = $ministries->firstWhere('id', $selectedMinistry); @endphp
-                        <input type="hidden" name="ministry_id" value="{{ $selectedMinistry }}">
-                        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
-                            @if($preselectedMinistry->color)
-                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $preselectedMinistry->color }}"></span>
-                            @endif
-                            <span class="text-gray-900 dark:text-white font-medium">{{ $preselectedMinistry->name }}</span>
-                        </div>
-                    @else
-                        <div class="flex items-center gap-2 mb-2">
-                            <button type="button" @click="useCustomLabel = false"
-                                    :class="!useCustomLabel ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600'"
-                                    class="px-3 py-1.5 text-sm rounded-lg border transition-colors">
-                                Вибрати команду
-                            </button>
-                            <button type="button" @click="useCustomLabel = true"
-                                    :class="useCustomLabel ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600'"
-                                    class="px-3 py-1.5 text-sm rounded-lg border transition-colors">
-                                Свій лейбл
-                            </button>
-                        </div>
-
-                        <div x-show="!useCustomLabel" x-cloak>
-                            <select name="ministry_id" id="ministry_id"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                <option value="">Без команди</option>
-                                @foreach($ministries as $ministry)
-                                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div x-show="useCustomLabel" x-cloak>
-                            <input type="text" name="ministry_label" id="ministry_label" value="{{ old('ministry_label') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                   placeholder="Напр.: Недільна школа, Молодіжка...">
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Необов'язково. Можна вибрати команду або ввести свій текст.</p>
-                    @endif
-                </div>
-
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
                     <input type="text" name="title" id="title" value="{{ old('title') }}" required
@@ -141,6 +96,29 @@
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                               placeholder="Додаткова інформація...">{{ old('notes') }}</textarea>
                 </div>
+
+                <!-- Ministry/Team Selection -->
+                @if($ministries->count() > 0)
+                <div x-data="{ selectedMinistry: '{{ $selectedMinistry ?? old('ministry_id', '') }}' }">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Команда</label>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($ministries as $ministry)
+                            <button type="button"
+                                    @click="selectedMinistry = selectedMinistry == '{{ $ministry->id }}' ? '' : '{{ $ministry->id }}'"
+                                    :class="selectedMinistry == '{{ $ministry->id }}'
+                                        ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-gray-500 dark:ring-offset-gray-800'
+                                        : 'hover:scale-105'"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
+                                    style="background-color: {{ $ministry->color ?? '#6b7280' }}20; color: {{ $ministry->color ?? '#6b7280' }}; border: 1px solid {{ $ministry->color ?? '#6b7280' }}40;">
+                                <span class="w-2 h-2 rounded-full" style="background-color: {{ $ministry->color ?? '#6b7280' }}"></span>
+                                {{ $ministry->name }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <input type="hidden" name="ministry_id" :value="selectedMinistry">
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Необов'язково. Натисніть ще раз, щоб скасувати вибір.</p>
+                </div>
+                @endif
 
                 <!-- Service Plan Option -->
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
