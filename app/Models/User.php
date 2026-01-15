@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'church_role_id',
+        'permission_overrides',
         'is_super_admin',
         'theme',
         'preferences',
@@ -45,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
         'password_set_at' => 'datetime',
         'preferences' => 'array',
+        'permission_overrides' => 'array',
         'onboarding_completed' => 'boolean',
         'onboarding_state' => 'array',
         'onboarding_started_at' => 'datetime',
@@ -125,6 +127,19 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
+        // Check individual permission overrides first
+        $overrides = $this->permission_overrides ?? [];
+        if (isset($overrides[$module])) {
+            // Explicit deny takes priority
+            if (isset($overrides[$module]['deny']) && in_array($action, $overrides[$module]['deny'])) {
+                return false;
+            }
+            // Explicit allow
+            if (isset($overrides[$module]['allow']) && in_array($action, $overrides[$module]['allow'])) {
+                return true;
+            }
+        }
+
         // New church role system
         if ($this->church_role_id && $this->churchRole) {
             return $this->churchRole->hasPermission($module, $action);
@@ -136,6 +151,54 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return false;
+    }
+
+    /**
+     * Get all permission overrides for this user
+     */
+    public function getPermissionOverrides(): array
+    {
+        return $this->permission_overrides ?? [];
+    }
+
+    /**
+     * Set permission override for a module
+     */
+    public function setPermissionOverride(string $module, array $allow = [], array $deny = []): void
+    {
+        $overrides = $this->permission_overrides ?? [];
+
+        if (empty($allow) && empty($deny)) {
+            unset($overrides[$module]);
+        } else {
+            $overrides[$module] = [];
+            if (!empty($allow)) {
+                $overrides[$module]['allow'] = $allow;
+            }
+            if (!empty($deny)) {
+                $overrides[$module]['deny'] = $deny;
+            }
+        }
+
+        $this->permission_overrides = $overrides;
+        $this->save();
+    }
+
+    /**
+     * Clear all permission overrides
+     */
+    public function clearPermissionOverrides(): void
+    {
+        $this->permission_overrides = null;
+        $this->save();
+    }
+
+    /**
+     * Check if user has any custom permission overrides
+     */
+    public function hasPermissionOverrides(): bool
+    {
+        return !empty($this->permission_overrides);
     }
 
     /**
