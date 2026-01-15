@@ -32,6 +32,7 @@ use App\Http\Controllers\TelegramChatController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\QrCheckinController;
 use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\MonobankSyncController;
 use Illuminate\Support\Facades\Route;
 
 // QR Check-in (public with optional auth)
@@ -346,6 +347,21 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('categories', [FinanceController::class, 'storeCategory'])->name('categories.store');
         Route::put('categories/{category}', [FinanceController::class, 'updateCategory'])->name('categories.update');
         Route::delete('categories/{category}', [FinanceController::class, 'destroyCategory'])->name('categories.destroy');
+
+        // Monobank Integration
+        Route::prefix('monobank')->name('monobank.')->group(function () {
+            Route::get('/', [MonobankSyncController::class, 'index'])->name('index');
+            Route::get('setup', [MonobankSyncController::class, 'setup'])->name('setup');
+            Route::post('connect', [MonobankSyncController::class, 'connect'])->name('connect');
+            Route::post('select-account', [MonobankSyncController::class, 'selectAccount'])->name('select-account');
+            Route::delete('disconnect', [MonobankSyncController::class, 'disconnect'])->name('disconnect');
+            Route::post('sync', [MonobankSyncController::class, 'sync'])->name('sync');
+            Route::post('{monoTransaction}/import', [MonobankSyncController::class, 'import'])->name('import');
+            Route::post('{monoTransaction}/ignore', [MonobankSyncController::class, 'ignore'])->name('ignore');
+            Route::post('{monoTransaction}/restore', [MonobankSyncController::class, 'restore'])->name('restore');
+            Route::post('bulk-import', [MonobankSyncController::class, 'bulkImport'])->name('bulk-import');
+            Route::get('transactions', [MonobankSyncController::class, 'getTransactions'])->name('transactions');
+        });
     });
 
     // Legacy expenses routes redirect

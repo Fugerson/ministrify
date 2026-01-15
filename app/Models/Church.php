@@ -45,6 +45,10 @@ class Church extends Model
         'attendance_enabled',
         'initial_balance',
         'initial_balance_date',
+        'monobank_token',
+        'monobank_account_id',
+        'monobank_auto_sync',
+        'monobank_last_sync',
     ];
 
     protected $casts = [
@@ -56,6 +60,8 @@ class Church extends Model
         'attendance_enabled' => 'boolean',
         'initial_balance' => 'decimal:2',
         'initial_balance_date' => 'date',
+        'monobank_auto_sync' => 'boolean',
+        'monobank_last_sync' => 'datetime',
     ];
 
     /**
@@ -91,6 +97,7 @@ class Church extends Model
     protected $hidden = [
         'telegram_bot_token',
         'calendar_token',
+        'monobank_token',
     ];
 
     public function users(): HasMany
