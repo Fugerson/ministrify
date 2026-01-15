@@ -95,7 +95,19 @@ class MonobankSyncController extends Controller
             $query->mccCategory($request->mcc_category);
         }
 
-        $transactions = $query->orderByDesc('mono_time')->paginate(50)->withQueryString();
+        // Sorting
+        $sortField = $request->get('sort', 'mono_time');
+        $sortDir = $request->get('dir', 'desc');
+
+        $allowedSorts = ['mono_time', 'amount', 'counterpart_name', 'mcc'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'mono_time';
+        }
+        if (!in_array($sortDir, ['asc', 'desc'])) {
+            $sortDir = 'desc';
+        }
+
+        $transactions = $query->orderBy($sortField, $sortDir)->paginate(50)->withQueryString();
 
         // Stats
         $stats = $this->getStats($church);
@@ -128,7 +140,9 @@ class MonobankSyncController extends Controller
             'donationCategory',
             'people',
             'tab',
-            'mccCategories'
+            'mccCategories',
+            'sortField',
+            'sortDir'
         ));
     }
 

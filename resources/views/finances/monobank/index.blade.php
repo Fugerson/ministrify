@@ -201,69 +201,6 @@
                 </nav>
             </div>
 
-            {{-- Filters --}}
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                <form action="{{ route('finances.monobank.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
-                    <input type="hidden" name="tab" value="{{ $tab }}">
-
-                    {{-- Search --}}
-                    <div class="flex-1 min-w-[200px]">
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук..."
-                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    </div>
-
-                    {{-- Date from --}}
-                    <input type="date" name="date_from" value="{{ request('date_from') }}"
-                           class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-
-                    {{-- Date to --}}
-                    <input type="date" name="date_to" value="{{ request('date_to') }}"
-                           class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-
-                    {{-- Amount min --}}
-                    <input type="number" name="amount_min" value="{{ request('amount_min') }}" placeholder="Від ₴" step="0.01"
-                           class="w-24 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-
-                    {{-- Amount max --}}
-                    <input type="number" name="amount_max" value="{{ request('amount_max') }}" placeholder="До ₴" step="0.01"
-                           class="w-24 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-
-                    {{-- Category filter (for imported tab) --}}
-                    @if($tab === 'imported')
-                        <select name="category_id" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <option value="">Усі категорії</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    @endif
-
-                    {{-- MCC category filter (for expenses and all tabs) --}}
-                    @if(in_array($tab, ['expenses', 'all']))
-                        <select name="mcc_category" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <option value="">Тип витрат</option>
-                            @foreach($mccCategories as $key => $label)
-                                <option value="{{ $key }}" {{ request('mcc_category') == $key ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                    @endif
-
-                    <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg">
-                        Фільтр
-                    </button>
-
-                    @if(request()->hasAny(['search', 'date_from', 'date_to', 'amount_min', 'amount_max', 'category_id', 'mcc_category']))
-                        <a href="{{ route('finances.monobank.index', ['tab' => $tab]) }}" class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">
-                            Скинути
-                        </a>
-                    @endif
-                </form>
-            </div>
-
             {{-- Bulk actions --}}
             @if($tab === 'new' && $transactions->count() > 0)
                 <div x-show="selectedIds.length > 0" x-cloak class="p-4 bg-primary-50 dark:bg-primary-900/20 border-b border-primary-100 dark:border-primary-800">
@@ -305,179 +242,300 @@
                 </div>
             @endif
 
-            {{-- Transactions list --}}
-            <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                @forelse($transactions as $tx)
-                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                         x-data="{ showImport: false }">
-                        <div class="flex items-start gap-4">
-                            {{-- Checkbox for bulk actions --}}
+            {{-- Transactions Table --}}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    {{-- Table Header with Filters --}}
+                    <thead class="bg-gray-50 dark:bg-gray-800/50">
+                        <tr>
                             @if($tab === 'new')
-                                <input type="checkbox" value="{{ $tx->id }}"
-                                       x-model.number="selectedIds"
-                                       class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <th class="w-10 px-3 py-3">
+                                    <input type="checkbox" @click="toggleAll($event)" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                </th>
                             @endif
-
-                            {{-- Amount --}}
-                            <div class="flex-shrink-0 w-28 text-right">
-                                <span class="text-lg font-semibold {{ $tx->is_income ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ $tx->formatted_amount }}
-                                </span>
-                            </div>
-
-                            {{-- Details --}}
-                            <div class="flex-1 min-w-0">
-                                <p class="font-medium text-gray-900 dark:text-white truncate">
-                                    {{ $tx->counterpart_display }}
-                                </p>
-                                @if($tx->comment)
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
-                                        {{ $tx->comment }}
-                                    </p>
-                                @endif
-                                <p class="text-xs text-gray-400 mt-1">
-                                    {{ $tx->mono_time->format('d.m.Y H:i') }}
-                                    @if($tx->counterpart_iban)
-                                        &bull; {{ Str::mask($tx->counterpart_iban, '*', 10, -4) }}
+                            <th class="px-3 py-3 text-left">
+                                <div class="space-y-2">
+                                    <a href="{{ route('finances.monobank.index', array_merge(request()->except(['sort', 'dir']), ['tab' => $tab, 'sort' => 'mono_time', 'dir' => ($sortField === 'mono_time' && $sortDir === 'desc') ? 'asc' : 'desc'])) }}"
+                                       class="flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hover:text-primary-600">
+                                        Дата/Час
+                                        @if($sortField === 'mono_time')
+                                            <svg class="w-4 h-4 {{ $sortDir === 'asc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        @endif
+                                    </a>
+                                    <div class="flex gap-1">
+                                        <input type="date" form="tableFilters" name="date_from" value="{{ request('date_from') }}"
+                                               class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        <input type="date" form="tableFilters" name="date_to" value="{{ request('date_to') }}"
+                                               class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 text-left">
+                                <div class="space-y-2">
+                                    <a href="{{ route('finances.monobank.index', array_merge(request()->except(['sort', 'dir']), ['tab' => $tab, 'sort' => 'counterpart_name', 'dir' => ($sortField === 'counterpart_name' && $sortDir === 'asc') ? 'desc' : 'asc'])) }}"
+                                       class="flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hover:text-primary-600">
+                                        Відправник/Опис
+                                        @if($sortField === 'counterpart_name')
+                                            <svg class="w-4 h-4 {{ $sortDir === 'asc' ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        @endif
+                                    </a>
+                                    <input type="text" form="tableFilters" name="search" value="{{ request('search') }}" placeholder="Пошук..."
+                                           class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 text-left">
+                                <div class="space-y-2">
+                                    <a href="{{ route('finances.monobank.index', array_merge(request()->except(['sort', 'dir']), ['tab' => $tab, 'sort' => 'mcc', 'dir' => ($sortField === 'mcc' && $sortDir === 'asc') ? 'desc' : 'asc'])) }}"
+                                       class="flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hover:text-primary-600">
+                                        Категорія
+                                        @if($sortField === 'mcc')
+                                            <svg class="w-4 h-4 {{ $sortDir === 'asc' ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        @endif
+                                    </a>
+                                    <select form="tableFilters" name="mcc_category" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        <option value="">Усі</option>
+                                        @foreach($mccCategories as $key => $label)
+                                            <option value="{{ $key }}" {{ request('mcc_category') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 text-right">
+                                <div class="space-y-2">
+                                    <a href="{{ route('finances.monobank.index', array_merge(request()->except(['sort', 'dir']), ['tab' => $tab, 'sort' => 'amount', 'dir' => ($sortField === 'amount' && $sortDir === 'desc') ? 'asc' : 'desc'])) }}"
+                                       class="flex items-center justify-end gap-1 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase hover:text-primary-600">
+                                        Сума
+                                        @if($sortField === 'amount')
+                                            <svg class="w-4 h-4 {{ $sortDir === 'asc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        @endif
+                                    </a>
+                                    <div class="flex gap-1">
+                                        <input type="number" form="tableFilters" name="amount_min" value="{{ request('amount_min') }}" placeholder="Від" step="0.01"
+                                               class="w-16 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        <input type="number" form="tableFilters" name="amount_max" value="{{ request('amount_max') }}" placeholder="До" step="0.01"
+                                               class="w-16 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 text-left">
+                                <div class="space-y-2">
+                                    <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Статус</span>
+                                    @if($tab === 'imported')
+                                        <select form="tableFilters" name="category_id" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            <option value="">Усі</option>
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    @else
+                                        <div class="h-6"></div>
                                     @endif
-                                </p>
-
-                                {{-- Status badges --}}
-                                <div class="flex flex-wrap items-center gap-2 mt-2">
-                                    @if($tx->mcc && !$tx->is_income)
-                                        @php
-                                            $mccKey = $tx->mcc_category_key;
-                                            $mccColors = [
-                                                'utilities' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-                                                'groceries' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-                                                'restaurants' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-                                                'fuel' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-                                                'transport' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-                                                'healthcare' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-                                                'education' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-                                                'entertainment' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
-                                                'shopping' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
-                                                'transfers' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
-                                                'other' => 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-                                            ];
-                                            $colorClass = $mccColors[$mccKey] ?? $mccColors['other'];
-                                        @endphp
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 text-center">
+                                <div class="space-y-2">
+                                    <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Дії</span>
+                                    <div class="flex gap-1 justify-center">
+                                        <button type="submit" form="tableFilters" class="px-2 py-1 bg-primary-600 hover:bg-primary-700 text-white text-xs rounded">
+                                            Фільтр
+                                        </button>
+                                        @if(request()->hasAny(['search', 'date_from', 'date_to', 'amount_min', 'amount_max', 'category_id', 'mcc_category']))
+                                            <a href="{{ route('finances.monobank.index', ['tab' => $tab]) }}" class="px-2 py-1 bg-gray-400 hover:bg-gray-500 text-white text-xs rounded">
+                                                Скинути
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @forelse($transactions as $tx)
+                            @php
+                                $mccKey = $tx->mcc_category_key;
+                                $mccColors = [
+                                    'utilities' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                    'groceries' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                    'restaurants' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                                    'fuel' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                                    'transport' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+                                    'healthcare' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                    'education' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+                                    'entertainment' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+                                    'shopping' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+                                    'transfers' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+                                    'other' => 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+                                ];
+                                $colorClass = $mccColors[$mccKey] ?? $mccColors['other'];
+                            @endphp
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50" x-data="{ showImport: false }">
+                                @if($tab === 'new')
+                                    <td class="px-3 py-3">
+                                        <input type="checkbox" value="{{ $tx->id }}" x-model.number="selectedIds"
+                                               class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    </td>
+                                @endif
+                                <td class="px-3 py-3 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $tx->mono_time->format('d.m.Y') }}</div>
+                                    <div class="text-xs text-gray-500">{{ $tx->mono_time->format('H:i') }}</div>
+                                </td>
+                                <td class="px-3 py-3">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-xs" title="{{ $tx->counterpart_display }}">
+                                        {{ Str::limit($tx->counterpart_display, 40) }}
+                                    </div>
+                                    @if($tx->comment)
+                                        <div class="text-xs text-gray-500 truncate max-w-xs" title="{{ $tx->comment }}">{{ Str::limit($tx->comment, 50) }}</div>
+                                    @endif
+                                    @if($tx->counterpart_iban)
+                                        <div class="text-xs text-gray-400">{{ Str::mask($tx->counterpart_iban, '*', 10, -4) }}</div>
+                                    @endif
+                                </td>
+                                <td class="px-3 py-3">
+                                    @if($tx->mcc)
                                         <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded {{ $colorClass }}">
                                             {{ $tx->mcc_category }}
                                         </span>
+                                    @else
+                                        <span class="text-xs text-gray-400">—</span>
                                     @endif
+                                </td>
+                                <td class="px-3 py-3 text-right whitespace-nowrap">
+                                    <span class="text-sm font-semibold {{ $tx->is_income ? 'text-green-600' : 'text-red-600' }}">
+                                        {{ $tx->formatted_amount }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-3">
                                     @if($tx->is_processed)
                                         <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded">
                                             Імпортовано
-                                            @if($tx->person)
-                                                &bull; {{ $tx->person->full_name }}
-                                            @endif
                                         </span>
-                                    @endif
-                                    @if($tx->is_ignored)
+                                        @if($tx->person)
+                                            <div class="text-xs text-gray-500 mt-1">{{ $tx->person->full_name }}</div>
+                                        @endif
+                                    @elseif($tx->is_ignored)
                                         <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded">
                                             Приховано
                                         </span>
+                                    @elseif($tx->is_income)
+                                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded">
+                                            Новий
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded">
+                                            Витрата
+                                        </span>
                                     @endif
-                                </div>
-                            </div>
-
-                            {{-- Actions --}}
-                            <div class="flex-shrink-0 flex items-center gap-2">
-                                @if(!$tx->is_processed && !$tx->is_ignored && $tx->is_income)
-                                    <button @click="showImport = !showImport"
-                                            class="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg">
-                                        Імпорт
-                                    </button>
-                                    <form action="{{ route('finances.monobank.ignore', $tx) }}" method="POST">
+                                </td>
+                                <td class="px-3 py-3 text-center">
+                                    <div class="flex items-center justify-center gap-1">
+                                        @if(!$tx->is_processed && !$tx->is_ignored && $tx->is_income)
+                                            <button @click="showImport = !showImport" class="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded">
+                                                Імпорт
+                                            </button>
+                                            <form action="{{ route('finances.monobank.ignore', $tx) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="p-1 text-gray-400 hover:text-gray-600" title="Приховати">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @elseif($tx->is_ignored)
+                                            <form action="{{ route('finances.monobank.restore', $tx) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="px-2 py-1 text-xs bg-gray-500 hover:bg-gray-600 text-white rounded">
+                                                    Відновити
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-xs text-gray-400">—</span>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                            {{-- Import form row --}}
+                            <tr x-show="showImport" x-collapse x-cloak>
+                                <td colspan="{{ $tab === 'new' ? 8 : 7 }}" class="px-3 py-4 bg-gray-50 dark:bg-gray-800/50">
+                                    <form action="{{ route('finances.monobank.import', $tx) }}" method="POST"
+                                          x-data="importForm({{ $tx->id }}, '{{ $donationCategory?->id }}')" x-init="loadSuggestions()">
                                         @csrf
-                                        <button type="submit" class="p-1.5 text-gray-400 hover:text-gray-600" title="Приховати">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                                            </svg>
-                                        </button>
+                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                                                <select name="category_id" x-model="categoryId" required
+                                                        class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                    @foreach($categories as $category)
+                                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Людина
+                                                    <span x-show="previousCount > 0" class="text-green-600" x-text="'(' + previousCount + ')'"></span>
+                                                </label>
+                                                <select name="person_id" x-model="personId"
+                                                        class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                    <option value="">-- Не вказано --</option>
+                                                    @foreach($people as $person)
+                                                        <option value="{{ $person->id }}">{{ $person->first_name }} {{ $person->last_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                                                <input type="text" name="description" value="{{ $tx->counterpart_display }}"
+                                                       class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            </div>
+                                            <div class="flex items-end gap-2">
+                                                @if($tx->counterpart_iban)
+                                                    <label class="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                                                        <input type="checkbox" name="save_iban" value="1" x-model="saveIban"
+                                                               class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                                        Зберегти IBAN
+                                                    </label>
+                                                @endif
+                                                <button type="submit" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded">
+                                                    Імпортувати
+                                                </button>
+                                                <button type="button" @click="showImport = false" class="px-3 py-1.5 text-gray-600 hover:text-gray-800 text-sm">
+                                                    Скасувати
+                                                </button>
+                                            </div>
+                                        </div>
                                     </form>
-                                @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ $tab === 'new' ? 8 : 7 }}" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
+                                    <p>Транзакцій не знайдено</p>
+                                    @if($tab === 'new')
+                                        <p class="mt-2 text-sm">Натисніть "Синхронізувати" щоб завантажити нові транзакції</p>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
 
-                                @if($tx->is_ignored)
-                                    <form action="{{ route('finances.monobank.restore', $tx) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-1.5 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg">
-                                            Відновити
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- Import form (expandable) --}}
-                        <div x-show="showImport" x-collapse x-cloak class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <form action="{{ route('finances.monobank.import', $tx) }}" method="POST"
-                                  x-data="importForm({{ $tx->id }}, '{{ $donationCategory?->id }}')" x-init="loadSuggestions()">
-                                @csrf
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
-                                        <select name="category_id" x-model="categoryId" required
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                            @foreach($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Людина
-                                            <span x-show="previousCount > 0" class="text-xs text-green-600" x-text="'(' + previousCount + ' попередніх)'"></span>
-                                        </label>
-                                        <select name="person_id" x-model="personId"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                            <option value="">-- Не вказано --</option>
-                                            @foreach($people as $person)
-                                                <option value="{{ $person->id }}">{{ $person->first_name }} {{ $person->last_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
-                                        <input type="text" name="description" value="{{ $tx->counterpart_display }}"
-                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    </div>
-                                </div>
-
-                                @if($tx->counterpart_iban)
-                                    <div class="mt-3">
-                                        <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                            <input type="checkbox" name="save_iban" value="1" x-model="saveIban"
-                                                   class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                                            Зберегти IBAN для цієї людини (для автовизначення)
-                                        </label>
-                                    </div>
-                                @endif
-
-                                <div class="mt-4 flex justify-end gap-2">
-                                    <button type="button" @click="showImport = false"
-                                            class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                                        Скасувати
-                                    </button>
-                                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg">
-                                        Імпортувати
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                @empty
-                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                        </svg>
-                        <p>Транзакцій не знайдено</p>
-                        @if($tab === 'new')
-                            <p class="mt-2 text-sm">Натисніть "Синхронізувати" щоб завантажити нові транзакції</p>
-                        @endif
-                    </div>
-                @endforelse
+                {{-- Hidden form for filters --}}
+                <form id="tableFilters" action="{{ route('finances.monobank.index') }}" method="GET">
+                    <input type="hidden" name="tab" value="{{ $tab }}">
+                    <input type="hidden" name="sort" value="{{ $sortField }}">
+                    <input type="hidden" name="dir" value="{{ $sortDir }}">
+                </form>
             </div>
 
             {{-- Pagination --}}
@@ -495,6 +553,14 @@
 function monobankPage() {
     return {
         selectedIds: [],
+        toggleAll(event) {
+            const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+            if (event.target.checked) {
+                this.selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            } else {
+                this.selectedIds = [];
+            }
+        }
     }
 }
 
