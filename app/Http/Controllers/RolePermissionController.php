@@ -8,24 +8,11 @@ use Illuminate\Http\Request;
 class RolePermissionController extends Controller
 {
     /**
-     * Show permissions management page
+     * Redirect to church roles page (permissions are now managed there)
      */
     public function index()
     {
-        $church = $this->getCurrentChurch();
-
-        // Get all permissions for all roles
-        $permissions = [];
-        foreach (array_keys(RolePermission::ROLES) as $role) {
-            $permissions[$role] = RolePermission::getAllForRole($church->id, $role);
-        }
-
-        return view('settings.permissions', [
-            'roles' => RolePermission::ROLES,
-            'modules' => RolePermission::MODULES,
-            'actions' => RolePermission::ACTIONS,
-            'permissions' => $permissions,
-        ]);
+        return redirect()->route('settings.church-roles.index');
     }
 
     /**

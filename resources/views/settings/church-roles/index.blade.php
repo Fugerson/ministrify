@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Церковні ролі')
+@section('title', 'Ролі та права доступу')
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6" x-data="churchRolesManager()">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Церковні ролі</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Налаштуйте ролі для членів вашої церкви</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ролі та права доступу</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Налаштуйте ролі та їх права доступу до системи</p>
         </div>
         <div class="flex items-center gap-2">
             <button @click="resetToDefaults()"
@@ -146,11 +146,12 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <div class="text-sm text-blue-800 dark:text-blue-200">
-                <p class="font-medium">Підказки:</p>
+                <p class="font-medium">Як це працює:</p>
                 <ul class="mt-1 list-disc list-inside space-y-1 text-blue-700 dark:text-blue-300">
+                    <li><span class="font-medium">Замок</span> — надає повний доступ до системи (для адмінів)</li>
+                    <li><span class="font-medium">Ключ</span> — налаштувати права доступу для ролі</li>
                     <li>Перетягуйте ролі для зміни порядку</li>
-                    <li>Двічі клікніть на назву для редагування</li>
-                    <li>Роль "за замовчуванням" буде обрана автоматично для нових людей</li>
+                    <li>Роль "за замовчуванням" обирається для нових людей</li>
                 </ul>
             </div>
         </div>
