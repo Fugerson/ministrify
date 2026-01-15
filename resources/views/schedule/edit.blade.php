@@ -49,17 +49,29 @@
 
                 <!-- Ministry/Team Selection -->
                 @if($ministries->count() > 0)
-                <div>
-                    <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
-                    <select name="ministry_id" id="ministry_id"
+                <div x-data="{
+                    selectedId: '{{ old('ministry_id', $event->ministry_id) }}',
+                    ministries: @json($ministries->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'color' => $m->color])),
+                    get selected() {
+                        return this.ministries.find(m => m.id == this.selectedId);
+                    }
+                }">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
+                    <select name="ministry_id" x-model="selectedId"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         <option value="">Без команди</option>
                         @foreach($ministries as $ministry)
-                            <option value="{{ $ministry->id }}" {{ old('ministry_id', $event->ministry_id) == $ministry->id ? 'selected' : '' }}>
-                                {{ $ministry->name }}
-                            </option>
+                            <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                         @endforeach
                     </select>
+                    <!-- Colorful label preview -->
+                    <div x-show="selected" x-cloak class="mt-2">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                              :style="selected ? 'background-color: ' + selected.color + '20; color: ' + selected.color + '; border: 1px solid ' + selected.color + '40' : ''">
+                            <span class="w-2 h-2 rounded-full" :style="selected ? 'background-color: ' + selected.color : ''"></span>
+                            <span x-text="selected?.name"></span>
+                        </span>
+                    </div>
                 </div>
                 @endif
 
