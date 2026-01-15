@@ -100,7 +100,7 @@ class MonobankSyncController extends Controller
 
         $service->saveToken($church, $request->token, $accountId);
 
-        return redirect()->route('monobank.index')
+        return redirect()->route('finances.monobank.index')
             ->with('success', "Monobank підключено! Ім'я: {$validation['name']}");
     }
 
@@ -128,7 +128,7 @@ class MonobankSyncController extends Controller
         $service = new MonobankPersonalService();
         $service->disconnect($church);
 
-        return redirect()->route('monobank.index')
+        return redirect()->route('finances.monobank.index')
             ->with('success', 'Monobank відключено');
     }
 

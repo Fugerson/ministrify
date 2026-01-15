@@ -46,6 +46,10 @@
                 </li>
                 <li class="flex items-start gap-2">
                     <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">3</span>
+                    <span>Натисніть <strong>"Активувати токен"</strong></span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">4</span>
                     <span>Скопіюйте отриманий токен</span>
                 </li>
             </ol>
