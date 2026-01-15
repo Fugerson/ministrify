@@ -20,12 +20,30 @@
                 <div class="ml-4 flex-1">
                     <input type="text" x-model="title" @change="saveField('title', title)"
                            class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 w-full p-0 pb-1">
-                    <select x-model="ministryId" @change="saveMinistry()"
-                            class="text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 p-0 pb-1 text-sm cursor-pointer">
-                        @foreach($ministries as $ministry)
-                            <option value="{{ $ministry->id }}" data-color="{{ $ministry->color }}">{{ $ministry->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="mt-1 relative" x-data="{ showDropdown: false }">
+                        <!-- Ministry Badge -->
+                        <button type="button" @click="showDropdown = !showDropdown"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:opacity-80"
+                                :style="'background-color: ' + (ministryColor || '#6b7280') + '20; color: ' + (ministryColor || '#6b7280') + '; border: 1px solid ' + (ministryColor || '#6b7280') + '40'">
+                            <span class="w-2 h-2 rounded-full" :style="'background-color: ' + (ministryColor || '#6b7280')"></span>
+                            <span x-text="ministries.find(m => m.id == ministryId)?.name || 'Без команди'"></span>
+                            <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <!-- Dropdown -->
+                        <div x-show="showDropdown" x-cloak @click.away="showDropdown = false"
+                             class="absolute left-0 top-full mt-1 z-20 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-[180px]">
+                            <template x-for="ministry in ministries" :key="ministry.id">
+                                <button type="button"
+                                        @click="ministryId = ministry.id; ministryColor = ministry.color; saveMinistry(); showDropdown = false"
+                                        class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full" :style="'background-color: ' + ministry.color"></span>
+                                    <span x-text="ministry.name" class="text-gray-700 dark:text-gray-300"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="text-right shrink-0">
