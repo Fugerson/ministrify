@@ -88,6 +88,7 @@ class Person extends Model
         'last_name',
         'phone',
         'email',
+        'iban',
         'gender',
         'marital_status',
         'telegram_username',

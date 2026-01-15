@@ -49,6 +49,7 @@ class Church extends Model
         'monobank_account_id',
         'monobank_auto_sync',
         'monobank_last_sync',
+        'monobank_webhook_secret',
     ];
 
     protected $casts = [

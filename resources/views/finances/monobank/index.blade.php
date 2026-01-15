@@ -3,275 +3,490 @@
 @section('title', 'Monobank')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Monobank</h1>
-            <p class="text-gray-500 dark:text-gray-400">Синхронізація транзакцій з особистої картки</p>
-        </div>
-        <div class="flex items-center gap-3">
-            <a href="{{ route('finances.index') }}" class="inline-flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                До фінансів
-            </a>
-        </div>
-    </div>
-
+<div x-data="monobankPage()" class="space-y-6">
     @if(!$isConnected)
-    <!-- Not Connected State -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 text-center">
-        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center">
-            <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-        </div>
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Підключіть Monobank</h2>
-        <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-            Автоматично імпортуйте транзакції з вашої картки Monobank для обліку пожертв
-        </p>
-
-        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 max-w-md mx-auto mb-6 text-left">
-            <h3 class="font-medium text-gray-900 dark:text-white mb-3">Як отримати токен:</h3>
-            <ol class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li class="flex items-start gap-2">
-                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">1</span>
-                    <span>Перейдіть на <a href="https://api.monobank.ua/" target="_blank" class="text-primary-600 hover:underline">api.monobank.ua</a></span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">2</span>
-                    <span>Відскануйте QR-код у застосунку Monobank</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">3</span>
-                    <span>Натисніть <strong>"Активувати токен"</strong></span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">4</span>
-                    <span>Скопіюйте отриманий токен</span>
-                </li>
-            </ol>
-        </div>
-
-        <form action="{{ route('finances.monobank.connect') }}" method="POST" class="max-w-md mx-auto">
-            @csrf
-            <div class="mb-4">
-                <input type="text" name="token" placeholder="Вставте токен сюди..."
-                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
-                    required>
-                @error('token')
-                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+        {{-- Not Connected State --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
             </div>
-            <button type="submit" class="w-full px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-colors">
-                Підключити Monobank
-            </button>
-        </form>
-    </div>
-    @else
-    <!-- Connected State -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Connection Info Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Підключення</h3>
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
-                    Активно
-                </span>
-            </div>
-
-            @if($clientName)
-            <p class="text-gray-600 dark:text-gray-400 mb-4">
-                <span class="font-medium text-gray-900 dark:text-white">{{ $clientName }}</span>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Підключіть Monobank</h2>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                Автоматично імпортуйте транзакції з вашої картки Monobank для обліку пожертв
             </p>
-            @endif
 
-            @if(count($accounts) > 0)
-            <div class="mb-4">
-                <label class="block text-sm text-gray-500 dark:text-gray-400 mb-2">Обраний рахунок</label>
-                <form action="{{ route('finances.monobank.select-account') }}" method="POST">
-                    @csrf
-                    <select name="account_id" onchange="this.form.submit()"
-                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                        @foreach($accounts as $account)
-                        <option value="{{ $account['id'] }}" {{ $church->monobank_account_id === $account['id'] ? 'selected' : '' }}>
-                            {{ $account['masked_pan'] ?? 'Картка' }} ({{ number_format($account['balance'], 2) }} {{ $account['currency'] }})
-                        </option>
-                        @endforeach
-                    </select>
-                </form>
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 max-w-md mx-auto mb-6 text-left">
+                <h3 class="font-medium text-gray-900 dark:text-white mb-3">Як отримати токен:</h3>
+                <ol class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                    <li class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">1</span>
+                        <span>Перейдіть на <a href="https://api.monobank.ua/" target="_blank" class="text-primary-600 hover:underline">api.monobank.ua</a></span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">2</span>
+                        <span>Відскануйте QR-код у застосунку Monobank</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">3</span>
+                        <span>Натисніть <strong>"Активувати токен"</strong></span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium">4</span>
+                        <span>Скопіюйте отриманий токен</span>
+                    </li>
+                </ol>
             </div>
-            @endif
 
-            <form action="{{ route('finances.monobank.disconnect') }}" method="POST" onsubmit="return confirm('Відключити Monobank?')">
+            <form action="{{ route('finances.monobank.connect') }}" method="POST" class="max-w-md mx-auto">
                 @csrf
-                @method('DELETE')
-                <button type="submit" class="w-full px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg transition-colors text-sm font-medium">
-                    Відключити
+                <div class="mb-4">
+                    <input type="text" name="token" placeholder="Вставте токен сюди..."
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                           required>
+                    @error('token')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+                <button type="submit" class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                    Підключити Monobank
                 </button>
             </form>
         </div>
+    @else
+        {{-- Connected State --}}
 
-        <!-- Stats Cards -->
-        <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total'] }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Всього</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $stats['income'] }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Надходжень</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-                <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ $stats['unprocessed'] }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Не оброблено</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                    {{ $stats['last_sync'] ? $stats['last_sync']->diffForHumans() : 'Ніколи' }}
-                </p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Остання синхр.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sync Controls -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Синхронізація</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Завантажити нові транзакції з Monobank</p>
-            </div>
-            <form action="{{ route('finances.monobank.sync') }}" method="POST" class="flex items-center gap-3">
-                @csrf
-                <select name="days" class="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm">
-                    <option value="7">За 7 днів</option>
-                    <option value="14">За 14 днів</option>
-                    <option value="30">За 30 днів</option>
-                </select>
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    Синхронізувати
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Transactions List -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <h3 class="font-semibold text-gray-900 dark:text-white">Транзакції</h3>
-        </div>
-
-        @if($transactions->isEmpty())
-        <div class="p-12 text-center">
-            <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-            <p class="text-gray-500 dark:text-gray-400">Немає транзакцій. Натисніть "Синхронізувати"</p>
-        </div>
-        @else
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700/50">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дата</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Опис</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Сума</th>
-                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Статус</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @foreach($transactions as $tx)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 {{ $tx->is_ignored ? 'opacity-50' : '' }}">
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <div class="text-sm text-gray-900 dark:text-white">{{ $tx->mono_time->format('d.m.Y') }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $tx->mono_time->format('H:i') }}</div>
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="text-sm text-gray-900 dark:text-white">{{ $tx->counterpart_display }}</div>
-                            @if($tx->comment)
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $tx->comment }}</div>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 text-right whitespace-nowrap">
-                            <span class="font-medium {{ $tx->is_income ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                {{ $tx->formatted_amount }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            @if($tx->is_processed)
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                                Імпортовано
-                            </span>
-                            @elseif($tx->is_ignored)
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
-                                Приховано
-                            </span>
-                            @elseif($tx->is_income)
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
-                                Новий
-                            </span>
+        {{-- Header with account info --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">M</span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $clientName ?? 'Monobank' }}</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            @if($stats['last_sync'])
+                                Остання синхронізація: {{ $stats['last_sync']->diffForHumans() }}
                             @else
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
-                                Витрата
-                            </span>
+                                Ще не синхронізовано
                             @endif
-                        </td>
-                        <td class="px-4 py-3 text-right whitespace-nowrap">
-                            @if(!$tx->is_processed && $tx->is_income && !$tx->is_ignored)
-                            <div x-data="{ open: false }" class="relative inline-block">
-                                <button @click="open = !open" class="px-3 py-1.5 text-sm bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
-                                    Імпорт
-                                </button>
-                                <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-10 p-4">
-                                    <form action="{{ route('finances.monobank.import', $tx) }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="category_id" value="{{ $donationCategory?->id }}">
-                                        <div class="mb-3">
-                                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">Опис</label>
-                                            <input type="text" name="description" value="{{ $tx->counterpart_display }}"
-                                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm">
-                                        </div>
-                                        <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">
-                                            Імпортувати як пожертву
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('finances.monobank.ignore', $tx) }}" method="POST" class="mt-2">
-                                        @csrf
-                                        <button type="submit" class="w-full px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm">
-                                            Приховати
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                            @elseif($tx->is_ignored)
-                            <form action="{{ route('finances.monobank.restore', $tx) }}" method="POST" class="inline">
+                            @if($church->monobank_auto_sync)
+                                <span class="text-green-600">&bull; Автосинхронізація</span>
+                            @endif
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    {{-- Sync buttons --}}
+                    <form action="{{ route('finances.monobank.sync') }}" method="POST" class="inline">
+                        @csrf
+                        <input type="hidden" name="days" value="7">
+                        <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                            Синхронізувати
+                        </button>
+                    </form>
+
+                    {{-- Settings dropdown --}}
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-cloak
+                             class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                            <form action="{{ route('finances.monobank.sync') }}" method="POST">
                                 @csrf
-                                <button type="submit" class="text-sm text-primary-600 hover:text-primary-700">
-                                    Відновити
+                                <input type="hidden" name="days" value="14">
+                                <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Синхронізувати 14 днів
                                 </button>
                             </form>
-                            @elseif($tx->is_processed && $tx->transaction)
-                            <a href="{{ route('finances.index') }}" class="text-sm text-primary-600 hover:text-primary-700">
-                                Переглянути
-                            </a>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                            <form action="{{ route('finances.monobank.sync') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="days" value="30">
+                                <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Синхронізувати 30 днів
+                                </button>
+                            </form>
+                            <hr class="border-gray-200 dark:border-gray-700">
+                            <form action="{{ route('finances.monobank.toggle-auto-sync') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    {{ $church->monobank_auto_sync ? 'Вимкнути' : 'Увімкнути' }} автосинхронізацію
+                                </button>
+                            </form>
+                            <hr class="border-gray-200 dark:border-gray-700">
+                            <form action="{{ route('finances.monobank.disconnect') }}" method="POST"
+                                  onsubmit="return confirm('Ви впевнені? Токен буде видалено.')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                    Відключити Monobank
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Account selector if multiple --}}
+            @if(count($accounts) > 1)
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <form action="{{ route('finances.monobank.select-account') }}" method="POST" class="flex items-center gap-3">
+                        @csrf
+                        <label class="text-sm text-gray-600 dark:text-gray-400">Рахунок:</label>
+                        <select name="account_id" onchange="this.form.submit()"
+                                class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            @foreach($accounts as $account)
+                                <option value="{{ $account['id'] }}" {{ $church->monobank_account_id == $account['id'] ? 'selected' : '' }}>
+                                    {{ $account['masked_pan'] ?? $account['iban'] }} ({{ number_format($account['balance'], 2) }} {{ $account['currency'] }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+            @endif
         </div>
-        @endif
-    </div>
+
+        {{-- Statistics --}}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Нові</p>
+                <p class="text-2xl font-bold text-primary-600">{{ $stats['unprocessed'] }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Цей місяць</p>
+                <p class="text-2xl font-bold text-green-600">{{ number_format($stats['this_month_amount'], 0, ',', ' ') }} ₴</p>
+                <p class="text-xs text-gray-400">{{ $stats['this_month_count'] }} транзакцій</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Минулий місяць</p>
+                <p class="text-2xl font-bold text-gray-600 dark:text-gray-300">{{ number_format($stats['last_month_amount'], 0, ',', ' ') }} ₴</p>
+                <p class="text-xs text-gray-400">{{ $stats['last_month_count'] }} транзакцій</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Імпортовано</p>
+                <p class="text-2xl font-bold text-blue-600">{{ number_format($stats['imported_income'], 0, ',', ' ') }} ₴</p>
+            </div>
+        </div>
+
+        {{-- Tabs --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div class="border-b border-gray-200 dark:border-gray-700">
+                <nav class="flex -mb-px overflow-x-auto">
+                    @php
+                        $tabs = [
+                            'new' => ['label' => 'Нові', 'count' => $stats['unprocessed']],
+                            'imported' => ['label' => 'Імпортовані', 'count' => null],
+                            'ignored' => ['label' => 'Приховані', 'count' => $stats['ignored']],
+                            'expenses' => ['label' => 'Витрати', 'count' => null],
+                            'all' => ['label' => 'Усі', 'count' => $stats['total']],
+                        ];
+                    @endphp
+                    @foreach($tabs as $key => $tabData)
+                        <a href="{{ route('finances.monobank.index', array_merge(request()->except('tab', 'page'), ['tab' => $key])) }}"
+                           class="px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors {{ $tab === $key ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                            {{ $tabData['label'] }}
+                            @if($tabData['count'])
+                                <span class="ml-1 px-2 py-0.5 text-xs rounded-full {{ $tab === $key ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
+                                    {{ $tabData['count'] }}
+                                </span>
+                            @endif
+                        </a>
+                    @endforeach
+                </nav>
+            </div>
+
+            {{-- Filters --}}
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <form action="{{ route('finances.monobank.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
+                    <input type="hidden" name="tab" value="{{ $tab }}">
+
+                    {{-- Search --}}
+                    <div class="flex-1 min-w-[200px]">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук..."
+                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+
+                    {{-- Date from --}}
+                    <input type="date" name="date_from" value="{{ request('date_from') }}"
+                           class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+                    {{-- Date to --}}
+                    <input type="date" name="date_to" value="{{ request('date_to') }}"
+                           class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+                    {{-- Amount min --}}
+                    <input type="number" name="amount_min" value="{{ request('amount_min') }}" placeholder="Від ₴" step="0.01"
+                           class="w-24 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+                    {{-- Amount max --}}
+                    <input type="number" name="amount_max" value="{{ request('amount_max') }}" placeholder="До ₴" step="0.01"
+                           class="w-24 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+                    {{-- Category filter (for imported tab) --}}
+                    @if($tab === 'imported')
+                        <select name="category_id" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="">Усі категорії</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+
+                    <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg">
+                        Фільтр
+                    </button>
+
+                    @if(request()->hasAny(['search', 'date_from', 'date_to', 'amount_min', 'amount_max', 'category_id']))
+                        <a href="{{ route('finances.monobank.index', ['tab' => $tab]) }}" class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">
+                            Скинути
+                        </a>
+                    @endif
+                </form>
+            </div>
+
+            {{-- Bulk actions --}}
+            @if($tab === 'new' && $transactions->count() > 0)
+                <div x-show="selectedIds.length > 0" x-cloak class="p-4 bg-primary-50 dark:bg-primary-900/20 border-b border-primary-100 dark:border-primary-800">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <span class="text-sm text-primary-700 dark:text-primary-300">
+                            Обрано: <strong x-text="selectedIds.length"></strong>
+                        </span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <form action="{{ route('finances.monobank.bulk-import') }}" method="POST" class="flex items-center gap-2">
+                                @csrf
+                                <template x-for="id in selectedIds">
+                                    <input type="hidden" name="transaction_ids[]" :value="id">
+                                </template>
+                                <select name="category_id" required class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg">
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" {{ $donationCategory && $donationCategory->id == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg">
+                                    Імпортувати
+                                </button>
+                            </form>
+                            <form action="{{ route('finances.monobank.bulk-ignore') }}" method="POST">
+                                @csrf
+                                <template x-for="id in selectedIds">
+                                    <input type="hidden" name="transaction_ids[]" :value="id">
+                                </template>
+                                <button type="submit" class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded-lg">
+                                    Приховати
+                                </button>
+                            </form>
+                            <button @click="selectedIds = []" class="px-3 py-1.5 text-gray-600 hover:text-gray-800 text-sm">
+                                Скасувати
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Transactions list --}}
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                @forelse($transactions as $tx)
+                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                         x-data="{ showImport: false }">
+                        <div class="flex items-start gap-4">
+                            {{-- Checkbox for bulk actions --}}
+                            @if($tab === 'new')
+                                <input type="checkbox" value="{{ $tx->id }}"
+                                       x-model.number="selectedIds"
+                                       class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                            @endif
+
+                            {{-- Amount --}}
+                            <div class="flex-shrink-0 w-28 text-right">
+                                <span class="text-lg font-semibold {{ $tx->is_income ? 'text-green-600' : 'text-red-600' }}">
+                                    {{ $tx->formatted_amount }}
+                                </span>
+                            </div>
+
+                            {{-- Details --}}
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-gray-900 dark:text-white truncate">
+                                    {{ $tx->counterpart_display }}
+                                </p>
+                                @if($tx->comment)
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                        {{ $tx->comment }}
+                                    </p>
+                                @endif
+                                <p class="text-xs text-gray-400 mt-1">
+                                    {{ $tx->mono_time->format('d.m.Y H:i') }}
+                                    @if($tx->counterpart_iban)
+                                        &bull; {{ Str::mask($tx->counterpart_iban, '*', 10, -4) }}
+                                    @endif
+                                </p>
+
+                                {{-- Status badges --}}
+                                @if($tx->is_processed)
+                                    <span class="inline-flex items-center mt-2 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded">
+                                        Імпортовано
+                                        @if($tx->person)
+                                            &bull; {{ $tx->person->full_name }}
+                                        @endif
+                                    </span>
+                                @endif
+                                @if($tx->is_ignored)
+                                    <span class="inline-flex items-center mt-2 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded">
+                                        Приховано
+                                    </span>
+                                @endif
+                            </div>
+
+                            {{-- Actions --}}
+                            <div class="flex-shrink-0 flex items-center gap-2">
+                                @if(!$tx->is_processed && !$tx->is_ignored && $tx->is_income)
+                                    <button @click="showImport = !showImport"
+                                            class="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg">
+                                        Імпорт
+                                    </button>
+                                    <form action="{{ route('finances.monobank.ignore', $tx) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="p-1.5 text-gray-400 hover:text-gray-600" title="Приховати">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if($tx->is_ignored)
+                                    <form action="{{ route('finances.monobank.restore', $tx) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1.5 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg">
+                                            Відновити
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Import form (expandable) --}}
+                        <div x-show="showImport" x-collapse x-cloak class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <form action="{{ route('finances.monobank.import', $tx) }}" method="POST"
+                                  x-data="importForm({{ $tx->id }}, '{{ $donationCategory?->id }}')" x-init="loadSuggestions()">
+                                @csrf
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                                        <select name="category_id" x-model="categoryId" required
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Людина
+                                            <span x-show="previousCount > 0" class="text-xs text-green-600" x-text="'(' + previousCount + ' попередніх)'"></span>
+                                        </label>
+                                        <select name="person_id" x-model="personId"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            <option value="">-- Не вказано --</option>
+                                            @foreach($people as $person)
+                                                <option value="{{ $person->id }}">{{ $person->first_name }} {{ $person->last_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                                        <input type="text" name="description" value="{{ $tx->counterpart_display }}"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    </div>
+                                </div>
+
+                                @if($tx->counterpart_iban)
+                                    <div class="mt-3">
+                                        <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                            <input type="checkbox" name="save_iban" value="1" x-model="saveIban"
+                                                   class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                            Зберегти IBAN для цієї людини (для автовизначення)
+                                        </label>
+                                    </div>
+                                @endif
+
+                                <div class="mt-4 flex justify-end gap-2">
+                                    <button type="button" @click="showImport = false"
+                                            class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                                        Скасувати
+                                    </button>
+                                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg">
+                                        Імпортувати
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <p>Транзакцій не знайдено</p>
+                        @if($tab === 'new')
+                            <p class="mt-2 text-sm">Натисніть "Синхронізувати" щоб завантажити нові транзакції</p>
+                        @endif
+                    </div>
+                @endforelse
+            </div>
+
+            {{-- Pagination --}}
+            @if($transactions->hasPages())
+                <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                    {{ $transactions->links() }}
+                </div>
+            @endif
+        </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+function monobankPage() {
+    return {
+        selectedIds: [],
+    }
+}
+
+function importForm(txId, defaultCategoryId) {
+    return {
+        categoryId: defaultCategoryId,
+        personId: '',
+        saveIban: false,
+        previousCount: 0,
+
+        async loadSuggestions() {
+            try {
+                const response = await fetch(`/finances/monobank/${txId}/suggestions`);
+                const data = await response.json();
+
+                if (data.suggested_category_id) {
+                    this.categoryId = String(data.suggested_category_id);
+                }
+                if (data.suggested_person_id) {
+                    this.personId = String(data.suggested_person_id);
+                }
+                this.previousCount = data.previous_transactions || 0;
+            } catch (e) {
+                console.error('Failed to load suggestions', e);
+            }
+        }
+    }
+}
+</script>
+@endpush
 @endsection

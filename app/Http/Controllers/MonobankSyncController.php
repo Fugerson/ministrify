@@ -3,18 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\MonobankTransaction;
+use App\Models\MonobankSenderMapping;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\Person;
 use App\Services\MonobankPersonalService;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class MonobankSyncController extends Controller
 {
     /**
-     * Show Monobank integration page
+     * Show Monobank integration page with filters
      */
-    public function index()
+    public function index(Request $request)
     {
         $church = $this->getCurrentChurch();
         $service = new MonobankPersonalService($church);
@@ -31,25 +33,81 @@ class MonobankSyncController extends Controller
             }
         }
 
-        // Get recent transactions
-        $transactions = MonobankTransaction::where('church_id', $church->id)
-            ->orderByDesc('mono_time')
-            ->limit(50)
-            ->get();
+        // Build query with filters
+        $query = MonobankTransaction::where('church_id', $church->id);
+
+        // Tab filter (status)
+        $tab = $request->get('tab', 'new');
+        switch ($tab) {
+            case 'new':
+                $query->unprocessedIncome();
+                break;
+            case 'imported':
+                $query->where('is_processed', true);
+                break;
+            case 'ignored':
+                $query->where('is_ignored', true);
+                break;
+            case 'expenses':
+                $query->where('is_income', false);
+                break;
+            case 'all':
+                // No filter
+                break;
+        }
+
+        // Date filter
+        if ($request->filled('date_from')) {
+            $query->where('mono_time', '>=', Carbon::parse($request->date_from)->startOfDay());
+        }
+        if ($request->filled('date_to')) {
+            $query->where('mono_time', '<=', Carbon::parse($request->date_to)->endOfDay());
+        }
+
+        // Amount filter
+        if ($request->filled('amount_min')) {
+            $query->whereRaw('ABS(amount) >= ?', [$request->amount_min * 100]);
+        }
+        if ($request->filled('amount_max')) {
+            $query->whereRaw('ABS(amount) <= ?', [$request->amount_max * 100]);
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('counterpart_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('comment', 'like', "%{$search}%")
+                  ->orWhere('counterpart_iban', 'like', "%{$search}%");
+            });
+        }
+
+        // Category filter (for imported)
+        if ($request->filled('category_id')) {
+            $query->whereHas('transaction', function ($q) use ($request) {
+                $q->where('category_id', $request->category_id);
+            });
+        }
+
+        $transactions = $query->orderByDesc('mono_time')->paginate(50)->withQueryString();
 
         // Stats
-        $stats = [
-            'total' => MonobankTransaction::where('church_id', $church->id)->count(),
-            'income' => MonobankTransaction::where('church_id', $church->id)->income()->count(),
-            'unprocessed' => MonobankTransaction::where('church_id', $church->id)->unprocessedIncome()->count(),
-            'last_sync' => $church->monobank_last_sync,
-        ];
+        $stats = $this->getStats($church);
 
-        // Get donation category for quick import (prefer donation category, then any income)
-        $donationCategory = TransactionCategory::where('church_id', $church->id)
+        // Get categories for filters and import
+        $categories = TransactionCategory::where('church_id', $church->id)
             ->where('type', 'income')
-            ->orderByDesc('is_donation')
-            ->first();
+            ->orderBy('name')
+            ->get();
+
+        // Default donation category
+        $donationCategory = $categories->firstWhere('is_donation', true) ?? $categories->first();
+
+        // Get people for import dropdown
+        $people = Person::where('church_id', $church->id)
+            ->orderBy('first_name')
+            ->get(['id', 'first_name', 'last_name', 'iban']);
 
         return view('finances.monobank.index', compact(
             'isConnected',
@@ -58,8 +116,49 @@ class MonobankSyncController extends Controller
             'transactions',
             'stats',
             'church',
-            'donationCategory'
+            'categories',
+            'donationCategory',
+            'people',
+            'tab'
         ));
+    }
+
+    /**
+     * Get statistics
+     */
+    protected function getStats($church): array
+    {
+        $baseQuery = MonobankTransaction::where('church_id', $church->id);
+
+        // Current month stats
+        $thisMonth = Carbon::now()->startOfMonth();
+        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
+
+        return [
+            'total' => (clone $baseQuery)->count(),
+            'income' => (clone $baseQuery)->income()->count(),
+            'unprocessed' => (clone $baseQuery)->unprocessedIncome()->count(),
+            'ignored' => (clone $baseQuery)->where('is_ignored', true)->count(),
+            'last_sync' => $church->monobank_last_sync,
+
+            // Amounts
+            'total_income' => (clone $baseQuery)->income()->sum('amount') / 100,
+            'imported_income' => (clone $baseQuery)->where('is_processed', true)->sum('amount') / 100,
+
+            // This month
+            'this_month_count' => (clone $baseQuery)->income()->where('mono_time', '>=', $thisMonth)->count(),
+            'this_month_amount' => (clone $baseQuery)->income()->where('mono_time', '>=', $thisMonth)->sum('amount') / 100,
+
+            // Last month
+            'last_month_count' => (clone $baseQuery)->income()
+                ->where('mono_time', '>=', $lastMonth)
+                ->where('mono_time', '<', $thisMonth)
+                ->count(),
+            'last_month_amount' => (clone $baseQuery)->income()
+                ->where('mono_time', '>=', $lastMonth)
+                ->where('mono_time', '<', $thisMonth)
+                ->sum('amount') / 100,
+        ];
     }
 
     /**
@@ -156,18 +255,63 @@ class MonobankSyncController extends Controller
     }
 
     /**
-     * Import transaction as donation
+     * Get suggestions for a transaction (person & category based on history)
+     */
+    public function getSuggestions(MonobankTransaction $monoTransaction)
+    {
+        $church = $this->getCurrentChurch();
+
+        if ($monoTransaction->church_id !== $church->id) {
+            abort(403);
+        }
+
+        // Find mapping by IBAN or name
+        $mapping = MonobankSenderMapping::findForSender(
+            $church->id,
+            $monoTransaction->counterpart_iban,
+            $monoTransaction->counterpart_name
+        );
+
+        // Try to find person by IBAN
+        $personByIban = null;
+        if ($monoTransaction->counterpart_iban) {
+            $personByIban = Person::where('church_id', $church->id)
+                ->where('iban', $monoTransaction->counterpart_iban)
+                ->first();
+        }
+
+        // Count previous transactions from this sender
+        $previousCount = MonobankTransaction::where('church_id', $church->id)
+            ->where('id', '!=', $monoTransaction->id)
+            ->where(function ($q) use ($monoTransaction) {
+                if ($monoTransaction->counterpart_iban) {
+                    $q->where('counterpart_iban', $monoTransaction->counterpart_iban);
+                } else {
+                    $q->where('counterpart_name', $monoTransaction->counterpart_name);
+                }
+            })
+            ->count();
+
+        return response()->json([
+            'mapping' => $mapping,
+            'person_by_iban' => $personByIban,
+            'previous_transactions' => $previousCount,
+            'suggested_person_id' => $personByIban?->id ?? $mapping?->person_id,
+            'suggested_category_id' => $mapping?->category_id,
+        ]);
+    }
+
+    /**
+     * Import transaction as donation with smart mapping
      */
     public function import(Request $request, MonobankTransaction $monoTransaction)
     {
         $church = $this->getCurrentChurch();
 
-        // Verify belongs to church
         if ($monoTransaction->church_id !== $church->id) {
             abort(403);
         }
 
-        // Already processed?
         if ($monoTransaction->is_processed) {
             return back()->with('error', 'Транзакція вже оброблена');
         }
@@ -176,6 +320,7 @@ class MonobankSyncController extends Controller
             'category_id' => 'required|exists:transaction_categories,id',
             'person_id' => 'nullable|exists:people,id',
             'description' => 'nullable|string|max:500',
+            'save_iban' => 'nullable|boolean',
         ]);
 
         // Create transaction
@@ -197,6 +342,22 @@ class MonobankSyncController extends Controller
             'transaction_id' => $transaction->id,
             'person_id' => $request->person_id,
         ]);
+
+        // Update sender mapping for smart categorization
+        MonobankSenderMapping::updateFromImport(
+            $church->id,
+            $monoTransaction->counterpart_iban,
+            $monoTransaction->counterpart_name,
+            $request->category_id,
+            $request->person_id
+        );
+
+        // Save IBAN to person if requested
+        if ($request->save_iban && $request->person_id && $monoTransaction->counterpart_iban) {
+            Person::where('id', $request->person_id)->update([
+                'iban' => $monoTransaction->counterpart_iban,
+            ]);
+        }
 
         return back()->with('success', 'Транзакцію імпортовано як пожертву');
     }
@@ -257,11 +418,21 @@ class MonobankSyncController extends Controller
 
             if (!$monoTx) continue;
 
+            // Try to find person by IBAN
+            $personId = null;
+            if ($monoTx->counterpart_iban) {
+                $person = Person::where('church_id', $church->id)
+                    ->where('iban', $monoTx->counterpart_iban)
+                    ->first();
+                $personId = $person?->id;
+            }
+
             $transaction = Transaction::create([
                 'church_id' => $church->id,
                 'type' => 'income',
                 'amount' => $monoTx->amount_uah,
                 'category_id' => $request->category_id,
+                'person_id' => $personId,
                 'description' => $monoTx->counterpart_display,
                 'date' => $monoTx->mono_time->toDateString(),
                 'status' => Transaction::STATUS_COMPLETED,
@@ -271,12 +442,42 @@ class MonobankSyncController extends Controller
             $monoTx->update([
                 'is_processed' => true,
                 'transaction_id' => $transaction->id,
+                'person_id' => $personId,
             ]);
+
+            // Update mapping
+            MonobankSenderMapping::updateFromImport(
+                $church->id,
+                $monoTx->counterpart_iban,
+                $monoTx->counterpart_name,
+                $request->category_id,
+                $personId
+            );
 
             $imported++;
         }
 
         return back()->with('success', "Імпортовано {$imported} транзакцій");
+    }
+
+    /**
+     * Bulk ignore selected transactions
+     */
+    public function bulkIgnore(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $request->validate([
+            'transaction_ids' => 'required|array|min:1',
+            'transaction_ids.*' => 'integer',
+        ]);
+
+        $count = MonobankTransaction::whereIn('id', $request->transaction_ids)
+            ->where('church_id', $church->id)
+            ->where('is_processed', false)
+            ->update(['is_ignored' => true]);
+
+        return back()->with('success', "Приховано {$count} транзакцій");
     }
 
     /**
@@ -299,5 +500,67 @@ class MonobankSyncController extends Controller
         $transactions = $query->orderByDesc('mono_time')->limit(100)->get();
 
         return response()->json($transactions);
+    }
+
+    /**
+     * Toggle auto-sync setting
+     */
+    public function toggleAutoSync(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+        $church->update(['monobank_auto_sync' => !$church->monobank_auto_sync]);
+
+        $status = $church->monobank_auto_sync ? 'увімкнено' : 'вимкнено';
+        return back()->with('success', "Автосинхронізацію {$status}");
+    }
+
+    /**
+     * Webhook endpoint for real-time transactions
+     */
+    public function webhook(Request $request, string $secret)
+    {
+        // Find church by webhook secret
+        $church = \App\Models\Church::where('monobank_webhook_secret', $secret)->first();
+
+        if (!$church) {
+            return response('Invalid secret', 404);
+        }
+
+        // Handle webhook data
+        $data = $request->all();
+
+        if (isset($data['type']) && $data['type'] === 'StatementItem' && isset($data['data'])) {
+            $statementData = $data['data']['statementItem'] ?? null;
+            if ($statementData) {
+                MonobankTransaction::createFromMonoData($church->id, $statementData);
+            }
+        }
+
+        return response('OK', 200);
+    }
+
+    /**
+     * Setup webhook for real-time sync
+     */
+    public function setupWebhook(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+        $service = new MonobankPersonalService($church);
+
+        // Generate webhook secret if not exists
+        if (!$church->monobank_webhook_secret) {
+            $church->update(['monobank_webhook_secret' => bin2hex(random_bytes(16))]);
+        }
+
+        $webhookUrl = route('monobank.webhook', ['secret' => $church->monobank_webhook_secret]);
+
+        // Set webhook via Monobank API
+        $result = $service->setWebhook($webhookUrl);
+
+        if ($result) {
+            return back()->with('success', 'Webhook налаштовано. Тепер транзакції будуть надходити автоматично.');
+        }
+
+        return back()->with('error', 'Не вдалося налаштувати webhook. Спробуйте пізніше.');
     }
 }

@@ -38,6 +38,11 @@ use Illuminate\Support\Facades\Route;
 // QR Check-in (public with optional auth)
 Route::get('checkin/{token}', [QrCheckinController::class, 'show'])->name('checkin.show');
 
+// Monobank webhook (public, no CSRF)
+Route::match(['get', 'post'], 'monobank/webhook/{secret}', [MonobankSyncController::class, 'webhook'])
+    ->name('monobank.webhook')
+    ->withoutMiddleware(['web']);
+
 // Landing pages (public)
 Route::get('/', [LandingController::class, 'home'])->name('landing.home');
 Route::get('features', [LandingController::class, 'features'])->name('landing.features');
@@ -356,10 +361,14 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
             Route::post('select-account', [MonobankSyncController::class, 'selectAccount'])->name('select-account');
             Route::delete('disconnect', [MonobankSyncController::class, 'disconnect'])->name('disconnect');
             Route::post('sync', [MonobankSyncController::class, 'sync'])->name('sync');
+            Route::post('toggle-auto-sync', [MonobankSyncController::class, 'toggleAutoSync'])->name('toggle-auto-sync');
+            Route::post('setup-webhook', [MonobankSyncController::class, 'setupWebhook'])->name('setup-webhook');
+            Route::get('{monoTransaction}/suggestions', [MonobankSyncController::class, 'getSuggestions'])->name('suggestions');
             Route::post('{monoTransaction}/import', [MonobankSyncController::class, 'import'])->name('import');
             Route::post('{monoTransaction}/ignore', [MonobankSyncController::class, 'ignore'])->name('ignore');
             Route::post('{monoTransaction}/restore', [MonobankSyncController::class, 'restore'])->name('restore');
             Route::post('bulk-import', [MonobankSyncController::class, 'bulkImport'])->name('bulk-import');
+            Route::post('bulk-ignore', [MonobankSyncController::class, 'bulkIgnore'])->name('bulk-ignore');
             Route::get('transactions', [MonobankSyncController::class, 'getTransactions'])->name('transactions');
         });
     });

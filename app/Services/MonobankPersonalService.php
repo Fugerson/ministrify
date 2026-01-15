@@ -269,6 +269,39 @@ class MonobankPersonalService
             'monobank_account_id' => null,
             'monobank_auto_sync' => false,
             'monobank_last_sync' => null,
+            'monobank_webhook_secret' => null,
         ]);
+    }
+
+    /**
+     * Set webhook URL for real-time notifications
+     */
+    public function setWebhook(string $webhookUrl): bool
+    {
+        if (!$this->token) {
+            return false;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'X-Token' => $this->token,
+            ])->post(self::API_BASE . '/personal/webhook', [
+                'webHookUrl' => $webhookUrl,
+            ]);
+
+            if ($response->successful()) {
+                return true;
+            }
+
+            Log::warning('Monobank webhook setup failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return false;
+        } catch (\Exception $e) {
+            Log::error('Monobank webhook exception', ['error' => $e->getMessage()]);
+            return false;
+        }
     }
 }
