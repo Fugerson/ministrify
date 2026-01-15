@@ -340,25 +340,46 @@
                                     @if($tx->counterpart_iban)
                                         &bull; {{ Str::mask($tx->counterpart_iban, '*', 10, -4) }}
                                     @endif
-                                    @if($tx->mcc && !$tx->is_income)
-                                        &bull; <span class="text-gray-500">{{ $tx->mcc_category }}</span>
-                                    @endif
                                 </p>
 
                                 {{-- Status badges --}}
-                                @if($tx->is_processed)
-                                    <span class="inline-flex items-center mt-2 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded">
-                                        Імпортовано
-                                        @if($tx->person)
-                                            &bull; {{ $tx->person->full_name }}
-                                        @endif
-                                    </span>
-                                @endif
-                                @if($tx->is_ignored)
-                                    <span class="inline-flex items-center mt-2 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded">
-                                        Приховано
-                                    </span>
-                                @endif
+                                <div class="flex flex-wrap items-center gap-2 mt-2">
+                                    @if($tx->mcc && !$tx->is_income)
+                                        @php
+                                            $mccKey = $tx->mcc_category_key;
+                                            $mccColors = [
+                                                'utilities' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                                'groceries' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                                'restaurants' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                                                'fuel' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                                                'transport' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+                                                'healthcare' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                                'education' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+                                                'entertainment' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+                                                'shopping' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+                                                'transfers' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+                                                'other' => 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+                                            ];
+                                            $colorClass = $mccColors[$mccKey] ?? $mccColors['other'];
+                                        @endphp
+                                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded {{ $colorClass }}">
+                                            {{ $tx->mcc_category }}
+                                        </span>
+                                    @endif
+                                    @if($tx->is_processed)
+                                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded">
+                                            Імпортовано
+                                            @if($tx->person)
+                                                &bull; {{ $tx->person->full_name }}
+                                            @endif
+                                        </span>
+                                    @endif
+                                    @if($tx->is_ignored)
+                                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded">
+                                            Приховано
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
 
                             {{-- Actions --}}
