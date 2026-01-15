@@ -495,20 +495,8 @@ $storageKey = "help_seen_{$page}";
 @if($help)
 <div x-data="{
     open: false,
-    dismissed: false,
-    init() {
-        if (!localStorage.getItem('{{ $storageKey }}')) {
-            setTimeout(() => {
-                if (!this.dismissed) {
-                    this.open = true;
-                }
-            }, 500);
-        }
-    },
     dismiss() {
         this.open = false;
-        this.dismissed = true;
-        localStorage.setItem('{{ $storageKey }}', '1');
     },
     showHelp() {
         this.open = true;
@@ -579,19 +567,11 @@ x-cloak>
                 </div>
 
                 <!-- Footer -->
-                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Натисніть ? у хедері для повторного перегляду
-                        </p>
-                        <button @click="dismiss()"
-                                class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                            Зрозуміло
-                        </button>
-                    </div>
+                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    <button @click="dismiss()"
+                            class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                        Зрозуміло
+                    </button>
                 </div>
             </div>
         </div>
