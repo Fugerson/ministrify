@@ -18,6 +18,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:generate-recurring-events')
             ->weekly()
             ->description('Generate recurring events for next 4 weeks');
+
+        // Sync Monobank transactions for churches with auto-sync enabled
+        $schedule->command('monobank:sync')
+            ->hourly()
+            ->description('Sync Monobank transactions automatically');
     }
 
     protected function commands(): void

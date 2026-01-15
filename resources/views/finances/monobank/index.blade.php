@@ -240,11 +240,23 @@
                         </select>
                     @endif
 
+                    {{-- MCC category filter (for expenses and all tabs) --}}
+                    @if(in_array($tab, ['expenses', 'all']))
+                        <select name="mcc_category" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="">Тип витрат</option>
+                            @foreach($mccCategories as $key => $label)
+                                <option value="{{ $key }}" {{ request('mcc_category') == $key ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+
                     <button type="submit" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg">
                         Фільтр
                     </button>
 
-                    @if(request()->hasAny(['search', 'date_from', 'date_to', 'amount_min', 'amount_max', 'category_id']))
+                    @if(request()->hasAny(['search', 'date_from', 'date_to', 'amount_min', 'amount_max', 'category_id', 'mcc_category']))
                         <a href="{{ route('finances.monobank.index', ['tab' => $tab]) }}" class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">
                             Скинути
                         </a>
@@ -327,6 +339,9 @@
                                     {{ $tx->mono_time->format('d.m.Y H:i') }}
                                     @if($tx->counterpart_iban)
                                         &bull; {{ Str::mask($tx->counterpart_iban, '*', 10, -4) }}
+                                    @endif
+                                    @if($tx->mcc && !$tx->is_income)
+                                        &bull; <span class="text-gray-500">{{ $tx->mcc_category }}</span>
                                     @endif
                                 </p>
 

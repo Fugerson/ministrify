@@ -83,11 +83,16 @@ class MonobankSyncController extends Controller
             });
         }
 
-        // Category filter (for imported)
+        // Category filter (for imported transactions)
         if ($request->filled('category_id')) {
             $query->whereHas('transaction', function ($q) use ($request) {
                 $q->where('category_id', $request->category_id);
             });
+        }
+
+        // MCC category filter (for expenses)
+        if ($request->filled('mcc_category')) {
+            $query->mccCategory($request->mcc_category);
         }
 
         $transactions = $query->orderByDesc('mono_time')->paginate(50)->withQueryString();
@@ -109,6 +114,9 @@ class MonobankSyncController extends Controller
             ->orderBy('first_name')
             ->get(['id', 'first_name', 'last_name', 'iban']);
 
+        // MCC categories for expenses filter
+        $mccCategories = MonobankTransaction::getMccCategories();
+
         return view('finances.monobank.index', compact(
             'isConnected',
             'clientName',
@@ -119,7 +127,8 @@ class MonobankSyncController extends Controller
             'categories',
             'donationCategory',
             'people',
-            'tab'
+            'tab',
+            'mccCategories'
         ));
     }
 
