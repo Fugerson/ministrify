@@ -220,7 +220,7 @@
                                 @else
                                     <a href="{{ route('events.show', $item->original) }}"
                                        class="block p-2 rounded-lg text-xs transition-all hover:shadow-md"
-                                       style="background-color: {{ $item->ministry->color ?? '#3b82f6' }}20; border-left: 3px solid {{ $item->ministry->color ?? '#3b82f6' }};">
+                                       style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}20; border-left: 3px solid {{ $item->ministry_display_color ?? '#3b82f6' }};">
                                         <p class="font-medium text-gray-900 dark:text-white truncate">{{ $item->time ? $item->time->format('H:i') : '--:--' }}</p>
                                         <p class="text-gray-600 dark:text-gray-300 truncate">{{ $item->title }}</p>
                                         <div class="flex items-center mt-1">
@@ -290,7 +290,7 @@
                                     @else
                                         <a href="{{ route('events.show', $item->original) }}"
                                            class="block px-1.5 py-0.5 rounded text-xs truncate transition-colors hover:opacity-80 {{ $isPast && !$isToday ? 'opacity-60' : '' }}"
-                                           style="background-color: {{ $item->ministry->color ?? '#3b82f6' }}20; color: {{ $item->ministry->color ?? '#3b82f6' }};">
+                                           style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}20; color: {{ $item->ministry_display_color ?? '#3b82f6' }};">
                                             <span class="hidden lg:inline">{{ $item->time ? $item->time->format('H:i') : '' }}</span>
                                             {{ Str::limit($item->title, 15) }}
                                         </a>
@@ -370,14 +370,14 @@
                                         <a href="{{ route('events.show', $item->original) }}"
                                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry->color ?? '#3b82f6' }}20;">
-                                                    <svg class="w-5 h-5" style="color: {{ $item->ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}20;">
+                                                    <svg class="w-5 h-5" style="color: {{ $item->ministry_display_color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                     </svg>
                                                 </div>
                                                 <div>
                                                     <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry->name ?? 'Без команди' }} &bull; {{ $item->time ? $item->time->format('H:i') : '-' }}</p>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? 'Без команди' }} &bull; {{ $item->time ? $item->time->format('H:i') : '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-2">
@@ -441,14 +441,14 @@
                     <a href="{{ route('events.show', $item->original) }}"
                        class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style="background-color: {{ $item->ministry->color ?? '#3b82f6' }}20;">
-                                <span class="text-lg font-bold" style="color: {{ $item->ministry->color ?? '#3b82f6' }};">{{ $item->date->format('d') }}</span>
-                                <span class="text-xs" style="color: {{ $item->ministry->color ?? '#3b82f6' }};">{{ $months[$item->date->month - 1] ?? '' }}</span>
+                            <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}20;">
+                                <span class="text-lg font-bold" style="color: {{ $item->ministry_display_color ?? '#3b82f6' }};">{{ $item->date->format('d') }}</span>
+                                <span class="text-xs" style="color: {{ $item->ministry_display_color ?? '#3b82f6' }};">{{ $months[$item->date->month - 1] ?? '' }}</span>
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $item->ministry->name ?? 'Без команди' }}
+                                    {{ $item->ministry_display_name ?? 'Без команди' }}
                                     @if($item->time)
                                         &bull; {{ $item->time->format('H:i') }}
                                     @endif

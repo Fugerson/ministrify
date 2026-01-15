@@ -17,6 +17,7 @@ class Event extends Model
     protected $fillable = [
         'church_id',
         'ministry_id',
+        'ministry_label',
         'title',
         'date',
         'time',
@@ -74,6 +75,28 @@ class Event extends Model
     public function ministry(): BelongsTo
     {
         return $this->belongsTo(Ministry::class);
+    }
+
+    /**
+     * Get display name for ministry (ministry name or custom label)
+     */
+    public function getMinistryDisplayNameAttribute(): ?string
+    {
+        if ($this->ministry) {
+            return $this->ministry->name;
+        }
+        return $this->ministry_label;
+    }
+
+    /**
+     * Get ministry color (from ministry or default gray for custom label)
+     */
+    public function getMinistryDisplayColorAttribute(): ?string
+    {
+        if ($this->ministry) {
+            return $this->ministry->color;
+        }
+        return $this->ministry_label ? '#6b7280' : null;
     }
 
     public function parentEvent(): BelongsTo
