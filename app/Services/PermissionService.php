@@ -10,7 +10,6 @@ class PermissionService
 {
     /**
      * Check if current user can perform action on module
-     * Uses ChurchRole permissions with fallback to legacy RolePermission
      */
     public function can(string $module, string $action): bool
     {
@@ -20,7 +19,18 @@ class PermissionService
             return false;
         }
 
-        return $user->hasPermission($module, $action);
+        // Super admin can do everything
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Get church from user
+        $churchId = $user->church_id;
+        if (!$churchId) {
+            return false;
+        }
+
+        return RolePermission::hasPermission($churchId, $user->role, $module, $action);
     }
 
     /**
@@ -70,19 +80,13 @@ class PermissionService
             return array_keys(RolePermission::MODULES);
         }
 
-        // Use church role permissions if available
-        if ($user->church_role_id && $user->churchRole) {
-            $permissions = $user->churchRole->getAllPermissions();
-            return array_keys(array_filter($permissions, fn($perms) => in_array('view', $perms)));
-        }
-
-        // Fallback to legacy role permissions
         $churchId = $user->church_id;
-        if (!$churchId || !$user->role) {
+        if (!$churchId) {
             return [];
         }
 
         $permissions = RolePermission::getAllForRole($churchId, $user->role);
+
         return array_keys(array_filter($permissions, fn($perms) => in_array('view', $perms)));
     }
 
@@ -91,6 +95,15 @@ class PermissionService
      */
     public function userCan(User $user, string $module, string $action): bool
     {
-        return $user->hasPermission($module, $action);
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        $churchId = $user->church_id;
+        if (!$churchId) {
+            return false;
+        }
+
+        return RolePermission::hasPermission($churchId, $user->role, $module, $action);
     }
 }
