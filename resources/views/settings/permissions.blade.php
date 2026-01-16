@@ -63,6 +63,36 @@
                 </div>
             </template>
 
+            <!-- Bulk actions (hidden for admin roles) -->
+            <template x-if="!isCurrentRoleAdmin()">
+                <div class="mb-4 flex flex-wrap items-center gap-2">
+                    <span class="text-sm text-gray-500 dark:text-gray-400 mr-2">Швидкий вибір:</span>
+                    <button type="button" @click="selectAll()" class="px-3 py-1.5 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">
+                        Все
+                    </button>
+                    <button type="button" @click="selectNone()" class="px-3 py-1.5 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                        Нічого
+                    </button>
+                    <span class="text-gray-300 dark:text-gray-600">|</span>
+                    <button type="button" @click="selectColumn('view')" class="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                        + Перегляд
+                    </button>
+                    <button type="button" @click="selectColumn('create')" class="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                        + Створення
+                    </button>
+                    <button type="button" @click="selectColumn('edit')" class="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                        + Редагування
+                    </button>
+                    <button type="button" @click="selectColumn('delete')" class="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                        + Видалення
+                    </button>
+                    <span class="text-gray-300 dark:text-gray-600">|</span>
+                    <button type="button" @click="selectViewOnly()" class="px-3 py-1.5 text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
+                        Тільки перегляд
+                    </button>
+                </div>
+            </template>
+
             <!-- Permissions table -->
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -70,16 +100,26 @@
                         <tr class="text-left border-b border-gray-200 dark:border-gray-700">
                             <th class="pb-3 text-sm font-semibold text-gray-900 dark:text-white">Модуль</th>
                             @foreach($actions as $actionKey => $actionLabel)
-                            <th class="pb-3 text-sm font-semibold text-gray-900 dark:text-white text-center w-24">{{ $actionLabel }}</th>
+                            <th class="pb-3 text-sm font-semibold text-gray-900 dark:text-white text-center w-24">
+                                <span>{{ $actionLabel }}</span>
+                                <template x-if="!isCurrentRoleAdmin()">
+                                    <button type="button" @click="toggleColumn('{{ $actionKey }}')" class="block mx-auto mt-1 text-xs text-primary-600 dark:text-primary-400 hover:underline">
+                                        вкл/викл
+                                    </button>
+                                </template>
+                            </th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         @foreach($modules as $moduleKey => $module)
-                        <tr>
+                        <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700/30">
                             <td class="py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500">
+                                    <button type="button" @click="!isCurrentRoleAdmin() && toggleRow('{{ $moduleKey }}')"
+                                            :class="isCurrentRoleAdmin() ? 'cursor-default' : 'cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400'"
+                                            class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 transition-colors"
+                                            :title="isCurrentRoleAdmin() ? '' : 'Вибрати все / нічого для цього модуля'">
                                         @switch($module['icon'])
                                             @case('home')
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -120,7 +160,7 @@
                                             @default
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                                         @endswitch
-                                    </div>
+                                    </button>
                                     <span class="font-medium text-gray-900 dark:text-white">{{ $module['label'] }}</span>
                                 </div>
                             </td>
@@ -426,6 +466,69 @@ function permissionsManager() {
 
         markDirty() {
             this.isDirty = true;
+        },
+
+        // Bulk selection methods
+        selectAll() {
+            modules.forEach(module => {
+                this.rolePermissions[this.currentRoleId][module] = ['view', 'create', 'edit', 'delete'];
+            });
+            this.markDirty();
+        },
+
+        selectNone() {
+            modules.forEach(module => {
+                this.rolePermissions[this.currentRoleId][module] = [];
+            });
+            this.markDirty();
+        },
+
+        selectColumn(action) {
+            modules.forEach(module => {
+                const perms = this.rolePermissions[this.currentRoleId][module] || [];
+                if (!perms.includes(action)) {
+                    this.rolePermissions[this.currentRoleId][module] = [...perms, action];
+                }
+            });
+            this.markDirty();
+        },
+
+        toggleColumn(action) {
+            const allHave = modules.every(module => {
+                const perms = this.rolePermissions[this.currentRoleId][module] || [];
+                return perms.includes(action);
+            });
+
+            modules.forEach(module => {
+                let perms = this.rolePermissions[this.currentRoleId][module] || [];
+                if (allHave) {
+                    // Remove action from all
+                    this.rolePermissions[this.currentRoleId][module] = perms.filter(p => p !== action);
+                } else {
+                    // Add action to all
+                    if (!perms.includes(action)) {
+                        this.rolePermissions[this.currentRoleId][module] = [...perms, action];
+                    }
+                }
+            });
+            this.markDirty();
+        },
+
+        selectViewOnly() {
+            modules.forEach(module => {
+                this.rolePermissions[this.currentRoleId][module] = ['view'];
+            });
+            this.markDirty();
+        },
+
+        toggleRow(module) {
+            const perms = this.rolePermissions[this.currentRoleId][module] || [];
+            if (perms.length === 4) {
+                this.rolePermissions[this.currentRoleId][module] = [];
+            } else {
+                this.rolePermissions[this.currentRoleId][module] = ['view', 'create', 'edit', 'delete'];
+            }
+            this.markDirty();
         },
 
         async savePermissions() {
