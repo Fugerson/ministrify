@@ -61,6 +61,45 @@ Route::get('health', function () {
     return response()->json($status, $status['status'] === 'ok' ? 200 : 503);
 })->name('health');
 
+// UptimeRobot webhook for Telegram alerts
+Route::match(['get', 'post'], 'webhook/uptime/{secret}', function ($secret, \Illuminate\Http\Request $request) {
+    // Verify secret
+    if ($secret !== 'mnsfy2026alert') {
+        abort(403);
+    }
+
+    $botToken = config('services.telegram.alert_bot_token');
+    $chatId = config('services.telegram.alert_chat_id');
+
+    if (!$botToken || !$chatId) {
+        return response()->json(['error' => 'Telegram not configured'], 500);
+    }
+
+    // Parse UptimeRobot data
+    $monitorName = $request->input('monitorFriendlyName', 'Unknown');
+    $alertType = $request->input('alertType', '1'); // 1 = down, 2 = up
+    $alertDetails = $request->input('alertDetails', '');
+
+    $emoji = $alertType == '1' ? '🔴' : '🟢';
+    $status = $alertType == '1' ? 'DOWN' : 'UP';
+
+    $message = "{$emoji} *Ministrify {$status}*\n\n";
+    $message .= "Monitor: {$monitorName}\n";
+    if ($alertDetails) {
+        $message .= "Details: {$alertDetails}\n";
+    }
+    $message .= "Time: " . now()->format('Y-m-d H:i:s');
+
+    // Send to Telegram
+    \Illuminate\Support\Facades\Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+        'chat_id' => $chatId,
+        'text' => $message,
+        'parse_mode' => 'Markdown',
+    ]);
+
+    return response()->json(['ok' => true]);
+})->withoutMiddleware(['web'])->name('uptime.webhook');
+
 // QR Check-in (public with optional auth)
 Route::get('checkin/{token}', [QrCheckinController::class, 'show'])->name('checkin.show');
 

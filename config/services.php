@@ -3,6 +3,8 @@
 return [
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'alert_bot_token' => env('ALERT_TELEGRAM_BOT_TOKEN'),
+        'alert_chat_id' => env('ALERT_TELEGRAM_CHAT_ID'),
     ],
 
     'vapid' => [
