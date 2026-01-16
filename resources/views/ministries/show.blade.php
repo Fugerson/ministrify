@@ -25,11 +25,23 @@
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
                         @php $visibility = $ministry->visibility ?? 'public'; @endphp
                         @if($visibility !== 'public')
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $visibility === 'members' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' }}">
+                            @php
+                                $badgeColors = [
+                                    'members' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                                    'leaders' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+                                    'specific' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+                                ];
+                                $badgeLabels = [
+                                    'members' => 'Тільки учасники',
+                                    'leaders' => 'Тільки лідери',
+                                    'specific' => 'Конкретні люди',
+                                ];
+                            @endphp
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $badgeColors[$visibility] ?? 'bg-gray-100 text-gray-800' }}">
                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                {{ $visibility === 'members' ? 'Тільки учасники' : 'Тільки лідери' }}
+                                {{ $badgeLabels[$visibility] ?? 'Приватна' }}
                             </span>
                         @endif
                     </div>
@@ -446,51 +458,110 @@
             <div x-show="activeTab === 'access'"{{ $tab !== 'access' ? ' style="display:none"' : '' }}
                  x-data="accessSettings()"
                  x-init="init()">
-                <div class="max-w-xl">
+                <div class="max-w-2xl">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Налаштування доступу</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
                         Визначте, хто може бачити цю команду та її деталі
                     </p>
 
                     <div class="space-y-3">
-                        @foreach(\App\Models\Ministry::VISIBILITY_OPTIONS as $value => $label)
+                        <!-- Public -->
                         <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === '{{ $value }}'
-                                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
-                            <input type="radio" name="visibility" value="{{ $value }}"
-                                   x-model="visibility"
-                                   @change="saveVisibility()"
-                                   class="mt-1 text-primary-600 focus:ring-primary-500">
+                               :class="visibility === 'public' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                            <input type="radio" name="visibility" value="public" x-model="visibility" @change="saveVisibility()" class="mt-1 text-primary-600 focus:ring-primary-500">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
-                                    @if($value === 'public')
                                     <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    @elseif($value === 'members')
+                                    <span class="font-medium text-gray-900 dark:text-white">Всі користувачі</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Всі користувачі церкви можуть бачити цю команду</p>
+                            </div>
+                        </label>
+
+                        <!-- Members -->
+                        <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
+                               :class="visibility === 'members' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                            <input type="radio" name="visibility" value="members" x-model="visibility" @change="saveVisibility()" class="mt-1 text-primary-600 focus:ring-primary-500">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                                     </svg>
-                                    @else
+                                    <span class="font-medium text-gray-900 dark:text-white">Тільки учасники команди</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Тільки учасники цієї команди та адміністратори</p>
+                            </div>
+                        </label>
+
+                        <!-- Leaders -->
+                        <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
+                               :class="visibility === 'leaders' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                            <input type="radio" name="visibility" value="leaders" x-model="visibility" @change="saveVisibility()" class="mt-1 text-primary-600 focus:ring-primary-500">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                    </svg>
+                                    <span class="font-medium text-gray-900 dark:text-white">Тільки лідери служінь</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Тільки адміністратори та лідери всіх служінь церкви</p>
+                            </div>
+                        </label>
+
+                        <!-- Specific People -->
+                        <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
+                               :class="visibility === 'specific' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                            <input type="radio" name="visibility" value="specific" x-model="visibility" @change="saveVisibility()" class="mt-1 text-primary-600 focus:ring-primary-500">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                     </svg>
-                                    @endif
-                                    <span class="font-medium text-gray-900 dark:text-white">{{ $label }}</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">Тільки конкретні люди</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    @if($value === 'public')
-                                        Всі користувачі церкви можуть бачити цю команду
-                                    @elseif($value === 'members')
-                                        Тільки учасники цієї команди та адміністратори бачать деталі
-                                    @else
-                                        Тільки адміністратори та лідери інших служінь мають доступ
-                                    @endif
-                                </p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть конкретних людей які матимуть доступ</p>
                             </div>
                         </label>
-                        @endforeach
+                    </div>
+
+                    <!-- People Selector (shows for 'specific' visibility) -->
+                    <div x-show="visibility === 'specific'" x-transition class="mt-6 p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Виберіть людей з доступом:</h4>
+
+                        <!-- Selected people tags -->
+                        <div class="flex flex-wrap gap-2 mb-3" x-show="allowedPeople.length > 0">
+                            <template x-for="person in allowedPeople" :key="person.id">
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm rounded-lg">
+                                    <span x-text="person.name"></span>
+                                    <button type="button" @click="removePerson(person.id)" class="hover:text-primary-900 dark:hover:text-primary-100">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </span>
+                            </template>
+                        </div>
+
+                        <!-- Search/Add people -->
+                        <div class="relative">
+                            <input type="text" x-model="searchQuery" @input="searchPeople()" placeholder="Пошук людей..."
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                            <!-- Search results dropdown -->
+                            <div x-show="searchResults.length > 0" x-transition
+                                 class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                <template x-for="person in searchResults" :key="person.id">
+                                    <button type="button" @click="addPerson(person)"
+                                            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between">
+                                        <span x-text="person.full_name" class="text-gray-900 dark:text-white"></span>
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Save indicator -->
@@ -509,21 +580,21 @@
                                 <span class="w-2 h-2 bg-green-500 rounded-full"></span>
                                 Адміністратори - завжди мають доступ
                             </li>
-                            <li class="flex items-center gap-2" x-show="visibility !== 'leaders'">
-                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                                Лідер команди ({{ $ministry->leader?->full_name ?? 'не призначено' }})
-                            </li>
                             <li class="flex items-center gap-2" x-show="visibility === 'members'">
                                 <span class="w-2 h-2 bg-green-500 rounded-full"></span>
                                 {{ $ministry->members->count() }} учасників команди
                             </li>
                             <li class="flex items-center gap-2" x-show="visibility === 'leaders'">
-                                <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+                                <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
                                 Лідери всіх служінь церкви
                             </li>
                             <li class="flex items-center gap-2" x-show="visibility === 'public'">
                                 <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
                                 Всі користувачі церкви
+                            </li>
+                            <li class="flex items-center gap-2" x-show="visibility === 'specific'">
+                                <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                                <span x-text="allowedPeople.length + ' вибраних людей'"></span>
                             </li>
                         </ul>
                     </div>
@@ -637,8 +708,35 @@ async function runAutoAssign() {
 function accessSettings() {
     return {
         visibility: '{{ $ministry->visibility ?? "public" }}',
+        allowedPeople: @json(collect($ministry->allowed_person_ids ?? [])->map(fn($id) => ['id' => $id, 'name' => \App\Models\Person::find($id)?->full_name ?? 'Unknown'])),
+        searchQuery: '',
+        searchResults: [],
         saved: false,
+        allPeople: @json($availablePeople->map(fn($p) => ['id' => $p->id, 'full_name' => $p->full_name])),
         init() {},
+        searchPeople() {
+            if (this.searchQuery.length < 2) {
+                this.searchResults = [];
+                return;
+            }
+            const query = this.searchQuery.toLowerCase();
+            const selectedIds = this.allowedPeople.map(p => p.id);
+            this.searchResults = this.allPeople
+                .filter(p => p.full_name.toLowerCase().includes(query) && !selectedIds.includes(p.id))
+                .slice(0, 10);
+        },
+        addPerson(person) {
+            if (!this.allowedPeople.find(p => p.id === person.id)) {
+                this.allowedPeople.push({ id: person.id, name: person.full_name });
+                this.saveVisibility();
+            }
+            this.searchQuery = '';
+            this.searchResults = [];
+        },
+        removePerson(personId) {
+            this.allowedPeople = this.allowedPeople.filter(p => p.id !== personId);
+            this.saveVisibility();
+        },
         async saveVisibility() {
             try {
                 const response = await fetch('{{ route("ministries.update-visibility", $ministry) }}', {
@@ -648,7 +746,10 @@ function accessSettings() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ visibility: this.visibility })
+                    body: JSON.stringify({
+                        visibility: this.visibility,
+                        allowed_person_ids: this.allowedPeople.map(p => p.id)
+                    })
                 });
                 if (response.ok) {
                     this.saved = true;

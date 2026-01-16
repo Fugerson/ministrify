@@ -19,11 +19,13 @@ class Ministry extends Model
     public const VISIBILITY_PUBLIC = 'public';      // Everyone can see
     public const VISIBILITY_MEMBERS = 'members';    // Only members can see
     public const VISIBILITY_LEADERS = 'leaders';    // Only admins and ministry leaders can see
+    public const VISIBILITY_SPECIFIC = 'specific';  // Only specific people can see
 
     public const VISIBILITY_OPTIONS = [
         self::VISIBILITY_PUBLIC => 'Всі користувачі',
         self::VISIBILITY_MEMBERS => 'Тільки учасники команди',
         self::VISIBILITY_LEADERS => 'Тільки адміни та лідери служінь',
+        self::VISIBILITY_SPECIFIC => 'Тільки конкретні люди',
     ];
 
     protected $fillable = [
@@ -42,6 +44,7 @@ class Ministry extends Model
         'allow_registrations',
         'is_private',
         'visibility',
+        'allowed_person_ids',
     ];
 
     protected $casts = [
@@ -49,6 +52,7 @@ class Ministry extends Model
         'is_public' => 'boolean',
         'allow_registrations' => 'boolean',
         'is_private' => 'boolean',
+        'allowed_person_ids' => 'array',
     ];
 
     public function church(): BelongsTo
@@ -203,6 +207,17 @@ class Ministry extends Model
             return false;
         }
 
+        // Admins can always access
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // Check if user is in allowed_person_ids list
+        $allowedPersonIds = $this->allowed_person_ids ?? [];
+        if ($user->person && in_array($user->person->id, $allowedPersonIds)) {
+            return true;
+        }
+
         $visibility = $this->visibility ?? self::VISIBILITY_PUBLIC;
 
         // Public - everyone can access
@@ -210,9 +225,9 @@ class Ministry extends Model
             return true;
         }
 
-        // Admins can always access
-        if ($user->isAdmin()) {
-            return true;
+        // Specific - only allowed_person_ids (already checked above)
+        if ($visibility === self::VISIBILITY_SPECIFIC) {
+            return false;
         }
 
         // Leaders visibility - only admins and ministry leaders

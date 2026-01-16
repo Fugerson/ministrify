@@ -237,11 +237,14 @@ class MinistryController extends Controller
         Gate::authorize('manage-ministry', $ministry);
 
         $validated = $request->validate([
-            'visibility' => 'required|in:public,members,leaders',
+            'visibility' => 'required|in:public,members,leaders,specific',
+            'allowed_person_ids' => 'nullable|array',
+            'allowed_person_ids.*' => 'integer|exists:people,id',
         ]);
 
         $ministry->update([
             'visibility' => $validated['visibility'],
+            'allowed_person_ids' => $validated['allowed_person_ids'] ?? [],
             // Also update is_private for backwards compatibility
             'is_private' => $validated['visibility'] !== 'public',
         ]);
@@ -249,6 +252,7 @@ class MinistryController extends Controller
         return response()->json([
             'success' => true,
             'visibility' => $ministry->visibility,
+            'allowed_person_ids' => $ministry->allowed_person_ids,
         ]);
     }
 
