@@ -258,6 +258,9 @@
             fullscreen: false,
             touchStartX: 0,
             touchEndX: 0,
+            touchStartY: 0,
+            touchEndY: 0,
+            isSingleTouch: true,
             images: [
                 '/icons/demo/Screenshot_7.jpg',
                 '/icons/demo/Screenshot_2.jpg',
@@ -267,10 +270,24 @@
                 '/icons/demo/Screenshot_6.jpg',
                 '/icons/demo/Screenshot_8.jpg'
             ],
+            handleTouchStart(e) {
+                this.isSingleTouch = e.touches.length === 1;
+                if (this.isSingleTouch) {
+                    this.touchStartX = e.touches[0].clientX;
+                    this.touchStartY = e.touches[0].clientY;
+                }
+            },
+            handleTouchEnd(e) {
+                if (!this.isSingleTouch) return;
+                this.touchEndX = e.changedTouches[0].clientX;
+                this.touchEndY = e.changedTouches[0].clientY;
+                this.handleSwipe();
+            },
             handleSwipe() {
-                const diff = this.touchStartX - this.touchEndX;
-                if (Math.abs(diff) > 50) {
-                    if (diff > 0) {
+                const diffX = this.touchStartX - this.touchEndX;
+                const diffY = this.touchStartY - this.touchEndY;
+                if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+                    if (diffX > 0) {
                         this.activeSlide = (this.activeSlide + 1) % this.slides;
                     } else {
                         this.activeSlide = (this.activeSlide - 1 + this.slides) % this.slides;
@@ -292,8 +309,8 @@
                 {{-- Large Preview --}}
                 <div class="relative rounded-xl md:rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/20 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer group"
                      @click="openFullscreen()"
-                     @touchstart="touchStartX = $event.touches[0].clientX"
-                     @touchend="touchEndX = $event.changedTouches[0].clientX; handleSwipe()">
+                     @touchstart="handleTouchStart($event)"
+                     @touchend="handleTouchEnd($event)">
                     <div class="bg-gray-100 dark:bg-gray-800 px-3 md:px-4 py-2 md:py-3 flex items-center space-x-2 border-b border-gray-200 dark:border-gray-700">
                         <div class="w-2.5 h-2.5 md:w-3 md:h-3 bg-red-400 rounded-full"></div>
                         <div class="w-2.5 h-2.5 md:w-3 md:h-3 bg-yellow-400 rounded-full"></div>
@@ -375,8 +392,9 @@
                  x-transition:leave-end="opacity-0"
                  class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
                  @click.self="closeFullscreen()"
-                 @touchstart="touchStartX = $event.touches[0].clientX"
-                 @touchend="touchEndX = $event.changedTouches[0].clientX; handleSwipe()">
+                 @touchstart.prevent="handleTouchStart($event)"
+                 @touchend.prevent="handleTouchEnd($event)"
+                 @touchmove.prevent>
 
                 {{-- Close button --}}
                 <button @click="closeFullscreen()" class="absolute top-4 right-4 z-10 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
