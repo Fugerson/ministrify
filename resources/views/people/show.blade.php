@@ -1380,6 +1380,7 @@ function avatarUpload() {
             this.$refs.removePhotoInput.value = '1';
             const input = this.$el.querySelector('input[type="file"]');
             if (input) input.value = '';
+            this.debouncedSave();
         }
     }
 }
