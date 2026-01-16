@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Helpers\CurrencyHelper;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transaction extends Model
@@ -69,6 +71,7 @@ class Transaction extends Model
         'source_type',
         'amount',
         'currency',
+        'amount_uah',
         'date',
         'category_id',
         'person_id',
@@ -92,11 +95,40 @@ class Transaction extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'amount_uah' => 'decimal:2',
         'date' => 'date',
         'is_anonymous' => 'boolean',
         'payment_data' => 'array',
         'paid_at' => 'datetime',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        // Calculate amount_uah when saving
+        static::saving(function (Transaction $transaction) {
+            $transaction->calculateAmountUah();
+        });
+    }
+
+    /**
+     * Calculate and set the amount in UAH based on currency and date.
+     */
+    public function calculateAmountUah(): void
+    {
+        $currency = $this->currency ?? 'UAH';
+
+        if ($currency === 'UAH') {
+            $this->amount_uah = $this->amount;
+        } else {
+            $this->amount_uah = ExchangeRate::toUah(
+                (float) $this->amount,
+                $currency,
+                $this->date
+            );
+        }
+    }
 
     // ==================
     // Relationships
@@ -130,6 +162,11 @@ class Transaction extends Model
     public function recorder(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TransactionAttachment::class);
     }
 
     // ==================
@@ -197,8 +234,29 @@ class Transaction extends Model
 
     public function getFormattedAmountAttribute(): string
     {
-        $sign = $this->direction === self::DIRECTION_IN ? '+' : '-';
-        return $sign . number_format($this->amount, 2, ',', ' ') . ' ' . $this->currency;
+        return CurrencyHelper::formatWithSign(
+            (float) $this->amount,
+            $this->currency ?? 'UAH',
+            $this->direction
+        );
+    }
+
+    public function getFormattedAmountUahAttribute(): string
+    {
+        if ($this->currency === 'UAH') {
+            return $this->formatted_amount;
+        }
+
+        return CurrencyHelper::formatWithSign(
+            (float) ($this->amount_uah ?? $this->amount),
+            'UAH',
+            $this->direction
+        );
+    }
+
+    public function getCurrencySymbolAttribute(): string
+    {
+        return CurrencyHelper::symbol($this->currency ?? 'UAH');
     }
 
     public function getSourceTypeLabelAttribute(): string

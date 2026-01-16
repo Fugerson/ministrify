@@ -120,8 +120,15 @@
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                                 {{ $expense->category?->name ?? '-' }}
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm font-semibold text-red-600 dark:text-red-400 text-right">
-                                -{{ number_format($expense->amount, 0, ',', ' ') }} ₴
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
+                                <span class="text-sm font-semibold text-red-600 dark:text-red-400">
+                                    -{{ \App\Helpers\CurrencyHelper::format($expense->amount, $expense->currency ?? 'UAH') }}
+                                </span>
+                                @if(($expense->currency ?? 'UAH') !== 'UAH' && $expense->amount_uah)
+                                <span class="block text-xs text-gray-400 dark:text-gray-500">
+                                    {{ number_format($expense->amount_uah, 0, ',', ' ') }} ₴
+                                </span>
+                                @endif
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm">
                                 <a href="{{ route('finances.expenses.edit', $expense) }}" class="p-2 inline-flex text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">

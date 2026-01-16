@@ -28,18 +28,35 @@
             @csrf
             @method('PUT')
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ currency: '{{ old('currency', $income->currency ?? 'UAH') }}', exchangeRates: {{ json_encode($exchangeRates) }} }">
                 <!-- Amount -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Сума <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative">
-                        <input type="number" name="amount" value="{{ old('amount', $income->amount) }}" step="0.01" min="0.01" required
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                               placeholder="0.00">
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">₴</span>
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <input type="number" name="amount" value="{{ old('amount', $income->amount) }}" step="0.01" min="0.01" required
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                   placeholder="0.00">
+                        </div>
+                        @if(count($enabledCurrencies) > 1)
+                        <select name="currency" x-model="currency"
+                                class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            @foreach($enabledCurrencies as $curr)
+                                <option value="{{ $curr }}" {{ old('currency', $income->currency) == $curr ? 'selected' : '' }}>{{ \App\Helpers\CurrencyHelper::symbol($curr) }} {{ $curr }}</option>
+                            @endforeach
+                        </select>
+                        @else
+                        <input type="hidden" name="currency" value="UAH">
+                        <span class="inline-flex items-center px-3 py-2 text-gray-500 dark:text-gray-400">₴</span>
+                        @endif
                     </div>
+                    <template x-if="currency !== 'UAH' && exchangeRates[currency]">
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Курс НБУ: 1 <span x-text="currency"></span> = <span x-text="exchangeRates[currency]?.toFixed(2)"></span> ₴
+                        </p>
+                    </template>
                     @error('amount')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror

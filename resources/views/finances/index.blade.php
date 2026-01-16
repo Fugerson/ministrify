@@ -66,7 +66,7 @@
     <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-6 text-white">
         <div class="flex items-center justify-between">
             <div class="flex-1">
-                <p class="text-indigo-100 text-sm font-medium">Поточний баланс каси</p>
+                <p class="text-indigo-100 text-sm font-medium">Поточний баланс каси (в гривнях)</p>
                 <p class="text-4xl font-bold mt-1">{{ number_format($currentBalance, 0, ',', ' ') }} ₴</p>
                 <div class="mt-3 text-sm text-indigo-100 space-y-1">
                     @if($initialBalance > 0)
@@ -84,6 +84,26 @@
                         <span class="font-medium text-red-200">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
                     </div>
                 </div>
+                @if(count($incomeByCurrency) > 1 || count($expenseByCurrency) > 1 || !empty($incomeByCurrency['USD']) || !empty($incomeByCurrency['EUR']) || !empty($expenseByCurrency['USD']) || !empty($expenseByCurrency['EUR']))
+                <div class="mt-3 pt-3 border-t border-white/20">
+                    <p class="text-xs text-indigo-200 mb-2">За період по валютах:</p>
+                    <div class="flex flex-wrap gap-3">
+                        @foreach(['UAH' => '₴', 'USD' => '$', 'EUR' => '€'] as $code => $symbol)
+                            @php
+                                $income = $incomeByCurrency[$code] ?? 0;
+                                $expense = $expenseByCurrency[$code] ?? 0;
+                            @endphp
+                            @if($income > 0 || $expense > 0)
+                            <div class="bg-white/10 rounded-lg px-3 py-1.5">
+                                <span class="font-medium">{{ $symbol }}</span>
+                                <span class="text-green-200">+{{ number_format($income, 0, ',', ' ') }}</span>
+                                <span class="text-red-200">-{{ number_format($expense, 0, ',', ' ') }}</span>
+                            </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
             <div class="p-3 bg-white bg-opacity-20 rounded-full ml-4">
                 <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -273,7 +293,7 @@
                             </div>
                         </div>
                         <span class="text-sm font-semibold text-green-600 dark:text-green-400">
-                            +{{ number_format($income->amount, 0, ',', ' ') }} ₴
+                            +{{ \App\Helpers\CurrencyHelper::format($income->amount, $income->currency ?? 'UAH') }}
                         </span>
                     </div>
                 @empty
@@ -306,7 +326,7 @@
                             </div>
                         </div>
                         <span class="text-sm font-semibold text-red-600 dark:text-red-400">
-                            -{{ number_format($expense->amount, 0, ',', ' ') }} ₴
+                            -{{ \App\Helpers\CurrencyHelper::format($expense->amount, $expense->currency ?? 'UAH') }}
                         </span>
                     </div>
                 @empty

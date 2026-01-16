@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CurrencyHelper;
+use App\Models\ExchangeRate;
 use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Transaction;
+use App\Models\TransactionAttachment;
 use App\Models\TransactionCategory;
 use App\Rules\BelongsToChurch;
 use Carbon\Carbon;
@@ -34,16 +37,47 @@ class FinanceController extends Controller
             $periodLabel = $year . ' рік';
         }
 
-        $totalIncome = $incomeQuery->sum('amount');
-        $totalExpense = $expenseQuery->sum('amount');
+        // Calculate totals in UAH (using amount_uah for converted amounts)
+        $totalIncome = $incomeQuery->sum('amount_uah') ?: $incomeQuery->sum('amount');
+        $totalExpense = $expenseQuery->sum('amount_uah') ?: $expenseQuery->sum('amount');
         $periodBalance = $totalIncome - $totalExpense;
 
-        // Overall balance (includes initial balance)
+        // Overall balance (includes initial balance) - all in UAH
         $initialBalance = (float) $church->initial_balance;
         $initialBalanceDate = $church->initial_balance_date;
-        $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount');
-        $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
+        $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount_uah')
+            ?: Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount');
+        $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount_uah')
+            ?: Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
+
+        // Get balances by currency for the period
+        $incomeQueryForCurrency = Transaction::where('church_id', $church->id)->incoming()->completed();
+        $expenseQueryForCurrency = Transaction::where('church_id', $church->id)->outgoing()->completed();
+
+        if ($month) {
+            $incomeQueryForCurrency->forMonth($year, $month);
+            $expenseQueryForCurrency->forMonth($year, $month);
+        } else {
+            $incomeQueryForCurrency->forYear($year);
+            $expenseQueryForCurrency->forYear($year);
+        }
+
+        $incomeByCurrency = $incomeQueryForCurrency->clone()
+            ->selectRaw('currency, SUM(amount) as total')
+            ->groupBy('currency')
+            ->pluck('total', 'currency')
+            ->toArray();
+
+        $expenseByCurrency = $expenseQueryForCurrency->clone()
+            ->selectRaw('currency, SUM(amount) as total')
+            ->groupBy('currency')
+            ->pluck('total', 'currency')
+            ->toArray();
+
+        // Get exchange rates
+        $exchangeRates = ExchangeRate::getLatestRates();
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
 
         // Monthly data for chart
         $monthlyData = $this->getMonthlyData($church->id, $year);
@@ -152,6 +186,8 @@ class FinanceController extends Controller
             'totalIncome', 'totalExpense', 'periodBalance',
             'initialBalance', 'initialBalanceDate', 'currentBalance',
             'allTimeIncome', 'allTimeExpense',
+            'incomeByCurrency', 'expenseByCurrency',
+            'exchangeRates', 'enabledCurrencies',
             'monthlyData',
             'incomeByCategory', 'expenseByCategory', 'expenseByMinistry',
             'recentIncomes', 'recentExpenses',
@@ -200,8 +236,10 @@ class FinanceController extends Controller
             ->orderBy('sort_order')
             ->get();
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
 
-        return view('finances.incomes.create', compact('categories', 'people'));
+        return view('finances.incomes.create', compact('categories', 'people', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function storeIncome(Request $request)
@@ -209,6 +247,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
             'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
             'person_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'description' => 'nullable|string|max:255',
@@ -235,6 +274,7 @@ class FinanceController extends Controller
             'direction' => Transaction::DIRECTION_IN,
             'source_type' => $sourceType,
             'amount' => $validated['amount'],
+            'currency' => $validated['currency'] ?? 'UAH',
             'date' => $validated['date'],
             'category_id' => $validated['category_id'],
             'person_id' => $request->boolean('is_anonymous') ? null : ($validated['person_id'] ?? null),
@@ -260,8 +300,10 @@ class FinanceController extends Controller
             ->orderBy('sort_order')
             ->get();
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
 
-        return view('finances.incomes.edit', compact('income', 'categories', 'people'));
+        return view('finances.incomes.edit', compact('income', 'categories', 'people', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function updateIncome(Request $request, Transaction $income)
@@ -271,6 +313,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
             'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
             'person_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'description' => 'nullable|string|max:255',
@@ -283,6 +326,7 @@ class FinanceController extends Controller
         if ($validated['is_anonymous']) {
             $validated['person_id'] = null;
         }
+        $validated['currency'] = $validated['currency'] ?? 'UAH';
 
         $income->update($validated);
 
@@ -349,8 +393,10 @@ class FinanceController extends Controller
             ->get();
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
         $selectedMinistry = $request->get('ministry');
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
 
-        return view('finances.expenses.create', compact('categories', 'ministries', 'selectedMinistry'));
+        return view('finances.expenses.create', compact('categories', 'ministries', 'selectedMinistry', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function storeExpense(Request $request)
@@ -358,12 +404,15 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'description' => 'required|string|max:255',
             'payment_method' => 'nullable|in:cash,card,transfer,online',
             'notes' => 'nullable|string',
             'force_over_budget' => 'boolean',
+            'receipts' => 'nullable|array|max:10',
+            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf|max:10240',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -389,11 +438,12 @@ class FinanceController extends Controller
             }
         }
 
-        Transaction::create([
+        $transaction = Transaction::create([
             'church_id' => $church->id,
             'direction' => Transaction::DIRECTION_OUT,
             'source_type' => Transaction::SOURCE_EXPENSE,
             'amount' => $validated['amount'],
+            'currency' => $validated['currency'] ?? 'UAH',
             'date' => $validated['date'],
             'category_id' => $validated['category_id'] ?? null,
             'ministry_id' => $validated['ministry_id'] ?? null,
@@ -403,6 +453,21 @@ class FinanceController extends Controller
             'status' => Transaction::STATUS_COMPLETED,
             'recorded_by' => auth()->id(),
         ]);
+
+        // Handle receipt uploads
+        if ($request->hasFile('receipts')) {
+            foreach ($request->file('receipts') as $file) {
+                $path = $file->store("receipts/{$church->id}", 'public');
+
+                $transaction->attachments()->create([
+                    'filename' => basename($path),
+                    'original_name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'mime_type' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                ]);
+            }
+        }
 
         $message = 'Витрату додано.';
         if ($budgetWarning) {
@@ -424,8 +489,12 @@ class FinanceController extends Controller
             ->orderBy('sort_order')
             ->get();
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
 
-        return view('finances.expenses.edit', compact('expense', 'categories', 'ministries'));
+        $expense->load('attachments');
+
+        return view('finances.expenses.edit', compact('expense', 'categories', 'ministries', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function updateExpense(Request $request, Transaction $expense)
@@ -435,13 +504,20 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'description' => 'required|string|max:255',
             'payment_method' => 'nullable|in:cash,card,transfer,online',
             'notes' => 'nullable|string',
             'force_over_budget' => 'boolean',
+            'receipts' => 'nullable|array|max:10',
+            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf|max:10240',
+            'delete_attachments' => 'nullable|array',
+            'delete_attachments.*' => 'integer|exists:transaction_attachments,id',
         ]);
+
+        $validated['currency'] = $validated['currency'] ?? 'UAH';
 
         // Check ministry budget limits (only if amount increased or ministry changed)
         $budgetWarning = null;
@@ -475,6 +551,30 @@ class FinanceController extends Controller
         }
 
         $expense->update($validated);
+
+        // Delete marked attachments
+        if (!empty($validated['delete_attachments'])) {
+            $expense->attachments()
+                ->whereIn('id', $validated['delete_attachments'])
+                ->get()
+                ->each(fn ($att) => $att->delete());
+        }
+
+        // Handle new receipt uploads
+        $church = $this->getCurrentChurch();
+        if ($request->hasFile('receipts')) {
+            foreach ($request->file('receipts') as $file) {
+                $path = $file->store("receipts/{$church->id}", 'public');
+
+                $expense->attachments()->create([
+                    'filename' => basename($path),
+                    'original_name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'mime_type' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                ]);
+            }
+        }
 
         $message = 'Витрату оновлено.';
         if ($budgetWarning) {

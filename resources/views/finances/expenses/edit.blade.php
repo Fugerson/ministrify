@@ -64,14 +64,31 @@
                     @enderror
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4" x-data="{ currency: '{{ old('currency', $expense->currency ?? 'UAH') }}', exchangeRates: {{ json_encode($exchangeRates) }} }">
                     <div>
                         <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <input type="number" name="amount" id="amount" value="{{ old('amount', $expense->amount) }}" required min="0.01" step="0.01"
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            <span class="absolute right-3 top-2 text-gray-500 dark:text-gray-400">₴</span>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <input type="number" name="amount" id="amount" value="{{ old('amount', $expense->amount) }}" required min="0.01" step="0.01"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            </div>
+                            @if(count($enabledCurrencies) > 1)
+                            <select name="currency" x-model="currency"
+                                    class="w-20 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
+                                @foreach($enabledCurrencies as $curr)
+                                    <option value="{{ $curr }}" {{ old('currency', $expense->currency) == $curr ? 'selected' : '' }}>{{ \App\Helpers\CurrencyHelper::symbol($curr) }}</option>
+                                @endforeach
+                            </select>
+                            @else
+                            <input type="hidden" name="currency" value="UAH">
+                            <span class="inline-flex items-center px-2 py-2 text-gray-500 dark:text-gray-400">₴</span>
+                            @endif
                         </div>
+                        <template x-if="currency !== 'UAH' && exchangeRates[currency]">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Курс: 1 <span x-text="currency"></span> = <span x-text="exchangeRates[currency]?.toFixed(2)"></span> ₴
+                            </p>
+                        </template>
                         @error('amount')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
@@ -109,16 +126,137 @@
                     </select>
                 </div>
 
-                <div>
-                    <label for="receipt_photo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Фото чека</label>
-                    @if($expense->receipt_photo)
-                        <div class="mb-2">
-                            <img src="{{ Storage::url($expense->receipt_photo) }}" class="max-w-xs rounded-lg">
+                <div x-data="receiptUploaderEdit()">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Чеки / Квитанції</label>
+
+                    <!-- Existing attachments -->
+                    @if($expense->attachments->count() > 0)
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Завантажені файли:</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            @foreach($expense->attachments as $attachment)
+                            <div class="relative group" x-data="{ deleted: false }" x-show="!deleted">
+                                @if($attachment->is_image)
+                                    <a href="{{ $attachment->url }}" target="_blank">
+                                        <img src="{{ $attachment->url }}" class="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
+                                    </a>
+                                @else
+                                    <a href="{{ $attachment->url }}" target="_blank" class="block w-full h-24 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </a>
+                                @endif
+                                <button type="button" @click="deleted = true; $refs.deleteInput{{ $attachment->id }}.disabled = false"
+                                        class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                                <input type="hidden" name="delete_attachments[]" value="{{ $attachment->id }}" disabled x-ref="deleteInput{{ $attachment->id }}">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{{ $attachment->original_name }}</p>
+                            </div>
+                            @endforeach
                         </div>
+                    </div>
                     @endif
-                    <input type="file" name="receipt_photo" id="receipt_photo" accept="image/*"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+
+                    <!-- Drop zone for new files -->
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 dark:hover:border-primary-400 transition-colors cursor-pointer"
+                         @click="$refs.fileInput.click()"
+                         @dragover.prevent="dragover = true"
+                         @dragleave.prevent="dragover = false"
+                         @drop.prevent="handleDrop($event)"
+                         :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-900/20': dragover }">
+                        <input type="file" name="receipts[]" multiple accept="image/*,.pdf" class="hidden" x-ref="fileInput" @change="handleFiles($event)">
+                        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            Додати нові файли
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            JPG, PNG, PDF до 10 МБ
+                        </p>
+                    </div>
+
+                    <!-- Preview grid for new files -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3" x-show="previews.length > 0">
+                        <template x-for="(preview, index) in previews" :key="index">
+                            <div class="relative group">
+                                <template x-if="preview.type === 'image'">
+                                    <img :src="preview.url" class="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
+                                </template>
+                                <template x-if="preview.type === 'pdf'">
+                                    <div class="w-full h-24 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                </template>
+                                <button type="button" @click="removeFile(index)"
+                                        class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate" x-text="preview.name"></p>
+                            </div>
+                        </template>
+                    </div>
+                    @error('receipts')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                    @error('receipts.*')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
                 </div>
+
+                <script>
+                    function receiptUploaderEdit() {
+                        return {
+                            dragover: false,
+                            previews: [],
+                            files: [],
+                            handleFiles(event) {
+                                this.addFiles(event.target.files);
+                            },
+                            handleDrop(event) {
+                                this.dragover = false;
+                                this.addFiles(event.dataTransfer.files);
+                            },
+                            addFiles(fileList) {
+                                for (let file of fileList) {
+                                    if (this.previews.length >= 10) break;
+                                    if (!file.type.match('image.*') && file.type !== 'application/pdf') continue;
+                                    if (file.size > 10 * 1024 * 1024) continue;
+
+                                    const preview = {
+                                        name: file.name,
+                                        type: file.type === 'application/pdf' ? 'pdf' : 'image',
+                                        url: file.type !== 'application/pdf' ? URL.createObjectURL(file) : null
+                                    };
+                                    this.previews.push(preview);
+                                    this.files.push(file);
+                                }
+                                this.updateInput();
+                            },
+                            removeFile(index) {
+                                if (this.previews[index].url) {
+                                    URL.revokeObjectURL(this.previews[index].url);
+                                }
+                                this.previews.splice(index, 1);
+                                this.files.splice(index, 1);
+                                this.updateInput();
+                            },
+                            updateInput() {
+                                const dt = new DataTransfer();
+                                this.files.forEach(f => dt.items.add(f));
+                                this.$refs.fileInput.files = dt.files;
+                            }
+                        }
+                    }
+                </script>
 
                 <div>
                     <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>

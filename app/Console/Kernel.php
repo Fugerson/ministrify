@@ -28,6 +28,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('privatbank:sync')
             ->hourly()
             ->description('Sync PrivatBank transactions automatically');
+
+        // Sync exchange rates from NBU (after 10:00 when NBU publishes rates)
+        $schedule->command('exchange-rates:sync')
+            ->dailyAt('10:30')
+            ->description('Sync exchange rates from NBU');
     }
 
     protected function commands(): void
