@@ -715,7 +715,7 @@ async function runAutoAssign() {
         ];
     })->values();
 
-    $allPeopleData = $availablePeople->map(fn($p) => [
+    $allPeopleData = $registeredUsers->map(fn($p) => [
         'id' => $p->id,
         'full_name' => $p->full_name,
         'photo' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,

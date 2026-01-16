@@ -114,6 +114,12 @@ class MinistryController extends Controller
             ->orderBy('last_name')
             ->get();
 
+        // Get registered users (people with user accounts) for access settings
+        $registeredUsers = Person::where('church_id', $church->id)
+            ->whereHas('user')
+            ->orderBy('last_name')
+            ->get();
+
         // Get resources for this ministry (root level only)
         $resources = Resource::where('church_id', $church->id)
             ->where('ministry_id', $ministry->id)
@@ -123,7 +129,7 @@ class MinistryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources'));
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'registeredUsers'));
     }
 
     public function edit(Ministry $ministry)
