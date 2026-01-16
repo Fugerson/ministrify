@@ -32,7 +32,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                         </svg>
                     </a>
-                    <a href="{{ url('/features') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all hover:scale-105">
+                    <a href="#demo" class="inline-flex items-center justify-center px-8 py-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all hover:scale-105">
                         <svg class="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -64,41 +64,14 @@
 
             {{-- Right: Hero Image / Dashboard Preview --}}
             <div class="relative">
-                <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-primary-600/10 border border-gray-200 dark:border-gray-700">
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-primary-600/20 border border-gray-200 dark:border-gray-700">
                     <div class="bg-gray-100 dark:bg-gray-800 px-4 py-3 flex items-center space-x-2 border-b border-gray-200 dark:border-gray-700">
                         <div class="w-3 h-3 bg-red-400 rounded-full"></div>
                         <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
                         <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                        <span class="ml-4 text-sm text-gray-500 dark:text-gray-400">ministrify.one/dashboard</span>
+                        <span class="ml-4 text-sm text-gray-500 dark:text-gray-400">ministrify.app/dashboard</span>
                     </div>
-                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6 aspect-video">
-                        {{-- Mock dashboard with demo data --}}
-                        <div class="grid grid-cols-3 gap-4 mb-4">
-                            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                                <div class="text-2xl font-bold text-primary-600">247</div>
-                                <div class="text-xs text-gray-500">Людей</div>
-                            </div>
-                            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                                <div class="text-2xl font-bold text-green-600">18</div>
-                                <div class="text-xs text-gray-500">Подій</div>
-                            </div>
-                            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                                <div class="text-2xl font-bold text-purple-600">8</div>
-                                <div class="text-xs text-gray-500">Команд</div>
-                            </div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm h-32">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Відвідуваність</div>
-                                <div class="text-xs text-green-500">+12%</div>
-                            </div>
-                            <div class="flex items-end space-x-1 h-16">
-                                @foreach([40, 55, 45, 60, 75, 65, 80, 70, 85, 78, 90, 88] as $h)
-                                    <div class="flex-1 bg-primary-500/80 rounded-t" style="height: {{ $h }}%"></div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
+                    <img src="/icons/demo/Screenshot_7.jpg" alt="Ministrify Dashboard" class="w-full">
                 </div>
 
                 {{-- Floating elements --}}
@@ -261,6 +234,116 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </a>
+        </div>
+    </div>
+</section>
+
+{{-- Screenshots Gallery Section --}}
+<section id="demo" class="py-20 bg-gray-50 dark:bg-gray-900 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <span class="inline-block px-4 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium mb-4">Демо</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Подивіться як це працює
+            </h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Інтуїтивний інтерфейс, який ваша команда полюбить з першого погляду
+            </p>
+        </div>
+
+        {{-- Screenshot Gallery with Thumbnails --}}
+        <div x-data="{ activeSlide: 0, slides: 7 }">
+            {{-- Main Screenshot Showcase --}}
+            <div class="relative mb-6">
+                {{-- Large Preview --}}
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/20 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                    <div class="bg-gray-100 dark:bg-gray-800 px-4 py-3 flex items-center space-x-2 border-b border-gray-200 dark:border-gray-700">
+                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                        <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                        <span class="ml-4 text-sm text-gray-500 dark:text-gray-400">ministrify.app</span>
+                    </div>
+                    <div class="relative">
+                        <img x-show="activeSlide === 0" src="/icons/demo/Screenshot_7.jpg" alt="Головна" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                        <img x-show="activeSlide === 1" src="/icons/demo/Screenshot_2.jpg" alt="Люди" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                        <img x-show="activeSlide === 2" src="/icons/demo/Screenshot_5.jpg" alt="Команди" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                        <img x-show="activeSlide === 3" src="/icons/demo/Screenshot_4.jpg" alt="Розклад" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                        <img x-show="activeSlide === 4" src="/icons/demo/Screenshot_3.jpg" alt="Фінанси" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                        <img x-show="activeSlide === 5" src="/icons/demo/Screenshot_6.jpg" alt="Завдання" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                        <img x-show="activeSlide === 6" src="/icons/demo/Screenshot_8.jpg" alt="Налаштування" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                    </div>
+                </div>
+
+                {{-- Navigation Arrows --}}
+                <button @click="activeSlide = (activeSlide - 1 + slides) % slides" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
+                    <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button @click="activeSlide = (activeSlide + 1) % slides" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
+                    <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Thumbnails --}}
+            <div class="flex justify-center gap-3 flex-wrap">
+                @php
+                    $screenshots = [
+                        ['file' => 'Screenshot_7.jpg', 'label' => 'Головна'],
+                        ['file' => 'Screenshot_2.jpg', 'label' => 'Люди'],
+                        ['file' => 'Screenshot_5.jpg', 'label' => 'Команди'],
+                        ['file' => 'Screenshot_4.jpg', 'label' => 'Розклад'],
+                        ['file' => 'Screenshot_3.jpg', 'label' => 'Фінанси'],
+                        ['file' => 'Screenshot_6.jpg', 'label' => 'Завдання'],
+                        ['file' => 'Screenshot_8.jpg', 'label' => 'Налаштування'],
+                    ];
+                @endphp
+                @foreach($screenshots as $index => $screenshot)
+                    <button
+                        @click="activeSlide = {{ $index }}"
+                        class="group relative rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105"
+                        :class="activeSlide === {{ $index }} ? 'border-primary-500 shadow-lg shadow-primary-500/25' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'"
+                    >
+                        <img src="/icons/demo/{{ $screenshot['file'] }}" alt="{{ $screenshot['label'] }}" class="w-24 h-14 md:w-32 md:h-[72px] object-cover object-top">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center pb-1">
+                            <span class="text-white text-xs font-medium">{{ $screenshot['label'] }}</span>
+                        </div>
+                    </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Feature highlights --}}
+        <div class="mt-16 grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Мобільна версія</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Працює на будь-якому пристрої — телефон, планшет, комп'ютер</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Блискавично швидкий</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Оптимізований для максимальної продуктивності</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Темна тема</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Зручно працювати вдень і вночі</p>
+            </div>
         </div>
     </div>
 </section>
