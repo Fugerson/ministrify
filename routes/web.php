@@ -354,6 +354,9 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('categories/{category}', [FinanceController::class, 'updateCategory'])->name('categories.update');
         Route::delete('categories/{category}', [FinanceController::class, 'destroyCategory'])->name('categories.destroy');
 
+        // Unified Cards Page
+        Route::get('cards', [FinanceController::class, 'cards'])->name('cards');
+
         // Monobank Integration
         Route::prefix('monobank')->name('monobank.')->group(function () {
             Route::get('/', [MonobankSyncController::class, 'index'])->name('index');

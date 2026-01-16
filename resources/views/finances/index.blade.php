@@ -57,9 +57,7 @@
                 <span class="text-gray-300 dark:text-gray-600">|</span>
                 <a href="{{ route('donations.index') }}" class="text-primary-600 dark:text-primary-400 hover:underline">Пожертви</a>
                 <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('finances.monobank.index') }}" class="text-gray-600 dark:text-gray-400 hover:underline">Monobank</a>
-                <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('finances.privatbank.index') }}" class="text-gray-600 dark:text-gray-400 hover:underline">PrivatBank</a>
+                <a href="{{ route('finances.cards') }}" class="text-gray-600 dark:text-gray-400 hover:underline">Моя карта</a>
             </div>
         </div>
     </div>

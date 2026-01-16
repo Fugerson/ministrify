@@ -647,4 +647,18 @@ class FinanceController extends Controller
             abort(404);
         }
     }
+
+    /**
+     * Unified bank cards page with Monobank and PrivatBank tabs
+     */
+    public function cards()
+    {
+        $church = $this->getCurrentChurch();
+
+        // Check connection status for both banks
+        $monobankConnected = !empty($church->monobank_token);
+        $privatbankConnected = !empty($church->privatbank_merchant_id);
+
+        return view('finances.cards.index', compact('church', 'monobankConnected', 'privatbankConnected'));
+    }
 }
