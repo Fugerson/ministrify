@@ -471,8 +471,9 @@
                     <div class="space-y-3">
                         <!-- Public -->
                         <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === 'public' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
-                            <input type="radio" name="visibility" value="public" x-model="visibility" @change="saveVisibility()" class="mt-1 text-primary-600 focus:ring-primary-500">
+                               :class="visibility === 'public' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
+                               @click.prevent="setVisibility('public')">
+                            <input type="checkbox" :checked="visibility === 'public'" class="mt-1 w-5 h-5 rounded text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -486,8 +487,9 @@
 
                         <!-- Members -->
                         <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === 'members' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
-                            <input type="radio" name="visibility" value="members" x-model="visibility" @change="saveVisibility()" class="mt-1 text-primary-600 focus:ring-primary-500">
+                               :class="visibility === 'members' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
+                               @click.prevent="setVisibility('members')">
+                            <input type="checkbox" :checked="visibility === 'members'" class="mt-1 w-5 h-5 rounded text-amber-600 focus:ring-amber-500 border-gray-300 dark:border-gray-600">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -501,8 +503,9 @@
 
                         <!-- Leaders -->
                         <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === 'leaders' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
-                            <input type="radio" name="visibility" value="leaders" x-model="visibility" @change="saveVisibility()" class="mt-1 text-primary-600 focus:ring-primary-500">
+                               :class="visibility === 'leaders' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
+                               @click.prevent="setVisibility('leaders')">
+                            <input type="checkbox" :checked="visibility === 'leaders'" class="mt-1 w-5 h-5 rounded text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-600">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -516,8 +519,9 @@
 
                         <!-- Specific People -->
                         <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === 'specific' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
-                            <input type="radio" name="visibility" value="specific" x-model="visibility" @change="saveVisibility()" class="mt-1 text-primary-600 focus:ring-primary-500">
+                               :class="visibility === 'specific' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
+                               @click.prevent="setVisibility('specific')">
+                            <input type="checkbox" :checked="visibility === 'specific'" class="mt-1 w-5 h-5 rounded text-red-600 focus:ring-red-500 border-gray-300 dark:border-gray-600">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -753,6 +757,10 @@ function accessSettings() {
         saved: false,
         allPeople: @json($allPeopleData),
         init() {},
+        setVisibility(value) {
+            this.visibility = value;
+            this.saveVisibility();
+        },
         searchPeople() {
             if (this.searchQuery.length < 2) {
                 this.searchResults = [];
