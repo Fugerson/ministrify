@@ -167,21 +167,8 @@
 <script>
 function shepherdsManager() {
     return {
-        shepherds: @json($shepherds->map(fn($s) => [
-            'id' => $s->id,
-            'full_name' => $s->full_name,
-            'photo' => $s->photo ? Storage::url($s->photo) : null,
-            'role' => $s->churchRoleRelation?->name,
-            'sheep_count' => $s->sheep_count,
-            'initials' => mb_substr($s->first_name, 0, 1) . mb_substr($s->last_name, 0, 1),
-        ])),
-        availablePeople: @json($availablePeople->sortBy('last_name')->values()->map(fn($p) => [
-            'id' => $p->id,
-            'full_name' => $p->full_name,
-            'photo' => $p->photo ? Storage::url($p->photo) : null,
-            'role' => $p->churchRoleRelation?->name,
-            'initials' => mb_substr($p->first_name, 0, 1) . mb_substr($p->last_name, 0, 1),
-        ])),
+        shepherds: @json($shepherdsJson),
+        availablePeople: @json($availablePeopleJson),
         searchQuery: '',
         selectedPerson: null,
         isOpen: false,

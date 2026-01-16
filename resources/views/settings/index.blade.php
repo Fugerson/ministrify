@@ -1092,6 +1092,92 @@
                 </button>
             </div>
         </form>
+
+        <!-- Currency Settings -->
+        <form method="POST" action="{{ route('settings.currencies') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            @csrf
+            @method('PUT')
+
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Мультивалютність</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть валюти для обліку доходів та витрат</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                    <p class="text-sm text-amber-800 dark:text-amber-300">
+                        <strong>Курси валют:</strong> Автоматично оновлюються з НБУ щодня о 10:30.
+                        Всі суми в іноземній валюті конвертуються в гривні за курсом на дату транзакції.
+                    </p>
+                </div>
+
+                @php
+                    $enabledCurrencies = $church->enabled_currencies ?? ['UAH'];
+                    $allCurrencies = [
+                        'UAH' => ['symbol' => '₴', 'name' => 'Гривня (UAH)', 'flag' => '🇺🇦'],
+                        'USD' => ['symbol' => '$', 'name' => 'Долар США (USD)', 'flag' => '🇺🇸'],
+                        'EUR' => ['symbol' => '€', 'name' => 'Євро (EUR)', 'flag' => '🇪🇺'],
+                    ];
+                @endphp
+
+                <div class="space-y-3">
+                    @foreach($allCurrencies as $code => $currency)
+                    <label class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $code === 'UAH' ? 'bg-gray-50 dark:bg-gray-700/30' : '' }}">
+                        <input type="checkbox" name="currencies[]" value="{{ $code }}"
+                               {{ in_array($code, $enabledCurrencies) ? 'checked' : '' }}
+                               {{ $code === 'UAH' ? 'checked disabled' : '' }}
+                               class="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                        @if($code === 'UAH')
+                            <input type="hidden" name="currencies[]" value="UAH">
+                        @endif
+                        <span class="ml-3 text-2xl">{{ $currency['flag'] }}</span>
+                        <div class="ml-3 flex-1">
+                            <span class="block text-sm font-medium text-gray-900 dark:text-white">{{ $currency['name'] }}</span>
+                            @if($code === 'UAH')
+                                <span class="text-xs text-gray-500 dark:text-gray-400">Основна валюта (обов'язкова)</span>
+                            @endif
+                        </div>
+                        <span class="text-xl font-semibold text-gray-400 dark:text-gray-500">{{ $currency['symbol'] }}</span>
+                    </label>
+                    @endforeach
+                </div>
+
+                @if(count($enabledCurrencies) > 1)
+                <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Поточні курси НБУ</h4>
+                    <div class="flex flex-wrap gap-4">
+                        @php
+                            $rates = \App\Models\ExchangeRate::getLatestRates();
+                        @endphp
+                        @foreach(['USD', 'EUR'] as $code)
+                            @if(in_array($code, $enabledCurrencies) && isset($rates[$code]))
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">{{ $allCurrencies[$code]['flag'] }}</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">1 {{ $code }} =</span>
+                                <span class="font-semibold text-gray-900 dark:text-white">{{ number_format($rates[$code], 2, ',', ' ') }} ₴</span>
+                            </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
+                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                    Зберегти валюти
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Users Tab -->

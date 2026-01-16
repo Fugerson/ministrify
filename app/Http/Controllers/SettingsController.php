@@ -302,4 +302,28 @@ class SettingsController extends Controller
 
         return back()->with('success', 'Початковий баланс оновлено.');
     }
+
+    /**
+     * Update currency settings
+     */
+    public function updateCurrencies(Request $request)
+    {
+        $validated = $request->validate([
+            'currencies' => 'required|array|min:1',
+            'currencies.*' => 'in:UAH,USD,EUR',
+        ]);
+
+        // UAH is always required
+        $currencies = collect($validated['currencies'])->unique()->values()->toArray();
+        if (!in_array('UAH', $currencies)) {
+            array_unshift($currencies, 'UAH');
+        }
+
+        $church = $this->getCurrentChurch();
+        $church->update([
+            'enabled_currencies' => $currencies,
+        ]);
+
+        return back()->with('success', 'Налаштування валют оновлено.');
+    }
 }
