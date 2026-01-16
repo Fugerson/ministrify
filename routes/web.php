@@ -36,6 +36,31 @@ use App\Http\Controllers\MonobankSyncController;
 use App\Http\Controllers\PrivatbankSyncController;
 use Illuminate\Support\Facades\Route;
 
+// Health check endpoint (for monitoring)
+Route::get('health', function () {
+    $status = ['status' => 'ok', 'timestamp' => now()->toIso8601String()];
+
+    // Check database
+    try {
+        \DB::connection()->getPdo();
+        $status['database'] = 'ok';
+    } catch (\Exception $e) {
+        $status['database'] = 'error';
+        $status['status'] = 'degraded';
+    }
+
+    // Check Redis
+    try {
+        \Illuminate\Support\Facades\Redis::ping();
+        $status['redis'] = 'ok';
+    } catch (\Exception $e) {
+        $status['redis'] = 'error';
+        $status['status'] = 'degraded';
+    }
+
+    return response()->json($status, $status['status'] === 'ok' ? 200 : 503);
+})->name('health');
+
 // QR Check-in (public with optional auth)
 Route::get('checkin/{token}', [QrCheckinController::class, 'show'])->name('checkin.show');
 
@@ -416,6 +441,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('theme-color', [SettingsController::class, 'updateThemeColor'])->name('theme-color');
         Route::put('design-theme', [SettingsController::class, 'updateDesignTheme'])->name('design-theme');
         Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
+        Route::put('currencies', [SettingsController::class, 'updateCurrencies'])->name('currencies');
 
         // Role permissions management
         Route::get('permissions', [\App\Http\Controllers\RolePermissionController::class, 'index'])->name('permissions.index');
