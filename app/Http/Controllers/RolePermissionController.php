@@ -18,6 +18,7 @@ class RolePermissionController extends Controller
 
         // Get all church roles for this church
         $churchRoles = ChurchRole::where('church_id', $church->id)
+            ->with('permissions')
             ->orderBy('sort_order')
             ->get();
 
