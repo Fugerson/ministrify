@@ -251,182 +251,154 @@
             </p>
         </div>
 
-        {{-- Screenshot Gallery with Thumbnails --}}
+        {{-- Screenshot Gallery --}}
         <div x-data="{
             activeSlide: 0,
             slides: 7,
             fullscreen: false,
-            touchStartX: 0,
-            touchEndX: 0,
-            touchStartY: 0,
-            touchEndY: 0,
-            isSingleTouch: true,
             images: [
-                '/icons/demo/Screenshot_7.jpg',
-                '/icons/demo/Screenshot_2.jpg',
-                '/icons/demo/Screenshot_5.jpg',
-                '/icons/demo/Screenshot_4.jpg',
-                '/icons/demo/Screenshot_3.jpg',
-                '/icons/demo/Screenshot_6.jpg',
-                '/icons/demo/Screenshot_8.jpg'
+                { src: '/icons/demo/Screenshot_7.jpg', label: 'Головна' },
+                { src: '/icons/demo/Screenshot_2.jpg', label: 'Люди' },
+                { src: '/icons/demo/Screenshot_5.jpg', label: 'Команди' },
+                { src: '/icons/demo/Screenshot_4.jpg', label: 'Розклад' },
+                { src: '/icons/demo/Screenshot_3.jpg', label: 'Фінанси' },
+                { src: '/icons/demo/Screenshot_6.jpg', label: 'Завдання' },
+                { src: '/icons/demo/Screenshot_8.jpg', label: 'Налаштування' }
             ],
-            handleTouchStart(e) {
-                this.isSingleTouch = e.touches.length === 1;
-                if (this.isSingleTouch) {
-                    this.touchStartX = e.touches[0].clientX;
-                    this.touchStartY = e.touches[0].clientY;
-                }
-            },
-            handleTouchEnd(e) {
-                if (!this.isSingleTouch) return;
-                this.touchEndX = e.changedTouches[0].clientX;
-                this.touchEndY = e.changedTouches[0].clientY;
-                this.handleSwipe();
-            },
-            handleSwipe() {
-                const diffX = this.touchStartX - this.touchEndX;
-                const diffY = this.touchStartY - this.touchEndY;
-                if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
-                    if (diffX > 0) {
-                        this.activeSlide = (this.activeSlide + 1) % this.slides;
-                    } else {
-                        this.activeSlide = (this.activeSlide - 1 + this.slides) % this.slides;
-                    }
-                }
-            },
-            openFullscreen() {
+            openFullscreen(index) {
+                this.activeSlide = index;
                 this.fullscreen = true;
                 document.body.style.overflow = 'hidden';
             },
             closeFullscreen() {
                 this.fullscreen = false;
                 document.body.style.overflow = '';
+            },
+            next() {
+                this.activeSlide = (this.activeSlide + 1) % this.slides;
+            },
+            prev() {
+                this.activeSlide = (this.activeSlide - 1 + this.slides) % this.slides;
             }
         }"
-        @keydown.escape.window="closeFullscreen()">
-            {{-- Main Screenshot Showcase --}}
-            <div class="relative mb-4 md:mb-6">
-                {{-- Large Preview --}}
-                <div class="relative rounded-xl md:rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/20 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer group"
-                     @click="openFullscreen()"
-                     @touchstart="handleTouchStart($event)"
-                     @touchend="handleTouchEnd($event)">
-                    <div class="bg-gray-100 dark:bg-gray-800 px-3 md:px-4 py-2 md:py-3 flex items-center space-x-2 border-b border-gray-200 dark:border-gray-700">
-                        <div class="w-2.5 h-2.5 md:w-3 md:h-3 bg-red-400 rounded-full"></div>
-                        <div class="w-2.5 h-2.5 md:w-3 md:h-3 bg-yellow-400 rounded-full"></div>
-                        <div class="w-2.5 h-2.5 md:w-3 md:h-3 bg-green-400 rounded-full"></div>
-                        <span class="ml-3 md:ml-4 text-xs md:text-sm text-gray-500 dark:text-gray-400">ministrify.app</span>
+        @keydown.escape.window="closeFullscreen()"
+        @keydown.arrow-right.window="if(fullscreen) next()"
+        @keydown.arrow-left.window="if(fullscreen) prev()">
+
+            {{-- Main Featured Screenshot --}}
+            <div class="relative mb-6">
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/20 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer group"
+                     @click="openFullscreen(activeSlide)">
+                    <div class="bg-gray-100 dark:bg-gray-800 px-4 py-3 flex items-center space-x-2 border-b border-gray-200 dark:border-gray-700">
+                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                        <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                        <span class="ml-4 text-sm text-gray-500 dark:text-gray-400">ministrify.app</span>
                     </div>
                     <div class="relative">
-                        <img x-show="activeSlide === 0" src="/icons/demo/Screenshot_7.jpg" alt="Головна" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                        <img x-show="activeSlide === 1" src="/icons/demo/Screenshot_2.jpg" alt="Люди" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                        <img x-show="activeSlide === 2" src="/icons/demo/Screenshot_5.jpg" alt="Команди" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                        <img x-show="activeSlide === 3" src="/icons/demo/Screenshot_4.jpg" alt="Розклад" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                        <img x-show="activeSlide === 4" src="/icons/demo/Screenshot_3.jpg" alt="Фінанси" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                        <img x-show="activeSlide === 5" src="/icons/demo/Screenshot_6.jpg" alt="Завдання" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                        <img x-show="activeSlide === 6" src="/icons/demo/Screenshot_8.jpg" alt="Налаштування" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                        <template x-for="(img, index) in images" :key="index">
+                            <img x-show="activeSlide === index"
+                                 :src="img.src"
+                                 :alt="img.label"
+                                 class="w-full"
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100">
+                        </template>
 
-                        {{-- Fullscreen hint overlay --}}
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                            <div class="opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full p-3">
+                        {{-- Fullscreen hint --}}
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+                            <div class="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 backdrop-blur-sm rounded-full p-4">
                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
                                 </svg>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Navigation Arrows (hidden on mobile, visible on desktop) --}}
-                <button @click="activeSlide = (activeSlide - 1 + slides) % slides" class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
+                {{-- Desktop Navigation Arrows --}}
+                <button @click="prev()" class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
                     <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-                <button @click="activeSlide = (activeSlide + 1) % slides" class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
+                <button @click="next()" class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
                     <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
-
-                {{-- Swipe hint for mobile --}}
-                <div class="md:hidden flex justify-center mt-3 text-xs text-gray-400 dark:text-gray-500">
-                    <span>← Свайпніть для перегляду →</span>
-                </div>
             </div>
 
-            {{-- Thumbnails (horizontal scroll on mobile) --}}
-            <div class="flex gap-2 md:gap-3 overflow-x-auto pb-2 md:pb-0 md:flex-wrap md:justify-center snap-x snap-mandatory scrollbar-hide" style="-webkit-overflow-scrolling: touch;">
-                @php
-                    $screenshots = [
-                        ['file' => 'Screenshot_7.jpg', 'label' => 'Головна'],
-                        ['file' => 'Screenshot_2.jpg', 'label' => 'Люди'],
-                        ['file' => 'Screenshot_5.jpg', 'label' => 'Команди'],
-                        ['file' => 'Screenshot_4.jpg', 'label' => 'Розклад'],
-                        ['file' => 'Screenshot_3.jpg', 'label' => 'Фінанси'],
-                        ['file' => 'Screenshot_6.jpg', 'label' => 'Завдання'],
-                        ['file' => 'Screenshot_8.jpg', 'label' => 'Налаштування'],
-                    ];
-                @endphp
-                @foreach($screenshots as $index => $screenshot)
-                    <button
-                        @click="activeSlide = {{ $index }}"
-                        class="group relative rounded-lg md:rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 flex-shrink-0 snap-center"
-                        :class="activeSlide === {{ $index }} ? 'border-primary-500 shadow-lg shadow-primary-500/25' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'"
-                    >
-                        <img src="/icons/demo/{{ $screenshot['file'] }}" alt="{{ $screenshot['label'] }}" class="w-20 h-12 md:w-32 md:h-[72px] object-cover object-top">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end justify-center pb-0.5 md:pb-1">
-                            <span class="text-white text-[10px] md:text-xs font-medium">{{ $screenshot['label'] }}</span>
+            {{-- Thumbnail Grid --}}
+            <div class="grid grid-cols-4 md:grid-cols-7 gap-2 md:gap-3">
+                <template x-for="(img, index) in images" :key="index">
+                    <button @click="activeSlide = index"
+                            class="relative rounded-lg md:rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 aspect-video"
+                            :class="activeSlide === index ? 'border-primary-500 shadow-lg shadow-primary-500/25 ring-2 ring-primary-500/50' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'">
+                        <img :src="img.src" :alt="img.label" class="w-full h-full object-cover object-top">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end justify-center pb-1">
+                            <span class="text-white text-[9px] md:text-xs font-medium truncate px-1" x-text="img.label"></span>
                         </div>
                     </button>
-                @endforeach
+                </template>
             </div>
 
-            {{-- Fullscreen Modal --}}
+            {{-- Fullscreen Lightbox --}}
             <div x-show="fullscreen"
-                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
-                 class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
-                 @click.self="closeFullscreen()"
-                 @touchstart.prevent="handleTouchStart($event)"
-                 @touchend.prevent="handleTouchEnd($event)"
-                 @touchmove.prevent>
+                 class="fixed inset-0 z-50 bg-black flex flex-col"
+                 @click.self="closeFullscreen()">
 
-                {{-- Close button --}}
-                <button @click="closeFullscreen()" class="absolute top-4 right-4 z-10 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
+                {{-- Header --}}
+                <div class="flex items-center justify-between p-4 text-white">
+                    <span class="text-sm font-medium" x-text="images[activeSlide]?.label"></span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-400" x-text="(activeSlide + 1) + ' / ' + slides"></span>
+                        <button @click="closeFullscreen()" class="ml-4 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-                {{-- Navigation arrows --}}
-                <button @click.stop="activeSlide = (activeSlide - 1 + slides) % slides" class="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{-- Image Container --}}
+                <div class="flex-1 flex items-center justify-center px-4 pb-4 overflow-hidden">
+                    <img :src="images[activeSlide]?.src"
+                         :alt="images[activeSlide]?.label"
+                         class="max-w-full max-h-full object-contain select-none"
+                         @click.stop>
+                </div>
+
+                {{-- Navigation --}}
+                <button @click.stop="prev()" class="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-                <button @click.stop="activeSlide = (activeSlide + 1) % slides" class="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button @click.stop="next()" class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
 
-                {{-- Image --}}
-                <div class="max-w-7xl max-h-[90vh] mx-4">
-                    <img :src="images[activeSlide]" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" alt="">
-                </div>
-
-                {{-- Slide indicator --}}
-                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                    <template x-for="(img, index) in images" :key="index">
-                        <button @click.stop="activeSlide = index"
-                                class="w-2 h-2 rounded-full transition-all"
-                                :class="activeSlide === index ? 'bg-white w-6' : 'bg-white/40 hover:bg-white/60'"></button>
-                    </template>
+                {{-- Thumbnail Strip --}}
+                <div class="p-4 bg-black/50">
+                    <div class="flex justify-center gap-2 overflow-x-auto scrollbar-hide">
+                        <template x-for="(img, index) in images" :key="index">
+                            <button @click.stop="activeSlide = index"
+                                    class="flex-shrink-0 w-16 h-10 md:w-20 md:h-12 rounded-lg overflow-hidden border-2 transition-all"
+                                    :class="activeSlide === index ? 'border-white opacity-100' : 'border-transparent opacity-50 hover:opacity-75'">
+                                <img :src="img.src" :alt="img.label" class="w-full h-full object-cover object-top">
+                            </button>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
