@@ -725,14 +725,33 @@ async function runAutoAssign() {
     }
 }
 
+@php
+    $allowedPeopleData = collect($ministry->allowed_person_ids ?? [])->map(function($id) {
+        $p = \App\Models\Person::find($id);
+        if (!$p) return ['id' => $id, 'name' => 'Unknown', 'photo' => null, 'initials' => '?'];
+        return [
+            'id' => $id,
+            'name' => $p->full_name,
+            'photo' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
+            'initials' => mb_substr($p->first_name, 0, 1) . mb_substr($p->last_name, 0, 1)
+        ];
+    })->values();
+
+    $allPeopleData = $availablePeople->map(fn($p) => [
+        'id' => $p->id,
+        'full_name' => $p->full_name,
+        'photo' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
+        'initials' => mb_substr($p->first_name, 0, 1) . mb_substr($p->last_name, 0, 1)
+    ])->values();
+@endphp
 function accessSettings() {
     return {
         visibility: '{{ $ministry->visibility ?? "public" }}',
-        allowedPeople: @json(collect($ministry->allowed_person_ids ?? [])->map(function($id) { $p = \App\Models\Person::find($id); return $p ? ['id' => $id, 'name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null, 'initials' => mb_substr($p->first_name, 0, 1) . mb_substr($p->last_name, 0, 1)] : ['id' => $id, 'name' => 'Unknown', 'photo' => null, 'initials' => '?']; })),
+        allowedPeople: @json($allowedPeopleData),
         searchQuery: '',
         searchResults: [],
         saved: false,
-        allPeople: @json($availablePeople->map(fn($p) => ['id' => $p->id, 'full_name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null, 'initials' => mb_substr($p->first_name, 0, 1) . mb_substr($p->last_name, 0, 1)])),
+        allPeople: @json($allPeopleData),
         init() {},
         searchPeople() {
             if (this.searchQuery.length < 2) {
