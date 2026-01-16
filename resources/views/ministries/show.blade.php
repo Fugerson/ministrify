@@ -547,31 +547,18 @@
                             </template>
                         </div>
 
-                        <!-- Search/Add people -->
-                        <div class="relative">
-                            <input type="text" x-model="searchQuery" @input="searchPeople()" placeholder="Пошук людей..."
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                            <!-- Search results dropdown -->
-                            <div x-show="searchResults.length > 0" x-transition
-                                 class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                <template x-for="person in searchResults" :key="person.id">
-                                    <button type="button" @click="addPerson(person)"
-                                            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3">
-                                        <template x-if="person.photo">
-                                            <img :src="person.photo" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
-                                        </template>
-                                        <template x-if="!person.photo">
-                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
-                                                <span class="text-xs text-white font-medium" x-text="person.initials"></span>
-                                            </div>
-                                        </template>
-                                        <span x-text="person.full_name" class="text-gray-900 dark:text-white flex-1"></span>
-                                        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                        </svg>
-                                    </button>
+                        <!-- Select people dropdown -->
+                        <div class="flex gap-2">
+                            <select x-model="selectedPersonId" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                <option value="">Оберіть людину...</option>
+                                <template x-for="person in availablePeopleFiltered" :key="person.id">
+                                    <option :value="person.id" x-text="person.full_name"></option>
                                 </template>
-                            </div>
+                            </select>
+                            <button type="button" @click="addSelectedPerson()" :disabled="!selectedPersonId"
+                                    class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                Додати
+                            </button>
                         </div>
                     </div>
 
@@ -739,29 +726,22 @@ function accessSettings() {
     return {
         visibility: '{{ $ministry->visibility ?? "public" }}',
         allowedPeople: @json($allowedPeopleData),
-        searchQuery: '',
-        searchResults: [],
+        selectedPersonId: '',
         saved: false,
         allPeople: @json($allPeopleData),
         init() {},
-        searchPeople() {
-            if (this.searchQuery.length < 2) {
-                this.searchResults = [];
-                return;
-            }
-            const query = this.searchQuery.toLowerCase();
+        get availablePeopleFiltered() {
             const selectedIds = this.allowedPeople.map(p => p.id);
-            this.searchResults = this.allPeople
-                .filter(p => p.full_name.toLowerCase().includes(query) && !selectedIds.includes(p.id))
-                .slice(0, 10);
+            return this.allPeople.filter(p => !selectedIds.includes(p.id));
         },
-        addPerson(person) {
-            if (!this.allowedPeople.find(p => p.id === person.id)) {
+        addSelectedPerson() {
+            if (!this.selectedPersonId) return;
+            const person = this.allPeople.find(p => p.id == this.selectedPersonId);
+            if (person && !this.allowedPeople.find(p => p.id === person.id)) {
                 this.allowedPeople.push({ id: person.id, name: person.full_name, photo: person.photo, initials: person.initials });
                 this.saveVisibility();
             }
-            this.searchQuery = '';
-            this.searchResults = [];
+            this.selectedPersonId = '';
         },
         removePerson(personId) {
             this.allowedPeople = this.allowedPeople.filter(p => p.id !== personId);
