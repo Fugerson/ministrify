@@ -252,16 +252,33 @@
         </div>
 
         {{-- Screenshot Gallery with Thumbnails --}}
-        <div x-data="{ activeSlide: 0, slides: 7 }">
+        <div x-data="{
+            activeSlide: 0,
+            slides: 7,
+            touchStartX: 0,
+            touchEndX: 0,
+            handleSwipe() {
+                const diff = this.touchStartX - this.touchEndX;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        this.activeSlide = (this.activeSlide + 1) % this.slides;
+                    } else {
+                        this.activeSlide = (this.activeSlide - 1 + this.slides) % this.slides;
+                    }
+                }
+            }
+        }">
             {{-- Main Screenshot Showcase --}}
-            <div class="relative mb-6">
+            <div class="relative mb-4 md:mb-6">
                 {{-- Large Preview --}}
-                <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/20 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                    <div class="bg-gray-100 dark:bg-gray-800 px-4 py-3 flex items-center space-x-2 border-b border-gray-200 dark:border-gray-700">
-                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
-                        <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                        <span class="ml-4 text-sm text-gray-500 dark:text-gray-400">ministrify.app</span>
+                <div class="relative rounded-xl md:rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/20 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                     @touchstart="touchStartX = $event.touches[0].clientX"
+                     @touchend="touchEndX = $event.changedTouches[0].clientX; handleSwipe()">
+                    <div class="bg-gray-100 dark:bg-gray-800 px-3 md:px-4 py-2 md:py-3 flex items-center space-x-2 border-b border-gray-200 dark:border-gray-700">
+                        <div class="w-2.5 h-2.5 md:w-3 md:h-3 bg-red-400 rounded-full"></div>
+                        <div class="w-2.5 h-2.5 md:w-3 md:h-3 bg-yellow-400 rounded-full"></div>
+                        <div class="w-2.5 h-2.5 md:w-3 md:h-3 bg-green-400 rounded-full"></div>
+                        <span class="ml-3 md:ml-4 text-xs md:text-sm text-gray-500 dark:text-gray-400">ministrify.app</span>
                     </div>
                     <div class="relative">
                         <img x-show="activeSlide === 0" src="/icons/demo/Screenshot_7.jpg" alt="Головна" class="w-full" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
@@ -274,21 +291,26 @@
                     </div>
                 </div>
 
-                {{-- Navigation Arrows --}}
-                <button @click="activeSlide = (activeSlide - 1 + slides) % slides" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
+                {{-- Navigation Arrows (hidden on mobile, visible on desktop) --}}
+                <button @click="activeSlide = (activeSlide - 1 + slides) % slides" class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
                     <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-                <button @click="activeSlide = (activeSlide + 1) % slides" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
+                <button @click="activeSlide = (activeSlide + 1) % slides" class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors z-10">
                     <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
+
+                {{-- Swipe hint for mobile --}}
+                <div class="md:hidden flex justify-center mt-3 text-xs text-gray-400 dark:text-gray-500">
+                    <span>← Свайпніть для перегляду →</span>
+                </div>
             </div>
 
-            {{-- Thumbnails --}}
-            <div class="flex justify-center gap-3 flex-wrap">
+            {{-- Thumbnails (horizontal scroll on mobile) --}}
+            <div class="flex gap-2 md:gap-3 overflow-x-auto pb-2 md:pb-0 md:flex-wrap md:justify-center snap-x snap-mandatory scrollbar-hide" style="-webkit-overflow-scrolling: touch;">
                 @php
                     $screenshots = [
                         ['file' => 'Screenshot_7.jpg', 'label' => 'Головна'],
@@ -303,12 +325,12 @@
                 @foreach($screenshots as $index => $screenshot)
                     <button
                         @click="activeSlide = {{ $index }}"
-                        class="group relative rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105"
+                        class="group relative rounded-lg md:rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 flex-shrink-0 snap-center"
                         :class="activeSlide === {{ $index }} ? 'border-primary-500 shadow-lg shadow-primary-500/25' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'"
                     >
-                        <img src="/icons/demo/{{ $screenshot['file'] }}" alt="{{ $screenshot['label'] }}" class="w-24 h-14 md:w-32 md:h-[72px] object-cover object-top">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center pb-1">
-                            <span class="text-white text-xs font-medium">{{ $screenshot['label'] }}</span>
+                        <img src="/icons/demo/{{ $screenshot['file'] }}" alt="{{ $screenshot['label'] }}" class="w-20 h-12 md:w-32 md:h-[72px] object-cover object-top">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end justify-center pb-0.5 md:pb-1">
+                            <span class="text-white text-[10px] md:text-xs font-medium">{{ $screenshot['label'] }}</span>
                         </div>
                     </button>
                 @endforeach

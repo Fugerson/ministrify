@@ -86,6 +86,13 @@
         .dark .hero-gradient {
             background: linear-gradient(135deg, #172554 0%, #1e3a8a 50%, #1e40af 100%);
         }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 
     {{-- Schema.org Markup --}}
