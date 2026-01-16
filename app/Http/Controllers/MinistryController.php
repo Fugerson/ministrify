@@ -27,7 +27,7 @@ class MinistryController extends Controller
         $ministries = $query->get();
 
         // Filter private ministries - show only to members/admins
-        if (!$user->isAdmin() && !$user->isManager()) {
+        if (!$user->isAdmin()) {
             $ministries = $ministries->filter(function ($ministry) {
                 return $ministry->canAccess();
             });
