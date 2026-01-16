@@ -20,7 +20,8 @@
     @forelse($ministries as $ministry)
         @php
             $canAccess = $ministry->canAccess();
-            $isLocked = $ministry->is_private && !$canAccess;
+            $visibility = $ministry->visibility ?? 'public';
+            $isLocked = $visibility !== 'public' && !$canAccess;
         @endphp
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 {{ $isLocked ? 'opacity-60' : '' }}">
             <div class="p-4 md:p-6">
@@ -28,8 +29,8 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="text-lg font-semibold {{ $isLocked ? 'text-gray-500 dark:text-gray-500' : 'text-gray-900 dark:text-white' }}">{{ $ministry->name }}</h3>
-                            @if($ministry->is_private)
-                                <svg class="w-4 h-4 {{ $canAccess ? 'text-amber-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Приватна команда">
+                            @if($visibility !== 'public')
+                                <svg class="w-4 h-4 {{ $canAccess ? 'text-amber-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="{{ $visibility === 'members' ? 'Тільки учасники' : 'Тільки лідери' }}">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
                             @endif

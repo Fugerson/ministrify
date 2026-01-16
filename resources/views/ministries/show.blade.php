@@ -4,38 +4,10 @@
 
 @section('actions')
 @can('manage-ministry', $ministry)
-<div class="flex items-center gap-3">
-    <!-- Privacy Toggle -->
-    <div x-data="{ isPrivate: {{ $ministry->is_private ? 'true' : 'false' }}, loading: false }"
-         class="flex items-center gap-2">
-        <button type="button"
-                @click="if(!loading) {
-                    loading = true;
-                    fetch('{{ route('ministries.toggle-privacy', $ministry) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(r => r.json())
-                    .then(data => { isPrivate = data.is_private; loading = false; })
-                    .catch(() => loading = false);
-                }"
-                :class="isPrivate ? 'bg-amber-500' : 'bg-gray-300 dark:bg-gray-600'"
-                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-            <span :class="isPrivate ? 'translate-x-5' : 'translate-x-0'"
-                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-        </button>
-        <span class="text-sm text-gray-600 dark:text-gray-400" x-text="isPrivate ? 'Приватна' : 'Відкрита'"></span>
-    </div>
-
-    <a href="{{ route('ministries.edit', $ministry) }}"
-       class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
-        Налаштування
-    </a>
-</div>
+<a href="{{ route('ministries.edit', $ministry) }}"
+   class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
+    Налаштування
+</a>
 @endcan
 @endsection
 
@@ -51,12 +23,13 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
-                        @if($ministry->is_private)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                        @php $visibility = $ministry->visibility ?? 'public'; @endphp
+                        @if($visibility !== 'public')
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $visibility === 'members' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' }}">
                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                Приватна
+                                {{ $visibility === 'members' ? 'Тільки учасники' : 'Тільки лідери' }}
                             </span>
                         @endif
                     </div>
@@ -130,6 +103,16 @@
                     </svg>
                     Ресурси
                 </button>
+                @can('manage-ministry', $ministry)
+                <button @click="setTab('access')" type="button"
+                   :class="activeTab === 'access' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    Доступ
+                </button>
+                @endcan
             </nav>
         </div>
 
@@ -457,6 +440,96 @@
                 </div>
                 @endif
             </div>
+
+            <!-- Access Settings Tab -->
+            @can('manage-ministry', $ministry)
+            <div x-show="activeTab === 'access'"{{ $tab !== 'access' ? ' style="display:none"' : '' }}
+                 x-data="accessSettings()"
+                 x-init="init()">
+                <div class="max-w-xl">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Налаштування доступу</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                        Визначте, хто може бачити цю команду та її деталі
+                    </p>
+
+                    <div class="space-y-3">
+                        @foreach(\App\Models\Ministry::VISIBILITY_OPTIONS as $value => $label)
+                        <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
+                               :class="visibility === '{{ $value }}'
+                                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
+                            <input type="radio" name="visibility" value="{{ $value }}"
+                                   x-model="visibility"
+                                   @change="saveVisibility()"
+                                   class="mt-1 text-primary-600 focus:ring-primary-500">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    @if($value === 'public')
+                                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    @elseif($value === 'members')
+                                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                    </svg>
+                                    @else
+                                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                    @endif
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ $label }}</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    @if($value === 'public')
+                                        Всі користувачі церкви можуть бачити цю команду
+                                    @elseif($value === 'members')
+                                        Тільки учасники цієї команди та адміністратори бачать деталі
+                                    @else
+                                        Тільки адміністратори та лідери інших служінь мають доступ
+                                    @endif
+                                </p>
+                            </div>
+                        </label>
+                        @endforeach
+                    </div>
+
+                    <!-- Save indicator -->
+                    <div class="mt-4 flex items-center gap-2" x-show="saved" x-transition>
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span class="text-sm text-green-600 dark:text-green-400">Збережено</span>
+                    </div>
+
+                    <!-- Current access info -->
+                    <div class="mt-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Поточний доступ:</h4>
+                        <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                            <li class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                Адміністратори - завжди мають доступ
+                            </li>
+                            <li class="flex items-center gap-2" x-show="visibility !== 'leaders'">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                Лідер команди ({{ $ministry->leader?->full_name ?? 'не призначено' }})
+                            </li>
+                            <li class="flex items-center gap-2" x-show="visibility === 'members'">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                {{ $ministry->members->count() }} учасників команди
+                            </li>
+                            <li class="flex items-center gap-2" x-show="visibility === 'leaders'">
+                                <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+                                Лідери всіх служінь церкви
+                            </li>
+                            <li class="flex items-center gap-2" x-show="visibility === 'public'">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                Всі користувачі церкви
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @endcan
         </div>
     </div>
 
@@ -558,6 +631,33 @@ async function runAutoAssign() {
         }
     } catch (error) {
         document.getElementById('modalContent').innerHTML = `<div class="text-center py-4"><p class="text-red-600">Помилка з'єднання</p><button onclick="closeAutoAssignModal()" class="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl">Закрити</button></div>`;
+    }
+}
+
+function accessSettings() {
+    return {
+        visibility: '{{ $ministry->visibility ?? "public" }}',
+        saved: false,
+        init() {},
+        async saveVisibility() {
+            try {
+                const response = await fetch('{{ route("ministries.update-visibility", $ministry) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ visibility: this.visibility })
+                });
+                if (response.ok) {
+                    this.saved = true;
+                    setTimeout(() => this.saved = false, 2000);
+                }
+            } catch (error) {
+                console.error('Error saving visibility:', error);
+            }
+        }
     }
 }
 </script>

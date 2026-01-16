@@ -231,6 +231,27 @@ class MinistryController extends Controller
         ]);
     }
 
+    public function updateVisibility(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('manage-ministry', $ministry);
+
+        $validated = $request->validate([
+            'visibility' => 'required|in:public,members,leaders',
+        ]);
+
+        $ministry->update([
+            'visibility' => $validated['visibility'],
+            // Also update is_private for backwards compatibility
+            'is_private' => $validated['visibility'] !== 'public',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'visibility' => $ministry->visibility,
+        ]);
+    }
+
     protected function authorizeChurch($model): void
     {
         if ($model->church_id !== $this->getCurrentChurch()->id) {

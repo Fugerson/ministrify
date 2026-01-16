@@ -15,6 +15,17 @@ class Ministry extends Model
 {
     use HasFactory, SoftDeletes, Auditable;
 
+    // Visibility options
+    public const VISIBILITY_PUBLIC = 'public';      // Everyone can see
+    public const VISIBILITY_MEMBERS = 'members';    // Only members can see
+    public const VISIBILITY_LEADERS = 'leaders';    // Only admins and ministry leaders can see
+
+    public const VISIBILITY_OPTIONS = [
+        self::VISIBILITY_PUBLIC => 'Всі користувачі',
+        self::VISIBILITY_MEMBERS => 'Тільки учасники команди',
+        self::VISIBILITY_LEADERS => 'Тільки адміни та лідери служінь',
+    ];
+
     protected $fillable = [
         'church_id',
         'type_id',
@@ -30,6 +41,7 @@ class Ministry extends Model
         'cover_image',
         'allow_registrations',
         'is_private',
+        'visibility',
     ];
 
     protected $casts = [
@@ -191,27 +203,59 @@ class Ministry extends Model
             return false;
         }
 
-        // If not private - everyone can access
-        if (!$this->is_private) {
+        $visibility = $this->visibility ?? self::VISIBILITY_PUBLIC;
+
+        // Public - everyone can access
+        if ($visibility === self::VISIBILITY_PUBLIC) {
             return true;
         }
 
-        // Admins and managers can always access
-        if ($user->isAdmin() || $user->isManager()) {
+        // Admins can always access
+        if ($user->isAdmin()) {
             return true;
         }
 
-        // Leaders of ministry can access
-        if ($user->person && $this->leader_id === $user->person->id) {
-            return true;
+        // Leaders visibility - only admins and ministry leaders
+        if ($visibility === self::VISIBILITY_LEADERS) {
+            // Check if user is a leader of ANY ministry (not just this one)
+            if ($user->person) {
+                $isAnyMinistryLeader = self::where('church_id', $this->church_id)
+                    ->where('leader_id', $user->person->id)
+                    ->exists();
+                if ($isAnyMinistryLeader) {
+                    return true;
+                }
+            }
+            return false;
         }
 
-        // Members can access
-        if ($user->person && $this->members()->where('person_id', $user->person->id)->exists()) {
-            return true;
+        // Members visibility - members, leaders, admins
+        if ($visibility === self::VISIBILITY_MEMBERS) {
+            // Leaders of this ministry can access
+            if ($user->person && $this->leader_id === $user->person->id) {
+                return true;
+            }
+
+            // Members can access
+            if ($user->person && $this->members()->where('person_id', $user->person->id)->exists()) {
+                return true;
+            }
+
+            return false;
         }
 
-        return false;
+        // Fallback for legacy is_private
+        if ($this->is_private) {
+            if ($user->person && $this->leader_id === $user->person->id) {
+                return true;
+            }
+            if ($user->person && $this->members()->where('person_id', $user->person->id)->exists()) {
+                return true;
+            }
+            return false;
+        }
+
+        return true;
     }
 
     /**
