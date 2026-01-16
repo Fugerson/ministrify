@@ -28,7 +28,7 @@ return new class extends Migration
 
         // Add enabled_currencies to churches
         Schema::table('churches', function (Blueprint $table) {
-            $table->json('enabled_currencies')->nullable()->after('currency');
+            $table->json('enabled_currencies')->nullable();
         });
 
         // Set amount_uah for existing UAH transactions
