@@ -37,10 +37,10 @@
             </ol>
         </div>
 
-        <form action="{{ route('finances.privatbank.connect') }}" method="POST" class="max-w-md mx-auto space-y-4">
+        <form action="{{ route('finances.privatbank.connect') }}" method="POST" class="max-w-md mx-auto space-y-4" autocomplete="off">
             @csrf
             <div>
-                <input type="text" name="merchant_id" placeholder="Merchant ID"
+                <input type="text" name="merchant_id" placeholder="Merchant ID" autocomplete="off"
                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                        required>
                 @error('merchant_id')
@@ -48,7 +48,7 @@
                 @enderror
             </div>
             <div>
-                <input type="password" name="password" placeholder="Пароль Merchant"
+                <input type="text" name="password" placeholder="Пароль Merchant" autocomplete="new-password"
                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                        required>
                 @error('password')
@@ -56,7 +56,7 @@
                 @enderror
             </div>
             <div>
-                <input type="text" name="card_number" placeholder="Номер картки (останні 4 цифри)"
+                <input type="text" name="card_number" placeholder="Номер картки (останні 4 цифри)" autocomplete="off"
                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                        required>
                 @error('card_number')
