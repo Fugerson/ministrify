@@ -471,9 +471,8 @@
                     <div class="space-y-3">
                         <!-- Public -->
                         <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === 'public' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
-                               @click.prevent="setVisibility('public')">
-                            <input type="checkbox" :checked="visibility === 'public'" class="mt-1 w-5 h-5 rounded text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600">
+                               :class="visibility === 'public' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                            <input type="radio" name="visibility" value="public" x-model="visibility" @change="saveVisibility()" class="mt-1 w-5 h-5 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -487,9 +486,8 @@
 
                         <!-- Members -->
                         <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === 'members' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
-                               @click.prevent="setVisibility('members')">
-                            <input type="checkbox" :checked="visibility === 'members'" class="mt-1 w-5 h-5 rounded text-amber-600 focus:ring-amber-500 border-gray-300 dark:border-gray-600">
+                               :class="visibility === 'members' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                            <input type="radio" name="visibility" value="members" x-model="visibility" @change="saveVisibility()" class="mt-1 w-5 h-5 text-amber-600 focus:ring-amber-500 border-gray-300 dark:border-gray-600">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -503,9 +501,8 @@
 
                         <!-- Leaders -->
                         <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === 'leaders' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
-                               @click.prevent="setVisibility('leaders')">
-                            <input type="checkbox" :checked="visibility === 'leaders'" class="mt-1 w-5 h-5 rounded text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-600">
+                               :class="visibility === 'leaders' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                            <input type="radio" name="visibility" value="leaders" x-model="visibility" @change="saveVisibility()" class="mt-1 w-5 h-5 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-600">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -516,27 +513,17 @@
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Тільки адміністратори та лідери всіх служінь церкви</p>
                             </div>
                         </label>
-
-                        <!-- Specific People -->
-                        <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="visibility === 'specific' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'"
-                               @click.prevent="setVisibility('specific')">
-                            <input type="checkbox" :checked="visibility === 'specific'" class="mt-1 w-5 h-5 rounded text-red-600 focus:ring-red-500 border-gray-300 dark:border-gray-600">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                    </svg>
-                                    <span class="font-medium text-gray-900 dark:text-white">Тільки конкретні люди</span>
-                                </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть конкретних людей які матимуть доступ</p>
-                            </div>
-                        </label>
                     </div>
 
-                    <!-- People Selector (shows for 'specific' visibility) -->
-                    <div x-show="visibility === 'specific'" x-transition class="mt-6 p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
-                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Виберіть людей з доступом:</h4>
+                    <!-- Additional People with Access -->
+                    <div class="mt-6 p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-700/30">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            </svg>
+                            <h4 class="font-medium text-gray-900 dark:text-white">Додаткові люди з доступом</h4>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Ці люди матимуть доступ незалежно від вибраної опції вище</p>
 
                         <!-- Selected people tags -->
                         <div class="flex flex-wrap gap-2 mb-3" x-show="allowedPeople.length > 0">
@@ -616,9 +603,9 @@
                                 <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
                                 Всі користувачі церкви
                             </li>
-                            <li class="flex items-center gap-2" x-show="visibility === 'specific'">
-                                <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-                                <span x-text="allowedPeople.length + ' вибраних людей'"></span>
+                            <li class="flex items-center gap-2" x-show="allowedPeople.length > 0">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                <span x-text="'+ ' + allowedPeople.length + ' додаткових людей'"></span>
                             </li>
                         </ul>
                     </div>
@@ -757,10 +744,6 @@ function accessSettings() {
         saved: false,
         allPeople: @json($allPeopleData),
         init() {},
-        setVisibility(value) {
-            this.visibility = value;
-            this.saveVisibility();
-        },
         searchPeople() {
             if (this.searchQuery.length < 2) {
                 this.searchResults = [];
