@@ -80,12 +80,12 @@
                  :class="{'bg-primary-50 dark:bg-primary-900/30': highlightedIndex === index}"
                  class="px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer flex items-center gap-3">
                 @if($showPhoto)
-                <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                <div class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary-400 to-primary-600 flex-shrink-0">
                     <template x-if="person.photo">
                         <img :src="person.photo" :alt="person.full_name" class="w-full h-full object-cover">
                     </template>
                     <template x-if="!person.photo">
-                        <div class="w-full h-full flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs font-medium" x-text="person.initials"></div>
+                        <div class="w-full h-full flex items-center justify-center text-white text-sm font-medium" x-text="person.initials"></div>
                     </template>
                 </div>
                 @endif

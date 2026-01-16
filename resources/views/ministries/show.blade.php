@@ -199,9 +199,13 @@
                         @endphp
                         <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-600 dark:text-gray-400">{{ substr($member->first_name, 0, 1) }}</span>
+                                @if($member->photo)
+                                <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover">
+                                @else
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                                    <span class="text-white font-medium">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>
                                 </div>
+                                @endif
                                 <div class="ml-3">
                                     <a href="{{ route('people.show', $member) }}" class="font-medium text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400">
                                         {{ $member->full_name }}
@@ -533,7 +537,15 @@
                         <!-- Selected people tags -->
                         <div class="flex flex-wrap gap-2 mb-3" x-show="allowedPeople.length > 0">
                             <template x-for="person in allowedPeople" :key="person.id">
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm rounded-lg">
+                                <span class="inline-flex items-center gap-2 px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm rounded-lg">
+                                    <template x-if="person.photo">
+                                        <img :src="person.photo" class="w-6 h-6 rounded-full object-cover">
+                                    </template>
+                                    <template x-if="!person.photo">
+                                        <div class="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center">
+                                            <span class="text-xs text-white font-medium" x-text="person.initials"></span>
+                                        </div>
+                                    </template>
                                     <span x-text="person.name"></span>
                                     <button type="button" @click="removePerson(person.id)" class="hover:text-primary-900 dark:hover:text-primary-100">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -550,12 +562,20 @@
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                             <!-- Search results dropdown -->
                             <div x-show="searchResults.length > 0" x-transition
-                                 class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                 class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 <template x-for="person in searchResults" :key="person.id">
                                     <button type="button" @click="addPerson(person)"
-                                            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between">
-                                        <span x-text="person.full_name" class="text-gray-900 dark:text-white"></span>
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3">
+                                        <template x-if="person.photo">
+                                            <img :src="person.photo" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                                        </template>
+                                        <template x-if="!person.photo">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
+                                                <span class="text-xs text-white font-medium" x-text="person.initials"></span>
+                                            </div>
+                                        </template>
+                                        <span x-text="person.full_name" class="text-gray-900 dark:text-white flex-1"></span>
+                                        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                         </svg>
                                     </button>
@@ -708,11 +728,11 @@ async function runAutoAssign() {
 function accessSettings() {
     return {
         visibility: '{{ $ministry->visibility ?? "public" }}',
-        allowedPeople: @json(collect($ministry->allowed_person_ids ?? [])->map(fn($id) => ['id' => $id, 'name' => \App\Models\Person::find($id)?->full_name ?? 'Unknown'])),
+        allowedPeople: @json(collect($ministry->allowed_person_ids ?? [])->map(function($id) { $p = \App\Models\Person::find($id); return $p ? ['id' => $id, 'name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null, 'initials' => mb_substr($p->first_name, 0, 1) . mb_substr($p->last_name, 0, 1)] : ['id' => $id, 'name' => 'Unknown', 'photo' => null, 'initials' => '?']; })),
         searchQuery: '',
         searchResults: [],
         saved: false,
-        allPeople: @json($availablePeople->map(fn($p) => ['id' => $p->id, 'full_name' => $p->full_name])),
+        allPeople: @json($availablePeople->map(fn($p) => ['id' => $p->id, 'full_name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null, 'initials' => mb_substr($p->first_name, 0, 1) . mb_substr($p->last_name, 0, 1)])),
         init() {},
         searchPeople() {
             if (this.searchQuery.length < 2) {
@@ -727,7 +747,7 @@ function accessSettings() {
         },
         addPerson(person) {
             if (!this.allowedPeople.find(p => p.id === person.id)) {
-                this.allowedPeople.push({ id: person.id, name: person.full_name });
+                this.allowedPeople.push({ id: person.id, name: person.full_name, photo: person.photo, initials: person.initials });
                 this.saveVisibility();
             }
             this.searchQuery = '';
