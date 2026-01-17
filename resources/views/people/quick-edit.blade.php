@@ -94,21 +94,21 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative isolate">
         <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-320px)]" style="min-height: 400px;">
             <table class="w-full text-sm" style="min-width: 2000px;">
-                <thead class="bg-gray-50 dark:bg-gray-700/50 sticky top-0 z-20">
+                <thead class="bg-gray-100 dark:bg-gray-700 sticky top-0 z-20">
                     <tr>
                         <!-- Checkbox -->
-                        <th class="px-2 py-3 w-10 sticky left-0 bg-gray-50 dark:bg-gray-700/50 z-30">
+                        <th class="px-2 py-3 w-10 sticky left-0 bg-gray-100 dark:bg-gray-700 z-30 border-b border-gray-200 dark:border-gray-600">
                             <input type="checkbox" @change="toggleSelectAll($event)" :checked="allSelected" :indeterminate.prop="someSelected"
                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
                         </th>
                         <!-- Row Number -->
-                        <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-10">#</th>
+                        <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-10 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">#</th>
                         <!-- Sortable columns -->
                         <template x-for="col in columns" :key="col.key">
-                            <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50 select-none"
+                            <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 select-none bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
                                 :style="{ minWidth: col.width }"
                                 @click="toggleSort(col.key)">
                                 <div class="flex items-center gap-1">
@@ -122,7 +122,7 @@
                             </th>
                         </template>
                         <!-- Actions -->
-                        <th class="px-2 py-3 w-10 sticky right-0 bg-gray-50 dark:bg-gray-700/50 z-30"></th>
+                        <th class="px-2 py-3 w-10 sticky right-0 bg-gray-100 dark:bg-gray-700 z-30 border-b border-gray-200 dark:border-gray-600"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -303,7 +303,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-4">
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex flex-wrap items-center justify-between gap-4">
             <div class="text-sm text-gray-500 dark:text-gray-400">
                 Всього: <span x-text="rows.length"></span> |
                 Показано: <span x-text="filteredRows.length"></span> |
