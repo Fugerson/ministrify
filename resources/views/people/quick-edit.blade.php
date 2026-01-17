@@ -96,7 +96,7 @@
     <!-- Table -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative" style="z-index: 0;">
         <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-320px)]" style="min-height: 400px;">
-            <table class="w-full text-sm" style="min-width: 2000px;">
+            <table class="w-full text-sm" style="min-width: 2800px;">
                 <thead class="bg-gray-100 dark:bg-gray-700 sticky top-0 z-20">
                     <tr>
                         <!-- Checkbox -->
@@ -121,8 +121,10 @@
                                     </template>
                                 </div>
                                 <!-- Resize handle -->
-                                <div class="absolute top-0 right-0 w-1 h-full cursor-col-resize bg-transparent hover:bg-primary-500 group-hover:bg-gray-300 dark:group-hover:bg-gray-500 transition-colors"
-                                     @mousedown.stop="initResize($event, colIndex)"></div>
+                                <div class="absolute top-0 right-0 w-2 h-full cursor-col-resize flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity"
+                                     @mousedown.stop="initResize($event, colIndex)">
+                                    <div class="w-0.5 h-4 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
+                                </div>
                             </th>
                         </template>
                         <!-- Actions -->
@@ -425,23 +427,23 @@ function quickEdit() {
         resizeStartWidth: 0,
 
         columns: [
-            { key: 'first_name', label: "Ім'я", width: '140px' },
-            { key: 'last_name', label: 'Прізвище', width: '140px' },
-            { key: 'phone', label: 'Телефон', width: '140px' },
-            { key: 'email', label: 'Email', width: '180px' },
-            { key: 'telegram_username', label: 'Telegram', width: '120px' },
-            { key: 'birth_date', label: 'Народж.', width: '130px' },
-            { key: 'gender', label: 'Стать', width: '80px' },
-            { key: 'marital_status', label: 'Сімейний', width: '100px' },
-            { key: 'membership_status', label: 'Статус', width: '100px' },
-            { key: 'church_role', label: 'Роль', width: '110px' },
-            { key: 'ministry_id', label: 'Команда', width: '150px' },
-            { key: 'address', label: 'Адреса', width: '180px' },
-            { key: 'first_visit_date', label: 'Перший візит', width: '130px' },
-            { key: 'joined_date', label: 'Приєднався', width: '130px' },
-            { key: 'baptism_date', label: 'Хрещення', width: '130px' },
-            { key: 'anniversary', label: 'Річниця', width: '130px' },
-            { key: 'notes', label: 'Нотатки', width: '200px' },
+            { key: 'first_name', label: "Ім'я", width: '160px' },
+            { key: 'last_name', label: 'Прізвище', width: '160px' },
+            { key: 'phone', label: 'Телефон', width: '160px' },
+            { key: 'email', label: 'Email', width: '220px' },
+            { key: 'telegram_username', label: 'Telegram', width: '140px' },
+            { key: 'birth_date', label: 'Народження', width: '140px' },
+            { key: 'gender', label: 'Стать', width: '90px' },
+            { key: 'marital_status', label: 'Сімейний стан', width: '130px' },
+            { key: 'membership_status', label: 'Статус', width: '120px' },
+            { key: 'church_role', label: 'Роль', width: '140px' },
+            { key: 'ministry_id', label: 'Команда', width: '180px' },
+            { key: 'address', label: 'Адреса', width: '220px' },
+            { key: 'first_visit_date', label: 'Перший візит', width: '140px' },
+            { key: 'joined_date', label: 'Приєднався', width: '140px' },
+            { key: 'baptism_date', label: 'Хрещення', width: '140px' },
+            { key: 'anniversary', label: 'Річниця', width: '140px' },
+            { key: 'notes', label: 'Нотатки', width: '250px' },
         ],
 
         get filteredRows() {
