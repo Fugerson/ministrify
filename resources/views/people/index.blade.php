@@ -268,7 +268,8 @@
                             <div class="flex items-center gap-3">
                                 @if($person->photo)
                                 <img src="{{ Storage::url($person->photo) }}" alt=""
-                                     class="w-10 h-10 rounded-xl object-cover flex-shrink-0">
+                                     class="w-10 h-10 rounded-xl object-cover flex-shrink-0"
+                                     loading="lazy">
                                 @else
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
                                     <span class="text-sm font-semibold text-white">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
@@ -358,7 +359,7 @@
                             @if($person->shepherd)
                             <div class="flex items-center gap-2">
                                 @if($person->shepherd->photo)
-                                <img src="{{ Storage::url($person->shepherd->photo) }}" alt="" class="w-6 h-6 rounded-full object-cover">
+                                <img src="{{ Storage::url($person->shepherd->photo) }}" alt="" class="w-6 h-6 rounded-full object-cover" loading="lazy">
                                 @else
                                 <div class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                                     <span class="text-xs font-medium text-green-600 dark:text-green-400">{{ mb_substr($person->shepherd->first_name, 0, 1) }}</span>

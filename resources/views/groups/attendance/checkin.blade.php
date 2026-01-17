@@ -36,7 +36,7 @@
                     class="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all {{ $isPresent ? 'bg-green-50 dark:bg-green-900/20' : '' }}">
                 <div class="flex items-center">
                     @if($member->photo)
-                    <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover mr-4">
+                    <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover mr-4" loading="lazy">
                     @else
                     <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-4">
                         <span class="text-lg font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>

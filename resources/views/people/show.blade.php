@@ -717,7 +717,7 @@
                         <a href="{{ route('people.show', $sheep) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <div class="flex items-center gap-3">
                                 @if($sheep->photo)
-                                <img src="{{ Storage::url($sheep->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover">
+                                <img src="{{ Storage::url($sheep->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy">
                                 @else
                                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
                                     <span class="text-sm font-medium text-white">{{ mb_substr($sheep->first_name, 0, 1) }}{{ mb_substr($sheep->last_name, 0, 1) }}</span>
@@ -885,7 +885,7 @@
             <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <a href="{{ route('people.show', $member->person) }}" class="flex items-center gap-3 flex-1 min-w-0">
                     @if($member->person->photo)
-                    <img src="{{ Storage::url($member->person->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                    <img src="{{ Storage::url($member->person->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover flex-shrink-0" loading="lazy">
                     @else
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center flex-shrink-0">
                         <span class="text-sm font-medium text-white">{{ mb_substr($member->person->first_name, 0, 1) }}</span>

@@ -200,7 +200,7 @@
                         <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <div class="flex items-center">
                                 @if($member->photo)
-                                <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover">
+                                <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover" loading="lazy">
                                 @else
                                 <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
                                     <span class="text-white font-medium">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>

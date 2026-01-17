@@ -272,7 +272,7 @@
                                     <div class="flex-shrink-0" title="{{ $card->assignee->full_name }}">
                                         @if($card->assignee->photo)
                                             <img src="{{ Storage::url($card->assignee->photo) }}"
-                                                 class="w-5 h-5 rounded-full object-cover">
+                                                 class="w-5 h-5 rounded-full object-cover" loading="lazy">
                                         @else
                                             <div class="w-5 h-5 rounded-full bg-gray-300 dark:bg-gray-500 flex items-center justify-center">
                                                 <span class="text-gray-600 dark:text-gray-200 text-xs font-medium">

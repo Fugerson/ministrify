@@ -390,7 +390,7 @@
                 <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                     <div class="flex items-center gap-3">
                         @if($attendee->person->photo)
-                        <img src="{{ Storage::url($attendee->person->photo) }}" alt="{{ $attendee->person->full_name }}" class="w-10 h-10 rounded-full object-cover">
+                        <img src="{{ Storage::url($attendee->person->photo) }}" alt="{{ $attendee->person->full_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
                         @else
                         <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
                             <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($attendee->person->first_name, 0, 1) }}{{ mb_substr($attendee->person->last_name, 0, 1) }}</span>
