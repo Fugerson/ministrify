@@ -853,6 +853,114 @@ class PersonController extends Controller
     }
 
     /**
+     * Quick edit view - Excel-like editing interface
+     */
+    public function quickEdit()
+    {
+        $church = $this->getCurrentChurch();
+
+        $people = Person::where('church_id', $church->id)
+            ->with('ministries')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        $ministries = $church->ministries()->orderBy('name')->get();
+
+        return view('people.quick-edit', compact('people', 'ministries'));
+    }
+
+    /**
+     * Save quick edit changes (create, update, delete)
+     */
+    public function quickSave(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'create' => 'array',
+            'create.*.first_name' => 'nullable|string|max:100',
+            'create.*.last_name' => 'nullable|string|max:100',
+            'create.*.phone' => 'nullable|string|max:20',
+            'create.*.email' => 'nullable|email|max:255',
+            'create.*.birth_date' => 'nullable|date',
+            'create.*.gender' => 'nullable|in:male,female',
+            'create.*.ministry_id' => 'nullable|exists:ministries,id',
+
+            'update' => 'array',
+            'update.*.id' => 'required|exists:people,id',
+            'update.*.first_name' => 'nullable|string|max:100',
+            'update.*.last_name' => 'nullable|string|max:100',
+            'update.*.phone' => 'nullable|string|max:20',
+            'update.*.email' => 'nullable|email|max:255',
+            'update.*.birth_date' => 'nullable|date',
+            'update.*.gender' => 'nullable|in:male,female',
+            'update.*.ministry_id' => 'nullable|exists:ministries,id',
+
+            'delete' => 'array',
+            'delete.*' => 'exists:people,id',
+        ]);
+
+        $stats = ['created' => 0, 'updated' => 0, 'deleted' => 0];
+        $created = [];
+
+        // Create new people
+        foreach ($validated['create'] ?? [] as $data) {
+            if (empty($data['first_name']) && empty($data['last_name'])) {
+                continue;
+            }
+
+            $ministryId = $data['ministry_id'] ?? null;
+            unset($data['ministry_id']);
+
+            $person = Person::create([
+                ...$data,
+                'church_id' => $church->id,
+            ]);
+
+            if ($ministryId) {
+                $person->ministries()->attach($ministryId);
+            }
+
+            $created[] = ['id' => $person->id];
+            $stats['created']++;
+        }
+
+        // Update existing people
+        foreach ($validated['update'] ?? [] as $data) {
+            $person = Person::where('church_id', $church->id)->find($data['id']);
+            if (!$person) continue;
+
+            $ministryId = $data['ministry_id'] ?? null;
+            unset($data['ministry_id'], $data['id']);
+
+            $person->update($data);
+
+            // Update ministry (single ministry for quick edit simplicity)
+            if ($ministryId) {
+                $person->ministries()->sync([$ministryId]);
+            }
+
+            $stats['updated']++;
+        }
+
+        // Delete people
+        foreach ($validated['delete'] ?? [] as $id) {
+            $person = Person::where('church_id', $church->id)->find($id);
+            if ($person) {
+                $person->delete();
+                $stats['deleted']++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'stats' => $stats,
+            'created' => $created,
+        ]);
+    }
+
+    /**
      * Handle bulk actions on multiple people
      */
     public function bulkAction(Request $request)
