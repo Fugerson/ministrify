@@ -603,7 +603,7 @@
          @keydown.window.escape="searchOpen = false; fabOpen = false">
 
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 {{ session('impersonating_from') || session('impersonate_church_id') ? 'pt-10' : '' }}">
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 {{ session('impersonating_from') || session('impersonate_church_id') ? 'pt-10' : '' }}">
             <div class="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)

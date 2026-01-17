@@ -94,7 +94,7 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative isolate">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative" style="z-index: 0;">
         <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-320px)]" style="min-height: 400px;">
             <table class="w-full text-sm" style="min-width: 2000px;">
                 <thead class="bg-gray-100 dark:bg-gray-700 sticky top-0 z-20">
@@ -106,12 +106,13 @@
                         </th>
                         <!-- Row Number -->
                         <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-10 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">#</th>
+                        <!-- Photo -->
+                        <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-14 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">Фото</th>
                         <!-- Sortable columns -->
-                        <template x-for="col in columns" :key="col.key">
-                            <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 select-none bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
-                                :style="{ minWidth: col.width }"
-                                @click="toggleSort(col.key)">
-                                <div class="flex items-center gap-1">
+                        <template x-for="(col, colIndex) in columns" :key="col.key">
+                            <th class="relative px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase select-none bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 group"
+                                :style="{ width: col.width, minWidth: '60px' }">
+                                <div class="flex items-center gap-1 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200" @click="toggleSort(col.key)">
                                     <span x-text="col.label"></span>
                                     <template x-if="sortKey === col.key">
                                         <svg class="w-3 h-3" :class="{'rotate-180': sortDir === 'desc'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,6 +120,9 @@
                                         </svg>
                                     </template>
                                 </div>
+                                <!-- Resize handle -->
+                                <div class="absolute top-0 right-0 w-1 h-full cursor-col-resize bg-transparent hover:bg-primary-500 group-hover:bg-gray-300 dark:group-hover:bg-gray-500 transition-colors"
+                                     @mousedown.stop="initResize($event, colIndex)"></div>
                             </th>
                         </template>
                         <!-- Actions -->
@@ -136,6 +140,36 @@
                             </td>
                             <!-- Row Number -->
                             <td class="px-2 py-1 text-gray-400 text-xs" x-text="index + 1"></td>
+
+                            <!-- Photo -->
+                            <td class="px-1 py-1">
+                                <div class="relative group" x-data="{ fileInput: null }">
+                                    <template x-if="row.photo_url">
+                                        <div class="relative">
+                                            <img :src="row.photo_url" class="w-10 h-10 rounded-full object-cover cursor-pointer" @click="fileInput.click()">
+                                            <button @click.stop="deletePhoto(row)" type="button" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template x-if="!row.photo_url">
+                                        <div @click="fileInput.click()" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                            </svg>
+                                        </div>
+                                    </template>
+                                    <input type="file" x-ref="fileInput" x-init="fileInput = $refs.fileInput" @change="uploadPhoto(row, $event)" accept="image/*" class="hidden">
+                                    <div x-show="row.uploadingPhoto" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                                        <svg class="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </td>
 
                             <!-- First Name -->
                             <td class="px-1 py-1">
@@ -385,6 +419,10 @@ function quickEdit() {
         deleteCount: 0,
         pendingDeleteRows: [],
         lastSelectedIndex: null,
+        resizing: false,
+        resizeColIndex: null,
+        resizeStartX: 0,
+        resizeStartWidth: 0,
 
         columns: [
             { key: 'first_name', label: "Ім'я", width: '140px' },
@@ -528,6 +566,8 @@ function quickEdit() {
                 baptism_date: '',
                 anniversary: '',
                 notes: '',
+                photo_url: null,
+                uploadingPhoto: false,
                 isDirty: false,
                 isNew: true,
                 isDeleted: false,
@@ -649,6 +689,104 @@ function quickEdit() {
             } finally {
                 this.saving = false;
             }
+        },
+
+        async uploadPhoto(row, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Only allow for saved rows
+            if (!row.id) {
+                this.toast('Спочатку збережіть запис, потім додайте фото');
+                event.target.value = '';
+                return;
+            }
+
+            row.uploadingPhoto = true;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            try {
+                const response = await fetch(`/people/${row.id}/upload-photo`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    row.photo_url = data.photo_url;
+                    this.toast('Фото завантажено');
+                } else {
+                    alert(data.message || 'Помилка завантаження фото');
+                }
+            } catch (error) {
+                console.error('Photo upload error:', error);
+                alert('Помилка завантаження фото');
+            } finally {
+                row.uploadingPhoto = false;
+                event.target.value = '';
+            }
+        },
+
+        async deletePhoto(row) {
+            if (!row.id || !row.photo_url) return;
+
+            if (!confirm('Видалити фото?')) return;
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+            try {
+                const response = await fetch(`/people/${row.id}/delete-photo`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    row.photo_url = null;
+                    this.toast('Фото видалено');
+                } else {
+                    alert(data.message || 'Помилка видалення');
+                }
+            } catch (error) {
+                console.error('Photo delete error:', error);
+                alert('Помилка видалення');
+            }
+        },
+
+        // Column resizing
+        initResize(event, colIndex) {
+            event.preventDefault();
+            this.resizing = true;
+            this.resizeColIndex = colIndex;
+            this.resizeStartX = event.pageX;
+            this.resizeStartWidth = parseInt(this.columns[colIndex].width);
+
+            document.addEventListener('mousemove', this.doResize.bind(this));
+            document.addEventListener('mouseup', this.stopResize.bind(this));
+        },
+
+        doResize(event) {
+            if (!this.resizing) return;
+            const diff = event.pageX - this.resizeStartX;
+            const newWidth = Math.max(60, this.resizeStartWidth + diff);
+            this.columns[this.resizeColIndex].width = newWidth + 'px';
+        },
+
+        stopResize() {
+            this.resizing = false;
+            document.removeEventListener('mousemove', this.doResize);
+            document.removeEventListener('mouseup', this.stopResize);
         },
 
         toast(message) {

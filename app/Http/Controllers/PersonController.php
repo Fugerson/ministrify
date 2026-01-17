@@ -888,6 +888,8 @@ class PersonController extends Controller
                 'baptism_date' => $p->baptism_date?->format('Y-m-d'),
                 'anniversary' => $p->anniversary?->format('Y-m-d'),
                 'notes' => $p->notes,
+                'photo_url' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
+                'uploadingPhoto' => false,
                 'isDirty' => false,
                 'isNew' => false,
                 'isDeleted' => false,
@@ -999,6 +1001,60 @@ class PersonController extends Controller
             'stats' => $stats,
             'created' => $created,
         ]);
+    }
+
+    /**
+     * Upload photo for a person (AJAX)
+     */
+    public function uploadPhoto(Request $request, Person $person)
+    {
+        $church = $this->getCurrentChurch();
+
+        // Ensure person belongs to current church
+        if ($person->church_id !== $church->id) {
+            return response()->json(['success' => false, 'message' => 'Доступ заборонено'], 403);
+        }
+
+        $request->validate([
+            'photo' => 'required|image|max:5120', // 5MB max
+        ]);
+
+        // Delete old photo if exists
+        if ($person->photo) {
+            $this->imageService->delete($person->photo);
+        }
+
+        // Store new photo
+        $path = $this->imageService->storeProfilePhoto(
+            $request->file('photo'),
+            'people'
+        );
+
+        $person->update(['photo' => $path]);
+
+        return response()->json([
+            'success' => true,
+            'photo_url' => \Illuminate\Support\Facades\Storage::url($path),
+        ]);
+    }
+
+    /**
+     * Delete photo for a person (AJAX)
+     */
+    public function deletePhoto(Person $person)
+    {
+        $church = $this->getCurrentChurch();
+
+        if ($person->church_id !== $church->id) {
+            return response()->json(['success' => false, 'message' => 'Доступ заборонено'], 403);
+        }
+
+        if ($person->photo) {
+            $this->imageService->delete($person->photo);
+            $person->update(['photo' => null]);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**
