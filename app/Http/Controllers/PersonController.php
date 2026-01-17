@@ -951,6 +951,11 @@ class PersonController extends Controller
             $ministryId = $data['ministry_id'] ?? null;
             unset($data['ministry_id']);
 
+            // Set default value for required field
+            if (empty($data['membership_status'])) {
+                $data['membership_status'] = 'guest';
+            }
+
             $person = Person::create([
                 ...$data,
                 'church_id' => $church->id,
