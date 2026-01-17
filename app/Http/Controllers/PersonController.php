@@ -456,12 +456,13 @@ class PersonController extends Controller
             ->with('success', 'Людину відновлено.');
     }
 
-    public function export()
+    public function export(Request $request)
     {
         $church = $this->getCurrentChurch();
+        $ids = $request->has('ids') ? explode(',', $request->get('ids')) : null;
         $filename = 'people_' . now()->format('Y-m-d') . '.xlsx';
 
-        return Excel::download(new PeopleExport($church->id), $filename);
+        return Excel::download(new PeopleExport($church->id, $ids), $filename);
     }
 
     public function import(Request $request)
@@ -849,6 +850,108 @@ class PersonController extends Controller
         $person->update(['shepherd_id' => $shepherdId]);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Handle bulk actions on multiple people
+     */
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:ministry,tag,message,delete',
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+            'value' => 'nullable|integer',
+            'message' => 'nullable|string|max:1000',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $ids = $validated['ids'];
+
+        // Verify all people belong to this church
+        $people = Person::where('church_id', $church->id)
+            ->whereIn('id', $ids)
+            ->get();
+
+        if ($people->count() !== count($ids)) {
+            return response()->json(['success' => false, 'message' => 'Деякі записи не знайдено']);
+        }
+
+        switch ($validated['action']) {
+            case 'ministry':
+                $ministry = $church->ministries()->find($validated['value']);
+                if (!$ministry) {
+                    return response()->json(['success' => false, 'message' => 'Служіння не знайдено']);
+                }
+
+                foreach ($people as $person) {
+                    $person->ministries()->syncWithoutDetaching([$ministry->id]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Додано {$people->count()} людей до служіння «{$ministry->name}»",
+                    'reload' => true
+                ]);
+
+            case 'tag':
+                $tag = $church->tags()->find($validated['value']);
+                if (!$tag) {
+                    return response()->json(['success' => false, 'message' => 'Тег не знайдено']);
+                }
+
+                foreach ($people as $person) {
+                    $person->tags()->syncWithoutDetaching([$tag->id]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Додано тег «{$tag->name}» для {$people->count()} людей",
+                    'reload' => true
+                ]);
+
+            case 'message':
+                if (!$church->telegram_bot_token) {
+                    return response()->json(['success' => false, 'message' => 'Telegram бот не налаштовано']);
+                }
+
+                $message = $validated['message'];
+                if (empty($message)) {
+                    return response()->json(['success' => false, 'message' => 'Повідомлення не може бути порожнім']);
+                }
+
+                $telegram = new \App\Services\TelegramService($church->telegram_bot_token);
+                $sent = 0;
+
+                foreach ($people as $person) {
+                    if ($person->telegram_chat_id) {
+                        try {
+                            $telegram->sendMessage($person->telegram_chat_id, $message);
+                            $sent++;
+                        } catch (\Exception $e) {
+                            \Log::error('Bulk message error', ['person_id' => $person->id, 'error' => $e->getMessage()]);
+                        }
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Надіслано {$sent} повідомлень",
+                ]);
+
+            case 'delete':
+                foreach ($people as $person) {
+                    $person->delete(); // Soft delete
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Видалено {$people->count()} людей",
+                    'reload' => true
+                ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Невідома дія']);
     }
 
     protected function authorizeChurch($model): void

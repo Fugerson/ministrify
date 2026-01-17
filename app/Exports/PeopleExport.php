@@ -12,11 +12,13 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class PeopleExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected int $churchId;
+    protected ?array $ids;
     protected array $householdCache = [];
 
-    public function __construct(int $churchId)
+    public function __construct(int $churchId, ?array $ids = null)
     {
         $this->churchId = $churchId;
+        $this->ids = $ids;
         $this->buildHouseholdCache();
     }
 
@@ -67,9 +69,14 @@ class PeopleExport implements FromCollection, WithHeadings, WithMapping, WithSty
 
     public function collection()
     {
-        return Person::where('church_id', $this->churchId)
-            ->with(['tags', 'ministries'])
-            ->orderBy('last_name')
+        $query = Person::where('church_id', $this->churchId)
+            ->with(['tags', 'ministries']);
+
+        if ($this->ids) {
+            $query->whereIn('id', $this->ids);
+        }
+
+        return $query->orderBy('last_name')
             ->orderBy('first_name')
             ->get();
     }

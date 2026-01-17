@@ -13,6 +13,69 @@
 
 @section('content')
 <div x-data="peopleTable()" class="space-y-4">
+    <!-- Bulk Actions Toolbar -->
+    @admin
+    <div x-show="selectedIds.length > 0" x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="sticky top-16 z-40 bg-primary-600 text-white rounded-xl shadow-lg p-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <button @click="clearSelection()" class="p-1.5 hover:bg-white/20 rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <span class="font-medium">
+                    Вибрано: <span x-text="selectedIds.length"></span>
+                </span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Add to Ministry -->
+                <button @click="bulkAction = 'ministry'; showBulkModal = true"
+                        class="inline-flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Команда
+                </button>
+                <!-- Add Tag -->
+                <button @click="bulkAction = 'tag'; showBulkModal = true"
+                        class="inline-flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                    Тег
+                </button>
+                <!-- Send Message -->
+                <button @click="bulkAction = 'message'; showBulkModal = true"
+                        class="inline-flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    Telegram
+                </button>
+                <!-- Export Selected -->
+                <button @click="exportSelected()"
+                        class="inline-flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Excel
+                </button>
+                <!-- Delete -->
+                <button @click="bulkAction = 'delete'; showBulkModal = true"
+                        class="inline-flex items-center gap-2 px-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Видалити
+                </button>
+            </div>
+        </div>
+    </div>
+    @endadmin
     <!-- Search & Filter Bar -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
@@ -222,6 +285,15 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
+                        @admin
+                        <th class="px-4 py-3 w-10">
+                            <input type="checkbox"
+                                   @change="toggleSelectAll($event.target.checked)"
+                                   :checked="isAllSelected"
+                                   :indeterminate.prop="isPartiallySelected"
+                                   class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 cursor-pointer">
+                        </th>
+                        @endadmin
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Ім'я
                         </th>
@@ -262,7 +334,18 @@
                         x-transition:enter-start="opacity-0"
                         x-transition:enter-end="opacity-100"
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
+                        :class="{ 'bg-primary-50 dark:bg-primary-900/20': selectedIds.includes({{ $person->id }}) }"
                         onclick="window.location='{{ route('people.show', $person) }}'">
+                        @admin
+                        <!-- Checkbox -->
+                        <td class="px-4 py-3" onclick="event.stopPropagation()">
+                            <input type="checkbox"
+                                   value="{{ $person->id }}"
+                                   @change="toggleSelect({{ $person->id }})"
+                                   :checked="selectedIds.includes({{ $person->id }})"
+                                   class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 cursor-pointer">
+                        </td>
+                        @endadmin
                         <!-- Name -->
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
@@ -493,6 +576,172 @@
         </div>
     </div>
     @endadmin
+
+    <!-- Bulk Action Modal -->
+    @admin
+    <div x-show="showBulkModal" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @keydown.escape.window="showBulkModal = false">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div x-show="showBulkModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity"
+                 @click="showBulkModal = false"></div>
+
+            <div x-show="showBulkModal" x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full">
+
+                <!-- Ministry Selection -->
+                <template x-if="bulkAction === 'ministry'">
+                    <div>
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додати до команди</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Вибрано людей: <span x-text="selectedIds.length"></span>
+                            </p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-2 max-h-64 overflow-y-auto">
+                                @foreach($ministries as $ministry)
+                                <label class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <input type="radio" name="bulk_ministry" value="{{ $ministry->id }}" x-model="bulkValue"
+                                           class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 focus:ring-primary-500">
+                                    <span class="ml-3 flex items-center gap-2">
+                                        @if($ministry->color)
+                                        <span class="w-3 h-3 rounded-full" style="background-color: {{ $ministry->color }}"></span>
+                                        @endif
+                                        <span class="text-gray-900 dark:text-white">{{ $ministry->name }}</span>
+                                    </span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3">
+                            <button @click="showBulkModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                                Скасувати
+                            </button>
+                            <button @click="executeBulkAction()" :disabled="!bulkValue || bulkLoading"
+                                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50">
+                                <span x-show="!bulkLoading">Додати</span>
+                                <span x-show="bulkLoading" class="flex items-center gap-2">
+                                    <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    Зачекайте...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Tag Selection -->
+                <template x-if="bulkAction === 'tag'">
+                    <div>
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додати тег</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Вибрано людей: <span x-text="selectedIds.length"></span>
+                            </p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-2 max-h-64 overflow-y-auto">
+                                @foreach($tags ?? [] as $tag)
+                                <label class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <input type="radio" name="bulk_tag" value="{{ $tag->id }}" x-model="bulkValue"
+                                           class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 focus:ring-primary-500">
+                                    <span class="ml-3 text-gray-900 dark:text-white">{{ $tag->name }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3">
+                            <button @click="showBulkModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                                Скасувати
+                            </button>
+                            <button @click="executeBulkAction()" :disabled="!bulkValue || bulkLoading"
+                                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50">
+                                <span x-show="!bulkLoading">Додати</span>
+                                <span x-show="bulkLoading">Зачекайте...</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Telegram Message -->
+                <template x-if="bulkAction === 'message'">
+                    <div>
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Надіслати Telegram</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Вибрано людей: <span x-text="selectedIds.length"></span>
+                            </p>
+                        </div>
+                        <div class="p-6">
+                            <textarea x-model="bulkMessage" rows="4" placeholder="Введіть повідомлення..."
+                                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"></textarea>
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                Повідомлення отримають тільки ті, хто підключив Telegram
+                            </p>
+                        </div>
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3">
+                            <button @click="showBulkModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                                Скасувати
+                            </button>
+                            <button @click="executeBulkAction()" :disabled="!bulkMessage || bulkLoading"
+                                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50">
+                                <span x-show="!bulkLoading">Надіслати</span>
+                                <span x-show="bulkLoading">Зачекайте...</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Delete Confirmation -->
+                <template x-if="bulkAction === 'delete'">
+                    <div>
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-red-600">Видалити людей</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-gray-900 dark:text-white">
+                                        Ви впевнені, що хочете видалити <strong x-text="selectedIds.length"></strong> людей?
+                                    </p>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        Цю дію можна буде скасувати через архів.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3">
+                            <button @click="showBulkModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                                Скасувати
+                            </button>
+                            <button @click="executeBulkAction()" :disabled="bulkLoading"
+                                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50">
+                                <span x-show="!bulkLoading">Видалити</span>
+                                <span x-show="bulkLoading">Зачекайте...</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+    @endadmin
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -576,8 +825,16 @@ function peopleTable() {
         filteredCount: {{ $people->count() }},
         perPage: 25,
         currentPage: 1,
-        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
+        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'id' => $p->id, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
         filteredIndices: [],
+
+        // Bulk selection state
+        selectedIds: [],
+        showBulkModal: false,
+        bulkAction: '',
+        bulkValue: '',
+        bulkMessage: '',
+        bulkLoading: false,
 
         init() {
             this.$nextTick(() => {
@@ -742,6 +999,96 @@ function peopleTable() {
             this.currentPage = 1;
             if (this.flatpickrInstance) {
                 this.flatpickrInstance.clear();
+            }
+        },
+
+        // Bulk selection methods
+        get visibleIds() {
+            return this.allPeople
+                .filter(p => this.filteredIndices.includes(p.index))
+                .map(p => p.id);
+        },
+
+        get isAllSelected() {
+            return this.visibleIds.length > 0 && this.visibleIds.every(id => this.selectedIds.includes(id));
+        },
+
+        get isPartiallySelected() {
+            return this.selectedIds.length > 0 && !this.isAllSelected && this.visibleIds.some(id => this.selectedIds.includes(id));
+        },
+
+        toggleSelect(id) {
+            const index = this.selectedIds.indexOf(id);
+            if (index === -1) {
+                this.selectedIds.push(id);
+            } else {
+                this.selectedIds.splice(index, 1);
+            }
+        },
+
+        toggleSelectAll(checked) {
+            if (checked) {
+                this.visibleIds.forEach(id => {
+                    if (!this.selectedIds.includes(id)) {
+                        this.selectedIds.push(id);
+                    }
+                });
+            } else {
+                this.selectedIds = this.selectedIds.filter(id => !this.visibleIds.includes(id));
+            }
+        },
+
+        clearSelection() {
+            this.selectedIds = [];
+        },
+
+        exportSelected() {
+            const ids = this.selectedIds.join(',');
+            window.location.href = `{{ route('people.export') }}?ids=${ids}`;
+        },
+
+        async executeBulkAction() {
+            this.bulkLoading = true;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+            try {
+                const response = await fetch('{{ route("people.bulk-action") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: this.bulkAction,
+                        ids: this.selectedIds,
+                        value: this.bulkValue,
+                        message: this.bulkMessage
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.showBulkModal = false;
+                    this.clearSelection();
+                    this.bulkValue = '';
+                    this.bulkMessage = '';
+
+                    // Show success message and optionally reload
+                    if (data.reload) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Операція виконана успішно');
+                    }
+                } else {
+                    alert(data.message || 'Сталася помилка');
+                }
+            } catch (error) {
+                console.error('Bulk action error:', error);
+                alert('Сталася помилка при виконанні операції');
+            } finally {
+                this.bulkLoading = false;
             }
         }
     };

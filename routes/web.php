@@ -234,6 +234,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('people/{person}/update-shepherd', [PersonController::class, 'updateShepherd'])->name('people.update-shepherd');
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export');
     Route::post('people-import', [PersonController::class, 'import'])->name('people.import');
+    Route::post('people-bulk-action', [PersonController::class, 'bulkAction'])->name('people.bulk-action');
 
     // Family Relationships
     Route::post('people/{person}/family', [\App\Http\Controllers\FamilyRelationshipController::class, 'store'])->name('family.store');
