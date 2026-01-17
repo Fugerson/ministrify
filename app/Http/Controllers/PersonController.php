@@ -15,9 +15,16 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Services\ImageService;
 
 class PersonController extends Controller
 {
+    protected ImageService $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
     public function index(Request $request)
     {
         $church = $this->getCurrentChurch();
@@ -184,9 +191,12 @@ class PersonController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        // Handle photo upload
+        // Handle photo upload with WebP conversion
         if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')->store('people', 'public');
+            $validated['photo'] = $this->imageService->storeProfilePhoto(
+                $request->file('photo'),
+                'people'
+            );
         }
 
         // Handle empty church_role_id
@@ -382,18 +392,17 @@ class PersonController extends Controller
             'ministries' => 'nullable|array',
         ]);
 
-        // Handle photo upload
+        // Handle photo upload with WebP conversion
         if ($request->hasFile('photo')) {
             // Delete old photo
-            if ($person->photo) {
-                Storage::disk('public')->delete($person->photo);
-            }
-            $validated['photo'] = $request->file('photo')->store('people', 'public');
+            $this->imageService->delete($person->photo);
+            $validated['photo'] = $this->imageService->storeProfilePhoto(
+                $request->file('photo'),
+                'people'
+            );
         } elseif ($request->input('remove_photo') === '1') {
             // Remove photo if requested
-            if ($person->photo) {
-                Storage::disk('public')->delete($person->photo);
-            }
+            $this->imageService->delete($person->photo);
             $validated['photo'] = null;
         }
 

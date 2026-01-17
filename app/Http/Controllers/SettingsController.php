@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Services\ImageService;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -10,6 +11,12 @@ use Illuminate\Support\Str;
 
 class SettingsController extends Controller
 {
+    protected ImageService $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
     public function index()
     {
         $church = $this->getCurrentChurch();
@@ -40,10 +47,8 @@ class SettingsController extends Controller
         $church = $this->getCurrentChurch();
 
         if ($request->hasFile('logo')) {
-            if ($church->logo) {
-                Storage::disk('public')->delete($church->logo);
-            }
-            $validated['logo'] = $request->file('logo')->store('logos', 'public');
+            $this->imageService->delete($church->logo);
+            $validated['logo'] = $this->imageService->store($request->file('logo'), 'logos', 300);
         }
 
         $church->update($validated);
@@ -208,17 +213,13 @@ class SettingsController extends Controller
         $validated['public_site_enabled'] = $request->boolean('public_site_enabled');
 
         if ($request->hasFile('cover_image')) {
-            if ($church->cover_image) {
-                Storage::disk('public')->delete($church->cover_image);
-            }
-            $validated['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+            $this->imageService->delete($church->cover_image);
+            $validated['cover_image'] = $this->imageService->store($request->file('cover_image'), 'covers', 1200);
         }
 
         if ($request->hasFile('pastor_photo')) {
-            if ($church->pastor_photo) {
-                Storage::disk('public')->delete($church->pastor_photo);
-            }
-            $validated['pastor_photo'] = $request->file('pastor_photo')->store('pastors', 'public');
+            $this->imageService->delete($church->pastor_photo);
+            $validated['pastor_photo'] = $this->imageService->storeProfilePhoto($request->file('pastor_photo'), 'pastors');
         }
 
         $church->update($validated);
