@@ -867,7 +867,24 @@ class PersonController extends Controller
 
         $ministries = $church->ministries()->orderBy('name')->get();
 
-        return view('people.quick-edit', compact('people', 'ministries'));
+        // Prepare rows data for JavaScript (avoid complex @json in Blade)
+        $rows = $people->map(function ($p) {
+            return [
+                'id' => $p->id,
+                'first_name' => $p->first_name,
+                'last_name' => $p->last_name,
+                'phone' => $p->phone,
+                'email' => $p->email,
+                'birth_date' => $p->birth_date?->format('Y-m-d'),
+                'gender' => $p->gender,
+                'ministry_id' => $p->ministries->first()?->id,
+                'isDirty' => false,
+                'isNew' => false,
+                'isDeleted' => false,
+            ];
+        })->values();
+
+        return view('people.quick-edit', compact('rows', 'ministries'));
     }
 
     /**

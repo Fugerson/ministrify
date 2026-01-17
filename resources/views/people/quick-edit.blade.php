@@ -201,19 +201,7 @@
 <script>
 function quickEdit() {
     return {
-        rows: @json($people->map(fn($p) => [
-            'id' => $p->id,
-            'first_name' => $p->first_name,
-            'last_name' => $p->last_name,
-            'phone' => $p->phone,
-            'email' => $p->email,
-            'birth_date' => $p->birth_date?->format('Y-m-d'),
-            'gender' => $p->gender,
-            'ministry_id' => $p->ministries->first()?->id,
-            'isDirty' => false,
-            'isNew' => false,
-            'isDeleted' => false,
-        ])),
+        rows: @json($rows),
         searchQuery: '',
         filterMinistry: '',
         saving: false,
