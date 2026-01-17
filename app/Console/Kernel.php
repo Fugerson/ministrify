@@ -14,6 +14,16 @@ class Kernel extends ConsoleKernel
             ->everyFifteenMinutes()
             ->description('Send event reminders based on each event\'s settings');
 
+        // Send birthday reminders to leaders at 8:00 AM
+        $schedule->command('app:send-birthday-reminders')
+            ->dailyAt('08:00')
+            ->description('Send birthday reminders to leaders and admins');
+
+        // Send task deadline reminders at 9:00 AM
+        $schedule->command('app:send-task-reminders')
+            ->dailyAt('09:00')
+            ->description('Send task deadline reminders to assignees');
+
         // Generate recurring events
         $schedule->command('app:generate-recurring-events')
             ->weekly()

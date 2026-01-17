@@ -755,32 +755,81 @@
         </div>
     </div>
 
-    <!-- Notification settings info -->
+    <!-- Notification settings -->
     @if($church->telegram_bot_token)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Нагадування</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Автоматичні нагадування</h2>
         </div>
 
-        <div class="p-6">
-            <div class="flex items-start gap-3">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-gray-900 dark:text-white font-medium">Налаштування на рівні події</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Нагадування тепер налаштовуються індивідуально для кожної події.
-                        При створенні або редагуванні події ви можете вказати коли надсилати нагадування служителям.
-                    </p>
-                    <a href="{{ route('schedule') }}" class="inline-flex items-center gap-1 mt-3 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                        Перейти до розкладу
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        <form method="POST" action="{{ route('settings.notifications') }}" class="p-6 space-y-6">
+            @csrf
+            @method('PUT')
+
+            <!-- Birthday reminders -->
+            <label class="flex items-center justify-between cursor-pointer">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0A1.5 1.5 0 003 15.546V12a9 9 0 1118 0v3.546zM12 3v1m0 11v1m-4-4h1m6 0h1"/>
                         </svg>
-                    </a>
+                    </div>
+                    <div>
+                        <p class="text-gray-900 dark:text-white font-medium">Дні народження</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Нагадування лідерам про дні народження членів церкви</p>
+                    </div>
+                </div>
+                <div class="relative inline-flex">
+                    <input type="checkbox" name="birthday_reminders" value="1"
+                           {{ ($church->settings['notifications']['birthday_reminders'] ?? true) ? 'checked' : '' }}
+                           class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                </div>
+            </label>
+
+            <!-- Task reminders -->
+            <label class="flex items-center justify-between cursor-pointer">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-900 dark:text-white font-medium">Дедлайни завдань</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Нагадування виконавцям про терміни завдань</p>
+                    </div>
+                </div>
+                <div class="relative inline-flex">
+                    <input type="checkbox" name="task_reminders" value="1"
+                           {{ ($church->settings['notifications']['task_reminders'] ?? true) ? 'checked' : '' }}
+                           class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                </div>
+            </label>
+
+            <button type="submit" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                Зберегти
+            </button>
+        </form>
+
+        <div class="px-6 pb-6 pt-0">
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                            Нагадування для <strong>служінь</strong> налаштовуються індивідуально для кожної події в розкладі.
+                        </p>
+                        <a href="{{ route('schedule') }}" class="inline-flex items-center gap-1 mt-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700">
+                            Перейти до розкладу
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

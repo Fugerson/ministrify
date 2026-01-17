@@ -181,6 +181,8 @@ class SettingsController extends Controller
             'reminder_day_before' => $request->boolean('reminder_day_before'),
             'reminder_same_day' => $request->boolean('reminder_same_day'),
             'notify_leader_on_decline' => $request->boolean('notify_leader_on_decline'),
+            'birthday_reminders' => $request->boolean('birthday_reminders'),
+            'task_reminders' => $request->boolean('task_reminders'),
         ];
 
         $church->update(['settings' => $settings]);
