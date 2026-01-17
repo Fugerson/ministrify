@@ -832,6 +832,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('volunteers', [\App\Http\Controllers\ReportsController::class, 'volunteers'])->name('volunteers');
         Route::get('export/finances', [\App\Http\Controllers\ReportsController::class, 'exportFinances'])->name('export-finances');
         Route::get('export/attendance', [\App\Http\Controllers\ReportsController::class, 'exportAttendance'])->name('export-attendance');
+        Route::get('export/volunteers', [\App\Http\Controllers\ReportsController::class, 'exportVolunteers'])->name('export-volunteers');
     });
 
     // Prayer Requests - временно отключено

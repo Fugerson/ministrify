@@ -8,8 +8,12 @@ use App\Models\Transaction;
 use App\Models\Assignment;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
+use App\Exports\VolunteersExport;
+use App\Exports\TransactionsExport;
+use App\Exports\AttendanceExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 
 class ReportsController extends Controller
@@ -265,81 +269,26 @@ class ReportsController extends Controller
     {
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
-        $format = $request->get('format', 'csv');
+        $filename = "finances-{$year}.xlsx";
 
-        $transactions = Transaction::where('church_id', $church->id)
-            ->completed()
-            ->whereYear('date', $year)
-            ->with(['category', 'ministry', 'person'])
-            ->orderBy('date')
-            ->get();
-
-        if ($format === 'csv') {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=finances-{$year}.csv",
-            ];
-
-            $callback = function () use ($transactions) {
-                $file = fopen('php://output', 'w');
-                fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-                fputcsv($file, ['Дата', 'Тип', 'Категорія', 'Сума', 'Опис', 'Служіння', 'Особа']);
-
-                foreach ($transactions as $t) {
-                    fputcsv($file, [
-                        $t->date->format('d.m.Y'),
-                        $t->direction === 'in' ? 'Надходження' : 'Витрата',
-                        $t->category?->name ?? '-',
-                        $t->amount,
-                        $t->description ?? '-',
-                        $t->ministry?->name ?? '-',
-                        $t->person?->full_name ?? ($t->is_anonymous ? 'Анонімно' : '-'),
-                    ]);
-                }
-
-                fclose($file);
-            };
-
-            return response()->stream($callback, 200, $headers);
-        }
-
-        return back()->with('error', 'Непідтримуваний формат');
+        return Excel::download(new TransactionsExport($church->id, $year), $filename);
     }
 
     public function exportAttendance(Request $request)
     {
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
+        $filename = "attendance-{$year}.xlsx";
 
-        $records = AttendanceRecord::whereHas('attendance', fn($q) => $q->where('church_id', $church->id)->whereYear('date', $year))
-            ->with(['person', 'attendance.attendable'])
-            ->orderBy('created_at')
-            ->get();
+        return Excel::download(new AttendanceExport($church->id, $year), $filename);
+    }
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=attendance-{$year}.csv",
-        ];
+    public function exportVolunteers(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+        $year = $request->get('year', now()->year);
+        $filename = "volunteers-{$year}.xlsx";
 
-        $callback = function () use ($records) {
-            $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['Дата', 'Подія/Група', 'Тип', 'Особа', 'Статус']);
-
-            foreach ($records as $r) {
-                $attendance = $r->attendance;
-                fputcsv($file, [
-                    $attendance?->date?->format('d.m.Y') ?? '-',
-                    $attendance?->entity_name ?? '-',
-                    $attendance?->type_label ?? '-',
-                    $r->person?->full_name ?? '-',
-                    $r->present ? 'Присутній' : 'Відсутній',
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(new VolunteersExport($church->id, $year), $filename);
     }
 }
