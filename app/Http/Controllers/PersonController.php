@@ -875,12 +875,23 @@ class PersonController extends Controller
                 'last_name' => $p->last_name,
                 'phone' => $p->phone,
                 'email' => $p->email,
+                'telegram_username' => $p->telegram_username,
                 'birth_date' => $p->birth_date?->format('Y-m-d'),
                 'gender' => $p->gender,
+                'marital_status' => $p->marital_status,
+                'membership_status' => $p->membership_status,
+                'church_role' => $p->church_role,
                 'ministry_id' => $p->ministries->first()?->id,
+                'address' => $p->address,
+                'first_visit_date' => $p->first_visit_date?->format('Y-m-d'),
+                'joined_date' => $p->joined_date?->format('Y-m-d'),
+                'baptism_date' => $p->baptism_date?->format('Y-m-d'),
+                'anniversary' => $p->anniversary?->format('Y-m-d'),
+                'notes' => $p->notes,
                 'isDirty' => false,
                 'isNew' => false,
                 'isDeleted' => false,
+                'selected' => false,
             ];
         })->values();
 
@@ -894,25 +905,33 @@ class PersonController extends Controller
     {
         $church = $this->getCurrentChurch();
 
+        $fieldRules = [
+            'first_name' => 'nullable|string|max:100',
+            'last_name' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'telegram_username' => 'nullable|string|max:100',
+            'birth_date' => 'nullable|date',
+            'gender' => 'nullable|in:male,female',
+            'marital_status' => 'nullable|in:single,married,widowed,divorced',
+            'membership_status' => 'nullable|in:guest,newcomer,member,active',
+            'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
+            'ministry_id' => 'nullable|exists:ministries,id',
+            'address' => 'nullable|string|max:500',
+            'first_visit_date' => 'nullable|date',
+            'joined_date' => 'nullable|date',
+            'baptism_date' => 'nullable|date',
+            'anniversary' => 'nullable|date',
+            'notes' => 'nullable|string|max:2000',
+        ];
+
         $validated = $request->validate([
             'create' => 'array',
-            'create.*.first_name' => 'nullable|string|max:100',
-            'create.*.last_name' => 'nullable|string|max:100',
-            'create.*.phone' => 'nullable|string|max:20',
-            'create.*.email' => 'nullable|email|max:255',
-            'create.*.birth_date' => 'nullable|date',
-            'create.*.gender' => 'nullable|in:male,female',
-            'create.*.ministry_id' => 'nullable|exists:ministries,id',
+            ...collect($fieldRules)->mapWithKeys(fn($rule, $key) => ["create.*.{$key}" => $rule])->toArray(),
 
             'update' => 'array',
             'update.*.id' => 'required|exists:people,id',
-            'update.*.first_name' => 'nullable|string|max:100',
-            'update.*.last_name' => 'nullable|string|max:100',
-            'update.*.phone' => 'nullable|string|max:20',
-            'update.*.email' => 'nullable|email|max:255',
-            'update.*.birth_date' => 'nullable|date',
-            'update.*.gender' => 'nullable|in:male,female',
-            'update.*.ministry_id' => 'nullable|exists:ministries,id',
+            ...collect($fieldRules)->mapWithKeys(fn($rule, $key) => ["update.*.{$key}" => $rule])->toArray(),
 
             'delete' => 'array',
             'delete.*' => 'exists:people,id',
@@ -948,14 +967,19 @@ class PersonController extends Controller
             $person = Person::where('church_id', $church->id)->find($data['id']);
             if (!$person) continue;
 
+            $hasMinistryField = array_key_exists('ministry_id', $data);
             $ministryId = $data['ministry_id'] ?? null;
             unset($data['ministry_id'], $data['id']);
 
             $person->update($data);
 
             // Update ministry (single ministry for quick edit simplicity)
-            if ($ministryId) {
-                $person->ministries()->sync([$ministryId]);
+            if ($hasMinistryField) {
+                if ($ministryId) {
+                    $person->ministries()->sync([$ministryId]);
+                } else {
+                    $person->ministries()->detach();
+                }
             }
 
             $stats['updated']++;
