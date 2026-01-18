@@ -207,11 +207,11 @@
                 <a href="{{ route('finances.incomes') }}" class="text-sm text-primary-600 hover:text-primary-500">Усі →</a>
             </div>
             <div class="p-6">
-                @if($incomeByCategory->where('incomes_sum_amount', '>', 0)->count() > 0)
+                @if($incomeByCategory->count() > 0)
                     <div class="space-y-4">
-                        @foreach($incomeByCategory->where('incomes_sum_amount', '>', 0)->take(5) as $cat)
+                        @foreach($incomeByCategory->take(5) as $cat)
                             @php
-                                $percent = $totalIncome > 0 ? ($cat->incomes_sum_amount / $totalIncome) * 100 : 0;
+                                $percent = $totalIncome > 0 ? ($cat->total_amount / $totalIncome) * 100 : 0;
                             @endphp
                             <div>
                                 <div class="flex items-center justify-between mb-1">
@@ -219,7 +219,7 @@
                                         {{ $cat->icon ?? '💰' }} {{ $cat->name }}
                                     </span>
                                     <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                                        {{ number_format($cat->incomes_sum_amount, 0, ',', ' ') }} ₴
+                                        {{ number_format($cat->total_amount, 0, ',', ' ') }} ₴
                                     </span>
                                 </div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -245,7 +245,7 @@
                     <div class="space-y-4">
                         @foreach($expenseByMinistry->take(5) as $ministry)
                             @php
-                                $percent = $totalExpense > 0 ? ($ministry->expenses_sum_amount / $totalExpense) * 100 : 0;
+                                $percent = $totalExpense > 0 ? ($ministry->total_expense / $totalExpense) * 100 : 0;
                             @endphp
                             <div>
                                 <div class="flex items-center justify-between mb-1">
@@ -253,7 +253,7 @@
                                         {{ $ministry->name }}
                                     </span>
                                     <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                                        {{ number_format($ministry->expenses_sum_amount, 0, ',', ' ') }} ₴
+                                        {{ number_format($ministry->total_expense, 0, ',', ' ') }} ₴
                                     </span>
                                 </div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -288,7 +288,7 @@
                                     {{ $income->category?->name ?? 'Без категорії' }}
                                 </p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $income->date->format('d.m.Y') }} • {{ $income->donor_name }}
+                                    {{ $income->date->format('d.m.Y') }} • {{ $income->donor_display_name }}
                                 </p>
                             </div>
                         </div>
@@ -336,33 +336,6 @@
         </div>
     </div>
 
-    <!-- Top donors (if not anonymous) -->
-    @if($topDonors->count() > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Найбільші жертводавці</h3>
-        </div>
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                @foreach($topDonors as $index => $donor)
-                    <div class="text-center">
-                        <div class="relative inline-block">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white text-2xl font-bold mx-auto">
-                                {{ $index + 1 }}
-                            </div>
-                        </div>
-                        <p class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                            {{ $donor->person?->first_name }} {{ Str::limit($donor->person?->last_name, 1, '.') }}
-                        </p>
-                        <p class="text-sm text-green-600 dark:text-green-400 font-semibold">
-                            {{ number_format($donor->total, 0, ',', ' ') }} ₴
-                        </p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-    @endif
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

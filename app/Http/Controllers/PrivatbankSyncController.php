@@ -247,14 +247,16 @@ class PrivatbankSyncController extends Controller
         // Create transaction
         $transaction = Transaction::create([
             'church_id' => $church->id,
-            'type' => 'income',
+            'direction' => Transaction::DIRECTION_IN,
+            'source_type' => Transaction::SOURCE_DONATION,
             'amount' => $privatTransaction->amount_uah,
+            'currency' => 'UAH',
             'category_id' => $request->category_id,
             'person_id' => $request->person_id,
             'description' => $request->description ?: $privatTransaction->counterpart_display,
             'date' => $privatTransaction->privat_time->toDateString(),
             'status' => Transaction::STATUS_COMPLETED,
-            'payment_method' => 'privatbank',
+            'payment_method' => 'transfer',
         ]);
 
         // Mark as processed
@@ -325,13 +327,15 @@ class PrivatbankSyncController extends Controller
 
             $transaction = Transaction::create([
                 'church_id' => $church->id,
-                'type' => 'income',
+                'direction' => Transaction::DIRECTION_IN,
+                'source_type' => Transaction::SOURCE_DONATION,
                 'amount' => $privatTx->amount_uah,
+                'currency' => 'UAH',
                 'category_id' => $request->category_id,
                 'description' => $privatTx->counterpart_display,
                 'date' => $privatTx->privat_time->toDateString(),
                 'status' => Transaction::STATUS_COMPLETED,
-                'payment_method' => 'privatbank',
+                'payment_method' => 'transfer',
             ]);
 
             $privatTx->update([

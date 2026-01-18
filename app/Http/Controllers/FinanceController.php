@@ -38,17 +38,20 @@ class FinanceController extends Controller
         }
 
         // Calculate totals in UAH (using amount_uah for converted amounts)
-        $totalIncome = $incomeQuery->sum('amount_uah') ?: $incomeQuery->sum('amount');
-        $totalExpense = $expenseQuery->sum('amount_uah') ?: $expenseQuery->sum('amount');
+        $hasAmountUah = \Schema::hasColumn('transactions', 'amount_uah');
+        $totalIncome = $hasAmountUah ? ($incomeQuery->sum('amount_uah') ?: $incomeQuery->sum('amount')) : $incomeQuery->sum('amount');
+        $totalExpense = $hasAmountUah ? ($expenseQuery->sum('amount_uah') ?: $expenseQuery->sum('amount')) : $expenseQuery->sum('amount');
         $periodBalance = $totalIncome - $totalExpense;
 
         // Overall balance (includes initial balance) - all in UAH
         $initialBalance = (float) $church->initial_balance;
         $initialBalanceDate = $church->initial_balance_date;
-        $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount_uah')
-            ?: Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount');
-        $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount_uah')
-            ?: Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
+        $allTimeIncome = $hasAmountUah
+            ? (Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount_uah') ?: Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount'))
+            : Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount');
+        $allTimeExpense = $hasAmountUah
+            ? (Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount_uah') ?: Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount'))
+            : Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
 
         // Get balances by currency for the period
@@ -167,20 +170,6 @@ class FinanceController extends Controller
         // Year comparison
         $yearComparison = $this->getYearComparison($church->id, $year);
 
-        // Top donors (non-anonymous)
-        $topDonors = Transaction::where('church_id', $church->id)
-            ->incoming()
-            ->completed()
-            ->where('is_anonymous', false)
-            ->whereNotNull('person_id')
-            ->when($month, fn($q) => $q->forMonth($year, $month), fn($q) => $q->forYear($year))
-            ->select('person_id', DB::raw('SUM(amount) as total'))
-            ->groupBy('person_id')
-            ->orderByDesc('total')
-            ->limit(5)
-            ->with('person')
-            ->get();
-
         return view('finances.index', compact(
             'church', 'year', 'month', 'periodLabel',
             'totalIncome', 'totalExpense', 'periodBalance',
@@ -191,7 +180,7 @@ class FinanceController extends Controller
             'monthlyData',
             'incomeByCategory', 'expenseByCategory', 'expenseByMinistry',
             'recentIncomes', 'recentExpenses',
-            'yearComparison', 'topDonors'
+            'yearComparison'
         ));
     }
 

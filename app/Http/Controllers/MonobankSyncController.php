@@ -349,14 +349,16 @@ class MonobankSyncController extends Controller
         // Create transaction
         $transaction = Transaction::create([
             'church_id' => $church->id,
-            'type' => 'income',
+            'direction' => Transaction::DIRECTION_IN,
+            'source_type' => Transaction::SOURCE_DONATION,
             'amount' => $monoTransaction->amount_uah,
+            'currency' => 'UAH',
             'category_id' => $request->category_id,
             'person_id' => $request->person_id,
             'description' => $request->description ?: $monoTransaction->counterpart_display,
             'date' => $monoTransaction->mono_time->toDateString(),
             'status' => Transaction::STATUS_COMPLETED,
-            'payment_method' => 'monobank',
+            'payment_method' => Transaction::PAYMENT_MONOBANK,
         ]);
 
         // Mark as processed
@@ -452,14 +454,16 @@ class MonobankSyncController extends Controller
 
             $transaction = Transaction::create([
                 'church_id' => $church->id,
-                'type' => 'income',
+                'direction' => Transaction::DIRECTION_IN,
+                'source_type' => Transaction::SOURCE_DONATION,
                 'amount' => $monoTx->amount_uah,
+                'currency' => 'UAH',
                 'category_id' => $request->category_id,
                 'person_id' => $personId,
                 'description' => $monoTx->counterpart_display,
                 'date' => $monoTx->mono_time->toDateString(),
                 'status' => Transaction::STATUS_COMPLETED,
-                'payment_method' => 'monobank',
+                'payment_method' => Transaction::PAYMENT_MONOBANK,
             ]);
 
             $monoTx->update([
