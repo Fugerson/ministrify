@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CurrencyHelper;
+use App\Models\DonationCampaign;
 use App\Models\ExchangeRate;
 use App\Models\Ministry;
 use App\Models\Person;
@@ -170,6 +171,47 @@ class FinanceController extends Controller
         // Year comparison
         $yearComparison = $this->getYearComparison($church->id, $year);
 
+        // === NEW: Quick Stats ===
+        $quickStats = $this->getQuickStats($church->id);
+
+        // === NEW: Active Campaigns ===
+        $activeCampaigns = DonationCampaign::where('church_id', $church->id)
+            ->where('is_active', true)
+            ->orderByDesc('created_at')
+            ->limit(3)
+            ->get();
+
+        // === NEW: Payment Methods Breakdown ===
+        $paymentMethodsQuery = Transaction::where('church_id', $church->id)
+            ->incoming()
+            ->completed();
+
+        if ($month) {
+            $paymentMethodsQuery->forMonth($year, $month);
+        } else {
+            $paymentMethodsQuery->forYear($year);
+        }
+
+        $paymentMethods = $paymentMethodsQuery
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(amount) as total')
+            ->groupBy('payment_method')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($pm) => [
+                'method' => $pm->payment_method,
+                'label' => Transaction::PAYMENT_METHODS[$pm->payment_method] ?? $pm->payment_method ?? 'Інше',
+                'count' => $pm->count,
+                'total' => $pm->total,
+            ]);
+
+        // === NEW: Activity Feed (last 10 transactions) ===
+        $activityFeed = Transaction::where('church_id', $church->id)
+            ->completed()
+            ->with(['category', 'person', 'ministry'])
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
         return view('finances.index', compact(
             'church', 'year', 'month', 'periodLabel',
             'totalIncome', 'totalExpense', 'periodBalance',
@@ -180,7 +222,8 @@ class FinanceController extends Controller
             'monthlyData',
             'incomeByCategory', 'expenseByCategory', 'expenseByMinistry',
             'recentIncomes', 'recentExpenses',
-            'yearComparison'
+            'yearComparison',
+            'quickStats', 'activeCampaigns', 'paymentMethods', 'activityFeed'
         ));
     }
 
@@ -728,6 +771,100 @@ class FinanceController extends Controller
             9 => 'Вер', 10 => 'Жов', 11 => 'Лис', 12 => 'Гру',
         ];
         return $months[$month] ?? '';
+    }
+
+    private function getQuickStats(int $churchId): array
+    {
+        $now = Carbon::now();
+        $thisWeekStart = $now->copy()->startOfWeek();
+        $lastWeekStart = $now->copy()->subWeek()->startOfWeek();
+        $lastWeekEnd = $now->copy()->subWeek()->endOfWeek();
+        $thisMonthStart = $now->copy()->startOfMonth();
+        $lastMonthStart = $now->copy()->subMonth()->startOfMonth();
+        $lastMonthEnd = $now->copy()->subMonth()->endOfMonth();
+
+        // This week income
+        $thisWeekIncome = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->where('date', '>=', $thisWeekStart)
+            ->sum('amount');
+
+        // Last week income
+        $lastWeekIncome = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->whereBetween('date', [$lastWeekStart, $lastWeekEnd])
+            ->sum('amount');
+
+        // Week change percentage
+        $weekChange = $lastWeekIncome > 0
+            ? round((($thisWeekIncome - $lastWeekIncome) / $lastWeekIncome) * 100, 0)
+            : ($thisWeekIncome > 0 ? 100 : 0);
+
+        // This month donors count
+        $thisMonthDonors = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->where('date', '>=', $thisMonthStart)
+            ->whereNotNull('person_id')
+            ->distinct('person_id')
+            ->count('person_id');
+
+        // Last month donors count
+        $lastMonthDonors = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->whereBetween('date', [$lastMonthStart, $lastMonthEnd])
+            ->whereNotNull('person_id')
+            ->distinct('person_id')
+            ->count('person_id');
+
+        // Donors change
+        $donorsChange = $thisMonthDonors - $lastMonthDonors;
+
+        // Average donation this month
+        $thisMonthTotal = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->where('date', '>=', $thisMonthStart)
+            ->sum('amount');
+
+        $thisMonthCount = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->where('date', '>=', $thisMonthStart)
+            ->count();
+
+        $avgDonation = $thisMonthCount > 0 ? round($thisMonthTotal / $thisMonthCount, 0) : 0;
+
+        // Last month average
+        $lastMonthTotal = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->whereBetween('date', [$lastMonthStart, $lastMonthEnd])
+            ->sum('amount');
+
+        $lastMonthCount = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->whereBetween('date', [$lastMonthStart, $lastMonthEnd])
+            ->count();
+
+        $lastMonthAvg = $lastMonthCount > 0 ? round($lastMonthTotal / $lastMonthCount, 0) : 0;
+        $avgChange = $lastMonthAvg > 0
+            ? round((($avgDonation - $lastMonthAvg) / $lastMonthAvg) * 100, 0)
+            : ($avgDonation > 0 ? 100 : 0);
+
+        // Total transactions this month
+        $totalTransactions = Transaction::where('church_id', $churchId)
+            ->completed()
+            ->where('date', '>=', $thisMonthStart)
+            ->count();
+
+        return [
+            'thisWeekIncome' => $thisWeekIncome,
+            'lastWeekIncome' => $lastWeekIncome,
+            'weekChange' => $weekChange,
+            'thisMonthDonors' => $thisMonthDonors,
+            'lastMonthDonors' => $lastMonthDonors,
+            'donorsChange' => $donorsChange,
+            'avgDonation' => $avgDonation,
+            'avgChange' => $avgChange,
+            'totalTransactions' => $totalTransactions,
+        ];
     }
 
     protected function authorizeChurch($model): void

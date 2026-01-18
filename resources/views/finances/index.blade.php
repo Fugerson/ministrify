@@ -62,6 +62,106 @@
         </div>
     </div>
 
+    <!-- Quick Stats Bar -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Цей тиждень</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($quickStats['thisWeekIncome'], 0, ',', ' ') }} ₴</p>
+                </div>
+                @if($quickStats['weekChange'] != 0)
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $quickStats['weekChange'] > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }}">
+                    @if($quickStats['weekChange'] > 0)
+                        <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                    @else
+                        <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    @endif
+                    {{ abs($quickStats['weekChange']) }}%
+                </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Середній дар</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($quickStats['avgDonation'], 0, ',', ' ') }} ₴</p>
+                </div>
+                @if($quickStats['avgChange'] != 0)
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $quickStats['avgChange'] > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }}">
+                    {{ $quickStats['avgChange'] > 0 ? '+' : '' }}{{ $quickStats['avgChange'] }}%
+                </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Жертводавців</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ $quickStats['thisMonthDonors'] }}</p>
+                </div>
+                @if($quickStats['donorsChange'] != 0)
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $quickStats['donorsChange'] > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }}">
+                    {{ $quickStats['donorsChange'] > 0 ? '+' : '' }}{{ $quickStats['donorsChange'] }}
+                </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Транзакцій</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ $quickStats['totalTransactions'] }}</p>
+                </div>
+                <span class="text-gray-400 dark:text-gray-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Campaigns -->
+    @if($activeCampaigns->count() > 0)
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Активні збори</h3>
+            <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500">Усі →</a>
+        </div>
+        <div class="space-y-4">
+            @foreach($activeCampaigns as $campaign)
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $campaign->name }}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ number_format($campaign->raised_amount, 0, ',', ' ') }} / {{ number_format($campaign->goal_amount, 0, ',', ' ') }} ₴
+                        </span>
+                        <span class="text-sm font-semibold {{ $campaign->progress_percent >= 100 ? 'text-green-600' : 'text-primary-600' }}">
+                            {{ $campaign->progress_percent }}%
+                        </span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div class="h-3 rounded-full transition-all duration-500 {{ $campaign->progress_percent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-primary-500 to-primary-400' }}"
+                         style="width: {{ min($campaign->progress_percent, 100) }}%"></div>
+                </div>
+                @if($campaign->days_remaining !== null)
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    {{ $campaign->days_remaining > 0 ? 'Залишилось ' . $campaign->days_remaining . ' днів' : 'Завершено' }}
+                </p>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- Current Balance Card -->
     <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-6 text-white">
         <div class="flex items-center justify-between">
@@ -336,6 +436,92 @@
         </div>
     </div>
 
+    <!-- Activity Feed & Payment Methods -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Activity Feed -->
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Стрічка активності</h3>
+            </div>
+            <div class="p-4 max-h-80 overflow-y-auto">
+                <div class="space-y-3">
+                    @forelse($activityFeed as $activity)
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0 mt-1">
+                            @if($activity->direction === 'in')
+                            <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                                </svg>
+                            </div>
+                            @else
+                            <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                                </svg>
+                            </div>
+                            @endif
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-gray-900 dark:text-white">
+                                @if($activity->direction === 'in')
+                                    <span class="font-medium text-green-600 dark:text-green-400">+{{ number_format($activity->amount, 0, ',', ' ') }} ₴</span>
+                                    <span class="text-gray-500 dark:text-gray-400">{{ $activity->category?->name ?? 'Надходження' }}</span>
+                                @else
+                                    <span class="font-medium text-red-600 dark:text-red-400">-{{ number_format($activity->amount, 0, ',', ' ') }} ₴</span>
+                                    <span class="text-gray-500 dark:text-gray-400">{{ Str::limit($activity->description, 25) }}</span>
+                                @endif
+                            </p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                {{ $activity->created_at->diffForHumans() }}
+                                @if($activity->direction === 'in' && $activity->person)
+                                    • {{ $activity->person->first_name }}
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">Немає активності</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Способи оплати</h3>
+            </div>
+            <div class="p-6">
+                @if($paymentMethods->count() > 0)
+                <div class="relative">
+                    <canvas id="paymentMethodsChart" class="max-h-40"></canvas>
+                </div>
+                <div class="mt-4 space-y-2">
+                    @php
+                        $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                        $totalPayments = $paymentMethods->sum('total');
+                    @endphp
+                    @foreach($paymentMethods as $index => $pm)
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full mr-2" style="background-color: {{ $colors[$index % count($colors)] }}"></span>
+                            <span class="text-gray-700 dark:text-gray-300">{{ $pm['label'] }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-medium text-gray-900 dark:text-white">{{ number_format($pm['total'], 0, ',', ' ') }} ₴</span>
+                            <span class="text-gray-400 dark:text-gray-500 ml-1">({{ $totalPayments > 0 ? round($pm['total'] / $totalPayments * 100) : 0 }}%)</span>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <p class="text-gray-500 dark:text-gray-400 text-center py-8">Немає даних</p>
+                @endif
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -347,6 +533,7 @@ function financesDashboard() {
 
         init() {
             this.initChart();
+            this.initPaymentMethodsChart();
         },
 
         updatePeriod() {
@@ -474,6 +661,49 @@ function financesDashboard() {
                             },
                             grid: {
                                 drawOnChartArea: false,
+                            }
+                        }
+                    }
+                }
+            });
+        },
+
+        initPaymentMethodsChart() {
+            const ctx = document.getElementById('paymentMethodsChart');
+            if (!ctx) return;
+
+            const paymentMethods = @json($paymentMethods);
+            if (!paymentMethods || paymentMethods.length === 0) return;
+
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: paymentMethods.map(pm => pm.label),
+                    datasets: [{
+                        data: paymentMethods.map(pm => pm.total),
+                        backgroundColor: paymentMethods.map((_, i) => colors[i % colors.length]),
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percent = Math.round((value / total) * 100);
+                                    return context.label + ': ' + value.toLocaleString('uk-UA') + ' ₴ (' + percent + '%)';
+                                }
                             }
                         }
                     }
