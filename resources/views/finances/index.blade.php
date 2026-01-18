@@ -71,106 +71,6 @@
         </div>
     </div>
 
-    <!-- Quick Stats Bar -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Цей тиждень</p>
-                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($quickStats['thisWeekIncome'], 0, ',', ' ') }} ₴</p>
-                </div>
-                @if($quickStats['weekChange'] != 0)
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $quickStats['weekChange'] > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }}">
-                    @if($quickStats['weekChange'] > 0)
-                        <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
-                    @else
-                        <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    @endif
-                    {{ abs($quickStats['weekChange']) }}%
-                </span>
-                @endif
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Середній дар</p>
-                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($quickStats['avgDonation'], 0, ',', ' ') }} ₴</p>
-                </div>
-                @if($quickStats['avgChange'] != 0)
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $quickStats['avgChange'] > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }}">
-                    {{ $quickStats['avgChange'] > 0 ? '+' : '' }}{{ $quickStats['avgChange'] }}%
-                </span>
-                @endif
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Жертводавців</p>
-                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ $quickStats['thisMonthDonors'] }}</p>
-                </div>
-                @if($quickStats['donorsChange'] != 0)
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $quickStats['donorsChange'] > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }}">
-                    {{ $quickStats['donorsChange'] > 0 ? '+' : '' }}{{ $quickStats['donorsChange'] }}
-                </span>
-                @endif
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Транзакцій</p>
-                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ $quickStats['totalTransactions'] }}</p>
-                </div>
-                <span class="text-gray-400 dark:text-gray-500">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                </span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Campaigns -->
-    @if($activeCampaigns->count() > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Активні збори</h3>
-            <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500">Усі →</a>
-        </div>
-        <div class="space-y-4">
-            @foreach($activeCampaigns as $campaign)
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $campaign->name }}</span>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ number_format($campaign->raised_amount, 0, ',', ' ') }} / {{ number_format($campaign->goal_amount, 0, ',', ' ') }} ₴
-                        </span>
-                        <span class="text-sm font-semibold {{ $campaign->progress_percent >= 100 ? 'text-green-600' : 'text-primary-600' }}">
-                            {{ $campaign->progress_percent }}%
-                        </span>
-                    </div>
-                </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-                    <div class="h-3 rounded-full transition-all duration-500 {{ $campaign->progress_percent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-primary-500 to-primary-400' }}"
-                         style="width: {{ min($campaign->progress_percent, 100) }}%"></div>
-                </div>
-                @if($campaign->days_remaining !== null)
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {{ $campaign->days_remaining > 0 ? 'Залишилось ' . $campaign->days_remaining . ' днів' : 'Завершено' }}
-                </p>
-                @endif
-            </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
     <!-- Current Balance Card -->
     <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-6 text-white">
         <div class="flex items-center justify-between">
@@ -530,6 +430,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Active Campaigns -->
+    @if($activeCampaigns->count() > 0)
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Активні збори</h3>
+            <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500">Усі →</a>
+        </div>
+        <div class="space-y-4">
+            @foreach($activeCampaigns as $campaign)
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $campaign->name }}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ number_format($campaign->raised_amount, 0, ',', ' ') }} / {{ number_format($campaign->goal_amount, 0, ',', ' ') }} ₴
+                        </span>
+                        <span class="text-sm font-semibold {{ $campaign->progress_percent >= 100 ? 'text-green-600' : 'text-primary-600' }}">
+                            {{ $campaign->progress_percent }}%
+                        </span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div class="h-3 rounded-full transition-all duration-500 {{ $campaign->progress_percent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-primary-500 to-primary-400' }}"
+                         style="width: {{ min($campaign->progress_percent, 100) }}%"></div>
+                </div>
+                @if($campaign->days_remaining !== null)
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    {{ $campaign->days_remaining > 0 ? 'Залишилось ' . $campaign->days_remaining . ' днів' : 'Завершено' }}
+                </p>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
 </div>
 
