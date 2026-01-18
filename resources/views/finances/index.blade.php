@@ -35,19 +35,19 @@
                 </select>
                 <select x-model="selectedMonth" @change="updatePeriod()"
                         class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    <option value="">Весь рік</option>
-                    <option value="1">Січень</option>
-                    <option value="2">Лютий</option>
-                    <option value="3">Березень</option>
-                    <option value="4">Квітень</option>
-                    <option value="5">Травень</option>
-                    <option value="6">Червень</option>
-                    <option value="7">Липень</option>
-                    <option value="8">Серпень</option>
-                    <option value="9">Вересень</option>
-                    <option value="10">Жовтень</option>
-                    <option value="11">Листопад</option>
-                    <option value="12">Грудень</option>
+                    <option value="" {{ empty($month) ? 'selected' : '' }}>Весь рік</option>
+                    <option value="1" {{ $month == 1 ? 'selected' : '' }}>Січень</option>
+                    <option value="2" {{ $month == 2 ? 'selected' : '' }}>Лютий</option>
+                    <option value="3" {{ $month == 3 ? 'selected' : '' }}>Березень</option>
+                    <option value="4" {{ $month == 4 ? 'selected' : '' }}>Квітень</option>
+                    <option value="5" {{ $month == 5 ? 'selected' : '' }}>Травень</option>
+                    <option value="6" {{ $month == 6 ? 'selected' : '' }}>Червень</option>
+                    <option value="7" {{ $month == 7 ? 'selected' : '' }}>Липень</option>
+                    <option value="8" {{ $month == 8 ? 'selected' : '' }}>Серпень</option>
+                    <option value="9" {{ $month == 9 ? 'selected' : '' }}>Вересень</option>
+                    <option value="10" {{ $month == 10 ? 'selected' : '' }}>Жовтень</option>
+                    <option value="11" {{ $month == 11 ? 'selected' : '' }}>Листопад</option>
+                    <option value="12" {{ $month == 12 ? 'selected' : '' }}>Грудень</option>
                 </select>
             </div>
             <div class="flex items-center space-x-3 text-sm">
