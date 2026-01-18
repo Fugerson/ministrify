@@ -53,16 +53,10 @@ class Transaction extends Model
     // Payment methods
     public const PAYMENT_CASH = 'cash';
     public const PAYMENT_CARD = 'card';
-    public const PAYMENT_TRANSFER = 'transfer';
-    public const PAYMENT_LIQPAY = 'liqpay';
-    public const PAYMENT_MONOBANK = 'monobank';
 
     public const PAYMENT_METHODS = [
         self::PAYMENT_CASH => 'Готівка',
         self::PAYMENT_CARD => 'Картка',
-        self::PAYMENT_TRANSFER => 'Переказ',
-        self::PAYMENT_LIQPAY => 'LiqPay',
-        self::PAYMENT_MONOBANK => 'Monobank',
     ];
 
     protected $fillable = [

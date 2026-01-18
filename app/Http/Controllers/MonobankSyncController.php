@@ -358,7 +358,7 @@ class MonobankSyncController extends Controller
             'description' => $request->description ?: $monoTransaction->counterpart_display,
             'date' => $monoTransaction->mono_time->toDateString(),
             'status' => Transaction::STATUS_COMPLETED,
-            'payment_method' => Transaction::PAYMENT_MONOBANK,
+            'payment_method' => Transaction::PAYMENT_CARD,
         ]);
 
         // Mark as processed
@@ -463,7 +463,7 @@ class MonobankSyncController extends Controller
                 'description' => $monoTx->counterpart_display,
                 'date' => $monoTx->mono_time->toDateString(),
                 'status' => Transaction::STATUS_COMPLETED,
-                'payment_method' => Transaction::PAYMENT_MONOBANK,
+                'payment_method' => Transaction::PAYMENT_CARD,
             ]);
 
             $monoTx->update([

@@ -256,7 +256,7 @@ class PrivatbankSyncController extends Controller
             'description' => $request->description ?: $privatTransaction->counterpart_display,
             'date' => $privatTransaction->privat_time->toDateString(),
             'status' => Transaction::STATUS_COMPLETED,
-            'payment_method' => 'transfer',
+            'payment_method' => Transaction::PAYMENT_CARD,
         ]);
 
         // Mark as processed
@@ -335,7 +335,7 @@ class PrivatbankSyncController extends Controller
                 'description' => $privatTx->counterpart_display,
                 'date' => $privatTx->privat_time->toDateString(),
                 'status' => Transaction::STATUS_COMPLETED,
-                'payment_method' => 'transfer',
+                'payment_method' => Transaction::PAYMENT_CARD,
             ]);
 
             $privatTx->update([
