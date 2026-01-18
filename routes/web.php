@@ -402,6 +402,10 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('/', [FinanceController::class, 'index'])->name('index');
         Route::get('chart-data', [FinanceController::class, 'chartData'])->name('chart-data');
 
+        // Journal (Ledger)
+        Route::get('journal', [FinanceController::class, 'journal'])->name('journal');
+        Route::get('journal/export', [FinanceController::class, 'journalExport'])->name('journal.export');
+
         // Incomes (using Transaction model)
         Route::get('incomes', [FinanceController::class, 'incomes'])->name('incomes');
         Route::get('incomes/create', [FinanceController::class, 'createIncome'])->name('incomes.create');

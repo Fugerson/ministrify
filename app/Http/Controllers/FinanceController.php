@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CurrencyHelper;
+use App\Models\Church;
 use App\Models\DonationCampaign;
 use App\Models\ExchangeRate;
 use App\Models\Ministry;
@@ -225,6 +226,211 @@ class FinanceController extends Controller
             'yearComparison',
             'quickStats', 'activeCampaigns', 'paymentMethods', 'activityFeed'
         ));
+    }
+
+    /**
+     * Financial Journal - comprehensive ledger view
+     */
+    public function journal(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        // Date range handling
+        $period = $request->get('period', 'month');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        // Calculate dates based on period
+        $dates = $this->getJournalDates($period, $startDate, $endDate);
+        $startDate = $dates['start'];
+        $endDate = $dates['end'];
+
+        // Build query
+        $query = Transaction::where('church_id', $church->id)
+            ->completed()
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with(['category', 'person', 'ministry', 'recorder', 'attachments']);
+
+        // Apply filters
+        if ($direction = $request->get('direction')) {
+            $query->where('direction', $direction);
+        }
+
+        if ($categoryId = $request->get('category_id')) {
+            $query->where('category_id', $categoryId);
+        }
+
+        if ($ministryId = $request->get('ministry_id')) {
+            $query->where('ministry_id', $ministryId);
+        }
+
+        if ($paymentMethod = $request->get('payment_method')) {
+            $query->where('payment_method', $paymentMethod);
+        }
+
+        if ($personId = $request->get('person_id')) {
+            $query->where('person_id', $personId);
+        }
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                  ->orWhereHas('person', function ($q) use ($search) {
+                      $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Get transactions ordered by date DESC
+        $transactions = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(50);
+
+        // Calculate running balance (from the start of all time to end of period)
+        $balanceBeforePeriod = $this->calculateBalanceBeforeDate($church->id, $startDate);
+
+        // Calculate totals for the period
+        $periodTotals = [
+            'income' => Transaction::where('church_id', $church->id)
+                ->completed()->incoming()
+                ->whereBetween('date', [$startDate, $endDate])
+                ->when($request->get('category_id'), fn($q, $v) => $q->where('category_id', $v))
+                ->when($request->get('ministry_id'), fn($q, $v) => $q->where('ministry_id', $v))
+                ->when($request->get('payment_method'), fn($q, $v) => $q->where('payment_method', $v))
+                ->when($request->get('person_id'), fn($q, $v) => $q->where('person_id', $v))
+                ->sum('amount'),
+            'expense' => Transaction::where('church_id', $church->id)
+                ->completed()->outgoing()
+                ->whereBetween('date', [$startDate, $endDate])
+                ->when($request->get('category_id'), fn($q, $v) => $q->where('category_id', $v))
+                ->when($request->get('ministry_id'), fn($q, $v) => $q->where('ministry_id', $v))
+                ->when($request->get('payment_method'), fn($q, $v) => $q->where('payment_method', $v))
+                ->when($request->get('person_id'), fn($q, $v) => $q->where('person_id', $v))
+                ->sum('amount'),
+        ];
+        $periodTotals['balance'] = $periodTotals['income'] - $periodTotals['expense'];
+
+        // Get filter options
+        $categories = TransactionCategory::where('church_id', $church->id)->orderBy('name')->get();
+        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+        $people = Person::where('church_id', $church->id)
+            ->whereHas('transactions')
+            ->orderBy('first_name')
+            ->get();
+
+        // Current balance
+        $currentBalance = (float) $church->initial_balance
+            + Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount')
+            - Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
+
+        return view('finances.journal', compact(
+            'transactions', 'period', 'startDate', 'endDate',
+            'periodTotals', 'balanceBeforePeriod', 'currentBalance',
+            'categories', 'ministries', 'people'
+        ));
+    }
+
+    /**
+     * Export journal to Excel
+     */
+    public function journalExport(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $period = $request->get('period', 'month');
+        $dates = $this->getJournalDates($period, $request->get('start_date'), $request->get('end_date'));
+
+        $query = Transaction::where('church_id', $church->id)
+            ->completed()
+            ->whereBetween('date', [$dates['start'], $dates['end']])
+            ->with(['category', 'person', 'ministry']);
+
+        if ($direction = $request->get('direction')) {
+            $query->where('direction', $direction);
+        }
+        if ($categoryId = $request->get('category_id')) {
+            $query->where('category_id', $categoryId);
+        }
+        if ($ministryId = $request->get('ministry_id')) {
+            $query->where('ministry_id', $ministryId);
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->get();
+
+        $filename = 'journal_' . $dates['start']->format('Y-m-d') . '_' . $dates['end']->format('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($transactions) {
+            $file = fopen('php://output', 'w');
+            // BOM for UTF-8
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, ['Дата', 'Тип', 'Категорія', 'Команда', 'Опис', 'Особа', 'Сума', 'Валюта', 'Спосіб оплати'], ';');
+
+            foreach ($transactions as $t) {
+                fputcsv($file, [
+                    $t->date->format('d.m.Y'),
+                    $t->direction === 'in' ? 'Надходження' : 'Витрата',
+                    $t->category?->name ?? '-',
+                    $t->ministry?->name ?? '-',
+                    $t->description,
+                    $t->person ? $t->person->first_name . ' ' . $t->person->last_name : '-',
+                    ($t->direction === 'in' ? '+' : '-') . number_format($t->amount, 2, ',', ''),
+                    $t->currency ?? 'UAH',
+                    Transaction::PAYMENT_METHODS[$t->payment_method] ?? $t->payment_method ?? '-',
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    private function getJournalDates(string $period, ?string $startDate, ?string $endDate): array
+    {
+        $now = Carbon::now();
+
+        switch ($period) {
+            case 'today':
+                return ['start' => $now->copy()->startOfDay(), 'end' => $now->copy()->endOfDay()];
+            case 'week':
+                return ['start' => $now->copy()->startOfWeek(), 'end' => $now->copy()->endOfWeek()];
+            case 'month':
+                return ['start' => $now->copy()->startOfMonth(), 'end' => $now->copy()->endOfMonth()];
+            case 'quarter':
+                return ['start' => $now->copy()->startOfQuarter(), 'end' => $now->copy()->endOfQuarter()];
+            case 'year':
+                return ['start' => $now->copy()->startOfYear(), 'end' => $now->copy()->endOfYear()];
+            case 'custom':
+                return [
+                    'start' => $startDate ? Carbon::parse($startDate)->startOfDay() : $now->copy()->startOfMonth(),
+                    'end' => $endDate ? Carbon::parse($endDate)->endOfDay() : $now->copy()->endOfDay(),
+                ];
+            default:
+                return ['start' => $now->copy()->startOfMonth(), 'end' => $now->copy()->endOfMonth()];
+        }
+    }
+
+    private function calculateBalanceBeforeDate(int $churchId, $date): float
+    {
+        $church = Church::find($churchId);
+        $initialBalance = (float) ($church->initial_balance ?? 0);
+
+        $income = Transaction::where('church_id', $churchId)
+            ->incoming()->completed()
+            ->where('date', '<', $date)
+            ->sum('amount');
+
+        $expense = Transaction::where('church_id', $churchId)
+            ->outgoing()->completed()
+            ->where('date', '<', $date)
+            ->sum('amount');
+
+        return $initialBalance + $income - $expense;
     }
 
     // Income/Transactions list
