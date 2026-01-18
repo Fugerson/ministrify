@@ -7,6 +7,7 @@ use App\Models\Church;
 use App\Models\DonationCampaign;
 use App\Models\ExchangeRate;
 use App\Models\Ministry;
+use App\Models\MinistryBudget;
 use App\Models\Person;
 use App\Models\Transaction;
 use App\Models\TransactionAttachment;
@@ -646,7 +647,8 @@ class FinanceController extends Controller
             'date' => 'required|date',
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'description' => 'required|string|max:255',
-            'payment_method' => 'nullable|in:cash,card,transfer,online',
+            'payment_method' => 'nullable|in:cash,card',
+            'expense_type' => 'nullable|in:recurring,one_time',
             'notes' => 'nullable|string',
             'force_over_budget' => 'boolean',
             'receipts' => 'nullable|array|max:10',
@@ -680,6 +682,7 @@ class FinanceController extends Controller
             'church_id' => $church->id,
             'direction' => Transaction::DIRECTION_OUT,
             'source_type' => Transaction::SOURCE_EXPENSE,
+            'expense_type' => $validated['expense_type'] ?? null,
             'amount' => $validated['amount'],
             'currency' => $validated['currency'] ?? 'UAH',
             'date' => $validated['date'],
@@ -746,7 +749,8 @@ class FinanceController extends Controller
             'date' => 'required|date',
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'description' => 'required|string|max:255',
-            'payment_method' => 'nullable|in:cash,card,transfer,online',
+            'payment_method' => 'nullable|in:cash,card',
+            'expense_type' => 'nullable|in:recurring,one_time',
             'notes' => 'nullable|string',
             'force_over_budget' => 'boolean',
             'receipts' => 'nullable|array|max:10',
@@ -907,6 +911,96 @@ class FinanceController extends Controller
         $category->delete();
 
         return back()->with('success', 'Категорію видалено.');
+    }
+
+    // Team Budgets
+    public function budgets(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month', now()->month);
+
+        $ministries = Ministry::where('church_id', $church->id)
+            ->with(['budgets' => function ($q) use ($year, $month) {
+                $q->where('year', $year)->where('month', $month);
+            }])
+            ->orderBy('name')
+            ->get()
+            ->map(function ($ministry) use ($year, $month) {
+                $budget = $ministry->budgets->first();
+                $spent = Transaction::where('ministry_id', $ministry->id)
+                    ->where('direction', Transaction::DIRECTION_OUT)
+                    ->forMonth($year, $month)
+                    ->completed()
+                    ->sum('amount');
+
+                return [
+                    'ministry' => $ministry,
+                    'budget' => $budget,
+                    'monthly_budget' => $budget?->monthly_budget ?? $ministry->monthly_budget ?? 0,
+                    'spent' => $spent,
+                    'remaining' => ($budget?->monthly_budget ?? $ministry->monthly_budget ?? 0) - $spent,
+                    'percentage' => ($budget?->monthly_budget ?? $ministry->monthly_budget ?? 0) > 0
+                        ? round(($spent / ($budget?->monthly_budget ?? $ministry->monthly_budget)) * 100, 1)
+                        : 0,
+                ];
+            });
+
+        $totals = [
+            'budget' => $ministries->sum('monthly_budget'),
+            'spent' => $ministries->sum('spent'),
+            'remaining' => $ministries->sum('remaining'),
+        ];
+
+        // Get recent expenses without receipts (categories with receipt_required)
+        $expensesMissingReceipts = Transaction::where('church_id', $church->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
+            ->whereHas('category', fn($q) => $q->where('receipt_required', true))
+            ->whereDoesntHave('attachments')
+            ->forMonth($year, $month)
+            ->with(['ministry', 'category'])
+            ->orderByDesc('date')
+            ->limit(10)
+            ->get();
+
+        return view('finances.budgets.index', compact(
+            'ministries',
+            'totals',
+            'expensesMissingReceipts',
+            'year',
+            'month'
+        ));
+    }
+
+    public function updateBudget(Request $request, Ministry $ministry)
+    {
+        $church = $this->getCurrentChurch();
+
+        if ($ministry->church_id !== $church->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'monthly_budget' => 'required|numeric|min:0',
+            'year' => 'required|integer|min:2020|max:2100',
+            'month' => 'required|integer|min:1|max:12',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        MinistryBudget::updateOrCreate(
+            [
+                'church_id' => $church->id,
+                'ministry_id' => $ministry->id,
+                'year' => $validated['year'],
+                'month' => $validated['month'],
+            ],
+            [
+                'monthly_budget' => $validated['monthly_budget'],
+                'notes' => $validated['notes'] ?? null,
+            ]
+        );
+
+        return back()->with('success', "Бюджет для \"{$ministry->name}\" оновлено.");
     }
 
     // Analytics API

@@ -113,17 +113,45 @@
                     @enderror
                 </div>
 
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                        <select name="category_id" id="category_id"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option value="">Без категорії</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id', $expense->category_id) == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="expense_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип витрати</label>
+                        <select name="expense_type" id="expense_type"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option value="">Не вказано</option>
+                            <option value="recurring" {{ old('expense_type', $expense->expense_type) == 'recurring' ? 'selected' : '' }}>Регулярна</option>
+                            <option value="one_time" {{ old('expense_type', $expense->expense_type) == 'one_time' ? 'selected' : '' }}>Одноразова</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div>
-                    <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
-                    <select name="category_id" id="category_id"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">Без категорії</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id', $expense->category_id) == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="payment_method" value="card" {{ old('payment_method', $expense->payment_method ?? 'card') == 'card' ? 'checked' : '' }}
+                                   class="text-primary-600 focus:ring-primary-500">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Картка</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="payment_method" value="cash" {{ old('payment_method', $expense->payment_method) == 'cash' ? 'checked' : '' }}
+                                   class="text-primary-600 focus:ring-primary-500">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Готівка</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div x-data="receiptUploaderEdit()">

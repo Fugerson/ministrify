@@ -428,6 +428,10 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('categories/{category}', [FinanceController::class, 'updateCategory'])->name('categories.update');
         Route::delete('categories/{category}', [FinanceController::class, 'destroyCategory'])->name('categories.destroy');
 
+        // Team Budgets
+        Route::get('budgets', [FinanceController::class, 'budgets'])->name('budgets');
+        Route::post('budgets/{ministry}', [FinanceController::class, 'updateBudget'])->name('budgets.update');
+
         // Unified Cards Page
         Route::get('cards', [FinanceController::class, 'cards'])->name('cards');
 

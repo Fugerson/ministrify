@@ -21,6 +21,7 @@ class TransactionCategory extends Model
         'type',
         'icon',
         'color',
+        'receipt_required',
         'is_tithe',
         'is_offering',
         'is_donation',
@@ -33,6 +34,7 @@ class TransactionCategory extends Model
         'is_offering' => 'boolean',
         'is_donation' => 'boolean',
         'is_system' => 'boolean',
+        'receipt_required' => 'boolean',
     ];
 
     public function church(): BelongsTo

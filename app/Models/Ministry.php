@@ -92,6 +92,24 @@ class Ministry extends Model
         return $this->hasMany(Expense::class);
     }
 
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function budgets(): HasMany
+    {
+        return $this->hasMany(MinistryBudget::class);
+    }
+
+    public function currentBudget(): ?MinistryBudget
+    {
+        return $this->budgets()
+            ->where('year', now()->year)
+            ->where('month', now()->month)
+            ->first();
+    }
+
     public function meetings(): HasMany
     {
         return $this->hasMany(MinistryMeeting::class)->orderByDesc('date');

@@ -59,10 +59,20 @@ class Transaction extends Model
         self::PAYMENT_CARD => 'Картка',
     ];
 
+    // Expense types
+    public const EXPENSE_RECURRING = 'recurring';
+    public const EXPENSE_ONE_TIME = 'one_time';
+
+    public const EXPENSE_TYPES = [
+        self::EXPENSE_RECURRING => 'Регулярна',
+        self::EXPENSE_ONE_TIME => 'Одноразова',
+    ];
+
     protected $fillable = [
         'church_id',
         'direction',
         'source_type',
+        'expense_type',
         'amount',
         'currency',
         'amount_uah',
@@ -277,6 +287,14 @@ class Transaction extends Model
     public function getPaymentMethodLabelAttribute(): string
     {
         return self::PAYMENT_METHODS[$this->payment_method] ?? $this->payment_method ?? 'Не вказано';
+    }
+
+    public function getExpenseTypeLabelAttribute(): ?string
+    {
+        if (!$this->expense_type) {
+            return null;
+        }
+        return self::EXPENSE_TYPES[$this->expense_type] ?? $this->expense_type;
     }
 
     public function getDonorDisplayNameAttribute(): string
