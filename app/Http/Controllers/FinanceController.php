@@ -24,7 +24,7 @@ class FinanceController extends Controller
         $church = $this->getCurrentChurch();
 
         $year = $request->get('year', now()->year);
-        $month = $request->get('month');
+        $month = $request->get('month', now()->month);
 
         // Calculate totals using Transaction model
         $incomeQuery = Transaction::where('church_id', $church->id)->incoming()->completed();
