@@ -73,10 +73,9 @@
 
     <!-- Current Balance Card -->
     <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-6 text-white">
-        <div class="flex items-center justify-between">
-            <div class="flex-1">
-                <p class="text-indigo-100 text-sm font-medium">Поточний баланс каси (в гривнях)</p>
-                <p class="text-4xl font-bold mt-1">{{ number_format($currentBalance, 0, ',', ' ') }} ₴</p>
+        <div>
+            <p class="text-indigo-100 text-sm font-medium">Поточний баланс каси (в гривнях)</p>
+            <p class="text-4xl font-bold mt-1">{{ number_format($currentBalance, 0, ',', ' ') }} ₴</p>
                 <div class="mt-3 text-sm text-indigo-100 space-y-1 max-w-sm">
                     @if($initialBalance > 0)
                     <div class="flex justify-between gap-4">
@@ -113,12 +112,6 @@
                     </div>
                 </div>
                 @endif
-            </div>
-            <div class="p-3 bg-white bg-opacity-20 rounded-full ml-4">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
         </div>
         @if(!$initialBalance && !$initialBalanceDate)
         <div class="mt-4 pt-4 border-t border-white/20">
