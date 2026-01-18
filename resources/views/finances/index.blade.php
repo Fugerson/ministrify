@@ -77,20 +77,20 @@
             <div class="flex-1">
                 <p class="text-indigo-100 text-sm font-medium">Поточний баланс каси (в гривнях)</p>
                 <p class="text-4xl font-bold mt-1">{{ number_format($currentBalance, 0, ',', ' ') }} ₴</p>
-                <div class="mt-3 text-sm text-indigo-100 space-y-1">
+                <div class="mt-3 text-sm text-indigo-100 space-y-1 max-w-sm">
                     @if($initialBalance > 0)
-                    <div class="flex justify-between">
+                    <div class="flex justify-between gap-4">
                         <span>Початковий баланс{{ $initialBalanceDate ? ' (' . $initialBalanceDate->format('d.m.Y') . ')' : '' }}:</span>
-                        <span class="font-medium">{{ number_format($initialBalance, 0, ',', ' ') }} ₴</span>
+                        <span class="font-medium whitespace-nowrap">{{ number_format($initialBalance, 0, ',', ' ') }} ₴</span>
                     </div>
                     @endif
-                    <div class="flex justify-between">
+                    <div class="flex justify-between gap-4">
                         <span>+ Всього надходжень:</span>
-                        <span class="font-medium text-green-200">{{ number_format($allTimeIncome, 0, ',', ' ') }} ₴</span>
+                        <span class="font-medium text-green-200 whitespace-nowrap">{{ number_format($allTimeIncome, 0, ',', ' ') }} ₴</span>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between gap-4">
                         <span>- Всього витрат:</span>
-                        <span class="font-medium text-red-200">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
+                        <span class="font-medium text-red-200 whitespace-nowrap">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
                     </div>
                 </div>
                 @if(count($incomeByCurrency) > 1 || count($expenseByCurrency) > 1 || !empty($incomeByCurrency['USD']) || !empty($incomeByCurrency['EUR']) || !empty($expenseByCurrency['USD']) || !empty($expenseByCurrency['EUR']))
