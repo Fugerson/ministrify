@@ -236,79 +236,21 @@ class FinanceController extends Controller
     {
         $church = $this->getCurrentChurch();
 
-        // Date range handling
-        $period = $request->get('period', 'month');
-        $startDate = $request->get('start_date');
-        $endDate = $request->get('end_date');
+        // Always load a full year of data for client-side period switching
+        $yearStart = now()->startOfYear();
+        $yearEnd = now()->endOfYear();
 
-        // Calculate dates based on period
-        $dates = $this->getJournalDates($period, $startDate, $endDate);
-        $startDate = $dates['start'];
-        $endDate = $dates['end'];
-
-        // Build query
-        $query = Transaction::where('church_id', $church->id)
+        // Build query - get ALL transactions for the year (period filtering done client-side)
+        $transactions = Transaction::where('church_id', $church->id)
             ->completed()
-            ->whereBetween('date', [$startDate, $endDate])
-            ->with(['category', 'person', 'ministry', 'recorder', 'attachments']);
+            ->whereBetween('date', [$yearStart, $yearEnd])
+            ->with(['category', 'person', 'ministry', 'recorder', 'attachments'])
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        // Apply filters
-        if ($direction = $request->get('direction')) {
-            $query->where('direction', $direction);
-        }
-
-        if ($categoryId = $request->get('category_id')) {
-            $query->where('category_id', $categoryId);
-        }
-
-        if ($ministryId = $request->get('ministry_id')) {
-            $query->where('ministry_id', $ministryId);
-        }
-
-        if ($paymentMethod = $request->get('payment_method')) {
-            $query->where('payment_method', $paymentMethod);
-        }
-
-        if ($personId = $request->get('person_id')) {
-            $query->where('person_id', $personId);
-        }
-
-        if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                  ->orWhereHas('person', function ($q) use ($search) {
-                      $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        // Get transactions ordered by date DESC
-        $transactions = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(50);
-
-        // Calculate running balance (from the start of all time to end of period)
-        $balanceBeforePeriod = $this->calculateBalanceBeforeDate($church->id, $startDate);
-
-        // Calculate totals for the period
-        $periodTotals = [
-            'income' => Transaction::where('church_id', $church->id)
-                ->completed()->incoming()
-                ->whereBetween('date', [$startDate, $endDate])
-                ->when($request->get('category_id'), fn($q, $v) => $q->where('category_id', $v))
-                ->when($request->get('ministry_id'), fn($q, $v) => $q->where('ministry_id', $v))
-                ->when($request->get('payment_method'), fn($q, $v) => $q->where('payment_method', $v))
-                ->when($request->get('person_id'), fn($q, $v) => $q->where('person_id', $v))
-                ->sum('amount'),
-            'expense' => Transaction::where('church_id', $church->id)
-                ->completed()->outgoing()
-                ->whereBetween('date', [$startDate, $endDate])
-                ->when($request->get('category_id'), fn($q, $v) => $q->where('category_id', $v))
-                ->when($request->get('ministry_id'), fn($q, $v) => $q->where('ministry_id', $v))
-                ->when($request->get('payment_method'), fn($q, $v) => $q->where('payment_method', $v))
-                ->when($request->get('person_id'), fn($q, $v) => $q->where('person_id', $v))
-                ->sum('amount'),
-        ];
-        $periodTotals['balance'] = $periodTotals['income'] - $periodTotals['expense'];
+        // Calculate balance before the year
+        $balanceBeforeYear = $this->calculateBalanceBeforeDate($church->id, $yearStart);
 
         // Get filter options
         $categories = TransactionCategory::where('church_id', $church->id)->orderBy('name')->get();
@@ -318,14 +260,16 @@ class FinanceController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        // Current balance
+        // Current balance (all time)
         $currentBalance = (float) $church->initial_balance
             + Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount')
             - Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
 
+        // Initial period from request or default to month
+        $initialPeriod = $request->get('period', 'month');
+
         return view('finances.journal', compact(
-            'transactions', 'period', 'startDate', 'endDate',
-            'periodTotals', 'balanceBeforePeriod', 'currentBalance',
+            'transactions', 'initialPeriod', 'balanceBeforeYear', 'currentBalance',
             'categories', 'ministries', 'people'
         ));
     }
