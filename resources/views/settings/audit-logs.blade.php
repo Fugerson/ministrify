@@ -96,7 +96,7 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Дія</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Тип</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Об'єкт</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">IP</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase min-w-[300px]">Зміни</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase"></th>
                     </tr>
                 </thead>
@@ -142,13 +142,23 @@
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">
                                 {{ Str::limit($log->model_name, 30) }}
                             </td>
-                            <td class="px-4 py-3 text-xs text-gray-400 font-mono">
-                                {{ $log->ip_address }}
+                            <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">
+                                @if($log->changes_summary_text)
+                                    <span class="font-mono" title="{{ $log->changes_summary_text }}">
+                                        {{ Str::limit($log->changes_summary_text, 60) }}
+                                    </span>
+                                @elseif($log->action === 'created' && $log->new_values)
+                                    <span class="text-green-600 dark:text-green-400">Новий запис</span>
+                                @elseif($log->action === 'deleted')
+                                    <span class="text-red-600 dark:text-red-400">Видалено</span>
+                                @else
+                                    <span class="text-gray-400">—</span>
+                                @endif
                             </td>
                             <td class="px-4 py-3">
                                 @if($log->old_values || $log->new_values)
                                     <button onclick="showLogDetails({{ $log->id }})"
-                                            class="text-primary-600 dark:text-primary-400 hover:text-primary-700 text-sm">
+                                            class="text-primary-600 dark:text-primary-400 hover:text-primary-700 text-sm whitespace-nowrap">
                                         Деталі
                                     </button>
                                 @endif

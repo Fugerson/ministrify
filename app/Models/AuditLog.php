@@ -118,11 +118,19 @@ class AuditLog extends Model
             'App\\Models\\Group' => 'Група',
             'App\\Models\\Expense' => 'Витрата',
             'App\\Models\\Income' => 'Дохід',
+            'App\\Models\\Transaction' => 'Транзакція',
+            'App\\Models\\TransactionCategory' => 'Категорія фінансів',
+            'App\\Models\\Budget' => 'Бюджет',
+            'App\\Models\\BudgetItem' => 'Стаття бюджету',
+            'App\\Models\\Donation' => 'Пожертва',
             'App\\Models\\Board' => 'Дошка',
             'App\\Models\\BoardCard' => 'Картка',
+            'App\\Models\\BoardColumn' => 'Колонка дошки',
             'App\\Models\\Assignment' => 'Призначення',
             'App\\Models\\Attendance' => 'Відвідуваність',
             'App\\Models\\Church' => 'Церква',
+            'App\\Models\\Tag' => 'Тег',
+            'App\\Models\\ExpenseCategory' => 'Категорія витрат',
             default => class_basename($this->model_type ?? ''),
         };
     }
@@ -174,6 +182,8 @@ class AuditLog extends Model
         'notes' => 'Примітки',
         'color' => 'Колір',
         'is_active' => 'Активний',
+        'type' => 'Тип',
+        'currency' => 'Валюта',
 
         // Person
         'first_name' => 'Ім\'я',
@@ -187,6 +197,9 @@ class AuditLog extends Model
         'baptism_date' => 'Дата хрещення',
         'city' => 'Місто',
         'occupation' => 'Професія',
+        'photo' => 'Фото',
+        'telegram_id' => 'Telegram',
+        'telegram_username' => 'Telegram нік',
 
         // Event
         'start_date' => 'Початок',
@@ -198,6 +211,7 @@ class AuditLog extends Model
         'recurrence_pattern' => 'Шаблон повторення',
         'all_day' => 'Весь день',
         'ministry_id' => 'Служіння',
+        'event_type' => 'Тип події',
 
         // Ministry
         'leader_id' => 'Лідер',
@@ -213,12 +227,30 @@ class AuditLog extends Model
         'theme' => 'Тема',
         'church_role_id' => 'Церковна роль',
 
-        // Finance
+        // Finance / Transaction
         'amount' => 'Сума',
         'category' => 'Категорія',
+        'category_id' => 'Категорія',
+        'transaction_category_id' => 'Категорія',
         'date' => 'Дата',
         'payment_method' => 'Спосіб оплати',
         'person_id' => 'Особа',
+        'transaction_date' => 'Дата операції',
+        'source' => 'Джерело',
+        'purpose' => 'Призначення',
+        'is_tithe' => 'Десятина',
+        'is_recurring' => 'Регулярний',
+        'recurring_day' => 'День повторення',
+        'reference_number' => 'Номер',
+
+        // Budget
+        'budget_id' => 'Бюджет',
+        'planned_amount' => 'Планова сума',
+        'actual_amount' => 'Фактична сума',
+        'period_start' => 'Початок періоду',
+        'period_end' => 'Кінець періоду',
+        'year' => 'Рік',
+        'month' => 'Місяць',
 
         // Board/Cards
         'position' => 'Позиція',
@@ -227,6 +259,16 @@ class AuditLog extends Model
         'board_id' => 'Дошка',
         'column_id' => 'Колонка',
         'assigned_to' => 'Призначено',
+
+        // Donation
+        'donor_name' => 'Жертводавець',
+        'donor_email' => 'Email жертводавця',
+        'donation_type' => 'Тип пожертви',
+        'anonymous' => 'Анонімно',
+
+        // Settings
+        'sort_order' => 'Порядок',
+        'icon' => 'Іконка',
     ];
 
     /**
@@ -327,8 +369,28 @@ class AuditLog extends Model
             };
         }
 
+        // Payment method
+        if ($field === 'payment_method') {
+            return match($value) {
+                'cash' => 'Готівка',
+                'card' => 'Картка',
+                'bank_transfer' => 'Переказ',
+                'online' => 'Онлайн',
+                default => $value,
+            };
+        }
+
+        // Transaction type
+        if ($field === 'type') {
+            return match($value) {
+                'income' => 'Надходження',
+                'expense' => 'Витрата',
+                default => $value,
+            };
+        }
+
         // Amount (money)
-        if ($field === 'amount') {
+        if (in_array($field, ['amount', 'planned_amount', 'actual_amount', 'initial_balance'])) {
             return number_format((float)$value, 2, '.', ' ') . ' ₴';
         }
 
@@ -370,6 +432,40 @@ class AuditLog extends Model
         }
 
         return $changes;
+    }
+
+    /**
+     * Get compact text summary of changes for display in table
+     */
+    public function getChangesSummaryTextAttribute(): ?string
+    {
+        $changes = $this->changes_summary;
+
+        if (empty($changes)) {
+            return null;
+        }
+
+        $parts = [];
+        $maxChanges = 3; // Show max 3 changes
+
+        foreach (array_slice($changes, 0, $maxChanges) as $change) {
+            $old = $change['old'] ?? '—';
+            $new = $change['new'] ?? '—';
+
+            // Truncate long values
+            if (mb_strlen($old) > 20) $old = mb_substr($old, 0, 17) . '...';
+            if (mb_strlen($new) > 20) $new = mb_substr($new, 0, 17) . '...';
+
+            $parts[] = "{$change['field']}: {$old} → {$new}";
+        }
+
+        $result = implode('; ', $parts);
+
+        if (count($changes) > $maxChanges) {
+            $result .= ' (+' . (count($changes) - $maxChanges) . ')';
+        }
+
+        return $result;
     }
 
     /**

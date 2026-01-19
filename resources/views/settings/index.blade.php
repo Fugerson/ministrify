@@ -1509,6 +1509,7 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Дія</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Тип</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Об'єкт</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Зміни</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -1550,10 +1551,23 @@
                                 <td class="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">
                                     {{ Str::limit($log->model_name, 30) }}
                                 </td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300 hidden lg:table-cell">
+                                    @if($log->changes_summary_text)
+                                        <span class="font-mono" title="{{ $log->changes_summary_text }}">
+                                            {{ Str::limit($log->changes_summary_text, 50) }}
+                                        </span>
+                                    @elseif($log->action === 'created')
+                                        <span class="text-green-600 dark:text-green-400">Новий</span>
+                                    @elseif($log->action === 'deleted')
+                                        <span class="text-red-600 dark:text-red-400">Видалено</span>
+                                    @else
+                                        <span class="text-gray-400">—</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="6" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
                                     Записів не знайдено
                                 </td>
                             </tr>
