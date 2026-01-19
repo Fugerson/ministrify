@@ -13,7 +13,7 @@ class AnnouncementController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $church = $user->church;
+        $church = $this->getCurrentChurch();
 
         $announcements = Announcement::forChurch($church->id)
             ->published()
@@ -32,14 +32,10 @@ class AnnouncementController extends Controller
      */
     public function show(Announcement $announcement)
     {
-        $user = auth()->user();
-
-        if ($announcement->church_id !== $user->church_id) {
-            abort(404);
-        }
+        $this->authorizeChurch($announcement);
 
         // Mark as read
-        $announcement->markAsReadBy($user);
+        $announcement->markAsReadBy(auth()->user());
 
         return view('announcements.show', compact('announcement'));
     }
@@ -65,7 +61,7 @@ class AnnouncementController extends Controller
         ]);
 
         $user = auth()->user();
-        $church = $user->church;
+        $church = $this->getCurrentChurch();
 
         $announcement = Announcement::create([
             'church_id' => $church->id,
@@ -87,11 +83,7 @@ class AnnouncementController extends Controller
      */
     public function edit(Announcement $announcement)
     {
-        $user = auth()->user();
-
-        if ($announcement->church_id !== $user->church_id) {
-            abort(404);
-        }
+        $this->authorizeChurch($announcement);
 
         return view('announcements.edit', compact('announcement'));
     }
@@ -101,11 +93,7 @@ class AnnouncementController extends Controller
      */
     public function update(Request $request, Announcement $announcement)
     {
-        $user = auth()->user();
-
-        if ($announcement->church_id !== $user->church_id) {
-            abort(404);
-        }
+        $this->authorizeChurch($announcement);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -130,11 +118,7 @@ class AnnouncementController extends Controller
      */
     public function destroy(Announcement $announcement)
     {
-        $user = auth()->user();
-
-        if ($announcement->church_id !== $user->church_id) {
-            abort(404);
-        }
+        $this->authorizeChurch($announcement);
 
         $announcement->delete();
 
@@ -147,11 +131,7 @@ class AnnouncementController extends Controller
      */
     public function togglePin(Announcement $announcement)
     {
-        $user = auth()->user();
-
-        if ($announcement->church_id !== $user->church_id) {
-            abort(404);
-        }
+        $this->authorizeChurch($announcement);
 
         $announcement->update(['is_pinned' => !$announcement->is_pinned]);
 

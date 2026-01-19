@@ -643,7 +643,7 @@ class PersonController extends Controller
             return response()->json(['error' => 'Профіль не знайдено'], 404);
         }
 
-        $church = $user->church;
+        $church = $this->getCurrentChurch();
 
         if (!$church->telegram_bot_token) {
             return response()->json(['error' => 'Telegram бот не налаштовано церквою'], 400);
