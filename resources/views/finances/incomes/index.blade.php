@@ -13,18 +13,14 @@
 @endsection
 
 @section('content')
+@include('finances.partials.tabs')
+
+<div id="finance-content">
 @php
     $months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
 @endphp
 
 <div class="space-y-6">
-    <!-- Back link -->
-    <a href="{{ route('finances.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-        До аналітики
-    </a>
 
     <!-- Summary card -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
@@ -86,8 +82,7 @@
                     <tr>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дата</th>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Категорія</th>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Жертводавець</th>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Спосіб</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Спосіб</th>
                         <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Сума</th>
                         <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
                     </tr>
@@ -107,14 +102,7 @@
                                     {{ $income->category?->icon ?? '💰' }} {{ $income->category?->name ?? 'Без категорії' }}
                                 </span>
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white hidden md:table-cell">
-                                @if($income->is_anonymous)
-                                    <span class="text-gray-400 dark:text-gray-500 italic">Анонімно</span>
-                                @else
-                                    {{ $income->person?->full_name ?? 'Не вказано' }}
-                                @endif
-                            </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
                                 {{ $income->payment_method_label }}
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
@@ -137,7 +125,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="5" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                 Немає надходжень за цей місяць
                             </td>
                         </tr>
@@ -153,4 +141,5 @@
         @endif
     </div>
 </div>
+</div><!-- /finance-content -->
 @endsection

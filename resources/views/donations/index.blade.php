@@ -3,6 +3,9 @@
 @section('title', 'Пожертви')
 
 @section('content')
+@include('finances.partials.tabs')
+
+<div id="finance-content">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -21,7 +24,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-6 md:mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
@@ -46,40 +49,16 @@
             <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_year'], 0, ',', ' ') }} ₴</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700 col-span-2 sm:col-span-1">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                     <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                 </div>
-                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Донорів</span>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Всього транзакцій</span>
             </div>
-            <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['donors_count'] }}</p>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                </div>
-                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Регулярних</span>
-            </div>
-            <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['recurring_count'] }}</p>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700 col-span-2 sm:col-span-1">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                    </svg>
-                </div>
-                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Середня</span>
-            </div>
-            <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['avg_donation'], 0, ',', ' ') }} ₴</p>
+            <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['transactions_count'] ?? 0 }}</p>
         </div>
     </div>
 
@@ -103,56 +82,26 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Донор</th>
-                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Сума</th>
-                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Призначення</th>
-                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Метод</th>
-                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Статус</th>
                                 <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дата</th>
+                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Сума</th>
+                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Призначення</th>
+                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Метод</th>
+                                <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Статус</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                             @forelse($donations as $donation)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-2 md:gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                                                @if($donation->is_anonymous)
-                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                    </svg>
-                                                @else
-                                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ substr($donation->donor_name ?? 'A', 0, 1) }}</span>
-                                                @endif
-                                            </div>
-                                            <div class="min-w-0">
-                                                <p class="font-medium text-gray-900 dark:text-white text-sm truncate">{{ $donation->donor_display_name }}</p>
-                                                @if($donation->donor_email)
-                                                    <p class="text-xs text-gray-500 truncate hidden sm:block">{{ $donation->donor_email }}</p>
-                                                @endif
-                                                <!-- Mobile: show purpose -->
-                                                <p class="md:hidden text-xs text-gray-500 dark:text-gray-400 truncate">{{ $donation->purpose ?? ($donation->campaign?->name ?? '') }}</p>
-                                            </div>
-                                        </div>
+                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $donation->created_at->format('d.m.Y') }}
                                     </td>
                                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                        <span class="font-semibold text-gray-900 dark:text-white text-sm md:text-base">{{ $donation->formatted_amount }}</span>
-                                        <!-- Mobile: show status badge -->
-                                        <div class="sm:hidden mt-0.5">
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium
-                                                @if($donation->status === 'completed') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
-                                                @elseif($donation->status === 'pending') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
-                                                @elseif($donation->status === 'failed') bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
-                                                @else bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300
-                                                @endif">
-                                                {{ $donation->status_label }}
-                                            </span>
-                                        </div>
+                                        <span class="font-semibold text-green-600 dark:text-green-400">{{ $donation->formatted_amount }}</span>
                                     </td>
-                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden md:table-cell">
+                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
                                         <span class="text-sm text-gray-600 dark:text-gray-400">{{ $donation->purpose ?? ($donation->campaign?->name ?? 'Загальна') }}</span>
                                     </td>
-                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden lg:table-cell">
+                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden md:table-cell">
                                         @if($donation->payment_method === 'liqpay')
                                             <span class="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded">
                                                 LiqPay
@@ -162,10 +111,10 @@
                                                 Monobank
                                             </span>
                                         @else
-                                            <span class="text-sm text-gray-500">{{ $donation->payment_method }}</span>
+                                            <span class="text-sm text-gray-500">{{ $donation->payment_method ?? 'Картка' }}</span>
                                         @endif
                                     </td>
-                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
+                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
                                             @if($donation->status === 'completed') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
                                             @elseif($donation->status === 'pending') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
@@ -175,14 +124,10 @@
                                             {{ $donation->status_label }}
                                         </span>
                                     </td>
-                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        <span class="hidden sm:inline">{{ $donation->created_at->format('d.m.Y H:i') }}</span>
-                                        <span class="sm:hidden">{{ $donation->created_at->format('d.m') }}</span>
-                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                         <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                         </svg>
@@ -266,31 +211,6 @@
                         </div>
                     @empty
                         <p class="text-center text-gray-500 dark:text-gray-400 py-4">Немає активних кампаній</p>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Top Donors -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-                    <h3 class="font-semibold text-gray-900 dark:text-white">Топ донорів ({{ now()->year }})</h3>
-                </div>
-                <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @forelse($topDonors as $donor)
-                        <div class="px-6 py-3 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                                    <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ substr($donor->donor_name ?? 'A', 0, 1) }}</span>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $donor->donor_name }}</p>
-                                    <p class="text-xs text-gray-500">{{ $donor->donations_count }} пожертв</p>
-                                </div>
-                            </div>
-                            <span class="font-semibold text-gray-900 dark:text-white">{{ number_format($donor->total_amount, 0, ',', ' ') }} ₴</span>
-                        </div>
-                    @empty
-                        <p class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Ще немає даних</p>
                     @endforelse
                 </div>
             </div>
@@ -397,4 +317,5 @@ function donationChart(data) {
     }
 }
 </script>
+</div><!-- /finance-content -->
 @endsection

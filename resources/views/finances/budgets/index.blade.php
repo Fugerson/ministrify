@@ -3,6 +3,9 @@
 @section('title', 'Бюджети команд')
 
 @section('content')
+@include('finances.partials.tabs')
+
+<div id="finance-content">
 <div class="space-y-6" x-data="budgetsPage()">
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -314,4 +317,5 @@ function budgetsPage() {
     }
 }
 </script>
+</div><!-- /finance-content -->
 @endsection

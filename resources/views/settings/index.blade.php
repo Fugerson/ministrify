@@ -878,6 +878,178 @@
         </div>
     </div>
 
+    <!-- Finance Categories -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ showForm: false, editId: null, formType: 'income' }">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Категорії фінансів</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Категорії для надходжень та витрат</p>
+            </div>
+            <button @click="showForm = !showForm; editId = null" class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Додати
+            </button>
+        </div>
+
+        <!-- Add/Edit Form -->
+        <div x-show="showForm" x-cloak class="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+            <form action="{{ route('settings.transaction-categories.store') }}" method="POST">
+                @csrf
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                    <div>
+                        <input type="text" name="name" placeholder="Назва" required
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <select name="type" x-model="formType"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                            <option value="income">Надходження</option>
+                            <option value="expense">Витрата</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="text" name="icon" placeholder="Емодзі" maxlength="10"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <input type="color" name="color" value="#3B82F6"
+                               class="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm transition-colors">
+                            Додати
+                        </button>
+                        <button type="button" @click="showForm = false" class="px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="p-6">
+            <!-- Income Categories -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-green-600 dark:text-green-400 mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Надходження
+                </h3>
+                <div class="space-y-2">
+                    @foreach($transactionCategories->where('type', 'income') as $category)
+                        <div x-data="{ editing: false }" class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div x-show="!editing" class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm" style="background-color: {{ $category->color }}20">
+                                    {{ $category->icon ?? '💰' }}
+                                </span>
+                                <span class="text-gray-900 dark:text-white">{{ $category->name }}</span>
+                                <span class="text-xs text-gray-500">{{ $category->transactions_count }} записів</span>
+                            </div>
+                            <div x-show="!editing" class="flex items-center gap-2">
+                                <button @click="editing = true" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                                @if($category->transactions_count == 0)
+                                    <form action="{{ route('settings.transaction-categories.destroy', $category) }}" method="POST" class="inline"
+                                          onsubmit="return confirm('Видалити категорію?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-400 hover:text-red-600">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                            <!-- Edit form -->
+                            <form x-show="editing" action="{{ route('settings.transaction-categories.update', $category) }}" method="POST" class="flex-1 flex items-center gap-2">
+                                @csrf
+                                @method('PUT')
+                                <input type="text" name="name" value="{{ $category->name }}" required
+                                       class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                <input type="text" name="icon" value="{{ $category->icon }}" placeholder="Емодзі" maxlength="10"
+                                       class="w-16 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                <input type="color" name="color" value="{{ $category->color }}"
+                                       class="w-10 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer">
+                                <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm">Зберегти</button>
+                                <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">Скасувати</button>
+                            </form>
+                        </div>
+                    @endforeach
+                    @if($transactionCategories->where('type', 'income')->isEmpty())
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає категорій надходжень</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Expense Categories -->
+            <div>
+                <h3 class="text-sm font-medium text-red-600 dark:text-red-400 mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                    </svg>
+                    Витрати
+                </h3>
+                <div class="space-y-2">
+                    @foreach($transactionCategories->where('type', 'expense') as $category)
+                        <div x-data="{ editing: false }" class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div x-show="!editing" class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm" style="background-color: {{ $category->color }}20">
+                                    {{ $category->icon ?? '📦' }}
+                                </span>
+                                <span class="text-gray-900 dark:text-white">{{ $category->name }}</span>
+                                <span class="text-xs text-gray-500">{{ $category->transactions_count }} записів</span>
+                            </div>
+                            <div x-show="!editing" class="flex items-center gap-2">
+                                <button @click="editing = true" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                                @if($category->transactions_count == 0)
+                                    <form action="{{ route('settings.transaction-categories.destroy', $category) }}" method="POST" class="inline"
+                                          onsubmit="return confirm('Видалити категорію?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-400 hover:text-red-600">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                            <!-- Edit form -->
+                            <form x-show="editing" action="{{ route('settings.transaction-categories.update', $category) }}" method="POST" class="flex-1 flex items-center gap-2">
+                                @csrf
+                                @method('PUT')
+                                <input type="text" name="name" value="{{ $category->name }}" required
+                                       class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                <input type="text" name="icon" value="{{ $category->icon }}" placeholder="Емодзі" maxlength="10"
+                                       class="w-16 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                <input type="color" name="color" value="{{ $category->color }}"
+                                       class="w-10 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer">
+                                <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm">Зберегти</button>
+                                <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">Скасувати</button>
+                            </form>
+                        </div>
+                    @endforeach
+                    @if($transactionCategories->where('type', 'expense')->isEmpty())
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає категорій витрат</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Church Roles -->
     <a href="{{ route('settings.church-roles.index') }}"
        class="block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-colors">

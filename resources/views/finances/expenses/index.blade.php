@@ -13,18 +13,14 @@
 @endsection
 
 @section('content')
+@include('finances.partials.tabs')
+
+<div id="finance-content">
 @php
     $months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
 @endphp
 
 <div class="space-y-6">
-    <!-- Back link -->
-    <a href="{{ route('finances.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-        До аналітики
-    </a>
 
     <!-- Summary card -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
@@ -156,4 +152,5 @@
         @endif
     </div>
 </div>
+</div><!-- /finance-content -->
 @endsection

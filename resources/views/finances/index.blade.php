@@ -22,6 +22,9 @@
 @endsection
 
 @section('content')
+@include('finances.partials.tabs')
+
+<div id="finance-content">
 <div x-data="financesDashboard()" class="space-y-6">
     <!-- Period selector -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
@@ -49,24 +52,6 @@
                     <option value="11" {{ $month == 11 ? 'selected' : '' }}>Листопад</option>
                     <option value="12" {{ $month == 12 ? 'selected' : '' }}>Грудень</option>
                 </select>
-            </div>
-            <div class="flex items-center space-x-3 text-sm">
-                <a href="{{ route('finances.journal') }}" class="inline-flex items-center px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg font-medium hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Журнал
-                </a>
-                <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('finances.incomes') }}" class="text-green-600 dark:text-green-400 hover:underline">Надходження</a>
-                <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('finances.expenses.index') }}" class="text-red-600 dark:text-red-400 hover:underline">Витрати</a>
-                <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('donations.index') }}" class="text-primary-600 dark:text-primary-400 hover:underline">Пожертви</a>
-                <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('finances.budgets') }}" class="text-blue-600 dark:text-blue-400 hover:underline">Бюджети</a>
-                <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('finances.cards') }}" class="text-gray-600 dark:text-gray-400 hover:underline">Моя карта</a>
             </div>
         </div>
     </div>
@@ -290,7 +275,7 @@
                                     {{ $income->category?->name ?? 'Без категорії' }}
                                 </p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $income->date->format('d.m.Y') }} • {{ $income->donor_display_name }}
+                                    {{ $income->date->format('d.m.Y') }} • {{ $income->payment_method_label ?? 'Готівка' }}
                                 </p>
                             </div>
                         </div>
@@ -651,4 +636,5 @@ function financesDashboard() {
     }
 }
 </script>
+</div><!-- /finance-content -->
 @endsection

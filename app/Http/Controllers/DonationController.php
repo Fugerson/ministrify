@@ -220,6 +220,7 @@ class DonationController extends Controller
 
         $donations = Transaction::where('church_id', $church->id)
             ->where('source_type', Transaction::SOURCE_DONATION)
+            ->with(['campaign'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -236,19 +237,11 @@ class DonationController extends Controller
                 ->where('status', Transaction::STATUS_COMPLETED)
                 ->whereYear('date', now()->year)
                 ->sum('amount'),
-            'donors_count' => Transaction::where('church_id', $church->id)
+            'transactions_count' => Transaction::where('church_id', $church->id)
                 ->where('source_type', Transaction::SOURCE_DONATION)
                 ->where('status', Transaction::STATUS_COMPLETED)
-                ->whereMonth('date', now()->month)
-                ->whereNotNull('donor_email')
-                ->distinct()
-                ->count('donor_email'),
-            'recurring_count' => 0, // Recurring handled differently in unified system
-            'avg_donation' => Transaction::where('church_id', $church->id)
-                ->where('source_type', Transaction::SOURCE_DONATION)
-                ->where('status', Transaction::STATUS_COMPLETED)
-                ->whereMonth('date', now()->month)
-                ->avg('amount') ?? 0,
+                ->whereYear('date', now()->year)
+                ->count(),
         ];
 
         // Monthly chart data
@@ -266,19 +259,6 @@ class DonationController extends Controller
             ];
         }
 
-        // Top donors
-        $topDonors = Transaction::where('church_id', $church->id)
-            ->where('source_type', Transaction::SOURCE_DONATION)
-            ->where('status', Transaction::STATUS_COMPLETED)
-            ->whereYear('date', now()->year)
-            ->whereNotNull('donor_email')
-            ->where('is_anonymous', false)
-            ->selectRaw('donor_name, donor_email, SUM(amount) as total_amount, COUNT(*) as donations_count')
-            ->groupBy('donor_email', 'donor_name')
-            ->orderByDesc('total_amount')
-            ->limit(10)
-            ->get();
-
         // By purpose
         $byPurpose = Transaction::where('church_id', $church->id)
             ->where('source_type', Transaction::SOURCE_DONATION)
@@ -293,7 +273,7 @@ class DonationController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('donations.index', compact('donations', 'stats', 'chartData', 'topDonors', 'byPurpose', 'campaigns'));
+        return view('donations.index', compact('donations', 'stats', 'chartData', 'byPurpose', 'campaigns'));
     }
 
     /**

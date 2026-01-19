@@ -3,6 +3,9 @@
 @section('title', 'Моя карта')
 
 @section('content')
+@include('finances.partials.tabs')
+
+<div id="finance-content">
 <div class="space-y-6">
     <!-- Bank Selection Tabs -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
@@ -43,4 +46,5 @@
         @include('finances.cards.monobank-content')
     @endif
 </div>
+</div><!-- /finance-content -->
 @endsection

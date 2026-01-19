@@ -515,11 +515,16 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         // Expense categories
         Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->except(['show']);
 
-        // Income categories
+        // Income categories (legacy)
         Route::get('income-categories', [FinanceController::class, 'incomeCategories'])->name('income-categories.index');
         Route::post('income-categories', [FinanceController::class, 'storeIncomeCategory'])->name('income-categories.store');
         Route::put('income-categories/{incomeCategory}', [FinanceController::class, 'updateIncomeCategory'])->name('income-categories.update');
         Route::delete('income-categories/{incomeCategory}', [FinanceController::class, 'destroyIncomeCategory'])->name('income-categories.destroy');
+
+        // Transaction categories (unified)
+        Route::post('transaction-categories', [SettingsController::class, 'storeTransactionCategory'])->name('transaction-categories.store');
+        Route::put('transaction-categories/{category}', [SettingsController::class, 'updateTransactionCategory'])->name('transaction-categories.update');
+        Route::delete('transaction-categories/{category}', [SettingsController::class, 'destroyTransactionCategory'])->name('transaction-categories.destroy');
 
         // Ministry types
         Route::post('ministry-types', [\App\Http\Controllers\MinistryTypeController::class, 'store'])->name('ministry-types.store');

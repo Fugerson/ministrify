@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\TransactionCategory;
 use App\Services\ImageService;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
@@ -25,6 +26,13 @@ class SettingsController extends Controller
         $users = $church->users()->with('person')->get();
         $ministries = $church->ministries()->orderBy('name')->get();
 
+        // Transaction categories (unified)
+        $transactionCategories = TransactionCategory::where('church_id', $church->id)
+            ->withCount('transactions')
+            ->orderBy('type')
+            ->orderBy('sort_order')
+            ->get();
+
         // Audit logs
         $auditLogs = AuditLog::where('church_id', $church->id)
             ->with('user')
@@ -32,7 +40,7 @@ class SettingsController extends Controller
             ->limit(100)
             ->get();
 
-        return view('settings.index', compact('church', 'expenseCategories', 'tags', 'users', 'ministries', 'auditLogs'));
+        return view('settings.index', compact('church', 'expenseCategories', 'tags', 'users', 'ministries', 'transactionCategories', 'auditLogs'));
     }
 
     public function updateChurch(Request $request)
@@ -328,5 +336,75 @@ class SettingsController extends Controller
         ]);
 
         return back()->with('success', 'Налаштування валют оновлено.');
+    }
+
+    /**
+     * Store a new transaction category
+     */
+    public function storeTransactionCategory(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:income,expense',
+            'icon' => 'nullable|string|max:10',
+            'color' => 'nullable|string|max:20',
+        ]);
+
+        $church = $this->getCurrentChurch();
+
+        TransactionCategory::create([
+            'church_id' => $church->id,
+            'name' => $validated['name'],
+            'type' => $validated['type'],
+            'icon' => $validated['icon'] ?? null,
+            'color' => $validated['color'] ?? '#3B82F6',
+            'sort_order' => TransactionCategory::where('church_id', $church->id)
+                ->where('type', $validated['type'])
+                ->max('sort_order') + 1,
+        ]);
+
+        return back()->with('success', 'Категорію додано.');
+    }
+
+    /**
+     * Update a transaction category
+     */
+    public function updateTransactionCategory(Request $request, TransactionCategory $category)
+    {
+        $church = $this->getCurrentChurch();
+
+        if ($category->church_id !== $church->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'icon' => 'nullable|string|max:10',
+            'color' => 'nullable|string|max:20',
+        ]);
+
+        $category->update($validated);
+
+        return back()->with('success', 'Категорію оновлено.');
+    }
+
+    /**
+     * Delete a transaction category
+     */
+    public function destroyTransactionCategory(TransactionCategory $category)
+    {
+        $church = $this->getCurrentChurch();
+
+        if ($category->church_id !== $church->id) {
+            abort(403);
+        }
+
+        if ($category->transactions()->count() > 0) {
+            return back()->with('error', 'Неможливо видалити категорію з транзакціями.');
+        }
+
+        $category->delete();
+
+        return back()->with('success', 'Категорію видалено.');
     }
 }

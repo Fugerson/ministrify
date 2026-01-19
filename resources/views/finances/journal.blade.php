@@ -3,14 +3,23 @@
 @section('title', 'Фінансовий журнал')
 
 @section('actions')
-<div class="flex items-center space-x-2">
-    <a href="{{ route('finances.journal.export', request()->query()) }}"
-       class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        Експорт CSV
-    </a>
+<div class="flex items-center space-x-2" x-data="exportButton()">
+    <button @click="downloadExport()"
+            :disabled="exporting"
+            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-sm font-medium rounded-lg transition-colors">
+        <template x-if="!exporting">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+        </template>
+        <template x-if="exporting">
+            <svg class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </template>
+        <span x-text="exporting ? 'Генерація...' : 'Експорт CSV'"></span>
+    </button>
     <a href="{{ route('finances.index') }}"
        class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,180 +28,97 @@
         Dashboard
     </a>
 </div>
+
+<script>
+function exportButton() {
+    return {
+        exporting: false,
+        async downloadExport() {
+            this.exporting = true;
+            try {
+                const response = await fetch('{{ route("finances.journal.export") }}?' + new URLSearchParams(window.location.search).toString(), {
+                    headers: { 'Accept': 'text/csv' }
+                });
+
+                if (!response.ok) throw new Error('Export failed');
+
+                const blob = await response.blob();
+                const filename = response.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] || 'journal.csv';
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Помилка експорту');
+            } finally {
+                this.exporting = false;
+            }
+        }
+    }
+}
+</script>
 @endsection
 
 @section('content')
+@include('finances.partials.tabs')
+
+<div id="finance-content">
 <div x-data="journalApp()" class="space-y-4">
     <!-- Period Selector -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
         <div class="flex flex-wrap items-center gap-3">
             <!-- Quick Period Buttons -->
             <div class="flex flex-wrap gap-2">
-                @foreach(['today' => 'Сьогодні', 'week' => 'Тиждень', 'month' => 'Місяць', 'quarter' => 'Квартал', 'year' => 'Рік'] as $key => $label)
-                <button type="button"
-                        @click="setPeriod('{{ $key }}')"
-                        class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {{ $period === $key ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
-                    {{ $label }}
-                </button>
-                @endforeach
-                <button type="button"
-                        @click="showCustomDates = !showCustomDates"
-                        class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {{ $period === 'custom' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
-                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    Період
-                </button>
+                <template x-for="[key, label] in Object.entries(periodLabels)" :key="key">
+                    <button type="button"
+                            @click="setPeriod(key)"
+                            :class="activePeriod === key ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
+                            x-text="label">
+                    </button>
+                </template>
             </div>
 
             <!-- Date Display -->
             <div class="flex-1 text-center">
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ $startDate->format('d.m.Y') }} — {{ $endDate->format('d.m.Y') }}
-                </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400" x-text="dateRangeDisplay"></span>
             </div>
 
             <!-- Balance Info -->
             <div class="text-right">
                 <span class="text-sm text-gray-500 dark:text-gray-400">Баланс:</span>
-                <span class="ml-1 font-semibold {{ $currentBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                    {{ number_format($currentBalance, 0, ',', ' ') }} ₴
+                <span class="ml-1 font-semibold" :class="currentBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                      x-text="formatNumber(currentBalance) + ' ₴'">
                 </span>
             </div>
         </div>
-
-        <!-- Custom Date Range -->
-        <div x-show="showCustomDates" x-collapse class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <form method="GET" class="flex flex-wrap items-end gap-3">
-                <input type="hidden" name="period" value="custom">
-                @foreach(request()->except(['period', 'start_date', 'end_date', 'page']) as $key => $value)
-                    @if($value)
-                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                    @endif
-                @endforeach
-                <div>
-                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Від</label>
-                    <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}"
-                           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">До</label>
-                    <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}"
-                           class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                </div>
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    Застосувати
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <form method="GET" class="flex flex-wrap items-center gap-3">
-            <input type="hidden" name="period" value="{{ $period }}">
-            @if($period === 'custom')
-            <input type="hidden" name="start_date" value="{{ $startDate->format('Y-m-d') }}">
-            <input type="hidden" name="end_date" value="{{ $endDate->format('Y-m-d') }}">
-            @endif
-
-            <!-- Search -->
-            <div class="relative flex-1 min-w-[200px]">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук..."
-                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-            </div>
-
-            <!-- Direction Filter -->
-            <select name="direction" onchange="this.form.submit()"
-                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                <option value="">Всі операції</option>
-                <option value="in" {{ request('direction') === 'in' ? 'selected' : '' }}>Надходження</option>
-                <option value="out" {{ request('direction') === 'out' ? 'selected' : '' }}>Витрати</option>
-            </select>
-
-            <!-- Category Filter -->
-            <select name="category_id" onchange="this.form.submit()"
-                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                <option value="">Всі категорії</option>
-                @foreach($categories as $category)
-                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                    {{ $category->icon }} {{ $category->name }}
-                </option>
-                @endforeach
-            </select>
-
-            <!-- Ministry Filter -->
-            <select name="ministry_id" onchange="this.form.submit()"
-                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                <option value="">Всі команди</option>
-                @foreach($ministries as $ministry)
-                <option value="{{ $ministry->id }}" {{ request('ministry_id') == $ministry->id ? 'selected' : '' }}>
-                    {{ $ministry->name }}
-                </option>
-                @endforeach
-            </select>
-
-            <!-- Payment Method Filter -->
-            <select name="payment_method" onchange="this.form.submit()"
-                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                <option value="">Спосіб оплати</option>
-                @foreach(\App\Models\Transaction::PAYMENT_METHODS as $key => $label)
-                <option value="{{ $key }}" {{ request('payment_method') === $key ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-
-            <!-- Person Filter -->
-            <select name="person_id" onchange="this.form.submit()"
-                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                <option value="">Всі особи</option>
-                @foreach($people as $person)
-                <option value="{{ $person->id }}" {{ request('person_id') == $person->id ? 'selected' : '' }}>
-                    {{ $person->first_name }} {{ $person->last_name }}
-                </option>
-                @endforeach
-            </select>
-
-            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                Фільтр
-            </button>
-
-            @if(request()->hasAny(['search', 'direction', 'category_id', 'ministry_id', 'payment_method', 'person_id']))
-            <a href="{{ route('finances.journal', ['period' => $period, 'start_date' => $period === 'custom' ? $startDate->format('Y-m-d') : null, 'end_date' => $period === 'custom' ? $endDate->format('Y-m-d') : null]) }}"
-               class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm font-medium">
-                Скинути
-            </a>
-            @endif
-        </form>
     </div>
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Баланс на початок</p>
-            <p class="text-xl font-bold {{ $balanceBeforePeriod >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600' }}">
-                {{ number_format($balanceBeforePeriod, 0, ',', ' ') }} ₴
-            </p>
+            <p class="text-xl font-bold" :class="periodStats.balanceBefore >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'"
+               x-text="formatNumber(periodStats.balanceBefore) + ' ₴'"></p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Надходження</p>
-            <p class="text-xl font-bold text-green-600 dark:text-green-400">
-                +{{ number_format($periodTotals['income'], 0, ',', ' ') }} ₴
-            </p>
+            <p class="text-xl font-bold text-green-600 dark:text-green-400" x-text="'+' + formatNumber(periodStats.income) + ' ₴'"></p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Витрати</p>
-            <p class="text-xl font-bold text-red-600 dark:text-red-400">
-                -{{ number_format($periodTotals['expense'], 0, ',', ' ') }} ₴
-            </p>
+            <p class="text-xl font-bold text-red-600 dark:text-red-400" x-text="'-' + formatNumber(periodStats.expense) + ' ₴'"></p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Баланс на кінець</p>
-            <p class="text-xl font-bold {{ ($balanceBeforePeriod + $periodTotals['balance']) >= 0 ? 'text-primary-600 dark:text-primary-400' : 'text-red-600' }}">
-                {{ number_format($balanceBeforePeriod + $periodTotals['balance'], 0, ',', ' ') }} ₴
-            </p>
+            <p class="text-xl font-bold" :class="periodStats.balanceAfter >= 0 ? 'text-primary-600 dark:text-primary-400' : 'text-red-600'"
+               x-text="formatNumber(periodStats.balanceAfter) + ' ₴'"></p>
         </div>
     </div>
 
@@ -205,113 +131,134 @@
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дата</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Опис</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Категорія</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Команда / Особа</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Команда</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Сума</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Баланс</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16"></th>
                     </tr>
+                    <!-- Filter Row -->
+                    <tr class="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                        <td class="px-4 py-2"></td>
+                        <td class="px-4 py-2">
+                            <div class="relative">
+                                <svg class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <input type="text" x-model.debounce.300ms="filters.search" placeholder="Пошук..."
+                                       class="w-full pl-8 pr-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs">
+                            </div>
+                        </td>
+                        <td class="px-4 py-2">
+                            <select x-model="filters.category_id"
+                                    class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs">
+                                <option value="">Всі</option>
+                                @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td class="px-4 py-2">
+                            <select x-model="filters.ministry_id"
+                                    class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs">
+                                <option value="">Всі</option>
+                                @foreach($ministries as $ministry)
+                                <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td class="px-4 py-2">
+                            <select x-model="filters.direction"
+                                    class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs">
+                                <option value="">Всі</option>
+                                <option value="in">+</option>
+                                <option value="out">-</option>
+                            </select>
+                        </td>
+                        <td class="px-4 py-2"></td>
+                        <td class="px-4 py-2 text-center">
+                            <button type="button" x-show="hasActiveFilters" @click="resetFilters()"
+                               class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Скинути фільтри">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    @php
-                        // Calculate running balance from end of period backwards
-                        $runningBalance = $balanceBeforePeriod + $periodTotals['balance'];
-                        $transactionsWithBalance = $transactions->map(function ($t) use (&$runningBalance) {
-                            $balance = $runningBalance;
-                            if ($t->direction === 'in') {
-                                $runningBalance -= $t->amount;
-                            } else {
-                                $runningBalance += $t->amount;
-                            }
-                            return ['transaction' => $t, 'balance' => $balance];
-                        });
-                    @endphp
-
-                    @forelse($transactionsWithBalance as $item)
-                        @php $t = $item['transaction']; @endphp
+                    <template x-for="item in displayedTransactions" :key="item.transaction.id">
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
-                            @click="openDetails({{ $t->id }})"
-                            x-data="{ details: false }">
+                            @click="openDetails(item.transaction.id)">
                             <td class="px-4 py-3 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $t->date->format('d.m.Y') }}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t->date->format('l') }}</div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="formatDate(item.transaction.date)"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400" x-text="formatWeekday(item.transaction.date)"></div>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="text-sm text-gray-900 dark:text-white">{{ Str::limit($t->description, 40) }}</div>
-                                @if($t->payment_method)
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ \App\Models\Transaction::PAYMENT_METHODS[$t->payment_method] ?? $t->payment_method }}
-                                </div>
-                                @endif
+                                <div class="text-sm text-gray-900 dark:text-white" x-text="truncate(item.transaction.description, 40)"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400" x-show="item.transaction.payment_method" x-text="paymentMethods[item.transaction.payment_method] || item.transaction.payment_method"></div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
-                                @if($t->category)
-                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium"
-                                      style="background-color: {{ $t->category->color }}20; color: {{ $t->category->color }}">
-                                    {{ $t->category->icon }} {{ $t->category->name }}
-                                </span>
-                                @else
-                                <span class="text-gray-400 dark:text-gray-500 text-sm">—</span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
-                                @if($t->direction === 'out' && $t->ministry)
-                                    <div class="text-sm text-gray-900 dark:text-white">{{ $t->ministry->name }}</div>
-                                @elseif($t->direction === 'in' && $t->person)
-                                    <div class="text-sm text-gray-900 dark:text-white">{{ $t->person->first_name }} {{ Str::limit($t->person->last_name, 1, '.') }}</div>
-                                @elseif($t->is_anonymous)
-                                    <span class="text-gray-400 dark:text-gray-500 text-sm italic">Анонімно</span>
-                                @else
+                                <template x-if="item.transaction.category">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium"
+                                          :style="'background-color: ' + item.transaction.category.color + '20; color: ' + item.transaction.category.color">
+                                        <span x-text="(item.transaction.category.icon || '') + ' ' + item.transaction.category.name"></span>
+                                    </span>
+                                </template>
+                                <template x-if="!item.transaction.category">
                                     <span class="text-gray-400 dark:text-gray-500 text-sm">—</span>
-                                @endif
+                                </template>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <template x-if="item.transaction.ministry">
+                                    <div class="text-sm text-gray-900 dark:text-white" x-text="item.transaction.ministry.name"></div>
+                                </template>
+                                <template x-if="!item.transaction.ministry">
+                                    <span class="text-gray-400 dark:text-gray-500 text-sm">—</span>
+                                </template>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-right">
-                                <span class="text-sm font-semibold {{ $t->direction === 'in' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                    {{ $t->direction === 'in' ? '+' : '-' }}{{ number_format($t->amount, 0, ',', ' ') }}
-                                    <span class="text-xs">{{ $t->currency ?? '₴' }}</span>
+                                <span class="text-sm font-semibold" :class="item.transaction.direction === 'in' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                    <span x-text="(item.transaction.direction === 'in' ? '+' : '-') + formatNumber(item.transaction.amount)"></span>
+                                    <span class="text-xs" x-text="item.transaction.currency || '₴'"></span>
                                 </span>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-right">
-                                <span class="text-sm font-medium {{ $item['balance'] >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600' }}">
-                                    {{ number_format($item['balance'], 0, ',', ' ') }} ₴
-                                </span>
+                                <span class="text-sm font-medium" :class="item.balance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'" x-text="formatNumber(item.balance) + ' ₴'"></span>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-center">
                                 <div class="flex items-center justify-center space-x-1">
-                                    @if($t->attachments && $t->attachments->count() > 0)
-                                    <span class="inline-flex items-center text-gray-400 dark:text-gray-500" title="{{ $t->attachments->count() }} файл(ів)">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-                                        </svg>
-                                        <span class="text-xs ml-0.5">{{ $t->attachments->count() }}</span>
-                                    </span>
-                                    @endif
+                                    <template x-if="item.transaction.attachments && item.transaction.attachments.length > 0">
+                                        <span class="inline-flex items-center text-gray-400 dark:text-gray-500">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                            </svg>
+                                            <span class="text-xs ml-0.5" x-text="item.transaction.attachments.length"></span>
+                                        </span>
+                                    </template>
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
-                                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                </svg>
-                                <p class="text-lg font-medium">Немає транзакцій</p>
-                                <p class="text-sm">за вибраний період з вказаними фільтрами</p>
-                            </td>
-                        </tr>
-                    @endforelse
+                    </template>
+                    <tr x-show="displayedTransactions.length === 0">
+                        <td colspan="7" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <p class="text-lg font-medium">Немає транзакцій</p>
+                            <p class="text-sm">за вибраний період з вказаними фільтрами</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination -->
-        @if($transactions->hasPages())
-        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-            {{ $transactions->withQueryString()->links() }}
+        <!-- Results count -->
+        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400" x-show="hasActiveFilters">
+            Знайдено: <span x-text="displayedTransactions.length"></span> з <span x-text="periodTransactions.length"></span>
         </div>
-        @endif
     </div>
 
     <!-- Transaction Details Modal -->
@@ -357,7 +304,7 @@
                         <!-- Amount -->
                         <div class="text-center py-4">
                             <span class="text-3xl font-bold" :class="transaction?.direction === 'in' ? 'text-green-600' : 'text-red-600'"
-                                  x-text="(transaction?.direction === 'in' ? '+' : '-') + new Intl.NumberFormat('uk-UA').format(transaction?.amount || 0) + ' ' + (transaction?.currency || '₴')">
+                                  x-text="(transaction?.direction === 'in' ? '+' : '-') + formatNumber(transaction?.amount || 0) + ' ' + (transaction?.currency || '₴')">
                             </span>
                         </div>
 
@@ -382,10 +329,6 @@
                             <div x-show="transaction?.ministry">
                                 <span class="text-gray-500 dark:text-gray-400">Команда:</span>
                                 <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.ministry?.name"></span>
-                            </div>
-                            <div x-show="transaction?.person">
-                                <span class="text-gray-500 dark:text-gray-400">Особа:</span>
-                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.person?.full_name"></span>
                             </div>
                             <div x-show="transaction?.recorder">
                                 <span class="text-gray-500 dark:text-gray-400">Записав:</span>
@@ -445,18 +388,195 @@
 <script>
 function journalApp() {
     return {
-        showCustomDates: {{ $period === 'custom' ? 'true' : 'false' }},
         showModal: false,
         loading: false,
         transaction: null,
 
+        // Period state
+        activePeriod: '{{ $initialPeriod }}',
+        periodLabels: {
+            'today': 'Сьогодні',
+            'week': 'Тиждень',
+            'month': 'Місяць',
+            'quarter': 'Квартал',
+            'year': 'Рік'
+        },
+
+        // Filter state
+        filters: {
+            search: '',
+            category_id: '',
+            ministry_id: '',
+            direction: ''
+        },
+
+        // Data
+        allTransactions: @json($transactions),
+        balanceBeforeYear: {{ $balanceBeforeYear }},
+        currentBalance: {{ $currentBalance }},
+        paymentMethods: @json(\App\Models\Transaction::PAYMENT_METHODS),
+
+        get hasActiveFilters() {
+            return this.filters.search || this.filters.category_id || this.filters.ministry_id || this.filters.direction;
+        },
+
+        // Calculate date range for current period
+        get dateRange() {
+            const now = new Date();
+            let start, end;
+
+            switch (this.activePeriod) {
+                case 'today':
+                    start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+                    break;
+                case 'week':
+                    const dayOfWeek = now.getDay();
+                    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                    start = new Date(now.getFullYear(), now.getMonth(), diff);
+                    end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000);
+                    end.setHours(23, 59, 59);
+                    break;
+                case 'month':
+                    start = new Date(now.getFullYear(), now.getMonth(), 1);
+                    end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+                    break;
+                case 'quarter':
+                    const quarter = Math.floor(now.getMonth() / 3);
+                    start = new Date(now.getFullYear(), quarter * 3, 1);
+                    end = new Date(now.getFullYear(), quarter * 3 + 3, 0, 23, 59, 59);
+                    break;
+                case 'year':
+                default:
+                    start = new Date(now.getFullYear(), 0, 1);
+                    end = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+                    break;
+            }
+
+            return { start, end };
+        },
+
+        get dateRangeDisplay() {
+            const { start, end } = this.dateRange;
+            const formatDate = (d) => d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            return formatDate(start) + ' — ' + formatDate(end);
+        },
+
+        // Filter transactions by current period
+        get periodTransactions() {
+            const { start, end } = this.dateRange;
+            return this.allTransactions.filter(t => {
+                const date = new Date(t.date);
+                return date >= start && date <= end;
+            });
+        },
+
+        // Calculate period stats
+        get periodStats() {
+            const transactions = this.periodTransactions;
+            const { start } = this.dateRange;
+
+            // Calculate balance before period start
+            let balanceBefore = this.balanceBeforeYear;
+            for (let t of this.allTransactions) {
+                const date = new Date(t.date);
+                if (date < start) {
+                    if (t.direction === 'in') {
+                        balanceBefore += parseFloat(t.amount);
+                    } else {
+                        balanceBefore -= parseFloat(t.amount);
+                    }
+                }
+            }
+
+            // Calculate income and expense for period
+            let income = 0, expense = 0;
+            for (let t of transactions) {
+                if (t.direction === 'in') {
+                    income += parseFloat(t.amount);
+                } else {
+                    expense += parseFloat(t.amount);
+                }
+            }
+
+            return {
+                balanceBefore,
+                income,
+                expense,
+                balanceAfter: balanceBefore + income - expense
+            };
+        },
+
+        // Apply filters to period transactions and calculate running balance
+        get displayedTransactions() {
+            const { balanceBefore, income, expense } = this.periodStats;
+            let currentBalance = balanceBefore + income - expense;
+            let result = [];
+
+            for (let t of this.periodTransactions) {
+                const balance = currentBalance;
+                if (t.direction === 'in') {
+                    currentBalance -= parseFloat(t.amount);
+                } else {
+                    currentBalance += parseFloat(t.amount);
+                }
+
+                // Apply filters
+                let passes = true;
+
+                if (this.filters.search) {
+                    const search = this.filters.search.toLowerCase();
+                    const matchDesc = t.description && t.description.toLowerCase().includes(search);
+                    const matchCategory = t.category && t.category.name.toLowerCase().includes(search);
+                    const matchMinistry = t.ministry && t.ministry.name.toLowerCase().includes(search);
+                    if (!matchDesc && !matchCategory && !matchMinistry) passes = false;
+                }
+                if (passes && this.filters.category_id && (!t.category || t.category_id != this.filters.category_id)) passes = false;
+                if (passes && this.filters.ministry_id && (!t.ministry || t.ministry_id != this.filters.ministry_id)) passes = false;
+                if (passes && this.filters.direction && t.direction !== this.filters.direction) passes = false;
+
+                if (passes) {
+                    result.push({ transaction: t, balance: balance });
+                }
+            }
+
+            return result;
+        },
+
         setPeriod(period) {
+            this.activePeriod = period;
+            // Update URL without reload
             const url = new URL(window.location.href);
             url.searchParams.set('period', period);
-            url.searchParams.delete('start_date');
-            url.searchParams.delete('end_date');
-            url.searchParams.delete('page');
-            window.location.href = url.toString();
+            window.history.replaceState({}, '', url.toString());
+        },
+
+        resetFilters() {
+            this.filters = {
+                search: '',
+                category_id: '',
+                ministry_id: '',
+                direction: ''
+            };
+        },
+
+        formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        },
+
+        formatWeekday(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('uk-UA', { weekday: 'long' });
+        },
+
+        formatNumber(num) {
+            return new Intl.NumberFormat('uk-UA').format(Math.round(num));
+        },
+
+        truncate(str, len) {
+            if (!str) return '';
+            return str.length > len ? str.substring(0, len) + '...' : str;
         },
 
         async openDetails(id) {
@@ -465,16 +585,13 @@ function journalApp() {
             this.transaction = null;
 
             try {
-                // Find transaction in current page data
-                const transactions = @json($transactions->items());
-                const found = transactions.find(t => t.id === id);
+                const found = this.allTransactions.find(t => t.id === id);
 
                 if (found) {
                     this.transaction = {
                         ...found,
                         date_formatted: new Date(found.date).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' }),
-                        payment_method_label: @json(\App\Models\Transaction::PAYMENT_METHODS)[found.payment_method] || found.payment_method || '—',
-                        person: found.person ? { full_name: found.person.first_name + ' ' + found.person.last_name } : null,
+                        payment_method_label: this.paymentMethods[found.payment_method] || found.payment_method || '—',
                     };
                 }
             } catch (e) {
@@ -486,4 +603,5 @@ function journalApp() {
     }
 }
 </script>
+</div><!-- /finance-content -->
 @endsection
