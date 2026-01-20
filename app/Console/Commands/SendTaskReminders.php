@@ -84,7 +84,7 @@ class SendTaskReminders extends Command
                     $personTasksTomorrow = $tasks->filter(fn($t) => $t->due_date->isTomorrow());
                     $personTasksOverdue = $tasks->filter(fn($t) => $t->due_date->isPast() && !$t->due_date->isToday());
 
-                    $message = $this->buildMessage($personTasksToday, $personTasksTomorrow, $personTasksOverdue);
+                    $message = $this->buildMessage($personTasksToday, $personTasksTomorrow, $personTasksOverdue, $church);
 
                     if ($telegram->sendMessage($assignee->telegram_chat_id, $message)) {
                         $sent++;
@@ -100,9 +100,10 @@ class SendTaskReminders extends Command
         return self::SUCCESS;
     }
 
-    private function buildMessage($tasksToday, $tasksTomorrow, $tasksOverdue): string
+    private function buildMessage($tasksToday, $tasksTomorrow, $tasksOverdue, Church $church): string
     {
-        $message = "📋 <b>Нагадування про завдання</b>\n\n";
+        $message = "📋 <b>Нагадування про завдання</b>\n";
+        $message .= "⛪ {$church->name}\n\n";
 
         if ($tasksOverdue->isNotEmpty()) {
             $message .= "🚨 <b>Прострочено:</b>\n";

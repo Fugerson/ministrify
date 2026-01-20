@@ -70,7 +70,7 @@ class SendBirthdayReminders extends Command
                         continue;
                     }
 
-                    $message = $this->buildMessage($birthdaysToday, $birthdaysTomorrow);
+                    $message = $this->buildMessage($birthdaysToday, $birthdaysTomorrow, $church);
 
                     if ($telegram->sendMessage($recipient->telegram_chat_id, $message)) {
                         $sent++;
@@ -99,9 +99,10 @@ class SendBirthdayReminders extends Command
             ->get();
     }
 
-    private function buildMessage($birthdaysToday, $birthdaysTomorrow): string
+    private function buildMessage($birthdaysToday, $birthdaysTomorrow, Church $church): string
     {
-        $message = "🎂 <b>Дні народження</b>\n\n";
+        $message = "🎂 <b>Дні народження</b>\n";
+        $message .= "⛪ {$church->name}\n\n";
 
         if ($birthdaysToday->isNotEmpty()) {
             $message .= "📅 <b>Сьогодні:</b>\n";
