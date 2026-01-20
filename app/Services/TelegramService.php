@@ -68,7 +68,7 @@ class TelegramService
         $event = $assignment->event;
         $position = $assignment->position;
 
-        if (!$person->telegram_chat_id) {
+        if (!$person?->telegram_chat_id || !$event || !$position || !$event->ministry) {
             return false;
         }
 
@@ -93,7 +93,7 @@ class TelegramService
         $person = $responsibility->person;
         $event = $responsibility->event;
 
-        if (!$person->telegram_chat_id) {
+        if (!$person?->telegram_chat_id || !$event || !$event->ministry) {
             return false;
         }
 
@@ -112,13 +112,13 @@ class TelegramService
 
     public function sendDeclineNotification(Assignment $assignment, Person $leader): bool
     {
-        if (!$leader->telegram_chat_id) {
-            return false;
-        }
-
         $person = $assignment->person;
         $event = $assignment->event;
         $position = $assignment->position;
+
+        if (!$leader->telegram_chat_id || !$person || !$event || !$position || !$event->ministry) {
+            return false;
+        }
 
         $message = "⚠️ <b>Відмова від служіння</b>\n\n"
             . "{$person->full_name} відхилив(ла) участь:\n"
@@ -146,10 +146,15 @@ class TelegramService
 
         foreach ($assignments as $assignment) {
             $event = $assignment->event;
+            if (!$event || !$event->ministry || !$assignment->position) {
+                continue;
+            }
+
             $status = match ($assignment->status) {
                 'confirmed' => '✅',
                 'pending' => '⏳',
                 'declined' => '❌',
+                default => '❓',
             };
 
             $message .= "{$event->date->format('d.m')} ({$this->getShortDayName($event->date)}) — "
@@ -169,7 +174,7 @@ class TelegramService
             ->where('status', '!=', 'declined')
             ->first();
 
-        if (!$assignment) {
+        if (!$assignment || !$assignment->event || !$assignment->position || !$assignment->event->ministry) {
             return "У тебе немає запланованих служінь.";
         }
 

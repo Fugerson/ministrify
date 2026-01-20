@@ -70,7 +70,7 @@ class TelegramController extends Controller
     {
         $responsibility = EventResponsibility::with('event')->find($responsibilityId);
 
-        if (!$responsibility || $responsibility->person_id !== $person->id) {
+        if (!$responsibility || $responsibility->person_id !== $person->id || !$responsibility->event) {
             return;
         }
 
@@ -136,7 +136,7 @@ class TelegramController extends Controller
     {
         $assignment = \App\Models\Assignment::with(['event.ministry', 'position'])->find($assignmentId);
 
-        if (!$assignment || $assignment->person_id !== $person->id) {
+        if (!$assignment || $assignment->person_id !== $person->id || !$assignment->event || !$assignment->position || !$assignment->event->ministry) {
             return response()->json(['ok' => true]);
         }
 
@@ -199,13 +199,16 @@ class TelegramController extends Controller
         $person = Person::where('telegram_chat_id', $chatId)->first();
 
         // If not found, try to auto-link by username
+        // Only link if exactly ONE person has this username (avoid multi-church conflicts)
         if (!$person && $username) {
-            $person = Person::where('telegram_username', '@' . $username)
-                ->orWhere('telegram_username', $username)
-                ->first();
+            $matchingPeople = Person::where(function ($q) use ($username) {
+                $q->where('telegram_username', '@' . $username)
+                  ->orWhere('telegram_username', $username);
+            })->get();
 
-            // Auto-link chat ID if found by username
-            if ($person) {
+            // Only auto-link if exactly one match found
+            if ($matchingPeople->count() === 1) {
+                $person = $matchingPeople->first();
                 $person->update([
                     'telegram_chat_id' => $chatId,
                 ]);
@@ -252,7 +255,7 @@ class TelegramController extends Controller
 
         // Find church for this person or use default response
         $church = $person?->church;
-        $telegram = $church ? new TelegramService($church->telegram_bot_token) : null;
+        $telegram = $church?->telegram_bot_token ? new TelegramService($church->telegram_bot_token) : null;
 
         switch ($command) {
             case '/start':
@@ -336,6 +339,16 @@ class TelegramController extends Controller
                     $telegram->sendMessage($chatId, $helpMessage);
                 } else {
                     $this->sendGenericMessage($chatId, $helpMessage);
+                }
+                break;
+
+            default:
+                // Unknown command - show help
+                $unknownMessage = "❓ Невідома команда.\n\nВведіть /help для списку доступних команд.";
+                if ($telegram) {
+                    $telegram->sendMessage($chatId, $unknownMessage);
+                } else {
+                    $this->sendGenericMessage($chatId, $unknownMessage);
                 }
                 break;
         }
