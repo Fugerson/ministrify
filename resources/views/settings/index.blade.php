@@ -698,29 +698,8 @@
         </div>
 
         <div class="p-6 space-y-6">
-            <!-- Token form -->
-            <form method="POST" action="{{ route('settings.telegram') }}" class="space-y-4">
-                @csrf
-                @method('PUT')
-
-                <div>
-                    <label for="telegram_bot_token" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Токен бота</label>
-                    <input type="password" name="telegram_bot_token" id="telegram_bot_token"
-                           value="{{ old('telegram_bot_token', $church->telegram_bot_token) }}"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                           placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz">
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Створіть бота через <a href="https://t.me/BotFather" target="_blank" class="text-primary-600 hover:underline">@BotFather</a> і вставте токен
-                    </p>
-                </div>
-
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                    Зберегти токен
-                </button>
-            </form>
-
-            @if($church->telegram_bot_token)
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <!-- Actions -->
+            <div>
                 <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Дії</h3>
                 <div class="flex flex-wrap gap-3">
                     <form method="POST" action="{{ route('settings.telegram.test') }}">
@@ -751,12 +730,10 @@
                     </button>
                 </div>
             </div>
-            @endif
         </div>
     </div>
 
     <!-- Notification settings -->
-    @if($church->telegram_bot_token)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Автоматичні нагадування</h2>
@@ -834,7 +811,6 @@
             </div>
         </div>
     </div>
-    @endif
     </div>
 
     <!-- Data Tab -->
