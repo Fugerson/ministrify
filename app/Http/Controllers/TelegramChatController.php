@@ -32,7 +32,7 @@ class TelegramChatController extends Controller
                 return $person->telegramMessages->first()?->created_at;
             });
 
-        $hasBot = !empty($church->telegram_bot_token);
+        $hasBot = !empty(config('services.telegram.bot_token'));
         $totalUnread = TelegramMessage::where('church_id', $church->id)
             ->where('direction', 'incoming')
             ->where('is_read', false)
@@ -68,7 +68,7 @@ class TelegramChatController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $hasBot = !empty($church->telegram_bot_token);
+        $hasBot = !empty(config('services.telegram.bot_token'));
 
         return view('telegram.chat', compact('person', 'messages', 'hasBot'));
     }
@@ -91,7 +91,7 @@ class TelegramChatController extends Controller
             abort(403);
         }
 
-        if (empty($church->telegram_bot_token)) {
+        if (empty(config('services.telegram.bot_token'))) {
             return back()->with('error', 'Telegram бот не налаштований');
         }
 
@@ -100,7 +100,7 @@ class TelegramChatController extends Controller
         }
 
         try {
-            $telegram = new TelegramService($church->telegram_bot_token);
+            $telegram = TelegramService::make();
             $telegram->sendMessage($person->telegram_chat_id, $validated['message']);
 
             // Save outgoing message

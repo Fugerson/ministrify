@@ -120,9 +120,9 @@ class AssignmentService
             'status' => 'pending',
         ]);
 
-        if ($notify && $person->telegram_chat_id && $person->church->telegram_bot_token) {
+        if ($notify && $person->telegram_chat_id && config('services.telegram.bot_token')) {
             try {
-                $telegram = new TelegramService($person->church->telegram_bot_token);
+                $telegram = TelegramService::make();
                 $telegram->sendAssignmentNotification($assignment);
                 $assignment->update(['notified_at' => now()]);
             } catch (\Exception $e) {
@@ -147,9 +147,9 @@ class AssignmentService
             $person = $assignment->person;
             $church = $person->church;
 
-            if ($person->telegram_chat_id && $church->telegram_bot_token) {
+            if ($person->telegram_chat_id && config('services.telegram.bot_token')) {
                 try {
-                    $telegram = new TelegramService($church->telegram_bot_token);
+                    $telegram = TelegramService::make();
                     $telegram->sendAssignmentNotification($assignment);
                     $assignment->update(['notified_at' => now()]);
                     $notified++;

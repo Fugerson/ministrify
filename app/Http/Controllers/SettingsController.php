@@ -66,76 +66,37 @@ class SettingsController extends Controller
 
     public function updateTelegram(Request $request)
     {
-        $validated = $request->validate([
-            'telegram_bot_token' => 'nullable|string|max:100',
-        ]);
-
-        $church = $this->getCurrentChurch();
-        $oldToken = $church->telegram_bot_token;
-        $church->update($validated);
-
-        // Auto-setup webhook if token was added or changed
-        if ($validated['telegram_bot_token'] && $validated['telegram_bot_token'] !== $oldToken) {
-            try {
-                $telegram = new TelegramService($validated['telegram_bot_token']);
-
-                // First verify the token is valid
-                $botInfo = $telegram->getMe();
-
-                // Set webhook
-                $webhookUrl = url('/api/telegram/webhook');
-                $webhookResult = $telegram->setWebhook($webhookUrl);
-
-                if ($webhookResult) {
-                    return back()->with('success', "Бот @{$botInfo['username']} підключено та webhook налаштовано!");
-                } else {
-                    return back()->with('warning', "Бот підключено, але не вдалося налаштувати webhook. Спробуйте вручну.");
-                }
-            } catch (\Exception $e) {
-                \Log::error('Telegram setup error', ['error' => $e->getMessage()]);
-                // Token saved but webhook failed - still inform user
-                return back()->with('error', 'Помилка підключення. Перевірте токен та спробуйте ще раз.');
-            }
-        }
-
-        return back()->with('success', 'Налаштування Telegram оновлено.');
+        // Telegram bot is now configured globally via .env
+        // This method is kept for backwards compatibility
+        return back()->with('info', 'Telegram бот налаштовується централізовано адміністратором системи.');
     }
 
     public function testTelegram()
     {
-        $church = $this->getCurrentChurch();
-
-        if (!$church->telegram_bot_token) {
-            return back()->with('error', 'Токен бота не налаштовано.');
+        if (!config('services.telegram.bot_token')) {
+            return back()->with('error', 'Telegram бот не налаштовано в системі.');
         }
 
         try {
-            $telegram = new TelegramService($church->telegram_bot_token);
+            $telegram = TelegramService::make();
             $botInfo = $telegram->getMe();
 
             return back()->with('success', "Бот підключено: @{$botInfo['username']}");
         } catch (\Exception $e) {
-            // Log error for debugging but don't expose to user
             \Log::error('Telegram connection error', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Помилка підключення до Telegram. Перевірте токен.');
+            return back()->with('error', 'Помилка підключення до Telegram.');
         }
     }
 
     public function setupWebhook()
     {
-        $church = $this->getCurrentChurch();
-
-        if (!$church->telegram_bot_token) {
-            return back()->with('error', 'Спочатку введіть токен бота.');
+        if (!config('services.telegram.bot_token')) {
+            return back()->with('error', 'Telegram бот не налаштовано в системі.');
         }
 
         try {
-            $telegram = new TelegramService($church->telegram_bot_token);
-
-            // Get webhook URL
+            $telegram = TelegramService::make();
             $webhookUrl = url('/api/telegram/webhook');
-
-            // Set webhook
             $result = $telegram->setWebhook($webhookUrl);
 
             if ($result) {
@@ -145,25 +106,24 @@ class SettingsController extends Controller
             }
         } catch (\Exception $e) {
             \Log::error('Telegram webhook error', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Помилка налаштування webhook. Перевірте токен та спробуйте ще раз.');
+            return back()->with('error', 'Помилка налаштування webhook.');
         }
     }
 
     public function getTelegramStatus()
     {
-        $church = $this->getCurrentChurch();
+        $token = config('services.telegram.bot_token');
 
-        if (!$church->telegram_bot_token) {
-            return response()->json(['connected' => false, 'error' => 'Токен не налаштовано']);
+        if (!$token) {
+            return response()->json(['connected' => false, 'error' => 'Бот не налаштовано']);
         }
 
         try {
-            $telegram = new TelegramService($church->telegram_bot_token);
+            $telegram = TelegramService::make();
             $botInfo = $telegram->getMe();
 
-            // Get webhook info
             $response = \Illuminate\Support\Facades\Http::get(
-                "https://api.telegram.org/bot{$church->telegram_bot_token}/getWebhookInfo"
+                "https://api.telegram.org/bot{$token}/getWebhookInfo"
             );
             $webhookInfo = $response->json()['result'] ?? null;
 

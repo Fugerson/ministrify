@@ -21,7 +21,7 @@ class TelegramBroadcastController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        $hasBot = !empty($church->telegram_bot_token);
+        $hasBot = !empty(config('services.telegram.bot_token'));
 
         return view('telegram.broadcast', compact('recipients', 'hasBot'));
     }
@@ -36,11 +36,11 @@ class TelegramBroadcastController extends Controller
 
         $church = $this->getChurchOrFail();
 
-        if (empty($church->telegram_bot_token)) {
+        if (empty(config('services.telegram.bot_token'))) {
             return back()->with('error', 'Telegram бот не налаштований');
         }
 
-        $telegram = new TelegramService($church->telegram_bot_token);
+        $telegram = TelegramService::make();
 
         $recipients = Person::where('church_id', $church->id)
             ->whereIn('id', $validated['recipients'])

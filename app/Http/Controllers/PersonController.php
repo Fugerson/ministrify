@@ -646,15 +646,15 @@ class PersonController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        if (!$church->telegram_bot_token) {
-            return response()->json(['error' => 'Telegram бот не налаштовано церквою'], 400);
+        if (!config('services.telegram.bot_token')) {
+            return response()->json(['error' => 'Telegram бот не налаштовано'], 400);
         }
 
         $code = \App\Http\Controllers\Api\TelegramController::generateLinkingCode($user->person);
 
         // Get bot username for link
         try {
-            $telegram = new \App\Services\TelegramService($church->telegram_bot_token);
+            $telegram = \App\Services\TelegramService::make();
             $botInfo = $telegram->getMe();
             $botUsername = $botInfo['username'];
         } catch (\Exception $e) {
@@ -1118,7 +1118,7 @@ class PersonController extends Controller
                 ]);
 
             case 'message':
-                if (!$church->telegram_bot_token) {
+                if (!config('services.telegram.bot_token')) {
                     return response()->json(['success' => false, 'message' => 'Telegram бот не налаштовано']);
                 }
 
@@ -1127,7 +1127,7 @@ class PersonController extends Controller
                     return response()->json(['success' => false, 'message' => 'Повідомлення не може бути порожнім']);
                 }
 
-                $telegram = new \App\Services\TelegramService($church->telegram_bot_token);
+                $telegram = \App\Services\TelegramService::make();
                 $sent = 0;
 
                 foreach ($people as $person) {

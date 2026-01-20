@@ -20,7 +20,12 @@ class SendBirthdayReminders extends Command
 
         $this->info("Checking birthdays for {$today->format('Y-m-d')}");
 
-        $churches = Church::whereNotNull('telegram_bot_token')->get();
+        if (!config('services.telegram.bot_token')) {
+            $this->warn('Telegram bot not configured');
+            return self::SUCCESS;
+        }
+
+        $churches = Church::all();
         $sent = 0;
 
         foreach ($churches as $church) {
@@ -58,7 +63,7 @@ class SendBirthdayReminders extends Command
             }
 
             try {
-                $telegram = new TelegramService($church->telegram_bot_token);
+                $telegram = TelegramService::make();
 
                 foreach ($recipients as $recipient) {
                     if (!$recipient->telegram_chat_id) {

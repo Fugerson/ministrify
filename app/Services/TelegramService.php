@@ -11,10 +11,23 @@ class TelegramService
     private string $token;
     private string $baseUrl;
 
-    public function __construct(string $token)
+    public function __construct(?string $token = null)
     {
-        $this->token = $token;
-        $this->baseUrl = "https://api.telegram.org/bot{$token}";
+        $this->token = $token ?? config('services.telegram.bot_token');
+
+        if (!$this->token) {
+            throw new \RuntimeException('Telegram bot token not configured');
+        }
+
+        $this->baseUrl = "https://api.telegram.org/bot{$this->token}";
+    }
+
+    /**
+     * Create instance with default config token
+     */
+    public static function make(): self
+    {
+        return new self();
     }
 
     public function getMe(): array

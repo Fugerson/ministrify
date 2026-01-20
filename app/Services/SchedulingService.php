@@ -608,12 +608,12 @@ class SchedulingService
         $person = $assignment->person;
         $church = $person->church;
 
-        if (!$person->telegram_chat_id || !$church->telegram_bot_token) {
+        if (!$person->telegram_chat_id || !config('services.telegram.bot_token')) {
             return false;
         }
 
         try {
-            $telegram = new TelegramService($church->telegram_bot_token);
+            $telegram = TelegramService::make();
             $telegram->sendAssignmentNotification($assignment);
             $assignment->update(['notified_at' => now()]);
             return true;

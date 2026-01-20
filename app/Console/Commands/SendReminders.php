@@ -48,12 +48,12 @@ class SendReminders extends Command
                     foreach ($responsibilities as $responsibility) {
                         $church = $responsibility->person->church ?? null;
 
-                        if (!$church || !$church->telegram_bot_token || !$responsibility->person->telegram_chat_id) {
+                        if (!$church || !config('services.telegram.bot_token') || !$responsibility->person->telegram_chat_id) {
                             continue;
                         }
 
                         try {
-                            $telegram = new TelegramService($church->telegram_bot_token);
+                            $telegram = TelegramService::make();
                             $telegram->sendResponsibilityReminder($responsibility);
 
                             $responsibility->update(['reminded_at' => now()]);

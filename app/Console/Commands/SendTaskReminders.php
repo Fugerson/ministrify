@@ -20,7 +20,12 @@ class SendTaskReminders extends Command
 
         $this->info("Checking task deadlines for {$today->format('Y-m-d')}");
 
-        $churches = Church::whereNotNull('telegram_bot_token')->get();
+        if (!config('services.telegram.bot_token')) {
+            $this->warn('Telegram bot not configured');
+            return self::SUCCESS;
+        }
+
+        $churches = Church::all();
         $sent = 0;
 
         foreach ($churches as $church) {
@@ -58,7 +63,7 @@ class SendTaskReminders extends Command
             }
 
             try {
-                $telegram = new TelegramService($church->telegram_bot_token);
+                $telegram = TelegramService::make();
 
                 // Group tasks by assignee
                 $allTasks = $tasksDueToday->merge($tasksDueTomorrow)->merge($tasksOverdue);

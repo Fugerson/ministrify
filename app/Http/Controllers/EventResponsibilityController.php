@@ -195,12 +195,12 @@ class EventResponsibilityController extends Controller
             return;
         }
 
-        if (!$person->telegram_chat_id || !$church->telegram_bot_token) {
+        if (!$person->telegram_chat_id || !config('services.telegram.bot_token')) {
             return;
         }
 
         try {
-            $telegram = new TelegramService($church->telegram_bot_token);
+            $telegram = TelegramService::make();
 
             $message = "🔔 <b>Нова відповідальність!</b>\n\n"
                 . "📅 {$event->date->format('d.m.Y')}, {$event->time->format('H:i')}\n"
