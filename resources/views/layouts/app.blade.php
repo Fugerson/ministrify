@@ -752,13 +752,7 @@
                 </div>
 
                 <div class="flex items-center space-x-3">
-                    @if(auth()->user()->person?->photo)
-                        <img src="{{ Storage::url(auth()->user()->person->photo) }}" alt="" class="w-9 h-9 rounded-full object-cover">
-                    @else
-                        <div class="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                            <span class="text-sm font-medium text-primary-600 dark:text-primary-300">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
-                        </div>
-                    @endif
+                    <x-user-avatar size="md" />
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ auth()->user()->name }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $currentChurch->name ?? '' }}</p>
@@ -876,13 +870,7 @@
             </nav>
             <div class="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 safe-bottom">
                 <div class="flex items-center space-x-3">
-                    @if(auth()->user()->person?->photo)
-                        <img src="{{ Storage::url(auth()->user()->person->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover">
-                    @else
-                        <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                            <span class="text-sm font-medium text-primary-600 dark:text-primary-300">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
-                        </div>
-                    @endif
+                    <x-user-avatar size="lg" />
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ auth()->user()->name }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $currentChurch->name ?? '' }}</p>
@@ -924,13 +912,7 @@
                             </svg>
                         </button>
                         <a href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center -mr-2">
-                            @if(auth()->user()->person?->photo)
-                                <img src="{{ Storage::url(auth()->user()->person->photo) }}" alt="" class="w-9 h-9 rounded-full object-cover">
-                            @else
-                                <div class="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                                    <span class="text-sm font-medium text-primary-600 dark:text-primary-300">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
-                                </div>
-                            @endif
+                            <x-user-avatar size="md" />
                         </a>
                     </div>
                 </div>
@@ -957,13 +939,7 @@
                     @yield('actions')
                     <!-- Profile Link -->
                     <a href="{{ route('my-profile') }}" class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors" title="Мій профіль">
-                        @if(auth()->user()->person?->photo)
-                            <img src="{{ Storage::url(auth()->user()->person->photo) }}" alt="" class="w-8 h-8 rounded-full object-cover">
-                        @else
-                            <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                                <span class="text-sm font-medium text-primary-600 dark:text-primary-300">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
-                            </div>
-                        @endif
+                        <x-user-avatar size="sm" />
                         <span class="text-sm text-gray-700 dark:text-gray-300">{{ auth()->user()->name }}</span>
                     </a>
                 </div>
