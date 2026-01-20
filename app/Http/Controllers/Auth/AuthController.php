@@ -58,18 +58,20 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent(),
             ]);
 
-            // Create audit log entry for login
-            AuditLog::create([
-                'church_id' => $user->church_id,
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'action' => 'login',
-                'model_type' => 'App\\Models\\User',
-                'model_id' => $user->id,
-                'model_name' => $user->name,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
+            // Create audit log entry for login (skip for super admins without church)
+            if ($user->church_id) {
+                AuditLog::create([
+                    'church_id' => $user->church_id,
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'action' => 'login',
+                    'model_type' => 'App\\Models\\User',
+                    'model_id' => $user->id,
+                    'model_name' => $user->name,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            }
 
             // Redirect super admins to system admin panel
             if ($user->isSuperAdmin()) {
@@ -95,8 +97,8 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
-        // Create audit log entry for logout before logging out
-        if ($user) {
+        // Create audit log entry for logout before logging out (skip for super admins without church)
+        if ($user && $user->church_id) {
             AuditLog::create([
                 'church_id' => $user->church_id,
                 'user_id' => $user->id,
