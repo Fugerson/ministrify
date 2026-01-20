@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Services\TwoFactorService;
 use Illuminate\Http\Request;
 
@@ -170,6 +171,20 @@ class TwoFactorController extends Controller
             auth()->login($user, session('2fa_remember', false));
             session()->forget('2fa_remember');
 
+            // Create audit log entry for login via 2FA
+            AuditLog::create([
+                'church_id' => $user->church_id,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'action' => 'login',
+                'model_type' => 'App\\Models\\User',
+                'model_id' => $user->id,
+                'model_name' => $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'notes' => '2FA',
+            ]);
+
             $redirect = $user->isSuperAdmin() ? route('system.index') : route('dashboard');
             return redirect()->intended($redirect);
         }
@@ -179,6 +194,20 @@ class TwoFactorController extends Controller
             session()->forget('2fa_user_id');
             auth()->login($user, session('2fa_remember', false));
             session()->forget('2fa_remember');
+
+            // Create audit log entry for login via recovery code
+            AuditLog::create([
+                'church_id' => $user->church_id,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'action' => 'login',
+                'model_type' => 'App\\Models\\User',
+                'model_id' => $user->id,
+                'model_name' => $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'notes' => '2FA recovery code',
+            ]);
 
             $redirect = $user->isSuperAdmin() ? route('system.index') : route('dashboard');
             return redirect()->intended($redirect)

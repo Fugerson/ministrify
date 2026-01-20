@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Rules\SecurePassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,6 +58,19 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent(),
             ]);
 
+            // Create audit log entry for login
+            AuditLog::create([
+                'church_id' => $user->church_id,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'action' => 'login',
+                'model_type' => 'App\\Models\\User',
+                'model_id' => $user->id,
+                'model_name' => $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             // Redirect super admins to system admin panel
             if ($user->isSuperAdmin()) {
                 return redirect()->intended(route('system.index'));
@@ -79,7 +93,22 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $userId = Auth::id();
+        $user = Auth::user();
+
+        // Create audit log entry for logout before logging out
+        if ($user) {
+            AuditLog::create([
+                'church_id' => $user->church_id,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'action' => 'logout',
+                'model_type' => 'App\\Models\\User',
+                'model_id' => $user->id,
+                'model_name' => $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
 
         Auth::logout();
         $request->session()->invalidate();
@@ -87,7 +116,7 @@ class AuthController extends Controller
 
         // Log logout
         Log::channel('security')->info('User logged out', [
-            'user_id' => $userId,
+            'user_id' => $user?->id,
             'ip' => $request->ip(),
         ]);
 
