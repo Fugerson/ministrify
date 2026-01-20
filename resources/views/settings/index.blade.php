@@ -636,38 +636,51 @@
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
                     </svg>
                 </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Telegram бот</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Сповіщення про служіння</p>
-                </div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Telegram бот</h2>
             </div>
         </div>
 
         <div class="p-6">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Як підключити Telegram?</h3>
-            <ol class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Як підключити Telegram?</h3>
+            <ol class="space-y-4 text-sm">
                 <li class="flex gap-3">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                    <span>Відкрийте <a href="https://t.me/ministrify_bot" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">@ministrify_bot</a> в Telegram</span>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Відкрийте бота в Telegram</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Натисніть <a href="https://t.me/ministrify_bot" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline">@ministrify_bot</a> або знайдіть в пошуку Telegram</p>
+                    </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                    <span>Натисніть <strong>/start</strong></span>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Натисніть /start</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Бот привітає вас і спробує знайти ваш профіль автоматично</p>
+                    </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                    <span>Якщо у вашому профілі вказано <strong>@username</strong> — бот підключиться автоматично</span>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Автоматичне підключення</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Якщо у вашому профілі в Ministrify вказано Telegram @username — бот підключиться автоматично</p>
+                    </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">4</span>
-                    <span>Або введіть код з <a href="{{ route('my-profile') }}" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">«Мій профіль»</a></span>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Або введіть код вручну</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Отримайте 6-значний код в розділі <a href="{{ route('my-profile') }}" class="text-primary-600 dark:text-primary-400 hover:underline">«Мій профіль»</a> і надішліть його боту</p>
+                    </div>
                 </li>
             </ol>
 
-            <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                    <strong>Що вміє бот:</strong> сповіщення про призначення, нагадування про служіння, підтвердження участі кнопками ✅/❌
-                </p>
+            <div class="mt-5 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                <p class="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">Що вміє бот:</p>
+                <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                    <li>• Сповіщення про нові призначення на служіння</li>
+                    <li>• Нагадування за день до події</li>
+                    <li>• Підтвердження або відмова кнопками ✅/❌</li>
+                    <li>• Перегляд розкладу командами /schedule та /next</li>
+                </ul>
             </div>
         </div>
     </div>
