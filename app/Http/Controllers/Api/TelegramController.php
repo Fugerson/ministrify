@@ -44,107 +44,141 @@ class TelegramController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        // Parse callback data
-        if (str_starts_with($data, 'resp_confirm_')) {
-            $responsibilityId = (int) str_replace('resp_confirm_', '', $data);
-            $responsibility = EventResponsibility::find($responsibilityId);
+        $church = $person->church;
+        $telegram = $church?->telegram_bot_token ? new TelegramService($church->telegram_bot_token) : null;
 
-            if ($responsibility && $responsibility->person_id === $person->id) {
-                $responsibility->confirm();
+        // Handle Assignment callbacks (confirm_{id}, decline_{id})
+        if (preg_match('/^(confirm|decline)_(\d+)$/', $data, $matches)) {
+            return $this->handleAssignmentCallback($matches[1], (int) $matches[2], $person, $church, $telegram, $chatId);
+        }
 
-                $church = $person->church;
-                if ($church?->telegram_bot_token) {
-                    $event = $responsibility->event;
+        // Handle EventResponsibility callbacks (resp_confirm_{id}, resp_decline_{id})
+        if (preg_match('/^resp_(confirm|decline)_(\d+)$/', $data, $matches)) {
+            $this->handleResponsibilityCallback($matches[1], (int) $matches[2], $person, $church, $telegram, $chatId);
+        }
 
-                    // Save response to chat history
-                    TelegramMessage::create([
-                        'church_id' => $church->id,
-                        'person_id' => $person->id,
-                        'direction' => 'incoming',
-                        'message' => "✅ Візьму на себе: {$event->title} - {$responsibility->name}",
-                        'is_read' => false,
-                    ]);
+        // Handle ServicePlanItem callbacks (plan_confirm_{itemId}_{personId}, plan_decline_{itemId}_{personId})
+        if (preg_match('/^plan_(confirm|decline)_(\d+)(?:_(\d+))?$/', $data, $matches)) {
+            $targetPersonId = isset($matches[3]) ? (int) $matches[3] : null;
+            $this->handlePlanItemCallback($matches[1], (int) $matches[2], $targetPersonId, $person, $church, $telegram, $chatId);
+        }
 
-                    $telegram = new TelegramService($church->telegram_bot_token);
-                    $telegram->sendMessage($chatId, "✅ Супер! Ви берете на себе: {$responsibility->name}");
-                }
+        return response()->json(['ok' => true]);
+    }
+
+    private function handleResponsibilityCallback(string $action, int $responsibilityId, Person $person, ?Church $church, ?TelegramService $telegram, string $chatId): void
+    {
+        $responsibility = EventResponsibility::with('event')->find($responsibilityId);
+
+        if (!$responsibility || $responsibility->person_id !== $person->id) {
+            return;
+        }
+
+        $event = $responsibility->event;
+        $isConfirm = $action === 'confirm';
+
+        $isConfirm ? $responsibility->confirm() : $responsibility->decline();
+
+        if ($telegram && $church) {
+            $logMessage = $isConfirm
+                ? "✅ Візьму на себе: {$event->title} - {$responsibility->name}"
+                : "❌ Не може: {$event->title} - {$responsibility->name}";
+
+            TelegramMessage::create([
+                'church_id' => $church->id,
+                'person_id' => $person->id,
+                'direction' => 'incoming',
+                'message' => $logMessage,
+                'is_read' => false,
+            ]);
+
+            $responseMessage = $isConfirm
+                ? "✅ Супер! Ви берете на себе: {$responsibility->name}"
+                : "😔 Зрозуміло, пошукаємо когось іншого.";
+
+            $telegram->sendMessage($chatId, $responseMessage);
+        }
+    }
+
+    private function handlePlanItemCallback(string $action, int $itemId, ?int $targetPersonId, Person $person, ?Church $church, ?TelegramService $telegram, string $chatId): void
+    {
+        $item = ServicePlanItem::with('event')->find($itemId);
+
+        if (!$item || ($targetPersonId !== $person->id && $item->responsible_id !== $person->id)) {
+            return;
+        }
+
+        $isConfirm = $action === 'confirm';
+        $item->setPersonStatus($person->id, $isConfirm ? 'confirmed' : 'declined');
+
+        if ($telegram && $church) {
+            $logMessage = $isConfirm
+                ? "✅ Підтверджено: {$item->title}"
+                : "❌ Відхилено: {$item->title}";
+
+            TelegramMessage::create([
+                'church_id' => $church->id,
+                'person_id' => $person->id,
+                'direction' => 'incoming',
+                'message' => $logMessage,
+                'is_read' => false,
+            ]);
+
+            $responseMessage = $isConfirm
+                ? "✅ Чудово! Ви підтвердили участь у: {$item->title}"
+                : "😔 Зрозуміло, пошукаємо когось іншого для: {$item->title}";
+
+            $telegram->sendMessage($chatId, $responseMessage);
+        }
+    }
+
+    private function handleAssignmentCallback(string $action, int $assignmentId, Person $person, ?Church $church, ?TelegramService $telegram, string $chatId): \Illuminate\Http\JsonResponse
+    {
+        $assignment = \App\Models\Assignment::with(['event.ministry', 'position'])->find($assignmentId);
+
+        if (!$assignment || $assignment->person_id !== $person->id) {
+            return response()->json(['ok' => true]);
+        }
+
+        $event = $assignment->event;
+        $position = $assignment->position;
+
+        if ($action === 'confirm') {
+            $assignment->confirm();
+
+            if ($telegram && $church) {
+                TelegramMessage::create([
+                    'church_id' => $church->id,
+                    'person_id' => $person->id,
+                    'direction' => 'incoming',
+                    'message' => "✅ Підтверджено: {$event->ministry->name} - {$position->name} ({$event->date->format('d.m.Y')})",
+                    'is_read' => false,
+                ]);
+
+                $telegram->sendMessage($chatId, "✅ Чудово! Ви підтвердили участь у служінні {$event->date->format('d.m.Y')}.");
             }
-        } elseif (str_starts_with($data, 'resp_decline_')) {
-            $responsibilityId = (int) str_replace('resp_decline_', '', $data);
-            $responsibility = EventResponsibility::find($responsibilityId);
+        } else {
+            $assignment->decline();
 
-            if ($responsibility && $responsibility->person_id === $person->id) {
-                $responsibility->decline();
+            if ($telegram && $church) {
+                TelegramMessage::create([
+                    'church_id' => $church->id,
+                    'person_id' => $person->id,
+                    'direction' => 'incoming',
+                    'message' => "❌ Відхилено: {$event->ministry->name} - {$position->name} ({$event->date->format('d.m.Y')})",
+                    'is_read' => false,
+                ]);
 
-                $church = $person->church;
-                if ($church?->telegram_bot_token) {
-                    $event = $responsibility->event;
+                $telegram->sendMessage($chatId, "😔 Зрозуміло. Повідомлення надіслано лідеру.");
 
-                    // Save response to chat history
-                    TelegramMessage::create([
-                        'church_id' => $church->id,
-                        'person_id' => $person->id,
-                        'direction' => 'incoming',
-                        'message' => "❌ Не може: {$event->title} - {$responsibility->name}",
-                        'is_read' => false,
-                    ]);
+                // Notify ministry leader if available
+                $leader = $event->ministry->leader ?? $church->people()
+                    ->whereNotNull('telegram_chat_id')
+                    ->whereHas('user', fn($q) => $q->where('role', 'admin'))
+                    ->first();
 
-                    $telegram = new TelegramService($church->telegram_bot_token);
-                    $telegram->sendMessage($chatId, "😔 Зрозуміло, пошукаємо когось іншого.");
-                }
-            }
-        } elseif (str_starts_with($data, 'plan_confirm_')) {
-            // Service Plan Item confirmation - format: plan_confirm_{itemId}_{personId}
-            $parts = explode('_', str_replace('plan_confirm_', '', $data));
-            $itemId = (int) $parts[0];
-            $targetPersonId = isset($parts[1]) ? (int) $parts[1] : null;
-
-            $item = ServicePlanItem::with('event')->find($itemId);
-
-            // Verify the person responding matches the target person
-            if ($item && ($targetPersonId === $person->id || $item->responsible_id === $person->id)) {
-                // Use per-person status tracking
-                $item->setPersonStatus($person->id, 'confirmed');
-
-                $church = $person->church;
-                if ($church?->telegram_bot_token) {
-                    TelegramMessage::create([
-                        'church_id' => $church->id,
-                        'person_id' => $person->id,
-                        'direction' => 'incoming',
-                        'message' => "✅ Підтверджено: {$item->title}",
-                        'is_read' => false,
-                    ]);
-
-                    $telegram = new TelegramService($church->telegram_bot_token);
-                    $telegram->sendMessage($chatId, "✅ Чудово! Ви підтвердили участь у: {$item->title}");
-                }
-            }
-        } elseif (str_starts_with($data, 'plan_decline_')) {
-            // Service Plan Item decline - format: plan_decline_{itemId}_{personId}
-            $parts = explode('_', str_replace('plan_decline_', '', $data));
-            $itemId = (int) $parts[0];
-            $targetPersonId = isset($parts[1]) ? (int) $parts[1] : null;
-
-            $item = ServicePlanItem::with('event')->find($itemId);
-
-            // Verify the person responding matches the target person
-            if ($item && ($targetPersonId === $person->id || $item->responsible_id === $person->id)) {
-                // Use per-person status tracking
-                $item->setPersonStatus($person->id, 'declined');
-
-                $church = $person->church;
-                if ($church?->telegram_bot_token) {
-                    TelegramMessage::create([
-                        'church_id' => $church->id,
-                        'person_id' => $person->id,
-                        'direction' => 'incoming',
-                        'message' => "❌ Відхилено: {$item->title}",
-                        'is_read' => false,
-                    ]);
-
-                    $telegram = new TelegramService($church->telegram_bot_token);
-                    $telegram->sendMessage($chatId, "😔 Зрозуміло, пошукаємо когось іншого для: {$item->title}");
+                if ($leader) {
+                    $telegram->sendDeclineNotification($assignment, $leader);
                 }
             }
         }

@@ -88,28 +88,6 @@ class TelegramService
         return $this->sendMessage($person->telegram_chat_id, $message, $keyboard);
     }
 
-    public function sendReminder(Assignment $assignment): bool
-    {
-        $person = $assignment->person;
-        $event = $assignment->event;
-        $position = $assignment->position;
-
-        if (!$person->telegram_chat_id) {
-            return false;
-        }
-
-        $isToday = $event->date->isToday();
-        $prefix = $isToday ? '⏰ <b>Нагадування!</b>' : '⏰ <b>Нагадування на завтра!</b>';
-
-        $message = "{$prefix}\n\n"
-            . ($isToday ? "Сьогодні" : "Завтра") . " ти служиш:\n"
-            . "📅 {$event->date->format('d.m.Y')}, {$event->time->format('H:i')}\n"
-            . "⛪ {$event->ministry->name} — {$position->name}\n\n"
-            . "Не забудь! 🙏";
-
-        return $this->sendMessage($person->telegram_chat_id, $message);
-    }
-
     public function sendResponsibilityReminder(\App\Models\EventResponsibility $responsibility): bool
     {
         $person = $responsibility->person;
@@ -150,22 +128,6 @@ class TelegramService
             . "Потрібно знайти заміну.";
 
         return $this->sendMessage($leader->telegram_chat_id, $message);
-    }
-
-    public function sendCancellationNotification(Assignment $assignment): bool
-    {
-        $person = $assignment->person;
-        $event = $assignment->event;
-
-        if (!$person->telegram_chat_id) {
-            return false;
-        }
-
-        $message = "⚠️ <b>Зміна в розкладі!</b>\n\n"
-            . "Твоє служіння {$event->date->format('d.m.Y')} СКАСОВАНО.\n\n"
-            . "Якщо є питання — звернись до лідера.";
-
-        return $this->sendMessage($person->telegram_chat_id, $message);
     }
 
     public function getScheduleMessage(Person $person): string
