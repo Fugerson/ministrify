@@ -106,8 +106,7 @@ class SendBirthdayReminders extends Command
         if ($birthdaysToday->isNotEmpty()) {
             $message .= "📅 <b>Сьогодні:</b>\n";
             foreach ($birthdaysToday as $person) {
-                $age = $person->birth_date->age;
-                $message .= "• {$person->full_name} — {$age} років\n";
+                $message .= "• {$person->full_name}\n";
             }
             $message .= "\n";
         }
@@ -115,8 +114,7 @@ class SendBirthdayReminders extends Command
         if ($birthdaysTomorrow->isNotEmpty()) {
             $message .= "📅 <b>Завтра:</b>\n";
             foreach ($birthdaysTomorrow as $person) {
-                $age = $person->birth_date->addYear()->age;
-                $message .= "• {$person->full_name} — {$age} років\n";
+                $message .= "• {$person->full_name}\n";
             }
         }
 
