@@ -674,12 +674,36 @@
             </ol>
 
             <div class="mt-5 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
-                <p class="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">Що вміє бот:</p>
-                <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
-                    <li>• Сповіщення про нові призначення на служіння</li>
+                <p class="text-sm font-medium text-blue-900 dark:text-blue-300 mb-3">Що вміє бот:</p>
+
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">📬 Сповіщення:</p>
+                <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
+                    <li>• Повідомлення про нові призначення на служіння</li>
                     <li>• Нагадування за день до події</li>
+                    <li>• Сповіщення про призначення відповідальностей</li>
+                    <li>• Сповіщення про пункти плану служіння</li>
+                    <li>• Повідомлення лідеру, якщо хтось відмовився</li>
+                </ul>
+
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">✅ Підтвердження:</p>
+                <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
                     <li>• Підтвердження або відмова кнопками ✅/❌</li>
-                    <li>• Перегляд розкладу командами /schedule та /next</li>
+                    <li>• Підтвердження відповідальностей на події</li>
+                    <li>• Підтвердження участі в плані служіння</li>
+                </ul>
+
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">📋 Команди:</p>
+                <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
+                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/schedule</code> — розклад на місяць</li>
+                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/next</code> — наступне служіння</li>
+                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/unavailable</code> — як вказати недоступність</li>
+                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/help</code> — список команд</li>
+                </ul>
+
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">🔗 Підключення:</p>
+                <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                    <li>• Автоматичне підключення за Telegram username</li>
+                    <li>• Підключення за 6-значним кодом з профілю</li>
                 </ul>
             </div>
         </div>
