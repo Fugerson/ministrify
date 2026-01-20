@@ -269,6 +269,22 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('ministries/{ministry}/resources/folder', [ResourceController::class, 'ministryCreateFolder'])->name('ministries.resources.folder.create');
     Route::post('ministries/{ministry}/resources/upload', [ResourceController::class, 'ministryUpload'])->name('ministries.resources.upload');
 
+    // Ministry Goals & Tasks
+    Route::prefix('ministries/{ministry}/goals')->name('ministries.goals.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MinistryGoalController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\MinistryGoalController::class, 'storeGoal'])->name('store');
+        Route::put('{goal}', [\App\Http\Controllers\MinistryGoalController::class, 'updateGoal'])->name('update');
+        Route::delete('{goal}', [\App\Http\Controllers\MinistryGoalController::class, 'destroyGoal'])->name('destroy');
+    });
+    Route::post('ministries/{ministry}/vision', [\App\Http\Controllers\MinistryGoalController::class, 'updateVision'])->name('ministries.vision.update');
+    Route::prefix('ministries/{ministry}/tasks')->name('ministries.tasks.')->group(function () {
+        Route::post('/', [\App\Http\Controllers\MinistryGoalController::class, 'storeTask'])->name('store');
+        Route::put('{task}', [\App\Http\Controllers\MinistryGoalController::class, 'updateTask'])->name('update');
+        Route::post('{task}/toggle', [\App\Http\Controllers\MinistryGoalController::class, 'toggleTask'])->name('toggle');
+        Route::patch('{task}/status', [\App\Http\Controllers\MinistryGoalController::class, 'updateTaskStatus'])->name('status');
+        Route::delete('{task}', [\App\Http\Controllers\MinistryGoalController::class, 'destroyTask'])->name('destroy');
+    });
+
     // Positions
     Route::post('ministries/{ministry}/positions', [PositionController::class, 'store'])->name('positions.store');
     Route::put('positions/{position}', [PositionController::class, 'update'])->name('positions.update');

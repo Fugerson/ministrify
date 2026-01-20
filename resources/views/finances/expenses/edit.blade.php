@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto">
-    <a href="{{ route('finances.expenses.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm mb-6">
+    <a href="{{ request('redirect_to') === 'ministry' && request('ministry') ? route('ministries.show', ['ministry' => request('ministry'), 'tab' => 'expenses']) : route('finances.expenses.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm mb-6">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -27,6 +27,8 @@
         <form method="POST" action="{{ route('finances.expenses.update', $expense) }}" enctype="multipart/form-data" class="p-6 space-y-6">
             @csrf
             @method('PUT')
+            <input type="hidden" name="redirect_to" value="{{ old('redirect_to', request('redirect_to')) }}">
+            <input type="hidden" name="redirect_ministry_id" value="{{ old('redirect_ministry_id', request('ministry')) }}">
 
             {{-- Budget exceeded warning --}}
             @if(session('budget_exceeded'))

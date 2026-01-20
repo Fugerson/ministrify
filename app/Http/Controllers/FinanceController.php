@@ -659,6 +659,13 @@ class FinanceController extends Controller
             $message .= ' ' . $budgetWarning;
         }
 
+        // Redirect back to ministry page if came from there
+        if (!empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry') {
+            return redirect()->route('ministries.show', ['ministry' => $validated['ministry_id'], 'tab' => 'expenses'])
+                ->with('success', $message)
+                ->with('budget_warning', $budgetWarning);
+        }
+
         return redirect()->route('finances.expenses.index')
             ->with('success', $message)
             ->with('budget_warning', $budgetWarning);
@@ -767,14 +774,27 @@ class FinanceController extends Controller
             $message .= ' ' . $budgetWarning;
         }
 
+        // Redirect back to ministry page if requested
+        if ($request->input('redirect_to') === 'ministry' && $request->input('redirect_ministry_id')) {
+            return redirect()->route('ministries.show', ['ministry' => $request->input('redirect_ministry_id'), 'tab' => 'expenses'])
+                ->with('success', $message);
+        }
+
         return redirect()->route('finances.expenses.index')
             ->with('success', $message);
     }
 
-    public function destroyExpense(Transaction $expense)
+    public function destroyExpense(Request $request, Transaction $expense)
     {
         $this->authorizeChurch($expense);
+        $ministryId = $expense->ministry_id;
         $expense->delete();
+
+        // Redirect back to ministry page if requested
+        if ($request->input('redirect_to') === 'ministry' && $ministryId) {
+            return redirect()->route('ministries.show', ['ministry' => $ministryId, 'tab' => 'expenses'])
+                ->with('success', 'Витрату видалено.');
+        }
 
         return back()->with('success', 'Витрату видалено.');
     }

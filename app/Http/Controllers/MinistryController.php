@@ -96,11 +96,13 @@ class MinistryController extends Controller
             'positions',
             'members',
             'events' => fn($q) => $q->upcoming()->with(['ministry.positions', 'assignments'])->limit(10),
-            'expenses' => fn($q) => $q->forMonth(now()->year, now()->month)->with('category'),
-            'meetings' => fn($q) => $q->with(['agendaItems', 'attendees.person'])->latest('date')->limit(20),
+            'transactions' => fn($q) => $q->where('direction', 'out')->whereMonth('date', now()->month)->whereYear('date', now()->year)->with(['category', 'attachments'])->orderByDesc('date'),
+            'goals' => fn($q) => $q->with(['tasks.assignee', 'creator'])->orderByDesc('created_at'),
         ]);
 
-        $tab = request('tab', 'schedule');
+        // Default tab: 'goals' for managers, 'schedule' for others
+        $defaultTab = Gate::allows('manage-ministry', $ministry) ? 'goals' : 'schedule';
+        $tab = request('tab', $defaultTab);
 
         // Get boards for task creation
         $boards = Board::where('church_id', $church->id)
@@ -129,7 +131,17 @@ class MinistryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'registeredUsers'));
+        // Goals stats
+        $goalsStats = [
+            'total_goals' => $ministry->goals()->count(),
+            'active_goals' => $ministry->goals()->active()->count(),
+            'completed_goals' => $ministry->goals()->completed()->count(),
+            'total_tasks' => $ministry->tasks()->count(),
+            'completed_tasks' => $ministry->tasks()->done()->count(),
+            'overdue_tasks' => $ministry->tasks()->overdue()->count(),
+        ];
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'registeredUsers', 'goalsStats'));
     }
 
     public function edit(Ministry $ministry)

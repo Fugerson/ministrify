@@ -33,6 +33,7 @@ class Ministry extends Model
         'type_id',
         'name',
         'description',
+        'vision',
         'icon',
         'color',
         'leader_id',
@@ -202,6 +203,40 @@ class Ministry extends Model
     public function joinRequests(): HasMany
     {
         return $this->hasMany(MinistryJoinRequest::class);
+    }
+
+    public function goals(): HasMany
+    {
+        return $this->hasMany(MinistryGoal::class);
+    }
+
+    public function activeGoals(): HasMany
+    {
+        return $this->goals()->where('status', 'active');
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(MinistryTask::class);
+    }
+
+    public function activeTasks(): HasMany
+    {
+        return $this->tasks()->whereIn('status', ['todo', 'in_progress']);
+    }
+
+    public function getHasVisionAttribute(): bool
+    {
+        return !empty($this->vision);
+    }
+
+    public function getGoalsProgressAttribute(): int
+    {
+        $goals = $this->activeGoals;
+        if ($goals->isEmpty()) {
+            return 0;
+        }
+        return (int) round($goals->avg('calculated_progress'));
     }
 
     public function pendingJoinRequests(): HasMany

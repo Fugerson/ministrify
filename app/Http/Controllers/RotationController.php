@@ -8,6 +8,7 @@ use App\Models\Person;
 use App\Services\RotationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class RotationController extends Controller
 {
@@ -38,7 +39,7 @@ class RotationController extends Controller
      */
     public function ministry(Ministry $ministry)
     {
-        $this->authorize('view', $ministry);
+        Gate::authorize('view-ministry', $ministry);
 
         $church = $this->getCurrentChurch();
 
@@ -106,7 +107,7 @@ class RotationController extends Controller
      */
     public function autoAssignBulk(Request $request, Ministry $ministry)
     {
-        $this->authorize('update', $ministry);
+        Gate::authorize('manage-ministry', $ministry);
 
         $request->validate([
             'weeks' => 'integer|min:1|max:12',
@@ -167,7 +168,7 @@ class RotationController extends Controller
      */
     public function report(Request $request, Ministry $ministry)
     {
-        $this->authorize('view', $ministry);
+        Gate::authorize('view-ministry', $ministry);
 
         $church = $this->getCurrentChurch();
         $rotationService = new RotationService($church);
