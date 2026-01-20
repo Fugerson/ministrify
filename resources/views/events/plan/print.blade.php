@@ -276,8 +276,8 @@
             <div class="assignments-grid">
                 @foreach($event->assignments as $assignment)
                     <div class="assignment-item">
-                        <span class="assignment-position">{{ $assignment->position->name }}:</span>
-                        <span class="assignment-name">{{ $assignment->person->full_name }}</span>
+                        <span class="assignment-position">{{ $assignment->position?->name ?? 'Позиція' }}:</span>
+                        <span class="assignment-name">{{ $assignment->person?->full_name ?? '—' }}</span>
                     </div>
                 @endforeach
             </div>
@@ -285,7 +285,7 @@
     @endif
 
     <div class="footer">
-        Сформовано: {{ now()->format('d.m.Y H:i') }} | {{ $event->ministry->name }} | {{ $event->church->name }}
+        Сформовано: {{ now()->format('d.m.Y H:i') }}@if($event->ministry) | {{ $event->ministry->name }}@endif | {{ $event->church->name }}
     </div>
 </body>
 </html>
