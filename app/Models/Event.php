@@ -216,7 +216,7 @@ class Event extends Model
     public function getUnfilledPositionsAttribute(): \Illuminate\Database\Eloquent\Collection
     {
         if (!$this->ministry) {
-            return collect();
+            return new \Illuminate\Database\Eloquent\Collection();
         }
 
         $filledPositionIds = $this->assignments()->pluck('position_id')->toArray();
