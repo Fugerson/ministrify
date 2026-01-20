@@ -58,8 +58,8 @@ trait Auditable
         // Get church_id from model or user
         $churchId = $this->church_id ?? $user->church_id ?? null;
 
-        // For critical actions, always log even without church_id
-        if (!$churchId && !$isCritical) {
+        // Skip logging if no church context
+        if (!$churchId) {
             return;
         }
 

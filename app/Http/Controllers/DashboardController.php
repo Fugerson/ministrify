@@ -58,18 +58,24 @@ class DashboardController extends Controller
                 ->whereYear('created_at', now()->year)
                 ->count();
 
-            // Age statistics
+            // Age statistics - optimized single query with CASE WHEN
+            $ageStatsRaw = (clone $peopleQuery)
+                ->whereNotNull('birth_date')
+                ->selectRaw("
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17 THEN 1 ELSE 0 END) as teens,
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35 THEN 1 ELSE 0 END) as youth,
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59 THEN 1 ELSE 0 END) as adults,
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60 THEN 1 ELSE 0 END) as seniors
+                ", [$today, $today, $today, $today, $today])
+                ->first();
+
             $ageStats = [
-                'children' => (clone $peopleQuery)->whereNotNull('birth_date')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12', [$today])->count(),
-                'teens' => (clone $peopleQuery)->whereNotNull('birth_date')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17', [$today])->count(),
-                'youth' => (clone $peopleQuery)->whereNotNull('birth_date')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35', [$today])->count(),
-                'adults' => (clone $peopleQuery)->whereNotNull('birth_date')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59', [$today])->count(),
-                'seniors' => (clone $peopleQuery)->whereNotNull('birth_date')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60', [$today])->count(),
+                'children' => (int) ($ageStatsRaw->children ?? 0),
+                'teens' => (int) ($ageStatsRaw->teens ?? 0),
+                'youth' => (int) ($ageStatsRaw->youth ?? 0),
+                'adults' => (int) ($ageStatsRaw->adults ?? 0),
+                'seniors' => (int) ($ageStatsRaw->seniors ?? 0),
             ];
 
             // Trends
@@ -88,21 +94,42 @@ class DashboardController extends Controller
             $ministriesWithEvents = $church->ministries()
                 ->whereHas('events', fn($q) => $q->where('date', '>=', now()))->count();
 
-            // Group stats
-            $activeGroupIds = Group::where('church_id', $church->id)->where('status', 'active')->pluck('id');
-            $totalGroups = Group::where('church_id', $church->id)->count();
-            $activeGroups = $activeGroupIds->count();
-            $pausedGroups = Group::where('church_id', $church->id)->where('status', 'paused')->count();
-            $vacationGroups = Group::where('church_id', $church->id)->where('status', 'vacation')->count();
+            // Group stats - optimized single query
+            $groupStatsRaw = Group::where('church_id', $church->id)
+                ->selectRaw("
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
+                    SUM(CASE WHEN status = 'paused' THEN 1 ELSE 0 END) as paused,
+                    SUM(CASE WHEN status = 'vacation' THEN 1 ELSE 0 END) as vacation
+                ")
+                ->first();
+
+            $totalGroups = (int) ($groupStatsRaw->total ?? 0);
+            $activeGroups = (int) ($groupStatsRaw->active ?? 0);
+            $pausedGroups = (int) ($groupStatsRaw->paused ?? 0);
+            $vacationGroups = (int) ($groupStatsRaw->vacation ?? 0);
+
             $totalGroupMembers = $activeGroups > 0
-                ? \DB::table('group_person')->whereIn('group_id', $activeGroupIds)->distinct('person_id')->count('person_id')
+                ? \DB::table('group_person')
+                    ->join('groups', 'group_person.group_id', '=', 'groups.id')
+                    ->where('groups.church_id', $church->id)
+                    ->where('groups.status', 'active')
+                    ->distinct('group_person.person_id')
+                    ->count('group_person.person_id')
                 : 0;
 
-            // Event stats
-            $eventsThisMonth = Event::where('church_id', $church->id)
-                ->whereMonth('date', now()->month)->whereYear('date', now()->year)->count();
-            $upcomingEventsCount = Event::where('church_id', $church->id)
-                ->where('date', '>=', now())->where('date', '<=', now()->endOfMonth())->count();
+            // Event stats - optimized single query
+            $eventStatsRaw = Event::where('church_id', $church->id)
+                ->whereMonth('date', now()->month)
+                ->whereYear('date', now()->year)
+                ->selectRaw("
+                    COUNT(*) as total,
+                    SUM(CASE WHEN date >= ? THEN 1 ELSE 0 END) as upcoming
+                ", [now()->toDateString()])
+                ->first();
+
+            $eventsThisMonth = (int) ($eventStatsRaw->total ?? 0);
+            $upcomingEventsCount = (int) ($eventStatsRaw->upcoming ?? 0);
 
             return [
                 'total_people' => $totalPeople,

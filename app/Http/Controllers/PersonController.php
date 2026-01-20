@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\UnavailableDate;
 use App\Exports\PeopleExport;
 use App\Imports\PeopleImport;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -821,7 +822,7 @@ class PersonController extends Controller
         }
 
         $validated = $request->validate([
-            'shepherd_id' => 'nullable|exists:people,id',
+            'shepherd_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
         ]);
 
         // Handle empty string as null
@@ -830,13 +831,9 @@ class PersonController extends Controller
             $shepherdId = null;
         }
 
-        // Validate shepherd if provided
+        // Additional validations for shepherd
         if ($shepherdId) {
             $shepherd = Person::find($shepherdId);
-
-            if (!$shepherd || $shepherd->church_id !== $church->id) {
-                return response()->json(['message' => 'Опікун не знайдений'], 400);
-            }
 
             if (!$shepherd->is_shepherd) {
                 return response()->json(['message' => 'Ця людина не є опікуном'], 400);

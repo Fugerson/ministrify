@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ministry;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
+use App\Rules\BelongsToChurch;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -78,10 +79,10 @@ class ExpenseController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'ministry_id' => 'required|exists:ministries,id',
+            'ministry_id' => ['required', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
-            'category_id' => 'nullable|exists:transaction_categories,id',
+            'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'date' => 'required|date',
             'receipt_photo' => 'nullable|image|max:5120',
             'notes' => 'nullable|string',
@@ -89,11 +90,6 @@ class ExpenseController extends Controller
 
         $church = $this->getCurrentChurch();
         $ministry = Ministry::findOrFail($validated['ministry_id']);
-
-        // Check access
-        if ($ministry->church_id !== $church->id) {
-            abort(404);
-        }
 
         Gate::authorize('manage-ministry', $ministry);
 
@@ -146,10 +142,10 @@ class ExpenseController extends Controller
         }
 
         $validated = $request->validate([
-            'ministry_id' => 'required|exists:ministries,id',
+            'ministry_id' => ['required', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
-            'category_id' => 'nullable|exists:transaction_categories,id',
+            'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'date' => 'required|date',
             'receipt_photo' => 'nullable|image|max:5120',
             'notes' => 'nullable|string',
