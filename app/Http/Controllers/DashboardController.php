@@ -59,7 +59,9 @@ class DashboardController extends Controller
                 ->count();
 
             // Age statistics - optimized single query with CASE WHEN
-            $ageStatsRaw = (clone $peopleQuery)
+            $ageStatsRaw = \DB::table('people')
+                ->where('church_id', $church->id)
+                ->whereNull('deleted_at')
                 ->whereNotNull('birth_date')
                 ->selectRaw("
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
@@ -95,7 +97,8 @@ class DashboardController extends Controller
                 ->whereHas('events', fn($q) => $q->where('date', '>=', now()))->count();
 
             // Group stats - optimized single query
-            $groupStatsRaw = Group::where('church_id', $church->id)
+            $groupStatsRaw = \DB::table('groups')
+                ->where('church_id', $church->id)
                 ->selectRaw("
                     COUNT(*) as total,
                     SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
@@ -119,7 +122,8 @@ class DashboardController extends Controller
                 : 0;
 
             // Event stats - optimized single query
-            $eventStatsRaw = Event::where('church_id', $church->id)
+            $eventStatsRaw = \DB::table('events')
+                ->where('church_id', $church->id)
                 ->whereMonth('date', now()->month)
                 ->whereYear('date', now()->year)
                 ->selectRaw("
