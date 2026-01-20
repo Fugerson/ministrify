@@ -596,9 +596,29 @@ class PersonController extends Controller
             'email' => 'nullable|email|max:255',
             'telegram_username' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:500',
+            'photo' => 'nullable|image|max:5120',
         ]);
 
-        $user->person->update($validated);
+        $person = $user->person;
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            $this->imageService->delete($person->photo);
+            $validated['photo'] = $this->imageService->storeProfilePhoto(
+                $request->file('photo'),
+                'people'
+            );
+        } elseif ($request->input('remove_photo') === '1') {
+            // Remove photo if requested
+            $this->imageService->delete($person->photo);
+            $validated['photo'] = null;
+        } else {
+            // Don't update photo field if not provided
+            unset($validated['photo']);
+        }
+
+        $person->update($validated);
 
         return back()->with('success', 'Профіль оновлено.');
     }

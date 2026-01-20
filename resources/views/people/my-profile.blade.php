@@ -20,23 +20,65 @@
         <!-- Profile info -->
         <div class="lg:col-span-2 space-y-6">
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                <div class="flex items-center space-x-4 mb-6">
-                    @if($person->photo)
-                    <img src="{{ Storage::url($person->photo) }}" alt="{{ $person->full_name }}" class="w-20 h-20 rounded-full object-cover">
-                    @else
-                    <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        <span class="text-2xl text-gray-500 dark:text-gray-400">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
-                    </div>
-                    @endif
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $person->full_name }}</h2>
-                        <p class="text-gray-500 dark:text-gray-400">{{ auth()->user()->role === 'admin' ? 'Адміністратор' : (auth()->user()->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
-                    </div>
-                </div>
-
-                <form action="{{ route('my-profile.update') }}" method="POST" class="space-y-4">
+                <form action="{{ route('my-profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-4"
+                      x-data="{
+                          preview: null,
+                          existingPhoto: {{ $person->photo ? 'true' : 'false' }},
+                          handleFileSelect(event) {
+                              const file = event.target.files[0];
+                              if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (e) => this.preview = e.target.result;
+                                  reader.readAsDataURL(file);
+                                  this.$refs.removePhotoInput.value = '0';
+                              }
+                          },
+                          removePhoto() {
+                              this.preview = null;
+                              this.existingPhoto = false;
+                              this.$refs.removePhotoInput.value = '1';
+                              this.$refs.photoInput.value = '';
+                          }
+                      }">
                     @csrf
                     @method('PUT')
+
+                    <div class="flex items-center space-x-4 mb-6">
+                        <!-- Editable avatar -->
+                        <div class="relative flex-shrink-0">
+                            <template x-if="preview">
+                                <img :src="preview" class="w-20 h-20 rounded-full object-cover">
+                            </template>
+                            <template x-if="!preview && existingPhoto">
+                                <img src="{{ $person->photo ? Storage::url($person->photo) : '' }}" class="w-20 h-20 rounded-full object-cover">
+                            </template>
+                            <template x-if="!preview && !existingPhoto">
+                                <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-2xl text-gray-500 dark:text-gray-400">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
+                                </div>
+                            </template>
+                            <!-- Photo upload overlay -->
+                            <label class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 rounded-full cursor-pointer transition-opacity">
+                                <input type="file" name="photo" accept="image/*" class="sr-only" x-ref="photoInput" @change="handleFileSelect($event)">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </label>
+                            <!-- Remove photo button -->
+                            <button type="button" x-show="preview || existingPhoto" @click="removePhoto()"
+                                    class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors z-10">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                            <input type="hidden" name="remove_photo" x-ref="removePhotoInput" value="0">
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $person->full_name }}</h2>
+                            <p class="text-gray-500 dark:text-gray-400">{{ auth()->user()->role === 'admin' ? 'Адміністратор' : (auth()->user()->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
+                        </div>
+                    </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
