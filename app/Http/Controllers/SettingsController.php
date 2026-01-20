@@ -145,15 +145,21 @@ class SettingsController extends Controller
         $church = $this->getCurrentChurch();
 
         $settings = $church->settings ?? [];
+        $currentNotifications = $settings['notifications'] ?? [];
+
         $settings['notifications'] = [
-            'reminder_day_before' => $request->boolean('reminder_day_before'),
-            'reminder_same_day' => $request->boolean('reminder_same_day'),
-            'notify_leader_on_decline' => $request->boolean('notify_leader_on_decline'),
-            'birthday_reminders' => $request->boolean('birthday_reminders'),
-            'task_reminders' => $request->boolean('task_reminders'),
+            'reminder_day_before' => $request->has('reminder_day_before') ? $request->boolean('reminder_day_before') : ($currentNotifications['reminder_day_before'] ?? true),
+            'reminder_same_day' => $request->has('reminder_same_day') ? $request->boolean('reminder_same_day') : ($currentNotifications['reminder_same_day'] ?? true),
+            'notify_leader_on_decline' => $request->has('notify_leader_on_decline') ? $request->boolean('notify_leader_on_decline') : ($currentNotifications['notify_leader_on_decline'] ?? true),
+            'birthday_reminders' => $request->has('birthday_reminders') ? $request->boolean('birthday_reminders') : ($currentNotifications['birthday_reminders'] ?? true),
+            'task_reminders' => $request->has('task_reminders') ? $request->boolean('task_reminders') : ($currentNotifications['task_reminders'] ?? true),
         ];
 
         $church->update(['settings' => $settings]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Налаштування сповіщень оновлено.');
     }

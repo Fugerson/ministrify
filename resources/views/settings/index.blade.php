@@ -710,15 +710,41 @@
     </div>
 
     <!-- Notification settings -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="{
+             birthdayReminders: {{ ($church->settings['notifications']['birthday_reminders'] ?? true) ? 'true' : 'false' }},
+             taskReminders: {{ ($church->settings['notifications']['task_reminders'] ?? true) ? 'true' : 'false' }},
+             saving: false,
+             saved: false,
+             save() {
+                 this.saving = true;
+                 this.saved = false;
+                 fetch('{{ route('settings.notifications') }}', {
+                     method: 'PUT',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                         'Accept': 'application/json'
+                     },
+                     body: JSON.stringify({
+                         birthday_reminders: this.birthdayReminders,
+                         task_reminders: this.taskReminders
+                     })
+                 }).then(() => {
+                     this.saving = false;
+                     this.saved = true;
+                     setTimeout(() => this.saved = false, 2000);
+                 }).catch(() => {
+                     this.saving = false;
+                 });
+             }
+         }">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Автоматичні нагадування</h2>
+            <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
         </div>
 
-        <form method="POST" action="{{ route('settings.notifications') }}" class="p-6 space-y-6">
-            @csrf
-            @method('PUT')
-
+        <div class="p-6 space-y-6">
             <!-- Birthday reminders -->
             <label class="flex items-center justify-between cursor-pointer">
                 <div class="flex items-center gap-3">
@@ -733,9 +759,7 @@
                     </div>
                 </div>
                 <div class="relative inline-flex">
-                    <input type="checkbox" name="birthday_reminders" value="1"
-                           {{ ($church->settings['notifications']['birthday_reminders'] ?? true) ? 'checked' : '' }}
-                           class="sr-only peer">
+                    <input type="checkbox" x-model="birthdayReminders" @change="save()" class="sr-only peer">
                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
                 </div>
             </label>
@@ -754,17 +778,11 @@
                     </div>
                 </div>
                 <div class="relative inline-flex">
-                    <input type="checkbox" name="task_reminders" value="1"
-                           {{ ($church->settings['notifications']['task_reminders'] ?? true) ? 'checked' : '' }}
-                           class="sr-only peer">
+                    <input type="checkbox" x-model="taskReminders" @change="save()" class="sr-only peer">
                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
                 </div>
             </label>
-
-            <button type="submit" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
-                Зберегти
-            </button>
-        </form>
+        </div>
 
         <div class="px-6 pb-6 pt-0">
             <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
