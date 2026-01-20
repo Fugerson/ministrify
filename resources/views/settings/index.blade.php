@@ -601,22 +601,7 @@
     </div>
 
     <!-- Integrations Tab -->
-    <div x-show="activeTab === 'integrations'" x-cloak class="space-y-6"
-         x-data="{
-             status: null,
-             loading: true,
-             async loadStatus() {
-                 this.loading = true;
-                 try {
-                     const response = await fetch('{{ route('settings.telegram.status') }}');
-                     this.status = await response.json();
-                 } catch (e) {
-                     this.status = { connected: false, error: 'Помилка з\'єднання' };
-                 }
-                 this.loading = false;
-             }
-         }"
-         x-init="loadStatus()">
+    <div x-show="activeTab === 'integrations'" x-cloak class="space-y-6">
 
     <!-- Telegram Chats Link -->
     <a href="{{ route('telegram.chat.index') }}" class="block bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-sm p-5 hover:from-blue-600 hover:to-blue-700 transition-all group">
@@ -642,9 +627,9 @@
         </div>
     </a>
 
-    <!-- Telegram bot -->
+    <!-- Telegram bot instructions -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="currentColor">
@@ -653,82 +638,36 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Telegram бот</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Сповіщення служительам</p>
-                </div>
-            </div>
-
-            <!-- Status indicator -->
-            <div x-show="!loading" class="flex items-center gap-2">
-                <template x-if="status?.connected">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-sm font-medium">
-                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                        Підключено
-                    </span>
-                </template>
-                <template x-if="!status?.connected">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-sm font-medium">
-                        <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
-                        Не налаштовано
-                    </span>
-                </template>
-            </div>
-        </div>
-
-        <!-- Bot status details -->
-        <div x-show="status?.connected && !loading" x-cloak class="px-6 py-4 bg-green-50 dark:bg-green-900/10 border-b border-gray-200 dark:border-gray-700">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Бот</p>
-                    <p class="font-medium text-gray-900 dark:text-white">
-                        <a :href="'https://t.me/' + status.bot_username" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline">
-                            @<span x-text="status.bot_username"></span>
-                        </a>
-                    </p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Webhook</p>
-                    <p class="font-medium" :class="status.webhook_url ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'"
-                       x-text="status.webhook_url ? 'Налаштовано' : 'Не налаштовано'"></p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Очікує</p>
-                    <p class="font-medium text-gray-900 dark:text-white" x-text="status.pending_updates + ' оновлень'"></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Сповіщення про служіння</p>
                 </div>
             </div>
         </div>
 
-        <div class="p-6 space-y-6">
-            <!-- Actions -->
-            <div>
-                <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Дії</h3>
-                <div class="flex flex-wrap gap-3">
-                    <form method="POST" action="{{ route('settings.telegram.test') }}">
-                        @csrf
-                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Перевірити підключення
-                        </button>
-                    </form>
+        <div class="p-6">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Як підключити Telegram?</h3>
+            <ol class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                <li class="flex gap-3">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                    <span>Відкрийте <a href="https://t.me/ministrify_bot" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">@ministrify_bot</a> в Telegram</span>
+                </li>
+                <li class="flex gap-3">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    <span>Натисніть <strong>/start</strong></span>
+                </li>
+                <li class="flex gap-3">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    <span>Якщо у вашому профілі вказано <strong>@username</strong> — бот підключиться автоматично</span>
+                </li>
+                <li class="flex gap-3">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                    <span>Або введіть код з <a href="{{ route('my-profile') }}" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">«Мій профіль»</a></span>
+                </li>
+            </ol>
 
-                    <form method="POST" action="{{ route('settings.telegram.webhook') }}">
-                        @csrf
-                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 rounded-lg transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                            </svg>
-                            Налаштувати Webhook
-                        </button>
-                    </form>
-
-                    <button @click="loadStatus()" type="button" class="inline-flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-                        <svg class="w-4 h-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        Оновити статус
-                    </button>
-                </div>
+            <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    <strong>Що вміє бот:</strong> сповіщення про призначення, нагадування про служіння, підтвердження участі кнопками ✅/❌
+                </p>
             </div>
         </div>
     </div>
