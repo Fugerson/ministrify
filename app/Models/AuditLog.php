@@ -358,6 +358,12 @@ class AuditLog extends Model
             };
         }
 
+        // Church role ID - look up role name
+        if ($field === 'church_role_id') {
+            $role = ChurchRole::find($value);
+            return $role ? $role->name : $value;
+        }
+
         // Priority
         if ($field === 'priority') {
             return match($value) {
