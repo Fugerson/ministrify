@@ -4,7 +4,7 @@
 
 @section('actions')
 @leader
-<a href="{{ route('announcements.create') }}" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl">
+<a href="{{ route('announcements.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
     + Нове оголошення
 </a>
 @endleader
