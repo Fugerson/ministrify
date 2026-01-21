@@ -20,7 +20,6 @@ class Church extends Model
         'address',
         'logo',
         'primary_color',
-        'theme',
         'design_theme',
         'telegram_bot_token',
         'settings',
@@ -97,6 +96,58 @@ class Church extends Model
     public function setTelegramBotTokenAttribute($value): void
     {
         $this->attributes['telegram_bot_token'] = $value ? Crypt::encryptString($value) : null;
+    }
+
+    /**
+     * Get monobank token (with decryption error handling)
+     */
+    public function getMonobankTokenAttribute($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (DecryptException $e) {
+            $this->attributes['monobank_token'] = null;
+            $this->saveQuietly();
+            return null;
+        }
+    }
+
+    /**
+     * Set monobank token (encrypted)
+     */
+    public function setMonobankTokenAttribute($value): void
+    {
+        $this->attributes['monobank_token'] = $value ? Crypt::encryptString($value) : null;
+    }
+
+    /**
+     * Get privatbank password (with decryption error handling)
+     */
+    public function getPrivatbankPasswordAttribute($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (DecryptException $e) {
+            $this->attributes['privatbank_password'] = null;
+            $this->saveQuietly();
+            return null;
+        }
+    }
+
+    /**
+     * Set privatbank password (encrypted)
+     */
+    public function setPrivatbankPasswordAttribute($value): void
+    {
+        $this->attributes['privatbank_password'] = $value ? Crypt::encryptString($value) : null;
     }
 
     /**

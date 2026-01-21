@@ -3,13 +3,44 @@
 use App\Models\Church;
 use App\Models\ChurchRole;
 use App\Models\ChurchRolePermission;
-use App\Models\RolePermission;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
+    // Default permissions (previously from RolePermission model)
+    private const DEFAULT_PERMISSIONS = [
+        'leader' => [
+            'dashboard' => ['view'],
+            'people' => ['view', 'create', 'edit'],
+            'groups' => ['view', 'create', 'edit'],
+            'ministries' => ['view', 'edit'],
+            'events' => ['view', 'create', 'edit'],
+            'finances' => [],
+            'reports' => ['view'],
+            'resources' => ['view', 'create'],
+            'boards' => ['view', 'create', 'edit'],
+            'announcements' => ['view', 'create'],
+            'website' => [],
+            'settings' => [],
+        ],
+        'volunteer' => [
+            'dashboard' => ['view'],
+            'people' => ['view'],
+            'groups' => ['view'],
+            'ministries' => ['view'],
+            'events' => ['view'],
+            'finances' => [],
+            'reports' => [],
+            'resources' => ['view'],
+            'boards' => ['view'],
+            'announcements' => ['view'],
+            'website' => [],
+            'settings' => [],
+        ],
+    ];
+
     public function up(): void
     {
         // For each church, create system roles and migrate users
@@ -39,7 +70,7 @@ return new class extends Migration
                     'is_admin_role' => false,
                 ]
             );
-            $this->setPermissionsForRole($leaderRole, RolePermission::DEFAULT_PERMISSIONS['leader']);
+            $this->setPermissionsForRole($leaderRole, self::DEFAULT_PERMISSIONS['leader']);
 
             // Create or update Volunteer role
             $volunteerRole = ChurchRole::updateOrCreate(
@@ -52,7 +83,7 @@ return new class extends Migration
                     'is_admin_role' => false,
                 ]
             );
-            $this->setPermissionsForRole($volunteerRole, RolePermission::DEFAULT_PERMISSIONS['volunteer']);
+            $this->setPermissionsForRole($volunteerRole, self::DEFAULT_PERMISSIONS['volunteer']);
 
             // Migrate existing users
             User::where('church_id', $church->id)

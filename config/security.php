@@ -114,7 +114,7 @@ return [
     |
     */
     'encrypted_fields' => [
-        'churches' => ['telegram_bot_token'],
+        'churches' => ['telegram_bot_token', 'monobank_token', 'privatbank_password'],
     ],
 
     /*

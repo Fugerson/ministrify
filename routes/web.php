@@ -516,11 +516,6 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('permissions', [\App\Http\Controllers\RolePermissionController::class, 'update'])->name('permissions.update');
         Route::post('permissions/reset', [\App\Http\Controllers\RolePermissionController::class, 'reset'])->name('permissions.reset');
 
-        // User permission overrides
-        Route::get('permissions/user/{user}', [\App\Http\Controllers\RolePermissionController::class, 'getUserOverrides'])->name('permissions.user.get');
-        Route::put('permissions/user/{user}', [\App\Http\Controllers\RolePermissionController::class, 'updateUserOverrides'])->name('permissions.user.update');
-        Route::delete('permissions/user/{user}', [\App\Http\Controllers\RolePermissionController::class, 'clearUserOverrides'])->name('permissions.user.clear');
-
         // Google Calendar integration
         Route::get('google-calendar/redirect', [\App\Http\Controllers\GoogleCalendarController::class, 'redirect'])->name('google-calendar.redirect');
         Route::get('google-calendar/callback', [\App\Http\Controllers\GoogleCalendarController::class, 'callback'])->name('google-calendar.callback');

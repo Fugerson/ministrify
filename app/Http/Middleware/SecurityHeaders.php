@@ -10,22 +10,25 @@ class SecurityHeaders
 {
     /**
      * Security headers to protect against common attacks.
+     * Uses values from config/security.php
      */
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
 
+        $config = config('security.headers');
+
         // Prevent clickjacking - don't allow embedding in iframes
-        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        $response->headers->set('X-Frame-Options', $config['x_frame_options'] ?? 'SAMEORIGIN');
 
         // Prevent MIME type sniffing
-        $response->headers->set('X-Content-Type-Options', 'nosniff');
+        $response->headers->set('X-Content-Type-Options', $config['x_content_type_options'] ?? 'nosniff');
 
         // Enable XSS protection in browsers
-        $response->headers->set('X-XSS-Protection', '1; mode=block');
+        $response->headers->set('X-XSS-Protection', $config['x_xss_protection'] ?? '1; mode=block');
 
         // Referrer policy - don't leak full URL to other sites
-        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $response->headers->set('Referrer-Policy', $config['referrer_policy'] ?? 'strict-origin-when-cross-origin');
 
         // Permissions policy - restrict browser features
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
@@ -45,8 +48,10 @@ class SecurityHeaders
                 "frame-ancestors 'self';"
             );
 
-            // Force HTTPS in production
-            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+            // Force HTTPS in production - use config values
+            $hstsMaxAge = $config['hsts_max_age'] ?? 31536000;
+            $hstsIncludeSubdomains = ($config['hsts_include_subdomains'] ?? true) ? '; includeSubDomains' : '';
+            $response->headers->set('Strict-Transport-Security', "max-age={$hstsMaxAge}{$hstsIncludeSubdomains}; preload");
         }
 
         return $response;
