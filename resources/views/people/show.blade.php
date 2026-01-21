@@ -115,12 +115,52 @@
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $person->full_name }}</h1>
                     @endif
                     <div class="flex flex-wrap gap-2 mt-2">
-                        @foreach($person->tags as $tag)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                  style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}">
-                                {{ $tag->name }}
-                            </span>
-                        @endforeach
+                        @if($isAdmin)
+                            <div x-data="{
+                                showPicker: false,
+                                selectedTags: {{ json_encode($person->tags->pluck('id')->toArray()) }},
+                                allTags: {{ json_encode($tags->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color])) }}
+                            }">
+                                <div class="flex flex-wrap gap-2 items-center">
+                                    <template x-for="tagId in selectedTags" :key="tagId">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer hover:opacity-80"
+                                              :style="'background-color: ' + (allTags.find(t => t.id === tagId)?.color || '#888') + '20; color: ' + (allTags.find(t => t.id === tagId)?.color || '#888')"
+                                              @click="selectedTags = selectedTags.filter(id => id !== tagId)">
+                                            <span x-text="allTags.find(t => t.id === tagId)?.name"></span>
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                            <input type="hidden" name="tags[]" :value="tagId">
+                                        </span>
+                                    </template>
+                                    <button type="button" @click="showPicker = !showPicker"
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        Тег
+                                    </button>
+                                </div>
+                                <div x-show="showPicker" x-cloak @click.outside="showPicker = false"
+                                     class="absolute mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 z-50">
+                                    <template x-for="tag in allTags.filter(t => !selectedTags.includes(t.id))" :key="tag.id">
+                                        <button type="button" @click="selectedTags.push(tag.id); showPicker = false"
+                                                class="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                            <span class="w-3 h-3 rounded-full" :style="'background-color: ' + tag.color"></span>
+                                            <span x-text="tag.name" class="text-gray-900 dark:text-white"></span>
+                                        </button>
+                                    </template>
+                                    <p x-show="allTags.filter(t => !selectedTags.includes(t.id)).length === 0" class="text-xs text-gray-500 px-3 py-1">Всі теги додано</p>
+                                </div>
+                            </div>
+                        @else
+                            @foreach($person->tags as $tag)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                      style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}">
+                                    {{ $tag->name }}
+                                </span>
+                            @endforeach
+                        @endif
                         @if($person->joined_date && $stats['membership_days'] !== null)
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                                 {{ floor($stats['membership_days'] / 365) > 0 ? floor($stats['membership_days'] / 365) . ' р. ' : '' }}{{ $stats['membership_days'] % 365 }} днів в церкві
@@ -576,11 +616,6 @@
     </div>
 
     @if($isAdmin)
-    <!-- Hidden tags to preserve existing values -->
-    @foreach($person->tags as $tag)
-        <input type="hidden" name="tags[]" value="{{ $tag->id }}">
-    @endforeach
-
     <!-- Ministries (Admin editable) -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mt-6">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Команди</h2>
