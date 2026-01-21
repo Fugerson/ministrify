@@ -15,7 +15,7 @@
     }
 }">
     <!-- Tabs -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-2 w-fit">
         <div class="flex flex-wrap gap-1 sm:gap-2">
             <button @click="setTab('general')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'general' }"
