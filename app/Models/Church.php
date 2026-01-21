@@ -54,6 +54,7 @@ class Church extends Model
         'privatbank_card_number',
         'privatbank_auto_sync',
         'privatbank_last_sync',
+        'enabled_currencies',
     ];
 
     protected $casts = [
@@ -69,6 +70,7 @@ class Church extends Model
         'monobank_last_sync' => 'datetime',
         'privatbank_auto_sync' => 'boolean',
         'privatbank_last_sync' => 'datetime',
+        'enabled_currencies' => 'array',
     ];
 
     /**
