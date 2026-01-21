@@ -19,7 +19,7 @@
 @endphp
 
 @section('content')
-<div class="space-y-8" x-data="personProfile()" @change="autoSave()">
+<div class="space-y-8" x-data="personProfile()" @change="autoSave()" @tags-changed.window="autoSave()">
     @if($isAdmin)
     <!-- Auto-save status indicator -->
     <div x-show="saveStatus !== 'idle'" x-cloak
@@ -125,7 +125,7 @@
                                     <template x-for="tagId in selectedTags" :key="tagId">
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer hover:opacity-80"
                                               :style="'background-color: ' + (allTags.find(t => t.id === tagId)?.color || '#888') + '20; color: ' + (allTags.find(t => t.id === tagId)?.color || '#888')"
-                                              @click="selectedTags = selectedTags.filter(id => id !== tagId)">
+                                              @click="selectedTags = selectedTags.filter(id => id !== tagId); $nextTick(() => $dispatch('tags-changed'))">
                                             <span x-text="allTags.find(t => t.id === tagId)?.name"></span>
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -144,7 +144,7 @@
                                 <div x-show="showPicker" x-cloak @click.outside="showPicker = false"
                                      class="absolute mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 z-50 min-w-48">
                                     <template x-for="tag in allTags.filter(t => !selectedTags.includes(t.id))" :key="tag.id">
-                                        <button type="button" @click="selectedTags.push(tag.id); showPicker = false"
+                                        <button type="button" @click="selectedTags.push(tag.id); showPicker = false; $nextTick(() => $dispatch('tags-changed'))"
                                                 class="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                                             <span class="w-3 h-3 rounded-full" :style="'background-color: ' + tag.color"></span>
                                             <span x-text="tag.name" class="text-gray-900 dark:text-white"></span>
