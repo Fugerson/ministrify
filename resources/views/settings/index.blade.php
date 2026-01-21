@@ -3,7 +3,7 @@
 @section('title', 'Налаштування')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-4 md:space-y-6" x-data="{
+<div class="max-w-6xl mx-auto space-y-4 md:space-y-6" x-data="{
     activeTab: new URLSearchParams(window.location.search).get('tab') || localStorage.getItem('settings_tab') || 'general',
     setTab(tab) {
         this.activeTab = tab;
