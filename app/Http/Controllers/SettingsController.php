@@ -7,6 +7,7 @@ use App\Models\ChurchRole;
 use App\Models\ChurchRolePermission;
 use App\Models\TransactionCategory;
 use App\Services\ImageService;
+use App\Services\NbuExchangeRateService;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -333,6 +334,11 @@ class SettingsController extends Controller
         $church->update([
             'enabled_currencies' => $currencies,
         ]);
+
+        // Auto-sync exchange rates if foreign currency enabled
+        if (in_array('USD', $currencies) || in_array('EUR', $currencies)) {
+            app(NbuExchangeRateService::class)->getCurrentRates();
+        }
 
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);

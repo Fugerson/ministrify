@@ -1323,7 +1323,7 @@
                 'USD' => ['symbol' => '$', 'name' => 'Долар США (USD)', 'flag' => '🇺🇸'],
                 'EUR' => ['symbol' => '€', 'name' => 'Євро (EUR)', 'flag' => '🇪🇺'],
             ];
-            $rates = \App\Models\ExchangeRate::getLatestRates();
+            $rates = app(\App\Services\NbuExchangeRateService::class)->getCurrentRates();
         @endphp
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
              x-data="{
