@@ -31,14 +31,16 @@
         </div>
 
         <div>
-            <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль</label>
-            <select name="role" id="role" required
-                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('role') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
-                <option value="volunteer" {{ old('role', $user->role) === 'volunteer' ? 'selected' : '' }}>Служитель</option>
-                <option value="leader" {{ old('role', $user->role) === 'leader' ? 'selected' : '' }}>Лідер</option>
-                <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Адмін</option>
+            <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль</label>
+            <select name="church_role_id" id="church_role_id" required
+                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('church_role_id') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
+                @foreach($churchRoles as $role)
+                <option value="{{ $role->id }}" {{ old('church_role_id', $user->church_role_id) == $role->id ? 'selected' : '' }}>
+                    {{ $role->name }}
+                </option>
+                @endforeach
             </select>
-            @error('role')
+            @error('church_role_id')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>

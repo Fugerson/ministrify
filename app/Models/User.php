@@ -24,9 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role',
         'church_role_id',
-        'permission_overrides',
         'is_super_admin',
         'theme',
         'preferences',
@@ -46,7 +44,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
         'password_set_at' => 'datetime',
         'preferences' => 'array',
-        'permission_overrides' => 'array',
         'onboarding_completed' => 'boolean',
         'onboarding_state' => 'array',
         'onboarding_started_at' => 'datetime',
@@ -86,32 +83,68 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
-        // Check new church role system first
-        if ($this->churchRole?->is_admin_role) {
-            return true;
-        }
-
-        // Fallback to legacy role
-        return $this->role === 'admin';
+        return $this->churchRole?->is_admin_role === true;
     }
 
     public function isLeader(): bool
     {
-        return $this->role === 'leader';
+        // Check if user has a role with 'leader' slug or name contains 'лідер'
+        if (!$this->churchRole) {
+            return false;
+        }
+        return $this->churchRole->slug === 'leader'
+            || str_contains(mb_strtolower($this->churchRole->name), 'лідер');
     }
 
     public function isVolunteer(): bool
     {
-        return $this->role === 'volunteer';
+        // User is volunteer if they have a role that's not admin and not leader
+        if (!$this->churchRole) {
+            return false;
+        }
+        return !$this->isAdmin() && !$this->isLeader();
     }
 
+    /**
+     * Check if user has one of the specified roles
+     * Supports both legacy role names and ChurchRole slugs
+     */
     public function hasRole(string|array $roles): bool
     {
-        if (is_string($roles)) {
-            return $this->role === $roles;
+        if (!$this->churchRole) {
+            return false;
         }
 
-        return in_array($this->role, $roles);
+        $roles = is_array($roles) ? $roles : [$roles];
+
+        foreach ($roles as $role) {
+            // Check by admin status
+            if ($role === 'admin' && $this->isAdmin()) {
+                return true;
+            }
+            // Check by leader status
+            if ($role === 'leader' && $this->isLeader()) {
+                return true;
+            }
+            // Check by volunteer status (any non-admin, non-leader)
+            if ($role === 'volunteer' && $this->isVolunteer()) {
+                return true;
+            }
+            // Check by exact slug match
+            if ($this->churchRole->slug === $role) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get display name for user's role
+     */
+    public function getRoleNameAttribute(): string
+    {
+        return $this->churchRole?->name ?? 'Без ролі';
     }
 
     /**
@@ -127,79 +160,14 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
-        // Check individual permission overrides first
-        $overrides = $this->permission_overrides ?? [];
-        if (isset($overrides[$module])) {
-            // Explicit deny takes priority
-            if (isset($overrides[$module]['deny']) && in_array($action, $overrides[$module]['deny'])) {
-                return false;
-            }
-            // Explicit allow
-            if (isset($overrides[$module]['allow']) && in_array($action, $overrides[$module]['allow'])) {
-                return true;
-            }
-        }
-
-        // New church role system
-        if ($this->church_role_id && $this->churchRole) {
+        // Use ChurchRole permission system
+        if ($this->churchRole) {
             return $this->churchRole->hasPermission($module, $action);
-        }
-
-        // Fallback to legacy role system
-        if ($this->role) {
-            return RolePermission::hasPermission($this->church_id, $this->role, $module, $action);
         }
 
         return false;
     }
 
-    /**
-     * Get all permission overrides for this user
-     */
-    public function getPermissionOverrides(): array
-    {
-        return $this->permission_overrides ?? [];
-    }
-
-    /**
-     * Set permission override for a module
-     */
-    public function setPermissionOverride(string $module, array $allow = [], array $deny = []): void
-    {
-        $overrides = $this->permission_overrides ?? [];
-
-        if (empty($allow) && empty($deny)) {
-            unset($overrides[$module]);
-        } else {
-            $overrides[$module] = [];
-            if (!empty($allow)) {
-                $overrides[$module]['allow'] = $allow;
-            }
-            if (!empty($deny)) {
-                $overrides[$module]['deny'] = $deny;
-            }
-        }
-
-        $this->permission_overrides = $overrides;
-        $this->save();
-    }
-
-    /**
-     * Clear all permission overrides
-     */
-    public function clearPermissionOverrides(): void
-    {
-        $this->permission_overrides = null;
-        $this->save();
-    }
-
-    /**
-     * Check if user has any custom permission overrides
-     */
-    public function hasPermissionOverrides(): bool
-    {
-        return !empty($this->permission_overrides);
-    }
 
     /**
      * Check if user can view module

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\RolePermission;
+use App\Models\ChurchRolePermission;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,18 +19,7 @@ class PermissionService
             return false;
         }
 
-        // Super admin can do everything
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        // Get church from user
-        $churchId = $user->church_id;
-        if (!$churchId) {
-            return false;
-        }
-
-        return RolePermission::hasPermission($churchId, $user->role, $module, $action);
+        return $user->hasPermission($module, $action);
     }
 
     /**
@@ -77,15 +66,14 @@ class PermissionService
         }
 
         if ($user->isSuperAdmin()) {
-            return array_keys(RolePermission::MODULES);
+            return array_keys(ChurchRolePermission::MODULES);
         }
 
-        $churchId = $user->church_id;
-        if (!$churchId) {
+        if (!$user->churchRole) {
             return [];
         }
 
-        $permissions = RolePermission::getAllForRole($churchId, $user->role);
+        $permissions = $user->churchRole->getAllPermissions();
 
         return array_keys(array_filter($permissions, fn($perms) => in_array('view', $perms)));
     }
@@ -95,15 +83,6 @@ class PermissionService
      */
     public function userCan(User $user, string $module, string $action): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        $churchId = $user->church_id;
-        if (!$churchId) {
-            return false;
-        }
-
-        return RolePermission::hasPermission($churchId, $user->role, $module, $action);
+        return $user->hasPermission($module, $action);
     }
 }

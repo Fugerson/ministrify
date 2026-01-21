@@ -48,12 +48,16 @@
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">{{ $user->email }}</td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                {{ $user->role === 'admin' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' : '' }}
-                                {{ $user->role === 'leader' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' : '' }}
-                                {{ $user->role === 'volunteer' ? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300' : '' }}">
-                                {{ $user->role === 'admin' ? 'Адмін' : ($user->role === 'leader' ? 'Лідер' : 'Служитель') }}
+                            @if($user->churchRole)
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                  style="background-color: {{ $user->churchRole->color }}20; color: {{ $user->churchRole->color }}">
+                                {{ $user->churchRole->name }}
                             </span>
+                            @else
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                Без ролі
+                            </span>
+                            @endif
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
                             <span class="inline-flex items-center text-sm text-green-600 dark:text-green-400">

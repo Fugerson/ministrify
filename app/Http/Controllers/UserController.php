@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChurchRole;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -17,7 +18,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::where('church_id', $this->getCurrentChurch()->id)
-            ->with('person')
+            ->with(['person', 'churchRole'])
             ->orderBy('name')
             ->get();
 
@@ -32,19 +33,23 @@ class UserController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        return view('settings.users.create', compact('people'));
+        $churchRoles = ChurchRole::where('church_id', $church->id)
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('settings.users.create', compact('people', 'churchRoles'));
     }
 
     public function store(Request $request)
     {
+        $church = $this->getCurrentChurch();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => ['required', Rule::in(['admin', 'leader', 'volunteer'])],
+            'church_role_id' => ['required', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
             'person_id' => 'nullable|exists:people,id',
         ]);
-
-        $church = $this->getCurrentChurch();
 
         // Generate secure random password (user will reset via email)
         $password = Str::random(32);
@@ -54,7 +59,7 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($password),
-            'role' => $validated['role'],
+            'church_role_id' => $validated['church_role_id'],
         ]);
 
         // Link to person if provided
@@ -93,17 +98,23 @@ class UserController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        return view('settings.users.edit', compact('user', 'people'));
+        $churchRoles = ChurchRole::where('church_id', $church->id)
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('settings.users.edit', compact('user', 'people', 'churchRoles'));
     }
 
     public function update(Request $request, User $user)
     {
         $this->authorizeChurch($user);
 
+        $church = $this->getCurrentChurch();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'role' => ['required', Rule::in(['admin', 'leader', 'volunteer'])],
+            'church_role_id' => ['required', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
             'person_id' => 'nullable|exists:people,id',
             'password' => ['nullable', 'string', 'min:10', new SecurePassword],
         ]);
@@ -111,7 +122,7 @@ class UserController extends Controller
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'role' => $validated['role'],
+            'church_role_id' => $validated['church_role_id'],
         ]);
 
         if (!empty($validated['password'])) {
@@ -119,8 +130,6 @@ class UserController extends Controller
         }
 
         // Update person link
-        $church = $this->getCurrentChurch();
-
         // Remove old link
         Person::where('user_id', $user->id)->update(['user_id' => null]);
 

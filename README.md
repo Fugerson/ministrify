@@ -36,7 +36,7 @@ docker-compose up -d
 
 ```bash
 docker-compose exec app composer install
-```
+``` 
 
 ### 5. Згенеруйте ключ додатку
 
