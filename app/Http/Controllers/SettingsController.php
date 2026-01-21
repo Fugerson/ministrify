@@ -23,7 +23,6 @@ class SettingsController extends Controller
     public function index()
     {
         $church = $this->getCurrentChurch();
-        $expenseCategories = $church->expenseCategories;
         $tags = $church->tags;
         $users = $church->users()->with(['person', 'churchRole'])->get();
         $ministries = $church->ministries()->orderBy('name')->get();
@@ -63,7 +62,7 @@ class SettingsController extends Controller
         $permissionActions = ChurchRolePermission::ACTIONS;
 
         return view('settings.index', compact(
-            'church', 'expenseCategories', 'tags', 'users', 'ministries',
+            'church', 'tags', 'users', 'ministries',
             'transactionCategories', 'auditLogs', 'churchRoles', 'rolesJson',
             'permissionModules', 'permissionActions'
         ));

@@ -1159,40 +1159,6 @@
         </div>
     </div>
 
-    <!-- Expense categories -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Категорії витрат</h2>
-        </div>
-
-        <div class="p-6">
-            <div class="space-y-2 mb-4">
-                @foreach($expenseCategories as $category)
-                    <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                        <span class="text-gray-900 dark:text-white">{{ $category->name }}</span>
-                        <form method="POST" action="{{ route('settings.expense-categories.destroy', $category) }}"
-                              onsubmit="return confirm('Видалити категорію?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
-                                Видалити
-                            </button>
-                        </form>
-                    </div>
-                @endforeach
-            </div>
-
-            <form method="POST" action="{{ route('settings.expense-categories.store') }}" class="flex gap-2">
-                @csrf
-                <input type="text" name="name" placeholder="Нова категорія" required
-                       class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">
-                    Додати
-                </button>
-            </form>
-        </div>
-    </div>
-
     <!-- Tags -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mt-6">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
