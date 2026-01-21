@@ -87,6 +87,10 @@ class SettingsController extends Controller
 
         $church->update($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Налаштування церкви оновлено.');
     }
 
@@ -302,6 +306,10 @@ class SettingsController extends Controller
             'initial_balance' => $validated['initial_balance'],
             'initial_balance_date' => $validated['initial_balance_date'],
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Початковий баланс оновлено.');
     }

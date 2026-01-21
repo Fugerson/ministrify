@@ -68,50 +68,99 @@
     <!-- General Tab -->
     <div x-show="activeTab === 'general'" x-cloak class="space-y-6">
     <!-- Church settings -->
-    <form method="POST" action="{{ route('settings.church') }}" enctype="multipart/form-data" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        @csrf
-        @method('PUT')
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="{
+             name: '{{ addslashes($church->name) }}',
+             city: '{{ addslashes($church->city) }}',
+             address: '{{ addslashes($church->address ?? '') }}',
+             saving: false,
+             saved: false,
+             timeout: null,
+             save() {
+                 if (!this.name.trim() || !this.city.trim()) return;
+                 this.saving = true;
+                 this.saved = false;
+                 fetch('{{ route('settings.church') }}', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                         'Accept': 'application/json'
+                     },
+                     body: JSON.stringify({
+                         _method: 'PUT',
+                         name: this.name,
+                         city: this.city,
+                         address: this.address
+                     })
+                 }).then(r => r.json()).then(() => {
+                     this.saving = false;
+                     this.saved = true;
+                     setTimeout(() => this.saved = false, 2000);
+                 }).catch(() => {
+                     this.saving = false;
+                 });
+             },
+             debounceSave() {
+                 clearTimeout(this.timeout);
+                 this.timeout = setTimeout(() => this.save(), 500);
+             }
+         }">
 
-        <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Основна інформація</h2>
+            <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
+            <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">Збереження...</span>
         </div>
 
         <div class="p-4 md:p-6 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
-                    <input type="text" name="name" id="name" value="{{ old('name', $church->name) }}" required
+                    <input type="text" id="name" x-model="name" @input="debounceSave()" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 </div>
 
                 <div>
                     <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Місто *</label>
-                    <input type="text" name="city" id="city" value="{{ old('city', $church->city) }}" required
+                    <input type="text" id="city" x-model="city" @input="debounceSave()" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 </div>
             </div>
 
             <div>
                 <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Адреса</label>
-                <input type="text" name="address" id="address" value="{{ old('address', $church->address) }}"
-                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-            </div>
-
-            <div>
-                <label for="logo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Логотип</label>
-                @if($church->logo)
-                    <div class="mb-2">
-                        <img src="{{ Storage::url($church->logo) }}" alt="{{ $church->name }} логотип" class="w-16 h-16 object-contain rounded-lg">
-                    </div>
-                @endif
-                <input type="file" name="logo" id="logo" accept="image/*"
+                <input type="text" id="address" x-model="address" @input="debounceSave()"
                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             </div>
         </div>
+    </div>
+
+    <!-- Logo upload (separate form) -->
+    <form method="POST" action="{{ route('settings.church') }}" enctype="multipart/form-data" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="name" value="{{ $church->name }}">
+        <input type="hidden" name="city" value="{{ $church->city }}">
+        <input type="hidden" name="address" value="{{ $church->address }}">
+
+        <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Логотип</h2>
+        </div>
+
+        <div class="p-4 md:p-6">
+            @if($church->logo)
+                <div class="mb-3">
+                    <img src="{{ Storage::url($church->logo) }}" alt="{{ $church->name }} логотип" class="w-16 h-16 object-contain rounded-lg">
+                </div>
+            @endif
+            <input type="file" name="logo" id="logo" accept="image/*"
+                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+        </div>
 
         <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                Зберегти
+            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Завантажити логотип
             </button>
         </div>
     </form>
@@ -1203,20 +1252,59 @@
     <!-- Finance Tab -->
     <div x-show="activeTab === 'finance'" x-cloak class="space-y-6">
         <!-- Initial Balance -->
-        <form method="POST" action="{{ route('settings.finance') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
-            @method('PUT')
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+             x-data="{
+                 initialBalance: {{ $church->initial_balance ?? 0 }},
+                 initialBalanceDate: '{{ $church->initial_balance_date?->format('Y-m-d') ?? now()->format('Y-m-d') }}',
+                 saving: false,
+                 saved: false,
+                 timeout: null,
+                 save() {
+                     if (!this.initialBalance || !this.initialBalanceDate) return;
+                     this.saving = true;
+                     this.saved = false;
+                     fetch('{{ route('settings.finance') }}', {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                             'Accept': 'application/json'
+                         },
+                         body: JSON.stringify({
+                             _method: 'PUT',
+                             initial_balance: this.initialBalance,
+                             initial_balance_date: this.initialBalanceDate
+                         })
+                     }).then(r => r.json()).then(() => {
+                         this.saving = false;
+                         this.saved = true;
+                         setTimeout(() => this.saved = false, 2000);
+                     }).catch(() => {
+                         this.saving = false;
+                     });
+                 },
+                 debounceSave() {
+                     clearTimeout(this.timeout);
+                     this.timeout = setTimeout(() => this.save(), 500);
+                 }
+             }">
 
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Початковий баланс</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Вкажіть баланс церкви на момент початку обліку</p>
+                        </div>
                     </div>
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Початковий баланс</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Вкажіть баланс церкви на момент початку обліку</p>
+                        <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
+                        <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">Збереження...</span>
                     </div>
                 </div>
             </div>
@@ -1233,27 +1321,21 @@
                     <div>
                         <label for="initial_balance" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума балансу *</label>
                         <div class="relative">
-                            <input type="number" name="initial_balance" id="initial_balance" step="0.01" min="0" required
-                                   value="{{ old('initial_balance', $church->initial_balance ?? 0) }}"
+                            <input type="number" id="initial_balance" step="0.01" min="0" required
+                                   x-model="initialBalance" @input="debounceSave()"
                                    class="w-full px-3 py-2 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                    placeholder="0.00">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 dark:text-gray-400 text-sm">грн</span>
                             </div>
                         </div>
-                        @error('initial_balance')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     <div>
                         <label for="initial_balance_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата балансу *</label>
-                        <input type="date" name="initial_balance_date" id="initial_balance_date" required
-                               value="{{ old('initial_balance_date', $church->initial_balance_date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}"
+                        <input type="date" id="initial_balance_date" required
+                               x-model="initialBalanceDate" @change="save()"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                        @error('initial_balance_date')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
                     </div>
                 </div>
 
@@ -1281,13 +1363,7 @@
                 </div>
                 @endif
             </div>
-
-            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                    Зберегти баланс
-                </button>
-            </div>
-        </form>
+        </div>
 
         <!-- Currency Settings -->
         <form method="POST" action="{{ route('settings.currencies') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
