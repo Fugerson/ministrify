@@ -1316,11 +1316,52 @@
         </div>
 
         <!-- Currency Settings -->
-        <form method="POST" action="{{ route('settings.currencies') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
-            @method('PUT')
+        @php
+            $enabledCurrencies = $church->enabled_currencies ?? ['UAH'];
+            $allCurrencies = [
+                'UAH' => ['symbol' => '₴', 'name' => 'Гривня (UAH)', 'flag' => '🇺🇦'],
+                'USD' => ['symbol' => '$', 'name' => 'Долар США (USD)', 'flag' => '🇺🇸'],
+                'EUR' => ['symbol' => '€', 'name' => 'Євро (EUR)', 'flag' => '🇪🇺'],
+            ];
+            $rates = \App\Models\ExchangeRate::getLatestRates();
+        @endphp
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+             x-data="{
+                 currencies: {{ json_encode($enabledCurrencies) }},
+                 saving: false,
+                 saved: false,
+                 save() {
+                     this.saving = true;
+                     this.saved = false;
+                     fetch('{{ route('settings.currencies') }}', {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                             'Accept': 'application/json'
+                         },
+                         body: JSON.stringify({
+                             _method: 'PUT',
+                             currencies: this.currencies
+                         })
+                     }).then(r => r.json()).then(() => {
+                         this.saving = false;
+                         this.saved = true;
+                         setTimeout(() => this.saved = false, 2000);
+                     }).catch(() => this.saving = false);
+                 },
+                 toggle(code) {
+                     if (code === 'UAH') return;
+                     if (this.currencies.includes(code)) {
+                         this.currencies = this.currencies.filter(c => c !== code);
+                     } else {
+                         this.currencies.push(code);
+                     }
+                     this.save();
+                 }
+             }">
 
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
                         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1332,6 +1373,10 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть валюти для обліку доходів та витрат</p>
                     </div>
                 </div>
+                <div>
+                    <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
+                    <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">Збереження...</span>
+                </div>
             </div>
 
             <div class="p-6 space-y-4">
@@ -1342,25 +1387,15 @@
                     </p>
                 </div>
 
-                @php
-                    $enabledCurrencies = $church->enabled_currencies ?? ['UAH'];
-                    $allCurrencies = [
-                        'UAH' => ['symbol' => '₴', 'name' => 'Гривня (UAH)', 'flag' => '🇺🇦'],
-                        'USD' => ['symbol' => '$', 'name' => 'Долар США (USD)', 'flag' => '🇺🇸'],
-                        'EUR' => ['symbol' => '€', 'name' => 'Євро (EUR)', 'flag' => '🇪🇺'],
-                    ];
-                @endphp
-
                 <div class="space-y-3">
                     @foreach($allCurrencies as $code => $currency)
-                    <label class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $code === 'UAH' ? 'bg-gray-50 dark:bg-gray-700/30' : '' }}">
-                        <input type="checkbox" name="currencies[]" value="{{ $code }}"
-                               {{ in_array($code, $enabledCurrencies) ? 'checked' : '' }}
-                               {{ $code === 'UAH' ? 'checked disabled' : '' }}
-                               class="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                        @if($code === 'UAH')
-                            <input type="hidden" name="currencies[]" value="UAH">
-                        @endif
+                    <label class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                           :class="{ 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800': currencies.includes('{{ $code }}') }"
+                           @click.prevent="toggle('{{ $code }}')">
+                        <input type="checkbox" value="{{ $code }}"
+                               :checked="currencies.includes('{{ $code }}')"
+                               {{ $code === 'UAH' ? 'disabled' : '' }}
+                               class="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500 pointer-events-none">
                         <span class="ml-3 text-2xl">{{ $currency['flag'] }}</span>
                         <div class="ml-3 flex-1">
                             <span class="block text-sm font-medium text-gray-900 dark:text-white">{{ $currency['name'] }}</span>
@@ -1373,16 +1408,12 @@
                     @endforeach
                 </div>
 
-                @if(count($enabledCurrencies) > 1)
-                <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg" x-show="currencies.length > 1">
                     <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Поточні курси НБУ</h4>
                     <div class="flex flex-wrap gap-4">
-                        @php
-                            $rates = \App\Models\ExchangeRate::getLatestRates();
-                        @endphp
                         @foreach(['USD', 'EUR'] as $code)
-                            @if(in_array($code, $enabledCurrencies) && isset($rates[$code]))
-                            <div class="flex items-center gap-2">
+                            @if(isset($rates[$code]))
+                            <div class="flex items-center gap-2" x-show="currencies.includes('{{ $code }}')">
                                 <span class="text-lg">{{ $allCurrencies[$code]['flag'] }}</span>
                                 <span class="text-sm text-gray-600 dark:text-gray-400">1 {{ $code }} =</span>
                                 <span class="font-semibold text-gray-900 dark:text-white">{{ number_format($rates[$code], 2, ',', ' ') }} ₴</span>
@@ -1391,15 +1422,8 @@
                         @endforeach
                     </div>
                 </div>
-                @endif
             </div>
-
-            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                    Зберегти валюти
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
 
     <!-- Users Tab -->

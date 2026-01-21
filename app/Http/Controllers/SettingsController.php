@@ -334,6 +334,10 @@ class SettingsController extends Controller
             'enabled_currencies' => $currencies,
         ]);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Налаштування валют оновлено.');
     }
 
