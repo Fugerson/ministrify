@@ -136,16 +136,15 @@
         </div>
     </div>
 
-    <!-- Logo upload (separate form) -->
-    <form method="POST" action="{{ route('settings.church') }}" enctype="multipart/form-data" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        @csrf
-        @method('PUT')
-        <input type="hidden" name="name" value="{{ $church->name }}">
-        <input type="hidden" name="city" value="{{ $church->city }}">
-        <input type="hidden" name="address" value="{{ $church->address }}">
-
-        <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <!-- Logo upload -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="{ uploading: false, saved: false }">
+        <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Логотип</h2>
+            <div>
+                <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
+                <span x-show="uploading" class="text-sm text-gray-500 dark:text-gray-400">Завантаження...</span>
+            </div>
         </div>
 
         <div class="p-4 md:p-6">
@@ -154,16 +153,31 @@
                     <img src="{{ Storage::url($church->logo) }}" alt="{{ $church->name }} логотип" class="w-16 h-16 object-contain rounded-lg">
                 </div>
             @endif
-            <input type="file" name="logo" id="logo" accept="image/*"
+            <input type="file" accept="image/*"
+                   @change="
+                       if ($event.target.files.length) {
+                           uploading = true;
+                           saved = false;
+                           const formData = new FormData();
+                           formData.append('_method', 'PUT');
+                           formData.append('name', '{{ addslashes($church->name) }}');
+                           formData.append('city', '{{ addslashes($church->city) }}');
+                           formData.append('address', '{{ addslashes($church->address ?? '') }}');
+                           formData.append('logo', $event.target.files[0]);
+                           fetch('{{ route('settings.church') }}', {
+                               method: 'POST',
+                               headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                               body: formData
+                           }).then(() => {
+                               uploading = false;
+                               saved = true;
+                               setTimeout(() => location.reload(), 500);
+                           }).catch(() => uploading = false);
+                       }
+                   "
                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
         </div>
-
-        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                Завантажити логотип
-            </button>
-        </div>
-    </form>
+    </div>
 
     <!-- Onboarding -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
