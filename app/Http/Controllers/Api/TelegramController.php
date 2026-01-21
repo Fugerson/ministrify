@@ -185,11 +185,6 @@ class TelegramController extends Controller
             }
         }
 
-        // Notify admins about unknown user
-        if (!$person && str_starts_with($text, '/start')) {
-            $this->notifyAdminsAboutUnknownUser($username, $firstName, $lastName, $chatId);
-        }
-
         // Handle commands
         if (str_starts_with($text, '/')) {
             return $this->handleCommand($text, $chatId, $person, $wasJustLinked);
@@ -339,33 +334,6 @@ class TelegramController extends Controller
         }
     }
 
-    private function notifyAdminsAboutUnknownUser(?string $username, string $firstName, string $lastName, string $chatId): void
-    {
-        // Notify all super admins
-        $superAdmins = User::where('is_super_admin', true)
-            ->whereHas('person', fn($q) => $q->whereNotNull('telegram_chat_id'))
-            ->with('person')
-            ->get();
-
-        $fullName = trim("{$firstName} {$lastName}");
-        $usernameText = $username ? "@{$username}" : "без username";
-
-        $message = "👋 <b>Новий користувач бота</b>\n\n"
-            . "👤 {$fullName}\n"
-            . "📱 {$usernameText}\n"
-            . "🆔 Chat ID: {$chatId}\n\n"
-            . "Користувач не знайдений в системі.";
-
-        foreach ($superAdmins as $admin) {
-            if ($admin->person?->telegram_chat_id) {
-                try {
-                    $this->telegram()->sendMessage($admin->person->telegram_chat_id, $message);
-                } catch (\Exception $e) {
-                    logger()->error('Failed to notify super admin', ['error' => $e->getMessage()]);
-                }
-            }
-        }
-    }
 
     private function saveMessage(Person $person, string $text, ?int $telegramMessageId = null): void
     {
