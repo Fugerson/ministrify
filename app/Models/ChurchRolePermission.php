@@ -17,29 +17,97 @@ class ChurchRolePermission extends Model
         'actions' => 'array',
     ];
 
-    // Available modules (same as RolePermission)
+    // Available modules with their allowed actions
     public const MODULES = [
-        'dashboard' => ['label' => 'Головна', 'icon' => 'home'],
-        'people' => ['label' => 'Люди', 'icon' => 'users'],
-        'groups' => ['label' => 'Домашні групи', 'icon' => 'user-group'],
-        'ministries' => ['label' => 'Служіння', 'icon' => 'heart'],
-        'events' => ['label' => 'Розклад', 'icon' => 'calendar'],
-        'finances' => ['label' => 'Фінанси', 'icon' => 'currency-dollar'],
-        'reports' => ['label' => 'Звіти', 'icon' => 'chart-bar'],
-        'resources' => ['label' => 'Ресурси', 'icon' => 'folder'],
-        'boards' => ['label' => 'Дошки завдань', 'icon' => 'view-boards'],
-        'announcements' => ['label' => 'Комунікації', 'icon' => 'speakerphone'],
-        'website' => ['label' => 'Веб-сайт', 'icon' => 'globe'],
-        'settings' => ['label' => 'Налаштування', 'icon' => 'cog'],
+        'dashboard' => [
+            'label' => 'Головна',
+            'icon' => 'home',
+            'actions' => ['view'],
+            'description' => 'Статистика та огляд',
+        ],
+        'people' => [
+            'label' => 'Люди',
+            'icon' => 'users',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Члени церкви, гості, контакти',
+        ],
+        'groups' => [
+            'label' => 'Домашні групи',
+            'icon' => 'user-group',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Малі групи та їх учасники',
+        ],
+        'ministries' => [
+            'label' => 'Служіння',
+            'icon' => 'heart',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Служіння та команди',
+        ],
+        'events' => [
+            'label' => 'Розклад',
+            'icon' => 'calendar',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Події, богослужіння, зустрічі',
+        ],
+        'finances' => [
+            'label' => 'Фінанси',
+            'icon' => 'currency-dollar',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Доходи, витрати, пожертви',
+        ],
+        'reports' => [
+            'label' => 'Звіти',
+            'icon' => 'chart-bar',
+            'actions' => ['view'],
+            'description' => 'Аналітика та статистика',
+        ],
+        'resources' => [
+            'label' => 'Ресурси',
+            'icon' => 'folder',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Файли та документи',
+        ],
+        'boards' => [
+            'label' => 'Дошки завдань',
+            'icon' => 'view-boards',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Kanban дошки та завдання',
+        ],
+        'announcements' => [
+            'label' => 'Комунікації',
+            'icon' => 'speakerphone',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Оголошення та повідомлення',
+        ],
+        'website' => [
+            'label' => 'Веб-сайт',
+            'icon' => 'globe',
+            'actions' => ['view', 'edit'],
+            'description' => 'Публічний сайт церкви',
+        ],
+        'settings' => [
+            'label' => 'Налаштування',
+            'icon' => 'cog',
+            'actions' => ['view', 'edit'],
+            'description' => 'Налаштування церкви',
+        ],
     ];
 
-    // Available actions
+    // All possible actions (for reference)
     public const ACTIONS = [
         'view' => 'Переглядати',
         'create' => 'Створювати',
         'edit' => 'Редагувати',
         'delete' => 'Видаляти',
     ];
+
+    /**
+     * Get allowed actions for a specific module
+     */
+    public static function getAllowedActions(string $module): array
+    {
+        return self::MODULES[$module]['actions'] ?? [];
+    }
 
     public function churchRole(): BelongsTo
     {

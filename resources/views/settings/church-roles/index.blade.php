@@ -194,13 +194,21 @@
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 <template x-for="(module, key) in modules" :key="key">
                                     <tr>
-                                        <td class="py-2 text-gray-700 dark:text-gray-300" x-text="module.label"></td>
+                                        <td class="py-2">
+                                            <div class="text-gray-700 dark:text-gray-300" x-text="module.label"></div>
+                                            <div class="text-xs text-gray-400 dark:text-gray-500" x-text="module.description"></div>
+                                        </td>
                                         <template x-for="action in ['view', 'create', 'edit', 'delete']" :key="action">
                                             <td class="py-2 text-center">
-                                                <input type="checkbox"
-                                                       :checked="permissions[key]?.includes(action)"
-                                                       @change="togglePermission(key, action)"
-                                                       class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                                <template x-if="module.actions?.includes(action)">
+                                                    <input type="checkbox"
+                                                           :checked="permissions[key]?.includes(action)"
+                                                           @change="togglePermission(key, action)"
+                                                           class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                                </template>
+                                                <template x-if="!module.actions?.includes(action)">
+                                                    <span class="text-gray-300 dark:text-gray-600">—</span>
+                                                </template>
                                             </td>
                                         </template>
                                     </tr>
@@ -243,20 +251,7 @@ function churchRolesManager() {
         permissionsRoleName: '',
         permissions: {},
         savingPermissions: false,
-        modules: {
-            dashboard: { label: 'Головна' },
-            people: { label: 'Люди' },
-            groups: { label: 'Домашні групи' },
-            ministries: { label: 'Команди' },
-            events: { label: 'Розклад' },
-            finances: { label: 'Фінанси' },
-            reports: { label: 'Звіти' },
-            resources: { label: 'Ресурси' },
-            boards: { label: 'Дошки завдань' },
-            announcements: { label: 'Комунікації' },
-            website: { label: 'Веб-сайт' },
-            settings: { label: 'Налаштування' }
-        },
+        modules: @json(\App\Models\ChurchRolePermission::MODULES),
 
         init() {
             this.$nextTick(() => this.initSortable());

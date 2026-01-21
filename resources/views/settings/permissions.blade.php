@@ -166,6 +166,7 @@
                             </td>
                             @foreach($actions as $actionKey => $actionLabel)
                             <td class="py-4 text-center">
+                                @if(in_array($actionKey, $module['actions'] ?? []))
                                 <label class="inline-flex items-center justify-center">
                                     <template x-if="isCurrentRoleAdmin()">
                                         <input type="checkbox" checked disabled
@@ -179,6 +180,9 @@
                                                class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:bg-gray-700">
                                     </template>
                                 </label>
+                                @else
+                                <span class="text-gray-300 dark:text-gray-600">—</span>
+                                @endif
                             </td>
                             @endforeach
                         </tr>
@@ -429,7 +433,8 @@
 
 <script>
 function permissionsManager() {
-    const modules = @json(array_keys($modules));
+    const moduleKeys = @json(array_keys($modules));
+    const modulesConfig = @json($modules);
 
     return {
         currentRoleId: {{ $churchRoles->first()?->id ?? 0 }},
@@ -455,7 +460,7 @@ function permissionsManager() {
 
         initEmptyUserOverrides() {
             this.userOverrides = {};
-            modules.forEach(module => {
+            moduleKeys.forEach(module => {
                 this.userOverrides[module] = { allow: [], deny: [] };
             });
         },
@@ -470,21 +475,25 @@ function permissionsManager() {
 
         // Bulk selection methods
         selectAll() {
-            modules.forEach(module => {
-                this.rolePermissions[this.currentRoleId][module] = ['view', 'create', 'edit', 'delete'];
+            moduleKeys.forEach(module => {
+                const allowedActions = modulesConfig[module]?.actions || [];
+                this.rolePermissions[this.currentRoleId][module] = [...allowedActions];
             });
             this.markDirty();
         },
 
         selectNone() {
-            modules.forEach(module => {
+            moduleKeys.forEach(module => {
                 this.rolePermissions[this.currentRoleId][module] = [];
             });
             this.markDirty();
         },
 
         selectColumn(action) {
-            modules.forEach(module => {
+            moduleKeys.forEach(module => {
+                const allowedActions = modulesConfig[module]?.actions || [];
+                if (!allowedActions.includes(action)) return; // Skip if action not allowed for this module
+
                 const perms = this.rolePermissions[this.currentRoleId][module] || [];
                 if (!perms.includes(action)) {
                     this.rolePermissions[this.currentRoleId][module] = [...perms, action];
@@ -494,18 +503,19 @@ function permissionsManager() {
         },
 
         toggleColumn(action) {
-            const allHave = modules.every(module => {
+            // Only consider modules that have this action
+            const relevantModules = moduleKeys.filter(m => (modulesConfig[m]?.actions || []).includes(action));
+
+            const allHave = relevantModules.every(module => {
                 const perms = this.rolePermissions[this.currentRoleId][module] || [];
                 return perms.includes(action);
             });
 
-            modules.forEach(module => {
+            relevantModules.forEach(module => {
                 let perms = this.rolePermissions[this.currentRoleId][module] || [];
                 if (allHave) {
-                    // Remove action from all
                     this.rolePermissions[this.currentRoleId][module] = perms.filter(p => p !== action);
                 } else {
-                    // Add action to all
                     if (!perms.includes(action)) {
                         this.rolePermissions[this.currentRoleId][module] = [...perms, action];
                     }
@@ -515,18 +525,21 @@ function permissionsManager() {
         },
 
         selectViewOnly() {
-            modules.forEach(module => {
-                this.rolePermissions[this.currentRoleId][module] = ['view'];
+            moduleKeys.forEach(module => {
+                const allowedActions = modulesConfig[module]?.actions || [];
+                this.rolePermissions[this.currentRoleId][module] = allowedActions.includes('view') ? ['view'] : [];
             });
             this.markDirty();
         },
 
         toggleRow(module) {
+            const allowedActions = modulesConfig[module]?.actions || [];
             const perms = this.rolePermissions[this.currentRoleId][module] || [];
-            if (perms.length === 4) {
+
+            if (perms.length === allowedActions.length) {
                 this.rolePermissions[this.currentRoleId][module] = [];
             } else {
-                this.rolePermissions[this.currentRoleId][module] = ['view', 'create', 'edit', 'delete'];
+                this.rolePermissions[this.currentRoleId][module] = [...allowedActions];
             }
             this.markDirty();
         },
