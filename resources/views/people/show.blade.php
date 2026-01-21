@@ -142,7 +142,7 @@
                                     </button>
                                 </div>
                                 <div x-show="showPicker" x-cloak @click.outside="showPicker = false"
-                                     class="absolute mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 z-50">
+                                     class="absolute mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 z-50 min-w-48">
                                     <template x-for="tag in allTags.filter(t => !selectedTags.includes(t.id))" :key="tag.id">
                                         <button type="button" @click="selectedTags.push(tag.id); showPicker = false"
                                                 class="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
@@ -150,7 +150,15 @@
                                             <span x-text="tag.name" class="text-gray-900 dark:text-white"></span>
                                         </button>
                                     </template>
-                                    <p x-show="allTags.filter(t => !selectedTags.includes(t.id)).length === 0" class="text-xs text-gray-500 px-3 py-1">Всі теги додано</p>
+                                    <template x-if="allTags.length === 0">
+                                        <a href="{{ route('settings.index', ['tab' => 'data']) }}" class="flex items-center gap-2 px-3 py-1.5 text-sm text-primary-600 hover:text-primary-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Створити теги в налаштуваннях
+                                        </a>
+                                    </template>
+                                    <p x-show="allTags.length > 0 && allTags.filter(t => !selectedTags.includes(t.id)).length === 0" class="text-xs text-gray-500 px-3 py-1">Всі теги додано</p>
                                 </div>
                             </div>
                         @else
