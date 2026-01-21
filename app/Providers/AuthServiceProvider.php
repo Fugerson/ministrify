@@ -2,21 +2,31 @@
 
 namespace App\Providers;
 
+use App\Models\Attendance;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Ministry;
 use App\Models\Person;
+use App\Models\Transaction;
 use App\Models\User;
+use App\Policies\AttendancePolicy;
 use App\Policies\EventPolicy;
 use App\Policies\GroupPolicy;
+use App\Policies\MinistryPolicy;
+use App\Policies\PersonPolicy;
+use App\Policies\TransactionPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
+        Attendance::class => AttendancePolicy::class,
         Event::class => EventPolicy::class,
         Group::class => GroupPolicy::class,
+        Ministry::class => MinistryPolicy::class,
+        Person::class => PersonPolicy::class,
+        Transaction::class => TransactionPolicy::class,
     ];
 
     public function boot(): void

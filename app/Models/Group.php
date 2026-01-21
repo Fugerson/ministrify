@@ -14,6 +14,11 @@ class Group extends Model
 {
     use HasFactory, SoftDeletes, Auditable;
 
+    /**
+     * Cached computed attributes to prevent N+1 queries
+     */
+    protected array $computedCache = [];
+
     public const STATUS_ACTIVE = 'active';
     public const STATUS_PAUSED = 'paused';
     public const STATUS_VACATION = 'vacation';
@@ -127,30 +132,92 @@ class Group extends Model
         return $this->hasMany(GroupAttendance::class);
     }
 
+    /**
+     * Get last attendance (memoized)
+     */
     public function getLastAttendanceAttribute(): ?Attendance
     {
-        return $this->attendances()->orderByDesc('date')->first();
+        if (array_key_exists('last_attendance', $this->computedCache)) {
+            return $this->computedCache['last_attendance'];
+        }
+        return $this->computedCache['last_attendance'] = $this->attendances()->orderByDesc('date')->first();
     }
 
+    /**
+     * Get average attendance (memoized)
+     */
     public function getAverageAttendanceAttribute(): float
     {
-        $attendances = $this->attendances()->take(10)->get();
-        if ($attendances->isEmpty()) return 0;
+        if (isset($this->computedCache['average_attendance'])) {
+            return $this->computedCache['average_attendance'];
+        }
 
-        return round($attendances->avg('members_present'), 1);
+        $attendances = $this->attendances()->take(10)->get();
+        if ($attendances->isEmpty()) return $this->computedCache['average_attendance'] = 0;
+
+        return $this->computedCache['average_attendance'] = round($attendances->avg('members_present'), 1);
     }
 
+    /**
+     * Get attendance trend (memoized)
+     */
     public function getAttendanceTrendAttribute(): string
     {
+        if (isset($this->computedCache['attendance_trend'])) {
+            return $this->computedCache['attendance_trend'];
+        }
+
         $recent = $this->attendances()->orderByDesc('date')->take(4)->pluck('members_present')->reverse()->values();
-        if ($recent->count() < 2) return 'stable';
+        if ($recent->count() < 2) return $this->computedCache['attendance_trend'] = 'stable';
 
         $first = $recent->take(2)->avg();
         $last = $recent->skip(2)->avg() ?: $recent->last();
 
-        if ($last > $first * 1.1) return 'up';
-        if ($last < $first * 0.9) return 'down';
-        return 'stable';
+        if ($last > $first * 1.1) return $this->computedCache['attendance_trend'] = 'up';
+        if ($last < $first * 0.9) return $this->computedCache['attendance_trend'] = 'down';
+        return $this->computedCache['attendance_trend'] = 'stable';
+    }
+
+    /**
+     * Batch load attendance stats for a collection of groups (prevents N+1)
+     */
+    public static function loadAttendanceStats(\Illuminate\Support\Collection $groups): void
+    {
+        if ($groups->isEmpty()) return;
+
+        $groupIds = $groups->pluck('id');
+
+        // Load last 10 attendances for each group in one query
+        $attendances = Attendance::whereIn('attendable_id', $groupIds)
+            ->where('attendable_type', self::class)
+            ->orderByDesc('date')
+            ->get()
+            ->groupBy('attendable_id');
+
+        foreach ($groups as $group) {
+            $groupAttendances = $attendances->get($group->id, collect())->take(10);
+
+            $group->computedCache['last_attendance'] = $groupAttendances->first();
+            $group->computedCache['average_attendance'] = $groupAttendances->isEmpty()
+                ? 0
+                : round($groupAttendances->avg('members_present'), 1);
+
+            // Calculate trend
+            $recent = $groupAttendances->take(4)->pluck('members_present')->reverse()->values();
+            if ($recent->count() < 2) {
+                $group->computedCache['attendance_trend'] = 'stable';
+            } else {
+                $first = $recent->take(2)->avg();
+                $last = $recent->skip(2)->avg() ?: $recent->last();
+                if ($last > $first * 1.1) {
+                    $group->computedCache['attendance_trend'] = 'up';
+                } elseif ($last < $first * 0.9) {
+                    $group->computedCache['attendance_trend'] = 'down';
+                } else {
+                    $group->computedCache['attendance_trend'] = 'stable';
+                }
+            }
+        }
     }
 
     /**
@@ -175,13 +242,15 @@ class Group extends Model
     }
 
     /**
-     * Get attendance stats for dashboard
+     * Get attendance stats for dashboard (memoized)
      */
     public function getAttendanceStatsAttribute(): array
     {
-        $attendances = $this->attendances()->orderByDesc('date')->take(10)->get();
+        if (isset($this->computedCache['attendance_stats'])) {
+            return $this->computedCache['attendance_stats'];
+        }
 
-        return [
+        return $this->computedCache['attendance_stats'] = [
             'total_meetings' => $this->attendances()->count(),
             'average_attendance' => $this->average_attendance,
             'last_meeting' => $this->last_attendance,

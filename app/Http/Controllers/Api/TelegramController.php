@@ -78,7 +78,13 @@ class TelegramController extends Controller
     {
         $responsibility = EventResponsibility::with('event')->find($responsibilityId);
 
+        // Security: verify ownership AND church isolation
         if (!$responsibility || $responsibility->person_id !== $person->id || !$responsibility->event) {
+            return;
+        }
+
+        // Ensure the event belongs to the same church as the person
+        if ($responsibility->event->church_id !== $person->church_id) {
             return;
         }
 
@@ -108,6 +114,11 @@ class TelegramController extends Controller
             return;
         }
 
+        // Security: ensure the event belongs to the same church as the person
+        if ($item->event && $item->event->church_id !== $person->church_id) {
+            return;
+        }
+
         $isConfirm = $action === 'confirm';
         $item->setPersonStatus($person->id, $isConfirm ? 'confirmed' : 'declined');
 
@@ -129,6 +140,11 @@ class TelegramController extends Controller
         $assignment = \App\Models\Assignment::with(['event.ministry', 'position'])->find($assignmentId);
 
         if (!$assignment || $assignment->person_id !== $person->id || !$assignment->event || !$assignment->position || !$assignment->event->ministry) {
+            return;
+        }
+
+        // Security: ensure the event belongs to the same church as the person
+        if ($assignment->event->church_id !== $person->church_id) {
             return;
         }
 

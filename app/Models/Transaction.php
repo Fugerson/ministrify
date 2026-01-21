@@ -93,8 +93,8 @@ class Transaction extends Model
         'description',
         'notes',
         'purpose',
-        'recorded_by',
         'paid_at',
+        // 'recorded_by' - intentionally excluded, set manually for security
     ];
 
     protected $casts = [
@@ -109,6 +109,13 @@ class Transaction extends Model
     protected static function boot(): void
     {
         parent::boot();
+
+        // Auto-set recorded_by on creation (security: prevent mass assignment)
+        static::creating(function (Transaction $transaction) {
+            if (!$transaction->recorded_by && auth()->check()) {
+                $transaction->recorded_by = auth()->id();
+            }
+        });
 
         // Calculate amount_uah when saving
         static::saving(function (Transaction $transaction) {
@@ -210,6 +217,33 @@ class Transaction extends Model
     public function scopeThisYear($query)
     {
         return $query->forYear(now()->year);
+    }
+
+    /**
+     * Scope for flexible period filtering
+     */
+    public function scopeForPeriod($query, string $period, ?string $startDate = null, ?string $endDate = null)
+    {
+        $now = now();
+
+        return match ($period) {
+            'today' => $query->whereDate('date', $now),
+            'week' => $query->whereBetween('date', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()]),
+            'month' => $query->forMonth($now->year, $now->month),
+            'quarter' => $query->whereBetween('date', [$now->copy()->startOfQuarter(), $now->copy()->endOfQuarter()]),
+            'year' => $query->forYear($now->year),
+            'custom' => $query->when($startDate, fn($q) => $q->where('date', '>=', $startDate))
+                             ->when($endDate, fn($q) => $q->where('date', '<=', $endDate)),
+            default => $query,
+        };
+    }
+
+    /**
+     * Scope for date range
+     */
+    public function scopeBetweenDates($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('date', [$startDate, $endDate]);
     }
 
     public function scopeTithes($query)

@@ -554,10 +554,27 @@ class Church extends Model
         $css = $this->getPublicSiteSetting('custom_css');
         if (!$css) return null;
 
-        // Sanitize: remove @import, javascript:, expression()
-        $css = preg_replace('/@import\s+/i', '', $css);
-        $css = preg_replace('/javascript\s*:/i', '', $css);
-        $css = preg_replace('/expression\s*\(/i', '', $css);
+        // Comprehensive CSS sanitization to prevent XSS attacks
+        $dangerousPatterns = [
+            // @import and vendor prefixes
+            '/@-?(?:webkit-|moz-|ms-|o-)?import\b/i',
+            // javascript: protocol (with possible obfuscation)
+            '/j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:/i',
+            // vbscript: protocol
+            '/v\s*b\s*s\s*c\s*r\s*i\s*p\s*t\s*:/i',
+            // expression() - IE specific
+            '/expression\s*\(/i',
+            // behavior: - IE specific
+            '/behavior\s*:/i',
+            // -moz-binding - Firefox specific
+            '/-moz-binding\s*:/i',
+            // data: URLs (can contain scripts)
+            '/url\s*\(\s*["\']?\s*data\s*:/i',
+        ];
+
+        foreach ($dangerousPatterns as $pattern) {
+            $css = preg_replace($pattern, '/* blocked */', $css);
+        }
 
         return $css;
     }

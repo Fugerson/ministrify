@@ -1037,6 +1037,9 @@ class FinanceController extends Controller
         return $months[$month] ?? '';
     }
 
+    /**
+     * Get quick stats with optimized queries (reduced from 10+ to 2 queries)
+     */
     private function getQuickStats(int $churchId): array
     {
         $now = Carbon::now();
@@ -1047,76 +1050,59 @@ class FinanceController extends Controller
         $lastMonthStart = $now->copy()->subMonth()->startOfMonth();
         $lastMonthEnd = $now->copy()->subMonth()->endOfMonth();
 
-        // This week income
-        $thisWeekIncome = Transaction::where('church_id', $churchId)
-            ->incoming()->completed()
-            ->where('date', '>=', $thisWeekStart)
-            ->sum('amount');
+        // Single optimized query for all income stats
+        $stats = DB::table('transactions')
+            ->where('church_id', $churchId)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->selectRaw("
+                SUM(CASE WHEN date >= ? THEN amount ELSE 0 END) as this_week_income,
+                SUM(CASE WHEN date >= ? AND date <= ? THEN amount ELSE 0 END) as last_week_income,
+                SUM(CASE WHEN date >= ? THEN amount ELSE 0 END) as this_month_total,
+                COUNT(CASE WHEN date >= ? THEN 1 END) as this_month_count,
+                SUM(CASE WHEN date >= ? AND date <= ? THEN amount ELSE 0 END) as last_month_total,
+                COUNT(CASE WHEN date >= ? AND date <= ? THEN 1 END) as last_month_count,
+                COUNT(DISTINCT CASE WHEN date >= ? AND person_id IS NOT NULL THEN person_id END) as this_month_donors,
+                COUNT(DISTINCT CASE WHEN date >= ? AND date <= ? AND person_id IS NOT NULL THEN person_id END) as last_month_donors
+            ", [
+                $thisWeekStart, // this_week_income
+                $lastWeekStart, $lastWeekEnd, // last_week_income
+                $thisMonthStart, // this_month_total
+                $thisMonthStart, // this_month_count
+                $lastMonthStart, $lastMonthEnd, // last_month_total
+                $lastMonthStart, $lastMonthEnd, // last_month_count
+                $thisMonthStart, // this_month_donors
+                $lastMonthStart, $lastMonthEnd, // last_month_donors
+            ])
+            ->first();
 
-        // Last week income
-        $lastWeekIncome = Transaction::where('church_id', $churchId)
-            ->incoming()->completed()
-            ->whereBetween('date', [$lastWeekStart, $lastWeekEnd])
-            ->sum('amount');
+        // Total transactions this month (includes both income and expense)
+        $totalTransactions = DB::table('transactions')
+            ->where('church_id', $churchId)
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->where('date', '>=', $thisMonthStart)
+            ->count();
 
-        // Week change percentage
+        // Calculate derived values
+        $thisWeekIncome = (float) ($stats->this_week_income ?? 0);
+        $lastWeekIncome = (float) ($stats->last_week_income ?? 0);
+        $thisMonthTotal = (float) ($stats->this_month_total ?? 0);
+        $thisMonthCount = (int) ($stats->this_month_count ?? 0);
+        $lastMonthTotal = (float) ($stats->last_month_total ?? 0);
+        $lastMonthCount = (int) ($stats->last_month_count ?? 0);
+        $thisMonthDonors = (int) ($stats->this_month_donors ?? 0);
+        $lastMonthDonors = (int) ($stats->last_month_donors ?? 0);
+
         $weekChange = $lastWeekIncome > 0
             ? round((($thisWeekIncome - $lastWeekIncome) / $lastWeekIncome) * 100, 0)
             : ($thisWeekIncome > 0 ? 100 : 0);
 
-        // This month donors count
-        $thisMonthDonors = Transaction::where('church_id', $churchId)
-            ->incoming()->completed()
-            ->where('date', '>=', $thisMonthStart)
-            ->whereNotNull('person_id')
-            ->distinct('person_id')
-            ->count('person_id');
-
-        // Last month donors count
-        $lastMonthDonors = Transaction::where('church_id', $churchId)
-            ->incoming()->completed()
-            ->whereBetween('date', [$lastMonthStart, $lastMonthEnd])
-            ->whereNotNull('person_id')
-            ->distinct('person_id')
-            ->count('person_id');
-
-        // Donors change
-        $donorsChange = $thisMonthDonors - $lastMonthDonors;
-
-        // Average donation this month
-        $thisMonthTotal = Transaction::where('church_id', $churchId)
-            ->incoming()->completed()
-            ->where('date', '>=', $thisMonthStart)
-            ->sum('amount');
-
-        $thisMonthCount = Transaction::where('church_id', $churchId)
-            ->incoming()->completed()
-            ->where('date', '>=', $thisMonthStart)
-            ->count();
-
         $avgDonation = $thisMonthCount > 0 ? round($thisMonthTotal / $thisMonthCount, 0) : 0;
-
-        // Last month average
-        $lastMonthTotal = Transaction::where('church_id', $churchId)
-            ->incoming()->completed()
-            ->whereBetween('date', [$lastMonthStart, $lastMonthEnd])
-            ->sum('amount');
-
-        $lastMonthCount = Transaction::where('church_id', $churchId)
-            ->incoming()->completed()
-            ->whereBetween('date', [$lastMonthStart, $lastMonthEnd])
-            ->count();
-
         $lastMonthAvg = $lastMonthCount > 0 ? round($lastMonthTotal / $lastMonthCount, 0) : 0;
+
         $avgChange = $lastMonthAvg > 0
             ? round((($avgDonation - $lastMonthAvg) / $lastMonthAvg) * 100, 0)
             : ($avgDonation > 0 ? 100 : 0);
-
-        // Total transactions this month
-        $totalTransactions = Transaction::where('church_id', $churchId)
-            ->completed()
-            ->where('date', '>=', $thisMonthStart)
-            ->count();
 
         return [
             'thisWeekIncome' => $thisWeekIncome,
@@ -1124,7 +1110,7 @@ class FinanceController extends Controller
             'weekChange' => $weekChange,
             'thisMonthDonors' => $thisMonthDonors,
             'lastMonthDonors' => $lastMonthDonors,
-            'donorsChange' => $donorsChange,
+            'donorsChange' => $thisMonthDonors - $lastMonthDonors,
             'avgDonation' => $avgDonation,
             'avgChange' => $avgChange,
             'totalTransactions' => $totalTransactions,
