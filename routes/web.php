@@ -511,8 +511,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
         Route::put('currencies', [SettingsController::class, 'updateCurrencies'])->name('currencies');
 
-        // Role permissions management
-        Route::get('permissions', [\App\Http\Controllers\RolePermissionController::class, 'index'])->name('permissions.index');
+        // Role permissions management (inline in settings page)
+        Route::get('permissions', fn() => redirect()->route('settings.index', ['tab' => 'permissions']))->name('permissions.index');
         Route::put('permissions', [\App\Http\Controllers\RolePermissionController::class, 'update'])->name('permissions.update');
         Route::post('permissions/reset', [\App\Http\Controllers\RolePermissionController::class, 'reset'])->name('permissions.reset');
 

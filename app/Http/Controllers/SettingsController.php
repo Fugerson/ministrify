@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\ChurchRole;
+use App\Models\ChurchRolePermission;
 use App\Models\TransactionCategory;
 use App\Services\ImageService;
 use App\Services\TelegramService;
@@ -40,7 +42,31 @@ class SettingsController extends Controller
             ->limit(100)
             ->get();
 
-        return view('settings.index', compact('church', 'expenseCategories', 'tags', 'users', 'ministries', 'transactionCategories', 'auditLogs'));
+        // Church roles with permissions
+        $churchRoles = ChurchRole::where('church_id', $church->id)
+            ->withCount(['users as people_count'])
+            ->with('permissions')
+            ->orderBy('sort_order')
+            ->get();
+
+        $rolesJson = $churchRoles->map(fn($role) => [
+            'id' => $role->id,
+            'name' => $role->name,
+            'slug' => $role->slug,
+            'color' => $role->color,
+            'is_admin_role' => $role->is_admin_role,
+            'is_default' => $role->is_default,
+            'people_count' => $role->people_count,
+        ]);
+
+        $permissionModules = ChurchRolePermission::MODULES;
+        $permissionActions = ChurchRolePermission::ACTIONS;
+
+        return view('settings.index', compact(
+            'church', 'expenseCategories', 'tags', 'users', 'ministries',
+            'transactionCategories', 'auditLogs', 'churchRoles', 'rolesJson',
+            'permissionModules', 'permissionActions'
+        ));
     }
 
     public function updateChurch(Request $request)

@@ -4,10 +4,14 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-4 md:space-y-6" x-data="{
-    activeTab: localStorage.getItem('settings_tab') || 'general',
+    activeTab: new URLSearchParams(window.location.search).get('tab') || localStorage.getItem('settings_tab') || 'general',
     setTab(tab) {
         this.activeTab = tab;
         localStorage.setItem('settings_tab', tab);
+        // Update URL without reload
+        const url = new URL(window.location);
+        url.searchParams.delete('tab');
+        window.history.replaceState({}, '', url);
     }
 }">
     <!-- Tabs -->
@@ -48,10 +52,11 @@
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 Користувачі
             </button>
-            <a href="{{ route('settings.permissions.index') }}"
-                    class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
+            <button @click="setTab('permissions')"
+                    :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'permissions' }"
+                    class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 Права доступу
-            </a>
+            </button>
             <button @click="setTab('audit')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'audit' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
@@ -1466,6 +1471,143 @@
         </div>
     </div>
 
+    <!-- Permissions Tab -->
+    <div x-show="activeTab === 'permissions'" x-cloak class="space-y-6" x-data="permissionsManager()">
+        @if($churchRoles->isEmpty())
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div>
+                    <p class="font-medium text-yellow-800 dark:text-yellow-200">Немає церковних ролей</p>
+                    <p class="text-sm text-yellow-600 dark:text-yellow-400">Спочатку створіть ролі на сторінці <a href="{{ route('settings.church-roles.index') }}" class="underline">Церковні ролі</a>.</p>
+                </div>
+            </div>
+        </div>
+        @else
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <!-- Role tabs -->
+            <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+                <nav class="flex -mb-px min-w-max">
+                    @foreach($churchRoles as $role)
+                    <button @click="currentRoleId = {{ $role->id }}"
+                            :class="currentRoleId === {{ $role->id }} ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300'"
+                            class="py-4 px-4 text-center border-b-2 font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full" style="background-color: {{ $role->color }}"></span>
+                        {{ $role->name }}
+                        @if($role->is_admin_role)
+                        <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        @endif
+                    </button>
+                    @endforeach
+                </nav>
+            </div>
+
+            <div class="p-6">
+                <!-- Admin notice -->
+                <template x-if="isCurrentRoleAdmin()">
+                    <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                            <div>
+                                <p class="font-medium text-blue-800 dark:text-blue-200">Ця роль має повний доступ</p>
+                                <p class="text-sm text-blue-600 dark:text-blue-400">Права ролі з повним доступом не можна обмежити.</p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Permissions table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left border-b border-gray-200 dark:border-gray-700">
+                                <th class="pb-3 text-sm font-semibold text-gray-900 dark:text-white">Модуль</th>
+                                @foreach($permissionActions as $actionKey => $actionLabel)
+                                <th class="pb-3 text-sm font-semibold text-gray-900 dark:text-white text-center w-24">{{ $actionLabel }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                            @foreach($permissionModules as $moduleKey => $module)
+                            <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                <td class="py-4">
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ $module['label'] }}</span>
+                                </td>
+                                @foreach($permissionActions as $actionKey => $actionLabel)
+                                <td class="py-4 text-center">
+                                    @if(in_array($actionKey, $module['actions'] ?? []))
+                                    <label class="inline-flex items-center justify-center">
+                                        <template x-if="isCurrentRoleAdmin()">
+                                            <input type="checkbox" checked disabled
+                                                   class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 bg-gray-100 dark:bg-gray-600 cursor-not-allowed">
+                                        </template>
+                                        <template x-if="!isCurrentRoleAdmin()">
+                                            <input type="checkbox"
+                                                   x-model="rolePermissions[currentRoleId]['{{ $moduleKey }}']"
+                                                   value="{{ $actionKey }}"
+                                                   @change="markDirty()"
+                                                   class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:bg-gray-700">
+                                        </template>
+                                    </label>
+                                    @else
+                                    <span class="text-gray-300 dark:text-gray-600">—</span>
+                                    @endif
+                                </td>
+                                @endforeach
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Actions -->
+                <template x-if="!isCurrentRoleAdmin()">
+                    <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <button @click="resetToDefaults()"
+                                type="button"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                            Скинути до стандартних
+                        </button>
+                        <button @click="savePermissions()"
+                                :disabled="!isDirty || saving"
+                                class="px-6 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <span x-show="!saving">Зберегти зміни</span>
+                            <span x-show="saving" class="flex items-center gap-2">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Збереження...
+                            </span>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+            <div class="flex gap-3">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div class="text-sm text-blue-800 dark:text-blue-200">
+                    <p class="font-medium mb-1">Як працюють права доступу</p>
+                    <ul class="list-disc list-inside space-y-1 text-blue-700 dark:text-blue-300">
+                        <li>Ролі з <strong>повним доступом</strong> (позначені щитом) мають доступ до всіх функцій</li>
+                        <li>Для інших ролей налаштуйте окремі права для кожного модуля</li>
+                        <li><a href="{{ route('settings.church-roles.index') }}" class="underline">Керувати ролями</a> можна на сторінці "Церковні ролі"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+
     <!-- Audit Log Tab -->
     <div x-show="activeTab === 'audit'" x-cloak class="space-y-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -1560,4 +1702,98 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function permissionsManager() {
+    const moduleKeys = @json(array_keys($permissionModules));
+    const modulesConfig = @json($permissionModules);
+
+    // Build initial permissions object from church roles
+    const initialPermissions = {};
+    @foreach($churchRoles as $role)
+    initialPermissions[{{ $role->id }}] = @json($role->getAllPermissions());
+    @endforeach
+
+    return {
+        currentRoleId: {{ $churchRoles->first()?->id ?? 0 }},
+        isDirty: false,
+        saving: false,
+        rolePermissions: initialPermissions,
+        roles: @json($rolesJson->keyBy('id')),
+
+        isCurrentRoleAdmin() {
+            return this.roles[this.currentRoleId]?.is_admin_role ?? false;
+        },
+
+        markDirty() {
+            this.isDirty = true;
+        },
+
+        async savePermissions() {
+            this.saving = true;
+
+            try {
+                const response = await fetch('{{ route('settings.permissions.update') }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        role_id: this.currentRoleId,
+                        permissions: this.rolePermissions[this.currentRoleId],
+                    }),
+                });
+
+                if (response.ok) {
+                    this.isDirty = false;
+                    if (window.showGlobalToast) {
+                        showGlobalToast('Права доступу збережено', 'success');
+                    }
+                } else {
+                    throw new Error('Failed to save');
+                }
+            } catch (error) {
+                if (window.showGlobalToast) {
+                    showGlobalToast('Помилка збереження', 'error');
+                }
+            }
+
+            this.saving = false;
+        },
+
+        async resetToDefaults() {
+            const roleName = this.roles[this.currentRoleId]?.name || 'цієї ролі';
+            if (!confirm(`Скинути права для "${roleName}" до стандартних?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route('settings.permissions.reset') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        role_id: this.currentRoleId,
+                    }),
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+            } catch (error) {
+                if (window.showGlobalToast) {
+                    showGlobalToast('Помилка скидання', 'error');
+                }
+            }
+        }
+    }
+}
+</script>
+@endpush
 @endsection
