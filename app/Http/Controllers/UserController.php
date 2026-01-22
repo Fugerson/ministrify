@@ -44,30 +44,55 @@ class UserController extends Controller
     {
         $church = $this->getCurrentChurch();
 
+        // If person_id provided, name/email are optional (will be taken from Person)
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email',
             'church_role_id' => ['required', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
             'person_id' => 'nullable|exists:people,id',
         ]);
+
+        // Get name and email from Person if person_id provided
+        $name = $validated['name'];
+        $email = $validated['email'];
+
+        if (!empty($validated['person_id'])) {
+            $person = Person::where('id', $validated['person_id'])
+                ->where('church_id', $church->id)
+                ->firstOrFail();
+
+            $name = $person->full_name;
+            $email = $person->email;
+
+            if (empty($email)) {
+                return back()->withInput()->withErrors(['person_id' => 'Ця людина не має email. Додайте email в профілі або створіть користувача без прив\'язки.']);
+            }
+
+            // Check if email is already taken by another user
+            if (User::where('email', $email)->exists()) {
+                return back()->withInput()->withErrors(['person_id' => 'Користувач з таким email вже існує.']);
+            }
+        } else {
+            // No person selected - require name and email
+            if (empty($name) || empty($email)) {
+                return back()->withInput()->withErrors(['name' => 'Вкажіть ім\'я та email, або оберіть людину.']);
+            }
+        }
 
         // Generate secure random password (user will reset via email)
         $password = Str::random(32);
 
         $user = User::create([
             'church_id' => $church->id,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+            'name' => $name,
+            'email' => $email,
             'password' => Hash::make($password),
             'church_role_id' => $validated['church_role_id'],
         ]);
 
         // Link to person if provided
         if (!empty($validated['person_id'])) {
-            $person = Person::findOrFail($validated['person_id']);
-            if ($person->church_id === $church->id) {
-                $person->update(['user_id' => $user->id]);
-            }
+            $person->update(['user_id' => $user->id]);
         }
 
         // Try to send password reset link
@@ -111,17 +136,45 @@ class UserController extends Controller
 
         $church = $this->getCurrentChurch();
 
+        // If person_id provided, name/email are optional (will be taken from Person)
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'name' => 'nullable|string|max:255',
+            'email' => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
             'church_role_id' => ['required', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
             'person_id' => 'nullable|exists:people,id',
             'password' => ['nullable', 'string', 'min:10', new SecurePassword],
         ]);
 
+        // Get name and email from Person if person_id provided
+        $name = $validated['name'];
+        $email = $validated['email'];
+
+        if (!empty($validated['person_id'])) {
+            $person = Person::where('id', $validated['person_id'])
+                ->where('church_id', $church->id)
+                ->firstOrFail();
+
+            $name = $person->full_name;
+            $email = $person->email;
+
+            if (empty($email)) {
+                return back()->withInput()->withErrors(['person_id' => 'Ця людина не має email. Додайте email в профілі або відв\'яжіть користувача.']);
+            }
+
+            // Check if email is already taken by another user
+            if (User::where('email', $email)->where('id', '!=', $user->id)->exists()) {
+                return back()->withInput()->withErrors(['person_id' => 'Користувач з таким email вже існує.']);
+            }
+        } else {
+            // No person selected - require name and email
+            if (empty($name) || empty($email)) {
+                return back()->withInput()->withErrors(['name' => 'Вкажіть ім\'я та email, або оберіть людину.']);
+            }
+        }
+
         $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+            'name' => $name,
+            'email' => $email,
             'church_role_id' => $validated['church_role_id'],
         ]);
 
@@ -135,10 +188,7 @@ class UserController extends Controller
 
         // Add new link
         if (!empty($validated['person_id'])) {
-            $person = Person::findOrFail($validated['person_id']);
-            if ($person->church_id === $church->id) {
-                $person->update(['user_id' => $user->id]);
-            }
+            $person->update(['user_id' => $user->id]);
         }
 
         return redirect()->route('settings.users.index')

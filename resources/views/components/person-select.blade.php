@@ -135,6 +135,7 @@ window.personSelectData['{{ $uniqueId }}'] = [
     {
         id: {{ $person->id }},
         full_name: @json($person->full_name),
+        email: @json($person->email),
         photo: @json($photoUrl),
         role: @json($roleName),
         initials: @json($initials)
@@ -174,9 +175,11 @@ function personSelectComponent_{{ str_replace('-', '_', $uniqueId) }}() {
             if (person) {
                 this.selectedId = person.id;
                 this.searchQuery = person.full_name;
+                this.$dispatch('person-selected', { person: person });
             } else {
                 this.selectedId = null;
                 this.searchQuery = '';
+                this.$dispatch('person-selected', { person: null });
             }
             this.isOpen = false;
         },
@@ -185,6 +188,7 @@ function personSelectComponent_{{ str_replace('-', '_', $uniqueId) }}() {
             this.selectedId = null;
             this.searchQuery = '';
             this.highlightedIndex = {{ $nullable ? '-1' : '0' }};
+            this.$dispatch('person-selected', { person: null });
         },
 
         highlightNext() {
