@@ -508,12 +508,20 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                             </svg>
                             <h2 class="font-semibold text-gray-900 dark:text-white">Відвідуваність</h2>
+                            <span x-show="saving" class="text-xs text-gray-500 dark:text-gray-400">
+                                <svg class="w-4 h-4 animate-spin inline" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                            <span x-show="saved" x-transition class="text-xs text-green-600 dark:text-green-400">Збережено</span>
+                            <span x-show="error" class="text-xs text-red-600 dark:text-red-400">Помилка!</span>
                         </div>
                         @php
                             $presentCount = $event->attendance?->records->where('present', true)->count() ?? 0;
                             $totalPeople = $allPeople->count();
                         @endphp
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $presentCount }}/{{ $totalPeople }}</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400" x-text="attending.length + '/' + {{ $totalPeople }}">{{ $presentCount }}/{{ $totalPeople }}</span>
                     </div>
                 </div>
 
@@ -580,6 +588,9 @@
                     search: '',
                     attending: @json($presentIds),
                     guestsCount: {{ $event->attendance?->guests_count ?? 0 }},
+                    saving: false,
+                    saved: false,
+                    error: false,
 
                     async toggleAttendance(personId) {
                         const index = this.attending.indexOf(personId);
@@ -592,8 +603,11 @@
                     },
 
                     async saveAttendance() {
+                        this.saving = true;
+                        this.saved = false;
+                        this.error = false;
                         try {
-                            await fetch('{{ route("events.attendance.save", $event) }}', {
+                            const response = await fetch('{{ route("events.attendance.save", $event) }}', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -604,8 +618,18 @@
                                     guests_count: this.guestsCount
                                 })
                             });
+                            if (response.ok) {
+                                this.saved = true;
+                                setTimeout(() => this.saved = false, 2000);
+                            } else {
+                                this.error = true;
+                                console.error('Save failed:', response.status);
+                            }
                         } catch (error) {
+                            this.error = true;
                             console.error('Error saving attendance:', error);
+                        } finally {
+                            this.saving = false;
                         }
                     }
                 }
