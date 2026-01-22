@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
@@ -112,9 +113,9 @@ class Event extends Model
         return $this->hasMany(EventResponsibility::class)->orderBy('id');
     }
 
-    public function attendance(): HasOne
+    public function attendance(): MorphOne
     {
-        return $this->hasOne(Attendance::class);
+        return $this->morphOne(Attendance::class, 'attendable');
     }
 
     public function checklist(): HasOne
