@@ -47,8 +47,18 @@ class FinanceController extends Controller
         $periodBalance = $totalIncome - $totalExpense;
 
         // Overall balance (includes initial balance) - all in UAH
-        $initialBalance = (float) $church->initial_balance;
         $initialBalanceDate = $church->initial_balance_date;
+
+        // Calculate initial balance total in UAH (including foreign currencies at current rate)
+        $allInitialBalances = $church->getAllInitialBalances();
+        $initialBalance = 0;
+        foreach ($allInitialBalances as $currency => $amount) {
+            if ($currency === 'UAH') {
+                $initialBalance += $amount;
+            } else {
+                $initialBalance += ExchangeRate::toUah($amount, $currency);
+            }
+        }
         $allTimeIncome = $hasAmountUah
             ? (Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount_uah') ?: Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount'))
             : Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount');
@@ -56,6 +66,38 @@ class FinanceController extends Controller
             ? (Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount_uah') ?: Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount'))
             : Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
+
+        // Calculate balances per currency (all time)
+        $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
+            ->incoming()->completed()
+            ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
+            ->groupBy('currency')
+            ->pluck('total', 'currency')
+            ->toArray();
+
+        $allTimeExpenseByCurrency = Transaction::where('church_id', $church->id)
+            ->outgoing()->completed()
+            ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
+            ->groupBy('currency')
+            ->pluck('total', 'currency')
+            ->toArray();
+
+        // Get initial balances per currency
+        $initialBalances = $church->getAllInitialBalances();
+
+        // Calculate balance per currency
+        $balancesByCurrency = [];
+        $allCurrencies = array_unique(array_merge(
+            array_keys($allTimeIncomeByCurrency),
+            array_keys($allTimeExpenseByCurrency),
+            array_keys($initialBalances)
+        ));
+        foreach ($allCurrencies as $curr) {
+            $initialBal = $initialBalances[$curr] ?? 0;
+            $income = $allTimeIncomeByCurrency[$curr] ?? 0;
+            $expense = $allTimeExpenseByCurrency[$curr] ?? 0;
+            $balancesByCurrency[$curr] = $initialBal + $income - $expense;
+        }
 
         // Get balances by currency for the period
         $incomeQueryForCurrency = Transaction::where('church_id', $church->id)->incoming()->completed();
@@ -219,7 +261,7 @@ class FinanceController extends Controller
             'totalIncome', 'totalExpense', 'periodBalance',
             'initialBalance', 'initialBalanceDate', 'currentBalance',
             'allTimeIncome', 'allTimeExpense',
-            'incomeByCurrency', 'expenseByCurrency',
+            'incomeByCurrency', 'expenseByCurrency', 'balancesByCurrency',
             'exchangeRates', 'enabledCurrencies',
             'monthlyData',
             'incomeByCategory', 'expenseByCategory', 'expenseByMinistry',
@@ -418,11 +460,10 @@ class FinanceController extends Controller
             ->forIncome()
             ->orderBy('sort_order')
             ->get();
-        $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
-        return view('finances.incomes.create', compact('categories', 'people', 'enabledCurrencies', 'exchangeRates'));
+        return view('finances.incomes.create', compact('categories', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function storeIncome(Request $request)
@@ -434,7 +475,7 @@ class FinanceController extends Controller
             'date' => 'required|date',
             'person_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'description' => 'nullable|string|max:255',
-            'payment_method' => 'required|in:cash,card,transfer,online',
+            'payment_method' => 'required|in:cash,card',
             'is_anonymous' => 'boolean',
             'notes' => 'nullable|string',
         ]);
@@ -482,11 +523,10 @@ class FinanceController extends Controller
             ->forIncome()
             ->orderBy('sort_order')
             ->get();
-        $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
-        return view('finances.incomes.edit', compact('income', 'categories', 'people', 'enabledCurrencies', 'exchangeRates'));
+        return view('finances.incomes.edit', compact('income', 'categories', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function updateIncome(Request $request, Transaction $income)
@@ -500,7 +540,7 @@ class FinanceController extends Controller
             'date' => 'required|date',
             'person_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'description' => 'nullable|string|max:255',
-            'payment_method' => 'required|in:cash,card,transfer,online',
+            'payment_method' => 'required|in:cash,card',
             'is_anonymous' => 'boolean',
             'notes' => 'nullable|string',
         ]);
@@ -797,6 +837,64 @@ class FinanceController extends Controller
         }
 
         return back()->with('success', 'Витрату видалено.');
+    }
+
+    // Currency Exchange
+    public function createExchange()
+    {
+        $church = $this->getCurrentChurch();
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
+
+        return view('finances.exchange.create', compact('enabledCurrencies', 'exchangeRates'));
+    }
+
+    public function storeExchange(Request $request)
+    {
+        $validated = $request->validate([
+            'from_currency' => 'required|in:UAH,USD,EUR',
+            'to_currency' => 'required|in:UAH,USD,EUR|different:from_currency',
+            'from_amount' => 'required|numeric|min:0.01',
+            'to_amount' => 'required|numeric|min:0.01',
+            'date' => 'required|date',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $church = $this->getCurrentChurch();
+
+        // Create the outgoing transaction (from currency)
+        $outTransaction = Transaction::create([
+            'church_id' => $church->id,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXCHANGE,
+            'amount' => $validated['from_amount'],
+            'currency' => $validated['from_currency'],
+            'date' => $validated['date'],
+            'status' => Transaction::STATUS_COMPLETED,
+            'payment_method' => Transaction::PAYMENT_CASH,
+            'description' => "Обмін {$validated['from_currency']} → {$validated['to_currency']}",
+            'notes' => $validated['notes'],
+        ]);
+
+        // Create the incoming transaction (to currency)
+        $inTransaction = Transaction::create([
+            'church_id' => $church->id,
+            'direction' => Transaction::DIRECTION_IN,
+            'source_type' => Transaction::SOURCE_EXCHANGE,
+            'amount' => $validated['to_amount'],
+            'currency' => $validated['to_currency'],
+            'date' => $validated['date'],
+            'status' => Transaction::STATUS_COMPLETED,
+            'payment_method' => Transaction::PAYMENT_CASH,
+            'description' => "Обмін {$validated['from_currency']} → {$validated['to_currency']}",
+            'notes' => $validated['notes'],
+            'related_transaction_id' => $outTransaction->id,
+        ]);
+
+        // Link back
+        $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
+
+        return redirect()->route('finances.index')->with('success', 'Обмін валюти зареєстровано.');
     }
 
     // Categories (unified)

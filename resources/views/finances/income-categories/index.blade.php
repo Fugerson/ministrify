@@ -41,20 +41,6 @@
                         </button>
                     </div>
                 </div>
-                <div class="flex items-center gap-6 mt-4">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" name="is_tithe" value="1" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-700 dark:text-gray-300">Десятина</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" name="is_offering" value="1" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-700 dark:text-gray-300">Пожертва</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" name="is_donation" value="1" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-700 dark:text-gray-300">Цільова пожертва</span>
-                    </label>
-                </div>
             </form>
 
             <!-- Categories list -->
@@ -68,18 +54,7 @@
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-900 dark:text-white">{{ $category->name }}</p>
-                                    <div class="flex items-center space-x-2 mt-1">
-                                        @if($category->is_tithe)
-                                            <span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">Десятина</span>
-                                        @endif
-                                        @if($category->is_offering)
-                                            <span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">Пожертва</span>
-                                        @endif
-                                        @if($category->is_donation)
-                                            <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Цільова</span>
-                                        @endif
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $category->incomes_count }} записів</span>
-                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $category->incomes_count }} записів</p>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
@@ -128,20 +103,6 @@
                                         Скасувати
                                     </button>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-6 mt-4">
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="checkbox" name="is_tithe" value="1" {{ $category->is_tithe ? 'checked' : '' }} class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">Десятина</span>
-                                </label>
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="checkbox" name="is_offering" value="1" {{ $category->is_offering ? 'checked' : '' }} class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">Пожертва</span>
-                                </label>
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="checkbox" name="is_donation" value="1" {{ $category->is_donation ? 'checked' : '' }} class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">Цільова пожертва</span>
-                                </label>
                             </div>
                         </form>
                     </div>

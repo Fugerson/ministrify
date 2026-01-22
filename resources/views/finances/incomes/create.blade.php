@@ -77,8 +77,6 @@
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
                             {{ $category->icon ?? '💰' }} {{ $category->name }}
-                            @if($category->is_tithe) (Десятина) @endif
-                            @if($category->is_offering) (Пожертва) @endif
                         </option>
                     @endforeach
                 </select>
@@ -92,8 +90,8 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Спосіб оплати <span class="text-red-500">*</span>
                 </label>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    @foreach(['cash' => '💵 Готівка', 'card' => '💳 Картка', 'transfer' => '🏦 Переказ', 'online' => '🌐 Онлайн'] as $value => $label)
+                <div class="grid grid-cols-2 gap-3">
+                    @foreach(['cash' => '💵 Готівка', 'card' => '💳 Картка'] as $value => $label)
                         <label class="relative flex items-center justify-center px-4 py-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <input type="radio" name="payment_method" value="{{ $value }}" {{ old('payment_method', 'cash') == $value ? 'checked' : '' }} class="sr-only peer">
                             <span class="text-sm text-gray-700 dark:text-gray-300 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 peer-checked:font-medium">{{ $label }}</span>
@@ -103,38 +101,8 @@
                 </div>
             </div>
 
-            <!-- Anonymous checkbox -->
-            <div x-data="{ anonymous: {{ old('is_anonymous') ? 'true' : 'false' }} }">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                    <input type="checkbox" name="is_anonymous" x-model="anonymous" value="1"
-                           class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Анонімне пожертвування</span>
-                </label>
-
-                <!-- Donor (if not anonymous) -->
-                <div x-show="!anonymous" x-transition class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Жертводавець
-                    </label>
-                    <x-person-select
-                        name="person_id"
-                        :people="$people"
-                        :selected="old('person_id')"
-                        placeholder="Почніть вводити ім'я..."
-                        null-text="Не вказано"
-                    />
-                </div>
-            </div>
-
-            <!-- Description -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Опис
-                </label>
-                <input type="text" name="description" value="{{ old('description') }}" maxlength="255"
-                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                       placeholder="Додатковий опис (необов'язково)">
-            </div>
+            <!-- Always anonymous -->
+            <input type="hidden" name="is_anonymous" value="1">
 
             <!-- Notes -->
             <div>

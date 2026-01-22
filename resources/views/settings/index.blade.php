@@ -1201,16 +1201,30 @@
 
     <!-- Finance Tab -->
     <div x-show="activeTab === 'finance'" x-cloak class="space-y-6">
-        <!-- Initial Balance -->
+        <!-- Initial Balance (Multi-currency) -->
+        @php
+            $enabledCurrenciesForBalance = $church->enabled_currencies ?? ['UAH'];
+            $initialBalances = $church->initial_balances ?? [];
+            $currencyInfo = [
+                'UAH' => ['symbol' => '₴', 'name' => 'Гривня', 'flag' => '🇺🇦'],
+                'USD' => ['symbol' => '$', 'name' => 'Долар', 'flag' => '🇺🇸'],
+                'EUR' => ['symbol' => '€', 'name' => 'Євро', 'flag' => '🇪🇺'],
+            ];
+        @endphp
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
              x-data="{
-                 initialBalance: {{ $church->initial_balance ?? 0 }},
-                 initialBalanceDate: '{{ $church->initial_balance_date?->format('Y-m-d') ?? now()->format('Y-m-d') }}',
+                 balances: {
+                     UAH: {{ $initialBalances['UAH'] ?? $church->initial_balance ?? 0 }},
+                     USD: {{ $initialBalances['USD'] ?? 0 }},
+                     EUR: {{ $initialBalances['EUR'] ?? 0 }}
+                 },
+                 balanceDate: '{{ $church->initial_balance_date?->format('Y-m-d') ?? now()->format('Y-m-d') }}',
+                 enabledCurrencies: {{ json_encode($enabledCurrenciesForBalance) }},
                  saving: false,
                  saved: false,
                  timeout: null,
                  save() {
-                     if (!this.initialBalance || !this.initialBalanceDate) return;
+                     if (!this.balanceDate) return;
                      this.saving = true;
                      this.saved = false;
                      fetch('{{ route('settings.finance') }}', {
@@ -1222,8 +1236,8 @@
                          },
                          body: JSON.stringify({
                              _method: 'PUT',
-                             initial_balance: this.initialBalance,
-                             initial_balance_date: this.initialBalanceDate
+                             initial_balances: this.balances,
+                             initial_balance_date: this.balanceDate
                          })
                      }).then(r => r.json()).then(() => {
                          this.saving = false;
@@ -1237,7 +1251,8 @@
                      clearTimeout(this.timeout);
                      this.timeout = setTimeout(() => this.save(), 500);
                  }
-             }">
+             }"
+             @currencies-changed.window="enabledCurrencies = $event.detail">
 
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
@@ -1262,56 +1277,39 @@
             <div class="p-6 space-y-6">
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                     <p class="text-sm text-blue-800 dark:text-blue-300">
-                        <strong>Як це працює:</strong> Вкажіть суму, яка була на рахунку церкви на певну дату.
-                        Всі подальші доходи та витрати будуть додаватись/віднімаватись від цієї суми для розрахунку поточного балансу.
+                        <strong>Як це працює:</strong> Вкажіть суму в кожній валюті, яка була на рахунках церкви на певну дату.
+                        Баланс по кожній валюті ведеться окремо.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="initial_balance" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума балансу *</label>
-                        <div class="relative">
-                            <input type="number" id="initial_balance" step="0.01" min="0" required
-                                   x-model="initialBalance" @input="debounceSave()"
-                                   class="w-full px-3 py-2 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                <!-- Date -->
+                <div class="max-w-xs">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата балансу *</label>
+                    <input type="date" required
+                           x-model="balanceDate" @change="save()"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                </div>
+
+                <!-- Currency balances -->
+                <div class="space-y-3">
+                    @foreach(['UAH', 'USD', 'EUR'] as $code)
+                    <div x-show="enabledCurrencies.includes('{{ $code }}')" class="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div class="flex items-center gap-2 w-24">
+                            <span class="text-xl">{{ $currencyInfo[$code]['flag'] }}</span>
+                            <span class="font-medium text-gray-900 dark:text-white">{{ $code }}</span>
+                        </div>
+                        <div class="flex-1 relative">
+                            <input type="number" step="0.01" min="0"
+                                   x-model="balances.{{ $code }}" @input="debounceSave()"
+                                   class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                    placeholder="0.00">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 dark:text-gray-400 text-sm">грн</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm font-medium">{{ $currencyInfo[$code]['symbol'] }}</span>
                             </div>
                         </div>
                     </div>
-
-                    <div>
-                        <label for="initial_balance_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата балансу *</label>
-                        <input type="date" id="initial_balance_date" required
-                               x-model="initialBalanceDate" @change="save()"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    </div>
+                    @endforeach
                 </div>
-
-                @if($church->initial_balance && $church->initial_balance_date)
-                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Поточний стан</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Початковий</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ number_format($church->initial_balance, 0, ',', ' ') }} ₴</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Доходи</p>
-                            <p class="text-lg font-semibold text-green-600 dark:text-green-400">+{{ number_format($church->total_income, 0, ',', ' ') }} ₴</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Витрати</p>
-                            <p class="text-lg font-semibold text-red-600 dark:text-red-400">-{{ number_format($church->total_expense, 0, ',', ' ') }} ₴</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Поточний</p>
-                            <p class="text-lg font-semibold text-primary-600 dark:text-primary-400">{{ number_format($church->current_balance, 0, ',', ' ') }} ₴</p>
-                        </div>
-                    </div>
-                </div>
-                @endif
             </div>
         </div>
 
@@ -1358,6 +1356,7 @@
                          this.currencies.push(code);
                      }
                      this.save();
+                     this.$dispatch('currencies-changed', this.currencies);
                  }
              }">
 
@@ -1380,10 +1379,10 @@
             </div>
 
             <div class="p-6 space-y-4">
-                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
-                    <p class="text-sm text-amber-800 dark:text-amber-300">
-                        <strong>Курси валют:</strong> Автоматично оновлюються з НБУ щодня о 10:30.
-                        Всі суми в іноземній валюті конвертуються в гривні за курсом на дату транзакції.
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <p class="text-sm text-blue-800 dark:text-blue-300">
+                        <strong>Мультивалютний облік:</strong> Кошти зберігаються в тій валюті, в якій надійшли.
+                        Баланс відображається окремо по кожній валюті. Еквівалент в гривні — довідково.
                     </p>
                 </div>
 

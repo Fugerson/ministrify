@@ -25,6 +25,7 @@ class Transaction extends Model
     public const SOURCE_INCOME = 'income';
     public const SOURCE_EXPENSE = 'expense';
     public const SOURCE_TRANSFER = 'transfer';
+    public const SOURCE_EXCHANGE = 'exchange';
 
     public const SOURCE_TYPES = [
         self::SOURCE_TITHE => 'Десятина',
@@ -33,6 +34,7 @@ class Transaction extends Model
         self::SOURCE_INCOME => 'Надходження',
         self::SOURCE_EXPENSE => 'Витрата',
         self::SOURCE_TRANSFER => 'Переказ',
+        self::SOURCE_EXCHANGE => 'Обмін валюти',
     ];
 
     // Statuses
@@ -94,6 +96,7 @@ class Transaction extends Model
         'notes',
         'purpose',
         'paid_at',
+        'related_transaction_id',
         // 'recorded_by' - intentionally excluded, set manually for security
     ];
 
@@ -178,6 +181,11 @@ class Transaction extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(TransactionAttachment::class);
+    }
+
+    public function relatedTransaction(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class, 'related_transaction_id');
     }
 
     // ==================

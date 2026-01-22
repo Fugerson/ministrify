@@ -3,13 +3,29 @@
 @section('title', 'Надходження')
 
 @section('actions')
-<a href="{{ route('finances.incomes.create') }}"
-   class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
-    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-    </svg>
-    Надходження
-</a>
+<div class="flex items-center space-x-2">
+    <a href="{{ route('finances.incomes.create') }}"
+       class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Надходження
+    </a>
+    <a href="{{ route('finances.expenses.create') }}"
+       class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+        </svg>
+        Витрата
+    </a>
+    <a href="{{ route('finances.exchange.create') }}"
+       class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+        </svg>
+        Обмін
+    </a>
+</div>
 @endsection
 
 @section('content')
@@ -42,19 +58,9 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
-            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                <p class="text-sm text-green-600 dark:text-green-400">Загалом</p>
-                <p class="text-2xl font-bold text-green-700 dark:text-green-300">{{ number_format($totals['total'], 0, ',', ' ') }} ₴</p>
-            </div>
-            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                <p class="text-sm text-blue-600 dark:text-blue-400">Десятини</p>
-                <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ number_format($totals['tithes'], 0, ',', ' ') }} ₴</p>
-            </div>
-            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-                <p class="text-sm text-purple-600 dark:text-purple-400">Пожертви</p>
-                <p class="text-2xl font-bold text-purple-700 dark:text-purple-300">{{ number_format($totals['offerings'], 0, ',', ' ') }} ₴</p>
-            </div>
+        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 inline-block">
+            <p class="text-sm text-green-600 dark:text-green-400">Загалом за місяць</p>
+            <p class="text-2xl font-bold text-green-700 dark:text-green-300">{{ number_format($totals['total'], 0, ',', ' ') }} ₴</p>
         </div>
     </div>
 

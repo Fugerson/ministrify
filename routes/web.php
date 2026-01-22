@@ -438,6 +438,10 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('expenses/{expense}', [FinanceController::class, 'updateExpense'])->name('expenses.update');
         Route::delete('expenses/{expense}', [FinanceController::class, 'destroyExpense'])->name('expenses.destroy');
 
+        // Currency Exchange
+        Route::get('exchange', [FinanceController::class, 'createExchange'])->name('exchange.create');
+        Route::post('exchange', [FinanceController::class, 'storeExchange'])->name('exchange.store');
+
         // Categories
         Route::get('categories', [FinanceController::class, 'categories'])->name('categories.index');
         Route::post('categories', [FinanceController::class, 'storeCategory'])->name('categories.store');

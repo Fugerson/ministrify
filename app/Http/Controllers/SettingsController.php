@@ -292,18 +292,34 @@ class SettingsController extends Controller
     }
 
     /**
-     * Update finance settings (initial balance)
+     * Update finance settings (initial balance - multi-currency)
      */
     public function updateFinance(Request $request)
     {
         $validated = $request->validate([
-            'initial_balance' => 'required|numeric|min:0',
+            'initial_balances' => 'required|array',
+            'initial_balances.UAH' => 'nullable|numeric|min:0',
+            'initial_balances.USD' => 'nullable|numeric|min:0',
+            'initial_balances.EUR' => 'nullable|numeric|min:0',
             'initial_balance_date' => 'required|date',
         ]);
 
         $church = $this->getCurrentChurch();
+
+        // Filter out zero/null values and build the balances array
+        $balances = [];
+        foreach ($validated['initial_balances'] as $currency => $amount) {
+            if ($amount && $amount > 0) {
+                $balances[$currency] = (float) $amount;
+            }
+        }
+
+        // Also update legacy field for backwards compatibility
+        $uahBalance = $balances['UAH'] ?? 0;
+
         $church->update([
-            'initial_balance' => $validated['initial_balance'],
+            'initial_balances' => $balances ?: null,
+            'initial_balance' => $uahBalance,
             'initial_balance_date' => $validated['initial_balance_date'],
         ]);
 

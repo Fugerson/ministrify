@@ -18,6 +18,13 @@
         </svg>
         Витрата
     </a>
+    <a href="{{ route('finances.exchange.create') }}"
+       class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+        </svg>
+        Обмін
+    </a>
 </div>
 @endsection
 
@@ -56,47 +63,80 @@
         </div>
     </div>
 
-    <!-- Current Balance Card -->
+    <!-- Current Balance Card - Multi-currency -->
     <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-6 text-white">
         <div>
-            <p class="text-indigo-100 text-sm font-medium">Поточний баланс каси (в гривнях)</p>
-            <p class="text-4xl font-bold mt-1">{{ number_format($currentBalance, 0, ',', ' ') }} ₴</p>
-                <div class="mt-3 text-sm text-indigo-100 space-y-1 max-w-sm">
-                    @if($initialBalance > 0)
-                    <div class="flex justify-between gap-4">
-                        <span>Початковий баланс{{ $initialBalanceDate ? ' (' . $initialBalanceDate->format('d.m.Y') . ')' : '' }}:</span>
-                        <span class="font-medium whitespace-nowrap">{{ number_format($initialBalance, 0, ',', ' ') }} ₴</span>
-                    </div>
-                    @endif
-                    <div class="flex justify-between gap-4">
-                        <span>+ Всього надходжень:</span>
-                        <span class="font-medium text-green-200 whitespace-nowrap">{{ number_format($allTimeIncome, 0, ',', ' ') }} ₴</span>
-                    </div>
-                    <div class="flex justify-between gap-4">
-                        <span>- Всього витрат:</span>
-                        <span class="font-medium text-red-200 whitespace-nowrap">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
-                    </div>
-                </div>
-                @if(count($incomeByCurrency) > 1 || count($expenseByCurrency) > 1 || !empty($incomeByCurrency['USD']) || !empty($incomeByCurrency['EUR']) || !empty($expenseByCurrency['USD']) || !empty($expenseByCurrency['EUR']))
-                <div class="mt-3 pt-3 border-t border-white/20">
-                    <p class="text-xs text-indigo-200 mb-2">За період по валютах:</p>
-                    <div class="flex flex-wrap gap-3">
-                        @foreach(['UAH' => '₴', 'USD' => '$', 'EUR' => '€'] as $code => $symbol)
-                            @php
-                                $income = $incomeByCurrency[$code] ?? 0;
-                                $expense = $expenseByCurrency[$code] ?? 0;
-                            @endphp
-                            @if($income > 0 || $expense > 0)
-                            <div class="bg-white/10 rounded-lg px-3 py-1.5">
-                                <span class="font-medium">{{ $symbol }}</span>
-                                <span class="text-green-200">+{{ number_format($income, 0, ',', ' ') }}</span>
-                                <span class="text-red-200">-{{ number_format($expense, 0, ',', ' ') }}</span>
-                            </div>
+            <p class="text-indigo-100 text-sm font-medium mb-3">Поточний баланс каси</p>
+
+            @php
+                $currencySymbols = ['UAH' => '₴', 'USD' => '$', 'EUR' => '€'];
+                $hasMultipleCurrencies = count($balancesByCurrency) > 1 || isset($balancesByCurrency['USD']) || isset($balancesByCurrency['EUR']);
+            @endphp
+
+            <!-- Show balance for each currency -->
+            <div class="flex flex-wrap gap-4 items-baseline">
+                @foreach(['UAH', 'USD', 'EUR'] as $code)
+                    @if(isset($balancesByCurrency[$code]) && ($balancesByCurrency[$code] != 0 || $code === 'UAH'))
+                        @php
+                            $balance = $balancesByCurrency[$code];
+                            $symbol = $currencySymbols[$code];
+                        @endphp
+                        <div class="@if($code === 'UAH') @else bg-white/10 rounded-lg px-4 py-2 @endif">
+                            @if($code === 'UAH')
+                                <p class="text-4xl font-bold">{{ number_format($balance, 0, ',', ' ') }} {{ $symbol }}</p>
+                            @else
+                                <span class="text-2xl font-bold {{ $balance >= 0 ? '' : 'text-red-200' }}">
+                                    {{ $balance >= 0 ? '' : '-' }}{{ $symbol }}{{ number_format(abs($balance), 0, ',', ' ') }}
+                                </span>
                             @endif
-                        @endforeach
-                    </div>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+
+            @if($hasMultipleCurrencies)
+            <p class="text-xs text-indigo-200 mt-2">
+                Еквівалент у гривні: {{ number_format($currentBalance, 0, ',', ' ') }} ₴
+            </p>
+            @endif
+
+            <div class="mt-4 text-sm text-indigo-100 space-y-1 max-w-sm">
+                @if($initialBalance > 0)
+                <div class="flex justify-between gap-4">
+                    <span>Початковий баланс{{ $initialBalanceDate ? ' (' . $initialBalanceDate->format('d.m.Y') . ')' : '' }}:</span>
+                    <span class="font-medium whitespace-nowrap">{{ number_format($initialBalance, 0, ',', ' ') }} ₴</span>
                 </div>
                 @endif
+                <div class="flex justify-between gap-4">
+                    <span>+ Всього надходжень:</span>
+                    <span class="font-medium text-green-200 whitespace-nowrap">{{ number_format($allTimeIncome, 0, ',', ' ') }} ₴</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                    <span>- Всього витрат:</span>
+                    <span class="font-medium text-red-200 whitespace-nowrap">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
+                </div>
+            </div>
+
+            @if(count($incomeByCurrency) > 1 || count($expenseByCurrency) > 1 || !empty($incomeByCurrency['USD']) || !empty($incomeByCurrency['EUR']) || !empty($expenseByCurrency['USD']) || !empty($expenseByCurrency['EUR']))
+            <div class="mt-3 pt-3 border-t border-white/20">
+                <p class="text-xs text-indigo-200 mb-2">Рух за період по валютах:</p>
+                <div class="flex flex-wrap gap-3">
+                    @foreach(['UAH' => '₴', 'USD' => '$', 'EUR' => '€'] as $code => $symbol)
+                        @php
+                            $income = $incomeByCurrency[$code] ?? 0;
+                            $expense = $expenseByCurrency[$code] ?? 0;
+                        @endphp
+                        @if($income > 0 || $expense > 0)
+                        <div class="bg-white/10 rounded-lg px-3 py-1.5">
+                            <span class="font-medium">{{ $symbol }}</span>
+                            <span class="text-green-200">+{{ number_format($income, 0, ',', ' ') }}</span>
+                            <span class="text-red-200">-{{ number_format($expense, 0, ',', ' ') }}</span>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
         @if(!$initialBalance && !$initialBalanceDate)
         <div class="mt-4 pt-4 border-t border-white/20">

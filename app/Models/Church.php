@@ -44,6 +44,7 @@ class Church extends Model
         'attendance_enabled',
         'initial_balance',
         'initial_balance_date',
+        'initial_balances',
         'monobank_token',
         'monobank_account_id',
         'monobank_auto_sync',
@@ -66,6 +67,7 @@ class Church extends Model
         'attendance_enabled' => 'boolean',
         'initial_balance' => 'decimal:2',
         'initial_balance_date' => 'date',
+        'initial_balances' => 'array',
         'monobank_auto_sync' => 'boolean',
         'monobank_last_sync' => 'datetime',
         'privatbank_auto_sync' => 'boolean',
@@ -446,6 +448,42 @@ class Church extends Model
             'total_expense' => $this->total_expense,
             'current_balance' => $this->current_balance,
         ];
+    }
+
+    /**
+     * Get initial balance for a specific currency
+     */
+    public function getInitialBalanceForCurrency(string $currency): float
+    {
+        // Try new JSON field first
+        if ($this->initial_balances && isset($this->initial_balances[$currency])) {
+            return (float) $this->initial_balances[$currency];
+        }
+
+        // Fallback to old field for UAH (backwards compatibility)
+        if ($currency === 'UAH' && $this->initial_balance) {
+            return (float) $this->initial_balance;
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Get all initial balances (multi-currency)
+     */
+    public function getAllInitialBalances(): array
+    {
+        // If new field exists, use it
+        if ($this->initial_balances) {
+            return $this->initial_balances;
+        }
+
+        // Fallback to old field
+        if ($this->initial_balance) {
+            return ['UAH' => (float) $this->initial_balance];
+        }
+
+        return [];
     }
 
     // ========== Website Builder Public Getters ==========

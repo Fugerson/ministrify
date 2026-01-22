@@ -5,7 +5,6 @@
         ['id' => 'analytics', 'route' => 'finances.index', 'label' => 'Аналітика'],
         ['id' => 'incomes', 'route' => 'finances.incomes', 'label' => 'Надходження'],
         ['id' => 'expenses', 'route' => 'finances.expenses.index', 'label' => 'Витрати'],
-        ['id' => 'donations', 'route' => 'donations.index', 'label' => 'Пожертви'],
         ['id' => 'budgets', 'route' => 'finances.budgets', 'label' => 'Бюджети'],
         ['id' => 'cards', 'route' => 'finances.cards', 'label' => 'Моя карта'],
     ];
