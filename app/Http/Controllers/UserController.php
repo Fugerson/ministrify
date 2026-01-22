@@ -53,8 +53,8 @@ class UserController extends Controller
         ]);
 
         // Get name and email from Person if person_id provided
-        $name = $validated['name'];
-        $email = $validated['email'];
+        $name = $validated['name'] ?? null;
+        $email = $validated['email'] ?? null;
 
         if (!empty($validated['person_id'])) {
             $person = Person::where('id', $validated['person_id'])
@@ -146,8 +146,8 @@ class UserController extends Controller
         ]);
 
         // Get name and email from Person if person_id provided
-        $name = $validated['name'];
-        $email = $validated['email'];
+        $name = $validated['name'] ?? null;
+        $email = $validated['email'] ?? null;
 
         if (!empty($validated['person_id'])) {
             $person = Person::where('id', $validated['person_id'])

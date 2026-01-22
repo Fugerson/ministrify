@@ -149,14 +149,21 @@
                        placeholder="Де обміняли, курс тощо...">
             </div>
 
+            <!-- Warning for same currency -->
+            <div x-show="fromCurrency === toCurrency" x-cloak class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                <p class="text-sm text-red-700 dark:text-red-300">
+                    Оберіть різні валюти для обміну
+                </p>
+            </div>
+
             <!-- Submit -->
             <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('finances.index') }}"
                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                     Скасувати
                 </a>
-                <button type="submit"
-                        class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" x-bind:disabled="fromCurrency === toCurrency"
+                        class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     Зареєструвати обмін
                 </button>
             </div>

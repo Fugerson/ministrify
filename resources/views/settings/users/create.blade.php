@@ -28,12 +28,20 @@
         </div>
 
         <!-- Show selected person info -->
-        <div x-show="personSelected" x-cloak class="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+        <div x-show="personSelected && personSelected?.email" x-cloak class="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
             <p class="text-sm text-green-700 dark:text-green-300">
                 <span class="font-medium" x-text="personSelected?.full_name"></span>
-                <span x-show="personSelected?.email" class="text-green-600 dark:text-green-400">
+                <span class="text-green-600 dark:text-green-400">
                     (<span x-text="personSelected?.email"></span>)
                 </span>
+            </p>
+        </div>
+
+        <!-- Warning when person has no email -->
+        <div x-show="personSelected && !personSelected?.email" x-cloak class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4">
+            <p class="text-sm text-amber-700 dark:text-amber-300">
+                <span class="font-medium" x-text="personSelected?.full_name"></span>
+                — немає email. Додайте email в профілі людини.
             </p>
         </div>
 
