@@ -143,6 +143,8 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle.login');
     Route::get('register', [RegisterController::class, 'showRegister'])->name('register');
     Route::post('register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
+    Route::get('join', [RegisterController::class, 'showJoin'])->name('join');
+    Route::post('join', [RegisterController::class, 'join'])->name('join.store')->middleware('throttle:5,1');
     Route::get('forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:3,1');
     Route::get('reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');

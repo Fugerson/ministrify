@@ -69,15 +69,21 @@
     @endif
 </form>
 
-<div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 text-center">
-    <p class="text-sm text-gray-500 dark:text-gray-400">
-        Ще немає акаунту?
-    </p>
-    <a href="{{ route('register') }}" class="mt-2 inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold">
-        Зареєструвати церкву
-        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-    </a>
+<div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 text-center space-y-3">
+    <div>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Хочете приєднатися до церкви?</p>
+        <a href="{{ route('join') }}" class="mt-1 inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold">
+            Приєднатися
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
+    <div>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Хочете зареєструвати нову церкву?</p>
+        <a href="{{ route('register') }}" class="mt-1 inline-flex items-center text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm">
+            Реєстрація церкви →
+        </a>
+    </div>
 </div>
 @endsection
