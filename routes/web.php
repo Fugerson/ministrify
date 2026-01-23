@@ -519,6 +519,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('telegram/webhook', [SettingsController::class, 'setupWebhook'])->name('telegram.webhook');
         Route::get('telegram/status', [SettingsController::class, 'getTelegramStatus'])->name('telegram.status');
         Route::put('notifications', [SettingsController::class, 'updateNotifications'])->name('notifications');
+        Route::put('self-registration', [SettingsController::class, 'updateSelfRegistration'])->name('self-registration');
         Route::put('public-site', [SettingsController::class, 'updatePublicSite'])->name('public-site');
         Route::put('payments', [SettingsController::class, 'updatePaymentSettings'])->name('payments');
         Route::put('theme-color', [SettingsController::class, 'updateThemeColor'])->name('theme-color');

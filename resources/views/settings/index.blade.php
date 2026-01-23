@@ -1427,6 +1427,62 @@
 
     <!-- Users Tab -->
     <div x-show="activeTab === 'users'" x-cloak class="space-y-6">
+        <!-- Self-registration setting -->
+        @admin
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+             x-data="{
+                 enabled: {{ $church->getSetting('self_registration_enabled') !== false ? 'true' : 'false' }},
+                 saving: false,
+                 toggle() {
+                     this.enabled = !this.enabled;
+                     this.saving = true;
+                     fetch('{{ route('settings.self-registration') }}', {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                             'Accept': 'application/json'
+                         },
+                         body: JSON.stringify({
+                             _method: 'PUT',
+                             enabled: this.enabled
+                         })
+                     }).then(r => r.json()).then(() => {
+                         this.saving = false;
+                         showGlobalToast(this.enabled ? 'Самореєстрацію увімкнено' : 'Самореєстрацію вимкнено', 'success');
+                     }).catch(() => {
+                         this.enabled = !this.enabled;
+                         this.saving = false;
+                         showGlobalToast('Помилка збереження', 'error');
+                     });
+                 }
+             }">
+            <div class="px-4 md:px-6 py-4 flex items-center justify-between">
+                <div class="flex-1">
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-white">Самореєстрація учасників</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Дозволити людям самостійно реєструватися у вашій церкві</p>
+                </div>
+                <button @click="toggle()" :disabled="saving"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                        :class="enabled ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-600'"
+                        role="switch" :aria-checked="enabled">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                          :class="enabled ? 'translate-x-5' : 'translate-x-0'"></span>
+                </button>
+            </div>
+            <div x-show="enabled" x-collapse class="px-4 md:px-6 pb-4 pt-0">
+                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                    <p class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Нові користувачі отримають базовий доступ. Ви можете призначити їм роль пізніше.
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endadmin
+
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>

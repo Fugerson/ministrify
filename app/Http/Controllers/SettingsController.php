@@ -194,6 +194,18 @@ class SettingsController extends Controller
         return back()->with('success', 'Налаштування сповіщень оновлено.');
     }
 
+    public function updateSelfRegistration(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+
+        $settings = $church->settings ?? [];
+        $settings['self_registration_enabled'] = $request->boolean('enabled');
+
+        $church->update(['settings' => $settings]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function updatePublicSite(Request $request)
     {
         $church = $this->getCurrentChurch();
