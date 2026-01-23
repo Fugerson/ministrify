@@ -13,6 +13,10 @@ class MinistryController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->canView('ministries')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
         $user = auth()->user();
 

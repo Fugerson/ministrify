@@ -18,6 +18,10 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
+        if (!auth()->user()->canView('events')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
 
         $query = Event::where('church_id', $church->id)
@@ -35,6 +39,10 @@ class EventController extends Controller
 
     public function schedule(Request $request)
     {
+        if (!auth()->user()->canView('events')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
 
         $view = $request->get('view', 'month');

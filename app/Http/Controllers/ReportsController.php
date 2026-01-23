@@ -20,6 +20,10 @@ class ReportsController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->canView('reports')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
 
         // Quick stats

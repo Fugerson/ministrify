@@ -11,6 +11,10 @@ class GroupController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->canView('groups')) {
+            abort(403);
+        }
+
         $groups = Group::where('church_id', $this->getCurrentChurch()->id)
             ->with(['leader', 'members'])
             ->withCount('members')

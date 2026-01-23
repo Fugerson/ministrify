@@ -17,6 +17,10 @@ class ResourceController extends Controller
      */
     public function index(Request $request, ?Resource $folder = null)
     {
+        if (!auth()->user()->canView('resources')) {
+            abort(403);
+        }
+
         $churchId = $this->getCurrentChurch()->id;
 
         // Validate folder belongs to church and is a general resource (not ministry-specific)

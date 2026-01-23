@@ -19,6 +19,10 @@ class BoardController extends Controller
     // Task Tracker - Single board for all church tasks
     public function index(Request $request)
     {
+        if (!auth()->user()->canView('boards')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
 
         // Get or create the main church task tracker

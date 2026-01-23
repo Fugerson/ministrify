@@ -28,6 +28,10 @@ class PersonController extends Controller
     }
     public function index(Request $request)
     {
+        if (!auth()->user()->canView('people')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
 
         $query = Person::where('church_id', $church->id)

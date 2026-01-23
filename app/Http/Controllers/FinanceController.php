@@ -21,6 +21,10 @@ class FinanceController extends Controller
 {
     public function index(Request $request)
     {
+        if (!auth()->user()->canView('finances')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
 
         $year = $request->get('year', now()->year);

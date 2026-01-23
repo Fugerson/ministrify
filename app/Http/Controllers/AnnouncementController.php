@@ -12,6 +12,10 @@ class AnnouncementController extends Controller
      */
     public function index()
     {
+        if (!auth()->user()->canView('announcements')) {
+            abort(403);
+        }
+
         $user = auth()->user();
         $church = $this->getCurrentChurch();
 
