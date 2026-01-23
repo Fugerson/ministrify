@@ -417,6 +417,7 @@
                                             <input type="email" x-model="userEmail" x-ref="emailInput"
                                                    @keydown.enter="updateEmail()"
                                                    @keydown.escape="editingEmail = false; userEmail = '{{ $person->user->email }}'"
+                                                   @change.stop
                                                    class="px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white w-48">
                                             <button @click="updateEmail()" class="p-1 text-green-600 hover:text-green-700">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -441,7 +442,7 @@
                         <!-- System Role Selector -->
                         <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                             <span class="text-xs text-gray-500 dark:text-gray-400">Рівень доступу:</span>
-                            <select x-model="churchRoleId" @change="updateRole()"
+                            <select x-model="churchRoleId" @change.stop="updateRole()"
                                     :disabled="saving || {{ $person->user->id === auth()->id() ? 'true' : 'false' }}"
                                     class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
                                 <option value="" class="bg-white dark:bg-gray-800 text-amber-600">Очікує підтвердження</option>
