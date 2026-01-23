@@ -4,19 +4,19 @@
 
 @section('content')
 <div x-data="quickEdit()" class="space-y-4">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <a href="{{ route('people.index') }}" class="inline-flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm mb-2">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-                Назад до списку
-            </a>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Швидке редагування</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Редагуйте дані прямо в таблиці, як в Excel</p>
-        </div>
-        <div class="flex items-center gap-3">
+    <!-- Header - Sticky -->
+    <div class="sticky top-16 z-40 bg-gray-50 dark:bg-gray-900 -mx-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <a href="{{ route('people.index') }}" class="inline-flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm mb-1">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    Назад до списку
+                </a>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">Швидке редагування</h1>
+            </div>
+            <div class="flex items-center gap-3">
             <!-- Bulk actions -->
             <template x-if="selectedCount > 0">
                 <div class="flex items-center gap-2">
@@ -59,6 +59,7 @@
                 </svg>
                 <span x-text="saving ? 'Зберігаю...' : 'Зберегти все'"></span>
             </button>
+        </div>
         </div>
     </div>
 
