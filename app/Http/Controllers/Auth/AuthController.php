@@ -73,6 +73,12 @@ class AuthController extends Controller
                 ]);
             }
 
+            // Clear intended URL if it's a signed verification link (to prevent 403 errors)
+            $intendedUrl = $request->session()->get('url.intended', '');
+            if (str_contains($intendedUrl, 'email/verify/')) {
+                $request->session()->forget('url.intended');
+            }
+
             // Redirect super admins to system admin panel
             if ($user->isSuperAdmin()) {
                 return redirect()->intended(route('system.index'));
@@ -193,16 +199,25 @@ class AuthController extends Controller
         $user = \App\Models\User::findOrFail($request->route('id'));
 
         if (!hash_equals(sha1($user->getEmailForVerification()), (string) $request->route('hash'))) {
-            return redirect()->route('verification.notice')->with('error', 'Невірне посилання для верифікації.');
+            return redirect()->route('login')->with('error', 'Невірне посилання для верифікації.');
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard'))->with('success', 'Email вже підтверджено.');
+            // Auto-login and redirect
+            if (!Auth::check()) {
+                Auth::login($user);
+            }
+            return redirect()->route('dashboard')->with('success', 'Email вже підтверджено.');
         }
 
         $user->markEmailAsVerified();
 
-        return redirect()->intended(route('dashboard'))->with('success', 'Email успішно підтверджено!');
+        // Auto-login after verification
+        if (!Auth::check()) {
+            Auth::login($user);
+        }
+
+        return redirect()->route('dashboard')->with('success', 'Email успішно підтверджено!');
     }
 
     /**

@@ -154,13 +154,15 @@ Route::post('stop-impersonating', [SystemAdminController::class, 'stopImpersonat
 // Email Verification
 Route::middleware('auth')->group(function () {
     Route::get('email/verify', [AuthController::class, 'verificationNotice'])->name('verification.notice');
-    Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
     Route::post('email/verification-notification', [AuthController::class, 'resendVerification'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
 });
+
+// Verification link can be clicked without being logged in
+Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
 
 // Two-Factor Authentication
 Route::get('two-factor/challenge', [\App\Http\Controllers\TwoFactorController::class, 'challenge'])->name('two-factor.challenge');

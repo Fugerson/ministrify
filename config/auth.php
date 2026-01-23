@@ -5,6 +5,11 @@ return [
         'guard' => 'web',
         'passwords' => 'users',
     ],
+
+    // Email verification link expires after 24 hours (in minutes)
+    'verification' => [
+        'expire' => 1440,
+    ],
     'guards' => [
         'web' => [
             'driver' => 'session',
