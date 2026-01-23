@@ -39,6 +39,9 @@ services:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - ALERT_TELEGRAM_BOT_TOKEN=${ALERT_TELEGRAM_BOT_TOKEN:-}
       - ALERT_TELEGRAM_CHAT_ID=${ALERT_TELEGRAM_CHAT_ID:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-}
     volumes:
       - app_storage:/var/www/html/storage/app/public
       - ./docker/php/production.ini:/usr/local/etc/php/conf.d/production.ini
