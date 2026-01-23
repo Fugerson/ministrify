@@ -38,10 +38,10 @@ class ChurchRolePermission extends Model
             'description' => 'Малі групи та їх учасники',
         ],
         'ministries' => [
-            'label' => 'Служіння',
+            'label' => 'Команди',
             'icon' => 'heart',
             'actions' => ['view', 'create', 'edit', 'delete'],
-            'description' => 'Служіння та команди',
+            'description' => 'Команди служіння',
         ],
         'events' => [
             'label' => 'Розклад',
