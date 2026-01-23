@@ -36,5 +36,10 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('role', function (string $role) {
             return auth()->check() && auth()->user()->hasRole($role);
         });
+
+        // Check if user has ANY church role assigned (not a pending self-registered user)
+        Blade::if('hasChurchRole', function () {
+            return auth()->check() && auth()->user()->churchRole !== null;
+        });
     }
 }
