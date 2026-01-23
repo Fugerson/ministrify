@@ -4,111 +4,112 @@
 
 @section('content')
 <div x-data="quickEdit()" class="space-y-4">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <a href="{{ route('people.index') }}" class="inline-flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm mb-2">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-                Назад до списку
-            </a>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Швидке редагування</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Редагуйте дані прямо в таблиці, як в Excel</p>
-        </div>
-        <div class="flex items-center gap-3">
-            <span x-show="hasChanges" class="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <circle cx="10" cy="10" r="5"/>
-                </svg>
-                Є незбережені зміни
-            </span>
-            <button @click="saveAll()" :disabled="saving || !hasChanges"
-                    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white rounded-xl font-medium transition-colors">
-                <svg x-show="!saving" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                <svg x-show="saving" class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-                <span x-text="saving ? 'Зберігаю...' : 'Зберегти все'"></span>
-            </button>
-        </div>
+    <!-- Minimal Header -->
+    <div class="flex items-center justify-between mb-2">
+        <a href="{{ route('people.index') }}" class="inline-flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Швидке редагування
+        </a>
     </div>
 
-    <!-- Floating Selection Bar - appears when items selected -->
-    <div x-show="selectedCount > 0" x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-4"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 translate-y-4"
-         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 dark:bg-gray-700 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-4">
-        <span class="text-sm">
-            Вибрано: <span x-text="selectedCount" class="font-bold"></span>
-        </span>
-        <div class="w-px h-6 bg-gray-600"></div>
-        <button @click="bulkGrantAccess()" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium transition-colors">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-            </svg>
-            Надати доступ
-        </button>
-        <button @click="bulkDelete()" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium transition-colors">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-            </svg>
-            Видалити
-        </button>
-        <button @click="clearSelection()" class="p-2 hover:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors" title="Скасувати вибір">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
-    </div>
-
-    <!-- Filters Bar - Fixed -->
-    <div class="sticky top-16 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-        <div class="flex flex-wrap items-center gap-3">
-            <div class="flex-1 min-w-[180px]">
+    <!-- FLOATING TOOLBAR - Always visible at bottom -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-2xl px-4 py-3">
+        <div class="max-w-screen-2xl mx-auto flex flex-wrap items-center gap-3">
+            <!-- Search -->
+            <div class="w-48">
                 <input type="text" x-model="searchQuery" placeholder="Пошук..."
-                       class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
+                       class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
             </div>
-            <select x-model="filterMinistry" class="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
-                <option value="">Всі команди</option>
+
+            <!-- Filters -->
+            <select x-model="filterMinistry" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
+                <option value="">Команда</option>
                 @foreach($ministries as $ministry)
                 <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                 @endforeach
             </select>
-            <select x-model="filterStatus" class="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
-                <option value="">Всі статуси</option>
+            <select x-model="filterStatus" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
+                <option value="">Статус</option>
                 <option value="guest">Гість</option>
                 <option value="newcomer">Новоприбулий</option>
                 <option value="member">Член церкви</option>
-                <option value="active">Активний член</option>
+                <option value="active">Активний</option>
             </select>
-            <select x-model="filterGender" class="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
+            <select x-model="filterGender" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
                 <option value="">Стать</option>
-                <option value="male">Чоловіки</option>
-                <option value="female">Жінки</option>
+                <option value="male">Ч</option>
+                <option value="female">Ж</option>
             </select>
+
             <button @click="clearFilters()" x-show="hasFilters" x-cloak class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                Скинути
+                ✕
             </button>
-            <button @click="addNewRow()" class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors">
+
+            <!-- Divider -->
+            <div class="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+
+            <!-- Add new -->
+            <button @click="addNewRow()" class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
                 Новий
             </button>
+
+            <!-- Selection actions -->
+            <template x-if="selectedCount > 0">
+                <div class="flex items-center gap-2 ml-2 pl-3 border-l border-gray-300 dark:border-gray-600">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Вибрано: <span x-text="selectedCount" class="font-bold text-primary-600"></span>
+                    </span>
+                    <button @click="bulkGrantAccess()" class="inline-flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                        Доступ
+                    </button>
+                    <button @click="bulkDelete()" class="inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                    <button @click="clearSelection()" class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </template>
+
+            <!-- Spacer -->
+            <div class="flex-1"></div>
+
+            <!-- Save -->
+            <span x-show="hasChanges" class="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <circle cx="10" cy="10" r="5"/>
+                </svg>
+                Зміни
+            </span>
+            <button @click="saveAll()" :disabled="saving || !hasChanges"
+                    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white rounded-lg font-medium text-sm">
+                <svg x-show="!saving" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <svg x-show="saving" class="w-4 h-4 mr-1 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span x-text="saving ? 'Зберігаю...' : 'Зберегти'"></span>
+            </button>
         </div>
     </div>
 
     <!-- Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative" style="z-index: 0;">
-        <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-320px)]" style="min-height: 400px;">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative mb-20" style="z-index: 0;">
+        <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-180px)]" style="min-height: 400px;">
             <table class="w-full text-sm" style="min-width: 2800px;">
                 <thead class="bg-gray-100 dark:bg-gray-700 sticky top-0 z-20">
                     <tr>
