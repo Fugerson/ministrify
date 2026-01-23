@@ -69,39 +69,39 @@
         </button>
     </div>
 
-    <!-- Filters Bar -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-        <div class="flex flex-wrap items-center gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <input type="text" x-model="searchQuery" placeholder="Пошук по всіх полях..."
-                       class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20">
+    <!-- Filters Bar - Fixed -->
+    <div class="sticky top-16 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="flex-1 min-w-[180px]">
+                <input type="text" x-model="searchQuery" placeholder="Пошук..."
+                       class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
             </div>
-            <select x-model="filterMinistry" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20">
+            <select x-model="filterMinistry" class="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
                 <option value="">Всі команди</option>
                 @foreach($ministries as $ministry)
                 <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                 @endforeach
             </select>
-            <select x-model="filterStatus" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20">
+            <select x-model="filterStatus" class="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
                 <option value="">Всі статуси</option>
                 <option value="guest">Гість</option>
                 <option value="newcomer">Новоприбулий</option>
                 <option value="member">Член церкви</option>
                 <option value="active">Активний член</option>
             </select>
-            <select x-model="filterGender" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20">
-                <option value="">Всі</option>
+            <select x-model="filterGender" class="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
+                <option value="">Стать</option>
                 <option value="male">Чоловіки</option>
                 <option value="female">Жінки</option>
             </select>
-            <button @click="clearFilters()" x-show="hasFilters" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                Скинути фільтри
+            <button @click="clearFilters()" x-show="hasFilters" x-cloak class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                Скинути
             </button>
-            <button @click="addNewRow()" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button @click="addNewRow()" class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Новий рядок
+                Новий
             </button>
         </div>
     </div>
