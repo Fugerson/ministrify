@@ -20,17 +20,11 @@ class MinistryController extends Controller
         $church = $this->getCurrentChurch();
         $user = auth()->user();
 
-        $query = Ministry::where('church_id', $church->id)
-            ->with(['leader', 'members', 'positions']);
+        $ministries = Ministry::where('church_id', $church->id)
+            ->with(['leader', 'members', 'positions'])
+            ->get();
 
-        // Leaders can only see their ministries
-        if ($user->isLeader() && $user->person) {
-            $query->where('leader_id', $user->person->id);
-        }
-
-        $ministries = $query->get();
-
-        // Filter private ministries - show only to members/admins
+        // Filter ministries based on visibility settings
         if (!$user->isAdmin()) {
             $ministries = $ministries->filter(function ($ministry) {
                 return $ministry->canAccess();
