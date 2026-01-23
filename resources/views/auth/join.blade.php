@@ -38,7 +38,7 @@
     <!-- Name -->
     <div>
         <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ваше ім'я</label>
-        <input type="text" name="name" id="name" value="{{ old('name') }}" required
+        <input type="text" name="name" id="name" value="{{ old('name') }}" required autocomplete="name"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all"
                placeholder="Іван Петренко">
         @error('name')
@@ -49,7 +49,7 @@
     <!-- Email -->
     <div>
         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-        <input type="email" name="email" id="email" value="{{ old('email') }}" required
+        <input type="email" name="email" id="email" value="{{ old('email') }}" required autocomplete="email"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all"
                placeholder="ivan@example.com">
         @error('email')
@@ -60,7 +60,7 @@
     <!-- Phone (optional) -->
     <div>
         <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Телефон <span class="text-gray-400">(необов'язково)</span></label>
-        <input type="tel" name="phone" id="phone" value="{{ old('phone') }}"
+        <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" autocomplete="tel"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all"
                placeholder="+380 XX XXX XX XX">
     </div>
@@ -69,7 +69,7 @@
     <div>
         <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Пароль</label>
         <div class="relative">
-            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" required
+            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" required autocomplete="new-password"
                    class="w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
             <button type="button" @click="showPassword = !showPassword"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
@@ -90,7 +90,7 @@
     <!-- Password Confirmation -->
     <div>
         <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Підтвердження пароля</label>
-        <input :type="showPassword ? 'text' : 'password'" name="password_confirmation" id="password_confirmation" required
+        <input :type="showPassword ? 'text' : 'password'" name="password_confirmation" id="password_confirmation" required autocomplete="new-password"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
     </div>
 
