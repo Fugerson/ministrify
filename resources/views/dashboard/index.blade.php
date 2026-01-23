@@ -13,6 +13,7 @@
         <p class="text-sm text-gray-500 dark:text-gray-400">{{ now()->locale('uk')->translatedFormat('l, d F') }}</p>
     </div>
 
+    @hasChurchRole
     <!-- Stats Grid - Informative Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mt-4 lg:mt-6">
         <!-- People Stats -->
@@ -600,6 +601,29 @@
         @endif
     </div>
     @endadmin
+    @else
+    <!-- Pending Approval Message for users without church role -->
+    <div class="mt-6 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-200 dark:border-amber-800 p-6 lg:p-8">
+        <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Очікування підтвердження</h2>
+            <p class="text-gray-600 dark:text-gray-400 max-w-md mb-6">
+                Ваш акаунт створено, але адміністратор ще не надав вам доступ до системи.
+                Зверніться до адміністратора вашої церкви для отримання доступу.
+            </p>
+            <a href="{{ route('profile.show') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                Мій профіль
+            </a>
+        </div>
+    </div>
+    @endhasChurchRole
 </div>
 
 @push('scripts')
