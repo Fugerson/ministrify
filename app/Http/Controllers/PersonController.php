@@ -29,7 +29,7 @@ class PersonController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('people')) {
-            abort(403);
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();

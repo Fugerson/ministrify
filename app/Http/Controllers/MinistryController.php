@@ -14,7 +14,7 @@ class MinistryController extends Controller
     public function index()
     {
         if (!auth()->user()->canView('ministries')) {
-            abort(403);
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();

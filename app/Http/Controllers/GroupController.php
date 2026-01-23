@@ -12,7 +12,7 @@ class GroupController extends Controller
     public function index()
     {
         if (!auth()->user()->canView('groups')) {
-            abort(403);
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
         }
 
         $groups = Group::where('church_id', $this->getCurrentChurch()->id)
