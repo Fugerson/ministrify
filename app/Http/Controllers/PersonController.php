@@ -709,8 +709,10 @@ class PersonController extends Controller
             return response()->json(['message' => 'Недостатньо прав'], 403);
         }
 
+        $church = $this->getCurrentChurch();
+
         $validated = $request->validate([
-            'role' => 'required|in:admin,leader,volunteer',
+            'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
         ]);
 
         if (!$person->user) {
@@ -722,7 +724,16 @@ class PersonController extends Controller
             return response()->json(['message' => 'Не можна змінювати власну роль'], 400);
         }
 
-        $person->user->update(['role' => $validated['role']]);
+        $hadNoRole = $person->user->church_role_id === null;
+        $newRoleId = $validated['church_role_id'] ?: null;
+
+        $person->user->update(['church_role_id' => $newRoleId]);
+
+        // Send notification if access was granted
+        if ($hadNoRole && $newRoleId !== null) {
+            $role = \App\Models\ChurchRole::find($newRoleId);
+            $person->user->notify(new \App\Notifications\AccessGranted($role->name, $church->name));
+        }
 
         return response()->json(['success' => true]);
     }

@@ -441,12 +441,15 @@
                         <!-- System Role Selector -->
                         <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                             <span class="text-xs text-gray-500 dark:text-gray-400">Рівень доступу:</span>
-                            <select x-model="role" @change="updateRole()"
+                            <select x-model="churchRoleId" @change="updateRole()"
                                     :disabled="saving || {{ $person->user->id === auth()->id() ? 'true' : 'false' }}"
                                     class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
-                                <option value="volunteer" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Служитель</option>
-                                <option value="leader" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Лідер команди</option>
-                                <option value="admin" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Адміністратор</option>
+                                <option value="" class="bg-white dark:bg-gray-800 text-amber-600">Очікує підтвердження</option>
+                                @foreach($churchRoles as $role)
+                                <option value="{{ $role->id }}" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                    {{ $role->name }}
+                                </option>
+                                @endforeach
                             </select>
                             <span x-show="saving" class="text-purple-600 dark:text-purple-400">
                                 <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -1140,7 +1143,7 @@ function personProfile() {
 function userRoleManager() {
     return {
         role: '{{ $person->user?->role ?? "volunteer" }}',
-        churchRoleId: {{ $person->user?->church_role_id ?? 'null' }},
+        churchRoleId: '{{ $person->user?->church_role_id ?? "" }}',
         saving: false,
         saved: false,
         showCreateModal: false,
@@ -1224,6 +1227,19 @@ function userRoleManager() {
         },
 
         async updateRole() {
+            const hadNoRole = this.churchRoleId === null || this.churchRoleId === '' || this.churchRoleId === 'null';
+            const newRoleId = this.churchRoleId || null;
+
+            // Show confirmation if granting access
+            if (hadNoRole && newRoleId) {
+                const roleSelect = document.querySelector('select[x-model="churchRoleId"]');
+                const roleName = roleSelect.options[roleSelect.selectedIndex].text;
+                if (!confirm(`Надати доступ з роллю "${roleName}"? Користувач отримає email-сповіщення.`)) {
+                    this.churchRoleId = '';
+                    return;
+                }
+            }
+
             this.saving = true;
             this.saved = false;
 
@@ -1235,7 +1251,7 @@ function userRoleManager() {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ role: this.role })
+                    body: JSON.stringify({ church_role_id: this.churchRoleId || null })
                 });
 
                 if (response.ok) {
