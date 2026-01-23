@@ -73,9 +73,11 @@ class AuthController extends Controller
                 ]);
             }
 
-            // Clear intended URL if it's a signed verification link (to prevent 403 errors)
+            // Clear intended URL if it's a signed verification link or AJAX endpoint
             $intendedUrl = $request->session()->get('url.intended', '');
-            if (str_contains($intendedUrl, 'email/verify/')) {
+            if (str_contains($intendedUrl, 'email/verify/') ||
+                str_contains($intendedUrl, 'unread-count') ||
+                str_contains($intendedUrl, '/api/')) {
                 $request->session()->forget('url.intended');
             }
 
