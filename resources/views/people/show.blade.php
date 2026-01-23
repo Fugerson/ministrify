@@ -682,7 +682,11 @@
                 @if($person->ministries->count() > 0)
                     <div class="divide-y divide-gray-100 dark:divide-gray-700">
                         @foreach($person->ministries as $ministry)
+                            @if(auth()->user()->canView('ministries'))
                             <a href="{{ route('ministries.show', $ministry) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            @else
+                            <div class="flex items-center justify-between p-4">
+                            @endif
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}20;">
                                         <svg class="w-5 h-5" style="color: {{ $ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -702,10 +706,16 @@
                                         @endif
                                     </div>
                                 </div>
+                                @if(auth()->user()->canView('ministries'))
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
+                                @endif
+                            @if(auth()->user()->canView('ministries'))
                             </a>
+                            @else
+                            </div>
+                            @endif
                         @endforeach
                     </div>
                 @else
