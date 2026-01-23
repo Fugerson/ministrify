@@ -14,8 +14,8 @@
         </a>
     </div>
 
-    <!-- FLOATING TOOLBAR - Always visible at bottom -->
-    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-2xl px-4 py-3">
+    <!-- FLOATING TOOLBAR - Always visible at bottom, respects sidebar -->
+    <div class="fixed bottom-0 left-0 right-0 lg:left-64 z-20 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-2xl px-4 py-3">
         <div class="max-w-screen-2xl mx-auto flex flex-wrap items-center gap-3">
             <!-- Search -->
             <div class="w-48">
