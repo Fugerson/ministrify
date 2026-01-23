@@ -79,8 +79,11 @@
 
         <div>
             <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль</label>
-            <select name="church_role_id" id="church_role_id" required
+            <select name="church_role_id" id="church_role_id"
                 class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('church_role_id') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
+                <option value="" {{ old('church_role_id', $user->church_role_id) === null ? 'selected' : '' }}>
+                    Очікує підтвердження (без доступу)
+                </option>
                 @foreach($churchRoles as $role)
                 <option value="{{ $role->id }}" {{ old('church_role_id', $user->church_role_id) == $role->id ? 'selected' : '' }}>
                     {{ $role->name }}
