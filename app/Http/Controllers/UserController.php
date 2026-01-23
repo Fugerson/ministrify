@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use App\Rules\SecurePassword;
+use App\Notifications\AccessGranted;
 
 class UserController extends Controller
 {
@@ -149,6 +150,7 @@ class UserController extends Controller
         $name = $validated['name'] ?? null;
         $email = $validated['email'] ?? null;
         $churchRoleId = $validated['church_role_id'] ?: null; // Convert empty string to null
+        $hadNoRole = $user->church_role_id === null; // Track if user had no role before
 
         if (!empty($validated['person_id'])) {
             $person = Person::where('id', $validated['person_id'])
@@ -190,6 +192,12 @@ class UserController extends Controller
         // Add new link
         if (!empty($validated['person_id'])) {
             $person->update(['user_id' => $user->id]);
+        }
+
+        // Send notification if user was granted access (had no role before, now has one)
+        if ($hadNoRole && $churchRoleId !== null) {
+            $role = ChurchRole::find($churchRoleId);
+            $user->notify(new AccessGranted($role->name, $church->name));
         }
 
         return redirect()->route('settings.users.index')
