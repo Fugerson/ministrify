@@ -28,7 +28,7 @@ cp .env.example .env
 
 ### 3. Запустіть Docker
 
-```bash
+ как со```bash
 docker-compose up -d
 ```
 

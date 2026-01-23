@@ -15,8 +15,13 @@ class SocialAuthController extends Controller
     /**
      * Redirect to Google OAuth
      */
-    public function redirectToGoogle()
+    public function redirectToGoogle(Request $request)
     {
+        // If joining a specific church, save church_id in session
+        if ($request->has('church_id')) {
+            $request->session()->put('google_join_church_id', $request->church_id);
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
@@ -84,6 +89,13 @@ class SocialAuthController extends Controller
             return redirect()->route('dashboard');
         }
 
+        // Check if user is joining a specific church via Google
+        $joinChurchId = $request->session()->pull('google_join_church_id');
+
+        if ($joinChurchId) {
+            return $this->createUserForChurch($request, $googleUser, $joinChurchId);
+        }
+
         // New user - store Google data in session and redirect to choose flow
         $request->session()->put('google_user', [
             'id' => $googleUser->getId(),
@@ -93,6 +105,57 @@ class SocialAuthController extends Controller
         ]);
 
         return redirect()->route('auth.google.register');
+    }
+
+    /**
+     * Create user for a specific church (self-registration via Google)
+     */
+    protected function createUserForChurch(Request $request, $googleUser, $churchId)
+    {
+        $church = \App\Models\Church::find($churchId);
+
+        if (!$church) {
+            return redirect()->route('join')->with('error', 'Церкву не знайдено.');
+        }
+
+        // Check if self-registration is enabled
+        if ($church->getSetting('self_registration_enabled') === false) {
+            return redirect()->route('join')->with('error', 'Ця церква не приймає нові реєстрації.');
+        }
+
+        // Parse name
+        $nameParts = explode(' ', $googleUser->getName(), 2);
+        $firstName = $nameParts[0];
+        $lastName = $nameParts[1] ?? '';
+
+        // Create user
+        $user = User::create([
+            'church_id' => $church->id,
+            'name' => $googleUser->getName(),
+            'email' => $googleUser->getEmail(),
+            'google_id' => $googleUser->getId(),
+            'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+            'email_verified_at' => now(),
+            'church_role_id' => null, // Basic access
+            'onboarding_completed' => true,
+        ]);
+
+        // Create linked Person record
+        \App\Models\Person::create([
+            'church_id' => $church->id,
+            'user_id' => $user->id,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $googleUser->getEmail(),
+            'membership_status' => 'newcomer',
+        ]);
+
+        // Login
+        Auth::login($user, true);
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Ласкаво просимо! Ваш акаунт створено.');
     }
 
     /**
