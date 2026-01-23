@@ -5,6 +5,7 @@
 @php
     use Illuminate\Support\Facades\Storage;
     $isAdmin = auth()->user()->isAdmin();
+    $canEdit = $canEditProfile ?? $isAdmin;
     $personMinistries = $person->ministries->keyBy('id');
     $familyMembersData = $person->family_members->map(function($m) {
         return [
@@ -20,7 +21,7 @@
 
 @section('content')
 <div class="space-y-8" x-data="personProfile()" @change="autoSave()" @tags-changed.window="autoSave()">
-    @if($isAdmin)
+    @if($canEdit)
     <!-- Auto-save status indicator -->
     <div x-show="saveStatus !== 'idle'" x-cloak
          class="fixed top-20 right-4 z-50 px-4 py-2 rounded-xl shadow-lg text-sm font-medium transition-all"
@@ -61,7 +62,7 @@
             <div class="flex flex-col sm:flex-row sm:items-end gap-4">
                 <!-- Avatar -->
                 <div class="flex-shrink-0 relative" x-data="avatarUpload()">
-                    @if($isAdmin)
+                    @if($canEdit)
                         <template x-if="preview">
                             <img :src="preview" class="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg">
                         </template>
@@ -205,7 +206,7 @@
 
             <!-- Contact Info -->
             <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                @if($isAdmin)
+                @if($canEdit)
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Телефон</p>
                         <input type="tel" name="phone" value="{{ old('phone', $person->phone) }}"
@@ -1072,7 +1073,7 @@
         @endif
     </div>
 
-    @if($isAdmin)
+    @if($canEdit)
     </form>
     @endif
 

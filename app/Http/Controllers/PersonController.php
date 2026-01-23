@@ -236,6 +236,9 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
+        // Allow viewing own profile without permission
+        $isOwnProfile = auth()->user()->person && auth()->user()->person->id === $person->id;
+
         $person->load(['tags', 'ministries.positions', 'groups', 'user', 'churchRoleRelation', 'shepherd', 'sheep', 'assignments' => function ($q) {
             $q->whereHas('event', fn($eq) => $eq->where('date', '>=', now()->subMonths(3)))
               ->with(['event.ministry', 'position'])
@@ -318,13 +321,15 @@ class PersonController extends Controller
             ];
         }
 
-        // For admin inline editing
+        // For admin inline editing or own profile editing
         $tags = collect();
         $ministries = collect();
         $churchRoles = collect();
         $shepherds = collect();
         $church = $this->getCurrentChurch();
-        if (auth()->user()->isAdmin()) {
+        $canEditProfile = auth()->user()->isAdmin() || $isOwnProfile;
+
+        if ($canEditProfile) {
             $tags = Tag::where('church_id', $church->id)->get();
             $ministries = $church->ministries()->with('positions')->get();
             $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
@@ -337,7 +342,7 @@ class PersonController extends Controller
             }
         }
 
-        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData', 'tags', 'ministries', 'churchRoles', 'shepherds', 'church'));
+        return view('people.show', compact('person', 'stats', 'activities', 'attendanceChartData', 'tags', 'ministries', 'churchRoles', 'shepherds', 'church', 'isOwnProfile', 'canEditProfile'));
     }
 
     private function calculateAttendanceRate(Person $person): ?int
@@ -376,26 +381,48 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'telegram_username' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:500',
-            'birth_date' => 'nullable|date',
-            'baptism_date' => 'nullable|date',
-            'anniversary' => 'nullable|date',
-            'gender' => 'nullable|in:male,female',
-            'marital_status' => 'nullable|in:single,married,widowed,divorced',
-            'joined_date' => 'nullable|date',
-            'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
-            'church_role_id' => 'nullable|exists:church_roles,id',
-            'notes' => 'nullable|string',
-            'photo' => 'nullable|image|max:2048',
-            'tags' => 'nullable|array',
-            'ministries' => 'nullable|array',
-        ]);
+        $user = auth()->user();
+        $isOwnProfile = $user->person && $user->person->id === $person->id;
+        $isAdmin = $user->isAdmin();
+
+        // If not admin and not own profile, deny access
+        if (!$isAdmin && !$isOwnProfile) {
+            abort(403, 'У вас немає дозволу редагувати цей профіль.');
+        }
+
+        // Different validation rules for admin vs own profile
+        if ($isAdmin) {
+            $validated = $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'phone' => 'nullable|string|max:20',
+                'email' => 'nullable|email|max:255',
+                'telegram_username' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:500',
+                'birth_date' => 'nullable|date',
+                'baptism_date' => 'nullable|date',
+                'anniversary' => 'nullable|date',
+                'gender' => 'nullable|in:male,female',
+                'marital_status' => 'nullable|in:single,married,widowed,divorced',
+                'joined_date' => 'nullable|date',
+                'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
+                'church_role_id' => 'nullable|exists:church_roles,id',
+                'notes' => 'nullable|string',
+                'photo' => 'nullable|image|max:2048',
+                'tags' => 'nullable|array',
+                'ministries' => 'nullable|array',
+            ]);
+        } else {
+            // Own profile - limited fields
+            $validated = $request->validate([
+                'phone' => 'nullable|string|max:20',
+                'email' => 'nullable|email|max:255',
+                'telegram_username' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:500',
+                'birth_date' => 'nullable|date',
+                'photo' => 'nullable|image|max:2048',
+            ]);
+        }
 
         // Handle photo upload with WebP conversion
         if ($request->hasFile('photo')) {
@@ -411,24 +438,28 @@ class PersonController extends Controller
             $validated['photo'] = null;
         }
 
-        // Handle empty church_role_id
-        if (isset($validated['church_role_id']) && $validated['church_role_id'] === '') {
+        // Handle empty church_role_id (admin only)
+        if ($isAdmin && isset($validated['church_role_id']) && $validated['church_role_id'] === '') {
             $validated['church_role_id'] = null;
         }
 
         $person->update($validated);
 
-        // Sync tags
-        $person->tags()->sync($request->tags ?? []);
+        // Sync tags (admin only)
+        if ($isAdmin) {
+            $person->tags()->sync($request->tags ?? []);
+        }
 
-        // Sync ministries with positions
-        $person->ministries()->detach();
-        if ($request->has('ministries')) {
-            foreach ($request->ministries as $ministryId => $data) {
-                if (!empty($data['selected'])) {
-                    $person->ministries()->attach($ministryId, [
-                        'position_ids' => json_encode($data['positions'] ?? []),
-                    ]);
+        // Sync ministries with positions (admin only)
+        if ($isAdmin) {
+            $person->ministries()->detach();
+            if ($request->has('ministries')) {
+                foreach ($request->ministries as $ministryId => $data) {
+                    if (!empty($data['selected'])) {
+                        $person->ministries()->attach($ministryId, [
+                            'position_ids' => json_encode($data['positions'] ?? []),
+                        ]);
+                    }
                 }
             }
         }
