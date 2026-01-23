@@ -23,6 +23,12 @@
                     <span class="text-sm text-gray-600 dark:text-gray-400">
                         Вибрано: <span x-text="selectedCount" class="font-semibold"></span>
                     </span>
+                    <button @click="bulkGrantAccess()" class="inline-flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                        Надати доступ
+                    </button>
                     <button @click="bulkDelete()" class="inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium transition-colors">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -385,6 +391,59 @@
         </div>
     </div>
 
+    <!-- Grant Access Modal -->
+    <div x-show="showGrantAccessModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4 p-6" @click.away="showGrantAccessModal = false">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Надати доступ до системи</h3>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Рівень доступу</label>
+                    <select x-model="grantAccessRoleId" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 dark:text-white">
+                        <option value="">Оберіть роль...</option>
+                        @foreach($churchRoles as $role)
+                        <option value="{{ $role->id }}">{{ $role->name }}@if($role->is_admin_role) (Повний доступ)@endif</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm">
+                    <p class="text-gray-700 dark:text-gray-300">
+                        Вибрано: <span x-text="grantAccessCount" class="font-semibold"></span> людей
+                    </p>
+                    <p x-show="grantAccessNoEmail > 0" class="text-amber-600 dark:text-amber-400 mt-1">
+                        <span x-text="grantAccessNoEmail"></span> без email (буде пропущено)
+                    </p>
+                    <p x-show="grantAccessAlreadyHave > 0" class="text-gray-500 dark:text-gray-400 mt-1">
+                        <span x-text="grantAccessAlreadyHave"></span> вже мають доступ (буде пропущено)
+                    </p>
+                </div>
+
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Користувачі отримають лист з посиланням для встановлення пароля.
+                </p>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button @click="showGrantAccessModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    Скасувати
+                </button>
+                <button @click="confirmGrantAccess()" :disabled="!grantAccessRoleId || grantAccessLoading || grantAccessEligible === 0"
+                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg transition-colors">
+                    <span x-show="!grantAccessLoading">Надати доступ</span>
+                    <span x-show="grantAccessLoading">Зачекайте...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Toast -->
     <div x-show="showToast" x-cloak
          x-transition:enter="transition ease-out duration-300"
@@ -420,6 +479,14 @@ function quickEdit() {
         showDeleteModal: false,
         deleteCount: 0,
         pendingDeleteRows: [],
+        showGrantAccessModal: false,
+        grantAccessRoleId: '',
+        grantAccessCount: 0,
+        grantAccessNoEmail: 0,
+        grantAccessAlreadyHave: 0,
+        grantAccessEligible: 0,
+        grantAccessLoading: false,
+        pendingGrantAccessRows: [],
         lastSelectedIndex: null,
         resizing: false,
         resizeColIndex: null,
@@ -612,6 +679,70 @@ function quickEdit() {
 
             this.showDeleteModal = false;
             this.pendingDeleteRows = [];
+        },
+
+        bulkGrantAccess() {
+            const selected = this.rows.filter(r => r.selected && !r.isDeleted && !r.isNew);
+            if (selected.length === 0) return;
+
+            this.pendingGrantAccessRows = selected;
+            this.grantAccessCount = selected.length;
+            this.grantAccessNoEmail = selected.filter(r => !r.email).length;
+            this.grantAccessAlreadyHave = selected.filter(r => r.user_id).length;
+            this.grantAccessEligible = selected.filter(r => r.email && !r.user_id).length;
+            this.grantAccessRoleId = '';
+            this.showGrantAccessModal = true;
+        },
+
+        async confirmGrantAccess() {
+            if (!this.grantAccessRoleId || this.grantAccessEligible === 0) return;
+
+            this.grantAccessLoading = true;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+            // Get only eligible IDs (have email, no user_id)
+            const eligibleIds = this.pendingGrantAccessRows
+                .filter(r => r.email && !r.user_id)
+                .map(r => r.id);
+
+            try {
+                const response = await fetch('{{ route("people.bulk-action") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'grant_access',
+                        ids: eligibleIds,
+                        church_role_id: this.grantAccessRoleId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.showGrantAccessModal = false;
+                    this.clearSelection();
+                    this.toastMessage = data.message;
+                    this.showToast = true;
+                    setTimeout(() => this.showToast = false, 5000);
+
+                    // Update user_id for granted rows
+                    eligibleIds.forEach(id => {
+                        const row = this.rows.find(r => r.id === id);
+                        if (row) row.user_id = true; // Mark as having access
+                    });
+                } else {
+                    alert(data.message || 'Сталася помилка');
+                }
+            } catch (error) {
+                console.error('Grant access error:', error);
+                alert('Сталася помилка при наданні доступу');
+            } finally {
+                this.grantAccessLoading = false;
+            }
         },
 
         async saveAll() {

@@ -883,6 +883,7 @@ class PersonController extends Controller
             ->get();
 
         $ministries = $church->ministries()->orderBy('name')->get();
+        $churchRoles = $church->churchRoles()->orderBy('sort_order')->get();
 
         // Prepare rows data for JavaScript (avoid complex @json in Blade)
         $rows = $people->map(function ($p) {
@@ -906,6 +907,7 @@ class PersonController extends Controller
                 'anniversary' => $p->anniversary?->format('Y-m-d'),
                 'notes' => $p->notes,
                 'photo_url' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
+                'user_id' => $p->user_id,
                 'uploadingPhoto' => false,
                 'isDirty' => false,
                 'isNew' => false,
@@ -914,7 +916,7 @@ class PersonController extends Controller
             ];
         })->values();
 
-        return view('people.quick-edit', compact('rows', 'ministries'));
+        return view('people.quick-edit', compact('rows', 'ministries', 'churchRoles'));
     }
 
     /**
@@ -1085,11 +1087,12 @@ class PersonController extends Controller
     public function bulkAction(Request $request)
     {
         $validated = $request->validate([
-            'action' => 'required|in:ministry,tag,message,delete',
+            'action' => 'required|in:ministry,tag,message,delete,grant_access',
             'ids' => 'required|array',
             'ids.*' => 'integer',
             'value' => 'nullable|integer',
             'message' => 'nullable|string|max:1000',
+            'church_role_id' => 'nullable|integer|exists:church_roles,id',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -1164,6 +1167,79 @@ class PersonController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => "Надіслано {$sent} повідомлень",
+                ]);
+
+            case 'grant_access':
+                if (!auth()->user()->isAdmin()) {
+                    return response()->json(['success' => false, 'message' => 'Недостатньо прав']);
+                }
+
+                $churchRoleId = $validated['church_role_id'] ?? null;
+                if (!$churchRoleId) {
+                    return response()->json(['success' => false, 'message' => 'Оберіть рівень доступу']);
+                }
+
+                $churchRole = $church->churchRoles()->find($churchRoleId);
+                if (!$churchRole) {
+                    return response()->json(['success' => false, 'message' => 'Роль не знайдено']);
+                }
+
+                $created = 0;
+                $skipped = 0;
+                $noEmail = 0;
+
+                foreach ($people as $person) {
+                    // Skip if already has user account
+                    if ($person->user_id) {
+                        $skipped++;
+                        continue;
+                    }
+
+                    // Skip if no email
+                    if (empty($person->email)) {
+                        $noEmail++;
+                        continue;
+                    }
+
+                    // Check if email already exists
+                    if (User::where('email', $person->email)->exists()) {
+                        $skipped++;
+                        continue;
+                    }
+
+                    // Create user
+                    $password = Str::random(10);
+                    $user = User::create([
+                        'church_id' => $church->id,
+                        'name' => $person->full_name,
+                        'email' => $person->email,
+                        'password' => Hash::make($password),
+                        'church_role_id' => $churchRoleId,
+                        'onboarding_completed' => true,
+                    ]);
+
+                    // Link person to user
+                    $person->update(['user_id' => $user->id]);
+
+                    // Send invitation email
+                    $token = Password::createToken($user);
+                    $user->sendPasswordResetNotification($token, isInvite: true);
+
+                    $created++;
+                }
+
+                $message = "Створено {$created} акаунтів.";
+                if ($skipped > 0) {
+                    $message .= " Пропущено {$skipped} (вже мають доступ).";
+                }
+                if ($noEmail > 0) {
+                    $message .= " Без email: {$noEmail}.";
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'reload' => true
                 ]);
 
             case 'delete':
