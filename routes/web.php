@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\FinanceController;
@@ -146,6 +147,12 @@ Route::middleware('guest')->group(function () {
     Route::post('forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:3,1');
     Route::get('reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
     Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:5,1');
+
+    // Google OAuth
+    Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+    Route::get('auth/google/register', [SocialAuthController::class, 'showRegisterOptions'])->name('auth.google.register');
+    Route::post('auth/google/register', [SocialAuthController::class, 'completeRegistration'])->name('auth.google.complete');
 });
 
 Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');

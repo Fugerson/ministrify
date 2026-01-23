@@ -10,6 +10,7 @@
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.3",
+        "laravel/socialite": "^5.0",
         "laravel/tinker": "^2.8",
         "league/csv": "^9.27",
         "livewire/livewire": "^3.0",
