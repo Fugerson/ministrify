@@ -16,6 +16,90 @@
         @endadmin
     </div>
 
+    @php
+        $pendingUsers = $users->whereNull('church_role_id');
+        $activeUsers = $users->whereNotNull('church_role_id');
+    @endphp
+
+    @if($pendingUsers->count() > 0)
+    <!-- Pending Access Requests -->
+    <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl shadow-sm border border-yellow-200 dark:border-yellow-800 overflow-hidden">
+        <div class="px-4 py-3 border-b border-yellow-200 dark:border-yellow-800">
+            <h2 class="text-sm font-semibold text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Очікують доступу ({{ $pendingUsers->count() }})
+            </h2>
+        </div>
+        <div class="divide-y divide-yellow-200 dark:divide-yellow-800">
+            @foreach($pendingUsers as $user)
+            <div class="px-4 py-3 flex items-center justify-between gap-4" x-data="{ showRoleSelect: false, selectedRole: '' }">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center">
+                        <span class="text-yellow-700 dark:text-yellow-300 font-medium">{{ mb_substr($user->name, 0, 1) }}</span>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="font-medium text-gray-900 dark:text-white truncate">{{ $user->name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ $user->email }}</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <!-- Role selector (hidden by default) -->
+                    <div x-show="showRoleSelect" x-cloak class="flex items-center gap-2">
+                        <select x-model="selectedRole" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <option value="">Оберіть роль</option>
+                            @foreach(\App\Models\ChurchRole::where('church_id', auth()->user()->church_id)->orderBy('sort_order')->get() as $role)
+                            <option value="{{ $role->id }}">{{ $role->name }}</option>
+                            @endforeach
+                        </select>
+                        <form method="POST" action="{{ route('settings.users.update', $user) }}" class="inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="name" value="{{ $user->name }}">
+                            <input type="hidden" name="email" value="{{ $user->email }}">
+                            <input type="hidden" name="church_role_id" :value="selectedRole">
+                            @if($user->person)
+                            <input type="hidden" name="person_id" value="{{ $user->person->id }}">
+                            @endif
+                            <button type="submit" :disabled="!selectedRole"
+                                    class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Зберегти
+                            </button>
+                        </form>
+                        <button @click="showRoleSelect = false" class="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Buttons (visible by default) -->
+                    <div x-show="!showRoleSelect" class="flex items-center gap-2">
+                        <button @click="showRoleSelect = true"
+                                class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span class="hidden sm:inline">Надати</span>
+                        </button>
+                        <form action="{{ route('settings.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Відхилити запит від {{ $user->name }}?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                <span class="hidden sm:inline">Відхилити</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -29,7 +113,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @foreach($users as $user)
+                    @foreach($activeUsers as $user)
                     <tr>
                         <td class="px-3 md:px-6 py-3 md:py-4">
                             <div class="flex items-center">
