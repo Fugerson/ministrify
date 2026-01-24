@@ -24,6 +24,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\SanitizeInput::class,
             \App\Http\Middleware\HandleTabRequest::class,
+            \App\Http\Middleware\NoCacheForAuth::class,
         ],
 
         'api' => [
