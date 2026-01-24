@@ -485,45 +485,147 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Page Loader */
+        /* Page Loader - Professional */
         #page-loader {
             position: fixed;
             inset: 0;
             z-index: 9999;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: #f3f4f6;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            gap: 24px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .dark #page-loader {
-            background: #111827;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         }
         #page-loader.loaded {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
-        .loader-spinner {
+
+        /* Logo container with pulse */
+        .loader-logo {
+            position: relative;
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .loader-logo::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2));
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+        .dark .loader-logo::before {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.15));
+        }
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.7; }
+        }
+        .loader-logo-inner {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            animation: logoFloat 3s ease-in-out infinite;
+            box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.5);
+        }
+        .loader-logo-inner img {
             width: 40px;
             height: 40px;
-            border: 3px solid #e5e7eb;
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            object-fit: contain;
+            border-radius: 8px;
         }
-        .dark .loader-spinner {
-            border-color: #374151;
-            border-top-color: #60a5fa;
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        /* Modern spinner ring */
+        .loader-ring {
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+        .loader-ring::before,
+        .loader-ring::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+        .loader-ring::before {
+            border-top-color: #3b82f6;
+            border-right-color: #3b82f6;
+            animation: ringRotate 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+        .loader-ring::after {
+            border-bottom-color: #8b5cf6;
+            border-left-color: #8b5cf6;
+            animation: ringRotate 1s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
+            animation-delay: -0.5s;
+        }
+        @keyframes ringRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Loading text */
+        .loader-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+        .dark .loader-text {
+            color: #94a3b8;
+        }
+
+        /* Progress bar */
+        .loader-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(59, 130, 246, 0.1);
+            overflow: hidden;
+        }
+        .loader-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            animation: progressLoad 1.5s ease-in-out infinite;
+            border-radius: 0 3px 3px 0;
+        }
+        @keyframes progressLoad {
+            0% { width: 0%; transform: translateX(0); }
+            50% { width: 70%; }
+            100% { width: 100%; transform: translateX(0); }
         }
 
         /* Hide content initially */
         .page-content {
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transform: translateY(8px);
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .page-content.visible {
             opacity: 1;
+            transform: translateY(0);
         }
 
         /* Dots loading */
@@ -600,16 +702,45 @@
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     <!-- Page Loader -->
     <div id="page-loader">
-        <div class="loader-spinner"></div>
+        <div class="loader-logo">
+            <div class="loader-logo-inner">
+                @if(isset($currentChurch) && $currentChurch->logo)
+                    <img src="/storage/{{ $currentChurch->logo }}" alt="">
+                @else
+                    <span>⛪</span>
+                @endif
+            </div>
+        </div>
+        <div class="loader-ring"></div>
+        <div class="loader-progress">
+            <div class="loader-progress-bar"></div>
+        </div>
     </div>
     <script>
-        // Hide loader when page is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                document.getElementById('page-loader').classList.add('loaded');
-                document.querySelector('.page-content')?.classList.add('visible');
-            }, 100);
-        });
+        // Hide loader when page is fully ready
+        (function() {
+            var hideLoader = function() {
+                var loader = document.getElementById('page-loader');
+                var content = document.querySelector('.page-content');
+                if (loader) {
+                    loader.classList.add('loaded');
+                }
+                if (content) {
+                    setTimeout(function() {
+                        content.classList.add('visible');
+                    }, 100);
+                }
+            };
+
+            // Wait for everything to be ready
+            if (document.readyState === 'complete') {
+                setTimeout(hideLoader, 200);
+            } else {
+                window.addEventListener('load', function() {
+                    setTimeout(hideLoader, 200);
+                });
+            }
+        })();
     </script>
     @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
     <!-- Church context banner -->
