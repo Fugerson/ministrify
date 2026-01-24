@@ -109,24 +109,60 @@
         "@type": "SoftwareApplication",
         "name": "Ministrify",
         "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди.",
+        "applicationSubCategory": "Church Management Software",
+        "operatingSystem": "Web, iOS, Android",
+        "description": "Сучасна українська платформа для управління церквою: члени, події, пожертви, групи, команди, Telegram-бот.",
         "url": "{{ url('/') }}",
+        "inLanguage": "uk",
         "author": {
             "@type": "Organization",
-            "name": "Ministrify"
+            "name": "Ministrify",
+            "url": "{{ url('/') }}",
+            "logo": "{{ asset('icon-512x512.png') }}"
         },
         "offers": {
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "UAH",
-            "description": "Безкоштовний план до 50 членів"
+            "availability": "https://schema.org/InStock",
+            "description": "Безкоштовно для всіх церков"
         },
         "aggregateRating": {
             "@type": "AggregateRating",
             "ratingValue": "4.9",
-            "ratingCount": "50"
-        }
+            "ratingCount": "50",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "featureList": "База членів церкви, Планування подій, Фінансовий облік, Telegram-бот, Домашні групи, Команди служіння"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Ministrify",
+        "url": "{{ url('/') }}",
+        "logo": "{{ asset('icon-512x512.png') }}",
+        "description": "Сучасна українська платформа для управління церквою",
+        "foundingDate": "2024",
+        "foundingLocation": "Ukraine",
+        "areaServed": {
+            "@type": "GeoCircle",
+            "geoMidpoint": {
+                "@type": "GeoCoordinates",
+                "latitude": "48.3794",
+                "longitude": "31.1656"
+            },
+            "geoRadius": "5000000"
+        },
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "url": "{{ url('/contact') }}",
+            "availableLanguage": ["Ukrainian", "Russian", "English"]
+        },
+        "sameAs": []
     }
     </script>
 

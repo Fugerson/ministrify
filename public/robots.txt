@@ -1,0 +1,30 @@
+# Ministrify - Church Management System
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://ministrify.app/sitemap.xml
+
+# Disallow admin and auth pages
+Disallow: /login
+Disallow: /register
+Disallow: /password
+Disallow: /dashboard
+Disallow: /people
+Disallow: /events
+Disallow: /ministries
+Disallow: /groups
+Disallow: /finance
+Disallow: /settings
+Disallow: /system-admin
+Disallow: /api/
+Disallow: /livewire/
+
+# Allow landing pages
+Allow: /features
+Allow: /contact
+Allow: /faq
+Allow: /docs
+Allow: /terms
+Allow: /privacy
+Allow: /register-church
