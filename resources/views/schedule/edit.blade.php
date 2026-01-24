@@ -2,6 +2,12 @@
 
 @section('title', 'Редагувати подію')
 
+@php
+    $ministriesJson = $ministries->map(function($m) {
+        return ['id' => $m->id, 'name' => $m->name, 'color' => $m->color];
+    })->values()->toJson();
+@endphp
+
 @section('content')
 <div class="max-w-2xl mx-auto">
     <div class="mb-6">
@@ -51,7 +57,7 @@
                 @if($ministries->count() > 0)
                 <div x-data="{
                     selectedId: '{{ old('ministry_id', $event->ministry_id) }}',
-                    ministries: @json($ministries->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'color' => $m->color])),
+                    ministries: {!! $ministriesJson !!},
                     get selected() {
                         return this.ministries.find(m => m.id == this.selectedId);
                     }

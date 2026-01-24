@@ -2,6 +2,12 @@
 
 @section('title', 'Редагувати шаблон')
 
+@php
+    $templateItemsJson = $template->items->map(function($i) {
+        return ['id' => $i->id, 'title' => $i->title, 'description' => $i->description];
+    })->toJson();
+@endphp
+
 @section('content')
 <div class="max-w-2xl mx-auto" x-data="checklistForm()">
     <form method="POST" action="{{ route('checklists.templates.update', $template) }}" class="space-y-6">
@@ -102,7 +108,7 @@
 <script>
 function checklistForm() {
     return {
-        items: @json($template->items->map(fn($i) => ['id' => $i->id, 'title' => $i->title, 'description' => $i->description])),
+        items: {!! $templateItemsJson !!},
 
         addItem() {
             this.items.push({ id: null, title: '', description: '' });

@@ -5,6 +5,16 @@
 @section('actions')
 @endsection
 
+@php
+    $ministriesJson = $ministries->map(function($m) {
+        return ['id' => $m->id, 'name' => $m->name, 'color' => $m->color];
+    })->values()->toJson();
+
+    $availablePeopleJson = $event->responsibilities->map(function($r) {
+        return ['id' => $r->person_id, 'name' => $r->person?->full_name ?? 'Невідомий'];
+    })->unique('id')->values()->toJson();
+@endphp
+
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
     <!-- Header (Editable) -->
@@ -923,7 +933,7 @@ function eventEditor() {
         ministryColor: @json($event->ministry?->color ?? '#3b82f6'),
         isService: {{ $event->is_service ? 'true' : 'false' }},
         trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }},
-        ministries: @json($ministries->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'color' => $m->color])),
+        ministries: {!! $ministriesJson !!},
 
         async saveField(field, value) {
             try {
@@ -1675,7 +1685,7 @@ function reminderManager() {
             person_ids: r.person_ids || []
         })),
         saving: false,
-        availablePeople: @json($event->responsibilities->map(fn($r) => ['id' => $r->person_id, 'name' => $r->person?->full_name ?? 'Невідомий'])->unique('id')->values()),
+        availablePeople: {!! $availablePeopleJson !!},
 
         addReminder() {
             this.reminders.push({

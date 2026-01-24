@@ -2,6 +2,12 @@
 
 @section('title', 'Створити подію')
 
+@php
+    $ministriesJson = $ministries->map(function($m) {
+        return ['id' => $m->id, 'name' => $m->name, 'color' => $m->color];
+    })->values()->toJson();
+@endphp
+
 @section('content')
 <div class="max-w-2xl mx-auto">
     <form method="POST" action="{{ route('events.store') }}" class="space-y-6">
@@ -101,7 +107,7 @@
                 @if($ministries->count() > 0)
                 <div x-data="{
                     selectedId: '{{ $selectedMinistry ?? old('ministry_id', '') }}',
-                    ministries: @json($ministries->map(fn($m) => ['id' => $m->id, 'name' => $m->name, 'color' => $m->color])),
+                    ministries: {!! $ministriesJson !!},
                     get selected() {
                         return this.ministries.find(m => m.id == this.selectedId);
                     }
