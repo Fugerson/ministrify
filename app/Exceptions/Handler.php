@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
+use Illuminate\Session\TokenMismatchException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -18,6 +19,15 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        // Handle CSRF token mismatch (419 Page Expired) - redirect to dashboard
+        $this->renderable(function (TokenMismatchException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Сесія закінчилась. Оновіть сторінку.'], 419);
+            }
+
+            return redirect()->route('dashboard')->with('error', 'Сесія закінчилась. Спробуйте ще раз.');
         });
 
         // Handle expired/invalid verification links with a friendly page
