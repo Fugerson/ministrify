@@ -14,6 +14,21 @@
                 document.documentElement.classList.add('dark');
             }
         })();
+
+        // Handle back/forward cache - check if user is still authenticated
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Page was loaded from bfcache, verify auth
+                fetch('/api/auth-check', { credentials: 'same-origin' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.authenticated) {
+                            window.location.href = '/login';
+                        }
+                    })
+                    .catch(() => window.location.reload());
+            }
+        });
     </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">

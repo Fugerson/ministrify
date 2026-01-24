@@ -4,7 +4,13 @@ use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\TelegramController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\PushSubscriptionController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+// Auth check for bfcache validation (prevents seeing cached pages after logout)
+Route::middleware('web')->get('auth-check', function () {
+    return response()->json(['authenticated' => Auth::check()]);
+});
 
 // Telegram webhook with rate limiting and validation
 Route::middleware(['throttle:120,1', 'telegram.webhook'])->group(function () {
