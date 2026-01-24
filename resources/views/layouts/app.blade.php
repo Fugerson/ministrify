@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="uk" x-data="{
-    darkMode: localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    darkMode: localStorage.getItem('theme') !== 'light',
     searchOpen: false,
     fabOpen: false
 }" :class="{ 'dark': darkMode }">
 <head>
     <script>
         // Apply dark mode immediately before any rendering to prevent FOUC
+        // Dark is default, only light if explicitly set
         (function() {
             const theme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (theme === 'dark' || (theme === 'auto' && prefersDark) || (!theme && prefersDark)) {
+            if (theme !== 'light') {
                 document.documentElement.classList.add('dark');
             }
         })();
