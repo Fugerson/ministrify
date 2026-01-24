@@ -587,8 +587,11 @@
                                             @endif
                                             <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
                                                 <span class="px-2 py-0.5 rounded bg-{{ $goal->status_color }}-100 dark:bg-{{ $goal->status_color }}-900/30 text-{{ $goal->status_color }}-700 dark:text-{{ $goal->status_color }}-300">{{ $goal->status_label }}</span>
+                                                @if($goal->period)
+                                                    <span class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ $goal->period }}</span>
+                                                @endif
                                                 @if($goal->due_date)
-                                                    <span class="text-gray-500 @if($goal->is_overdue) text-red-600 @endif">{{ $goal->due_date->format('d.m.Y') }}</span>
+                                                    <span class="text-gray-500 @if($goal->is_overdue) text-red-600 @endif">до {{ $goal->due_date->format('d.m.Y') }}</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -677,20 +680,25 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
                                 <textarea name="description" x-model="goalForm.description" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"></textarea>
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Період</label>
-                                    <select name="period" x-model="goalForm.period" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                        <option value="">-</option>
-                                        <option value="H1 2025">H1 2025</option>
-                                        <option value="H2 2025">H2 2025</option>
-                                        <option value="2025">2025</option>
-                                    </select>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Період</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Від</span>
+                                        <input type="date" x-model="goalForm.period_start" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">До</span>
+                                        <input type="date" x-model="goalForm.period_end" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дедлайн</label>
-                                    <input type="date" name="due_date" x-model="goalForm.due_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                </div>
+                                <input type="hidden" name="period" :value="goalForm.period_start && goalForm.period_end ?
+                                    new Date(goalForm.period_start).toLocaleDateString('uk-UA') + ' – ' + new Date(goalForm.period_end).toLocaleDateString('uk-UA') :
+                                    (goalForm.period_start ? new Date(goalForm.period_start).toLocaleDateString('uk-UA') : '')">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дедлайн</label>
+                                <input type="date" name="due_date" x-model="goalForm.due_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
@@ -963,11 +971,11 @@ function goalsManager() {
         showTaskModal: false,
         editingGoalId: null,
         editingTaskId: null,
-        goalForm: { title: '', description: '', period: '', due_date: '', priority: 'medium', status: 'active' },
+        goalForm: { title: '', description: '', period: '', period_start: '', period_end: '', due_date: '', priority: 'medium', status: 'active' },
         taskForm: { title: '', description: '', goal_id: '', assigned_to: '', due_date: '', priority: 'medium', status: 'todo' },
         resetGoalForm() {
             this.editingGoalId = null;
-            this.goalForm = { title: '', description: '', period: '', due_date: '', priority: 'medium', status: 'active' };
+            this.goalForm = { title: '', description: '', period: '', period_start: '', period_end: '', due_date: '', priority: 'medium', status: 'active' };
         },
         resetTaskForm() {
             this.editingTaskId = null;
@@ -975,7 +983,20 @@ function goalsManager() {
         },
         editGoal(id, data) {
             this.editingGoalId = id;
-            this.goalForm = { ...data };
+            this.goalForm = { ...data, period_start: '', period_end: '' };
+            // Parse period string if exists (format: "dd.mm.yyyy – dd.mm.yyyy" or "dd.mm.yyyy")
+            if (data.period) {
+                const parts = data.period.split(' – ');
+                if (parts.length === 2) {
+                    // Convert dd.mm.yyyy to yyyy-mm-dd for date inputs
+                    const parseDate = (str) => {
+                        const [d, m, y] = str.split('.');
+                        return `${y}-${m}-${d}`;
+                    };
+                    this.goalForm.period_start = parseDate(parts[0]);
+                    this.goalForm.period_end = parseDate(parts[1]);
+                }
+            }
             this.showGoalModal = true;
         },
         editTask(id, data) {
