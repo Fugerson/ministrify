@@ -696,10 +696,7 @@
                                     new Date(goalForm.period_start).toLocaleDateString('uk-UA') + ' – ' + new Date(goalForm.period_end).toLocaleDateString('uk-UA') :
                                     (goalForm.period_start ? new Date(goalForm.period_start).toLocaleDateString('uk-UA') : '')">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дедлайн</label>
-                                <input type="date" name="due_date" x-model="goalForm.due_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                            </div>
+                            <input type="hidden" name="due_date" :value="goalForm.period_end || ''">
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пріоритет</label>
