@@ -485,6 +485,47 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Page Loader */
+        #page-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .dark #page-loader {
+            background: #111827;
+        }
+        #page-loader.loaded {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .dark .loader-spinner {
+            border-color: #374151;
+            border-top-color: #60a5fa;
+        }
+
+        /* Hide content initially */
+        .page-content {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .page-content.visible {
+            opacity: 1;
+        }
+
         /* Dots loading */
         .loading-dots::after {
             content: '';
@@ -557,6 +598,19 @@
     @include('partials.design-themes')
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <!-- Page Loader -->
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+    <script>
+        // Hide loader when page is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.getElementById('page-loader').classList.add('loaded');
+                document.querySelector('.page-content')?.classList.add('visible');
+            }, 100);
+        });
+    </script>
     @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
     <!-- Church context banner -->
     <div class="sticky top-0 z-50 bg-indigo-600 text-white text-center py-2 px-4 flex items-center justify-center gap-4">
@@ -597,6 +651,7 @@
     </div>
     @endif
 
+    <div class="page-content">
     <div x-data="{ sidebarOpen: false }" class="min-h-screen flex"
          @keydown.window.prevent.cmd.k="searchOpen = true"
          @keydown.window.prevent.ctrl.k="searchOpen = true"
@@ -1489,5 +1544,6 @@
     }
     </script>
     @endauth
+    </div><!-- /.page-content -->
 </body>
 </html>
