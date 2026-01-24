@@ -19,6 +19,22 @@
     </div>
 </section>
 
+{{-- Dashboard Preview --}}
+<section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Зручний дашборд</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400">Вся важлива інформація на одному екрані</p>
+        </div>
+        <div class="relative max-w-5xl mx-auto">
+            <div class="absolute inset-0 bg-gradient-to-r from-primary-500 to-indigo-600 rounded-2xl transform rotate-1 opacity-20 dark:opacity-30"></div>
+            <div class="relative bg-gradient-to-br from-primary-500 to-indigo-600 rounded-2xl p-1 shadow-2xl">
+                <img src="/icons/demo/Screenshot_7.jpg" alt="Ministrify Dashboard" class="rounded-xl w-full">
+            </div>
+        </div>
+    </div>
+</section>
+
 {{-- Features --}}
 <section class="py-20 bg-white dark:bg-gray-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,11 +57,11 @@
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Зв'язки сімей
+                            Зв'язки сімей та опікуни
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Теги та фільтрація
+                            Теги, фільтрація та пошук
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -55,15 +71,8 @@
                 </div>
                 <div class="relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl transform rotate-3 opacity-20 dark:opacity-30"></div>
-                    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-1">
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 aspect-video flex items-center justify-center">
-                            <div class="text-center">
-                                <div class="w-20 h-20 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                                    <svg class="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                </div>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm">Управління членами</p>
-                            </div>
-                        </div>
+                    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-1 shadow-xl">
+                        <img src="/icons/demo/Screenshot_2.jpg" alt="Управління членами церкви" class="rounded-xl w-full">
                     </div>
                 </div>
             </div>
@@ -72,15 +81,8 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div class="order-2 lg:order-1 relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl transform -rotate-3 opacity-20 dark:opacity-30"></div>
-                    <div class="relative bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-1">
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 aspect-video flex items-center justify-center">
-                            <div class="text-center">
-                                <div class="w-20 h-20 mx-auto mb-4 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
-                                    <svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                </div>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm">Фінансовий облік</p>
-                            </div>
-                        </div>
+                    <div class="relative bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-1 shadow-xl">
+                        <img src="/icons/demo/Screenshot_3.jpg" alt="Фінансовий облік церкви" class="rounded-xl w-full">
                     </div>
                 </div>
                 <div class="order-1 lg:order-2">
@@ -103,7 +105,7 @@
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Графіки та аналітика
+                            Графіки та динаміка
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -139,21 +141,90 @@
                         </li>
                         <li class="flex items-center text-gray-700 dark:text-gray-300">
                             <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Планування подій
+                            Облік відвідуваності
                         </li>
                     </ul>
                 </div>
                 <div class="relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl transform rotate-3 opacity-20 dark:opacity-30"></div>
-                    <div class="relative bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-1">
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 aspect-video flex items-center justify-center">
-                            <div class="text-center">
-                                <div class="w-20 h-20 mx-auto mb-4 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center">
-                                    <svg class="w-10 h-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </div>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm">Календар подій</p>
-                            </div>
-                        </div>
+                    <div class="relative bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-1 shadow-xl">
+                        <img src="/icons/demo/Screenshot_4.jpg" alt="Календар подій церкви" class="rounded-xl w-full">
+                    </div>
+                </div>
+            </div>
+
+            {{-- Teams --}}
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="order-2 lg:order-1 relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-orange-500 to-amber-600 rounded-2xl transform -rotate-3 opacity-20 dark:opacity-30"></div>
+                    <div class="relative bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-1 shadow-xl">
+                        <img src="/icons/demo/Screenshot_5.jpg" alt="Команди служіння" class="rounded-xl w-full">
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2">
+                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        Команди
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Команди служіння</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                        Організуйте команди служіння, призначайте лідерів та учасників. Відстежуйте активність та плануйте ротацію.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Позиції та ролі
+                        </li>
+                        <li class="flex items-center text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Лідери команд
+                        </li>
+                        <li class="flex items-center text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Цілі та завдання
+                        </li>
+                        <li class="flex items-center text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Бюджет команди
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {{-- Tasks --}}
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-4">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        Завдання
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Трекер завдань</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                        Kanban-дошка для планування та відстеження завдань команд. Пріоритети, дедлайни, виконавці.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Kanban-дошка
+                        </li>
+                        <li class="flex items-center text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Пріоритети та дедлайни
+                        </li>
+                        <li class="flex items-center text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Фільтри по командах
+                        </li>
+                        <li class="flex items-center text-gray-700 dark:text-gray-300">
+                            <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Коментарі та вкладення
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-2xl transform rotate-3 opacity-20 dark:opacity-30"></div>
+                    <div class="relative bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl p-1 shadow-xl">
+                        <img src="/icons/demo/Screenshot_6.jpg" alt="Трекер завдань" class="rounded-xl w-full">
                     </div>
                 </div>
             </div>
@@ -163,14 +234,15 @@
                 <div class="order-2 lg:order-1 relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-sky-500 to-blue-600 rounded-2xl transform -rotate-3 opacity-20 dark:opacity-30"></div>
                     <div class="relative bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl p-1">
-                        <div class="bg-white dark:bg-gray-900 rounded-xl p-6 aspect-video flex items-center justify-center">
+                        <div class="bg-white dark:bg-gray-900 rounded-xl p-8 aspect-video flex items-center justify-center">
                             <div class="text-center">
-                                <div class="w-20 h-20 mx-auto mb-4 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center">
-                                    <svg class="w-10 h-10 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="currentColor">
+                                <div class="w-24 h-24 mx-auto mb-6 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center">
+                                    <svg class="w-14 h-14 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                                     </svg>
                                 </div>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm">Telegram бот</p>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Telegram бот</h3>
+                                <p class="text-gray-500 dark:text-gray-400">Сповіщення та комунікація</p>
                             </div>
                         </div>
                     </div>
@@ -219,17 +291,6 @@
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {{-- Команди --}}
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
-                <div class="w-14 h-14 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center mb-6">
-                    <svg class="w-7 h-7 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Команди</h3>
-                <p class="text-gray-600 dark:text-gray-400">Організуйте команди, позиції та призначайте волонтерів</p>
-            </div>
-
             {{-- Малі групи --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
                 <div class="w-14 h-14 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center mb-6">
@@ -239,17 +300,6 @@
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Малі групи</h3>
                 <p class="text-gray-600 dark:text-gray-400">Домашні групи, лідери, відвідуваність та статистика</p>
-            </div>
-
-            {{-- Трекер завдань --}}
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
-                <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mb-6">
-                    <svg class="w-7 h-7 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Трекер завдань</h3>
-                <p class="text-gray-600 dark:text-gray-400">Kanban-дошка для планування та відстеження завдань</p>
             </div>
 
             {{-- Відвідуваність --}}
@@ -274,6 +324,28 @@
                 <p class="text-gray-600 dark:text-gray-400">Детальна аналітика, графіки та експорт даних</p>
             </div>
 
+            {{-- Ресурси --}}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
+                <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-7 h-7 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Ресурси</h3>
+                <p class="text-gray-600 dark:text-gray-400">Файлове сховище для документів, презентацій та медіа</p>
+            </div>
+
+            {{-- Комунікації --}}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
+                <div class="w-14 h-14 bg-pink-100 dark:bg-pink-900/30 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-7 h-7 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Комунікації</h3>
+                <p class="text-gray-600 dark:text-gray-400">Оголошення, приватні повідомлення та масові розсилки</p>
+            </div>
+
             {{-- Мобільна версія --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
                 <div class="w-14 h-14 bg-violet-100 dark:bg-violet-900/30 rounded-xl flex items-center justify-center mb-6">
@@ -283,6 +355,48 @@
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Мобільна версія</h3>
                 <p class="text-gray-600 dark:text-gray-400">PWA додаток — працює на телефоні як нативний застосунок</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- Settings Preview --}}
+<section class="py-16 bg-white dark:bg-gray-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium mb-4">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Налаштування
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Гнучкі налаштування</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                    Повний контроль над системою: права доступу, категорії, інтеграції та персоналізація під вашу церкву.
+                </p>
+                <ul class="space-y-3">
+                    <li class="flex items-center text-gray-700 dark:text-gray-300">
+                        <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Права доступу по ролях
+                    </li>
+                    <li class="flex items-center text-gray-700 dark:text-gray-300">
+                        <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Церковні ролі та опікуни
+                    </li>
+                    <li class="flex items-center text-gray-700 dark:text-gray-300">
+                        <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Категорії фінансів
+                    </li>
+                    <li class="flex items-center text-gray-700 dark:text-gray-300">
+                        <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Інтеграція з Google та Telegram
+                    </li>
+                </ul>
+            </div>
+            <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-r from-gray-500 to-slate-600 rounded-2xl transform rotate-3 opacity-20 dark:opacity-30"></div>
+                <div class="relative bg-gradient-to-br from-gray-500 to-slate-600 rounded-2xl p-1 shadow-xl">
+                    <img src="/icons/demo/Screenshot_8.jpg" alt="Налаштування системи" class="rounded-xl w-full">
+                </div>
             </div>
         </div>
     </div>
