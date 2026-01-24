@@ -73,11 +73,18 @@ class AuthController extends Controller
                 ]);
             }
 
-            // Clear intended URL if it's a signed verification link or AJAX endpoint
+            // Clear intended URL if it's a signed verification link, AJAX endpoint, or restricted area
             $intendedUrl = $request->session()->get('url.intended', '');
-            if (str_contains($intendedUrl, 'email/verify/') ||
+            $shouldClearIntended = str_contains($intendedUrl, 'email/verify/') ||
                 str_contains($intendedUrl, 'unread-count') ||
-                str_contains($intendedUrl, '/api/')) {
+                str_contains($intendedUrl, '/api/');
+
+            // Don't redirect non-super-admins to system-admin
+            if (!$user->isSuperAdmin() && str_contains($intendedUrl, 'system-admin')) {
+                $shouldClearIntended = true;
+            }
+
+            if ($shouldClearIntended) {
                 $request->session()->forget('url.intended');
             }
 
