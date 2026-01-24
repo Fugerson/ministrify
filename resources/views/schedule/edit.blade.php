@@ -59,7 +59,8 @@
                     selectedId: '{{ old('ministry_id', $event->ministry_id) }}',
                     ministries: {!! $ministriesJson !!},
                     get selected() {
-                        return this.ministries.find(m => m.id == this.selectedId);
+                        const self = this;
+                        return this.ministries.find(function(m) { return m.id == self.selectedId; });
                     }
                 }">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>

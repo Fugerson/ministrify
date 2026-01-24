@@ -36,7 +36,7 @@
                                 class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:opacity-80"
                                 :style="'background-color: ' + (ministryColor || '#6b7280') + '20; color: ' + (ministryColor || '#6b7280') + '; border: 1px solid ' + (ministryColor || '#6b7280') + '40'">
                             <span class="w-2 h-2 rounded-full" :style="'background-color: ' + (ministryColor || '#6b7280')"></span>
-                            <span x-text="ministries.find(m => m.id == ministryId)?.name || 'Без команди'"></span>
+                            <span x-text="getMinistryName()"></span>
                             <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
@@ -964,6 +964,11 @@ function eventEditor() {
                 this.ministryColor = ministry.color;
             }
             await this.saveField('ministry_id', this.ministryId);
+        },
+
+        getMinistryName() {
+            const ministry = this.ministries.find(m => m.id == this.ministryId);
+            return ministry ? ministry.name : 'Без команди';
         }
     };
 }
