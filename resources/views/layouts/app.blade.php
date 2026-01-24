@@ -1093,6 +1093,14 @@
                         <span class="text-sm text-gray-500 dark:text-gray-400">Пошук...</span>
                     </button>
                     <div class="flex items-center">
+                        <button onclick="toggleTheme()" id="theme-toggle-mobile" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
+                            <svg id="theme-sun-mobile" class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                            </svg>
+                            <svg id="theme-moon-mobile" class="w-5 h-5 text-indigo-400 hidden" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                            </svg>
+                        </button>
                         <button @click="$dispatch('open-page-help')" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -1117,6 +1125,17 @@
             <header class="hidden lg:flex sticky {{ session('impersonating_from') || session('impersonate_church_id') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
                 <h1 class="text-lg font-semibold text-gray-900 dark:text-white">@yield('title', 'Головна')</h1>
                 <div class="flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" id="theme-toggle-desktop"
+                            class="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            title="Змінити тему">
+                        <svg id="theme-sun-desktop" class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg id="theme-moon-desktop" class="w-5 h-5 text-indigo-400 hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                        </svg>
+                    </button>
                     <!-- Help Button -->
                     <button @click="$dispatch('open-page-help')"
                             class="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -1651,28 +1670,26 @@
     @endauth
     </div><!-- /.page-content -->
 
-    <!-- Floating Theme Toggle (outside page-content to avoid transform breaking fixed positioning) -->
-    <button onclick="toggleTheme()" id="theme-toggle-btn"
-            class="fixed left-4 bottom-20 lg:bottom-6 z-[9999] w-11 h-11 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95">
-        <svg id="theme-sun" class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
-        </svg>
-        <svg id="theme-moon" class="w-5 h-5 text-indigo-400 hidden" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-        </svg>
-    </button>
     <script>
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            updateThemeIcon();
+            updateThemeIcons();
         }
-        function updateThemeIcon() {
+        function updateThemeIcons() {
             const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('theme-sun').classList.toggle('hidden', isDark);
-            document.getElementById('theme-moon').classList.toggle('hidden', !isDark);
+            // Desktop icons
+            const sunDesktop = document.getElementById('theme-sun-desktop');
+            const moonDesktop = document.getElementById('theme-moon-desktop');
+            if (sunDesktop) sunDesktop.classList.toggle('hidden', isDark);
+            if (moonDesktop) moonDesktop.classList.toggle('hidden', !isDark);
+            // Mobile icons
+            const sunMobile = document.getElementById('theme-sun-mobile');
+            const moonMobile = document.getElementById('theme-moon-mobile');
+            if (sunMobile) sunMobile.classList.toggle('hidden', isDark);
+            if (moonMobile) moonMobile.classList.toggle('hidden', !isDark);
         }
-        updateThemeIcon();
+        updateThemeIcons();
     </script>
 </body>
 </html>
