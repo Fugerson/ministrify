@@ -681,6 +681,14 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('my-profile/telegram/generate-code', [PersonController::class, 'generateTelegramCode'])->name('my-profile.telegram.generate');
     Route::delete('my-profile/telegram/unlink', [PersonController::class, 'unlinkTelegram'])->name('my-profile.telegram.unlink');
 
+    // Music Stand (for musicians)
+    Route::prefix('music-stand')->name('music-stand.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MusicStandController::class, 'index'])->name('index');
+        Route::get('event/{event}', [\App\Http\Controllers\MusicStandController::class, 'show'])->name('show');
+        Route::get('event/{event}/song/{song}', [\App\Http\Controllers\MusicStandController::class, 'song'])->name('song');
+        Route::get('song/{song}/data', [\App\Http\Controllers\MusicStandController::class, 'songData'])->name('song.data');
+    });
+
     // Support
     Route::prefix('support')->name('support.')->group(function () {
         Route::get('/', [SupportController::class, 'index'])->name('index');

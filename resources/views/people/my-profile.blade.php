@@ -10,6 +10,9 @@
             <a href="{{ route('my-schedule') }}" class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Мій розклад
             </a>
+            <a href="{{ route('music-stand.index') }}" class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Music Stand
+            </a>
             <a href="{{ route('my-giving') }}" class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Мої пожертви
             </a>
