@@ -41,6 +41,17 @@
                     <input type="color" name="color" id="color" value="{{ old('color', $ministry->color ?? '#3b82f6') }}"
                            class="w-16 h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
                 </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <input type="hidden" name="is_worship_ministry" value="0">
+                    <input type="checkbox" name="is_worship_ministry" id="is_worship_ministry" value="1"
+                           {{ old('is_worship_ministry', $ministry->is_worship_ministry) ? 'checked' : '' }}
+                           class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                    <label for="is_worship_ministry" class="text-sm text-gray-700 dark:text-gray-300">
+                        <span class="font-medium">Музичне служіння</span>
+                        <span class="block text-gray-500 dark:text-gray-400 text-xs">Показувати бібліотеку пісень та Music Stand</span>
+                    </label>
+                </div>
             </div>
         </div>
 

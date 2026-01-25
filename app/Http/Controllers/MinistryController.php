@@ -6,6 +6,7 @@ use App\Models\Board;
 use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Resource;
+use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -139,7 +140,15 @@ class MinistryController extends Controller
             'overdue_tasks' => $ministry->tasks()->overdue()->count(),
         ];
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'registeredUsers', 'goalsStats'));
+        // Load songs for worship ministries
+        $songs = [];
+        if ($ministry->is_worship_ministry) {
+            $songs = Song::where('church_id', $church->id)
+                ->orderBy('title')
+                ->get();
+        }
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'registeredUsers', 'goalsStats', 'songs'));
     }
 
     public function edit(Ministry $ministry)
@@ -166,7 +175,10 @@ class MinistryController extends Controller
             'color' => 'nullable|string|max:7',
             'leader_id' => 'nullable|exists:people,id',
             'monthly_budget' => 'nullable|numeric|min:0',
+            'is_worship_ministry' => 'boolean',
         ]);
+
+        $validated['is_worship_ministry'] = $request->boolean('is_worship_ministry');
 
         $ministry->update($validated);
 

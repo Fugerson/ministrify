@@ -39,6 +39,7 @@ class Ministry extends Model
         'leader_id',
         'monthly_budget',
         'is_public',
+        'is_worship_ministry',
         'slug',
         'public_description',
         'cover_image',
@@ -51,6 +52,7 @@ class Ministry extends Model
     protected $casts = [
         'monthly_budget' => 'decimal:2',
         'is_public' => 'boolean',
+        'is_worship_ministry' => 'boolean',
         'allow_registrations' => 'boolean',
         'is_private' => 'boolean',
         'allowed_person_ids' => 'array',

@@ -101,6 +101,16 @@
                     </svg>
                     Ресурси
                 </button>
+                @if($ministry->is_worship_ministry)
+                <button @click="setTab('songs')" type="button"
+                   :class="activeTab === 'songs' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                    </svg>
+                    Бібліотека пісень
+                </button>
+                @endif
                 @can('manage-ministry', $ministry)
                 <button @click="setTab('access')" type="button"
                    :class="activeTab === 'access' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -775,6 +785,94 @@
             </div>
             @endcan
 
+            <!-- Songs Library Tab (for worship ministries) -->
+            @if($ministry->is_worship_ministry)
+            <div x-show="activeTab === 'songs'"{{ $tab !== 'songs' ? ' style="display:none"' : '' }}
+                 x-data="songsLibrary()">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Бібліотека пісень</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Пісні для прославлення</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('music-stand.index') }}"
+                           class="inline-flex items-center px-3 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                            </svg>
+                            Music Stand
+                        </a>
+                        @can('manage-ministry', $ministry)
+                        <a href="{{ route('songs.create') }}"
+                           class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Додати пісню
+                        </a>
+                        @endcan
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="mb-4">
+                    <input type="text" x-model="search" placeholder="Пошук пісень..."
+                           class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+
+                <!-- Songs Grid -->
+                <div class="grid gap-3">
+                    @forelse($songs ?? [] as $song)
+                        <a href="{{ route('songs.show', $song) }}"
+                           class="block p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                           x-show="!search || '{{ strtolower($song->title) }}'.includes(search.toLowerCase()) || '{{ strtolower($song->artist ?? '') }}'.includes(search.toLowerCase())">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 dark:text-white">{{ $song->title }}</h4>
+                                        @if($song->artist)
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $song->artist }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    @if($song->key)
+                                        <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-mono rounded">{{ $song->key }}</span>
+                                    @endif
+                                    @if($song->bpm)
+                                        <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded">{{ $song->bpm }} BPM</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="text-center py-12">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає пісень</h3>
+                            <p class="text-gray-500 dark:text-gray-400 mb-4">Додайте першу пісню до бібліотеки</p>
+                            @can('manage-ministry', $ministry)
+                            <a href="{{ route('songs.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Додати пісню
+                            </a>
+                            @endcan
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+            @endif
+
             <!-- Access Settings Tab -->
             @can('manage-ministry', $ministry)
             <div x-show="activeTab === 'access'"{{ $tab !== 'access' ? ' style="display:none"' : '' }}
@@ -973,6 +1071,12 @@ function goalsManager() {
             this.taskForm = { ...data };
             this.showTaskModal = true;
         }
+    }
+}
+
+function songsLibrary() {
+    return {
+        search: ''
     }
 }
 
