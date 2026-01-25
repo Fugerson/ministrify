@@ -45,7 +45,26 @@ class SongController extends Controller
 
     public function create()
     {
-        return view('songs.create');
+        $church = $this->getCurrentChurch();
+
+        // Get existing artists for autocomplete
+        $artists = Song::where('church_id', $church->id)
+            ->whereNotNull('artist')
+            ->distinct()
+            ->pluck('artist')
+            ->sort()
+            ->values();
+
+        // Get all existing tags
+        $allTags = Song::where('church_id', $church->id)
+            ->whereNotNull('tags')
+            ->pluck('tags')
+            ->flatten()
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('songs.create', compact('artists', 'allTags'));
     }
 
     public function store(Request $request)
@@ -60,17 +79,21 @@ class SongController extends Controller
             'ccli_number' => 'nullable|string|max:50',
             'youtube_url' => 'nullable|url|max:255',
             'spotify_url' => 'nullable|url|max:255',
-            'tags' => 'nullable|string|max:500',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:50',
+            'new_tag' => 'nullable|string|max:50',
+            'notes' => 'nullable|string|max:5000',
         ]);
 
         $church = $this->getCurrentChurch();
 
-        // Parse tags from comma-separated string
-        $tags = null;
-        if (!empty($validated['tags'])) {
-            $tags = array_map('trim', explode(',', $validated['tags']));
-            $tags = array_filter($tags);
+        // Combine selected tags with new tag
+        $tags = $validated['tags'] ?? [];
+        if (!empty($validated['new_tag'])) {
+            $newTags = array_map('trim', explode(',', $validated['new_tag']));
+            $tags = array_merge($tags, array_filter($newTags));
         }
+        $tags = array_unique(array_filter($tags));
 
         Song::create([
             'church_id' => $church->id,
@@ -83,7 +106,8 @@ class SongController extends Controller
             'ccli_number' => $validated['ccli_number'],
             'youtube_url' => $validated['youtube_url'],
             'spotify_url' => $validated['spotify_url'],
-            'tags' => $tags,
+            'tags' => !empty($tags) ? array_values($tags) : null,
+            'notes' => $validated['notes'],
             'created_by' => auth()->id(),
         ]);
 
@@ -103,8 +127,26 @@ class SongController extends Controller
     public function edit(Song $song)
     {
         $this->authorizeChurch($song);
+        $church = $this->getCurrentChurch();
 
-        return view('songs.edit', compact('song'));
+        // Get existing artists for autocomplete
+        $artists = Song::where('church_id', $church->id)
+            ->whereNotNull('artist')
+            ->distinct()
+            ->pluck('artist')
+            ->sort()
+            ->values();
+
+        // Get all existing tags
+        $allTags = Song::where('church_id', $church->id)
+            ->whereNotNull('tags')
+            ->pluck('tags')
+            ->flatten()
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('songs.edit', compact('song', 'artists', 'allTags'));
     }
 
     public function update(Request $request, Song $song)
@@ -121,14 +163,19 @@ class SongController extends Controller
             'ccli_number' => 'nullable|string|max:50',
             'youtube_url' => 'nullable|url|max:255',
             'spotify_url' => 'nullable|url|max:255',
-            'tags' => 'nullable|string|max:500',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:50',
+            'new_tag' => 'nullable|string|max:50',
+            'notes' => 'nullable|string|max:5000',
         ]);
 
-        $tags = null;
-        if (!empty($validated['tags'])) {
-            $tags = array_map('trim', explode(',', $validated['tags']));
-            $tags = array_filter($tags);
+        // Combine selected tags with new tag
+        $tags = $validated['tags'] ?? [];
+        if (!empty($validated['new_tag'])) {
+            $newTags = array_map('trim', explode(',', $validated['new_tag']));
+            $tags = array_merge($tags, array_filter($newTags));
         }
+        $tags = array_unique(array_filter($tags));
 
         $song->update([
             'title' => $validated['title'],
@@ -140,7 +187,8 @@ class SongController extends Controller
             'ccli_number' => $validated['ccli_number'],
             'youtube_url' => $validated['youtube_url'],
             'spotify_url' => $validated['spotify_url'],
-            'tags' => $tags,
+            'tags' => !empty($tags) ? array_values($tags) : null,
+            'notes' => $validated['notes'],
         ]);
 
         return redirect()->route('songs.show', $song)

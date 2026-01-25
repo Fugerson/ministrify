@@ -24,6 +24,7 @@ class Song extends Model
         'youtube_url',
         'spotify_url',
         'tags',
+        'notes',
         'times_used',
         'last_used_at',
         'created_by',

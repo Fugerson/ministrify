@@ -39,9 +39,14 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Автор/Виконавець
                     </label>
-                    <input type="text" name="artist" value="{{ old('artist') }}"
+                    <input type="text" name="artist" value="{{ old('artist') }}" list="artists-list"
                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                           placeholder="Hillsong, Bethel, тощо">
+                           placeholder="Виберіть або введіть нового">
+                    <datalist id="artists-list">
+                        @foreach($artists as $artist)
+                            <option value="{{ $artist }}">
+                        @endforeach
+                    </datalist>
                 </div>
 
                 <div>
@@ -68,12 +73,38 @@
             </div>
 
             <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Теги (через кому)
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Теги
                 </label>
-                <input type="text" name="tags" value="{{ old('tags') }}"
+                @if($allTags->count() > 0)
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        @foreach($allTags as $tag)
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="tags[]" value="{{ $tag }}"
+                                       {{ in_array($tag, old('tags', [])) ? 'checked' : '' }}
+                                       class="sr-only peer">
+                                <span class="px-3 py-1.5 rounded-full text-sm border transition-all
+                                       peer-checked:bg-primary-600 peer-checked:text-white peer-checked:border-primary-600
+                                       border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300
+                                       hover:border-primary-400 dark:hover:border-primary-500">
+                                    {{ $tag }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
+                <input type="text" name="new_tag" value="{{ old('new_tag') }}"
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                       placeholder="worship, повільна, відкриття, прославлення">
+                       placeholder="Або додайте нові теги через кому">
+            </div>
+
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Коментарі
+                </label>
+                <textarea name="notes" rows="3"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                          placeholder="Нотатки для команди, особливості виконання тощо">{{ old('notes') }}</textarea>
             </div>
         </div>
 
