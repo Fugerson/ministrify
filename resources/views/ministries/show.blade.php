@@ -519,34 +519,6 @@
                     </form>
                 </div>
 
-                <!-- Stats -->
-                <div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-                        <p class="text-xl font-bold text-gray-900 dark:text-white">{{ $goalsStats['total_goals'] }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Цілей</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-                        <p class="text-xl font-bold text-blue-600">{{ $goalsStats['active_goals'] }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Активних</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-                        <p class="text-xl font-bold text-green-600">{{ $goalsStats['completed_goals'] }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Виконано</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-                        <p class="text-xl font-bold text-gray-900 dark:text-white">{{ $goalsStats['total_tasks'] }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Задач</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-                        <p class="text-xl font-bold text-green-600">{{ $goalsStats['completed_tasks'] }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Виконано</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-                        <p class="text-xl font-bold text-red-600">{{ $goalsStats['overdue_tasks'] }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Прострочено</p>
-                    </div>
-                </div>
-
                 <!-- Goals Header -->
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-semibold text-gray-900 dark:text-white">Цілі</h3>
