@@ -3,12 +3,6 @@
 @section('title', $ministry->name)
 
 @section('actions')
-@can('manage-ministry', $ministry)
-<a href="{{ route('ministries.edit', $ministry) }}"
-   class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
-    Налаштування
-</a>
-@endcan
 @endsection
 
 @section('content')
@@ -112,13 +106,14 @@
                 </button>
                 @endif
                 @can('manage-ministry', $ministry)
-                <button @click="setTab('access')" type="button"
-                   :class="activeTab === 'access' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                <button @click="setTab('settings')" type="button"
+                   :class="activeTab === 'settings' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    Доступ
+                    Налаштування
                 </button>
                 @endcan
             </nav>
@@ -873,16 +868,69 @@
             </div>
             @endif
 
-            <!-- Access Settings Tab -->
+            <!-- Settings Tab -->
             @can('manage-ministry', $ministry)
-            <div x-show="activeTab === 'access'"{{ $tab !== 'access' ? ' style="display:none"' : '' }}
-                 x-data="accessSettings()"
+            <div x-show="activeTab === 'settings'"{{ $tab !== 'settings' ? ' style="display:none"' : '' }}
+                 x-data="settingsTab()"
                  x-init="init()">
-                <div class="max-w-2xl">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Налаштування доступу</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                        Визначте, хто може бачити цю команду та її деталі
-                    </p>
+                <div class="max-w-2xl space-y-8">
+                    <!-- General Settings -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Загальні налаштування</h3>
+                        <form method="POST" action="{{ route('ministries.update', $ministry) }}" class="space-y-4">
+                            @csrf
+                            @method('PUT')
+
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
+                                <input type="text" name="name" id="name" value="{{ old('name', $ministry->name) }}" required
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            </div>
+
+                            <div>
+                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                                <textarea name="description" id="description" rows="2"
+                                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('description', $ministry->description) }}</textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Лідер</label>
+                                <x-person-select name="leader_id" :people="$availablePeople->merge($ministry->leader ? collect([$ministry->leader]) : collect())->unique('id')->sortBy('last_name')" :selected="old('leader_id', $ministry->leader_id)" placeholder="Пошук лідера..." />
+                            </div>
+
+                            <div>
+                                <label for="color" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                                <input type="color" name="color" id="color" value="{{ old('color', $ministry->color ?? '#3b82f6') }}"
+                                       class="w-16 h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
+                            </div>
+
+                            <div class="flex items-center gap-3 pt-2">
+                                <input type="hidden" name="is_worship_ministry" value="0">
+                                <input type="checkbox" name="is_worship_ministry" id="is_worship_ministry" value="1"
+                                       {{ old('is_worship_ministry', $ministry->is_worship_ministry) ? 'checked' : '' }}
+                                       class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                                <label for="is_worship_ministry" class="text-sm text-gray-700 dark:text-gray-300">
+                                    <span class="font-medium">Музичне служіння</span>
+                                    <span class="block text-gray-500 dark:text-gray-400 text-xs">Показувати бібліотеку пісень та Music Stand</span>
+                                </label>
+                            </div>
+
+                            <div class="pt-4">
+                                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                                    Зберегти зміни
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <hr class="border-gray-200 dark:border-gray-700">
+
+                    <!-- Access Settings -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Налаштування доступу</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                            Визначте, хто може бачити цю команду та її деталі
+                        </p>
 
                     <div class="space-y-3">
                         <!-- Public -->
@@ -1080,7 +1128,7 @@ function songsLibrary() {
     }
 }
 
-function accessSettings() {
+function settingsTab() {
     return {
         visibility: '{{ $ministry->visibility ?? "public" }}',
         allowedPeople: @json($allowedPeopleData),
