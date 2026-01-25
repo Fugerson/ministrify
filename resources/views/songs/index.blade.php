@@ -15,10 +15,12 @@
 @section('content')
 <div class="space-y-6">
     <!-- Search & Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <form class="flex flex-wrap gap-4">
-            <div class="flex-1 min-w-[200px]">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4"
+         x-data="{ timeout: null }">
+        <form x-ref="searchForm" class="flex flex-wrap gap-4">
+            <div class="flex-1 min-w-[200px] relative">
                 <input type="text" name="search" value="{{ request('search') }}"
+                       @input.debounce.400ms="$refs.searchForm.submit()"
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                        placeholder="Пошук пісень...">
             </div>
@@ -43,9 +45,6 @@
                 <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>Популярні</option>
                 <option value="last_used" {{ request('sort') === 'last_used' ? 'selected' : '' }}>Недавно використані</option>
             </select>
-            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">
-                Знайти
-            </button>
         </form>
     </div>
 
