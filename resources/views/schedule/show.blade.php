@@ -487,29 +487,30 @@
                         <input type="time" x-model="newItem.start_time"
                                class="min-w-[6rem] px-2 py-2 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
                         {{-- Title with song autocomplete --}}
-                        <div class="flex-1 relative" x-data="{ showSongs: false, songSearch: '', songIndex: 0 }">
+                        <div class="flex-1 relative" x-data="songAutocomplete()">
                             <input type="text" x-model="newItem.title"
-                                   @input="if($event.target.value.match(/song-/i)) { showSongs = true; songSearch = $event.target.value.replace(/.*song-/i, ''); } else { showSongs = false; }"
+                                   @input="checkForSongTrigger($event.target.value)"
+                                   @focus="if(newItem.title.match(/song-/i)) showSongs = true"
                                    @keydown.escape="showSongs = false"
-                                   @keydown.arrow-down.prevent="songIndex = Math.min(songIndex + 1, SONGS_DATA.length - 1)"
-                                   @keydown.arrow-up.prevent="songIndex = Math.max(songIndex - 1, 0)"
-                                   @keydown.enter.prevent="if(showSongs && SONGS_DATA.length) { const s = SONGS_DATA.filter(s => !songSearch || s.title.toLowerCase().includes(songSearch.toLowerCase()))[songIndex]; if(s) { newItem.title = '🎵 ' + s.title; newItem.song_id = s.id; showSongs = false; } } else { $el.form.requestSubmit(); }"
+                                   @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
+                                   @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
+                                   @keydown.enter.prevent="if(showSongs && filteredSongs().length) { selectSong(filteredSongs()[songIndex]); } else { $el.form.requestSubmit(); }"
                                    placeholder="Що відбувається... (song- для пісні)" required
                                    class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                            <div x-show="showSongs" x-cloak @click.outside="showSongs = false"
+                            <div x-show="showSongs" x-transition @click.away="showSongs = false"
                                  class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                 <template x-if="SONGS_DATA.length === 0">
                                     <div class="px-3 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
                                         Пісень немає. <a href="{{ route('songs.index') }}" class="text-primary-600 hover:underline">Додати пісні</a>
                                     </div>
                                 </template>
-                                <template x-if="SONGS_DATA.length > 0 && SONGS_DATA.filter(s => !songSearch || s.title.toLowerCase().includes(songSearch.toLowerCase())).length === 0">
+                                <template x-if="SONGS_DATA.length > 0 && filteredSongs().length === 0">
                                     <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
                                         Нічого не знайдено
                                     </div>
                                 </template>
-                                <template x-for="(song, index) in SONGS_DATA.filter(s => !songSearch || s.title.toLowerCase().includes(songSearch.toLowerCase())).slice(0, 10)" :key="song.id">
-                                    <button type="button" @click="newItem.title = '🎵 ' + song.title; newItem.song_id = song.id; showSongs = false;"
+                                <template x-for="(song, index) in filteredSongs()" :key="song.id">
+                                    <button type="button" @click="selectSong(song)"
                                             :class="{'bg-primary-50 dark:bg-primary-900/30': songIndex === index}"
                                             class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
                                         <div>
@@ -959,6 +960,41 @@
 // Songs data for autocomplete
 const SONGS_DATA = @json($songsForAutocomplete);
 console.log('SONGS_DATA loaded:', SONGS_DATA.length, 'songs', SONGS_DATA);
+
+// Song autocomplete component
+function songAutocomplete() {
+    return {
+        showSongs: false,
+        songSearch: '',
+        songIndex: 0,
+
+        checkForSongTrigger(value) {
+            if (value.match(/song-/i)) {
+                this.showSongs = true;
+                this.songSearch = value.replace(/.*song-/i, '').toLowerCase();
+                this.songIndex = 0;
+                console.log('Song trigger detected, search:', this.songSearch);
+            } else {
+                this.showSongs = false;
+            }
+        },
+
+        filteredSongs() {
+            if (!this.songSearch) return SONGS_DATA.slice(0, 10);
+            return SONGS_DATA.filter(s =>
+                s.title.toLowerCase().includes(this.songSearch)
+            ).slice(0, 10);
+        },
+
+        selectSong(song) {
+            if (!song) return;
+            this.newItem.title = song.title;
+            this.newItem.song_id = song.id;
+            this.showSongs = false;
+            console.log('Selected song:', song.title, 'id:', song.id);
+        }
+    };
+}
 
 // Toast notification helper
 function showGlobalToast(message, type = 'success') {
