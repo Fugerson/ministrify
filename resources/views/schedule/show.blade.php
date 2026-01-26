@@ -1202,7 +1202,8 @@ function planEditor() {
             start_time: '',
             title: '',
             responsible_names: '',
-            notes: ''
+            notes: '',
+            song_id: null
         },
 
         async addItem() {
@@ -1221,7 +1222,8 @@ function planEditor() {
                         title: this.newItem.title,
                         start_time: this.newItem.start_time || null,
                         responsible_names: this.newItem.responsible_names || null,
-                        notes: this.newItem.notes || null
+                        notes: this.newItem.notes || null,
+                        song_id: this.newItem.song_id || null
                     })
                 });
 
@@ -1230,7 +1232,7 @@ function planEditor() {
                     if (data.success && data.item) {
                         this.insertNewRow(data.item);
                         // Clear form
-                        this.newItem = { start_time: '', title: '', responsible_names: '', notes: '' };
+                        this.newItem = { start_time: '', title: '', responsible_names: '', notes: '', song_id: null };
                         showGlobalToast('Пункт додано', 'success');
                     }
                 } else {
@@ -1243,56 +1245,8 @@ function planEditor() {
         },
 
         insertNewRow(item) {
-            const tbody = document.querySelector('table tbody');
-            // Remove empty row if exists
-            const emptyRow = document.getElementById('empty-row');
-            if (emptyRow) emptyRow.remove();
-
-            const startTime = item.start_time ? item.start_time.substring(0, 5) : '';
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group';
-            row.dataset.id = item.id;
-            row.innerHTML = `
-                <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
-                    <input type="time"
-                           value="${startTime}"
-                           onchange="updateField(${item.id}, 'start_time', this.value)"
-                           class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
-                </td>
-                <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
-                    <textarea placeholder="Опис пункту..."
-                              onchange="updateField(${item.id}, 'title', this.value)"
-                              rows="1"
-                              class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
-                              style="word-wrap: break-word; overflow-wrap: break-word;"
-                              oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.title || ''}</textarea>
-                </td>
-                <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top whitespace-nowrap">
-                    <input type="text"
-                           value="${item.responsible_names || ''}"
-                           placeholder="Відповідальний"
-                           onchange="updateField(${item.id}, 'responsible_names', this.value)"
-                           class="px-2 py-1 text-sm text-gray-900 dark:text-white bg-transparent border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-primary-500">
-                </td>
-                <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
-                    <textarea placeholder="Примітки..."
-                              onchange="updateField(${item.id}, 'notes', this.value)"
-                              rows="1"
-                              class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
-                              style="word-wrap: break-word; overflow-wrap: break-word;"
-                              oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.notes || ''}</textarea>
-                </td>
-                <td class="px-3 py-3 text-center">
-                    <button type="button"
-                            onclick="window.planEditorDeleteItem(${item.id})"
-                            class="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                            title="Видалити">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </td>
-            `;
+            // Use global function that handles songs
+            window.insertPlanRow(item);
             tbody.appendChild(row);
             // Auto-resize textareas
             row.querySelectorAll('textarea').forEach(ta => {
