@@ -498,6 +498,16 @@
                                    class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                             <div x-show="showSongs" x-cloak @click.outside="showSongs = false"
                                  class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                                <template x-if="SONGS_DATA.length === 0">
+                                    <div class="px-3 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+                                        Пісень немає. <a href="{{ route('songs.index') }}" class="text-primary-600 hover:underline">Додати пісні</a>
+                                    </div>
+                                </template>
+                                <template x-if="SONGS_DATA.length > 0 && SONGS_DATA.filter(s => !songSearch || s.title.toLowerCase().includes(songSearch.toLowerCase())).length === 0">
+                                    <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
+                                        Нічого не знайдено
+                                    </div>
+                                </template>
                                 <template x-for="(song, index) in SONGS_DATA.filter(s => !songSearch || s.title.toLowerCase().includes(songSearch.toLowerCase())).slice(0, 10)" :key="song.id">
                                     <button type="button" @click="newItem.title = '🎵 ' + song.title; newItem.song_id = song.id; showSongs = false;"
                                             :class="{'bg-primary-50 dark:bg-primary-900/30': songIndex === index}"
