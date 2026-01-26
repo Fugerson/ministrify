@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -131,6 +132,14 @@ class Event extends Model
     public function planItems(): HasMany
     {
         return $this->hasMany(ServicePlanItem::class)->ordered();
+    }
+
+    public function songs(): BelongsToMany
+    {
+        return $this->belongsToMany(Song::class, 'event_songs')
+            ->withPivot(['order', 'key', 'notes'])
+            ->withTimestamps()
+            ->orderBy('event_songs.order');
     }
 
     public function hasServicePlan(): bool

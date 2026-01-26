@@ -252,6 +252,7 @@ class EventController extends Controller
             'ministry',
             'checklist.items.completedByUser',
             'planItems.responsible',
+            'planItems.song',
             'responsibilities.person',
             'attendance.records.person',
         ]);
@@ -298,7 +299,12 @@ class EventController extends Controller
         // Get ministries for inline editing
         $ministries = Ministry::where('church_id', $church->id)->get();
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries'));
+        // Get songs for autocomplete in service plan
+        $songs = \App\Models\Song::where('church_id', $church->id)
+            ->orderBy('title')
+            ->get(['id', 'title', 'artist', 'key']);
+
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songs'));
     }
 
     public function edit(Event $event)

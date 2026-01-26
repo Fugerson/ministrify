@@ -55,6 +55,7 @@ class ServicePlanController extends Controller
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'responsible_names' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
+            'song_id' => 'nullable|exists:songs,id',
         ]);
 
         // Get next sort order
@@ -66,7 +67,7 @@ class ServicePlanController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'item' => $item->load('responsible'),
+                'item' => $item->load(['responsible', 'song']),
                 'message' => 'Пункт плану додано',
             ]);
         }

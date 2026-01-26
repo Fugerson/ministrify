@@ -5,7 +5,10 @@
 @section('actions')
 <div class="flex items-center space-x-2">
     <a href="{{ route('songs.edit', $song) }}"
-       class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+       class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
         Редагувати
     </a>
 </div>
@@ -62,6 +65,14 @@
                         <span>Востаннє: {{ $song->last_used_at->diffForHumans() }}</span>
                     @endif
                 </div>
+
+                @if($song->notes)
+                    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                            <span class="font-medium">Коментарі:</span> {{ $song->notes }}
+                        </p>
+                    </div>
+                @endif
             </div>
 
             <!-- Chords -->
@@ -107,6 +118,13 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Дії</h3>
                 <div class="space-y-3">
+                    <a href="{{ route('songs.edit', $song) }}"
+                       class="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Редагувати
+                    </a>
                     @if($song->spotify_url)
                         <a href="{{ $song->spotify_url }}" target="_blank"
                            class="flex items-center px-4 py-2 bg-[#1DB954] text-white rounded-lg hover:bg-[#1ed760] transition-colors">

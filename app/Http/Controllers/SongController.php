@@ -12,24 +12,10 @@ class SongController extends Controller
     {
         $church = $this->getCurrentChurch();
 
-        $query = Song::where('church_id', $church->id)
-            ->search($request->get('search'))
-            ->withKey($request->get('key'))
-            ->withTag($request->get('tag'));
-
-        // Sort
-        $sort = $request->get('sort', 'title');
-        if ($sort === 'recent') {
-            $query->latest();
-        } elseif ($sort === 'popular') {
-            $query->orderByDesc('times_used');
-        } elseif ($sort === 'last_used') {
-            $query->orderByDesc('last_used_at');
-        } else {
-            $query->orderBy('title');
-        }
-
-        $songs = $query->paginate(24);
+        // Load all songs for client-side filtering
+        $songs = Song::where('church_id', $church->id)
+            ->orderBy('title')
+            ->get();
 
         // Get all unique tags for filter
         $allTags = Song::where('church_id', $church->id)
@@ -73,19 +59,24 @@ class SongController extends Controller
             'title' => 'required|string|max:255',
             'artist' => 'nullable|string|max:255',
             'key' => 'nullable|string|max:10',
-            'bpm' => 'nullable|integer|min:30|max:300',
+            'bpm' => 'nullable|numeric|min:30|max:300',
             'lyrics' => 'nullable|string|max:10000',
             'chords' => 'nullable|string|max:20000',
             'ccli_number' => 'nullable|string|max:50',
-            'youtube_url' => 'nullable|url|max:255',
-            'spotify_url' => 'nullable|url|max:255',
+            'youtube_url' => 'nullable|max:255',
+            'spotify_url' => 'nullable|max:255',
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
-            'new_tag' => 'nullable|string|max:50',
+            'new_tag' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:5000',
         ]);
 
         $church = $this->getCurrentChurch();
+
+        // Clean empty values
+        $validated['youtube_url'] = !empty($validated['youtube_url']) ? $validated['youtube_url'] : null;
+        $validated['spotify_url'] = !empty($validated['spotify_url']) ? $validated['spotify_url'] : null;
+        $validated['bpm'] = !empty($validated['bpm']) ? (int)$validated['bpm'] : null;
 
         // Combine selected tags with new tag
         $tags = $validated['tags'] ?? [];
@@ -95,7 +86,7 @@ class SongController extends Controller
         }
         $tags = array_unique(array_filter($tags));
 
-        Song::create([
+        $song = Song::create([
             'church_id' => $church->id,
             'title' => $validated['title'],
             'artist' => $validated['artist'],
@@ -110,6 +101,28 @@ class SongController extends Controller
             'notes' => $validated['notes'],
             'created_by' => auth()->id(),
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'song' => [
+                    'id' => $song->id,
+                    'title' => $song->title,
+                    'artist' => $song->artist,
+                    'key' => $song->key,
+                    'bpm' => $song->bpm,
+                    'lyrics' => $song->lyrics,
+                    'chords' => $song->chords,
+                    'ccli_number' => $song->ccli_number,
+                    'youtube_url' => $song->youtube_url,
+                    'spotify_url' => $song->spotify_url,
+                    'tags' => $song->tags ?? [],
+                    'notes' => $song->notes,
+                    'times_used' => $song->times_used ?? 0,
+                    'created_at' => $song->created_at,
+                ]
+            ]);
+        }
 
         return redirect()->route('songs.index')
             ->with('success', 'Пісню додано до бібліотеки.');
@@ -157,17 +170,22 @@ class SongController extends Controller
             'title' => 'required|string|max:255',
             'artist' => 'nullable|string|max:255',
             'key' => 'nullable|string|max:10',
-            'bpm' => 'nullable|integer|min:30|max:300',
+            'bpm' => 'nullable|numeric|min:30|max:300',
             'lyrics' => 'nullable|string|max:10000',
             'chords' => 'nullable|string|max:20000',
             'ccli_number' => 'nullable|string|max:50',
-            'youtube_url' => 'nullable|url|max:255',
-            'spotify_url' => 'nullable|url|max:255',
+            'youtube_url' => 'nullable|max:255',
+            'spotify_url' => 'nullable|max:255',
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
-            'new_tag' => 'nullable|string|max:50',
+            'new_tag' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:5000',
         ]);
+
+        // Clean empty values
+        $validated['youtube_url'] = !empty($validated['youtube_url']) ? $validated['youtube_url'] : null;
+        $validated['spotify_url'] = !empty($validated['spotify_url']) ? $validated['spotify_url'] : null;
+        $validated['bpm'] = !empty($validated['bpm']) ? (int)$validated['bpm'] : null;
 
         // Combine selected tags with new tag
         $tags = $validated['tags'] ?? [];
@@ -191,15 +209,41 @@ class SongController extends Controller
             'notes' => $validated['notes'],
         ]);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'song' => [
+                    'id' => $song->id,
+                    'title' => $song->title,
+                    'artist' => $song->artist,
+                    'key' => $song->key,
+                    'bpm' => $song->bpm,
+                    'lyrics' => $song->lyrics,
+                    'chords' => $song->chords,
+                    'ccli_number' => $song->ccli_number,
+                    'youtube_url' => $song->youtube_url,
+                    'spotify_url' => $song->spotify_url,
+                    'tags' => $song->tags ?? [],
+                    'notes' => $song->notes,
+                    'times_used' => $song->times_used ?? 0,
+                    'created_at' => $song->created_at,
+                ]
+            ]);
+        }
+
         return redirect()->route('songs.show', $song)
             ->with('success', 'Пісню оновлено.');
     }
 
-    public function destroy(Song $song)
+    public function destroy(Request $request, Song $song)
     {
         $this->authorizeChurch($song);
 
         $song->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('songs.index')
             ->with('success', 'Пісню видалено.');
@@ -227,6 +271,10 @@ class SongController extends Controller
         ]);
 
         $song->incrementUsage();
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'order' => $maxOrder + 1]);
+        }
 
         return back()->with('success', 'Пісню додано до події.');
     }
@@ -262,11 +310,15 @@ class SongController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function removeFromEvent(Event $event, Song $song)
+    public function removeFromEvent(Request $request, Event $event, Song $song)
     {
         $this->authorizeChurch($event);
 
         $event->songs()->detach($song->id);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Пісню видалено з події.');
     }

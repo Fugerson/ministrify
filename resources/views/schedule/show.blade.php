@@ -237,6 +237,17 @@
                                     </td>
                                     {{-- Що відбувається --}}
                                     <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                                        @if($item->song_id && $item->song)
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-lg">🎵</span>
+                                            <a href="{{ route('songs.show', $item->song_id) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">
+                                                {{ $item->song->title }}
+                                            </a>
+                                            @if($item->song->key)
+                                            <span class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">{{ $item->song->key }}</span>
+                                            @endif
+                                        </div>
+                                        @else
                                         <textarea placeholder="Опис пункту..."
                                                   @change="updateField({{ $item->id }}, 'title', $event.target.value)"
                                                   rows="1"
@@ -244,6 +255,7 @@
                                                   style="word-wrap: break-word; overflow-wrap: break-word;"
                                                   x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; })"
                                                   oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">{{ $item->title }}</textarea>
+                                        @endif
                                     </td>
                                     {{-- Відповідальний (multiple people with statuses) --}}
                                     @php
@@ -474,8 +486,31 @@
                     <form @submit.prevent="addItem()" class="flex items-center gap-2">
                         <input type="time" x-model="newItem.start_time"
                                class="min-w-[6rem] px-2 py-2 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
-                        <input type="text" x-model="newItem.title" placeholder="Що відбувається..." required
-                               class="flex-1 px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        {{-- Title with song autocomplete --}}
+                        <div class="flex-1 relative" x-data="{ showSongs: false, songSearch: '', songIndex: 0 }">
+                            <input type="text" x-model="newItem.title"
+                                   @input="if($event.target.value.match(/song-/i)) { showSongs = true; songSearch = $event.target.value.replace(/.*song-/i, ''); } else { showSongs = false; }"
+                                   @keydown.escape="showSongs = false"
+                                   @keydown.arrow-down.prevent="songIndex = Math.min(songIndex + 1, SONGS_DATA.length - 1)"
+                                   @keydown.arrow-up.prevent="songIndex = Math.max(songIndex - 1, 0)"
+                                   @keydown.enter.prevent="if(showSongs && SONGS_DATA.length) { const s = SONGS_DATA.filter(s => !songSearch || s.title.toLowerCase().includes(songSearch.toLowerCase()))[songIndex]; if(s) { newItem.title = '🎵 ' + s.title; newItem.song_id = s.id; showSongs = false; } } else { $el.form.requestSubmit(); }"
+                                   placeholder="Що відбувається... (song- для пісні)" required
+                                   class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                            <div x-show="showSongs" x-cloak @click.outside="showSongs = false"
+                                 class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                                <template x-for="(song, index) in SONGS_DATA.filter(s => !songSearch || s.title.toLowerCase().includes(songSearch.toLowerCase())).slice(0, 10)" :key="song.id">
+                                    <button type="button" @click="newItem.title = '🎵 ' + song.title; newItem.song_id = song.id; showSongs = false;"
+                                            :class="{'bg-primary-50 dark:bg-primary-900/30': songIndex === index}"
+                                            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
+                                        <div>
+                                            <span class="text-gray-900 dark:text-white" x-text="song.title"></span>
+                                            <span x-show="song.artist" class="text-gray-500 dark:text-gray-400" x-text="' - ' + song.artist"></span>
+                                        </div>
+                                        <span x-show="song.key" class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono" x-text="song.key"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                         <input type="text" x-model="newItem.responsible_names" placeholder="Відповідальний"
                                class="w-36 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <input type="text" x-model="newItem.notes" placeholder="Коментар"
@@ -647,6 +682,7 @@
             </script>
             @endpush
             @endif
+
         </div>
 
         <!-- Secondary content (grid for sidebar items) -->
@@ -898,8 +934,22 @@
 <!-- Toast Notification Container -->
 <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
 
+@php
+    $songsForAutocomplete = isset($songs) ? $songs->map(function($s) {
+        return [
+            'id' => $s->id,
+            'title' => $s->title,
+            'artist' => $s->artist,
+            'key' => $s->key,
+        ];
+    }) : collect([]);
+@endphp
 @push('scripts')
 <script>
+// Songs data for autocomplete
+const SONGS_DATA = @json($songsForAutocomplete);
+console.log('SONGS_DATA loaded:', SONGS_DATA.length, 'songs', SONGS_DATA);
+
 // Toast notification helper
 function showGlobalToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
@@ -1310,6 +1360,33 @@ window.insertPlanRow = function(item) {
     const row = document.createElement('tr');
     row.className = 'hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group';
     row.dataset.id = item.id;
+
+    // Build title cell - song link or textarea
+    let titleCell = '';
+    if (item.song && item.song.id) {
+        const keyBadge = item.song.key ? `<span class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${item.song.key}</span>` : '';
+        titleCell = `
+            <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🎵</span>
+                    <a href="/songs/${item.song.id}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">
+                        ${item.song.title}
+                    </a>
+                    ${keyBadge}
+                </div>
+            </td>`;
+    } else {
+        titleCell = `
+            <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                <textarea placeholder="Опис пункту..."
+                          onchange="updateField(${item.id}, 'title', this.value)"
+                          rows="1"
+                          class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                          style="word-wrap: break-word; overflow-wrap: break-word;"
+                          oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.title || ''}</textarea>
+            </td>`;
+    }
+
     row.innerHTML = `
         <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
             <input type="time"
@@ -1317,14 +1394,7 @@ window.insertPlanRow = function(item) {
                    onchange="updateField(${item.id}, 'start_time', this.value)"
                    class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
         </td>
-        <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
-            <textarea placeholder="Опис пункту..."
-                      onchange="updateField(${item.id}, 'title', this.value)"
-                      rows="1"
-                      class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
-                      style="word-wrap: break-word; overflow-wrap: break-word;"
-                      oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.title || ''}</textarea>
-        </td>
+        ${titleCell}
         <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top whitespace-nowrap">
             <input type="text"
                    value="${item.responsible_names || ''}"
@@ -1404,7 +1474,8 @@ function servicePlanManager() {
             start_time: '{{ $event->time ? $event->time->format("H:i") : "10:00" }}',
             type: '',
             title: '',
-            responsible_names: ''
+            responsible_names: '',
+            song_id: null
         },
 
         async addItem() {
@@ -1423,7 +1494,8 @@ function servicePlanManager() {
                         title: this.newItem.title,
                         type: this.newItem.type || null,
                         start_time: this.newItem.start_time || null,
-                        responsible_names: this.newItem.responsible_names || null
+                        responsible_names: this.newItem.responsible_names || null,
+                        song_id: this.newItem.song_id || null
                     })
                 });
 
@@ -1442,7 +1514,8 @@ function servicePlanManager() {
                         start_time: '{{ $event->time ? $event->time->format("H:i") : "10:00" }}',
                         type: '',
                         title: '',
-                        responsible_names: ''
+                        responsible_names: '',
+                        song_id: null
                     };
                     showGlobalToast('Пункт додано', 'success');
                 }

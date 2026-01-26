@@ -784,86 +784,350 @@
             @if($ministry->is_worship_ministry)
             <div x-show="activeTab === 'songs'"{{ $tab !== 'songs' ? ' style="display:none"' : '' }}
                  x-data="songsLibrary()">
+                <!-- Header -->
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Бібліотека пісень</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Пісні для прославлення</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Знайдено: <span x-text="filteredSongs.length"></span> пісень
+                        </p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('music-stand.index') }}"
-                           class="inline-flex items-center px-3 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors">
-                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                            </svg>
-                            Music Stand
-                        </a>
                         @can('manage-ministry', $ministry)
-                        <a href="{{ route('songs.create') }}"
+                        <button @click="openCreateModal()"
                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
                             Додати пісню
-                        </a>
+                        </button>
                         @endcan
                     </div>
                 </div>
 
-                <!-- Search -->
-                <div class="mb-4">
-                    <input type="text" x-model="search" placeholder="Пошук пісень..."
-                           class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                <!-- Search & Filters -->
+                <div class="flex flex-wrap gap-3 mb-4">
+                    <div class="flex-1 min-w-[200px]">
+                        <input type="text" x-model="search" placeholder="Пошук пісень..."
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <select x-model="filterKey"
+                            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
+                        <option value="">Усі тональності</option>
+                        @foreach(\App\Models\Song::KEYS as $key => $label)
+                            <option value="{{ $key }}">{{ $key }}</option>
+                        @endforeach
+                    </select>
+                    <select x-model="filterTag"
+                            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
+                        <option value="">Усі теги</option>
+                        <template x-for="tag in allTags" :key="tag">
+                            <option :value="tag" x-text="tag"></option>
+                        </template>
+                    </select>
+                    <select x-model="sortBy"
+                            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
+                        <option value="title">За назвою</option>
+                        <option value="recent">Нові</option>
+                        <option value="popular">Популярні</option>
+                    </select>
                 </div>
 
                 <!-- Songs Grid -->
-                <div class="grid gap-3">
-                    @forelse($songs ?? [] as $song)
-                        <a href="{{ route('songs.show', $song) }}"
-                           class="block p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                           x-show="!search || '{{ strtolower($song->title) }}'.includes(search.toLowerCase()) || '{{ strtolower($song->artist ?? '') }}'.includes(search.toLowerCase())">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-medium text-gray-900 dark:text-white">{{ $song->title }}</h4>
-                                        @if($song->artist)
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $song->artist }}</p>
-                                        @endif
-                                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <template x-for="song in filteredSongs" :key="song.id">
+                        <div @click="openSongModal(song)"
+                             class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 cursor-pointer hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 transition-all group">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                                    </svg>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    @if($song->key)
-                                        <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-mono rounded">{{ $song->key }}</span>
-                                    @endif
-                                    @if($song->bpm)
-                                        <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded">{{ $song->bpm }} BPM</span>
-                                    @endif
-                                </div>
+                                <span x-show="song.key" class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-mono rounded" x-text="song.key"></span>
                             </div>
-                        </a>
-                    @empty
-                        <div class="text-center py-12">
-                            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
-                                </svg>
+                            <h4 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 line-clamp-1" x-text="song.title"></h4>
+                            <p x-show="song.artist" class="text-sm text-gray-500 dark:text-gray-400 mt-1" x-text="song.artist"></p>
+                            <div x-show="song.tags && song.tags.length > 0" class="flex flex-wrap gap-1 mt-3">
+                                <template x-for="tag in song.tags.slice(0, 2)" :key="tag">
+                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full" x-text="tag"></span>
+                                </template>
                             </div>
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає пісень</h3>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">Додайте першу пісню до бібліотеки</p>
-                            @can('manage-ministry', $ministry)
-                            <a href="{{ route('songs.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                Додати пісню
-                            </a>
-                            @endcan
+                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+                                <span x-text="(song.times_used || 0) + ' раз'"></span>
+                                <span x-show="song.bpm" x-text="song.bpm + ' BPM'"></span>
+                            </div>
                         </div>
-                    @endforelse
+                    </template>
+                </div>
+
+                <!-- Empty States -->
+                <div x-show="filteredSongs.length === 0 && songs.length > 0" class="text-center py-12">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Нічого не знайдено</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Спробуйте змінити параметри пошуку</p>
+                </div>
+
+                <div x-show="songs.length === 0" class="text-center py-12">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає пісень</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Додайте першу пісню до бібліотеки</p>
+                    @can('manage-ministry', $ministry)
+                    <button @click="openCreateModal()" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Додати пісню
+                    </button>
+                    @endcan
+                </div>
+
+                <!-- Song Modal (Create/Edit) -->
+                <div x-show="showModal" x-cloak
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     @keydown.escape.window="showModal = false">
+                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                             class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
+                             @click="showModal = false"></div>
+
+                        <div x-show="showModal" x-transition:enter="ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                             x-transition:leave="ease-in duration-200"
+                             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                             class="relative inline-block w-full max-w-3xl p-6 my-8 text-left align-middle bg-white dark:bg-gray-800 rounded-2xl shadow-xl transform transition-all max-h-[90vh] overflow-y-auto">
+
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white" x-text="editingId ? 'Редагувати пісню' : 'Додати пісню'"></h3>
+                                <button @click="showModal = false" class="text-gray-400 hover:text-gray-500">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <form @submit.prevent="saveSong()">
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва <span class="text-red-500">*</span></label>
+                                            <input type="text" x-model="form.title" required
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Автор</label>
+                                            <input type="text" x-model="form.artist" list="artists-list-modal"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                            <datalist id="artists-list-modal">
+                                                <template x-for="artist in artists" :key="artist">
+                                                    <option :value="artist"></option>
+                                                </template>
+                                            </datalist>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тональність</label>
+                                            <select x-model="form.key"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                                <option value="">Не вказано</option>
+                                                @foreach(\App\Models\Song::KEYS as $key => $label)
+                                                    <option value="{{ $key }}">{{ $key }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">BPM</label>
+                                            <input type="number" x-model="form.bpm" min="30" max="300"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Теги</label>
+                                        <div class="flex flex-wrap gap-2 mb-2">
+                                            <template x-for="tag in allTags" :key="tag">
+                                                <label class="inline-flex items-center cursor-pointer">
+                                                    <input type="checkbox" :value="tag" x-model="form.tags" class="sr-only peer">
+                                                    <span class="px-3 py-1.5 rounded-full text-sm border transition-all peer-checked:bg-primary-600 peer-checked:text-white peer-checked:border-primary-600 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-400" x-text="tag"></span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                        <input type="text" x-model="form.new_tag" placeholder="Нові теги через кому"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Коментарі</label>
+                                        <textarea x-model="form.notes" rows="2"
+                                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                                                  placeholder="Нотатки для команди"></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Текст</label>
+                                        <textarea x-model="form.lyrics" rows="4"
+                                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 font-mono text-sm"></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Текст з акордами</label>
+                                        <textarea x-model="form.chords" rows="6"
+                                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+                                                  placeholder="[C]Святий, Святий, [Am]Святий..."></textarea>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CCLI</label>
+                                            <input type="text" x-model="form.ccli_number"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">YouTube</label>
+                                            <input type="url" x-model="form.youtube_url"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spotify</label>
+                                            <input type="url" x-model="form.spotify_url"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <button type="button" @click="showModal = false; if(editingId && viewingSong) showViewModal = true; resetForm();"
+                                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                        Скасувати
+                                    </button>
+                                    <button type="submit" :disabled="saving"
+                                            class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                                        <span x-show="!saving" x-text="editingId ? 'Зберегти' : 'Додати'"></span>
+                                        <span x-show="saving">Збереження...</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Song View Modal -->
+                <div x-show="showViewModal" x-cloak
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     @keydown.escape.window="showViewModal = false">
+                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div x-show="showViewModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                             class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
+                             @click="showViewModal = false"></div>
+
+                        <div x-show="showViewModal" x-transition:enter="ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                             x-transition:leave="ease-in duration-200"
+                             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                             class="relative inline-block w-full max-w-3xl p-6 my-8 text-left align-middle bg-white dark:bg-gray-800 rounded-2xl shadow-xl transform transition-all max-h-[90vh] overflow-y-auto">
+
+                            <template x-if="viewingSong">
+                                <div>
+                                    <!-- Header -->
+                                    <div class="flex items-start justify-between mb-4">
+                                        <div>
+                                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" x-text="viewingSong.title"></h3>
+                                            <p x-show="viewingSong.artist" class="text-gray-500 dark:text-gray-400 mt-1" x-text="viewingSong.artist"></p>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span x-show="viewingSong.key" class="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-mono rounded-lg" x-text="viewingSong.key"></span>
+                                            <span x-show="viewingSong.bpm" class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm rounded-lg" x-text="viewingSong.bpm + ' BPM'"></span>
+                                            <button @click="showViewModal = false" class="ml-2 text-gray-400 hover:text-gray-500">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tags -->
+                                    <div x-show="viewingSong.tags && viewingSong.tags.length > 0" class="flex flex-wrap gap-2 mb-4">
+                                        <template x-for="tag in viewingSong.tags" :key="tag">
+                                            <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm rounded-full" x-text="tag"></span>
+                                        </template>
+                                    </div>
+
+                                    <!-- Notes -->
+                                    <div x-show="viewingSong.notes" class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                                        <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                            <span class="font-medium">Коментарі:</span> <span x-text="viewingSong.notes"></span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Chords -->
+                                    <div x-show="viewingSong.chords" class="mb-4">
+                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст з акордами</h4>
+                                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg font-mono text-sm whitespace-pre-wrap max-h-96 overflow-y-auto" x-html="formatChords(viewingSong.chords)"></div>
+                                    </div>
+
+                                    <!-- Lyrics (if no chords) -->
+                                    <div x-show="viewingSong.lyrics && !viewingSong.chords" class="mb-4">
+                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст</h4>
+                                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm whitespace-pre-wrap max-h-96 overflow-y-auto" x-text="viewingSong.lyrics"></div>
+                                    </div>
+
+                                    <!-- Links -->
+                                    <div x-show="viewingSong.youtube_url || viewingSong.spotify_url" class="flex flex-wrap gap-2 mb-4">
+                                        <a x-show="viewingSong.youtube_url" :href="viewingSong.youtube_url" target="_blank"
+                                           class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                            YouTube
+                                        </a>
+                                        <a x-show="viewingSong.spotify_url" :href="viewingSong.spotify_url" target="_blank"
+                                           class="inline-flex items-center px-4 py-2 bg-[#1DB954] text-white text-sm rounded-lg hover:bg-[#1ed760]">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                                            Spotify
+                                        </a>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            Використано <span x-text="viewingSong.times_used || 0"></span> раз
+                                        </div>
+                                        @can('manage-ministry', $ministry)
+                                        <div class="flex items-center gap-2">
+                                            <button @click="showViewModal = false; openEditModal(viewingSong)"
+                                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                Редагувати
+                                            </button>
+                                            <button @click="showViewModal = false; deleteSong(viewingSong)"
+                                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                Видалити
+                                            </button>
+                                        </div>
+                                        @endcan
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </div>
             @endif
@@ -1122,9 +1386,198 @@ function goalsManager() {
     }
 }
 
+@php
+    $songsCollection = collect($songs ?? []);
+    $songsData = $songsCollection->map(function($s) {
+        return [
+            'id' => $s->id,
+            'title' => $s->title,
+            'artist' => $s->artist,
+            'key' => $s->key,
+            'bpm' => $s->bpm,
+            'lyrics' => $s->lyrics,
+            'chords' => $s->chords,
+            'ccli_number' => $s->ccli_number,
+            'youtube_url' => $s->youtube_url,
+            'spotify_url' => $s->spotify_url,
+            'tags' => $s->tags ?? [],
+            'notes' => $s->notes,
+            'times_used' => $s->times_used ?? 0,
+            'created_at' => $s->created_at,
+        ];
+    });
+    $allTagsData = $songsCollection->pluck('tags')->flatten()->filter()->unique()->sort()->values();
+    $artistsData = $songsCollection->pluck('artist')->filter()->unique()->sort()->values();
+@endphp
 function songsLibrary() {
     return {
-        search: ''
+        songs: @json($songsData),
+        allTags: @json($allTagsData),
+        artists: @json($artistsData),
+        search: '',
+        filterKey: '',
+        filterTag: '',
+        sortBy: 'title',
+        expandedSong: null,
+        showModal: false,
+        editingId: null,
+        saving: false,
+        viewingSong: null,
+        showViewModal: false,
+        form: {
+            title: '', artist: '', key: '', bpm: '', lyrics: '', chords: '',
+            ccli_number: '', youtube_url: '', spotify_url: '', tags: [], new_tag: '', notes: ''
+        },
+
+        get filteredSongs() {
+            let result = this.songs;
+            if (this.search) {
+                const s = this.search.toLowerCase();
+                result = result.filter(song =>
+                    song.title.toLowerCase().includes(s) ||
+                    (song.artist && song.artist.toLowerCase().includes(s))
+                );
+            }
+            if (this.filterKey) {
+                result = result.filter(song => song.key === this.filterKey);
+            }
+            if (this.filterTag) {
+                result = result.filter(song => song.tags && song.tags.includes(this.filterTag));
+            }
+            return [...result].sort((a, b) => {
+                switch (this.sortBy) {
+                    case 'recent': return new Date(b.created_at) - new Date(a.created_at);
+                    case 'popular': return (b.times_used || 0) - (a.times_used || 0);
+                    default: return a.title.localeCompare(b.title, 'uk');
+                }
+            });
+        },
+
+        toggleSong(id) {
+            this.expandedSong = this.expandedSong === id ? null : id;
+        },
+
+        formatChords(chords) {
+            if (!chords) return '';
+            let html = chords.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            html = html.replace(/\[([A-G][#b]?m?(?:add|sus|dim|aug|maj|min)?[0-9]?(?:\/[A-G][#b]?)?)\]/g,
+                '<span class="inline-block px-1 py-0.5 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs font-mono rounded mx-0.5">$1</span>');
+            return html.replace(/\n/g, '<br>');
+        },
+
+        resetForm() {
+            this.form = {
+                title: '', artist: '', key: '', bpm: '', lyrics: '', chords: '',
+                ccli_number: '', youtube_url: '', spotify_url: '', tags: [], new_tag: '', notes: ''
+            };
+            this.editingId = null;
+        },
+
+        openCreateModal() {
+            this.resetForm();
+            this.showModal = true;
+        },
+
+        openSongModal(song) {
+            this.viewingSong = song;
+            this.showViewModal = true;
+        },
+
+        openEditModal(song) {
+            this.editingId = song.id;
+            this.viewingSong = song; // Keep reference to return to view modal after save
+            this.showViewModal = false;
+            this.form = {
+                title: song.title || '',
+                artist: song.artist || '',
+                key: song.key || '',
+                bpm: song.bpm || '',
+                lyrics: song.lyrics || '',
+                chords: song.chords || '',
+                ccli_number: song.ccli_number || '',
+                youtube_url: song.youtube_url || '',
+                spotify_url: song.spotify_url || '',
+                tags: song.tags ? [...song.tags] : [],
+                new_tag: '',
+                notes: song.notes || ''
+            };
+            this.showModal = true;
+        },
+
+        async saveSong() {
+            this.saving = true;
+            const url = this.editingId ? `/songs/${this.editingId}` : '/songs';
+            const method = this.editingId ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(this.form)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const wasEditing = this.editingId;
+                    if (this.editingId) {
+                        const index = this.songs.findIndex(s => s.id === this.editingId);
+                        if (index !== -1) {
+                            this.songs[index] = { ...this.songs[index], ...data.song };
+                            // Update viewingSong if it was being viewed
+                            if (this.viewingSong && this.viewingSong.id === this.editingId) {
+                                this.viewingSong = this.songs[index];
+                            }
+                        }
+                    } else {
+                        this.songs.push(data.song);
+                    }
+                    // Update tags list
+                    this.allTags = [...new Set(this.songs.flatMap(s => s.tags || []))].sort();
+                    this.artists = [...new Set(this.songs.map(s => s.artist).filter(Boolean))].sort();
+                    this.showModal = false;
+                    this.resetForm();
+                    // Re-open view modal if we were editing
+                    if (wasEditing && this.viewingSong) {
+                        this.showViewModal = true;
+                    }
+                } else {
+                    const err = await response.json();
+                    alert(err.message || 'Помилка збереження');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Помилка збереження');
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        async deleteSong(song) {
+            if (!confirm(`Видалити пісню "${song.title}"?`)) return;
+
+            try {
+                const response = await fetch(`/songs/${song.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    this.songs = this.songs.filter(s => s.id !== song.id);
+                    this.expandedSong = null;
+                    this.allTags = [...new Set(this.songs.flatMap(s => s.tags || []))].sort();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Помилка видалення');
+            }
+        }
     }
 }
 

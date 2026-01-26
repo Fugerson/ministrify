@@ -67,6 +67,7 @@ class ServicePlanItem extends Model
         'sort_order',
         'notes',
         'status',
+        'song_id',
     ];
 
     protected $casts = [
@@ -196,6 +197,11 @@ class ServicePlanItem extends Model
     public function responsible(): BelongsTo
     {
         return $this->belongsTo(Person::class, 'responsible_id');
+    }
+
+    public function song(): BelongsTo
+    {
+        return $this->belongsTo(Song::class);
     }
 
     // Accessors
