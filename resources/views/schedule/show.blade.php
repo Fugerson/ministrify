@@ -238,23 +238,76 @@
                                     {{-- Що відбувається --}}
                                     <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
                                         @if($item->song_id && $item->song)
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-lg">🎵</span>
-                                            <a href="{{ route('songs.show', $item->song_id) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">
-                                                {{ $item->song->title }}
-                                            </a>
-                                            @if($item->song->key)
-                                            <span class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">{{ $item->song->key }}</span>
-                                            @endif
+                                        <div class="flex items-center gap-2" x-data="{ editing: false }">
+                                            <template x-if="!editing">
+                                                <div class="flex items-center gap-2 cursor-pointer" @click="editing = true" title="Клікніть для зміни">
+                                                    <span class="text-lg">🎵</span>
+                                                    <a href="{{ route('songs.show', $item->song_id) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>
+                                                        {{ $item->song->title }}
+                                                    </a>
+                                                    @if($item->song->key)
+                                                    <span class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">{{ $item->song->key }}</span>
+                                                    @endif
+                                                    <button type="button" @click.stop="if(confirm('Видалити пісню з цього пункту?')) { updateFieldWithSong({{ $item->id }}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title="Видалити пісню">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <template x-if="editing">
+                                                <div class="w-full relative" x-data="existingItemSongAutocomplete({{ $item->id }}, '{{ addslashes($item->song->title) }}')" x-init="$nextTick(() => $refs.input.focus())">
+                                                    <input type="text" x-ref="input" x-model="title"
+                                                           @input="checkForSongTrigger($event.target.value)"
+                                                           @blur="setTimeout(() => { if(!showSongs) editing = false; }, 200)"
+                                                           @keydown.escape="editing = false"
+                                                           @keydown.enter.prevent="if(showSongs && filteredSongs().length) { selectSong(filteredSongs()[songIndex]); } else { saveTitle(); editing = false; }"
+                                                           placeholder="Введіть song- для пошуку пісні"
+                                                           class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-primary-300 rounded focus:ring-1 focus:ring-primary-500">
+                                                    <div x-show="showSongs" x-transition @click.away="showSongs = false"
+                                                         class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                                                        <template x-if="SONGS_DATA.length === 0">
+                                                            <div class="px-3 py-3 text-center text-gray-500 text-sm">Пісень немає</div>
+                                                        </template>
+                                                        <template x-for="(song, index) in filteredSongs()" :key="song.id">
+                                                            <button type="button" @click="selectSong(song)"
+                                                                    :class="{'bg-primary-50 dark:bg-primary-900/30': songIndex === index}"
+                                                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
+                                                                <span x-text="song.title"></span>
+                                                                <span x-show="song.key" class="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded font-mono" x-text="song.key"></span>
+                                                            </button>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </template>
                                         </div>
                                         @else
-                                        <textarea placeholder="Опис пункту..."
-                                                  @change="updateField({{ $item->id }}, 'title', $event.target.value)"
-                                                  rows="1"
-                                                  class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
-                                                  style="word-wrap: break-word; overflow-wrap: break-word;"
-                                                  x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; })"
-                                                  oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">{{ $item->title }}</textarea>
+                                        <div class="relative" x-data="existingItemSongAutocomplete({{ $item->id }}, '{{ addslashes($item->title) }}')">
+                                            <textarea x-model="title"
+                                                      @input="checkForSongTrigger($event.target.value); $el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'"
+                                                      @blur="if(!showSongs) saveTitle()"
+                                                      @keydown.escape="showSongs = false"
+                                                      @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
+                                                      @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
+                                                      @keydown.enter.prevent="if(showSongs && filteredSongs().length) { selectSong(filteredSongs()[songIndex]); } else { saveTitle(); $el.blur(); }"
+                                                      placeholder="Опис пункту... (song- для пісні)"
+                                                      rows="1"
+                                                      class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                                                      style="word-wrap: break-word; overflow-wrap: break-word;"
+                                                      x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; })"></textarea>
+                                            <div x-show="showSongs" x-transition @click.away="showSongs = false"
+                                                 class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                                                <template x-if="SONGS_DATA.length === 0">
+                                                    <div class="px-3 py-3 text-center text-gray-500 text-sm">Пісень немає</div>
+                                                </template>
+                                                <template x-for="(song, index) in filteredSongs()" :key="song.id">
+                                                    <button type="button" @click="selectSong(song)"
+                                                            :class="{'bg-primary-50 dark:bg-primary-900/30': songIndex === index}"
+                                                            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
+                                                        <span x-text="song.title"></span>
+                                                        <span x-show="song.key" class="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded font-mono" x-text="song.key"></span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
                                         @endif
                                     </td>
                                     {{-- Відповідальний (multiple people with statuses) --}}
@@ -961,7 +1014,7 @@
 const SONGS_DATA = @json($songsForAutocomplete);
 console.log('SONGS_DATA loaded:', SONGS_DATA.length, 'songs', SONGS_DATA);
 
-// Song autocomplete component
+// Song autocomplete component for new items
 function songAutocomplete() {
     return {
         showSongs: false,
@@ -994,6 +1047,77 @@ function songAutocomplete() {
             console.log('Selected song:', song.title, 'id:', song.id);
         }
     };
+}
+
+// Song autocomplete for existing items
+function existingItemSongAutocomplete(itemId, initialTitle) {
+    return {
+        itemId: itemId,
+        title: initialTitle,
+        showSongs: false,
+        songSearch: '',
+        songIndex: 0,
+
+        checkForSongTrigger(value) {
+            if (value.match(/song-/i)) {
+                this.showSongs = true;
+                this.songSearch = value.replace(/.*song-/i, '').toLowerCase();
+                this.songIndex = 0;
+            } else {
+                this.showSongs = false;
+            }
+        },
+
+        filteredSongs() {
+            if (!this.songSearch) return SONGS_DATA.slice(0, 10);
+            return SONGS_DATA.filter(s =>
+                s.title.toLowerCase().includes(this.songSearch)
+            ).slice(0, 10);
+        },
+
+        selectSong(song) {
+            if (!song) return;
+            this.title = song.title;
+            this.showSongs = false;
+            updateFieldWithSong(this.itemId, song.id, song.title);
+        },
+
+        saveTitle() {
+            if (!this.title.match(/song-/i)) {
+                updateField(this.itemId, 'title', this.title);
+            }
+        }
+    };
+}
+
+// Update field with song_id
+async function updateFieldWithSong(itemId, songId, title) {
+    try {
+        const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${itemId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                song_id: songId,
+                title: title
+            })
+        });
+
+        if (response.ok) {
+            showGlobalToast(songId ? 'Пісню додано' : 'Пісню видалено', 'success');
+            // Reload to show updated song display
+            setTimeout(() => window.location.reload(), 500);
+        } else {
+            showGlobalToast('Помилка оновлення', 'error');
+        }
+    } catch (err) {
+        console.error('Update error:', err);
+        showGlobalToast('Помилка з\'єднання', 'error');
+    }
 }
 
 // Toast notification helper

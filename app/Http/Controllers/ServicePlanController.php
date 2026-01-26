@@ -98,6 +98,7 @@ class ServicePlanController extends Controller
             'responsible_names' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
             'status' => 'nullable|string|in:planned,confirmed,declined,completed',
+            'song_id' => 'nullable|exists:songs,id',
         ]);
 
         // Convert empty strings to null
