@@ -8,6 +8,7 @@ use App\Models\BoardCardActivity;
 use App\Models\BoardCardChecklistItem;
 use App\Models\BoardCardComment;
 use App\Models\BoardColumn;
+use App\Models\BoardEpic;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Ministry;
@@ -48,14 +49,16 @@ class BoardController extends Controller
             }
         }
 
-        // Load board with cards
+        // Load board with cards and epics
         $board->load([
             'columns.cards.assignee',
             'columns.cards.ministry',
+            'columns.cards.epic',
             'columns.cards.checklistItems',
             'columns.cards.comments',
             'columns.cards.creator',
             'columns.cards.attachments',
+            'epics',
         ]);
 
         // Get filter data
@@ -71,7 +74,23 @@ class BoardController extends Controller
             'my_tasks' => $allCards->where('assigned_to', auth()->user()->person?->id)->count(),
         ];
 
-        return view('boards.index', compact('board', 'people', 'ministries', 'stats'));
+        // Get epic stats
+        $epics = $board->epics->map(function ($epic) use ($allCards) {
+            $epicCards = $allCards->where('epic_id', $epic->id);
+            return [
+                'id' => $epic->id,
+                'name' => $epic->name,
+                'color' => $epic->color,
+                'description' => $epic->description,
+                'total' => $epicCards->count(),
+                'completed' => $epicCards->where('is_completed', true)->count(),
+                'progress' => $epicCards->count() > 0
+                    ? round(($epicCards->where('is_completed', true)->count() / $epicCards->count()) * 100)
+                    : 0,
+            ];
+        });
+
+        return view('boards.index', compact('board', 'people', 'ministries', 'stats', 'epics'));
     }
 
     public function create()
@@ -249,6 +268,7 @@ class BoardController extends Controller
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => 'nullable|exists:people,id',
+            'epic_id' => 'nullable|exists:board_epics,id',
             'event_id' => 'nullable|exists:events,id',
             'ministry_id' => 'nullable|exists:ministries,id',
             'group_id' => 'nullable|exists:groups,id',
@@ -261,6 +281,7 @@ class BoardController extends Controller
         $validated['created_by'] = auth()->id();
 
         $card = $column->cards()->create($validated);
+        $card->load('epic');
 
         // Log activity
         BoardCardActivity::log($card, 'created');
@@ -548,12 +569,13 @@ class BoardController extends Controller
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => 'nullable|exists:people,id',
+            'epic_id' => 'nullable|exists:board_epics,id',
             'column_id' => 'nullable|exists:board_columns,id',
         ]);
 
         // Track changes for activity log
         $changes = [];
-        foreach (['title', 'description', 'priority', 'due_date', 'assigned_to', 'column_id'] as $field) {
+        foreach (['title', 'description', 'priority', 'due_date', 'assigned_to', 'epic_id', 'column_id'] as $field) {
             if (array_key_exists($field, $validated) && $card->$field != $validated[$field]) {
                 $oldValue = $card->$field;
                 $newValue = $validated[$field];
@@ -985,5 +1007,66 @@ class BoardController extends Controller
         if ($board->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
+    }
+
+    // Epic Management
+    public function storeEpic(Request $request, Board $board)
+    {
+        $this->authorizeBoard($board);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'color' => 'nullable|string|max:7',
+            'description' => 'nullable|string',
+        ]);
+
+        $maxPosition = $board->epics()->max('position') ?? -1;
+        $validated['position'] = $maxPosition + 1;
+
+        $epic = $board->epics()->create($validated);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'epic' => $epic,
+            ]);
+        }
+
+        return redirect()->route('boards.index')->with('success', 'Епік створено.');
+    }
+
+    public function updateEpic(Request $request, BoardEpic $epic)
+    {
+        $this->authorizeBoard($epic->board);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'color' => 'nullable|string|max:7',
+            'description' => 'nullable|string',
+        ]);
+
+        $epic->update($validated);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'epic' => $epic]);
+        }
+
+        return redirect()->route('boards.index')->with('success', 'Епік оновлено.');
+    }
+
+    public function destroyEpic(BoardEpic $epic)
+    {
+        $this->authorizeBoard($epic->board);
+
+        // Remove epic from all cards (don't delete cards)
+        BoardCard::where('epic_id', $epic->id)->update(['epic_id' => null]);
+
+        $epic->delete();
+
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('boards.index')->with('success', 'Епік видалено.');
     }
 }

@@ -300,11 +300,11 @@ class EventController extends Controller
         $ministries = Ministry::where('church_id', $church->id)->get();
 
         // Get songs for autocomplete in service plan
-        $songs = \App\Models\Song::where('church_id', $church->id)
+        $songsForAutocomplete = \App\Models\Song::where('church_id', $church->id)
             ->orderBy('title')
             ->get(['id', 'title', 'artist', 'key']);
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songs'));
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete'));
     }
 
     public function edit(Event $event)

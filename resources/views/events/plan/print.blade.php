@@ -231,6 +231,10 @@
         <div class="event-time">Початок: {{ $event->time->format('H:i') }}</div>
     </div>
 
+    @php
+        // Load songs once for all items
+        $songsById = \App\Models\Song::where('church_id', $event->church_id)->get()->keyBy('id');
+    @endphp
     <div class="plan-items">
         @foreach($event->planItems as $item)
             <div class="plan-item">
@@ -250,7 +254,20 @@
                     @if($item->type)
                         <div class="item-type" style="color: {{ $item->type_color }};">{{ $item->type_label }}</div>
                     @endif
-                    <div class="item-title">{{ $item->title }}</div>
+                    @php
+                        // Parse [song-X] patterns and replace with song titles
+                        $titleHtml = e($item->title);
+                        $titleHtml = preg_replace_callback('/\[song-(\d+)\]/', function($matches) use ($songsById) {
+                            $songId = $matches[1];
+                            $song = $songsById->get($songId);
+                            if ($song) {
+                                $key = $song->key ? " ({$song->key})" : '';
+                                return '<strong>🎵 ' . e($song->title) . $key . '</strong>';
+                            }
+                            return $matches[0];
+                        }, $titleHtml);
+                    @endphp
+                    <div class="item-title">{!! $titleHtml !!}</div>
 
                     @if($item->description)
                         <div class="item-description">{{ $item->description }}</div>

@@ -18,12 +18,8 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Редагувати пісню</h2>
-                <form action="{{ route('songs.destroy', $song) }}" method="POST" class="inline"
-                      onsubmit="return confirm('Видалити цю пісню?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-red-600 hover:text-red-700 text-sm">Видалити</button>
-                </form>
+                <button type="button" onclick="if(confirm('Видалити цю пісню?')) document.getElementById('delete-song-form').submit()"
+                        class="text-red-600 hover:text-red-700 text-sm">Видалити</button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -131,6 +127,11 @@
             <a href="{{ route('songs.show', $song) }}" class="px-4 py-2 text-gray-700 dark:text-gray-300">Скасувати</a>
             <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg">Зберегти</button>
         </div>
+    </form>
+
+    <form id="delete-song-form" action="{{ route('songs.destroy', $song) }}" method="POST" class="hidden">
+        @csrf
+        @method('DELETE')
     </form>
 </div>
 @endsection

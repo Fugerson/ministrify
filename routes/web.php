@@ -819,6 +819,11 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
 
         // Duplicate Card
         Route::post('cards/{card}/duplicate', [BoardController::class, 'duplicateCard'])->name('cards.duplicate');
+
+        // Epics
+        Route::post('{board}/epics', [BoardController::class, 'storeEpic'])->name('epics.store');
+        Route::put('epics/{epic}', [BoardController::class, 'updateEpic'])->name('epics.update');
+        Route::delete('epics/{epic}', [BoardController::class, 'destroyEpic'])->name('epics.destroy');
     });
 
     // Private Messages

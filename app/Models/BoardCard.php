@@ -10,6 +10,7 @@ class BoardCard extends Model
 {
     protected $fillable = [
         'column_id',
+        'epic_id',
         'title',
         'description',
         'position',
@@ -37,6 +38,11 @@ class BoardCard extends Model
     public function column(): BelongsTo
     {
         return $this->belongsTo(BoardColumn::class, 'column_id');
+    }
+
+    public function epic(): BelongsTo
+    {
+        return $this->belongsTo(BoardEpic::class, 'epic_id');
     }
 
     public function assignee(): BelongsTo

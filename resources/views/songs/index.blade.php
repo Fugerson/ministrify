@@ -118,20 +118,25 @@
     </template>
 </div>
 
+@php
+$songsJson = $songs->map(function($s) {
+    return [
+        'id' => $s->id,
+        'title' => $s->title,
+        'artist' => $s->artist,
+        'key' => $s->key,
+        'bpm' => $s->bpm,
+        'tags' => $s->tags ?? [],
+        'times_used' => $s->times_used ?? 0,
+        'last_used_at' => $s->last_used_at,
+        'created_at' => $s->created_at,
+    ];
+});
+@endphp
 <script>
 function songsLibrary() {
     return {
-        songs: @json($songs->map(fn($s) => [
-            'id' => $s->id,
-            'title' => $s->title,
-            'artist' => $s->artist,
-            'key' => $s->key,
-            'bpm' => $s->bpm,
-            'tags' => $s->tags ?? [],
-            'times_used' => $s->times_used ?? 0,
-            'last_used_at' => $s->last_used_at,
-            'created_at' => $s->created_at,
-        ])),
+        songs: @json($songsJson),
         search: '',
         filterKey: '',
         filterTag: '',

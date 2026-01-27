@@ -33,6 +33,11 @@ class Board extends Model
         return $this->hasMany(BoardColumn::class)->orderBy('position');
     }
 
+    public function epics(): HasMany
+    {
+        return $this->hasMany(BoardEpic::class)->orderBy('position');
+    }
+
     public function cards(): HasManyThrough
     {
         return $this->hasManyThrough(BoardCard::class, BoardColumn::class, 'board_id', 'column_id');
