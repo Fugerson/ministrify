@@ -106,7 +106,7 @@ class GoogleCalendarController extends Controller
     }
 
     /**
-     * Sync events to Google Calendar
+     * Sync events to Google Calendar (one-way: Ministrify → Google)
      */
     public function sync(Request $request)
     {
@@ -129,5 +129,101 @@ class GoogleCalendarController extends Controller
             'success' => false,
             'error' => $result['error'] ?? 'Sync failed',
         ], 400);
+    }
+
+    /**
+     * Full two-way sync between Ministrify and Google Calendar
+     */
+    public function fullSync(Request $request)
+    {
+        $user = auth()->user();
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'calendar_id' => 'required|string',
+            'ministry_id' => 'nullable|integer|exists:ministries,id',
+        ]);
+
+        $result = $this->googleCalendar->fullSync(
+            $user,
+            $church,
+            $validated['calendar_id'],
+            $validated['ministry_id'] ?? null
+        );
+
+        if ($result['success']) {
+            $toGoogle = $result['to_google'];
+            $fromGoogle = $result['from_google'];
+
+            $message = "Синхронізовано: ";
+            $message .= "→ Google: {$toGoogle['created']} створено, {$toGoogle['updated']} оновлено";
+            if ($toGoogle['deleted'] > 0) {
+                $message .= ", {$toGoogle['deleted']} видалено";
+            }
+            $message .= "; ← Google: {$fromGoogle['created']} імпортовано, {$fromGoogle['updated']} оновлено";
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'details' => $result,
+                ]);
+            }
+
+            return back()->with('success', $message);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'error' => $result['error'] ?? 'Sync failed',
+            ], 400);
+        }
+
+        return back()->with('error', $result['error'] ?? 'Синхронізація не вдалась');
+    }
+
+    /**
+     * Import events from Google Calendar (one-way: Google → Ministrify)
+     */
+    public function importFromGoogle(Request $request)
+    {
+        $user = auth()->user();
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'calendar_id' => 'required|string',
+            'ministry_id' => 'nullable|integer|exists:ministries,id',
+        ]);
+
+        $result = $this->googleCalendar->importFromGoogle(
+            $user,
+            $church,
+            $validated['calendar_id'],
+            $validated['ministry_id'] ?? null
+        );
+
+        if ($result['success']) {
+            $message = "Імпортовано: {$result['created']} створено, {$result['updated']} оновлено, {$result['skipped']} пропущено";
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'details' => $result,
+                ]);
+            }
+
+            return back()->with('success', $message);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'error' => $result['error'] ?? 'Import failed',
+            ], 400);
+        }
+
+        return back()->with('error', $result['error'] ?? 'Імпорт не вдався');
     }
 }

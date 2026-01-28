@@ -38,6 +38,10 @@ class Event extends Model
         'is_service',
         'service_type',
         'reminder_settings',
+        'google_event_id',
+        'google_calendar_id',
+        'google_synced_at',
+        'google_sync_status',
     ];
 
     protected $casts = [
@@ -50,6 +54,7 @@ class Event extends Model
         'qr_checkin_enabled' => 'boolean',
         'track_attendance' => 'boolean',
         'reminder_settings' => 'array',
+        'google_synced_at' => 'datetime',
     ];
 
     // Service types

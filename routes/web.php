@@ -546,6 +546,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('google-calendar/disconnect', [\App\Http\Controllers\GoogleCalendarController::class, 'disconnect'])->name('google-calendar.disconnect');
         Route::get('google-calendar/calendars', [\App\Http\Controllers\GoogleCalendarController::class, 'calendars'])->name('google-calendar.calendars');
         Route::post('google-calendar/sync', [\App\Http\Controllers\GoogleCalendarController::class, 'sync'])->name('google-calendar.sync');
+        Route::post('google-calendar/full-sync', [\App\Http\Controllers\GoogleCalendarController::class, 'fullSync'])->name('google-calendar.full-sync');
+        Route::post('google-calendar/import', [\App\Http\Controllers\GoogleCalendarController::class, 'importFromGoogle'])->name('google-calendar.import');
 
         // Expense categories
         Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->except(['show']);

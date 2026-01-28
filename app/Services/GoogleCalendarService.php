@@ -353,4 +353,362 @@ class GoogleCalendarService
         $hexColor = strtolower($hexColor);
         return $colorMap[$hexColor] ?? '9';
     }
+
+    /**
+     * Fetch events from Google Calendar
+     */
+    public function fetchEventsFromGoogle(string $accessToken, string $calendarId, ?Carbon $timeMin = null, ?Carbon $timeMax = null): array
+    {
+        $params = [
+            'singleEvents' => 'true',
+            'orderBy' => 'startTime',
+            'maxResults' => 250,
+        ];
+
+        if ($timeMin) {
+            $params['timeMin'] = $timeMin->toRfc3339String();
+        } else {
+            $params['timeMin'] = now()->subMonth()->toRfc3339String();
+        }
+
+        if ($timeMax) {
+            $params['timeMax'] = $timeMax->toRfc3339String();
+        } else {
+            $params['timeMax'] = now()->addMonths(6)->toRfc3339String();
+        }
+
+        try {
+            $response = Http::withToken($accessToken)
+                ->get(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events", $params);
+
+            if ($response->successful()) {
+                return $response->json()['items'] ?? [];
+            }
+
+            Log::error('Failed to fetch Google events', ['response' => $response->body()]);
+        } catch (\Exception $e) {
+            Log::error('Google events fetch error', ['error' => $e->getMessage()]);
+        }
+
+        return [];
+    }
+
+    /**
+     * Get a single event from Google Calendar
+     */
+    public function getGoogleEvent(string $accessToken, string $calendarId, string $eventId): ?array
+    {
+        try {
+            $response = Http::withToken($accessToken)
+                ->get(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events/{$eventId}");
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to get Google event', ['error' => $e->getMessage()]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Import events from Google Calendar to Ministrify
+     */
+    public function importFromGoogle(User $user, Church $church, string $calendarId, ?int $ministryId = null): array
+    {
+        $accessToken = $this->getValidToken($user);
+        if (!$accessToken) {
+            return ['success' => false, 'error' => 'No valid access token'];
+        }
+
+        $results = [
+            'created' => 0,
+            'updated' => 0,
+            'skipped' => 0,
+            'errors' => [],
+        ];
+
+        $googleEvents = $this->fetchEventsFromGoogle($accessToken, $calendarId);
+
+        foreach ($googleEvents as $googleEvent) {
+            try {
+                $result = $this->importSingleEvent($church, $googleEvent, $calendarId, $ministryId);
+                $results[$result]++;
+            } catch (\Exception $e) {
+                $results['errors'][] = $e->getMessage();
+            }
+
+            usleep(50000); // 50ms rate limiting
+        }
+
+        return array_merge(['success' => true], $results);
+    }
+
+    /**
+     * Import a single Google event to Ministrify
+     */
+    protected function importSingleEvent(Church $church, array $googleEvent, string $calendarId, ?int $ministryId): string
+    {
+        // Skip cancelled events
+        if (($googleEvent['status'] ?? '') === 'cancelled') {
+            return 'skipped';
+        }
+
+        // Parse event data
+        $eventData = $this->parseGoogleEvent($googleEvent);
+        if (!$eventData) {
+            return 'skipped';
+        }
+
+        // Check if event already exists by google_event_id
+        $existingEvent = Event::where('church_id', $church->id)
+            ->where('google_event_id', $googleEvent['id'])
+            ->first();
+
+        if ($existingEvent) {
+            // Check if Google event is newer
+            $googleUpdated = isset($googleEvent['updated'])
+                ? Carbon::parse($googleEvent['updated'])
+                : now();
+
+            if ($existingEvent->google_synced_at && $googleUpdated->lte($existingEvent->google_synced_at)) {
+                return 'skipped'; // Local is newer or same
+            }
+
+            // Update existing event
+            $existingEvent->update(array_merge($eventData, [
+                'google_synced_at' => now(),
+                'google_sync_status' => 'synced',
+            ]));
+
+            return 'updated';
+        }
+
+        // Check for duplicate by title and date
+        $duplicate = Event::where('church_id', $church->id)
+            ->where('title', $eventData['title'])
+            ->whereDate('date', $eventData['date'])
+            ->whereNull('google_event_id')
+            ->first();
+
+        if ($duplicate) {
+            // Link existing event to Google
+            $duplicate->update([
+                'google_event_id' => $googleEvent['id'],
+                'google_calendar_id' => $calendarId,
+                'google_synced_at' => now(),
+                'google_sync_status' => 'synced',
+            ]);
+            return 'updated';
+        }
+
+        // Create new event
+        Event::create(array_merge($eventData, [
+            'church_id' => $church->id,
+            'ministry_id' => $ministryId,
+            'google_event_id' => $googleEvent['id'],
+            'google_calendar_id' => $calendarId,
+            'google_synced_at' => now(),
+            'google_sync_status' => 'synced',
+        ]));
+
+        return 'created';
+    }
+
+    /**
+     * Parse Google event to Ministrify format
+     */
+    protected function parseGoogleEvent(array $googleEvent): ?array
+    {
+        $summary = $googleEvent['summary'] ?? null;
+        if (!$summary) {
+            return null;
+        }
+
+        // Parse start time
+        $start = $googleEvent['start'] ?? [];
+        if (isset($start['dateTime'])) {
+            $startDt = Carbon::parse($start['dateTime']);
+            $date = $startDt->format('Y-m-d');
+            $time = $startDt->format('H:i');
+        } elseif (isset($start['date'])) {
+            $date = $start['date'];
+            $time = null;
+        } else {
+            return null;
+        }
+
+        return [
+            'title' => $summary,
+            'date' => $date,
+            'time' => $time,
+            'notes' => $googleEvent['description'] ?? null,
+            'location' => $googleEvent['location'] ?? null,
+        ];
+    }
+
+    /**
+     * Full two-way sync between Ministrify and Google Calendar
+     */
+    public function fullSync(User $user, Church $church, string $calendarId, ?int $ministryId = null): array
+    {
+        $accessToken = $this->getValidToken($user);
+        if (!$accessToken) {
+            return ['success' => false, 'error' => 'No valid access token'];
+        }
+
+        $results = [
+            'to_google' => ['created' => 0, 'updated' => 0, 'deleted' => 0, 'failed' => 0],
+            'from_google' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
+            'errors' => [],
+        ];
+
+        // 1. Push local events to Google (Ministrify → Google)
+        $localEvents = Event::where('church_id', $church->id)
+            ->where('date', '>=', now()->subMonth())
+            ->where('date', '<=', now()->addMonths(6))
+            ->when($ministryId, fn($q) => $q->where('ministry_id', $ministryId))
+            ->get();
+
+        foreach ($localEvents as $event) {
+            try {
+                $result = $this->syncEventToGoogle($accessToken, $calendarId, $event);
+                $results['to_google'][$result]++;
+            } catch (\Exception $e) {
+                $results['errors'][] = "Push {$event->id}: " . $e->getMessage();
+                $results['to_google']['failed']++;
+            }
+            usleep(100000); // 100ms
+        }
+
+        // 2. Pull Google events to Ministrify (Google → Ministrify)
+        $googleEvents = $this->fetchEventsFromGoogle($accessToken, $calendarId);
+
+        foreach ($googleEvents as $googleEvent) {
+            try {
+                // Skip events that originated from Ministrify (have our marker)
+                $description = $googleEvent['description'] ?? '';
+                if (str_contains($description, 'Створено в Ministrify')) {
+                    continue;
+                }
+
+                $result = $this->importSingleEvent($church, $googleEvent, $calendarId, $ministryId);
+                $results['from_google'][$result]++;
+            } catch (\Exception $e) {
+                $results['errors'][] = "Pull {$googleEvent['id']}: " . $e->getMessage();
+            }
+            usleep(50000); // 50ms
+        }
+
+        // 3. Handle deleted events (events in Ministrify with google_event_id that no longer exist in Google)
+        $this->handleDeletedGoogleEvents($accessToken, $calendarId, $church, $ministryId, $results);
+
+        return array_merge(['success' => true], $results);
+    }
+
+    /**
+     * Sync single event to Google Calendar
+     */
+    protected function syncEventToGoogle(string $accessToken, string $calendarId, Event $event): string
+    {
+        if ($event->google_event_id) {
+            // Check if local event is newer
+            if ($event->google_synced_at && $event->updated_at->lte($event->google_synced_at)) {
+                return 'skipped';
+            }
+
+            // Update in Google
+            $result = $this->updateEvent($accessToken, $calendarId, $event->google_event_id, $event);
+            if ($result) {
+                $event->update([
+                    'google_synced_at' => now(),
+                    'google_sync_status' => 'synced',
+                ]);
+                return 'updated';
+            }
+
+            // If update fails (event deleted in Google?), try to create
+            $event->update(['google_event_id' => null]);
+        }
+
+        // Create new event in Google
+        $result = $this->createEvent($accessToken, $calendarId, $event);
+        if ($result && isset($result['id'])) {
+            $event->update([
+                'google_event_id' => $result['id'],
+                'google_calendar_id' => $calendarId,
+                'google_synced_at' => now(),
+                'google_sync_status' => 'synced',
+            ]);
+            return 'created';
+        }
+
+        return 'failed';
+    }
+
+    /**
+     * Handle events deleted from Google Calendar
+     */
+    protected function handleDeletedGoogleEvents(string $accessToken, string $calendarId, Church $church, ?int $ministryId, array &$results): void
+    {
+        $syncedEvents = Event::where('church_id', $church->id)
+            ->whereNotNull('google_event_id')
+            ->where('google_calendar_id', $calendarId)
+            ->when($ministryId, fn($q) => $q->where('ministry_id', $ministryId))
+            ->get();
+
+        foreach ($syncedEvents as $event) {
+            $googleEvent = $this->getGoogleEvent($accessToken, $calendarId, $event->google_event_id);
+
+            if (!$googleEvent || ($googleEvent['status'] ?? '') === 'cancelled') {
+                // Event was deleted in Google - mark as unsynced
+                $event->update([
+                    'google_event_id' => null,
+                    'google_calendar_id' => null,
+                    'google_synced_at' => null,
+                    'google_sync_status' => null,
+                ]);
+                $results['to_google']['deleted']++;
+            }
+
+            usleep(50000); // 50ms
+        }
+    }
+
+    /**
+     * Disconnect event from Google Calendar (unlink without deleting)
+     */
+    public function unlinkEvent(Event $event): void
+    {
+        $event->update([
+            'google_event_id' => null,
+            'google_calendar_id' => null,
+            'google_synced_at' => null,
+            'google_sync_status' => null,
+        ]);
+    }
+
+    /**
+     * Delete event from Google and unlink
+     */
+    public function deleteAndUnlink(User $user, Event $event): bool
+    {
+        if (!$event->google_event_id || !$event->google_calendar_id) {
+            return true;
+        }
+
+        $accessToken = $this->getValidToken($user);
+        if (!$accessToken) {
+            return false;
+        }
+
+        $deleted = $this->deleteEvent($accessToken, $event->google_calendar_id, $event->google_event_id);
+
+        if ($deleted) {
+            $this->unlinkEvent($event);
+        }
+
+        return $deleted;
+    }
 }

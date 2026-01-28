@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Event;
 use App\Models\Person;
+use App\Observers\EventObserver;
 use App\Observers\PersonObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -19,6 +21,7 @@ class EventServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Person::observe(PersonObserver::class);
+        Event::observe(EventObserver::class);
     }
 
     public function shouldDiscoverEvents(): bool
