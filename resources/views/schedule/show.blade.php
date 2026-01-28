@@ -25,7 +25,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
     <!-- Header (Editable) -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6" x-data="eventEditor()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6" x-data="eventEditor()">
         <div class="flex items-start justify-between gap-4">
             <div class="flex items-center flex-1">
                 <div class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
@@ -125,8 +125,8 @@
         <div class="space-y-6">
             <!-- План події -->
             @if($event->is_service)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700" x-data="planEditor()">
-                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="planEditor()">
+                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,7 +187,7 @@
                                  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
                                  @keydown.escape.window="showSaveModal = false">
                                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4" @click.outside="showSaveModal = false">
-                                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Зберегти план як шаблон</h3>
                                     </div>
                                     <div class="p-6 space-y-4">
@@ -204,7 +204,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
+                                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
                                         <button type="button" @click="showSaveModal = false"
                                                 class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                                             Скасувати
@@ -221,10 +221,11 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto" style="min-height: 300px;">
+                <div style="min-height: 300px;">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
+                                <th class="px-1 py-4" style="width: 30px;"></th>
                                 <th class="px-3 py-4 text-left" style="width: 70px;">Час</th>
                                 <th class="px-3 py-4 text-left" style="width: 40%;">Що відбувається</th>
                                 <th class="px-3 py-4 text-left whitespace-nowrap" style="width: 1px;">Відповідальний</th>
@@ -232,11 +233,20 @@
                                 <th class="px-2 py-4" style="width: 40px;"></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($event->planItems->sortBy('sort_order') as $item)
                                 <tr class="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group" data-id="{{ $item->id }}">
+                                    {{-- Drag handle --}}
+                                    <td class="px-1 py-3 cursor-grab active:cursor-grabbing drag-handle">
+                                        <svg class="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+                                            <circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/>
+                                            <circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/>
+                                            <circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/>
+                                        </svg>
+                                    </td>
                                     {{-- Час --}}
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
+                                    <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700">
                                         <input type="time"
                                                value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
                                                @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
@@ -254,7 +264,7 @@
                                         }
                                         $displayTitle = trim($displayTitle);
                                     @endphp
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                                    <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
                                         <div class="relative" x-data="titleEditor({{ $item->id }}, '{{ addslashes($displayTitle) }}', {{ $item->song_id ?? 'null' }})">
                                             {{-- Display mode --}}
                                             <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.5rem] px-1 py-1 text-sm text-gray-900 dark:text-white break-words" x-html="renderWithSongLinks(title)"></div>
@@ -322,7 +332,7 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top whitespace-nowrap"
+                                    <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top whitespace-nowrap"
                                         x-data="{
                                             open: false,
                                             search: '',
@@ -340,11 +350,29 @@
                                                 this.people.splice(index, 1);
                                                 this.save();
                                             },
-                                            save() {
+                                            async save() {
                                                 const names = this.people.map(p => p.name).join(', ');
                                                 const primaryId = this.people.length > 0 ? this.people[0].id : null;
-                                                updateField(this.itemId, 'responsible_names', names);
-                                                updateField(this.itemId, 'responsible_id', primaryId);
+                                                try {
+                                                    const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${this.itemId}`, {
+                                                        method: 'PUT',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'Accept': 'application/json',
+                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                            'X-Requested-With': 'XMLHttpRequest'
+                                                        },
+                                                        body: JSON.stringify({ responsible_names: names, responsible_id: primaryId })
+                                                    });
+                                                    if (response.ok) {
+                                                        showGlobalToast('Збережено', 'success');
+                                                    } else {
+                                                        showGlobalToast('Помилка збереження', 'error');
+                                                    }
+                                                } catch (err) {
+                                                    console.error('Update error:', err);
+                                                    showGlobalToast('Помилка з\'єднання', 'error');
+                                                }
                                             },
                                             async askPerson(person, index) {
                                                 if (!person.id || !person.hasTelegram) return;
@@ -447,8 +475,8 @@
 
                                                 {{-- Dropdown --}}
                                                 <div x-show="open" x-cloak @click.outside="open = false"
-                                                     class="absolute z-20 left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-                                                    <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                                                     class="absolute z-50 left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                                                    <div class="p-2 border-b border-gray-200 dark:border-gray-700">
                                                         <input type="text" x-model="search" placeholder="Пошук..."
                                                                class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                                     </div>
@@ -480,7 +508,7 @@
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
-                                    <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+                                    <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
                                         <textarea placeholder="Примітки..."
                                                   @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
                                                   rows="1"
@@ -503,7 +531,7 @@
                                 </tr>
                             @empty
                                 <tr id="empty-row">
-                                    <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-sm">
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">
                                         Почніть додавати пункти плану нижче
                                     </td>
                                 </tr>
@@ -513,7 +541,7 @@
                 </div>
 
                 {{-- Add new row --}}
-                <div class="p-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
+                <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
                     <form @submit.prevent="addItem()" class="flex items-center gap-2">
                         <input type="time" x-model="newItem.start_time"
                                class="min-w-[6rem] px-2 py-2 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
@@ -572,7 +600,7 @@
             </div>
             @else
             {{-- Simple responsibility form for non-service events --}}
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Відповідальності</h2>
                 <form method="POST" action="{{ route('events.responsibilities.store', $event) }}" class="flex gap-2">
                     @csrf
@@ -587,8 +615,8 @@
 
             <!-- Attendance Section -->
             @if($event->track_attendance && $currentChurch->attendance_enabled)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700" x-data="attendanceManager()">
-                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="attendanceManager()">
+                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -649,7 +677,7 @@
                     </div>
 
                     <!-- Guests count -->
-                    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between">
                             <label class="text-sm text-gray-700 dark:text-gray-300">Гості</label>
                             <input type="number" x-model="guestsCount" min="0"
@@ -740,7 +768,7 @@
             <!-- Reminders -->
             @if($currentChurch->telegram_bot_token)
             @can('manage-ministry', $event->ministry)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5"
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
                  x-data="reminderManager()">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
@@ -829,7 +857,7 @@
             @endif
 
             <!-- Quick Actions -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Швидкі дії</h3>
                 <div class="space-y-2">
                     <!-- Add to Google Calendar -->
@@ -1701,7 +1729,7 @@ window.insertPlanRow = function(item) {
     if (item.song && item.song.id) {
         const keyBadge = item.song.key ? `<span class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${item.song.key}</span>` : '';
         titleCell = `
-            <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+            <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
                 <div class="flex items-center gap-2">
                     <span class="text-lg">🎵</span>
                     <a href="/songs/${item.song.id}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">
@@ -1712,7 +1740,7 @@ window.insertPlanRow = function(item) {
             </td>`;
     } else {
         titleCell = `
-            <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+            <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
                 <textarea placeholder="Опис пункту..."
                           onchange="updateField(${item.id}, 'title', this.value)"
                           rows="1"
@@ -1723,21 +1751,29 @@ window.insertPlanRow = function(item) {
     }
 
     row.innerHTML = `
-        <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700">
+        <td class="px-1 py-3 cursor-grab active:cursor-grabbing drag-handle">
+            <svg class="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+                <circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/>
+                <circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/>
+                <circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/>
+            </svg>
+        </td>
+        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700">
             <input type="time"
                    value="${startTime}"
                    onchange="updateField(${item.id}, 'start_time', this.value)"
                    class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
         </td>
         ${titleCell}
-        <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top whitespace-nowrap">
+        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top whitespace-nowrap">
             <input type="text"
                    value="${item.responsible_names || ''}"
                    placeholder="Відповідальний"
                    onchange="updateField(${item.id}, 'responsible_names', this.value)"
                    class="px-2 py-1 text-sm text-gray-900 dark:text-white bg-transparent border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-primary-500">
         </td>
-        <td class="px-3 py-3 border-r border-gray-100 dark:border-gray-700 align-top">
+        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
             <textarea placeholder="Примітки..."
                       onchange="updateField(${item.id}, 'notes', this.value)"
                       rows="1"
@@ -2184,5 +2220,67 @@ function reminderManager() {
     };
 }
 </script>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initPlanSortable();
+});
+
+function initPlanSortable() {
+    const tbody = document.querySelector('table tbody');
+    if (!tbody || typeof Sortable === 'undefined') return;
+
+    new Sortable(tbody, {
+        animation: 200,
+        handle: '.drag-handle',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'shadow-lg',
+        onEnd: async function(evt) {
+            const rows = tbody.querySelectorAll('tr[data-id]');
+            const items = [...rows].map(function(row, index) {
+                return {
+                    id: parseInt(row.dataset.id),
+                    sort_order: index
+                };
+            });
+
+            try {
+                const response = await fetch('/events/{{ $event->id }}/plan/reorder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ items: items })
+                });
+
+                const data = await response.json();
+                if (data.success || response.ok) {
+                    showGlobalToast('Порядок оновлено', 'success');
+                } else {
+                    showGlobalToast(data.message || 'Помилка збереження порядку', 'error');
+                }
+            } catch (err) {
+                console.error('Reorder error:', err);
+                showGlobalToast('Помилка збереження порядку', 'error');
+            }
+        }
+    });
+}
+</script>
+@endpush
+
+@push('styles')
+<style>
+    tr.sortable-ghost { opacity: 0.4; }
+    tr.sortable-chosen { background-color: rgb(239 246 255 / 0.5); }
+    .dark tr.sortable-chosen { background-color: rgb(55 65 81 / 0.5); }
+</style>
 @endpush
 @endsection
