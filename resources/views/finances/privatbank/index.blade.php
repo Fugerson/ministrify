@@ -331,23 +331,30 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
-                    <select name="category_id" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ $donationCategory && $donationCategory->id === $cat->id ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <x-searchable-select
+                        name="category_id"
+                        :items="$categories"
+                        :selected="$donationCategory?->id"
+                        labelKey="name"
+                        valueKey="id"
+                        colorKey="color"
+                        placeholder="Пошук категорії..."
+                        nullText="Виберіть категорію..."
+                        :nullable="false"
+                        required
+                    />
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Людина (необов'язково)</label>
-                    <select name="person_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                        <option value="">-- Не вказано --</option>
-                        @foreach($people as $person)
-                            <option value="{{ $person->id }}">{{ $person->first_name }} {{ $person->last_name }}</option>
-                        @endforeach
-                    </select>
+                    <x-person-select
+                        name="person_id"
+                        :people="$people"
+                        :selected="null"
+                        placeholder="Пошук людини..."
+                        nullText="Не вказано"
+                        nullable
+                    />
                 </div>
 
                 <div>

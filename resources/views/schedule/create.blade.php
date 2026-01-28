@@ -114,13 +114,18 @@
                     }
                 }">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
-                    <select name="ministry_id" x-model="selectedId"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                        <option value="">Без команди</option>
-                        @foreach($ministries as $ministry)
-                            <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                        @endforeach
-                    </select>
+                    <x-searchable-select
+                        name="ministry_id"
+                        :items="$ministries"
+                        :selected="$selectedMinistry ?? old('ministry_id')"
+                        labelKey="name"
+                        valueKey="id"
+                        colorKey="color"
+                        placeholder="Пошук команди..."
+                        nullText="Без команди"
+                        nullable
+                        x-on:select-changed="selectedId = $event.detail.value || ''"
+                    />
                     <!-- Colorful label preview -->
                     <div x-show="selected" x-cloak class="mt-2">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"

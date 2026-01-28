@@ -108,13 +108,21 @@
             </select>
 
             <!-- Ministry Filter -->
-            <select x-model="filters.ministry"
-                    class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Команда</option>
-                @foreach($ministries as $ministry)
-                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                @endforeach
-            </select>
+            <div class="w-40">
+                <x-searchable-select
+                    name="ministry_filter_temp"
+                    :items="$ministries"
+                    :selected="null"
+                    labelKey="name"
+                    valueKey="id"
+                    colorKey="color"
+                    placeholder="Команда"
+                    nullText="Всі команди"
+                    nullable
+                    x-on:select-changed="filters.ministry = $event.detail.value || ''"
+                    class="[&_input]:py-2 [&_input]:px-3 [&_input]:text-sm [&_input]:bg-gray-50 [&_input]:dark:bg-gray-900 [&_input]:border-0"
+                />
+            </div>
 
             <!-- Saved Views -->
             <div class="hidden sm:flex items-center gap-1">

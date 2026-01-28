@@ -80,15 +80,25 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Категорія <span class="text-red-500">*</span>
                 </label>
-                <select name="category_id" required
-                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                    <option value="">Оберіть категорію</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}" {{ old('category_id', $income->category_id) == $category->id ? 'selected' : '' }}>
-                            {{ $category->icon ?? '💰' }} {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
+                @php
+                    $categoriesWithIcon = $categories->map(function($c) {
+                        $c->display_name = ($c->icon ?? '') . ' ' . $c->name;
+                        return $c;
+                    });
+                @endphp
+                <x-searchable-select
+                    name="category_id"
+                    :items="$categoriesWithIcon"
+                    :selected="old('category_id', $income->category_id)"
+                    labelKey="display_name"
+                    valueKey="id"
+                    colorKey="color"
+                    :searchKeys="['name', 'display_name']"
+                    placeholder="Пошук категорії..."
+                    nullText="Оберіть категорію"
+                    :nullable="false"
+                    required
+                />
                 @error('category_id')
                     <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror

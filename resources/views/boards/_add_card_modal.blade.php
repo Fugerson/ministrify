@@ -132,13 +132,18 @@
                             <!-- Ministry -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Команда</label>
-                                <select x-model="addCardModal.ministryId"
-                                        class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
-                                    <option value="">Без команди</option>
-                                    @foreach($ministries as $ministry)
-                                        <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                                    @endforeach
-                                </select>
+                                <x-searchable-select
+                                    name="ministry_id_temp"
+                                    :items="$ministries"
+                                    :selected="null"
+                                    labelKey="name"
+                                    valueKey="id"
+                                    colorKey="color"
+                                    placeholder="Пошук команди..."
+                                    nullText="Без команди"
+                                    nullable
+                                    x-on:select-changed="addCardModal.ministryId = $event.detail.value || ''"
+                                />
                             </div>
 
                             <!-- Due Date -->

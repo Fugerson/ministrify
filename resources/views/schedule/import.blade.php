@@ -76,13 +76,18 @@
                 <label for="ministry_id_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Команда для імпортованих подій
                 </label>
-                <select name="ministry_id" id="ministry_id_url" required
-                        class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                    <option value="">Виберіть команду...</option>
-                    @foreach($ministries as $ministry)
-                        <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                    @endforeach
-                </select>
+                <x-searchable-select
+                    name="ministry_id"
+                    :items="$ministries"
+                    :selected="old('ministry_id')"
+                    labelKey="name"
+                    valueKey="id"
+                    colorKey="color"
+                    placeholder="Пошук команди..."
+                    nullText="Виберіть команду..."
+                    :nullable="false"
+                    required
+                />
                 @error('ministry_id')
                     <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror
@@ -162,13 +167,18 @@
                 <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Команда для імпортованих подій
                 </label>
-                <select name="ministry_id" id="ministry_id" required
-                        class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                    <option value="">Виберіть команду...</option>
-                    @foreach($ministries as $ministry)
-                        <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                    @endforeach
-                </select>
+                <x-searchable-select
+                    name="ministry_id"
+                    :items="$ministries"
+                    :selected="old('ministry_id')"
+                    labelKey="name"
+                    valueKey="id"
+                    colorKey="color"
+                    placeholder="Пошук команди..."
+                    nullText="Виберіть команду..."
+                    :nullable="false"
+                    required
+                />
                 @error('ministry_id')
                     <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror
