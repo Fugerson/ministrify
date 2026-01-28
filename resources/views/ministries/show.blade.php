@@ -818,7 +818,7 @@
                             'label' => $label
                         ])->values();
                     @endphp
-                    <div class="w-40">
+                    <div class="w-40" @select-changed="filterKey = $event.detail.value || ''">
                         <x-searchable-select
                             name="filter_key_temp"
                             :items="$songKeys"
@@ -829,8 +829,6 @@
                             placeholder="Тональність"
                             nullText="Усі тональності"
                             nullable
-                            x-on:select-changed="filterKey = $event.detail.value || ''"
-                            class="[&_input]:py-2 [&_input]:text-sm"
                         />
                     </div>
                     <select x-model="filterTag"
