@@ -72,7 +72,17 @@ class TelegramService
 
         $response = Http::post("{$this->baseUrl}/sendMessage", $data);
 
-        return $response->ok() && $response->json()['ok'];
+        $success = $response->ok() && ($response->json()['ok'] ?? false);
+
+        if (!$success) {
+            \Log::warning('TelegramService: Failed to send message', [
+                'chat_id' => $chatId,
+                'status' => $response->status(),
+                'response' => $response->json(),
+            ]);
+        }
+
+        return $success;
     }
 
     public function sendAssignmentNotification(Assignment $assignment): bool
