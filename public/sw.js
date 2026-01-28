@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ministrify-v2';
+const CACHE_NAME = 'ministrify-v3';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets to precache
