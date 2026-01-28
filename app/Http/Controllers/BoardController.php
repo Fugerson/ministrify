@@ -580,10 +580,18 @@ class BoardController extends Controller
             'description' => 'nullable|string',
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
-            'assigned_to' => 'nullable|exists:people,id',
+            'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
             'epic_id' => 'nullable|exists:board_epics,id',
             'column_id' => 'nullable|exists:board_columns,id',
         ]);
+
+        // Verify column belongs to the same board if provided
+        if (!empty($validated['column_id'])) {
+            $targetColumn = BoardColumn::find($validated['column_id']);
+            if (!$targetColumn || $targetColumn->board_id !== $card->column->board_id) {
+                abort(403, 'Колонка не належить цій дошці.');
+            }
+        }
 
         // Track changes for activity log
         $changes = [];

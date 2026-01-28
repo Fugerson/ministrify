@@ -205,9 +205,12 @@ class RotationService
         }
 
         // Check last assignment date
+        // Note: orderByDesc must be on the main query, not inside whereHas
         $lastAssignment = Assignment::where('person_id', $person->id)
             ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
-            ->whereHas('event', fn($q) => $q->orderByDesc('date'))
+            ->with('event')
+            ->get()
+            ->sortByDesc(fn($a) => $a->event?->date)
             ->first();
 
         if ($lastAssignment) {

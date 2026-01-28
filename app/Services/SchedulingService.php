@@ -402,8 +402,12 @@ class SchedulingService
         }
 
         // Check rest days since last assignment
+        // Note: orderByDesc must be on the main query, not inside whereHas
         $lastAssignment = Assignment::where('person_id', $person->id)
-            ->whereHas('event', fn($q) => $q->where('date', '<', $event->date)->orderByDesc('date'))
+            ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
+            ->with('event')
+            ->get()
+            ->sortByDesc(fn($a) => $a->event?->date)
             ->first();
 
         if ($lastAssignment && $lastAssignment->event) {
