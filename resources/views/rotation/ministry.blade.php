@@ -13,7 +13,7 @@
                 </svg>
             </a>
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}20;">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}30;">
                     <div class="w-4 h-4 rounded-full" style="background-color: {{ $ministry->color ?? '#3b82f6' }}"></div>
                 </div>
                 <div>
@@ -32,7 +32,7 @@
     </div>
 
     <!-- Balance Score Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
                 <h3 class="font-semibold text-gray-900 dark:text-white">Баланс навантаження</h3>
@@ -76,11 +76,11 @@
     </div>
 
     <!-- Upcoming Events -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="font-semibold text-gray-900 dark:text-white">Найближчі події</h3>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @forelse($events as $event)
             <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -181,8 +181,8 @@
     </div>
 
     <!-- Members Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="font-semibold text-gray-900 dark:text-white">Учасники команди</h3>
         </div>
         <div class="overflow-x-auto">
@@ -195,7 +195,7 @@
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">% участі</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($members as $member)
                     @php
                         $memberStat = $report['member_stats'][$member->id] ?? ['assignments' => 0, 'percentage' => 0];
@@ -252,7 +252,7 @@
 
 <!-- Result Toast -->
 <div id="resultToast" class="fixed bottom-4 right-4 z-50 hidden transform transition-transform">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-4 max-w-sm">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 max-w-sm">
         <div class="flex items-start gap-3">
             <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"></div>
             <div>

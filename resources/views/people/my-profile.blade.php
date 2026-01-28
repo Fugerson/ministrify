@@ -22,7 +22,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Profile info -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <form action="{{ route('my-profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-4"
                       x-data="{
                           preview: null,
@@ -118,7 +118,7 @@
             </div>
 
             <!-- Telegram connection -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
                  x-data="{
                      loading: false,
                      code: null,
@@ -264,7 +264,7 @@
             </div>
 
             <!-- Push Notifications -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
                  x-data="{
                      supported: 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window,
                      permission: Notification.permission || 'default',
@@ -450,14 +450,14 @@
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- Upcoming assignments -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Мої події</h3>
                 @if($upcomingAssignments->isEmpty())
                 <p class="text-gray-500 dark:text-gray-400">Немає запланованих подій</p>
                 @else
                 <div class="space-y-3">
                     @foreach($upcomingAssignments->take(5) as $assignment)
-                    <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
                         <div>
                             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignment->event->date->format('d.m') }} - {{ $assignment->event->ministry->name }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->position->name }}</p>
@@ -475,7 +475,7 @@
             </div>
 
             <!-- Blockout Dates -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,7 +495,7 @@
                 @if($activeBlockouts->isNotEmpty())
                 <div class="space-y-2 mb-4">
                     @foreach($activeBlockouts as $blockout)
-                    <div class="flex items-center gap-3 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                    <div class="flex items-center gap-3 py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
                         <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                             <span class="text-sm">
                                 @switch($blockout->reason)
@@ -529,7 +529,7 @@
             </div>
 
             <!-- Scheduling Preferences -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex items-center gap-2 mb-4">
                     <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>

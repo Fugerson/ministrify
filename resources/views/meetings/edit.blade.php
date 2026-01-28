@@ -13,7 +13,7 @@
         </a>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Редагувати зустріч</h2>
 
         <form method="POST" action="{{ route('meetings.update', [$ministry, $meeting]) }}" class="space-y-6">
@@ -87,7 +87,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <form method="POST" action="{{ route('meetings.destroy', [$ministry, $meeting]) }}" onsubmit="return confirm('Видалити зустріч?')">
                     @csrf
                     @method('DELETE')

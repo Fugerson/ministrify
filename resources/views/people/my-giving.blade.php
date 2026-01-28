@@ -13,19 +13,19 @@
 
     <!-- Stats cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Цього місяця</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_this_month'], 0, ',', ' ') }} ₴</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Цього року</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_this_year'], 0, ',', ' ') }} ₴</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Всього</p>
             <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">{{ number_format($stats['total_lifetime'], 0, ',', ' ') }} ₴</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Кількість</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['donations_count'] }}</p>
         </div>
@@ -33,7 +33,7 @@
 
     <!-- Monthly chart -->
     @if(count($monthlyData) > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Пожертви по місяцях ({{ now()->year }})</h2>
         <div class="h-48">
             <canvas id="monthlyChart"></canvas>
@@ -42,8 +42,8 @@
     @endif
 
     <!-- Transactions list -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Історія пожертв</h2>
             @if($years->count() > 0)
             <form method="GET" class="flex items-center gap-2">
@@ -64,7 +64,7 @@
             icon="inbox"
         />
         @else
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($transactions as $transaction)
             <div class="px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-4">
@@ -95,7 +95,7 @@
         </div>
 
         @if($transactions->hasPages())
-        <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
             {{ $transactions->links() }}
         </div>
         @endif

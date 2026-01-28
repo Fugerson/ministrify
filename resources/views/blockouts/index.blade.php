@@ -29,7 +29,7 @@
 
     <!-- Active Blockouts -->
     @if(isset($blockouts['active']) && $blockouts['active']->count() > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-4 py-3 bg-red-50 dark:bg-red-900/20 border-b border-red-100 dark:border-red-800">
             <h2 class="font-medium text-red-800 dark:text-red-200 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +38,7 @@
                 Активні періоди ({{ $blockouts['active']->count() }})
             </h2>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($blockouts['active'] as $blockout)
             <div class="px-4 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50">
                 <div class="flex-1">
@@ -119,7 +119,7 @@
 
     <!-- Expired Blockouts -->
     @if(isset($blockouts['expired']) && $blockouts['expired']->count() > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-600">
             <h2 class="font-medium text-gray-600 dark:text-gray-300 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,7 +128,7 @@
                 Минулі періоди ({{ $blockouts['expired']->count() }})
             </h2>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($blockouts['expired']->take(5) as $blockout)
             <div class="px-4 py-3 flex items-center justify-between opacity-60">
                 <div class="flex items-center gap-3">
@@ -143,7 +143,7 @@
 
     <!-- Empty State -->
     @if((!isset($blockouts['active']) || $blockouts['active']->count() === 0) && (!isset($blockouts['expired']) || $blockouts['expired']->count() === 0))
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>

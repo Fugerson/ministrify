@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-2xl">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <form method="POST" action="{{ route('groups.update', $group) }}" class="space-y-6">
             @csrf
             @method('PUT')
@@ -50,7 +50,7 @@
                 </p>
             </div>
 
-            <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 @can('delete', $group)
                 <form method="POST" action="{{ route('groups.destroy', $group) }}" onsubmit="return confirm('Видалити групу? Усі дані про членство будуть втрачені.')">
                     @csrf

@@ -17,7 +17,7 @@
         ] : null;
         $userHadNoRole = $user->church_role_id === null;
     @endphp
-    <form action="{{ route('settings.users.update', $user) }}" method="POST" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 space-y-6"
+    <form action="{{ route('settings.users.update', $user) }}" method="POST" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6"
           x-data="{
               personSelected: {{ json_encode($initialPersonData) }},
               hadNoRole: {{ $userHadNoRole ? 'true' : 'false' }},

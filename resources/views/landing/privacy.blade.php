@@ -11,7 +11,7 @@
             <p class="text-gray-600 dark:text-gray-400">Останнє оновлення: {{ now()->format('d.m.Y') }}</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mt-0">1. Вступ</h2>
                 <p>Ministrify поважає вашу приватність та захищає ваші персональні дані. Ця політика пояснює, як ми збираємо, використовуємо та захищаємо вашу інформацію.</p>

@@ -56,7 +56,7 @@
     @endif
 
     <!-- Header Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="bg-gradient-to-r from-primary-500 to-primary-600 h-24"></div>
         <div class="px-6 pb-6 -mt-12">
             <div class="flex flex-col sm:flex-row sm:items-end gap-4">
@@ -165,7 +165,7 @@
                         @else
                             @foreach($person->tags as $tag)
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                      style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}">
+                                      style="background-color: {{ $tag->color }}30; color: {{ $tag->color }}">
                                     {{ $tag->name }}
                                 </span>
                             @endforeach
@@ -317,7 +317,7 @@
                              class="absolute z-50 left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-48 overflow-auto">
                             <!-- Clear option -->
                             <div @click="clearShepherd()"
-                                 class="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+                                 class="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                                 -- Без опікуна --
                             </div>
                             <template x-for="(shepherd, index) in filteredShepherds" :key="shepherd.id">
@@ -571,7 +571,7 @@
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -585,7 +585,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -599,7 +599,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
                     <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -613,7 +613,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -630,7 +630,7 @@
 
     @if($isAdmin)
     <!-- Ministries (Admin editable) -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mt-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 mt-6">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Команди</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             @foreach($ministries as $ministry)
@@ -676,12 +676,12 @@
         <div class="lg:col-span-2 space-y-6">
             @if(!$isAdmin)
             <!-- Ministries (View only for non-admins) -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="font-semibold text-gray-900 dark:text-white">Команди</h2>
                 </div>
                 @if($person->ministries->count() > 0)
-                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <div class="divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach($person->ministries as $ministry)
                             @if(auth()->user()->canView('ministries'))
                             <a href="{{ route('ministries.show', $ministry) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
@@ -689,7 +689,7 @@
                             <div class="flex items-center justify-between p-4">
                             @endif
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}20;">
+                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}30;">
                                         <svg class="w-5 h-5" style="color: {{ $ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         </svg>
@@ -729,15 +729,15 @@
 
             <!-- Groups -->
             @if($person->groups->count() > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="font-semibold text-gray-900 dark:text-white">Групи</h2>
                 </div>
-                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($person->groups as $group)
                         <a href="{{ route('groups.show', $group) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $group->color }}20;">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $group->color }}30;">
                                     <svg class="w-5 h-5" style="color: {{ $group->color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     </svg>
@@ -763,14 +763,14 @@
 
             <!-- Sheep (People under their care) -->
             @if($church->shepherds_enabled && $person->is_shepherd && $person->sheep->count() > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-2">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                     <h2 class="font-semibold text-gray-900 dark:text-white">Підопічні ({{ $person->sheep->count() }})</h2>
                 </div>
-                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($person->sheep as $sheep)
                         <a href="{{ route('people.show', $sheep) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <div class="flex items-center gap-3">
@@ -798,7 +798,7 @@
             @endif
 
             <!-- Attendance Chart -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
                 <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Відвідуваність (12 тижнів)</h2>
                 <div class="h-48">
                     <canvas id="attendanceChart"></canvas>
@@ -807,8 +807,8 @@
         </div>
 
         <!-- Activity Timeline -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Активність</h2>
                 @if($stats['last_attended'])
                     <span class="text-xs text-gray-500 dark:text-gray-400">
@@ -816,7 +816,7 @@
                     </span>
                 @endif
             </div>
-            <div class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[600px] overflow-y-auto">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700 max-h-[600px] overflow-y-auto">
                 @forelse($activities as $activity)
                     <div class="p-4 flex items-start gap-3">
                         <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
@@ -843,15 +843,15 @@
 
     <!-- Recent Assignments -->
     @if($person->assignments->count() > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-6">
-        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-6">
+        <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="font-semibold text-gray-900 dark:text-white">Останні призначення</h2>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($person->assignments->take(10) as $assignment)
                 <a href="{{ route('events.show', $assignment->event) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $assignment->event->ministry->color ?? '#3b82f6' }}20;">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $assignment->event->ministry->color ?? '#3b82f6' }}30;">
                             <svg class="w-5 h-5" style="color: {{ $assignment->event->ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
@@ -875,9 +875,9 @@
     @endif
 
     <!-- Family Relationships -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-6"
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-6"
          @if($isAdmin) x-data="familyManager()" @endif>
-        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -897,7 +897,7 @@
 
         @if($isAdmin)
         <template x-if="familyMembers.length > 0">
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 <template x-for="member in familyMembers" :key="member.relationship_id">
                     <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <a :href="'/people/' + member.person_id" class="flex items-center gap-3 flex-1 min-w-0">
@@ -938,7 +938,7 @@
         @else
         @php $familyMembers = $person->family_members; @endphp
         @if($familyMembers->count() > 0)
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($familyMembers as $member)
             <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <a href="{{ route('people.show', $member->person) }}" class="flex items-center gap-3 flex-1 min-w-0">
@@ -1059,7 +1059,7 @@
     </div>
 
     <!-- Notes -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mt-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 mt-6">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Нотатки</h2>
         @if($isAdmin)
             <textarea name="notes" rows="3" placeholder="Додаткова інформація про людину..."

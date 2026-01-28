@@ -5,8 +5,8 @@
 @section('content')
 <div class="space-y-6" x-data="ministryResourcesManager()">
     <!-- Ministry Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     @if($ministry->icon)
@@ -27,7 +27,7 @@
         </div>
 
         <!-- Tabs -->
-        <div class="flex border-b border-gray-100 dark:border-gray-700 overflow-x-auto">
+        <div class="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'members']) }}"
                class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +116,7 @@
     @endif
 
     <!-- Resources grid -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         @if($resources->isEmpty())
         <div class="p-12 text-center">
             <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
@@ -141,7 +141,7 @@
         </div>
         @else
         <table class="w-full">
-            <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Назва</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Розмір</th>
@@ -149,7 +149,7 @@
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-16"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($resources as $resource)
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
                     @if($resource->isFolder())

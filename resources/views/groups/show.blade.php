@@ -26,7 +26,7 @@
 @section('content')
 <div class="space-y-6">
     <!-- Group Info -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-start gap-4">
             <div class="w-16 h-16 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
                 <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,16 +80,16 @@
 
     <!-- Stats Row -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $group->members->count() }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">Учасників</div>
         </div>
         @if($currentChurch->attendance_enabled)
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendanceStats['total_meetings'] }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">Зустрічей</div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center">
                 <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendanceStats['average_attendance'] }}</span>
                 @if($attendanceStats['trend'] === 'up')
@@ -104,7 +104,7 @@
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400">Сер. відвідув.</div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             @if($attendanceStats['last_meeting'])
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendanceStats['last_meeting']->date->format('d.m') }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">Остання зустріч</div>
@@ -118,8 +118,8 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Members -->
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="font-semibold text-gray-900 dark:text-white">Учасники ({{ $group->members->count() }})</h3>
                 @can('update', $group)
                 <button type="button" onclick="document.getElementById('addMemberModal').classList.remove('hidden')"
@@ -132,7 +132,7 @@
                 @endcan
             </div>
 
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($group->members->sortBy(fn($m) => $m->pivot->role === 'leader' ? 0 : ($m->pivot->role === 'assistant' ? 1 : 2)) as $member)
                 <div class="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <a href="{{ route('people.show', $member) }}" class="flex items-center flex-1 min-w-0">
@@ -171,7 +171,7 @@
                                 </svg>
                             </button>
                             <div x-show="open" @click.away="open = false" x-cloak
-                                 class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 py-1 z-10">
+                                 class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10">
                                 @if($member->pivot->role !== 'leader')
                                 <form method="POST" action="{{ route('groups.members.role', [$group, $member]) }}">
                                     @csrf
@@ -203,7 +203,7 @@
                                 </form>
                                 @endif
                                 @if($member->pivot->role !== 'leader')
-                                <hr class="my-1 border-gray-100 dark:border-gray-700">
+                                <hr class="my-1 border-gray-200 dark:border-gray-700">
                                 <form method="POST" action="{{ route('groups.members.remove', [$group, $member]) }}" onsubmit="return confirm('Видалити учасника з групи?')">
                                     @csrf
                                     @method('DELETE')
@@ -236,14 +236,14 @@
 
         <!-- Recent Attendance -->
         @if($currentChurch->attendance_enabled)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="font-semibold text-gray-900 dark:text-white">Відвідуваність</h3>
                 <a href="{{ route('groups.attendance.index', $group) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">
                     Усі записи
                 </a>
             </div>
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($group->attendances->take(5) as $attendance)
                 <a href="{{ route('groups.attendance.show', [$group, $attendance]) }}" class="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors block">
                     <div>
@@ -280,7 +280,7 @@
             </div>
             @if($group->attendances->count() > 0)
             @can('update', $group)
-            <div class="p-4 border-t border-gray-100 dark:border-gray-700">
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('groups.attendance.create', $group) }}" class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>

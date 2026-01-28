@@ -212,7 +212,7 @@
 
                             <!-- Tasks -->
                             @if($goal->tasks->count() > 0)
-                                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <div class="divide-y divide-gray-200 dark:divide-gray-700">
                                     @foreach($goal->tasks as $task)
                                         <div class="p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                             @can('manage-ministry', $ministry)
@@ -297,7 +297,7 @@
 
                             <!-- Add task to goal -->
                             @can('manage-ministry', $ministry)
-                            <div class="p-3 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-100 dark:border-gray-700">
+                            <div class="p-3 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700">
                                 <button @click="showTaskModal = true; taskForm.goal_id = {{ $goal->id }}" class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -335,7 +335,7 @@
     <div x-show="showGoalModal" class="fixed inset-0 z-50" style="display: none;">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showGoalModal = false"></div>
         <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editingGoalId ? 'Редагувати ціль' : 'Нова ціль'"></h3>
                 <button @click="showGoalModal = false" class="p-2 text-gray-400 hover:text-gray-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -412,7 +412,7 @@
     <div x-show="showTaskModal" class="fixed inset-0 z-50" style="display: none;">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showTaskModal = false"></div>
         <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editingTaskId ? 'Редагувати задачу' : 'Нова задача'"></h3>
                 <button @click="showTaskModal = false" class="p-2 text-gray-400 hover:text-gray-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

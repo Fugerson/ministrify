@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Редагувати запис</h2>
 
         <form method="POST" action="{{ route('groups.attendance.update', [$group, $attendance]) }}" class="space-y-6">
@@ -64,7 +64,7 @@
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ old('notes', $attendance->notes) }}</textarea>
             </div>
 
-            <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div></div>
                 <div class="flex items-center gap-3">
                     <a href="{{ route('groups.attendance.show', [$group, $attendance]) }}" class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 font-medium">

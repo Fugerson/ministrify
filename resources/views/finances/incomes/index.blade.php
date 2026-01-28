@@ -104,7 +104,7 @@
                                 </div>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: {{ $income->category?->color ?? '#3B82F6' }}20; color: {{ $income->category?->color ?? '#3B82F6' }}">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: {{ $income->category?->color ?? '#3B82F6' }}30; color: {{ $income->category?->color ?? '#3B82F6' }}">
                                     {{ $income->category?->icon ?? '💰' }} {{ $income->category?->name ?? 'Без категорії' }}
                                 </span>
                             </td>

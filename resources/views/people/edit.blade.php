@@ -9,7 +9,7 @@
         @method('PUT')
 
         <!-- Photo Upload Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Фото профілю</h2>
 
             <div x-data="avatarUpload()" class="flex items-center gap-6">
@@ -58,7 +58,7 @@
         </div>
 
         <!-- Basic Info -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Основна інформація</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -77,7 +77,7 @@
         </div>
 
         <!-- Contacts -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Контакти</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -162,7 +162,7 @@
         </div>
 
         <!-- Tags -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Теги</h2>
 
             <div class="flex flex-wrap gap-2">
@@ -182,7 +182,7 @@
         </div>
 
         <!-- Ministries -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Команди</h2>
 
             @php
@@ -228,7 +228,7 @@
         </div>
 
         <!-- Notes -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нотатки</h2>
 
             <textarea name="notes" rows="4" placeholder="Додаткова інформація про людину..."

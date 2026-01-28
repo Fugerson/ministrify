@@ -41,7 +41,7 @@
     </div>
 
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-start justify-between">
             <div>
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $attendance->date->translatedFormat('l, d F Y') }}</h2>
@@ -75,24 +75,24 @@
         </div>
 
         @if($attendance->notes)
-        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <p class="text-gray-600 dark:text-gray-400">{{ $attendance->notes }}</p>
         </div>
         @endif
 
         @if($attendance->recorder)
-        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
             Записав: {{ $attendance->recorder->name }} • {{ $attendance->created_at->format('d.m.Y H:i') }}
         </div>
         @endif
     </div>
 
     <!-- Attendance List -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="font-semibold text-gray-900 dark:text-white">Присутність</h3>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($attendance->records->sortByDesc('present') as $record)
             <div class="p-4 flex items-center justify-between {{ $record->present ? '' : 'opacity-50' }}">
                 <div class="flex items-center">

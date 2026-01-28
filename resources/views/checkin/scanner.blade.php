@@ -11,7 +11,7 @@
     </div>
 
     {{-- Event selector --}}
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Подія</label>
         <select x-model="selectedEventId"
                 @change="selectEvent()"
@@ -42,7 +42,7 @@
 
     {{-- QR Code display --}}
     <div x-show="showQrCode && selectedEvent?.checkin_url" x-cloak
-         class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6 text-center">
+         class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6 text-center">
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Покажіть цей QR-код учасникам для самостійної реєстрації</p>
         <div class="inline-block p-4 bg-white rounded-xl">
             <div id="qr-code-display" class="w-64 h-64 mx-auto"></div>
@@ -51,8 +51,8 @@
     </div>
 
     {{-- Camera scanner --}}
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-6">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="font-semibold text-gray-900 dark:text-white">Камера</h2>
             <button @click="toggleCamera()"
                     class="px-4 py-2 rounded-xl transition-colors"
@@ -83,11 +83,11 @@
     </div>
 
     {{-- Recent check-ins --}}
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="font-semibold text-gray-900 dark:text-white">Останні реєстрації</h2>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             <template x-for="checkin in recentCheckins" :key="checkin.id">
                 <div class="p-4 flex items-center gap-4">
                     <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">

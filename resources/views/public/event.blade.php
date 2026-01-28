@@ -35,7 +35,7 @@
                 <div class="flex-1 min-w-0">
                     @if($event->ministry)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-2"
-                              style="background-color: {{ $event->ministry->color }}20; color: {{ $event->ministry->color }};">
+                              style="background-color: {{ $event->ministry->color }}30; color: {{ $event->ministry->color }};">
                             {{ $event->ministry->name }}
                         </span>
                     @endif

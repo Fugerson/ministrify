@@ -33,7 +33,7 @@
 
 <div class="space-y-4">
     <!-- View Toggle & Navigation -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <!-- View Toggle -->
             <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
@@ -131,7 +131,7 @@
                     </button>
 
                     <div x-show="open" x-cloak x-transition
-                         class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 z-50">
+                         class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                         <div class="py-1">
                             <a href="{{ route('calendar.export') }}"
                                class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -147,7 +147,7 @@
                                 </svg>
                                 Експорт поточного періоду
                             </a>
-                            <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                             @leader
                             <a href="{{ route('calendar.import') }}"
                                class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -157,7 +157,7 @@
                                 Імпорт з Google Calendar
                             </a>
                             @endleader
-                            <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                             <button onclick="showSubscriptionModal()"
                                     class="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,16 +174,16 @@
 
     @if($view === 'week')
         <!-- Week View -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <!-- Days Header -->
-            <div class="grid grid-cols-7 border-b border-gray-100 dark:border-gray-700">
+            <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
                 @php $dayDate = $startDate->copy(); @endphp
                 @for($i = 0; $i < 7; $i++)
                     @php
                         $isToday = $dayDate->isToday();
                     @endphp
-                    <div class="p-3 text-center border-r border-gray-100 dark:border-gray-700 last:border-r-0 {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/30' : '' }}">
-                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $daysShort[$i] }}</p>
+                    <div class="p-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0 {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/30' : '' }}">
+                        <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">{{ $daysShort[$i] }}</p>
                         <p class="text-lg font-semibold mt-1 {{ $isToday ? 'text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">
                             {{ $dayDate->format('d') }}
                         </p>
@@ -202,17 +202,17 @@
                         $isToday = $dayDate->isToday();
                         $isPast = $dayDate->isPast() && !$isToday;
                     @endphp
-                    <div class="border-r border-gray-100 dark:border-gray-700 last:border-r-0 p-2 {{ $isToday ? 'bg-primary-50/50 dark:bg-primary-900/20' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
+                    <div class="border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-2 {{ $isToday ? 'bg-primary-50/50 dark:bg-primary-900/20' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
                         <div class="space-y-2">
                             @foreach($dayEvents as $item)
                                 @if($item->type === 'meeting')
                                     <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
                                        class="block p-2 rounded-lg text-xs transition-all hover:shadow-md"
-                                       style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}20; border-left: 3px solid {{ $item->ministry->color ?? '#8b5cf6' }};">
+                                       style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}30; border-left: 3px solid {{ $item->ministry->color ?? '#8b5cf6' }};">
                                         <p class="font-medium text-gray-900 dark:text-white truncate">
                                             {{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '--:--' }}
                                         </p>
-                                        <p class="text-gray-600 dark:text-gray-300 truncate">{{ $item->title }}</p>
+                                        <p class="text-gray-700 dark:text-gray-300 truncate">{{ $item->title }}</p>
                                         <div class="flex items-center mt-1">
                                             <span class="w-2 h-2 rounded-full bg-purple-500" title="Зустріч"></span>
                                         </div>
@@ -220,9 +220,9 @@
                                 @else
                                     <a href="{{ route('events.show', $item->original) }}"
                                        class="block p-2 rounded-lg text-xs transition-all hover:shadow-md"
-                                       style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}20; border-left: 3px solid {{ $item->ministry_display_color ?? '#3b82f6' }};">
+                                       style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30; border-left: 3px solid {{ $item->ministry_display_color ?? '#3b82f6' }};">
                                         <p class="font-medium text-gray-900 dark:text-white truncate">{{ $item->time ? $item->time->format('H:i') : '--:--' }}</p>
-                                        <p class="text-gray-600 dark:text-gray-300 truncate">{{ $item->title }}</p>
+                                        <p class="text-gray-700 dark:text-gray-300 truncate">{{ $item->title }}</p>
                                         <div class="flex items-center mt-1">
                                             @if($item->original->isFullyStaffed())
                                                 <span class="w-2 h-2 rounded-full bg-green-500"></span>
@@ -241,12 +241,12 @@
         </div>
     @else
         <!-- Month View - Calendar Grid -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <!-- Days Header -->
-            <div class="grid grid-cols-7 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+            <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                 @foreach($daysShort as $day)
                     <div class="p-3 text-center">
-                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $day }}</p>
+                        <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">{{ $day }}</p>
                     </div>
                 @endforeach
             </div>
@@ -269,13 +269,13 @@
                             $isCurrentMonth = $calendarDate->month == $month;
                             $isPast = $calendarDate->isPast() && !$isToday;
                         @endphp
-                        <div class="min-h-[100px] lg:min-h-[120px] border-b border-r border-gray-100 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                        <div class="min-h-[100px] lg:min-h-[120px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }}">
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-medium {{ $isToday ? 'w-7 h-7 flex items-center justify-center rounded-full bg-primary-600 text-white' : ($isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500') }}">
+                                <span class="text-sm font-medium {{ $isToday ? 'w-7 h-7 flex items-center justify-center rounded-full bg-primary-600 text-white' : ($isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-600') }}">
                                     {{ $calendarDate->format('j') }}
                                 </span>
                                 @if($dayEvents->count() > 2)
-                                    <span class="text-xs text-gray-400 dark:text-gray-500">+{{ $dayEvents->count() - 2 }}</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-500">+{{ $dayEvents->count() - 2 }}</span>
                                 @endif
                             </div>
                             <div class="space-y-1">
@@ -283,14 +283,14 @@
                                     @if($item->type === 'meeting')
                                         <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
                                            class="block px-1.5 py-0.5 rounded text-xs truncate transition-colors hover:opacity-80 {{ $isPast && !$isToday ? 'opacity-60' : '' }}"
-                                           style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}20; color: {{ $item->ministry->color ?? '#8b5cf6' }};">
+                                           style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}30; color: {{ $item->ministry->color ?? '#8b5cf6' }};">
                                             <span class="hidden lg:inline">{{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '' }}</span>
                                             📋 {{ Str::limit($item->title, 12) }}
                                         </a>
                                     @else
                                         <a href="{{ route('events.show', $item->original) }}"
                                            class="block px-1.5 py-0.5 rounded text-xs truncate transition-colors hover:opacity-80 {{ $isPast && !$isToday ? 'opacity-60' : '' }}"
-                                           style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}20; color: {{ $item->ministry_display_color ?? '#3b82f6' }};">
+                                           style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30; color: {{ $item->ministry_display_color ?? '#3b82f6' }};">
                                             <span class="hidden lg:inline">{{ $item->time ? $item->time->format('H:i') : '' }}</span>
                                             {{ Str::limit($item->title, 15) }}
                                         </a>
@@ -308,11 +308,11 @@
         </div>
 
         <!-- Events List (below calendar) -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="font-semibold text-gray-900 dark:text-white">Події місяця</h3>
             </div>
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @php
                     $currentDate = $startDate->copy();
                     $endOfMonth = $startDate->copy()->endOfMonth();
@@ -347,7 +347,7 @@
                                         <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
                                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}20;">
+                                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}30;">
                                                     <svg class="w-5 h-5" style="color: {{ $item->ministry->color ?? '#8b5cf6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                     </svg>
@@ -370,7 +370,7 @@
                                         <a href="{{ route('events.show', $item->original) }}"
                                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}20;">
+                                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30;">
                                                     <svg class="w-5 h-5" style="color: {{ $item->ministry_display_color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                     </svg>
@@ -427,8 +427,8 @@
 
         <!-- Upcoming Events from Next Month -->
         @if($view === 'month' && isset($upcomingNextMonth) && $upcomingNextMonth->count() > 0)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
                 <h3 class="font-semibold text-blue-700 dark:text-blue-300 flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
@@ -436,12 +436,12 @@
                     Найближчі події ({{ $months[$nextMonth - 1] ?? 'наступний місяць' }})
                 </h3>
             </div>
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($upcomingNextMonth as $item)
                     <a href="{{ route('events.show', $item->original) }}"
                        class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}20;">
+                            <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30;">
                                 <span class="text-lg font-bold" style="color: {{ $item->ministry_display_color ?? '#3b82f6' }};">{{ $item->date->format('d') }}</span>
                                 <span class="text-xs" style="color: {{ $item->ministry_display_color ?? '#3b82f6' }};">{{ $months[$item->date->month - 1] ?? '' }}</span>
                             </div>
@@ -480,10 +480,10 @@
 <!-- Subscription Modal -->
 <div id="subscriptionModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="hideSubscriptionModal()"></div>
+        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onclick="hideSubscriptionModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
         <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+            <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Підписка на календар</h3>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Додайте календар до Google, Apple або Outlook</p>
             </div>
@@ -560,7 +560,7 @@
                     </div>
                 </details>
             </div>
-            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
                 <button onclick="hideSubscriptionModal()" class="w-full px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-medium transition-colors">
                     Закрити
                 </button>
@@ -575,7 +575,7 @@
     <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="hideGoogleSyncModal()"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
-            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -622,7 +622,7 @@
                     <input type="url" name="calendar_url" id="google_url" required
                            placeholder="https://calendar.google.com/calendar/ical/..."
                            value="{{ $church->getSetting('google_calendar_url') }}"
-                           class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                           class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
 
                 <!-- Ministry -->
@@ -631,7 +631,7 @@
                         Команда для імпортованих подій
                     </label>
                     <select name="ministry_id" id="google_ministry" required
-                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Виберіть команду...</option>
                         @foreach($ministries as $ministry)
                             <option value="{{ $ministry->id }}" {{ $church->getSetting('google_calendar_ministry_id') == $ministry->id ? 'selected' : '' }}>
@@ -646,17 +646,17 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">З дати</label>
                         <input type="date" name="start_date" value="{{ now()->subMonth()->format('Y-m-d') }}"
-                               class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                               class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">До дати</label>
                         <input type="date" name="end_date" value="{{ now()->addMonths(3)->format('Y-m-d') }}"
-                               class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                               class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" onclick="hideGoogleSyncModal()"
                             class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
                         Скасувати

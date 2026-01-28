@@ -13,7 +13,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <form method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-4">
             <div>
                 <input type="text" name="search" value="{{ request('search') }}"
@@ -86,8 +86,8 @@
     </div>
 
     <!-- Logs List -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @forelse($logs as $log)
                 @php
                     $color = $log->action_color;
@@ -255,14 +255,14 @@
         </div>
 
         @if($logs->hasPages())
-            <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+            <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
                 {{ $logs->links() }}
             </div>
         @endif
     </div>
 
     <!-- Legend -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Легенда:</div>
         <div class="flex flex-wrap gap-4 text-sm">
             <span class="flex items-center gap-1.5">

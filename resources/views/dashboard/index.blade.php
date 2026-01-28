@@ -17,7 +17,7 @@
     <!-- Stats Grid - Informative Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mt-4 lg:mt-6">
         <!-- People Stats -->
-        <a href="{{ route('people.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
+        <a href="{{ route('people.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@
         </a>
 
         <!-- Ministries Stats -->
-        <a href="{{ route('ministries.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:border-green-200 dark:hover:border-green-800 transition-all group">
+        <a href="{{ route('ministries.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5 hover:border-green-200 dark:hover:border-green-800 transition-all group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-50 dark:bg-green-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@
         </a>
 
         <!-- Groups Stats -->
-        <a href="{{ route('groups.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:border-purple-200 dark:hover:border-purple-800 transition-all group">
+        <a href="{{ route('groups.index') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5 hover:border-purple-200 dark:hover:border-purple-800 transition-all group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-purple-50 dark:bg-purple-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +147,7 @@
                     <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $stats['vacation_groups'] }}</span>
                 </div>
                 @endif
-                <div class="flex items-center justify-between text-xs pt-1 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between text-xs pt-1 border-t border-gray-200 dark:border-gray-700">
                     <span class="text-gray-500 dark:text-gray-400">Учасників</span>
                     <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['total_group_members'] }}</span>
                 </div>
@@ -155,7 +155,7 @@
         </a>
 
         <!-- Events Stats -->
-        <a href="{{ route('schedule') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5 hover:border-amber-200 dark:hover:border-amber-800 transition-all group">
+        <a href="{{ route('schedule') }}" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5 hover:border-amber-200 dark:hover:border-amber-800 transition-all group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-amber-50 dark:bg-amber-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 lg:w-6 lg:h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,8 +180,8 @@
     </div>
 
     {{-- Task Tracker hidden for now
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-4 lg:mt-6">
-        <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-4 lg:mt-6">
+        <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
@@ -239,7 +239,7 @@
             </div>
 
             @if(count($urgentTasks) > 5)
-            <a href="{{ route('boards.index') }}" class="block text-center py-3 mt-3 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 border-t border-gray-100 dark:border-gray-700">
+            <a href="{{ route('boards.index') }}" class="block text-center py-3 mt-3 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 border-t border-gray-200 dark:border-gray-700">
                 + ще {{ count($urgentTasks) - 5 }} завдань
             </a>
             @endif
@@ -336,15 +336,15 @@
     <!-- Events & Attendance Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mt-4 lg:mt-6">
         <!-- Upcoming Events -->
-        <div class="md:col-span-2 lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="md:col-span-2 lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Найближчі події</h2>
                 <a href="{{ route('schedule') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
             </div>
             <div class="divide-y divide-gray-50 dark:divide-gray-700">
                 @forelse($upcomingEvents as $event)
                 <a href="{{ route('events.show', $event) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: {{ $event->ministry?->color ?? '#3b82f6' }}20;">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: {{ $event->ministry?->color ?? '#3b82f6' }}30;">
                         <svg class="w-6 h-6" style="color: {{ $event->ministry?->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
@@ -379,7 +379,7 @@
         </div>
 
         <!-- Attendance Chart -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5">
             <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Відвідуваність богослужінь</h2>
             <div class="h-48">
                 <canvas id="attendanceChart"></canvas>
@@ -395,8 +395,8 @@
 
     @admin
     <!-- Analytics Charts Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mt-4 lg:mt-6">
-        <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-4 lg:mt-6">
+        <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <h2 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
@@ -501,8 +501,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-4 lg:mt-6">
         <!-- Ministry Budgets -->
         @if(count($ministryBudgets) > 0)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Бюджети команд</h2>
                 <a href="{{ route('finances.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Звіт</a>
             </div>
@@ -528,14 +528,14 @@
 
         <!-- Expenses This Month -->
         @if(isset($stats['expenses_this_month']))
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 lg:p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Витрати за місяць</h2>
                 <a href="{{ route('finances.expenses.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
             </div>
 
             <!-- Total -->
-            <div class="text-center pb-4 mb-4 border-b border-gray-100 dark:border-gray-700">
+            <div class="text-center pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
                 <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['expenses_this_month'], 0, ',', ' ') }} ₴</p>
             </div>
 
@@ -565,8 +565,8 @@
 
         <!-- People Needing Attention -->
         @if(count($needAttention) > 0)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div class="px-4 lg:px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                     <h2 class="font-semibold text-gray-900 dark:text-white">Потребують уваги</h2>

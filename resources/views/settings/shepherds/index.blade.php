@@ -12,8 +12,8 @@
     </div>
 
     <!-- Shepherds List -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             <template x-if="shepherds.length === 0">
                 <div class="p-8 text-center text-gray-500 dark:text-gray-400">
                     <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +68,7 @@
 
         <!-- Add Shepherd -->
         <template x-if="availablePeople.length > 0">
-            <div class="border-t border-gray-100 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700/50">
+            <div class="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700/50">
                 <div class="flex items-center gap-4">
                     <div class="flex-1 relative">
                         <input type="text"

@@ -35,7 +35,7 @@
 
     {{-- Summary Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Загальний бюджет</p>
@@ -51,7 +51,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Витрачено</p>
@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Залишок</p>
@@ -86,7 +86,7 @@
 
     {{-- Progress Overview --}}
     @if($totals['budget'] > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between mb-3">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Використано загального бюджету</span>
             <span class="text-sm font-semibold {{ ($totals['spent'] / $totals['budget']) * 100 > 100 ? 'text-red-600' : 'text-gray-900 dark:text-white' }}">
@@ -104,8 +104,8 @@
     @endif
 
     {{-- Ministry Budgets Table --}}
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Бюджети по командах</h2>
         </div>
 
@@ -133,7 +133,7 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($ministries as $item)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                         <td class="px-6 py-4">

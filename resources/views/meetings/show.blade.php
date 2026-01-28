@@ -30,7 +30,7 @@
     </a>
 
     <!-- Meeting Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div class="flex items-start gap-4">
                 <!-- Date badge -->
@@ -123,7 +123,7 @@
     </div>
 
     <!-- Tabs -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="border-b border-gray-200 dark:border-gray-700">
             <nav class="flex -mb-px overflow-x-auto no-scrollbar">
                 <button @click="activeTab = 'agenda'" :class="activeTab === 'agenda' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"

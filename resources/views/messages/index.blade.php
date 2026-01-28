@@ -38,7 +38,7 @@ $commTabs = [
 <div class="space-y-6">
     <!-- Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center">
                 <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-3">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@ $commTabs = [
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center">
                 <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900 flex items-center justify-center mr-3">
                     <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@ $commTabs = [
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center">
                 <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900 flex items-center justify-center mr-3">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,15 +81,15 @@ $commTabs = [
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Templates -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="font-semibold text-gray-900 dark:text-white">Шаблони</h3>
                 <button type="button" onclick="document.getElementById('templateModal').classList.remove('hidden')"
                         class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
                     + Новий
                 </button>
             </div>
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($templates as $template)
                 <div class="p-4">
                     <div class="flex items-start justify-between">
@@ -117,11 +117,11 @@ $commTabs = [
         </div>
 
         <!-- History -->
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="font-semibold text-gray-900 dark:text-white">Історія розсилок</h3>
             </div>
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($logs as $log)
                 <div class="p-4">
                     <div class="flex items-start justify-between">

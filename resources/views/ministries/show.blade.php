@@ -341,7 +341,7 @@
                         </thead>
                         <tbody>
                             <template x-for="t in filteredTransactions" :key="t.id">
-                                <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                <tr class="border-b border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                     <td class="py-2 pr-3">
                                         <span class="font-semibold text-gray-900 dark:text-white whitespace-nowrap" x-text="new Intl.NumberFormat('uk-UA').format(t.amount) + ' ' + t.currency"></span>
                                     </td>
@@ -592,7 +592,7 @@
                                     </div>
                                 </div>
                                 @if($goal->tasks->count() > 0)
-                                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                                    <div class="divide-y divide-gray-200 dark:divide-gray-700">
                                         @foreach($goal->tasks as $task)
                                             <div class="p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                                 <form method="POST" action="{{ route('ministries.tasks.toggle', [$ministry, $task]) }}">
@@ -616,7 +616,7 @@
                                         @endforeach
                                     </div>
                                 @endif
-                                <div class="p-2 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-100 dark:border-gray-700">
+                                <div class="p-2 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700">
                                     <button @click="showTaskModal = true; taskForm.goal_id = {{ $goal->id }}" class="text-xs text-gray-500 hover:text-primary-600 flex items-center gap-1">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                         Додати задачу
@@ -881,7 +881,7 @@
                                     <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full" x-text="tag"></span>
                                 </template>
                             </div>
-                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
                                 <span x-text="(song.times_used || 0) + ' раз'"></span>
                                 <span x-show="song.bpm" x-text="song.bpm + ' BPM'"></span>
                             </div>

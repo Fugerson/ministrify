@@ -109,7 +109,7 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative mb-20" style="z-index: 0;">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative mb-20" style="z-index: 0;">
         <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-180px)]" style="min-height: 400px;">
             <table class="w-full text-sm" style="min-width: 2800px;">
                 <thead class="bg-gray-100 dark:bg-gray-700 sticky top-0 z-20">
@@ -146,7 +146,7 @@
                         <th class="px-2 py-3 w-10 sticky right-0 bg-gray-100 dark:bg-gray-700 z-30 border-b border-gray-200 dark:border-gray-600"></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     <template x-for="(row, index) in filteredRows" :key="row.id || row.tempId">
                         <tr :class="{'bg-green-50 dark:bg-green-900/20': row.isNew, 'bg-amber-50 dark:bg-amber-900/20': row.isDirty && !row.isNew, 'bg-primary-50 dark:bg-primary-900/20': row.selected}"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">

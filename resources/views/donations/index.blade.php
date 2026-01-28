@@ -25,7 +25,7 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +37,7 @@
             <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_month'], 0, ',', ' ') }} ₴</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@
             <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_year'], 0, ',', ' ') }} ₴</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700 col-span-2 sm:col-span-1">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700 col-span-2 sm:col-span-1">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                     <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
         <!-- Left Column: Chart + Donations -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Chart -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Динаміка пожертв</h3>
                 <div class="h-64" x-data="donationChart({{ json_encode($chartData) }})">
                     <canvas x-ref="chart"></canvas>
@@ -74,8 +74,8 @@
             </div>
 
             <!-- Recent Donations -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="font-semibold text-gray-900 dark:text-white">Останні пожертви</h3>
                 </div>
                 <div class="overflow-x-auto">
@@ -89,7 +89,7 @@
                                 <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Статус</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($donations as $donation)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -139,7 +139,7 @@
                     </table>
                 </div>
                 @if($donations->hasPages())
-                    <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                         {{ $donations->links() }}
                     </div>
                 @endif
@@ -149,15 +149,15 @@
         <!-- Right Column: Campaigns + Top Donors -->
         <div class="space-y-6">
             <!-- Campaigns -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h3 class="font-semibold text-gray-900 dark:text-white">Кампанії зборів</h3>
                     <button type="button" onclick="document.getElementById('newCampaignModal').classList.remove('hidden')"
                         class="text-sm text-primary-600 hover:text-primary-700 font-medium">+ Нова</button>
                 </div>
                 <div class="p-6 space-y-4">
                     @forelse($campaigns as $campaign)
-                        <div class="border border-gray-100 dark:border-gray-700 rounded-xl p-4">
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
                             <div class="flex justify-between items-start mb-2">
                                 <h4 class="font-medium text-gray-900 dark:text-white">{{ $campaign->name }}</h4>
                                 <div class="flex gap-1">
@@ -216,8 +216,8 @@
             </div>
 
             <!-- By Purpose -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="font-semibold text-gray-900 dark:text-white">По призначенню</h3>
                 </div>
                 <div class="p-6 space-y-3">

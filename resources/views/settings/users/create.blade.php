@@ -8,7 +8,7 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Новий користувач</h1>
     </div>
 
-    <form action="{{ route('settings.users.store') }}" method="POST" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 space-y-6"
+    <form action="{{ route('settings.users.store') }}" method="POST" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6"
           x-data="{ personSelected: null }"
           @person-selected.window="personSelected = $event.detail.person">
         @csrf

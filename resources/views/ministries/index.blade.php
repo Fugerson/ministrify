@@ -23,7 +23,7 @@
             $visibility = $ministry->visibility ?? 'public';
             $isLocked = $visibility !== 'public' && !$canAccess;
         @endphp
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 {{ $isLocked ? 'opacity-60' : '' }}">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 {{ $isLocked ? 'opacity-60' : '' }}">
             <div class="p-4 md:p-6">
                 <div class="flex items-start justify-between">
                     <div>
@@ -53,7 +53,7 @@
                 </div>
             </div>
 
-            <div class="px-4 md:px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
+            <div class="px-4 md:px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
                 @if($isLocked)
                     <span class="text-gray-400 dark:text-gray-500 text-sm font-medium flex items-center cursor-not-allowed">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

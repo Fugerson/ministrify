@@ -1531,7 +1531,7 @@
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                                 @if($user->churchRole)
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                                      style="background-color: {{ $user->churchRole->color }}20; color: {{ $user->churchRole->color }}">
+                                      style="background-color: {{ $user->churchRole->color }}30; color: {{ $user->churchRole->color }}">
                                     {{ $user->churchRole->name }}
                                 </span>
                                 @else
@@ -1594,7 +1594,7 @@
             </div>
         </div>
         @else
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
             <!-- Role tabs -->
             <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
                 <nav class="flex -mb-px min-w-max">
@@ -1639,7 +1639,7 @@
                                 @endforeach
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @foreach($permissionModules as $moduleKey => $module)
                             <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                 <td class="py-4">
@@ -1736,7 +1736,7 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Зміни</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($auditLogs as $log)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                 <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
@@ -1801,7 +1801,7 @@
             </div>
 
             @if($auditLogs->count() >= 100)
-                <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 text-center">
+                <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-center">
                     <a href="{{ route('settings.audit-logs.index') }}" class="text-primary-600 dark:text-primary-400 hover:underline text-sm">
                         Показати всі записи з фільтрами →
                     </a>

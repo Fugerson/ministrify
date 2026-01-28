@@ -59,7 +59,7 @@
                     </template>
                     <template x-for="card in filteredCards.slice(0, 10)" :key="card.id">
                         <button @click="openCard(card.id); showDropdown = false; searchQuery = ''"
-                                class="w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-start gap-2 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                                class="w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-start gap-2 border-b border-gray-200 dark:border-gray-700/50 last:border-0">
                             <span class="text-xs font-mono text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5" x-text="'#' + card.id"></span>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm text-gray-900 dark:text-white truncate" x-text="card.title"></p>
@@ -285,7 +285,7 @@
                                     <div class="card-top-row flex items-center gap-1.5 mb-2 flex-wrap">
                                         @if($card->epic)
                                             <span class="epic-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium"
-                                                  style="background-color: {{ $card->epic->color }}20; color: {{ $card->epic->color }}">
+                                                  style="background-color: {{ $card->epic->color }}30; color: {{ $card->epic->color }}">
                                                 <span class="w-1.5 h-1.5 rounded-full" style="background-color: {{ $card->epic->color }}"></span>
                                                 {{ Str::limit($card->epic->name, 15) }}
                                             </span>

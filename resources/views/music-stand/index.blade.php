@@ -22,7 +22,7 @@
     </div>
 
     @if($upcomingServices->isEmpty())
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
             <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
@@ -35,7 +35,7 @@
         <div class="grid gap-4">
             @foreach($upcomingServices as $service)
                 <a href="{{ route('music-stand.show', $service) }}"
-                   class="block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 hover:border-primary-300 dark:hover:border-primary-700 transition-colors">
+                   class="block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:border-primary-300 dark:hover:border-primary-700 transition-colors">
                     <div class="flex items-start justify-between">
                         <div class="flex items-start gap-4">
                             <div class="flex-shrink-0">
@@ -91,7 +91,7 @@
     @endif
 
     <!-- Quick Song Search -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
          x-data="{ search: '', songs: {{ $allSongs->toJson() }} }">
         <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Швидкий пошук пісні</h3>
         <input type="text" x-model="search" placeholder="Введіть назву пісні..."

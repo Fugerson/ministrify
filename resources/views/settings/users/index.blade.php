@@ -100,7 +100,7 @@
     </div>
     @endif
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
@@ -134,7 +134,7 @@
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                             @if($user->churchRole)
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                                  style="background-color: {{ $user->churchRole->color }}20; color: {{ $user->churchRole->color }}">
+                                  style="background-color: {{ $user->churchRole->color }}30; color: {{ $user->churchRole->color }}">
                                 {{ $user->churchRole->name }}
                             </span>
                             @else

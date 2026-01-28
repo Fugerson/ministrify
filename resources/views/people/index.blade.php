@@ -95,7 +95,7 @@
     </div>
     @endadmin
     <!-- Search & Filter Bar -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search -->
             <div class="flex-1 relative">
@@ -134,7 +134,7 @@
         </div>
 
         <!-- Active Filters Chips -->
-        <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <template x-if="filters.gender">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
                     <span x-text="filters.gender === 'male' ? 'Чоловіки' : 'Жінки'"></span>
@@ -207,7 +207,7 @@
     <!-- Filter Panel -->
     <div x-show="showFilters" x-cloak x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
 
             <!-- Gender -->
@@ -297,7 +297,7 @@
     </div>
 
     <!-- Table Container -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <!-- Table -->
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -335,7 +335,7 @@
                         <th class="px-4 py-3 w-10"></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($people as $index => $person)
                     <tr x-show="shouldShowRow({{ $index }}, @js([
                             'name' => $person->full_name,
@@ -431,7 +431,7 @@
                             <div class="flex flex-wrap gap-1">
                                 @foreach($person->ministries->take(2) as $ministry)
                                 <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
-                                      style="background-color: {{ $ministry->color ?? '#6366f1' }}20; color: {{ $ministry->color ?? '#6366f1' }}">
+                                      style="background-color: {{ $ministry->color ?? '#6366f1' }}30; color: {{ $ministry->color ?? '#6366f1' }}">
                                     {{ $ministry->name }}
                                 </span>
                                 @endforeach
@@ -447,7 +447,7 @@
                         <td class="px-4 py-3 hidden xl:table-cell">
                             @if($person->churchRoleRelation)
                             <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
-                                  style="background-color: {{ $person->churchRoleRelation->color }}20; color: {{ $person->churchRoleRelation->color }}">
+                                  style="background-color: {{ $person->churchRoleRelation->color }}30; color: {{ $person->churchRoleRelation->color }}">
                                 {{ $person->churchRoleRelation->name }}
                             </span>
                             @else
@@ -528,7 +528,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <span class="hidden sm:inline">Показувати</span>
                 <select x-model.number="perPage" @change="currentPage = 1"
@@ -577,7 +577,7 @@
 
     <!-- Export/Import -->
     @admin
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row gap-3">
             <a href="{{ route('people.export') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

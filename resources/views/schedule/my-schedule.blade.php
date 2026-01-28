@@ -41,8 +41,8 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white">Мій розклад</h1>
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             {{-- Loading state --}}
             <template x-if="loading && responsibilities.length === 0">
                 <div class="p-8 text-center">

@@ -17,7 +17,7 @@
 @section('content')
 <div class="space-y-4">
     <!-- View Options -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-2">
                 <a href="{{ route('events.index') }}"
@@ -47,9 +47,9 @@
     </div>
 
     <!-- Events List -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         @if($events->count() > 0)
-            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($events as $event)
                 <a href="{{ route('events.show', $event) }}"
                    class="block px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
@@ -58,7 +58,7 @@
                             <div class="flex items-center gap-2 mb-1">
                                 @if($event->ministry)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                                          style="background-color: {{ $event->ministry->color }}20; color: {{ $event->ministry->color }}">
+                                          style="background-color: {{ $event->ministry->color }}30; color: {{ $event->ministry->color }}">
                                         {{ $event->ministry->icon }} {{ $event->ministry->name }}
                                     </span>
                                 @endif
@@ -96,7 +96,7 @@
                 @endforeach
             </div>
 
-            <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+            <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
                 {{ $events->links() }}
             </div>
         @else

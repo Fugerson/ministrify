@@ -69,7 +69,7 @@
     @endif
 </form>
 
-<div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 text-center space-y-3">
+<div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center space-y-3">
     <div>
         <p class="text-sm text-gray-500 dark:text-gray-400">Хочете приєднатися до церкви?</p>
         <a href="{{ route('join') }}" class="mt-1 inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold">

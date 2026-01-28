@@ -18,8 +18,8 @@
     </div>
 
     <!-- Roles List -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="divide-y divide-gray-100 dark:divide-gray-700" x-ref="rolesList">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700" x-ref="rolesList">
             <template x-if="roles.length === 0">
                 <div class="p-8 text-center text-gray-500 dark:text-gray-400">
                     Немає ролей. Додайте першу роль нижче.
@@ -123,7 +123,7 @@
         </div>
 
         <!-- Add New Role -->
-        <div class="border-t border-gray-100 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700/50">
+        <div class="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700/50">
             <div class="flex items-center gap-4">
                 <input type="color" x-model="newColor" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0">
                 <input type="text" x-model="newName"
@@ -191,7 +191,7 @@
                                     <th class="pb-2 font-medium text-gray-900 dark:text-white text-center w-20">Видал.</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                 <template x-for="(module, key) in modules" :key="key">
                                     <tr>
                                         <td class="py-2">

@@ -7,7 +7,7 @@
 
 @if($showReminder)
 <div x-data="{ dismissed: false }" x-show="!dismissed" x-transition
-     class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mb-6">
+     class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 mb-6">
     <div class="flex items-start justify-between mb-4">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
