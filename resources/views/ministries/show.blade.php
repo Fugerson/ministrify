@@ -964,15 +964,49 @@
                                                 </template>
                                             </datalist>
                                         </div>
-                                        <div>
+                                        <div x-data="{
+                                            open: false,
+                                            query: form.key || '',
+                                            keys: @js(\App\Models\Song::KEYS),
+                                            get filtered() {
+                                                if (!this.query) return Object.entries(this.keys);
+                                                const q = this.query.toLowerCase();
+                                                return Object.entries(this.keys).filter(([key, label]) =>
+                                                    key.toLowerCase().includes(q) || label.toLowerCase().includes(q)
+                                                );
+                                            },
+                                            select(key) {
+                                                form.key = key;
+                                                this.query = key;
+                                                this.open = false;
+                                            }
+                                        }" x-init="$watch('form.key', val => query = val || '')">
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тональність</label>
-                                            <select x-model="form.key"
-                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                                <option value="">Не вказано</option>
-                                                @foreach(\App\Models\Song::KEYS as $key => $label)
-                                                    <option value="{{ $key }}">{{ $key }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="relative">
+                                                <input type="text"
+                                                       x-model="query"
+                                                       @focus="open = true"
+                                                       @click.away="open = false"
+                                                       @keydown.escape="open = false"
+                                                       @keydown.enter.prevent="filtered.length && select(filtered[0][0])"
+                                                       placeholder="Почніть вводити..."
+                                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                                <div x-show="open && filtered.length > 0" x-transition
+                                                     class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-auto">
+                                                    <div @click="select('')"
+                                                         class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-500">
+                                                        Не вказано
+                                                    </div>
+                                                    <template x-for="[key, label] in filtered" :key="key">
+                                                        <div @click="select(key)"
+                                                             class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
+                                                             :class="form.key === key ? 'bg-primary-50 dark:bg-primary-900/30' : ''">
+                                                            <span x-text="key" class="font-medium"></span>
+                                                            <span x-text="' - ' + label" class="text-gray-500 text-xs"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">BPM</label>
