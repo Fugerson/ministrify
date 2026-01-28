@@ -446,7 +446,7 @@ class EventController extends Controller
 
         $validated = $request->validate([
             'present' => 'nullable|array',
-            'present.*' => 'integer|exists:people,id',
+            'present.*' => ['integer', new BelongsToChurch(\App\Models\Person::class)],
             'guests_count' => 'nullable|integer|min:0',
         ]);
 

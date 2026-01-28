@@ -45,9 +45,10 @@ class FinanceController extends Controller
         }
 
         // Calculate totals in UAH (using amount_uah for converted amounts)
+        // Note: Using ?? instead of ?: because sum() returning 0 is a valid value
         $hasAmountUah = \Schema::hasColumn('transactions', 'amount_uah');
-        $totalIncome = $hasAmountUah ? ($incomeQuery->sum('amount_uah') ?: $incomeQuery->sum('amount')) : $incomeQuery->sum('amount');
-        $totalExpense = $hasAmountUah ? ($expenseQuery->sum('amount_uah') ?: $expenseQuery->sum('amount')) : $expenseQuery->sum('amount');
+        $totalIncome = $hasAmountUah ? ($incomeQuery->sum('amount_uah') ?? $incomeQuery->sum('amount')) : $incomeQuery->sum('amount');
+        $totalExpense = $hasAmountUah ? ($expenseQuery->sum('amount_uah') ?? $expenseQuery->sum('amount')) : $expenseQuery->sum('amount');
         $periodBalance = $totalIncome - $totalExpense;
 
         // Overall balance (includes initial balance) - all in UAH
@@ -64,10 +65,10 @@ class FinanceController extends Controller
             }
         }
         $allTimeIncome = $hasAmountUah
-            ? (Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount_uah') ?: Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount'))
+            ? (Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount_uah') ?? Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount'))
             : Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount');
         $allTimeExpense = $hasAmountUah
-            ? (Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount_uah') ?: Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount'))
+            ? (Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount_uah') ?? Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount'))
             : Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
 
@@ -866,37 +867,40 @@ class FinanceController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        // Create the outgoing transaction (from currency)
-        $outTransaction = Transaction::create([
-            'church_id' => $church->id,
-            'direction' => Transaction::DIRECTION_OUT,
-            'source_type' => Transaction::SOURCE_EXCHANGE,
-            'amount' => $validated['from_amount'],
-            'currency' => $validated['from_currency'],
-            'date' => $validated['date'],
-            'status' => Transaction::STATUS_COMPLETED,
-            'payment_method' => Transaction::PAYMENT_CASH,
-            'description' => "Обмін {$validated['from_currency']} → {$validated['to_currency']}",
-            'notes' => $validated['notes'],
-        ]);
+        // Use database transaction to ensure both records are created atomically
+        DB::transaction(function () use ($validated, $church) {
+            // Create the outgoing transaction (from currency)
+            $outTransaction = Transaction::create([
+                'church_id' => $church->id,
+                'direction' => Transaction::DIRECTION_OUT,
+                'source_type' => Transaction::SOURCE_EXCHANGE,
+                'amount' => $validated['from_amount'],
+                'currency' => $validated['from_currency'],
+                'date' => $validated['date'],
+                'status' => Transaction::STATUS_COMPLETED,
+                'payment_method' => Transaction::PAYMENT_CASH,
+                'description' => "Обмін {$validated['from_currency']} → {$validated['to_currency']}",
+                'notes' => $validated['notes'],
+            ]);
 
-        // Create the incoming transaction (to currency)
-        $inTransaction = Transaction::create([
-            'church_id' => $church->id,
-            'direction' => Transaction::DIRECTION_IN,
-            'source_type' => Transaction::SOURCE_EXCHANGE,
-            'amount' => $validated['to_amount'],
-            'currency' => $validated['to_currency'],
-            'date' => $validated['date'],
-            'status' => Transaction::STATUS_COMPLETED,
-            'payment_method' => Transaction::PAYMENT_CASH,
-            'description' => "Обмін {$validated['from_currency']} → {$validated['to_currency']}",
-            'notes' => $validated['notes'],
-            'related_transaction_id' => $outTransaction->id,
-        ]);
+            // Create the incoming transaction (to currency)
+            $inTransaction = Transaction::create([
+                'church_id' => $church->id,
+                'direction' => Transaction::DIRECTION_IN,
+                'source_type' => Transaction::SOURCE_EXCHANGE,
+                'amount' => $validated['to_amount'],
+                'currency' => $validated['to_currency'],
+                'date' => $validated['date'],
+                'status' => Transaction::STATUS_COMPLETED,
+                'payment_method' => Transaction::PAYMENT_CASH,
+                'description' => "Обмін {$validated['from_currency']} → {$validated['to_currency']}",
+                'notes' => $validated['notes'],
+                'related_transaction_id' => $outTransaction->id,
+            ]);
 
-        // Link back
-        $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
+            // Link back
+            $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
+        });
 
         return redirect()->route('finances.index')->with('success', 'Обмін валюти зареєстровано.');
     }

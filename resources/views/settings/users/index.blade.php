@@ -82,7 +82,7 @@
                             </svg>
                             <span class="hidden sm:inline">Надати</span>
                         </button>
-                        <form action="{{ route('settings.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Відхилити запит від {{ $user->name }}?')">
+                        <form action="{{ route('settings.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Відхилити запит від ' + @js($user->name) + '?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1">

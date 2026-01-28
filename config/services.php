@@ -7,6 +7,10 @@ return [
         'alert_chat_id' => env('ALERT_TELEGRAM_CHAT_ID'),
     ],
 
+    'uptime' => [
+        'webhook_secret' => env('UPTIME_WEBHOOK_SECRET'),
+    ],
+
     'vapid' => [
         'public_key' => env('VAPID_PUBLIC_KEY'),
         'private_key' => env('VAPID_PRIVATE_KEY'),

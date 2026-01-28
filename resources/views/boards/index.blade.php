@@ -1273,6 +1273,7 @@ function churchBoard() {
             const result = await response.json();
             if (result.success) {
                 this.cardPanel.data.comments.unshift(result.comment);
+                this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
             }
         },
 

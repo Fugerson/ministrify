@@ -202,7 +202,7 @@ class MinistryController extends Controller
         Gate::authorize('manage-ministry', $ministry);
 
         $validated = $request->validate([
-            'person_id' => 'required|exists:people,id',
+            'person_id' => ['required', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
             'position_ids' => 'nullable|array',
         ]);
 

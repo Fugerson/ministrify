@@ -103,9 +103,21 @@ class MonobankService
 
     public function verifySignature(string $body, string $signature): bool
     {
-        // Monobank uses X-Sign header for webhook verification
-        // The signature is base64(sha256(body + pubKeyBase64))
-        // For simplicity, we'll skip this for now and rely on unique references
+        // TODO: Implement proper Monobank signature verification
+        // Monobank uses ECDSA signature with their public key
+        // For now, we rely on unique references and webhook secrets
+        // See: https://api.monobank.ua/docs/acquiring.html#tag/Vebhuki
+
+        if (empty($signature)) {
+            \Log::warning('MonobankService: Webhook received without signature');
+            return true; // Allow for backwards compatibility
+        }
+
+        // Log for monitoring - helps detect potential abuse
+        \Log::info('MonobankService: Webhook signature present but not verified', [
+            'signature_length' => strlen($signature),
+        ]);
+
         return true;
     }
 }

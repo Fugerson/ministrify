@@ -64,8 +64,16 @@ Route::get('health', function () {
 
 // UptimeRobot webhook for Telegram alerts
 Route::match(['get', 'post'], 'webhook/uptime/{secret}', function ($secret, \Illuminate\Http\Request $request) {
-    // Verify secret
-    if ($secret !== 'mnsfy2026alert') {
+    // Verify secret from config (set UPTIME_WEBHOOK_SECRET in .env)
+    $configSecret = config('services.uptime.webhook_secret');
+
+    // Temporary fallback for backwards compatibility - remove after adding UPTIME_WEBHOOK_SECRET to .env
+    if (!$configSecret) {
+        $configSecret = 'mnsfy2026alert';
+        \Log::warning('UptimeRobot webhook: UPTIME_WEBHOOK_SECRET not set in .env, using legacy secret');
+    }
+
+    if (!hash_equals($configSecret, $secret)) {
         abort(403);
     }
 

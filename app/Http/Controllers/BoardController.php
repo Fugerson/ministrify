@@ -250,7 +250,12 @@ class BoardController extends Controller
             'positions.*' => 'integer|exists:board_columns,id',
         ]);
 
+        // Verify all columns belong to this board
+        $boardColumnIds = $board->columns()->pluck('id')->toArray();
         foreach ($positions['positions'] as $index => $columnId) {
+            if (!in_array($columnId, $boardColumnIds)) {
+                abort(403, 'Колонка не належить цій дошці.');
+            }
             BoardColumn::where('id', $columnId)->update(['position' => $index]);
         }
 
@@ -267,12 +272,12 @@ class BoardController extends Controller
             'description' => 'nullable|string',
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
-            'assigned_to' => 'nullable|exists:people,id',
+            'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
             'epic_id' => 'nullable|exists:board_epics,id',
-            'event_id' => 'nullable|exists:events,id',
-            'ministry_id' => 'nullable|exists:ministries,id',
-            'group_id' => 'nullable|exists:groups,id',
-            'person_id' => 'nullable|exists:people,id',
+            'event_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Event::class)],
+            'ministry_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Ministry::class)],
+            'group_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Group::class)],
+            'person_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
             'entity_type' => 'nullable|in:event,ministry,group,person',
         ]);
 
@@ -444,7 +449,14 @@ class BoardController extends Controller
             $q->where('church_id', $church->id);
         });
 
-        $query->where($validated['entity_type'] . '_id', $validated['entity_id']);
+        // Use explicit column mapping for safety
+        $columnMap = [
+            'event' => 'event_id',
+            'ministry' => 'ministry_id',
+            'group' => 'group_id',
+            'person' => 'person_id',
+        ];
+        $query->where($columnMap[$validated['entity_type']], $validated['entity_id']);
 
         $cards = $query->with(['column.board', 'assignee'])->get();
 
@@ -626,6 +638,12 @@ class BoardController extends Controller
             'column_id' => 'required|exists:board_columns,id',
             'position' => 'required|integer|min:0',
         ]);
+
+        // Verify target column belongs to the same board
+        $targetColumn = BoardColumn::find($validated['column_id']);
+        if (!$targetColumn || $targetColumn->board_id !== $card->column->board_id) {
+            abort(403, 'Колонка не належить цій дошці.');
+        }
 
         // Update positions in the old column
         BoardCard::where('column_id', $card->column_id)
