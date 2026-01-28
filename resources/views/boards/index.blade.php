@@ -80,7 +80,7 @@
             <!-- Epic Filter -->
             <select x-model="filters.epic"
                     class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Всі епіки</option>
+                <option value="">Всі проєкти</option>
                 @foreach($epics as $epic)
                     <option value="{{ $epic['id'] }}">{{ $epic['name'] }}</option>
                 @endforeach
@@ -151,6 +151,14 @@
                 <kbd class="hidden sm:inline px-1.5 py-0.5 text-[10px] font-mono bg-primary-500 rounded">N</kbd>
             </button>
 
+            <button @click="showEpicModal = true"
+                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Новий проєкт">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+            </button>
+
             <button @click="showShortcuts = true"
                     class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     title="Шорткати (?)">
@@ -168,7 +176,7 @@
         <div class="hidden lg:block w-64 flex-shrink-0">
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Епіки</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Проєкти</h3>
                     <button @click="showEpicModal = true" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -266,9 +274,9 @@
                                      @click="openCard({{ $card->id }})">
 
                                     <!-- Top row: Epic + ID -->
-                                    <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+                                    <div class="card-top-row flex items-center gap-1.5 mb-2 flex-wrap">
                                         @if($card->epic)
-                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium"
+                                            <span class="epic-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium"
                                                   style="background-color: {{ $card->epic->color }}20; color: {{ $card->epic->color }}">
                                                 <span class="w-1.5 h-1.5 rounded-full" style="background-color: {{ $card->epic->color }}"></span>
                                                 {{ Str::limit($card->epic->name, 15) }}
@@ -278,7 +286,7 @@
                                     </div>
 
                                     <!-- Title -->
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white leading-snug mb-2 {{ $card->is_completed ? 'line-through text-gray-400 dark:text-gray-500' : '' }}">
+                                    <p class="card-title text-sm font-medium text-gray-900 dark:text-white leading-snug mb-2 {{ $card->is_completed ? 'line-through text-gray-400 dark:text-gray-500' : '' }}">
                                         {{ $card->title }}
                                     </p>
 
@@ -288,26 +296,26 @@
                                     @endif
 
                                     <!-- Bottom row: Priority, Due, Meta -->
-                                    <div class="flex items-center justify-between text-xs">
-                                        <div class="flex items-center gap-2 flex-wrap">
+                                    <div class="card-meta flex items-center justify-between text-xs">
+                                        <div class="card-badges flex items-center gap-2 flex-wrap">
                                             <!-- Priority indicator -->
                                             @if($card->priority === 'urgent')
-                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 font-medium">
+                                                <span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 font-medium">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                                     Терм.
                                                 </span>
                                             @elseif($card->priority === 'high')
-                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 font-medium">
+                                                <span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 font-medium">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
                                                     Вис.
                                                 </span>
                                             @elseif($card->priority === 'medium')
-                                                <span class="w-1.5 h-1.5 rounded-full bg-yellow-500" title="Середній"></span>
+                                                <span class="priority-badge w-1.5 h-1.5 rounded-full bg-yellow-500" title="Середній"></span>
                                             @endif
 
                                             <!-- Due date -->
                                             @if($card->due_date)
-                                                <span class="inline-flex items-center gap-1 {{ $card->isOverdue() ? 'text-red-600 dark:text-red-400 font-medium' : ($card->isDueSoon() ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400') }}">
+                                                <span class="due-badge inline-flex items-center gap-1 {{ $card->isOverdue() ? 'text-red-600 dark:text-red-400 font-medium' : ($card->isDueSoon() ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400') }}">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                     </svg>
@@ -321,7 +329,7 @@
                                                     $completed = $card->checklistItems->where('is_completed', true)->count();
                                                     $total = $card->checklistItems->count();
                                                 @endphp
-                                                <span class="inline-flex items-center gap-1 {{ $completed === $total ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400' }}">
+                                                <span class="checklist-badge inline-flex items-center gap-1 {{ $completed === $total ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400' }}">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                     </svg>
@@ -331,7 +339,7 @@
 
                                             <!-- Comments -->
                                             @if($card->comments->count() > 0)
-                                                <span class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                                                <span class="comment-badge inline-flex items-center gap-1 text-gray-500 dark:text-gray-400">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                                                     </svg>
@@ -341,8 +349,9 @@
                                         </div>
 
                                         <!-- Assignee avatar -->
+                                        <div class="card-assignee flex-shrink-0">
                                         @if($card->assignee)
-                                            <div class="flex-shrink-0" title="{{ $card->assignee->full_name }}">
+                                            <div title="{{ $card->assignee->full_name }}">
                                                 @if($card->assignee->photo)
                                                     <img src="{{ Storage::url($card->assignee->photo) }}"
                                                          class="w-6 h-6 rounded-full object-cover ring-2 ring-white dark:ring-gray-700" loading="lazy">
@@ -355,6 +364,7 @@
                                                 @endif
                                             </div>
                                         @endif
+                                        </div>
                                     </div>
 
                                     <!-- Quick complete button -->
@@ -452,6 +462,7 @@ function churchBoard() {
         cards: @json($board->columns->flatMap->cards->keyBy('id')),
         allCards: @json($allCardsData),
         epics: @json($epicsData),
+        peopleList: @json($people->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null])),
         showShortcuts: false,
         myPersonId: {{ auth()->user()->person?->id ?? 'null' }},
         boardId: {{ $board->id }},
@@ -685,9 +696,30 @@ function churchBoard() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.success) {
-                        // Reload page to show new card
-                        window.location.reload();
+                    if (data.success && data.card) {
+                        // Find epic info
+                        const epic = this.epics.find(e => e.id == data.card.epic_id);
+                        // Find assignee info
+                        const assignee = this.peopleList.find(p => p.id == data.card.assigned_to);
+
+                        // Insert card dynamically
+                        this.insertCardToDOM(data.card, this.addCardModal.columnId, epic, assignee);
+
+                        // Add to allCards for search
+                        this.allCards.push({
+                            id: data.card.id,
+                            title: data.card.title,
+                            priority: data.card.priority,
+                            columnName: this.getColumnName(this.addCardModal.columnId),
+                            columnId: this.addCardModal.columnId,
+                            epicId: data.card.epic_id,
+                            epicName: epic?.name,
+                            epicColor: epic?.color
+                        });
+
+                        // Close modal and show toast
+                        this.addCardModal.open = false;
+                        if (window.showGlobalToast) showGlobalToast('Завдання створено', 'success');
                     }
                 }
             } catch (error) {
@@ -695,6 +727,97 @@ function churchBoard() {
             } finally {
                 this.addCardModal.loading = false;
             }
+        },
+
+        getColumnName(columnId) {
+            const col = document.querySelector(`.kanban-column[data-column-id="${columnId}"] h3`);
+            return col ? col.textContent.trim() : '';
+        },
+
+        insertCardToDOM(card, columnId, epic, assignee) {
+            const column = document.querySelector(`.kanban-cards[data-column-id="${columnId}"]`);
+            if (!column) return;
+
+            const cardHtml = this.renderCardHtml(card, epic, assignee);
+            column.insertAdjacentHTML('afterbegin', cardHtml);
+            this.updateColumnCount(columnId);
+
+            // Re-init sortable for the new card
+            this.initSortable();
+        },
+
+        renderCardHtml(card, epic, assignee) {
+            const priorityBadge = this.getPriorityBadgeHtml(card.priority);
+            const epicBadge = epic ? this.getEpicBadgeHtml(epic) : '';
+            const dueBadge = card.due_date ? this.getDueBadgeHtml(card.due_date) : '';
+            const assigneeHtml = assignee ? this.getAssigneeHtml(assignee) : '';
+            const descHtml = card.description ? `<p class="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">${this.escapeHtml(card.description).substring(0, 80)}</p>` : '';
+
+            return `
+                <div class="kanban-card group bg-white dark:bg-gray-700 rounded-xl border border-gray-100 dark:border-gray-600 p-3 cursor-pointer hover:shadow-md hover:border-gray-200 dark:hover:border-gray-500 transition-all duration-200 overflow-hidden relative"
+                     draggable="true"
+                     data-card-id="${card.id}"
+                     data-priority="${card.priority || 'low'}"
+                     data-assignee="${card.assigned_to || 'unassigned'}"
+                     data-ministry="${card.ministry_id || ''}"
+                     data-epic="${card.epic_id || ''}"
+                     data-due="${card.due_date || ''}"
+                     data-title="${(card.title || '').toLowerCase()}"
+                     data-overdue="0"
+                     onclick="document.querySelector('[x-data]').__x.$data.openCard(${card.id})">
+                    <div class="card-top-row flex items-center gap-1.5 mb-2 flex-wrap">
+                        ${epicBadge}
+                        <span class="text-[10px] font-mono text-gray-400 dark:text-gray-500 ml-auto">#${card.id}</span>
+                    </div>
+                    <p class="card-title text-sm font-medium text-gray-900 dark:text-white leading-snug mb-2">${this.escapeHtml(card.title)}</p>
+                    ${descHtml}
+                    <div class="card-meta flex items-center justify-between text-xs">
+                        <div class="card-badges flex items-center gap-2 flex-wrap">
+                            ${priorityBadge}
+                            ${dueBadge}
+                        </div>
+                        <div class="card-assignee flex-shrink-0">${assigneeHtml}</div>
+                    </div>
+                    <button onclick="event.stopPropagation(); document.querySelector('[x-data]').__x.$data.toggleComplete(${card.id})"
+                            class="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all bg-gray-100 text-gray-400 dark:bg-gray-600 hover:text-green-600 dark:hover:text-green-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </button>
+                </div>`;
+        },
+
+        getPriorityBadgeHtml(priority) {
+            const badges = {
+                'urgent': '<span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Терм.</span>',
+                'high': '<span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>Вис.</span>',
+                'medium': '<span class="priority-badge w-1.5 h-1.5 rounded-full bg-yellow-500" title="Середній"></span>'
+            };
+            return badges[priority] || '';
+        },
+
+        getEpicBadgeHtml(epic) {
+            return `<span class="epic-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium" style="background-color: ${epic.color}20; color: ${epic.color}"><span class="w-1.5 h-1.5 rounded-full" style="background-color: ${epic.color}"></span>${this.escapeHtml(epic.name).substring(0, 15)}</span>`;
+        },
+
+        getDueBadgeHtml(dueDate) {
+            const date = new Date(dueDate);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `<span class="due-badge inline-flex items-center gap-1 text-gray-500 dark:text-gray-400"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>${day}.${month}</span>`;
+        },
+
+        getAssigneeHtml(assignee) {
+            if (assignee.photo) {
+                return `<img src="${assignee.photo}" class="w-6 h-6 rounded-full object-cover ring-2 ring-white dark:ring-gray-700" title="${this.escapeHtml(assignee.name)}">`;
+            }
+            return `<div class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center ring-2 ring-white dark:ring-gray-700" title="${this.escapeHtml(assignee.name)}"><span class="text-primary-600 dark:text-primary-400 text-xs font-medium">${assignee.name.charAt(0)}</span></div>`;
+        },
+
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
         },
 
         async openCard(cardId) {
@@ -740,7 +863,7 @@ function churchBoard() {
             const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
             if (cardEl) {
                 if (field === 'title') {
-                    const titleEl = cardEl.querySelector('p.text-sm.font-medium');
+                    const titleEl = cardEl.querySelector('.card-title');
                     if (titleEl) titleEl.textContent = value;
                     cardEl.dataset.title = value.toLowerCase();
                 }
@@ -757,6 +880,74 @@ function churchBoard() {
 
                 if (field === 'epic_id') {
                     cardEl.dataset.epic = value || '';
+                    // Update epic badge on card
+                    const topRow = cardEl.querySelector('.card-top-row');
+                    if (topRow) {
+                        const existingBadge = topRow.querySelector('.epic-badge');
+                        if (existingBadge) existingBadge.remove();
+
+                        if (value) {
+                            const epic = this.epics.find(e => e.id == value);
+                            if (epic) {
+                                topRow.insertAdjacentHTML('afterbegin', this.getEpicBadgeHtml(epic));
+                            }
+                        }
+                    }
+                }
+
+                if (field === 'priority') {
+                    cardEl.dataset.priority = value || 'low';
+                    // Update priority badge
+                    const badges = cardEl.querySelector('.card-badges');
+                    if (badges) {
+                        const existingBadge = badges.querySelector('.priority-badge');
+                        if (existingBadge) existingBadge.remove();
+                        const newBadge = this.getPriorityBadgeHtml(value);
+                        if (newBadge) {
+                            badges.insertAdjacentHTML('afterbegin', newBadge);
+                        }
+                    }
+                }
+
+                if (field === 'due_date') {
+                    cardEl.dataset.due = value || '';
+                    // Update due badge
+                    const badges = cardEl.querySelector('.card-badges');
+                    if (badges) {
+                        const existingBadge = badges.querySelector('.due-badge');
+                        if (existingBadge) existingBadge.remove();
+                        if (value) {
+                            badges.insertAdjacentHTML('beforeend', this.getDueBadgeHtml(value));
+                        }
+                    }
+                }
+
+                if (field === 'assigned_to') {
+                    cardEl.dataset.assignee = value || 'unassigned';
+                    // Update assignee avatar
+                    const assigneeContainer = cardEl.querySelector('.card-assignee');
+                    if (assigneeContainer) {
+                        assigneeContainer.innerHTML = '';
+                        if (value) {
+                            const assignee = this.peopleList.find(p => p.id == value);
+                            if (assignee) {
+                                assigneeContainer.innerHTML = this.getAssigneeHtml(assignee);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Update allCards for search
+            const cardIndex = this.allCards.findIndex(c => c.id === cardId);
+            if (cardIndex !== -1) {
+                if (field === 'title') this.allCards[cardIndex].title = value;
+                if (field === 'priority') this.allCards[cardIndex].priority = value;
+                if (field === 'epic_id') {
+                    this.allCards[cardIndex].epicId = value;
+                    const epic = this.epics.find(e => e.id == value);
+                    this.allCards[cardIndex].epicName = epic?.name;
+                    this.allCards[cardIndex].epicColor = epic?.color;
                 }
             }
         },
@@ -770,22 +961,40 @@ function churchBoard() {
         },
 
         async toggleComplete(cardId) {
-            await fetch(`/boards/cards/${cardId}/toggle`, {
+            const response = await fetch(`/boards/cards/${cardId}/toggle`, {
                 method: 'POST',
-                headers: { 'X-CSRF-TOKEN': this.csrfToken }
+                headers: {
+                    'X-CSRF-TOKEN': this.csrfToken,
+                    'Accept': 'application/json'
+                }
             });
+
+            const result = await response.json();
 
             const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
             if (cardEl) {
-                const titleEl = cardEl.querySelector('p.text-sm.font-medium');
+                const titleEl = cardEl.querySelector('.card-title');
                 if (titleEl) {
-                    titleEl.classList.toggle('line-through');
-                    titleEl.classList.toggle('text-gray-400');
+                    titleEl.classList.toggle('line-through', result.is_completed);
+                    titleEl.classList.toggle('text-gray-400', result.is_completed);
+                    titleEl.classList.toggle('dark:text-gray-500', result.is_completed);
+                }
+
+                // Update complete button style
+                const completeBtn = cardEl.querySelector('button.absolute.top-2.right-2');
+                if (completeBtn) {
+                    if (result.is_completed) {
+                        completeBtn.classList.add('bg-green-100', 'text-green-600', 'dark:bg-green-900/30', 'dark:text-green-400');
+                        completeBtn.classList.remove('bg-gray-100', 'text-gray-400', 'dark:bg-gray-600');
+                    } else {
+                        completeBtn.classList.remove('bg-green-100', 'text-green-600', 'dark:bg-green-900/30', 'dark:text-green-400');
+                        completeBtn.classList.add('bg-gray-100', 'text-gray-400', 'dark:bg-gray-600');
+                    }
                 }
             }
 
             if (this.cardPanel.data && this.cardPanel.data.card.id === cardId) {
-                this.cardPanel.data.card.is_completed = !this.cardPanel.data.card.is_completed;
+                this.cardPanel.data.card.is_completed = result.is_completed;
             }
         },
 
@@ -811,18 +1020,21 @@ function churchBoard() {
             const result = await response.json();
             if (result.success) {
                 this.cardPanel.data.comments.unshift(result.comment);
+                this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
             }
         },
 
         async deleteComment(comment) {
             if (!confirm('Видалити коментар?')) return;
 
+            const cardId = this.cardPanel.data.card.id;
             await fetch(`/boards/comments/${comment.id}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
             });
 
             this.cardPanel.data.comments = this.cardPanel.data.comments.filter(c => c.id !== comment.id);
+            this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
         },
 
         async updateComment(comment, newContent) {
@@ -862,25 +1074,67 @@ function churchBoard() {
             const result = await response.json();
             if (result.success) {
                 this.cardPanel.data.checklist.push(result.item);
+                this.updateCardChecklistCount(cardId);
             }
         },
 
         async toggleChecklistItem(item) {
+            const cardId = this.cardPanel.data.card.id;
             await fetch(`/boards/cards/checklist/${item.id}/toggle`, {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
             });
 
             item.is_completed = !item.is_completed;
+            this.updateCardChecklistCount(cardId);
         },
 
         async deleteChecklistItem(item) {
+            const cardId = this.cardPanel.data.card.id;
             await fetch(`/boards/cards/checklist/${item.id}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
             });
 
             this.cardPanel.data.checklist = this.cardPanel.data.checklist.filter(i => i.id !== item.id);
+            this.updateCardChecklistCount(cardId);
+        },
+
+        updateCardChecklistCount(cardId) {
+            const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (!cardEl || !this.cardPanel.data) return;
+
+            const badges = cardEl.querySelector('.card-badges');
+            if (!badges) return;
+
+            // Remove existing checklist badge
+            const existingBadge = badges.querySelector('.checklist-badge');
+            if (existingBadge) existingBadge.remove();
+
+            const checklist = this.cardPanel.data.checklist;
+            if (checklist.length > 0) {
+                const completed = checklist.filter(i => i.is_completed).length;
+                const total = checklist.length;
+                const isComplete = completed === total;
+                const colorClass = isComplete ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400';
+                badges.insertAdjacentHTML('beforeend', `<span class="checklist-badge inline-flex items-center gap-1 ${colorClass}"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>${completed}/${total}</span>`);
+            }
+        },
+
+        updateCardCommentCount(cardId, count) {
+            const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (!cardEl) return;
+
+            const badges = cardEl.querySelector('.card-badges');
+            if (!badges) return;
+
+            // Remove existing comment badge
+            const existingBadge = badges.querySelector('.comment-badge');
+            if (existingBadge) existingBadge.remove();
+
+            if (count > 0) {
+                badges.insertAdjacentHTML('beforeend', `<span class="comment-badge inline-flex items-center gap-1 text-gray-500 dark:text-gray-400"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>${count}</span>`);
+            }
         },
 
         async uploadAttachment(event) {
@@ -954,6 +1208,7 @@ function churchBoard() {
             if (!this.cardPanel.data) return;
 
             const cardId = this.cardPanel.data.card.id;
+            const columnId = this.cardPanel.data.card.column_id;
 
             try {
                 const response = await fetch(`/boards/cards/${cardId}/duplicate`, {
@@ -965,8 +1220,28 @@ function churchBoard() {
                 });
 
                 const result = await response.json();
-                if (result.success) {
-                    window.location.reload();
+                if (result.success && result.card) {
+                    // Find epic and assignee info
+                    const epic = this.epics.find(e => e.id == result.card.epic_id);
+                    const assignee = this.peopleList.find(p => p.id == result.card.assigned_to);
+
+                    // Insert duplicated card
+                    this.insertCardToDOM(result.card, columnId, epic, assignee);
+
+                    // Add to allCards
+                    this.allCards.push({
+                        id: result.card.id,
+                        title: result.card.title,
+                        priority: result.card.priority,
+                        columnName: this.getColumnName(columnId),
+                        columnId: columnId,
+                        epicId: result.card.epic_id,
+                        epicName: epic?.name,
+                        epicColor: epic?.color
+                    });
+
+                    this.closePanel();
+                    if (window.showGlobalToast) showGlobalToast('Завдання дубльовано', 'success');
                 }
             } catch (error) {
                 console.error('Duplicate error:', error);
@@ -1020,9 +1295,15 @@ function churchBoard() {
                         cardEl.remove();
                         if (columnId) this.updateColumnCount(columnId);
                     }
+
+                    // Remove from allCards array for search
+                    this.allCards = this.allCards.filter(c => c.id !== cardId);
+
                     if (this.cardPanel.cardId === cardId) {
                         this.closePanel();
                     }
+
+                    if (window.showGlobalToast) showGlobalToast('Завдання видалено', 'success');
                 }
             } catch (error) {
                 console.error('Delete error:', error);
@@ -1044,8 +1325,33 @@ function churchBoard() {
                 });
 
                 const result = await response.json();
-                if (result.success) {
-                    window.location.reload();
+                if (result.success && result.epic) {
+                    // Add to epics array
+                    const newEpic = {
+                        id: result.epic.id,
+                        name: result.epic.name,
+                        color: result.epic.color,
+                        description: result.epic.description,
+                        total: 0,
+                        completed: 0,
+                        progress: 0
+                    };
+                    this.epics.push(newEpic);
+
+                    // Add to filter dropdown
+                    const filterSelect = document.querySelector('select[x-model="filters.epic"]');
+                    if (filterSelect) {
+                        const option = document.createElement('option');
+                        option.value = result.epic.id;
+                        option.textContent = result.epic.name;
+                        filterSelect.appendChild(option);
+                    }
+
+                    // Close modal and reset form
+                    this.showEpicModal = false;
+                    this.newEpic = { name: '', color: '#6366f1', description: '' };
+
+                    if (window.showGlobalToast) showGlobalToast('Проєкт створено', 'success');
                 }
             } catch (error) {
                 console.error('Error:', error);

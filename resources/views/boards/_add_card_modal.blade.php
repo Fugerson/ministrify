@@ -77,10 +77,10 @@
 
                             <!-- Epic -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Епік</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Проєкт</label>
                                 <select x-model="addCardModal.epicId"
                                         class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
-                                    <option value="">Без епіку</option>
+                                    <option value="">Без проєкту</option>
                                     @foreach($epics as $epic)
                                         <option value="{{ $epic['id'] }}">{{ $epic['name'] }}</option>
                                     @endforeach

@@ -605,11 +605,15 @@ class BoardController extends Controller
             ->with('success', 'Картку оновлено.');
     }
 
-    public function destroyCard(BoardCard $card)
+    public function destroyCard(Request $request, BoardCard $card)
     {
         $this->authorizeBoard($card->column->board);
         $board = $card->column->board;
         $card->delete();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Картку видалено.');
     }
@@ -641,7 +645,7 @@ class BoardController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function toggleCardComplete(BoardCard $card)
+    public function toggleCardComplete(Request $request, BoardCard $card)
     {
         $this->authorizeBoard($card->column->board);
 
@@ -651,6 +655,13 @@ class BoardController extends Controller
         } else {
             $card->markAsCompleted();
             BoardCardActivity::log($card, 'completed');
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'is_completed' => $card->is_completed,
+            ]);
         }
 
         return back()->with('success', 'Статус картки оновлено.');
@@ -687,7 +698,7 @@ class BoardController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'card' => $newCard->load('column'),
+                'card' => $newCard->load(['column', 'epic']),
                 'message' => 'Картку здубльовано',
             ]);
         }
