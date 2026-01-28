@@ -811,13 +811,28 @@
                         <input type="text" x-model="search" placeholder="Пошук пісень..."
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
-                    <select x-model="filterKey"
-                            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                        <option value="">Усі тональності</option>
-                        @foreach(\App\Models\Song::KEYS as $key => $label)
-                            <option value="{{ $key }}">{{ $key }}</option>
-                        @endforeach
-                    </select>
+                    @php
+                        $songKeys = collect(\App\Models\Song::KEYS)->map(fn($label, $key) => (object)[
+                            'id' => $key,
+                            'name' => $key,
+                            'label' => $label
+                        ])->values();
+                    @endphp
+                    <div class="w-40">
+                        <x-searchable-select
+                            name="filter_key_temp"
+                            :items="$songKeys"
+                            :selected="null"
+                            labelKey="name"
+                            valueKey="id"
+                            :searchKeys="['name', 'label']"
+                            placeholder="Тональність"
+                            nullText="Усі тональності"
+                            nullable
+                            x-on:select-changed="filterKey = $event.detail.value || ''"
+                            class="[&_input]:py-2 [&_input]:text-sm"
+                        />
+                    </div>
                     <select x-model="filterTag"
                             class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
                         <option value="">Усі теги</option>
