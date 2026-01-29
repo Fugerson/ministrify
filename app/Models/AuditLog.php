@@ -131,6 +131,17 @@ class AuditLog extends Model
             'App\\Models\\Church' => 'Церква',
             'App\\Models\\Tag' => 'Тег',
             'App\\Models\\ExpenseCategory' => 'Категорія витрат',
+            'App\\Models\\ChurchRole' => 'Церковна роль',
+            'App\\Models\\Position' => 'Позиція',
+            'App\\Models\\BlockoutDate' => 'Блокування дат',
+            'App\\Models\\EventRegistration' => 'Реєстрація на подію',
+            'App\\Models\\PrayerRequest' => 'Молитовна потреба',
+            'App\\Models\\Announcement' => 'Оголошення',
+            'App\\Models\\GroupAttendance' => 'Відвідуваність групи',
+            'App\\Models\\MinistryTask' => 'Завдання служіння',
+            'App\\Models\\MinistryGoal' => 'Ціль служіння',
+            'App\\Models\\MinistryMeeting' => 'Зустріч служіння',
+            'App\\Models\\ChurchRolePermission' => 'Дозвіл ролі',
             default => class_basename($this->model_type ?? ''),
         };
     }
@@ -269,6 +280,133 @@ class AuditLog extends Model
         // Settings
         'sort_order' => 'Порядок',
         'icon' => 'Іконка',
+
+        // Event — додаткові поля
+        'track_attendance' => 'Облік відвідуваності',
+        'is_service' => 'Богослужіння',
+        'service_type' => 'Тип богослужіння',
+        'allow_registration' => 'Дозволити реєстрацію',
+        'registration_limit' => 'Ліміт реєстрацій',
+        'registration_deadline' => 'Дедлайн реєстрації',
+        'public_description' => 'Публічний опис',
+        'cover_image' => 'Обкладинка',
+        'checkin_token' => 'Токен чекіну',
+        'qr_checkin_enabled' => 'QR чекін',
+        'recurrence_rule' => 'Правило повторення',
+        'parent_event_id' => 'Батьківська подія',
+        'is_public' => 'Публічний',
+        'reminder_settings' => 'Нагадування',
+        'google_event_id' => 'Google подія',
+        'google_calendar_id' => 'Google календар',
+        'google_synced_at' => 'Синхронізовано з Google',
+        'google_sync_status' => 'Статус синхронізації',
+        'time' => 'Час',
+
+        // Person — додаткові поля
+        'iban' => 'IBAN',
+        'telegram_chat_id' => 'Telegram чат ID',
+        'anniversary' => 'Річниця',
+        'first_visit_date' => 'Перший візит',
+        'joined_date' => 'Дата приєднання',
+        'last_scheduled_at' => 'Останнє призначення',
+        'times_scheduled_this_month' => 'Призначень цього місяця',
+        'times_scheduled_this_year' => 'Призначень цього року',
+        'is_shepherd' => 'Опікун',
+        'shepherd_id' => 'Опікун',
+        'user_id' => 'Користувач',
+
+        // Ministry — додаткові поля
+        'vision' => 'Бачення',
+        'monthly_budget' => 'Місячний бюджет',
+        'is_worship_ministry' => 'Музичне служіння',
+        'slug' => 'Slug',
+        'allow_registrations' => 'Дозволити реєстрацію',
+        'is_private' => 'Приватний',
+        'visibility' => 'Видимість',
+        'allowed_person_ids' => 'Дозволені особи',
+        'ministry_label' => 'Назва служіння',
+
+        // Group — додаткові поля
+        'meeting_location' => 'Місце зустрічі',
+        'meeting_schedule' => 'Розклад зустрічей',
+
+        // Transaction — додаткові поля
+        'direction' => 'Напрямок',
+        'source_type' => 'Тип джерела',
+        'expense_type' => 'Тип витрати',
+        'amount_uah' => 'Сума в грн',
+        'campaign_id' => 'Кампанія',
+        'donor_phone' => 'Телефон жертводавця',
+        'is_anonymous' => 'Анонімний',
+        'transaction_id' => 'ID транзакції',
+        'order_id' => 'Номер замовлення',
+        'payment_data' => 'Дані оплати',
+        'recorded_by' => 'Записав',
+        'paid_at' => 'Дата оплати',
+        'related_transaction_id' => 'Повʼязана транзакція',
+
+        // Assignment — додаткові поля
+        'event_id' => 'Подія',
+        'position_id' => 'Позиція',
+        'notified_at' => 'Сповіщено',
+        'responded_at' => 'Відповідь',
+        'email_sent_at' => 'Лист надіслано',
+        'email_opened_at' => 'Лист прочитано',
+        'blockout_override' => 'Ігнорувати блокування',
+        'preference_override' => 'Ігнорувати вподобання',
+        'conflict_override' => 'Ігнорувати конфлікт',
+        'decline_reason' => 'Причина відмови',
+        'assignment_notes' => 'Примітки призначення',
+
+        // Board — додаткові поля
+        'is_archived' => 'Архівований',
+
+        // User — додаткові поля
+        'google_id' => 'Google ID',
+        'is_super_admin' => 'Суперадмін',
+        'preferences' => 'Налаштування',
+        'onboarding_completed' => 'Онбординг завершено',
+        'onboarding_state' => 'Стан онбордингу',
+        'onboarding_started_at' => 'Онбординг розпочато',
+        'onboarding_completed_at' => 'Онбординг завершено',
+
+        // ChurchRole — додаткові поля
+        'is_default' => 'За замовчуванням',
+        'is_admin_role' => 'Адмін роль',
+
+        // PrayerRequest — додаткові поля
+        'submitter_name' => 'Імʼя подавача',
+        'submitter_email' => 'Email подавача',
+        'is_from_public' => 'З публічної форми',
+        'notify_on_prayer' => 'Сповіщати про молитви',
+        'answer_testimony' => 'Свідчення відповіді',
+        'answered_at' => 'Дата відповіді',
+        'prayer_count' => 'Кількість молитов',
+        'is_urgent' => 'Терміновий',
+        'content' => 'Зміст',
+
+        // Attendance — додаткові поля
+        'attendable_type' => 'Тип обʼєкта',
+        'attendable_id' => 'ID обʼєкта',
+        'total_count' => 'Загальна кількість',
+        'members_present' => 'Присутніх членів',
+        'guests_count' => 'Гостей',
+
+        // Announcement — додаткові поля
+        'author_id' => 'Автор',
+        'is_pinned' => 'Закріплений',
+
+        // MinistryGoal/Task/Meeting — додаткові поля
+        'goal_id' => 'Ціль',
+        'created_by' => 'Створив',
+        'completed_by' => 'Завершив',
+        'period' => 'Період',
+        'summary' => 'Підсумок',
+        'copied_from_id' => 'Скопійовано з',
+
+        // Church settings — додаткові поля
+        'shepherds_enabled' => 'Опікуни увімкнені',
+        'attendance_enabled' => 'Облік відвідуваності',
     ];
 
     /**
@@ -289,7 +427,17 @@ class AuditLog extends Model
         }
 
         // Boolean fields
-        if (is_bool($value) || in_array($field, ['is_active', 'is_recurring', 'all_day'])) {
+        $booleanFields = [
+            'is_active', 'is_recurring', 'all_day', 'is_service',
+            'track_attendance', 'is_public', 'is_private', 'is_shepherd',
+            'is_worship_ministry', 'allow_registration', 'allow_registrations',
+            'qr_checkin_enabled', 'is_tithe', 'anonymous', 'is_anonymous',
+            'is_archived', 'is_pinned', 'is_urgent', 'is_from_public',
+            'notify_on_prayer', 'is_super_admin', 'is_default', 'is_admin_role',
+            'onboarding_completed', 'blockout_override', 'preference_override',
+            'conflict_override', 'shepherds_enabled', 'attendance_enabled',
+        ];
+        if (is_bool($value) || in_array($field, $booleanFields)) {
             return $value ? 'Так' : 'Ні';
         }
 
@@ -332,6 +480,11 @@ class AuditLog extends Model
                 'pending' => 'Очікує',
                 'completed' => 'Завершено',
                 'cancelled' => 'Скасовано',
+                'archived' => 'Архівований',
+                'draft' => 'Чернетка',
+                'published' => 'Опубліковано',
+                'confirmed' => 'Підтверджено',
+                'declined' => 'Відхилено',
                 default => $value,
             };
         }
@@ -386,6 +539,61 @@ class AuditLog extends Model
             };
         }
 
+        // Service type
+        if ($field === 'service_type') {
+            return match($value) {
+                'sunday' => 'Недільне',
+                'midweek' => 'Середа',
+                'prayer' => 'Молитовне',
+                'youth' => 'Молодіжне',
+                'special' => 'Особливе',
+                default => $value,
+            };
+        }
+
+        // Visibility
+        if ($field === 'visibility') {
+            return match($value) {
+                'public' => 'Публічний',
+                'members' => 'Тільки учасники',
+                'leaders' => 'Тільки лідери',
+                'specific' => 'Обрані особи',
+                'private' => 'Приватний',
+                default => $value,
+            };
+        }
+
+        // Direction (transaction)
+        if ($field === 'direction') {
+            return match($value) {
+                'income' => 'Надходження',
+                'expense' => 'Витрата',
+                default => $value,
+            };
+        }
+
+        // Event type
+        if ($field === 'event_type') {
+            return match($value) {
+                'service' => 'Богослужіння',
+                'meeting' => 'Зустріч',
+                'rehearsal' => 'Репетиція',
+                'prayer' => 'Молитва',
+                'other' => 'Інше',
+                default => $value,
+            };
+        }
+
+        // Google sync status
+        if ($field === 'google_sync_status') {
+            return match($value) {
+                'synced' => 'Синхронізовано',
+                'pending' => 'Очікує',
+                'failed' => 'Помилка',
+                default => $value,
+            };
+        }
+
         // Transaction type
         if ($field === 'type') {
             return match($value) {
@@ -396,7 +604,7 @@ class AuditLog extends Model
         }
 
         // Amount (money)
-        if (in_array($field, ['amount', 'planned_amount', 'actual_amount', 'initial_balance'])) {
+        if (in_array($field, ['amount', 'planned_amount', 'actual_amount', 'initial_balance', 'amount_uah', 'monthly_budget'])) {
             return number_format((float)$value, 2, '.', ' ') . ' ₴';
         }
 
@@ -422,7 +630,13 @@ class AuditLog extends Model
         $new = $this->new_values ?? [];
 
         // Skip technical fields
-        $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at'];
+        $skip = [
+            'id', 'church_id', 'created_at', 'updated_at', 'deleted_at',
+            'password', 'remember_token', 'email_verified_at',
+            // Технічні поля
+            'checkin_token', 'google_event_id', 'google_calendar_id',
+            'google_id', 'calendar_token', 'telegram_bot_token',
+        ];
 
         foreach ($new as $key => $value) {
             if (in_array($key, $skip)) continue;
