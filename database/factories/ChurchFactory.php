@@ -14,13 +14,9 @@ class ChurchFactory extends Factory
     {
         return [
             'name' => fake()->company() . ' Church',
-            'slug' => Str::slug(fake()->company()),
-            'email' => fake()->unique()->safeEmail(),
-            'phone' => fake()->phoneNumber(),
+            'slug' => Str::slug(fake()->unique()->company()),
+            'city' => fake()->city(),
             'address' => fake()->address(),
-            'timezone' => 'Europe/Kyiv',
-            'locale' => 'uk',
-            'currency' => 'UAH',
         ];
     }
 }

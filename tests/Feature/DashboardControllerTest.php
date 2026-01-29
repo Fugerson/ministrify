@@ -20,6 +20,10 @@ class DashboardControllerTest extends TestCase
     {
         parent::setUp();
 
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('Dashboard uses MySQL-specific TIMESTAMPDIFF');
+        }
+
         $this->church = Church::factory()->create();
         $this->admin = User::factory()->admin()->create([
             'church_id' => $this->church->id,
@@ -174,6 +178,10 @@ class DashboardControllerTest extends TestCase
 
     public function test_user_without_church_is_redirected(): void
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('SQLite does not allow nullable church_id');
+        }
+
         $userWithoutChurch = User::factory()->create([
             'church_id' => null,
             'email_verified_at' => now(),

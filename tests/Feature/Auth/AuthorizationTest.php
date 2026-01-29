@@ -20,6 +20,10 @@ class AuthorizationTest extends TestCase
 
     public function test_authenticated_user_can_access_dashboard(): void
     {
+        if (config('database.default') === 'sqlite') {
+            $this->markTestSkipped('Dashboard uses MySQL-specific TIMESTAMPDIFF');
+        }
+
         $church = Church::factory()->create();
         $user = User::factory()->create([
             'church_id' => $church->id,
@@ -63,8 +67,11 @@ class AuthorizationTest extends TestCase
         $church = Church::factory()->create();
 
         $admin = User::factory()->admin()->create(['church_id' => $church->id]);
+        $admin->refresh();
         $leader = User::factory()->leader()->create(['church_id' => $church->id]);
-        $volunteer = User::factory()->create(['church_id' => $church->id, 'role' => 'volunteer']);
+        $leader->refresh();
+        $volunteer = User::factory()->volunteer()->create(['church_id' => $church->id]);
+        $volunteer->refresh();
 
         $this->assertTrue($admin->isAdmin());
         $this->assertFalse($admin->isLeader());

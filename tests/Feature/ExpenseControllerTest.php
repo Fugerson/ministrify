@@ -114,13 +114,14 @@ class ExpenseControllerTest extends TestCase
 
     public function test_leader_can_create_expense_for_own_ministry(): void
     {
-        $leaderPerson = Person::factory()->forChurch($this->church)->create();
         $leader = User::factory()->leader()->create([
             'church_id' => $this->church->id,
             'email_verified_at' => now(),
         ]);
-        $leader->person()->associate($leaderPerson);
-        $leader->save();
+        $leader->refresh();
+        $leaderPerson = Person::factory()->forChurch($this->church)->create([
+            'user_id' => $leader->id,
+        ]);
 
         $leaderMinistry = Ministry::factory()
             ->forChurch($this->church)

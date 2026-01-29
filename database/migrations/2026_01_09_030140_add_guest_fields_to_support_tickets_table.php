@@ -17,19 +17,20 @@ return new class extends Migration
             $table->string('guest_email')->nullable()->after('guest_name');
         });
 
-        // Make user_id nullable for guest tickets
-        Schema::table('support_tickets', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->foreignId('user_id')->nullable()->change();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+        // Make user_id nullable for guest tickets (requires DBAL, skip on SQLite)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('support_tickets', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+                $table->foreignId('user_id')->nullable()->change();
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
 
-        // Also make user_id nullable in support_messages for guest messages
-        Schema::table('support_messages', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->foreignId('user_id')->nullable()->change();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+            Schema::table('support_messages', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+                $table->foreignId('user_id')->nullable()->change();
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
     }
 
     /**
@@ -37,17 +38,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('support_messages', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->foreignId('user_id')->nullable(false)->change();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('support_messages', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+                $table->foreignId('user_id')->nullable(false)->change();
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
 
-        Schema::table('support_tickets', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->foreignId('user_id')->nullable(false)->change();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+            Schema::table('support_tickets', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+                $table->foreignId('user_id')->nullable(false)->change();
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
 
         Schema::table('support_tickets', function (Blueprint $table) {
             $table->dropColumn(['guest_name', 'guest_email']);

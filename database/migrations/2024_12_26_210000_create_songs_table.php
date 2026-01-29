@@ -28,7 +28,9 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->index(['church_id', 'title']);
-            $table->fullText(['title', 'artist', 'lyrics']);
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->fullText(['title', 'artist', 'lyrics']);
+            }
         });
 
         // Setlist - songs for a specific event

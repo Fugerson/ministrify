@@ -14,8 +14,8 @@ return new class extends Migration
         });
 
         // Generate tokens for existing churches
-        \App\Models\Church::all()->each(function ($church) {
-            $church->update(['calendar_token' => Str::random(32)]);
+        \DB::table('churches')->whereNull('calendar_token')->get()->each(function ($church) {
+            \DB::table('churches')->where('id', $church->id)->update(['calendar_token' => Str::random(32)]);
         });
     }
 

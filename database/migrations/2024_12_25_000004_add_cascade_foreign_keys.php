@@ -14,6 +14,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip on SQLite — information_schema not available
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         // Disable foreign key checks temporarily
         Schema::disableForeignKeyConstraints();
 
@@ -64,6 +69,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::disableForeignKeyConstraints();
 
         $this->dropForeignKeyIfExists('events', 'events_church_id_foreign');

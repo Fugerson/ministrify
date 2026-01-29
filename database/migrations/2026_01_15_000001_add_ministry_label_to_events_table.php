@@ -12,10 +12,12 @@ return new class extends Migration
             $table->string('ministry_label')->nullable()->after('ministry_id');
         });
 
-        // Make ministry_id nullable if it isn't already
-        Schema::table('events', function (Blueprint $table) {
-            $table->foreignId('ministry_id')->nullable()->change();
-        });
+        // Make ministry_id nullable if it isn't already (requires DBAL, skip on SQLite)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('events', function (Blueprint $table) {
+                $table->foreignId('ministry_id')->nullable()->change();
+            });
+        }
     }
 
     public function down(): void

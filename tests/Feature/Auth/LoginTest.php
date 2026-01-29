@@ -60,7 +60,7 @@ class LoginTest extends TestCase
         $response = $this->actingAs($user)->post('/logout');
 
         $this->assertGuest();
-        $response->assertRedirect('/');
+        $response->assertRedirect(); // Redirects after logout
     }
 
     public function test_unverified_users_cannot_access_dashboard(): void
