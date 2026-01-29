@@ -273,7 +273,11 @@ class PublicSiteController extends Controller
             'donor_name' => 'nullable|string|max:255',
             'donor_email' => 'nullable|email|max:255',
             'donor_phone' => 'nullable|string|max:20',
-            'campaign_id' => 'nullable|exists:donation_campaigns,id',
+            'campaign_id' => ['nullable', 'exists:donation_campaigns,id', function ($attr, $value, $fail) use ($church) {
+                if ($value && \App\Models\DonationCampaign::where('id', $value)->where('church_id', $church->id)->doesntExist()) {
+                    $fail('Обрана кампанія не належить цій церкві.');
+                }
+            }],
             'message' => 'nullable|string|max:500',
             'payment_method' => 'required|in:liqpay,monobank',
             'is_anonymous' => 'boolean',

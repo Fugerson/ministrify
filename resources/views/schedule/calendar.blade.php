@@ -497,7 +497,7 @@
                         <input type="text" id="icalUrl" readonly
                                value="{{ $church->calendar_feed_url }}"
                                class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white">
-                        <button onclick="copyIcalUrl()" class="px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        <button onclick="copyIcalUrl(event)" class="px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors">
                             Копіювати
                         </button>
                     </div>
@@ -689,17 +689,20 @@ function showGoogleSyncModal() {
 }
 
 function hideGoogleSyncModal() {
-    document.getElementById('googleSyncModal').classList.add('hidden');
+    const el = document.getElementById('googleSyncModal');
+    if (el) el.classList.add('hidden');
 }
 
-function copyIcalUrl() {
+function copyIcalUrl(e) {
     const input = document.getElementById('icalUrl');
     input.select();
+    const btn = e ? e.target : null;
     navigator.clipboard.writeText(input.value).then(() => {
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.textContent = 'Скопійовано!';
-        setTimeout(() => btn.textContent = originalText, 2000);
+        if (btn) {
+            const originalText = btn.textContent;
+            btn.textContent = 'Скопійовано!';
+            setTimeout(() => btn.textContent = originalText, 2000);
+        }
     });
 }
 

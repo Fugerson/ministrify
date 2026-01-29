@@ -755,54 +755,14 @@
             }
         })();
     </script>
-    @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
-    <!-- Church context banner -->
-    <div class="sticky top-0 z-50 bg-indigo-600 text-white text-center py-2 px-4 flex items-center justify-center gap-4">
-        <span class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-            Ви в контексті церкви: <strong>{{ $currentChurch->name }}</strong>
-        </span>
-        <form method="POST" action="{{ route('system.exit-church') }}" class="inline">
-            @csrf
-            <button type="submit" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
-                ← Вийти
-            </button>
-        </form>
-        <a href="{{ route('system.index') }}" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
-            System Admin
-        </a>
-    </div>
-    @endif
-
-    @if(session('impersonating_from'))
-    <!-- User impersonation banner -->
-    <div class="sticky top-0 z-50 bg-orange-500 text-white text-center py-2 px-4 flex items-center justify-center gap-4">
-        <span class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            Ви увійшли як <strong>{{ auth()->user()->name }}</strong>
-        </span>
-        <form method="POST" action="{{ route('stop-impersonating') }}" class="inline">
-            @csrf
-            <button type="submit" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
-                ← Повернутись
-            </button>
-        </form>
-    </div>
-    @endif
-
     <div class="page-content">
-    <div x-data="{ sidebarOpen: false }" class="min-h-screen flex"
+    <div x-data="{ sidebarOpen: false }" class="min-h-screen flex max-w-[100vw] overflow-x-hidden"
          @keydown.window.prevent.cmd.k="searchOpen = true"
          @keydown.window.prevent.ctrl.k="searchOpen = true"
          @keydown.window.escape="searchOpen = false; fabOpen = false">
 
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 {{ session('impersonating_from') || session('impersonate_church_id') ? 'pt-10' : '' }}">
+        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
             <div class="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
@@ -960,6 +920,46 @@
                 @endif
             </nav>
 
+            @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
+            <div class="flex-shrink-0 px-3 py-3 border-t border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30">
+                <div class="flex items-center gap-2 text-xs text-indigo-700 dark:text-indigo-300 mb-2">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span class="truncate">Церква: <strong>{{ $currentChurch->name }}</strong></span>
+                </div>
+                <div class="flex gap-1">
+                    <form method="POST" action="{{ route('system.exit-church') }}" class="flex-1">
+                        @csrf
+                        <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
+                            ← Вийти
+                        </button>
+                    </form>
+                    <a href="{{ route('system.index') }}" class="px-2 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
+                        Admin
+                    </a>
+                </div>
+            </div>
+            @endif
+
+            @if(session('impersonating_from'))
+            <div class="flex-shrink-0 px-3 py-3 border-t border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/30">
+                <div class="flex items-center gap-2 text-xs text-orange-700 dark:text-orange-300 mb-2">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    <span class="truncate">Ви увійшли як <strong>{{ auth()->user()->name }}</strong></span>
+                </div>
+                <form method="POST" action="{{ route('stop-impersonating') }}">
+                    @csrf
+                    <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-800/50 hover:bg-orange-200 dark:hover:bg-orange-800 rounded-lg transition-colors">
+                        ← Повернутись
+                    </button>
+                </form>
+            </div>
+            @endif
+
         </aside>
 
         <!-- Mobile Sidebar (overlay) -->
@@ -1093,12 +1093,53 @@
                 </a>
                 @endif
             </nav>
+
+            @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
+            <div class="flex-shrink-0 px-3 py-3 border-t border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30">
+                <div class="flex items-center gap-2 text-xs text-indigo-700 dark:text-indigo-300 mb-2">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span class="truncate">Церква: <strong>{{ $currentChurch->name }}</strong></span>
+                </div>
+                <div class="flex gap-1">
+                    <form method="POST" action="{{ route('system.exit-church') }}" class="flex-1">
+                        @csrf
+                        <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
+                            ← Вийти
+                        </button>
+                    </form>
+                    <a href="{{ route('system.index') }}" class="px-2 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
+                        Admin
+                    </a>
+                </div>
+            </div>
+            @endif
+
+            @if(session('impersonating_from'))
+            <div class="flex-shrink-0 px-3 py-3 border-t border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/30">
+                <div class="flex items-center gap-2 text-xs text-orange-700 dark:text-orange-300 mb-2">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    <span class="truncate">Ви увійшли як <strong>{{ auth()->user()->name }}</strong></span>
+                </div>
+                <form method="POST" action="{{ route('stop-impersonating') }}">
+                    @csrf
+                    <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-800/50 hover:bg-orange-200 dark:hover:bg-orange-800 rounded-lg transition-colors">
+                        ← Повернутись
+                    </button>
+                </form>
+            </div>
+            @endif
+
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 lg:pl-64 overflow-clip">
+        <div class="flex-1 min-w-0 lg:pl-64">
             <!-- Mobile Header -->
-            <header class="lg:hidden sticky {{ session('impersonating_from') || session('impersonate_church_id') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
+            <header class="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
                 <div class="flex items-center justify-between h-14 px-3">
                     <button @click="sidebarOpen = true" class="w-11 h-11 flex items-center justify-center -ml-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -1137,7 +1178,7 @@
             </header>
 
             <!-- Desktop Header -->
-            <header class="hidden lg:flex sticky {{ session('impersonating_from') || session('impersonate_church_id') ? 'top-10' : 'top-0' }} z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
+            <header class="hidden lg:flex sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
                 <h1 class="text-lg font-semibold text-gray-900 dark:text-white">@yield('title', 'Головна')</h1>
                 <div class="flex items-center space-x-4">
                     <!-- Theme Toggle -->
@@ -1538,7 +1579,7 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
-                        console.log('SW registered:', registration.scope);
+                        // SW registered
 
                         // Check for updates
                         registration.addEventListener('updatefound', () => {
@@ -1555,7 +1596,7 @@
                         });
                     })
                     .catch(error => {
-                        console.log('SW registration failed:', error);
+                        // SW registration failed
                     });
             });
         }

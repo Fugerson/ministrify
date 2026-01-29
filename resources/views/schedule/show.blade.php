@@ -265,7 +265,7 @@
                                         $displayTitle = trim($displayTitle);
                                     @endphp
                                     <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
-                                        <div class="relative" x-data="titleEditor({{ $item->id }}, '{{ addslashes($displayTitle) }}', {{ $item->song_id ?? 'null' }})">
+                                        <div class="relative" x-data="titleEditor({{ $item->id }}, {{ Js::from($displayTitle) }}, {{ $item->song_id ?? 'null' }})">
                                             {{-- Display mode --}}
                                             <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.5rem] px-1 py-1 text-sm text-gray-900 dark:text-white break-words" x-html="renderWithSongLinks(title)"></div>
                                             {{-- Edit mode --}}
@@ -484,7 +484,7 @@
                                                         @foreach($allPeople as $person)
                                                             <button type="button"
                                                                     x-show="!search || '{{ mb_strtolower($person->full_name) }}'.includes(search.toLowerCase())"
-                                                                    @click="addPerson({{ $person->id }}, '{{ addslashes($person->full_name) }}', {{ $person->telegram_chat_id ? 'true' : 'false' }})"
+                                                                    @click="addPerson({{ $person->id }}, {{ Js::from($person->full_name) }}, {{ $person->telegram_chat_id ? 'true' : 'false' }})"
                                                                     class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                                                 @if($person->telegram_chat_id)
                                                                     <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
@@ -1008,7 +1008,6 @@
 <script>
 // Songs data for autocomplete
 const SONGS_DATA = @json($songsForAutocomplete ?? []);
-console.log('SONGS_DATA loaded:', SONGS_DATA.length, 'songs', SONGS_DATA);
 
 
 // Song autocomplete for existing items
@@ -1654,14 +1653,8 @@ function planEditor() {
         },
 
         insertNewRow(item) {
-            // Use global function that handles songs
+            // Use global function that handles songs (it appends the row and resizes textareas)
             window.insertPlanRow(item);
-            tbody.appendChild(row);
-            // Auto-resize textareas
-            row.querySelectorAll('textarea').forEach(ta => {
-                ta.style.height = 'auto';
-                ta.style.height = ta.scrollHeight + 'px';
-            });
         },
 
         async deleteItem(id) {
@@ -1688,7 +1681,7 @@ function planEditor() {
                     const tbody = document.querySelector('table tbody');
                     if (tbody && tbody.children.length === 0) {
                         tbody.innerHTML = `<tr id="empty-row">
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-sm">
+                            <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">
                                 Почніть додавати пункти плану нижче
                             </td>
                         </tr>`;
@@ -1822,7 +1815,7 @@ window.planEditorDeleteItem = async function(id) {
             const tbody = document.querySelector('table tbody');
             if (tbody && tbody.children.length === 0) {
                 tbody.innerHTML = `<tr id="empty-row">
-                    <td colspan="5" class="px-4 py-8 text-center text-gray-400 text-sm">
+                    <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">
                         Почніть додавати пункти плану нижче
                     </td>
                 </tr>`;

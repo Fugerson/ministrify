@@ -568,7 +568,9 @@ class ServicePlanController extends Controller
             ], 422);
         }
 
-        $person = Person::find($personId);
+        $person = Person::where('id', $personId)
+            ->where('church_id', $event->church_id)
+            ->first();
 
         if (!$person) {
             return response()->json([

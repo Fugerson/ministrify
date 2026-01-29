@@ -1451,7 +1451,7 @@ function avatarUpload() {
             this.$refs.removePhotoInput.value = '1';
             const input = this.$el.querySelector('input[type="file"]');
             if (input) input.value = '';
-            this.debouncedSave();
+            this.autoSave();
         }
     }
 }
@@ -1490,7 +1490,6 @@ function familyManager() {
         selectPerson(person) {
             this.selectedPerson = person;
             this.searchQuery = person.name;
-            this.showResults = false;
         },
 
         async addFamilyMember() {

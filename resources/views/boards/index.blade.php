@@ -495,6 +495,10 @@ function churchBoard() {
             this.$watch('filters', () => { this.applyFilters(); this.activePreset = ''; }, { deep: true });
             this.$watch('searchQuery', () => this.applyFilters());
 
+            // Expose methods globally for dynamically generated card HTML
+            window.boardOpenCard = (id) => this.openCard(id);
+            window.boardToggleComplete = (id) => this.toggleComplete(id);
+
             // Open card from URL
             const urlParams = new URLSearchParams(window.location.search);
             const cardId = urlParams.get('card');
@@ -772,7 +776,7 @@ function churchBoard() {
                      data-due="${card.due_date || ''}"
                      data-title="${(card.title || '').toLowerCase()}"
                      data-overdue="0"
-                     onclick="document.querySelector('[x-data]').__x.$data.openCard(${card.id})">
+                     onclick="boardOpenCard(${card.id})">
                     <div class="card-top-row flex items-center gap-1.5 mb-2 flex-wrap">
                         ${epicBadge}
                         <span class="text-[10px] font-mono text-gray-400 dark:text-gray-500 ml-auto">#${card.id}</span>
@@ -786,7 +790,7 @@ function churchBoard() {
                         </div>
                         <div class="card-assignee flex-shrink-0">${assigneeHtml}</div>
                     </div>
-                    <button onclick="event.stopPropagation(); document.querySelector('[x-data]').__x.$data.toggleComplete(${card.id})"
+                    <button onclick="event.stopPropagation(); boardToggleComplete(${card.id})"
                             class="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all bg-gray-100 text-gray-400 dark:bg-gray-600 hover:text-green-600 dark:hover:text-green-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

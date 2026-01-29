@@ -316,7 +316,7 @@ function mySchedule() {
                         return reg.sync.register('sync-schedule-actions');
                     });
                 } catch (e) {
-                    console.log('Background sync not available');
+                    // Background sync not available
                 }
             }
         },

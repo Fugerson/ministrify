@@ -125,7 +125,7 @@ function chatApp() {
         sendMessage() {
             // Global lock - prevent any double sends
             if (window._pmSending) {
-                console.log('BLOCKED by global lock');
+                // blocked by global lock
                 return;
             }
             window._pmSending = true;

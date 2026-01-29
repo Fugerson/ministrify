@@ -5,7 +5,6 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GroupController;
@@ -550,13 +549,9 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('google-calendar/import', [\App\Http\Controllers\GoogleCalendarController::class, 'importFromGoogle'])->name('google-calendar.import');
 
         // Expense categories
-        Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->except(['show']);
+        Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
 
-        // Income categories (legacy)
-        Route::get('income-categories', [FinanceController::class, 'incomeCategories'])->name('income-categories.index');
-        Route::post('income-categories', [FinanceController::class, 'storeIncomeCategory'])->name('income-categories.store');
-        Route::put('income-categories/{incomeCategory}', [FinanceController::class, 'updateIncomeCategory'])->name('income-categories.update');
-        Route::delete('income-categories/{incomeCategory}', [FinanceController::class, 'destroyIncomeCategory'])->name('income-categories.destroy');
+        // Income categories removed -- replaced by unified transaction categories (see transaction-categories routes below)
 
         // Transaction categories (unified)
         Route::post('transaction-categories', [SettingsController::class, 'storeTransactionCategory'])->name('transaction-categories.store');
@@ -573,7 +568,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::delete('ministries/{ministry}', [\App\Http\Controllers\MinistryTypeController::class, 'destroyMinistry'])->name('ministries.destroy');
 
         // Users management
-        Route::resource('users', \App\Http\Controllers\UserController::class);
+        Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show']);
         Route::post('users/{user}/invite', [\App\Http\Controllers\UserController::class, 'sendInvite'])->name('users.invite');
 
         // Audit Logs
@@ -641,7 +636,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('about', [\App\Http\Controllers\WebsiteBuilder\AboutController::class, 'update'])->name('about.update');
 
         // Staff/Team management
-        Route::resource('team', \App\Http\Controllers\WebsiteBuilder\TeamController::class);
+        Route::resource('team', \App\Http\Controllers\WebsiteBuilder\TeamController::class)->parameters(['team' => 'staffMember']);
         Route::post('team/reorder', [\App\Http\Controllers\WebsiteBuilder\TeamController::class, 'reorder'])->name('team.reorder');
 
         // Sermons management
@@ -659,7 +654,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('gallery/reorder', [\App\Http\Controllers\WebsiteBuilder\GalleryController::class, 'reorder'])->name('gallery.reorder');
 
         // Blog management
-        Route::resource('blog', \App\Http\Controllers\WebsiteBuilder\BlogController::class);
+        Route::resource('blog', \App\Http\Controllers\WebsiteBuilder\BlogController::class)->parameters(['blog' => 'blogPost']);
         Route::get('blog-categories', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'categoriesIndex'])->name('blog.categories.index');
         Route::post('blog-categories', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'categoryStore'])->name('blog.categories.store');
         Route::put('blog-categories/{category}', [\App\Http\Controllers\WebsiteBuilder\BlogController::class, 'categoryUpdate'])->name('blog.categories.update');

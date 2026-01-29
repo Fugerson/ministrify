@@ -67,11 +67,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(ChurchRole::class);
     }
 
-    public function expenses(): HasMany
-    {
-        return $this->hasMany(Expense::class);
-    }
-
     public function pushSubscriptions(): HasMany
     {
         return $this->hasMany(PushSubscription::class);

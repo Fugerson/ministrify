@@ -413,7 +413,10 @@ class Person extends Model
     public function scopeUpcomingBirthdays($query, int $days = 30)
     {
         return $query->whereNotNull('birth_date')
-            ->whereRaw('DAYOFYEAR(birth_date) BETWEEN DAYOFYEAR(CURDATE()) AND DAYOFYEAR(CURDATE()) + ?', [$days]);
+            ->whereRaw(
+                '(DAYOFYEAR(CURDATE()) + ? <= 366 AND DAYOFYEAR(birth_date) BETWEEN DAYOFYEAR(CURDATE()) AND DAYOFYEAR(CURDATE()) + ?) OR (DAYOFYEAR(CURDATE()) + ? > 366 AND (DAYOFYEAR(birth_date) >= DAYOFYEAR(CURDATE()) OR DAYOFYEAR(birth_date) <= (DAYOFYEAR(CURDATE()) + ?) - 366))',
+                [$days, $days, $days, $days]
+            );
     }
 
     public function getAgeAttribute(): ?int

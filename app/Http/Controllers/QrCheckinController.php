@@ -135,7 +135,7 @@ class QrCheckinController extends Controller
 
         // Verify user has access to this church
         $user = auth()->user();
-        if ($event->church_id !== $user->church_id) {
+        if ($event->church_id !== $user->church_id || $person->church_id !== $user->church_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Доступ заборонено',

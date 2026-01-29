@@ -7,6 +7,7 @@ use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Resource;
 use App\Models\Song;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -55,7 +56,7 @@ class MinistryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
-            'leader_id' => 'nullable|exists:people,id',
+            'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'monthly_budget' => 'nullable|numeric|min:0',
         ]);
 
@@ -173,7 +174,7 @@ class MinistryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
-            'leader_id' => 'nullable|exists:people,id',
+            'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'monthly_budget' => 'nullable|numeric|min:0',
             'is_worship_ministry' => 'boolean',
         ]);
