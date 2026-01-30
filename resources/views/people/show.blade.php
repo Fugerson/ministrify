@@ -777,8 +777,8 @@
                                 @if($sheep->photo)
                                 <div x-data="{ hover: false, r: {} }" @mouseenter="hover = true; r = $el.getBoundingClientRect()" @mouseleave="hover = false">
                                     <img src="{{ Storage::url($sheep->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy">
-                                    <div x-show="hover" x-transition.opacity.duration.150ms class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
-                                        <img src="{{ Storage::url($sheep->photo) }}" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                                    <div class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
+                                        <img src="{{ Storage::url($sheep->photo) }}" :class="hover ? 'opacity-100 scale-100' : 'opacity-0 scale-75'" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800 transition-all duration-200 ease-out origin-bottom">
                                     </div>
                                 </div>
                                 @else
@@ -950,8 +950,8 @@
                     @if($member->person->photo)
                     <div class="flex-shrink-0" x-data="{ hover: false, r: {} }" @mouseenter="hover = true; r = $el.getBoundingClientRect()" @mouseleave="hover = false">
                         <img src="{{ Storage::url($member->person->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy">
-                        <div x-show="hover" x-transition.opacity.duration.150ms class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
-                            <img src="{{ Storage::url($member->person->photo) }}" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                        <div class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
+                            <img src="{{ Storage::url($member->person->photo) }}" :class="hover ? 'opacity-100 scale-100' : 'opacity-0 scale-75'" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800 transition-all duration-200 ease-out origin-bottom">
                         </div>
                     </div>
                     @else
