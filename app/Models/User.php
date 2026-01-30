@@ -248,20 +248,33 @@ class User extends Authenticatable implements MustVerifyEmail
         ]);
     }
 
+    private function getValidOnboardingState(): array
+    {
+        $state = $this->onboarding_state;
+        if (!is_array($state)) {
+            return ['current_step' => 'welcome', 'steps' => [], 'dismissed_hints' => []];
+        }
+        if (!isset($state['steps']) || !is_array($state['steps'])) {
+            $state['steps'] = [];
+        }
+        return $state;
+    }
+
     public function getOnboardingStep(string $step): ?array
     {
-        $state = $this->onboarding_state ?? [];
+        $state = $this->getValidOnboardingState();
         return $state['steps'][$step] ?? null;
     }
 
     public function getCurrentOnboardingStep(): string
     {
-        return $this->onboarding_state['current_step'] ?? 'welcome';
+        $state = $this->getValidOnboardingState();
+        return $state['current_step'] ?? 'welcome';
     }
 
     public function completeOnboardingStep(string $step, array $data = []): void
     {
-        $state = $this->onboarding_state ?? [];
+        $state = $this->getValidOnboardingState();
         $state['steps'][$step] = [
             'completed' => true,
             'skipped' => false,
@@ -286,7 +299,7 @@ class User extends Authenticatable implements MustVerifyEmail
             return; // Cannot skip required steps
         }
 
-        $state = $this->onboarding_state ?? [];
+        $state = $this->getValidOnboardingState();
         $state['steps'][$step] = [
             'completed' => false,
             'skipped' => true,
@@ -324,7 +337,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getOnboardingProgress(): array
     {
-        $state = $this->onboarding_state ?? [];
+        $state = $this->getValidOnboardingState();
         $steps = $state['steps'] ?? [];
 
         $total = count(self::ONBOARDING_STEPS);
@@ -345,7 +358,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function dismissOnboardingHint(string $hint): void
     {
-        $state = $this->onboarding_state ?? [];
+        $state = $this->getValidOnboardingState();
         $hints = $state['dismissed_hints'] ?? [];
 
         if (!in_array($hint, $hints)) {
@@ -357,7 +370,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasSeenOnboardingHint(string $hint): bool
     {
-        $state = $this->onboarding_state ?? [];
+        $state = $this->getValidOnboardingState();
         $hints = $state['dismissed_hints'] ?? [];
         return in_array($hint, $hints);
     }

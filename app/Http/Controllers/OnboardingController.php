@@ -16,8 +16,8 @@ class OnboardingController extends Controller
     {
         $user = auth()->user();
 
-        // Initialize onboarding if not started
-        if (!$user->onboarding_state) {
+        // Initialize onboarding if not started or state is corrupt
+        if (!is_array($user->onboarding_state)) {
             $user->startOnboarding();
             $user->refresh();
         }
