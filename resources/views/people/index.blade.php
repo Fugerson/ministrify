@@ -368,9 +368,14 @@
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 @if($person->photo)
-                                <img src="{{ Storage::url($person->photo) }}" alt=""
-                                     class="w-10 h-10 rounded-xl object-cover flex-shrink-0"
-                                     loading="lazy">
+                                <div class="relative group/avatar flex-shrink-0">
+                                    <img src="{{ Storage::url($person->photo) }}" alt=""
+                                         class="w-10 h-10 rounded-xl object-cover"
+                                         loading="lazy">
+                                    <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
+                                        <img src="{{ Storage::url($person->photo) }}" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                                    </div>
+                                </div>
                                 @else
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
                                     <span class="text-sm font-semibold text-white">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>

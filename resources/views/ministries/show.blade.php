@@ -181,7 +181,12 @@
                         <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <a href="{{ route('people.show', $member) }}" class="flex items-center hover:opacity-80">
                                 @if($member->photo)
-                                <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                                <div class="relative group/avatar">
+                                    <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                                    <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
+                                        <img src="{{ Storage::url($member->photo) }}" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                                    </div>
+                                </div>
                                 @else
                                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
                                     <span class="text-white text-sm font-medium">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>

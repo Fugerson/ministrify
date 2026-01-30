@@ -27,12 +27,19 @@
                      :data-shepherd-id="shepherd.id">
 
                     <!-- Photo -->
-                    <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                    <div class="relative group/avatar flex-shrink-0">
+                        <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                            <template x-if="shepherd.photo">
+                                <img :src="shepherd.photo" :alt="shepherd.full_name" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!shepherd.photo">
+                                <div class="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-lg font-medium" x-text="shepherd.initials"></div>
+                            </template>
+                        </div>
                         <template x-if="shepherd.photo">
-                            <img :src="shepherd.photo" :alt="shepherd.full_name" class="w-full h-full object-cover">
-                        </template>
-                        <template x-if="!shepherd.photo">
-                            <div class="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-lg font-medium" x-text="shepherd.initials"></div>
+                            <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
+                                <img :src="shepherd.photo" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                            </div>
                         </template>
                     </div>
 

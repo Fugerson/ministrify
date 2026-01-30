@@ -168,15 +168,18 @@
 
                             <!-- Photo -->
                             <td class="px-1 py-1">
-                                <div class="relative group" x-data="{ fileInput: null }">
+                                <div class="relative group/photo" x-data="{ fileInput: null }">
                                     <template x-if="row.photo_url">
-                                        <div class="relative">
+                                        <div class="relative group/avatar">
                                             <img :src="row.photo_url" class="w-10 h-10 rounded-full object-cover cursor-pointer" @click="fileInput.click()">
-                                            <button @click.stop="deletePhoto(row)" type="button" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button @click.stop="deletePhoto(row)" type="button" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover/photo:opacity-100 transition-opacity flex items-center justify-center">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                 </svg>
                                             </button>
+                                            <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
+                                                <img :src="row.photo_url" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                                            </div>
                                         </div>
                                     </template>
                                     <template x-if="!row.photo_url">

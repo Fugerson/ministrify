@@ -390,7 +390,12 @@
                 <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                     <div class="flex items-center gap-3">
                         @if($attendee->person->photo)
-                        <img src="{{ Storage::url($attendee->person->photo) }}" alt="{{ $attendee->person->full_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                        <div class="relative group/avatar">
+                            <img src="{{ Storage::url($attendee->person->photo) }}" alt="{{ $attendee->person->full_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                            <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
+                                <img src="{{ Storage::url($attendee->person->photo) }}" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                            </div>
+                        </div>
                         @else
                         <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
                             <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($attendee->person->first_name, 0, 1) }}{{ mb_substr($attendee->person->last_name, 0, 1) }}</span>

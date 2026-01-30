@@ -36,7 +36,12 @@
                     class="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all {{ $isPresent ? 'bg-green-50 dark:bg-green-900/20' : '' }}">
                 <div class="flex items-center">
                     @if($member->photo)
-                    <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover mr-4" loading="lazy">
+                    <div class="relative group/avatar mr-4">
+                        <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover" loading="lazy">
+                        <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
+                            <img src="{{ Storage::url($member->photo) }}" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                        </div>
+                    </div>
                     @else
                     <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-4">
                         <span class="text-lg font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>
