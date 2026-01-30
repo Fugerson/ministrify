@@ -29,9 +29,34 @@ class ChurchRole extends Model
         'is_admin_role' => 'boolean',
     ];
 
-    // Default roles to seed for new churches (only admin, others created by admin)
     public const DEFAULT_ROLES = [
-        ['name' => 'Адміністратор', 'slug' => 'admin', 'color' => '#dc2626', 'sort_order' => 0, 'is_admin_role' => true, 'is_default' => true],
+        'administrator' => ['name' => 'Адміністратор', 'slug' => 'administrator', 'color' => '#dc2626', 'sort_order' => 0, 'is_admin_role' => true, 'is_default' => false],
+        'leader' => ['name' => 'Лідер', 'slug' => 'leader', 'color' => '#8b5cf6', 'sort_order' => 1, 'is_admin_role' => false, 'is_default' => false],
+        'volunteer' => ['name' => 'Служитель', 'slug' => 'volunteer', 'color' => '#3b82f6', 'sort_order' => 2, 'is_admin_role' => false, 'is_default' => false],
+    ];
+
+    public const DEFAULT_PERMISSIONS = [
+        'leader' => [
+            'dashboard' => ['view'],
+            'people' => ['view', 'create', 'edit'],
+            'groups' => ['view', 'create', 'edit'],
+            'ministries' => ['view', 'edit'],
+            'events' => ['view', 'create', 'edit'],
+            'reports' => ['view'],
+            'resources' => ['view', 'create'],
+            'boards' => ['view', 'create', 'edit'],
+            'announcements' => ['view', 'create'],
+        ],
+        'volunteer' => [
+            'dashboard' => ['view'],
+            'people' => ['view'],
+            'groups' => ['view'],
+            'ministries' => ['view'],
+            'events' => ['view'],
+            'resources' => ['view'],
+            'boards' => ['view'],
+            'announcements' => ['view'],
+        ],
     ];
 
     protected static function boot()
@@ -139,10 +164,30 @@ class ChurchRole extends Model
         }
     }
 
-    public static function createDefaultsForChurch(int $churchId): void
+    public static function createDefaultsForChurch(int $churchId): self
     {
-        foreach (self::DEFAULT_ROLES as $role) {
-            self::create(array_merge($role, ['church_id' => $churchId]));
+        $adminRole = null;
+
+        foreach (self::DEFAULT_ROLES as $key => $roleData) {
+            $role = self::firstOrCreate(
+                ['church_id' => $churchId, 'slug' => $roleData['slug']],
+                $roleData
+            );
+
+            if ($role->is_admin_role) {
+                $adminRole = $role;
+            }
+
+            if (isset(self::DEFAULT_PERMISSIONS[$key])) {
+                foreach (self::DEFAULT_PERMISSIONS[$key] as $module => $actions) {
+                    ChurchRolePermission::firstOrCreate(
+                        ['church_role_id' => $role->id, 'module' => $module],
+                        ['actions' => $actions]
+                    );
+                }
+            }
         }
+
+        return $adminRole;
     }
 }

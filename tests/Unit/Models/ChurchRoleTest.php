@@ -32,12 +32,12 @@ class ChurchRoleTest extends TestCase
 
     public function test_custom_role_checks_configured_permissions(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
-        ChurchRolePermission::create([
-            'church_role_id' => $role->id,
-            'module' => 'people',
-            'actions' => ['view', 'create'],
-        ]);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
+        ChurchRolePermission::updateOrCreate(
+            ['church_role_id' => $role->id, 'module' => 'people'],
+            ['actions' => ['view', 'create']]
+        );
+        $role->clearPermissionCache();
 
         $this->assertTrue($role->hasPermission('people', 'view'));
         $this->assertTrue($role->hasPermission('people', 'create'));
@@ -59,7 +59,7 @@ class ChurchRoleTest extends TestCase
 
     public function test_get_all_permissions_for_custom_role(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::factory()->forChurch($this->church)->create();
         ChurchRolePermission::create([
             'church_role_id' => $role->id,
             'module' => 'people',
@@ -121,14 +121,14 @@ class ChurchRoleTest extends TestCase
     {
         $newChurch = Church::factory()->create();
 
-        ChurchRole::createDefaultsForChurch($newChurch->id);
-
+        // Church::created event auto-calls createDefaultsForChurch
         $adminRole = ChurchRole::where('church_id', $newChurch->id)
-            ->where('slug', 'admin')
+            ->where('is_admin_role', true)
             ->first();
 
         $this->assertNotNull($adminRole);
         $this->assertTrue($adminRole->is_admin_role);
+        $this->assertEquals(3, ChurchRole::where('church_id', $newChurch->id)->count());
     }
 
     public function test_slug_auto_generation(): void

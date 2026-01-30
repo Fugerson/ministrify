@@ -40,7 +40,7 @@ class UserTest extends TestCase
 
     public function test_is_admin_returns_false_for_non_admin_role(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,
@@ -58,7 +58,7 @@ class UserTest extends TestCase
 
     public function test_is_leader_returns_true_for_leader_slug(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'leader', 'name' => 'Leader']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'leader')->first();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,
@@ -94,10 +94,7 @@ class UserTest extends TestCase
 
     public function test_is_volunteer_returns_true_for_non_admin_non_leader(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create([
-            'slug' => 'volunteer',
-            'name' => 'Волонтер',
-        ]);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,
@@ -142,7 +139,7 @@ class UserTest extends TestCase
 
     public function test_has_role_with_array(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'leader']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'leader')->first();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,
@@ -200,7 +197,7 @@ class UserTest extends TestCase
 
     public function test_custom_role_checks_specific_permissions(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::factory()->forChurch($this->church)->create();
         ChurchRolePermission::create([
             'church_role_id' => $role->id,
             'module' => 'people',
@@ -259,7 +256,7 @@ class UserTest extends TestCase
 
     public function test_leader_can_manage_own_ministry(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'leader']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'leader')->first();
         $person = Person::factory()->forChurch($this->church)->create();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
@@ -273,7 +270,7 @@ class UserTest extends TestCase
 
     public function test_leader_cannot_manage_other_ministry(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'leader']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'leader')->first();
         $person = Person::factory()->forChurch($this->church)->create();
         $user = User::factory()->create([
             'church_id' => $this->church->id,

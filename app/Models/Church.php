@@ -13,6 +13,13 @@ class Church extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::created(function (Church $church) {
+            ChurchRole::createDefaultsForChurch($church->id);
+        });
+    }
+
     protected $fillable = [
         'name',
         'slug',

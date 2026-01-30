@@ -181,7 +181,7 @@ class MinistryTest extends TestCase
         $ministry = Ministry::factory()->forChurch($this->church)->create([
             'visibility' => Ministry::VISIBILITY_PUBLIC,
         ]);
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,
@@ -205,7 +205,7 @@ class MinistryTest extends TestCase
         $ministry = Ministry::factory()->forChurch($this->church)->create([
             'visibility' => Ministry::VISIBILITY_MEMBERS,
         ]);
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
         $person = Person::factory()->forChurch($this->church)->create();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
@@ -222,7 +222,7 @@ class MinistryTest extends TestCase
         $ministry = Ministry::factory()->forChurch($this->church)->create([
             'visibility' => Ministry::VISIBILITY_MEMBERS,
         ]);
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
         $person = Person::factory()->forChurch($this->church)->create();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
@@ -236,7 +236,7 @@ class MinistryTest extends TestCase
     public function test_specific_visibility_allows_listed_person(): void
     {
         $person = Person::factory()->forChurch($this->church)->create();
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,
@@ -267,7 +267,7 @@ class MinistryTest extends TestCase
     public function test_is_member_for_leader(): void
     {
         $person = Person::factory()->forChurch($this->church)->create();
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'leader']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'leader')->first();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,
@@ -282,7 +282,7 @@ class MinistryTest extends TestCase
     public function test_is_member_for_member(): void
     {
         $person = Person::factory()->forChurch($this->church)->create();
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,
@@ -297,7 +297,7 @@ class MinistryTest extends TestCase
 
     public function test_is_member_false_for_outsider(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create(['slug' => 'volunteer']);
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'volunteer')->first();
         $person = Person::factory()->forChurch($this->church)->create();
         $user = User::factory()->create([
             'church_id' => $this->church->id,

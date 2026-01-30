@@ -131,6 +131,7 @@ class LandingController extends Controller
         ]);
 
         // Create admin user
+        $adminRole = $church->churchRoles()->where('is_admin_role', true)->first();
         $user = \App\Models\User::create([
             'name' => $validated['admin_name'],
             'email' => $validated['email'],
@@ -138,6 +139,7 @@ class LandingController extends Controller
             'password' => bcrypt($validated['password']),
             'church_id' => $church->id,
             'role' => 'admin',
+            'church_role_id' => $adminRole?->id,
         ]);
 
         // Create person record for admin

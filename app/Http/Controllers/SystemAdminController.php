@@ -363,12 +363,14 @@ class SystemAdminController extends Controller
         ]);
 
         // Create admin user
+        $adminRole = $church->churchRoles()->where('is_admin_role', true)->first();
         $user = User::create([
             'church_id' => $church->id,
             'name' => $validated['admin_name'],
             'email' => $validated['admin_email'],
             'password' => Hash::make($validated['admin_password']),
             'role' => 'admin',
+            'church_role_id' => $adminRole?->id,
         ]);
 
         return redirect()->route('system.churches.index')

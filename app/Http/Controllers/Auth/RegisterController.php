@@ -127,12 +127,14 @@ class RegisterController extends Controller
             ]);
 
             // Create admin user
+            $adminRole = $church->churchRoles()->where('is_admin_role', true)->first();
             $user = User::create([
                 'church_id' => $church->id,
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => 'admin',
+                'church_role_id' => $adminRole?->id,
             ]);
 
             // Create default tags
