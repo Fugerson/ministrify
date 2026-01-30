@@ -6,7 +6,7 @@
 <div class="space-y-6">
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-4">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук..."
                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
 
@@ -25,8 +25,31 @@
                 <option value="created" {{ request('action') == 'created' ? 'selected' : '' }}>Створено</option>
                 <option value="updated" {{ request('action') == 'updated' ? 'selected' : '' }}>Оновлено</option>
                 <option value="deleted" {{ request('action') == 'deleted' ? 'selected' : '' }}>Видалено</option>
+                <option value="restored" {{ request('action') == 'restored' ? 'selected' : '' }}>Відновлено</option>
                 <option value="login" {{ request('action') == 'login' ? 'selected' : '' }}>Вхід</option>
                 <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>Вихід</option>
+            </select>
+
+            @php
+                $modelOptions = [
+                    'Person' => 'Члени', 'User' => 'Користувачі', 'Event' => 'Події',
+                    'Ministry' => 'Служіння', 'Group' => 'Групи',
+                    'Transaction' => 'Транзакції', 'DonationCampaign' => 'Кампанії пожертв',
+                    'OnlineDonation' => 'Онлайн-пожертви',
+                    'Board' => 'Дошки', 'BoardCard' => 'Картки',
+                    'BlogPost' => 'Блог-пости', 'Sermon' => 'Проповіді', 'Song' => 'Пісні',
+                    'Gallery' => 'Галереї', 'StaffMember' => 'Співробітники',
+                    'EventRegistration' => 'Реєстрації', 'PrayerRequest' => 'Молитовні потреби',
+                    'Announcement' => 'Оголошення', 'Assignment' => 'Призначення',
+                    'Attendance' => 'Відвідуваність', 'ChurchRole' => 'Церковні ролі',
+                    'Church' => 'Церква', 'SupportTicket' => 'Тікети підтримки',
+                ];
+            @endphp
+            <select name="model" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <option value="">Всі типи</option>
+                @foreach($modelOptions as $key => $label)
+                    <option value="{{ $key }}" {{ request('model') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
             </select>
 
             <input type="date" name="from" value="{{ request('from') }}"
@@ -35,7 +58,7 @@
             <input type="date" name="to" value="{{ request('to') }}"
                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
-            <div class="flex gap-2">
+            <div class="flex gap-2 md:col-span-2">
                 <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Фільтрувати</button>
                 <a href="{{ route('system.audit-logs') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">Скинути</a>
             </div>

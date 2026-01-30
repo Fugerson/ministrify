@@ -294,7 +294,23 @@ class SystemAdminController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        $logs = $query->latest()->paginate(50);
+        if ($request->action) {
+            $query->where('action', $request->action);
+        }
+
+        if ($request->model) {
+            $query->where('model_type', 'App\\Models\\' . $request->model);
+        }
+
+        if ($request->from) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+
+        if ($request->to) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
+        $logs = $query->latest()->paginate(50)->withQueryString();
         $churches = Church::orderBy('name')->get();
 
         return view('system-admin.audit-logs', compact('logs', 'churches'));

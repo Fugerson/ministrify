@@ -51,7 +51,21 @@ class AuditLogController extends Controller
         // Get filter options
         $users = $church->users()->select('id', 'name')->get();
         $actions = ['created', 'updated', 'deleted', 'restored', 'login', 'logout'];
-        $models = ['Person', 'Event', 'Ministry', 'Group', 'Expense', 'Income', 'User'];
+        $models = [
+            'Person', 'User', 'Event', 'Ministry', 'Group',
+            'Transaction', 'Expense', 'Income', 'DonationCampaign', 'OnlineDonation',
+            'Board', 'BoardCard', 'BoardColumn', 'BoardEpic',
+            'Assignment', 'Attendance', 'GroupAttendance',
+            'BlogPost', 'BlogCategory', 'Sermon', 'SermonSeries', 'Song',
+            'Gallery', 'GalleryPhoto', 'Testimonial', 'Faq', 'StaffMember',
+            'EventRegistration', 'PrayerRequest', 'Announcement',
+            'ChurchRole', 'ChurchRolePermission', 'Position', 'Tag',
+            'MinistryTask', 'MinistryGoal', 'MinistryMeeting', 'MinistryBudget', 'MinistryType',
+            'ChecklistTemplate', 'EventTaskTemplate', 'ServicePlanTemplate', 'MessageTemplate',
+            'TransactionCategory', 'ExpenseCategory', 'IncomeCategory',
+            'Resource', 'BlockoutDate', 'FamilyRelationship',
+            'Church', 'SupportTicket',
+        ];
 
         return view('settings.audit-logs', compact('logs', 'users', 'actions', 'models'));
     }

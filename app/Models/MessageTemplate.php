@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\Auditable;
 
 class MessageTemplate extends Model
 {
+    use Auditable;
+
     protected $fillable = [
         'church_id',
         'name',
