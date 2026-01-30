@@ -27,7 +27,7 @@
                      :data-shepherd-id="shepherd.id">
 
                     <!-- Photo -->
-                    <div class="relative group/avatar flex-shrink-0">
+                    <div class="flex-shrink-0" x-data="{ hover: false, r: {} }" @mouseenter="shepherd.photo && (hover = true, r = $el.getBoundingClientRect())" @mouseleave="hover = false">
                         <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
                             <template x-if="shepherd.photo">
                                 <img :src="shepherd.photo" :alt="shepherd.full_name" class="w-full h-full object-cover">
@@ -36,11 +36,9 @@
                                 <div class="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-lg font-medium" x-text="shepherd.initials"></div>
                             </template>
                         </div>
-                        <template x-if="shepherd.photo">
-                            <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
-                                <img :src="shepherd.photo" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
-                            </div>
-                        </template>
+                        <div x-show="hover" x-transition.opacity.duration.150ms class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
+                            <img :src="shepherd.photo" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
+                        </div>
                     </div>
 
                     <!-- Name -->

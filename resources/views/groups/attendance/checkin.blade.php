@@ -36,9 +36,9 @@
                     class="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all {{ $isPresent ? 'bg-green-50 dark:bg-green-900/20' : '' }}">
                 <div class="flex items-center">
                     @if($member->photo)
-                    <div class="relative group/avatar mr-4">
+                    <div class="mr-4" x-data="{ hover: false, r: {} }" @mouseenter="hover = true; r = $el.getBoundingClientRect()" @mouseleave="hover = false">
                         <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover" loading="lazy">
-                        <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
+                        <div x-show="hover" x-transition.opacity.duration.150ms class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
                             <img src="{{ Storage::url($member->photo) }}" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
                         </div>
                     </div>

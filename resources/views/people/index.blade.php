@@ -368,11 +368,11 @@
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 @if($person->photo)
-                                <div class="relative group/avatar flex-shrink-0">
+                                <div class="flex-shrink-0" x-data="{ hover: false, r: {} }" @mouseenter="hover = true; r = $el.getBoundingClientRect()" @mouseleave="hover = false">
                                     <img src="{{ Storage::url($person->photo) }}" alt=""
                                          class="w-10 h-10 rounded-xl object-cover"
                                          loading="lazy">
-                                    <div class="invisible group-hover/avatar:visible absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none transition-all duration-150">
+                                    <div x-show="hover" x-transition.opacity.duration.150ms class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
                                         <img src="{{ Storage::url($person->photo) }}" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800">
                                     </div>
                                 </div>
