@@ -27,7 +27,7 @@
         <!-- QR Code Display -->
         <div class="flex justify-center mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-lg border-4 border-primary-100 dark:border-primary-900">
-                <div id="qrcode" class="w-64 h-64"></div>
+                <div id="qrcode" class="w-48 h-48 sm:w-64 sm:h-64"></div>
             </div>
         </div>
 

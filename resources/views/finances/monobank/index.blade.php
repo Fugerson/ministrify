@@ -97,7 +97,7 @@
                             </svg>
                         </button>
                         <div x-show="open" @click.away="open = false" x-cloak
-                             class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                             class="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                             <form action="{{ route('finances.monobank.sync') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="days" value="14">

@@ -20,7 +20,7 @@
                 @endif
             </div>
             <div class="text-right">
-                <p class="text-4xl font-bold text-primary-600">{{ $attendance->total_count }}</p>
+                <p class="text-3xl sm:text-4xl font-bold text-primary-600">{{ $attendance->total_count }}</p>
                 <p class="text-gray-500 dark:text-gray-400">загальна кількість</p>
             </div>
         </div>

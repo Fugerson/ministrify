@@ -96,11 +96,11 @@
                     </button>
                 </form>
 
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('meetings.show', [$ministry, $meeting]) }}" class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
+                <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <a href="{{ route('meetings.show', [$ministry, $meeting]) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                         Скасувати
                     </a>
-                    <button type="submit" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
+                    <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
                         Зберегти
                     </button>
                 </div>

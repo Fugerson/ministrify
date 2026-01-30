@@ -195,12 +195,12 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end space-x-3 mt-6">
+                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
                         <button type="button" @click="showCreateFolder = false"
-                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
+                                class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
                             Скасувати
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
                             Створити
                         </button>
                     </div>
@@ -241,12 +241,12 @@
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
                                placeholder="Назва...">
                     </div>
-                    <div class="flex justify-end space-x-3 mt-6">
+                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
                         <button type="button" @click="showRename = false"
-                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
+                                class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
                             Скасувати
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
                             Зберегти
                         </button>
                     </div>

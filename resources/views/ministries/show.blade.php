@@ -8,7 +8,7 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 @if($ministry->color)
@@ -63,7 +63,7 @@
                 @can('manage-ministry', $ministry)
                 <button @click="setTab('goals')" type="button"
                    :class="activeTab === 'goals' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -72,24 +72,24 @@
                 @endcan
                 <button @click="setTab('schedule')" type="button"
                    :class="activeTab === 'schedule' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-6 py-3 border-b-2 text-sm font-medium">
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
                     Події
                 </button>
                 <button @click="setTab('members')" type="button"
                    :class="activeTab === 'members' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-6 py-3 border-b-2 text-sm font-medium">
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
                     Команда ({{ $ministry->members->count() }})
                 </button>
                 @can('manage-ministry', $ministry)
                 <button @click="setTab('expenses')" type="button"
                    :class="activeTab === 'expenses' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-6 py-3 border-b-2 text-sm font-medium">
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
                     Витрати
                 </button>
                 @endcan
                 <button @click="setTab('resources')" type="button"
                    :class="activeTab === 'resources' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                     </svg>
@@ -98,7 +98,7 @@
                 @if($ministry->is_worship_ministry)
                 <button @click="setTab('songs')" type="button"
                    :class="activeTab === 'songs' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                     </svg>
@@ -108,7 +108,7 @@
                 @can('manage-ministry', $ministry)
                 <button @click="setTab('settings')" type="button"
                    :class="activeTab === 'settings' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -293,7 +293,7 @@
                         <button @click="prevPeriod()" class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </button>
-                        <span class="font-medium text-gray-900 dark:text-white min-w-[140px] text-center" x-text="filterPeriod === 'month' ? monthNames[currentMonth] + ' ' + currentYear : currentYear"></span>
+                        <span class="font-medium text-gray-900 dark:text-white min-w-[100px] sm:min-w-[140px] text-center" x-text="filterPeriod === 'month' ? monthNames[currentMonth] + ' ' + currentYear : currentYear"></span>
                         <button @click="nextPeriod()" class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
@@ -353,7 +353,7 @@
                                         <span x-text="t.date_formatted"></span>
                                         <span x-show="t.payment_method" class="text-xs" x-text="' • ' + (t.payment_method === 'cash' ? 'Готівка' : 'Картка')"></span>
                                     </td>
-                                    <td class="py-2 px-3 text-gray-500 dark:text-gray-400 text-xs italic max-w-[150px] truncate" x-text="t.notes" :title="t.notes"></td>
+                                    <td class="py-2 px-3 text-gray-500 dark:text-gray-400 text-xs italic max-w-[100px] sm:max-w-[150px] truncate" x-text="t.notes" :title="t.notes"></td>
                                     <td class="py-2 px-3">
                                         <template x-if="t.attachments.length > 0">
                                             <a :href="t.attachments[0].url" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline text-xs flex items-center gap-1">

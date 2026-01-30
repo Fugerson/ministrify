@@ -23,7 +23,7 @@ if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
 }
 @endphp
 <div class="mb-6">
-    <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-fit" aria-label="Tabs">
+    <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-full sm:w-fit overflow-x-auto" aria-label="Tabs">
         @foreach($commTabs as $tab)
             <a href="{{ route($tab['route']) }}"
                class="relative flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all
@@ -70,7 +70,7 @@ if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
                 </div>
                 @endif
 
-                <a href="{{ route('announcements.show', $announcement) }}" class="block p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <a href="{{ route('announcements.show', $announcement) }}" class="block p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex items-start justify-between">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-2">
@@ -84,7 +84,7 @@ if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
                             <p class="text-gray-600 dark:text-gray-400 line-clamp-2">
                                 {{ Str::limit(strip_tags($announcement->content), 150) }}
                             </p>
-                            <div class="flex items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
+                            <div class="flex items-center gap-2 sm:gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
                                 <span class="flex items-center">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>

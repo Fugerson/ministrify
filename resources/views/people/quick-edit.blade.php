@@ -18,7 +18,7 @@
     <div class="fixed bottom-0 left-0 right-0 lg:left-64 z-20 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-2xl px-4 py-3">
         <div class="max-w-screen-2xl mx-auto flex flex-wrap items-center gap-3">
             <!-- Search -->
-            <div class="w-48">
+            <div class="w-full sm:w-48">
                 <input type="text" x-model="searchQuery" placeholder="Пошук..."
                        class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
             </div>
@@ -106,6 +106,14 @@
                 <span x-text="saving ? 'Зберігаю...' : 'Зберегти'"></span>
             </button>
         </div>
+    </div>
+
+    <!-- Scroll hint (mobile only) -->
+    <div class="sm:hidden bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-2.5 text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+        </svg>
+        Прокрутіть вправо для перегляду всіх колонок
     </div>
 
     <!-- Table -->

@@ -123,9 +123,9 @@
             </div>
         </div>
 
-        <div class="flex justify-end space-x-3">
-            <a href="{{ route('songs.show', $song) }}" class="px-4 py-2 text-gray-700 dark:text-gray-300">Скасувати</a>
-            <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg">Зберегти</button>
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3">
+            <a href="{{ route('songs.show', $song) }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300">Скасувати</a>
+            <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg">Зберегти</button>
         </div>
     </form>
 

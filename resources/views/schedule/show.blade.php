@@ -145,7 +145,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" x-cloak @click.outside="open = false"
-                                     class="absolute right-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
+                                     class="absolute right-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
                                     {{-- Custom templates --}}
                                     <div class="p-2">
                                         <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Мої шаблони</p>
@@ -475,7 +475,7 @@
 
                                                 {{-- Dropdown --}}
                                                 <div x-show="open" x-cloak @click.outside="open = false"
-                                                     class="absolute z-50 left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                                                     class="absolute z-50 left-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                                                     <div class="p-2 border-b border-gray-200 dark:border-gray-700">
                                                         <input type="text" x-model="search" placeholder="Пошук..."
                                                                class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">

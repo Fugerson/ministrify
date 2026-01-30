@@ -21,7 +21,7 @@ $commTabs = [
 ];
 @endphp
 <div class="mb-6">
-    <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-fit" aria-label="Tabs">
+    <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-full sm:w-fit overflow-x-auto" aria-label="Tabs">
         @foreach($commTabs as $tab)
             <a href="{{ route($tab['route']) }}"
                class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all
@@ -172,12 +172,12 @@ $commTabs = [
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Змінні: {first_name}, {last_name}, {full_name}</p>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 mt-6">
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
                     <button type="button" onclick="document.getElementById('templateModal').classList.add('hidden')"
-                            class="px-4 py-2 text-gray-700 dark:text-gray-300">
+                            class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300">
                         Скасувати
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
                         Зберегти
                     </button>
                 </div>

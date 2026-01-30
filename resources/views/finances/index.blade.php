@@ -3,7 +3,7 @@
 @section('title', 'Фінанси')
 
 @section('actions')
-<div class="flex items-center space-x-2">
+<div class="flex flex-wrap gap-2">
     <a href="{{ route('finances.incomes.create') }}"
        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Current Balance Card - Multi-currency -->
-    <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-6 text-white">
+    <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-4 sm:p-6 text-white">
         <div>
             <p class="text-indigo-100 text-sm font-medium mb-3">Поточний баланс каси</p>
 
@@ -83,7 +83,7 @@
                         @endphp
                         <div class="@if($code === 'UAH') @else bg-white/10 rounded-lg px-4 py-2 @endif">
                             @if($code === 'UAH')
-                                <p class="text-4xl font-bold">{{ number_format($balance, 0, ',', ' ') }} {{ $symbol }}</p>
+                                <p class="text-2xl sm:text-3xl md:text-4xl font-bold">{{ number_format($balance, 0, ',', ' ') }} {{ $symbol }}</p>
                             @else
                                 <span class="text-2xl font-bold {{ $balance >= 0 ? '' : 'text-red-200' }}">
                                     {{ $balance >= 0 ? '' : '-' }}{{ $symbol }}{{ number_format(abs($balance), 0, ',', ' ') }}
@@ -151,13 +151,13 @@
     </div>
 
     <!-- Summary cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <!-- Total Income -->
-        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-4 sm:p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-green-100 text-sm font-medium">Надходження</p>
-                    <p class="text-3xl font-bold mt-1">{{ number_format($totalIncome, 0, ',', ' ') }} ₴</p>
+                    <p class="text-2xl sm:text-3xl font-bold mt-1">{{ number_format($totalIncome, 0, ',', ' ') }} ₴</p>
                     @if($yearComparison['growth']['income'] != 0)
                         <p class="text-green-100 text-sm mt-2">
                             <span class="{{ $yearComparison['growth']['income'] > 0 ? '' : 'text-red-200' }}">
@@ -176,11 +176,11 @@
         </div>
 
         <!-- Total Expense -->
-        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
+        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-4 sm:p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-red-100 text-sm font-medium">Витрати</p>
-                    <p class="text-3xl font-bold mt-1">{{ number_format($totalExpense, 0, ',', ' ') }} ₴</p>
+                    <p class="text-2xl sm:text-3xl font-bold mt-1">{{ number_format($totalExpense, 0, ',', ' ') }} ₴</p>
                     @if($yearComparison['growth']['expense'] != 0)
                         <p class="text-red-100 text-sm mt-2">
                             <span class="{{ $yearComparison['growth']['expense'] < 0 ? 'text-green-200' : '' }}">
@@ -199,11 +199,11 @@
         </div>
 
         <!-- Period Balance -->
-        <div class="bg-gradient-to-br {{ $periodBalance >= 0 ? 'from-blue-500 to-blue-600' : 'from-orange-500 to-orange-600' }} rounded-xl shadow-lg p-6 text-white">
+        <div class="bg-gradient-to-br {{ $periodBalance >= 0 ? 'from-blue-500 to-blue-600' : 'from-orange-500 to-orange-600' }} rounded-xl shadow-lg p-4 sm:p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-blue-100 text-sm font-medium">Результат за період</p>
-                    <p class="text-3xl font-bold mt-1">{{ $periodBalance >= 0 ? '+' : '' }}{{ number_format($periodBalance, 0, ',', ' ') }} ₴</p>
+                    <p class="text-2xl sm:text-3xl font-bold mt-1">{{ $periodBalance >= 0 ? '+' : '' }}{{ number_format($periodBalance, 0, ',', ' ') }} ₴</p>
                     <p class="text-blue-100 text-sm mt-2">
                         {{ $periodLabel }}
                     </p>
@@ -297,7 +297,7 @@
     </div>
 
     <!-- Recent transactions -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <!-- Recent incomes -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">

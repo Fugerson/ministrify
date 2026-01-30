@@ -134,13 +134,13 @@
             </div>
 
             <!-- Submit -->
-            <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('finances.incomes') }}"
-                   class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                   class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                     Скасувати
                 </a>
                 <button type="submit"
-                        class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
+                        class="w-full sm:w-auto px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
                     Зберегти
                 </button>
             </div>

@@ -131,7 +131,7 @@
                     </button>
 
                     <div x-show="open" x-cloak x-transition
-                         class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                         class="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                         <div class="py-1">
                             <a href="{{ route('calendar.export') }}"
                                class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -174,7 +174,7 @@
 
     @if($view === 'week')
         <!-- Week View -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <!-- Days Header -->
             <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
                 @php $dayDate = $startDate->copy(); @endphp
@@ -193,7 +193,7 @@
             </div>
 
             <!-- Events Grid -->
-            <div class="grid grid-cols-7 min-h-[400px]">
+            <div class="grid grid-cols-7 sm:min-h-[400px]">
                 @php $dayDate = $startDate->copy(); @endphp
                 @for($i = 0; $i < 7; $i++)
                     @php
@@ -239,9 +239,74 @@
                 @endfor
             </div>
         </div>
+
+        <!-- Week View - Mobile List -->
+        <div class="sm:hidden bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                @php $dayDate = $startDate->copy(); @endphp
+                @for($i = 0; $i < 7; $i++)
+                    @php
+                        $dateKey = $dayDate->format('Y-m-d');
+                        $dayEvents = $events->get($dateKey, collect());
+                        $isToday = $dayDate->isToday();
+                        $isPast = $dayDate->isPast() && !$isToday;
+                    @endphp
+                    @if($dayEvents->count() > 0)
+                    <div class="p-4 {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
+                        <div class="flex items-baseline mb-2">
+                            <span class="text-lg font-bold {{ $isToday ? 'text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">{{ $dayDate->format('d') }}</span>
+                            <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">{{ $daysShort[$i] }}@if($isToday) <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">(Сьогодні)</span>@endif</span>
+                        </div>
+                        <div class="space-y-2">
+                            @foreach($dayEvents as $item)
+                                @if($item->type === 'meeting')
+                                    <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
+                                       class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}30;">
+                                                <svg class="w-5 h-5" style="color: {{ $item->ministry->color ?? '#8b5cf6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry->name ?? '' }} &bull; {{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '-' }}</p>
+                                            </div>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </a>
+                                @else
+                                    <a href="{{ route('events.show', $item->original) }}"
+                                       class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30;">
+                                                <svg class="w-5 h-5" style="color: {{ $item->ministry_display_color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? 'Без команди' }} &bull; {{ $item->time ? $item->time->format('H:i') : '-' }}</p>
+                                            </div>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </a>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                    @php $dayDate->addDay(); @endphp
+                @endfor
+            </div>
+        </div>
     @else
         <!-- Month View - Calendar Grid -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <!-- Days Header -->
             <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                 @foreach($daysShort as $day)
@@ -269,7 +334,7 @@
                             $isCurrentMonth = $calendarDate->month == $month;
                             $isPast = $calendarDate->isPast() && !$isToday;
                         @endphp
-                        <div class="min-h-[100px] lg:min-h-[120px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                        <div class="sm:min-h-[100px] lg:min-h-[120px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }}">
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-sm font-medium {{ $isToday ? 'w-7 h-7 flex items-center justify-center rounded-full bg-primary-600 text-white' : ($isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-600') }}">
                                     {{ $calendarDate->format('j') }}

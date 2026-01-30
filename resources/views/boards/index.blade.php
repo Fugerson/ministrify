@@ -15,7 +15,7 @@
 
             <!-- Quick Stats -->
             <div class="flex items-center gap-3">
-                <div class="flex items-center gap-6 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="flex items-center gap-3 sm:gap-6 px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="text-center">
                         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $stats['total'] }}</p>
                         <p class="text-xs text-gray-500">Всього</p>
@@ -37,9 +37,9 @@
         </div>
 
         <!-- Quick Filters Bar (Shortcut Style) -->
-        <div class="flex items-center gap-2 flex-wrap bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
+        <div class="flex items-center gap-2 flex-wrap overflow-x-auto bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
             <!-- Search -->
-            <div class="relative flex-1 min-w-[200px] max-w-xs" x-data="{ showDropdown: false }" @click.away="showDropdown = false">
+            <div class="relative flex-1 min-w-0 w-full sm:min-w-[200px] max-w-xs" x-data="{ showDropdown: false }" @click.away="showDropdown = false">
                 <input type="text" x-model="searchQuery" placeholder="Пошук... (/)"
                        x-ref="searchInput"
                        @focus="showDropdown = true"
@@ -53,7 +53,7 @@
 
                 <!-- Search Dropdown -->
                 <div x-show="showDropdown && searchQuery.length > 0" x-transition
-                     class="absolute z-50 mt-1 w-80 max-h-72 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
+                     class="absolute z-50 mt-1 w-full sm:w-80 max-w-[calc(100vw-2rem)] max-h-72 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
                     <template x-if="filteredCards.length === 0">
                         <div class="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">Нічого не знайдено</div>
                     </template>
@@ -231,7 +231,7 @@
                         ];
                         $colors = $columnColors[$column->color] ?? $columnColors['gray'];
                     @endphp
-                    <div class="kanban-column flex-shrink-0 w-72 sm:w-80 bg-gray-50/80 dark:bg-gray-800/50 rounded-xl flex flex-col border border-gray-200/50 dark:border-gray-700/50"
+                    <div class="kanban-column flex-shrink-0 w-[calc(100vw-2rem)] sm:w-72 md:w-80 bg-gray-50/80 dark:bg-gray-800/50 rounded-xl flex flex-col border border-gray-200/50 dark:border-gray-700/50"
                          data-column-id="{{ $column->id }}"
                          x-data="{ collapsed: false }">
 

@@ -272,7 +272,7 @@
                                 </div>
 
                                 <!-- Sidebar -->
-                                <div class="w-72 flex-shrink-0 px-4 py-4 space-y-4 bg-gray-50 dark:bg-gray-800/50">
+                                <div class="hidden lg:block w-72 flex-shrink-0 px-4 py-4 space-y-4 bg-gray-50 dark:bg-gray-800/50">
                                     <div class="space-y-3">
                                         <!-- Status -->
                                         <div>

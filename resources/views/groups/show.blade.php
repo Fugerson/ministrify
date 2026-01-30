@@ -26,7 +26,7 @@
 @section('content')
 <div class="space-y-6">
     <!-- Group Info -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
         <div class="flex items-start gap-4">
             <div class="w-16 h-16 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
                 <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +171,7 @@
                                 </svg>
                             </button>
                             <div x-show="open" @click.away="open = false" x-cloak
-                                 class="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10">
+                                 class="absolute right-0 mt-1 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10">
                                 @if($member->pivot->role !== 'leader')
                                 <form method="POST" action="{{ route('groups.members.role', [$group, $member]) }}">
                                     @csrf
@@ -300,7 +300,7 @@
 <div id="addMemberModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="min-h-screen px-4 flex items-center justify-center">
         <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('addMemberModal').classList.add('hidden')"></div>
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Додати учасника</h3>
             <form method="POST" action="{{ route('groups.members.add', $group) }}">
                 @csrf
@@ -317,12 +317,12 @@
                         </select>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 mt-6">
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
                     <button type="button" onclick="document.getElementById('addMemberModal').classList.add('hidden')"
-                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
+                            class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
                         Скасувати
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
                         Додати
                     </button>
                 </div>

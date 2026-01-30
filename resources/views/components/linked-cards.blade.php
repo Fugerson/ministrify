@@ -17,7 +17,7 @@
                 Створити завдання
             </button>
             <div x-show="open" @click.away="open = false" x-transition
-                 class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-600">
+                 class="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-600">
                 <div class="py-1">
                     @foreach($boards as $board)
                     <form action="{{ route('boards.create-from-entity') }}" method="POST">

@@ -124,7 +124,7 @@
                             </button>
 
                             <div x-show="showTemplates" x-cloak @click.away="showTemplates = false"
-                                 class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-10">
+                                 class="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-10">
                                 @foreach($templates as $template)
                                     <button type="button" @click="createChecklist({{ $template->id }})"
                                             class="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">

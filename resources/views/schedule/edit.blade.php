@@ -196,11 +196,11 @@
                 </button>
             </form>
 
-            <div class="flex items-center space-x-4">
-                <a href="{{ route('events.show', $event) }}" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+            <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <a href="{{ route('events.show', $event) }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                     Скасувати
                 </a>
-                <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                     Зберегти
                 </button>
             </div>

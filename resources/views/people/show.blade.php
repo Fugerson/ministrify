@@ -205,7 +205,7 @@
             </div>
 
             <!-- Contact Info -->
-            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 @if($canEdit)
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Телефон</p>
@@ -266,7 +266,7 @@
 
             @if($isAdmin)
             <!-- Additional Admin Fields -->
-            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Telegram</p>
                     <div class="flex items-center">
@@ -570,7 +570,7 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
@@ -655,7 +655,7 @@
                         <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ $ministry->name }}</span>
                     </label>
 
-                    <div x-show="open" x-cloak x-collapse class="mt-3 ml-6 flex flex-wrap gap-2">
+                    <div x-show="open" x-cloak x-collapse class="mt-3 ml-3 sm:ml-6 flex flex-wrap gap-2">
                         @foreach($ministry->positions as $position)
                             <label class="inline-flex items-center cursor-pointer">
                                 <input type="checkbox" name="ministries[{{ $ministry->id }}][positions][]" value="{{ $position->id }}"

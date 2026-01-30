@@ -45,7 +45,7 @@
          class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6 text-center">
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Покажіть цей QR-код учасникам для самостійної реєстрації</p>
         <div class="inline-block p-4 bg-white rounded-xl">
-            <div id="qr-code-display" class="w-64 h-64 mx-auto"></div>
+            <div id="qr-code-display" class="w-48 h-48 sm:w-64 sm:h-64 mx-auto"></div>
         </div>
         <p class="mt-4 text-xs text-gray-400 break-all" x-text="selectedEvent?.checkin_url"></p>
     </div>
@@ -76,7 +76,7 @@
             {{-- Scan overlay --}}
             <div x-show="cameraActive" class="absolute inset-0 pointer-events-none">
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="w-48 h-48 border-2 border-white/50 rounded-xl"></div>
+                    <div class="w-40 h-40 sm:w-48 sm:h-48 border-2 border-white/50 rounded-xl"></div>
                 </div>
             </div>
         </div>

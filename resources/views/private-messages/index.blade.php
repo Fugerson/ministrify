@@ -15,7 +15,7 @@ if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
 }
 @endphp
 <div class="mb-4">
-    <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-fit" aria-label="Tabs">
+    <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-full sm:w-fit overflow-x-auto" aria-label="Tabs">
         @foreach($commTabs as $tab)
             <a href="{{ route($tab['route']) }}"
                class="relative flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all
@@ -39,7 +39,7 @@ if(auth()->user()->isLeader() || auth()->user()->isAdmin()) {
     <div class="flex bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden" style="height: calc(100vh - 140px - env(safe-area-inset-bottom, 0px)); min-height: 500px; max-height: calc(100dvh - 140px);">
 
         <!-- Left Sidebar: Conversations List -->
-        <div class="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 flex flex-col"
+        <div class="w-full md:w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 flex flex-col"
              :class="{ 'hidden md:flex': selectedUser }">
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
