@@ -106,6 +106,11 @@
         }
         .dark body { background-color: #111827; }
 
+        /* Prevent text overflow — wrap long words instead of breaking layout */
+        body { overflow-wrap: break-word; word-break: break-word; }
+        td, th { overflow-wrap: break-word; }
+        .break-anywhere { overflow-wrap: anywhere; }
+
         /* Mobile viewport fixes */
         @supports (height: 100dvh) {
             .h-dvh { height: 100dvh; }

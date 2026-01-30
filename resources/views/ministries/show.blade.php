@@ -351,7 +351,7 @@
                                         <span class="font-semibold text-gray-900 dark:text-white whitespace-nowrap" x-text="new Intl.NumberFormat('uk-UA').format(t.amount) + ' ' + t.currency"></span>
                                     </td>
                                     <td class="py-2 px-3">
-                                        <span x-show="t.category" class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 whitespace-nowrap" x-text="t.category"></span>
+                                        <span x-show="t.category" class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400" x-text="t.category"></span>
                                     </td>
                                     <td class="py-2 px-3 text-gray-900 dark:text-white" x-text="t.description"></td>
                                     <td class="py-2 px-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">

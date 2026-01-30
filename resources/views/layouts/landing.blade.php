@@ -80,6 +80,7 @@
     </script>
     <style>
         [x-cloak] { display: none !important; }
+        body { overflow-wrap: break-word; word-break: break-word; }
         .gradient-text {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
             -webkit-background-clip: text;

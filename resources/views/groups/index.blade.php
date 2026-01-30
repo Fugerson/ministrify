@@ -112,7 +112,7 @@
                                 </div>
                             </a>
                         </td>
-                        <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden md:table-cell">
+                        <td class="px-3 md:px-6 py-3 md:py-4 hidden md:table-cell">
                             @if($group->leader)
                             <a href="{{ route('people.show', $group->leader) }}" class="text-sm text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400">
                                 {{ $group->leader->full_name }}

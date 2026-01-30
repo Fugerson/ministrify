@@ -98,7 +98,7 @@
                                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                                         <span class="font-semibold text-green-600 dark:text-green-400">{{ $donation->formatted_amount }}</span>
                                     </td>
-                                    <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
+                                    <td class="px-3 md:px-6 py-3 md:py-4 hidden sm:table-cell">
                                         <span class="text-sm text-gray-600 dark:text-gray-400">{{ $donation->purpose ?? ($donation->campaign?->name ?? 'Загальна') }}</span>
                                     </td>
                                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden md:table-cell">

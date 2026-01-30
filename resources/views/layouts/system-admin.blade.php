@@ -36,6 +36,10 @@
     <style>
         [x-cloak] { display: none !important; }
 
+        /* Prevent text overflow */
+        body { overflow-wrap: break-word; word-break: break-word; }
+        td, th { overflow-wrap: break-word; }
+
         /* Custom Scrollbars */
         * {
             scrollbar-width: thin;

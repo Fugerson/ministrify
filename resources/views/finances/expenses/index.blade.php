@@ -126,10 +126,10 @@
                                 <!-- Mobile: show ministry under description -->
                                 <p class="md:hidden text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $expense->ministry?->name ?? '' }}</p>
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                            <td class="px-3 md:px-6 py-3 md:py-4 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
                                 {{ $expense->ministry?->name ?? '-' }}
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
+                            <td class="px-3 md:px-6 py-3 md:py-4 text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                                 {{ $expense->category?->name ?? '-' }}
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">

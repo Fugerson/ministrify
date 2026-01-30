@@ -43,6 +43,7 @@
         }
     </script>
     <style>
+        body { overflow-wrap: break-word; word-break: break-word; }
         @media screen and (max-width: 768px) {
             input, select, textarea {
                 font-size: 16px !important;
