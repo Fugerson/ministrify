@@ -3,7 +3,7 @@
 @section('title', 'Фінанси')
 
 @section('actions')
-<div class="flex flex-wrap gap-2">
+<div id="finance-actions" class="flex flex-wrap gap-2">
     <a href="{{ route('finances.incomes.create') }}"
        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,7 +34,7 @@
 <div id="finance-content">
 <div x-data="financesDashboard()" class="space-y-6">
     <!-- Period selector -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+    <div id="finance-period" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-2">
                 <select x-model="selectedYear" @change="updatePeriod()"
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Current Balance Card - Multi-currency -->
-    <div class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-4 sm:p-6 text-white">
+    <div id="finance-balance" class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-4 sm:p-6 text-white">
         <div>
             <p class="text-indigo-100 text-sm font-medium mb-3">Поточний баланс каси</p>
 

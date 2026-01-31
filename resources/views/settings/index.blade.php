@@ -15,7 +15,7 @@
     }
 }">
     <!-- Tabs -->
-    <div class="overflow-x-auto no-scrollbar bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+    <div id="settings-tabs" class="overflow-x-auto no-scrollbar bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
         <div class="flex gap-1 sm:gap-2 min-w-max">
             <button @click="setTab('general')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'general' }"
