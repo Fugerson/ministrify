@@ -12,7 +12,7 @@
         <span class="hidden sm:inline">Швидке редагування</span>
     </a>
     @endadmin
-    <a href="{{ route('people.create') }}" id="people-add-btn" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
+    <a href="{{ route('people.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
@@ -95,7 +95,7 @@
     </div>
     @endadmin
     <!-- Search & Filter Bar -->
-    <div id="people-search-bar" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Search -->
             <div class="flex-1 relative">
@@ -113,7 +113,7 @@
             </div>
 
             <!-- Filter Button -->
-            <button id="people-filter-btn" @click="showFilters = !showFilters"
+            <button @click="showFilters = !showFilters"
                 :class="{'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800': hasFilters || showFilters, 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600': !hasFilters && !showFilters}"
                 class="inline-flex items-center px-4 py-2.5 border rounded-xl font-medium transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

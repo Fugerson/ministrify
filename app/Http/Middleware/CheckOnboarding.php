@@ -10,8 +10,58 @@ class CheckOnboarding
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Onboarding is now handled by Driver.js guided tour on the dashboard.
-        // No more redirects — let all users through.
-        return $next($request);
+        $user = auth()->user();
+
+        // Skip for guests
+        if (!$user) {
+            return $next($request);
+        }
+
+        // Skip for non-admins (volunteers and leaders don't need onboarding)
+        if (!$user->isAdmin()) {
+            return $next($request);
+        }
+
+        // Skip for super admins
+        if ($user->isSuperAdmin()) {
+            return $next($request);
+        }
+
+        // Skip if already completed
+        if ($user->onboarding_completed) {
+            return $next($request);
+        }
+
+        // Skip for invited admins (they didn't start onboarding themselves)
+        // Only the church creator who started onboarding should see it
+        if (!$user->onboarding_started_at) {
+            return $next($request);
+        }
+
+        // Skip if already on onboarding routes
+        if ($request->is('onboarding*')) {
+            return $next($request);
+        }
+
+        // Skip for API requests
+        if ($request->expectsJson()) {
+            return $next($request);
+        }
+
+        // Skip for specific routes that should always be accessible
+        $allowedRoutes = [
+            'logout',
+            'two-factor*',
+            'preferences.*',
+        ];
+
+        foreach ($allowedRoutes as $pattern) {
+            if ($request->is($pattern) || $request->routeIs($pattern)) {
+                return $next($request);
+            }
+        }
+
+        // Redirect to onboarding
+        return redirect()->route('onboarding.show');
     }
 }

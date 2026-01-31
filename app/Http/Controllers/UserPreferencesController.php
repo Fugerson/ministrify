@@ -30,10 +30,6 @@ class UserPreferencesController extends Controller
             $preferences['dashboard_widgets'] = $request->input('dashboard_widgets');
         }
 
-        if ($request->has('tour_completed')) {
-            $preferences['tour_completed'] = $request->boolean('tour_completed');
-        }
-
         $user->update(['preferences' => $preferences]);
 
         return response()->json(['success' => true]);

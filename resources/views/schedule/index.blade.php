@@ -17,7 +17,7 @@
 @section('content')
 <div class="space-y-4">
     <!-- View Options -->
-    <div id="schedule-options" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-2">
                 <a href="{{ route('events.index') }}"
@@ -47,7 +47,7 @@
     </div>
 
     <!-- Events List -->
-    <div id="events-list" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         @if($events->count() > 0)
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($events as $event)

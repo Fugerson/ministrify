@@ -92,10 +92,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Driver.js - Guided Tour -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
-    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
-
     <style>
         [x-cloak] { display: none !important; }
         .touch-target { min-height: 44px; min-width: 44px; }
@@ -783,8 +779,8 @@
                 </a>
             </div>
 
-            <nav id="sidebar-nav" class="flex-1 px-4 py-4 space-y-1 overflow-y-auto no-scrollbar">
-                <a href="{{ route('dashboard') }}" id="nav-dashboard" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto no-scrollbar">
+                <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
@@ -792,7 +788,7 @@
                 </a>
                 @hasChurchRole
                 @if(auth()->user()->canView('people'))
-                <a href="{{ route('people.index') }}" id="nav-people" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('people.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/>
                     </svg>
@@ -800,7 +796,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('groups'))
-                <a href="{{ route('groups.index') }}" id="nav-groups" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('groups.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
@@ -808,7 +804,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('ministries'))
-                <a href="{{ route('ministries.index') }}" id="nav-ministries" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('ministries.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
@@ -816,7 +812,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
-                <a href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('schedule') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
@@ -850,7 +846,7 @@
                 @endif
                 @endhasChurchRole
                 @if(auth()->user()->canView('finances'))
-                <a href="{{ route('finances.index') }}" id="nav-finances" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('finances.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
@@ -896,14 +892,6 @@
                     </div>
                 </div>
                 @endhasChurchRole
-
-                <!-- Guided Tour Button -->
-                <button onclick="startGuidedTour()" id="tour-restart-btn" class="flex items-center w-full px-3 py-2.5 text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                    </svg>
-                    Тур по системі
-                </button>
 
                 @admin
                 <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
@@ -1282,7 +1270,7 @@
 
         <!-- FAB (Quick Actions) -->
         @if(auth()->user()->canCreate('people') || auth()->user()->canCreate('events') || auth()->user()->canCreate('groups') || auth()->user()->canCreate('finances'))
-        <div id="fab-button" class="fixed right-4 bottom-20 lg:bottom-6 z-50" x-data="{ open: false }">
+        <div class="fixed right-4 bottom-20 lg:bottom-6 z-50" x-data="{ open: false }">
             <div x-show="open" x-cloak
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-95"
@@ -1763,187 +1751,6 @@
             if (moonMobile) moonMobile.classList.toggle('hidden', !isDark);
         }
         updateThemeIcons();
-    </script>
-
-    <!-- Driver.js Dark Mode + Mobile Styles -->
-    <style>
-        .driver-popover {
-            min-width: 280px;
-            max-width: calc(100vw - 2rem);
-            word-break: normal;
-            overflow-wrap: break-word;
-        }
-        .driver-popover .driver-popover-title {
-            font-size: 16px;
-            font-weight: 600;
-            white-space: normal;
-        }
-        .driver-popover .driver-popover-description {
-            font-size: 14px;
-            white-space: normal;
-            word-break: normal;
-        }
-        .driver-popover .driver-popover-footer {
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .driver-popover .driver-popover-footer button {
-            white-space: nowrap;
-        }
-        .driver-popover button.driver-popover-next-btn,
-        .driver-popover button.driver-popover-close-btn-text {
-            background-color: var(--driver-primary, #2563eb);
-            text-shadow: none;
-        }
-        @media (max-width: 640px) {
-            .driver-popover {
-                min-width: 260px;
-                max-width: calc(100vw - 1.5rem);
-                font-size: 13px;
-            }
-            .driver-popover .driver-popover-title {
-                font-size: 15px;
-            }
-            .driver-popover .driver-popover-description {
-                font-size: 13px;
-            }
-        }
-        .dark .driver-popover {
-            background-color: #1f2937;
-            color: #f3f4f6;
-        }
-        .dark .driver-popover .driver-popover-title {
-            color: #f9fafb;
-        }
-        .dark .driver-popover .driver-popover-description {
-            color: #d1d5db;
-        }
-        .dark .driver-popover .driver-popover-progress-text {
-            color: #9ca3af;
-        }
-        .dark .driver-popover button.driver-popover-prev-btn {
-            color: #d1d5db;
-            border-color: #4b5563;
-        }
-        .dark .driver-popover button.driver-popover-prev-btn:hover {
-            background-color: #374151;
-        }
-    </style>
-
-    <!-- Guided Tour Script -->
-    <script>
-        var __tourCompleted = {{ json_encode((auth()->user()->preferences['tour_completed'] ?? false) ? true : false) }};
-
-        function buildTourSteps() {
-            var steps = [];
-
-            function isVisible(el) {
-                if (!el) return false;
-                var rect = el.getBoundingClientRect();
-                if (rect.width === 0 && rect.height === 0) return false;
-                var style = window.getComputedStyle(el);
-                return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-            }
-
-            function add(id, title, desc, side, align) {
-                var el = document.getElementById(id);
-                if (el && isVisible(el)) {
-                    steps.push({ element: '#' + id, popover: { title: title, description: desc, side: side || 'bottom', align: align || 'start' } });
-                }
-            }
-
-            // === Dashboard ===
-            add('sidebar-nav', 'Навігація', 'Це головне меню. Звідси ви потрапите до будь-якого розділу системи.', 'right', 'start');
-            add('stats-grid', 'Статистика', 'Ключові показники вашої церкви: люди, служіння, групи та події. Натисніть на картку, щоб перейти до розділу.', 'bottom', 'center');
-            add('stat-people', 'Картка "Люди"', 'Загальна кількість людей, тренд за 3 місяці та розподіл за віком.', 'bottom', 'start');
-            add('stat-events', 'Картка "Події"', 'Скільки подій заплановано та проведено цього місяця.', 'bottom', 'end');
-
-            // === Sidebar nav items ===
-            add('nav-people', 'Люди', 'База людей та контактів. Додавайте, редагуйте, фільтруйте за різними критеріями.', 'right', 'start');
-            add('nav-groups', 'Групи', 'Домашні групи та малі групи. Відстежуйте учасників, лідерів та зустрічі.', 'right', 'start');
-            add('nav-ministries', 'Команди', 'Служіння та команди волонтерів. Організовуйте людей за напрямками роботи.', 'right', 'start');
-            add('nav-schedule', 'Розклад', 'Календар подій та зустрічей. Плануйте, запрошуйте та відстежуйте відвідуваність.', 'right', 'start');
-            add('nav-finances', 'Фінанси', 'Облік доходів та витрат, баланс каси, фінансові звіти по категоріях.', 'right', 'start');
-
-            // === People page ===
-            add('people-add-btn', 'Додати людину', 'Натисніть, щоб додати нову людину до бази. Вкажіть ім\'я, контакти, день народження тощо.', 'bottom', 'end');
-            add('people-search-bar', 'Пошук та фільтри', 'Шукайте за ім\'ям, телефоном чи email. Використовуйте фільтри для вибірки за статтю, служінням, роллю та іншими критеріями.', 'bottom', 'center');
-            add('people-filter-btn', 'Розширені фільтри', 'Відкрийте панель фільтрів: стать, сімейний стан, служіння, роль, пастор, дата народження.', 'bottom', 'start');
-
-            // === Groups page ===
-            add('groups-stats', 'Статистика груп', 'Загальна кількість груп, учасників та середній розмір групи.', 'bottom', 'center');
-            add('groups-table', 'Таблиця груп', 'Список усіх груп з лідерами, статусом та кількістю учасників. Натисніть на групу, щоб переглянути деталі.', 'top', 'center');
-
-            // === Ministries page ===
-            add('ministries-grid', 'Картки команд', 'Кожна картка — окреме служіння з лідером та кількістю учасників. Натисніть "Відкрити", щоб побачити деталі.', 'bottom', 'center');
-
-            // === Schedule page ===
-            add('schedule-options', 'Перегляд подій', 'Перемикайте між списком і календарем. Фільтруйте події за командою.', 'bottom', 'center');
-            add('events-list', 'Список подій', 'Усі заплановані та минулі події. Натисніть на подію, щоб побачити деталі та відвідуваність.', 'top', 'center');
-
-            // === Finances page ===
-            add('finance-actions', 'Фінансові операції', 'Три кнопки: зелена — додати надходження, червона — витрату, жовта — обмін валют.', 'bottom', 'end');
-            add('finance-period', 'Вибір періоду', 'Оберіть рік та місяць для перегляду фінансів. Можна подивитися за весь рік або конкретний місяць.', 'bottom', 'start');
-            add('finance-balance', 'Баланс каси', 'Поточний залишок по кожній валюті. Синій — додатний, помаранчевий — від\'ємний баланс.', 'bottom', 'center');
-
-            // === Settings page ===
-            add('settings-tabs', 'Розділи налаштувань', 'Загальні, тема, сайт, інтеграції, категорії, фінанси, користувачі, права доступу та журнал дій — все тут.', 'bottom', 'center');
-
-            // === FAB & Tour restart ===
-            add('fab-button', 'Швидке створення', 'Натисніть "+", щоб швидко додати людину, подію, групу або витрату з будь-якої сторінки.', 'left', 'end');
-            add('tour-restart-btn', 'Повторити тур', 'Ви завжди можете запустити цей тур знову, натиснувши тут.', 'right', 'start');
-
-            return steps;
-        }
-
-        function saveTourCompleted() {
-            fetch('{{ route("preferences.update") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ tour_completed: true })
-            }).catch(function() {});
-        }
-
-        function startGuidedTour() {
-            var steps = buildTourSteps();
-            if (steps.length === 0) return;
-
-            var driver = window.driver.js.driver({
-                showProgress: true,
-                animate: true,
-                overlayColor: 'rgba(0, 0, 0, 0.6)',
-                stagePadding: 8,
-                stageRadius: 12,
-                popoverOffset: 12,
-                showButtons: ['next', 'previous', 'close'],
-                nextBtnText: 'Далі',
-                prevBtnText: 'Назад',
-                doneBtnText: 'Готово',
-                progressText: '@{{current}} з @{{total}}',
-                steps: steps,
-                onDestroyStarted: function() {
-                    if (!driver.hasNextStep()) {
-                        saveTourCompleted();
-                    }
-                    driver.destroy();
-                }
-            });
-
-            driver.drive();
-        }
-
-        // Auto-start tour for new users on any page
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!__tourCompleted) {
-                setTimeout(function() {
-                    startGuidedTour();
-                }, 800);
-            }
-        });
     </script>
 </body>
 </html>
