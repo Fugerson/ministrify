@@ -1,7 +1,7 @@
 @php
     $user = auth()->user();
     $tourCompleted = $user->preferences['tour_completed'] ?? false;
-    $showReminder = $user && $user->isAdmin() && !$user->isSuperAdmin() && !$tourCompleted;
+    $showReminder = false; // temporarily disabled
 @endphp
 
 @if($showReminder)
