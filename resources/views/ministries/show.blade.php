@@ -55,6 +55,9 @@
                 this.activeTab = tab;
                 const url = new URL(window.location);
                 url.searchParams.set('tab', tab);
+                if (tab !== 'resources') {
+                    url.searchParams.delete('folder');
+                }
                 history.pushState({}, '', url);
             }
          }">
@@ -410,83 +413,397 @@
                 </div>
             </div>
 
-            <div x-show="activeTab === 'resources'"{{ $tab !== 'resources' ? ' style="display:none"' : '' }}>
-                <!-- Resources actions -->
-                @can('manage-ministry', $ministry)
-                <div class="flex items-center justify-end gap-2 mb-4">
-                    <a href="{{ route('ministries.resources', $ministry) }}"
-                       class="inline-flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            <div x-show="activeTab === 'resources'"{{ $tab !== 'resources' ? ' style="display:none"' : '' }}
+                 x-data="resourcesManager()">
+
+                <!-- Breadcrumbs -->
+                <nav class="flex items-center gap-2 text-sm mb-4">
+                    <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'resources']) }}"
+                       class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                         </svg>
-                        Відкрити менеджер
+                        Ресурси
                     </a>
+                    @foreach($breadcrumbs as $crumb)
+                    <span class="text-gray-400">/</span>
+                    @if($loop->last)
+                    <span class="text-gray-900 dark:text-white font-medium">{{ $crumb->name }}</span>
+                    @else
+                    <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'resources', 'folder' => $crumb->id]) }}"
+                       class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+                        {{ $crumb->name }}
+                    </a>
+                    @endif
+                    @endforeach
+                </nav>
+
+                <!-- Actions -->
+                @can('manage-ministry', $ministry)
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <button @click="showCreateFolder = true" class="inline-flex items-center text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                        Папка
+                    </button>
+                    <button @click="createAndOpenDocument()" class="inline-flex items-center text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        Документ
+                    </button>
+                    <label class="inline-flex items-center text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 transition-colors cursor-pointer"
+                           :class="uploading && 'opacity-50 pointer-events-none'">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span x-text="uploading ? 'Завантаження...' : 'Завантажити файл'"></span>
+                        <input type="file" class="hidden" @change="uploadFile($event)" multiple :disabled="uploading">
+                    </label>
                 </div>
+                <template x-if="uploadError">
+                    <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300" x-text="uploadError"></div>
+                </template>
                 @endcan
 
                 <!-- Resources list -->
                 @if($resources->count() > 0)
-                <div class="space-y-2">
+                <div class="space-y-1.5">
                     @foreach($resources as $resource)
-                    <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <div class="flex items-center gap-3">
-                            @if($resource->isFolder())
-                            <a href="{{ route('ministries.resources.folder', [$ministry, $resource]) }}" class="flex items-center gap-3 flex-1">
-                                <svg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-                                </svg>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $resource->name }}</span>
-                            </a>
+                    @php
+                        $isFolder = $resource->isFolder();
+                        $isDoc = $resource->isDocument();
+                        $mime = $resource->mime_type ?? '';
+                        // Icon colors
+                        if ($isFolder) { $iconBg = 'bg-amber-100 dark:bg-amber-900/30'; $iconColor = 'text-amber-600 dark:text-amber-400'; }
+                        elseif ($isDoc) { $iconBg = 'bg-blue-100 dark:bg-blue-900/30'; $iconColor = 'text-blue-600 dark:text-blue-400'; }
+                        elseif (str_contains($mime, 'pdf')) { $iconBg = 'bg-red-100 dark:bg-red-900/30'; $iconColor = 'text-red-600 dark:text-red-400'; }
+                        elseif (str_starts_with($mime, 'image/')) { $iconBg = 'bg-green-100 dark:bg-green-900/30'; $iconColor = 'text-green-600 dark:text-green-400'; }
+                        elseif (str_starts_with($mime, 'audio/')) { $iconBg = 'bg-pink-100 dark:bg-pink-900/30'; $iconColor = 'text-pink-600 dark:text-pink-400'; }
+                        elseif (str_starts_with($mime, 'video/')) { $iconBg = 'bg-purple-100 dark:bg-purple-900/30'; $iconColor = 'text-purple-600 dark:text-purple-400'; }
+                        elseif (str_contains($mime, 'word') || str_contains($mime, 'document')) { $iconBg = 'bg-blue-100 dark:bg-blue-900/30'; $iconColor = 'text-blue-600 dark:text-blue-400'; }
+                        elseif (str_contains($mime, 'excel') || str_contains($mime, 'spreadsheet')) { $iconBg = 'bg-emerald-100 dark:bg-emerald-900/30'; $iconColor = 'text-emerald-600 dark:text-emerald-400'; }
+                        else { $iconBg = 'bg-gray-100 dark:bg-gray-700'; $iconColor = 'text-gray-500 dark:text-gray-400'; }
+                    @endphp
+                    <div class="group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                         @if($isFolder)
+                         @click="window.location.href='{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'resources', 'folder' => $resource->id]) }}'"
+                         @elseif($isDoc)
+                         @click="openDocument({{ json_encode(['id' => $resource->id, 'name' => $resource->name, 'content' => $resource->content ?? '']) }})"
+                         @else
+                         @click="showPreview({{ json_encode([
+                             'id' => $resource->id,
+                             'name' => $resource->name,
+                             'icon' => $resource->icon,
+                             'size' => $resource->formatted_size,
+                             'mime' => $resource->mime_type,
+                             'url' => $resource->file_path ? Storage::url($resource->file_path) : '',
+                             'downloadUrl' => route('resources.download', $resource),
+                             'createdAt' => $resource->created_at->format('d.m.Y H:i'),
+                             'creator' => $resource->creator?->name,
+                         ]) }})"
+                         @endif>
+                        {{-- Icon --}}
+                        <div class="w-9 h-9 rounded-lg {{ $iconBg }} flex items-center justify-center flex-shrink-0">
+                            @if($isFolder)
+                            <svg class="w-5 h-5 {{ $iconColor }}" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+                            @elseif($isDoc)
+                            <svg class="w-5 h-5 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            @elseif(str_starts_with($mime, 'image/'))
+                            <svg class="w-5 h-5 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            @elseif(str_starts_with($mime, 'audio/'))
+                            <svg class="w-5 h-5 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                            @elseif(str_starts_with($mime, 'video/'))
+                            <svg class="w-5 h-5 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             @else
-                            <div class="flex items-center gap-3">
-                                @if($resource->mime_type && str_starts_with($resource->mime_type, 'image/'))
-                                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                @elseif($resource->mime_type === 'application/pdf')
-                                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                                @else
-                                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                @endif
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $resource->name }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $resource->formatted_size }}</span>
-                            </div>
+                            <svg class="w-5 h-5 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                             @endif
                         </div>
-                        @if($resource->isFile())
-                        <a href="{{ route('resources.download', $resource) }}"
-                           class="p-2 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                            </svg>
-                        </a>
-                        @endif
+                        {{-- Name & meta --}}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $resource->name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                @if($isFolder) Папка
+                                @elseif($isDoc) Документ
+                                @else {{ $resource->formatted_size }}
+                                @endif
+                                <span class="mx-1">&middot;</span>
+                                {{ $resource->created_at->format('d.m.Y') }}
+                            </p>
+                        </div>
+                        {{-- Context menu --}}
+                        @can('manage-ministry', $ministry)
+                        <button @click.stop="openMenu({{ $resource->id }}, '{{ addslashes($resource->name) }}', $event)"
+                                class="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                        </button>
+                        @endcan
                     </div>
                     @endforeach
                 </div>
                 @else
-                <div class="text-center py-8">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                        </svg>
-                    </div>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Немає ресурсів</p>
-                    @can('manage-ministry', $ministry)
-                    <a href="{{ route('ministries.resources', $ministry) }}"
-                       class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Додати ресурси
-                    </a>
-                    @endcan
-                </div>
+                <p class="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
+                    {{ count($breadcrumbs) > 0 ? 'Папка порожня' : 'Немає ресурсів' }}
+                </p>
                 @endif
+
+                <!-- Create folder modal -->
+                @can('manage-ministry', $ministry)
+                <div x-show="showCreateFolder" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+                    <div class="min-h-screen px-4 flex items-center justify-center">
+                        <div class="fixed inset-0 bg-black/50" @click="showCreateFolder = false"></div>
+                        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова папка</h3>
+                            <form method="POST" action="{{ route('ministries.resources.folder.create', $ministry) }}">
+                                @csrf
+                                <input type="hidden" name="parent_id" value="{{ $currentFolder?->id }}">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва</label>
+                                    <input type="text" name="name" required autofocus
+                                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
+                                           placeholder="Назва папки...">
+                                </div>
+                                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
+                                    <button type="button" @click="showCreateFolder = false"
+                                            class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
+                                        Скасувати
+                                    </button>
+                                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                                        Створити
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Context menu -->
+                <div x-show="menuOpen" x-cloak
+                     :style="`top: ${menuY}px; left: ${menuX}px`"
+                     @click.away="menuOpen = false"
+                     class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-48">
+                    <button @click="showRenameModal()" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Перейменувати
+                    </button>
+                    <button @click="deleteItem()" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Видалити
+                    </button>
+                </div>
+
+                <!-- Rename modal -->
+                <div x-show="showRename" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+                    <div class="min-h-screen px-4 flex items-center justify-center">
+                        <div class="fixed inset-0 bg-black/50" @click="showRename = false"></div>
+                        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Перейменувати</h3>
+                            <form @submit.prevent="submitRename()">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Нова назва</label>
+                                    <input type="text" x-model="renameName" required x-ref="renameInput"
+                                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
+                                           placeholder="Назва...">
+                                </div>
+                                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
+                                    <button type="button" @click="showRename = false"
+                                            class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
+                                        Скасувати
+                                    </button>
+                                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                                        Зберегти
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                @endcan
+
+                <!-- File preview modal -->
+                <div x-show="previewFile" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+                    <div class="min-h-screen px-4 flex items-center justify-center">
+                        <div class="fixed inset-0 bg-black/70" @click="previewFile = null"></div>
+                        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
+                            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-3xl" x-text="previewFile?.icon"></span>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900 dark:text-white" x-text="previewFile?.name"></h3>
+                                        <p class="text-sm text-gray-500" x-text="previewFile?.size"></p>
+                                    </div>
+                                </div>
+                                <button @click="previewFile = null" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <template x-if="previewFile?.mime?.startsWith('image/')">
+                                    <img :src="previewFile?.url" class="max-h-96 mx-auto rounded-lg">
+                                </template>
+                                <template x-if="previewFile?.mime?.startsWith('audio/')">
+                                    <audio :src="previewFile?.url" controls class="w-full"></audio>
+                                </template>
+                                <template x-if="previewFile?.mime?.startsWith('video/')">
+                                    <video :src="previewFile?.url" controls class="max-h-96 mx-auto rounded-lg"></video>
+                                </template>
+                                <template x-if="previewFile?.mime === 'application/pdf'">
+                                    <iframe :src="previewFile?.url" class="w-full h-96 rounded-lg"></iframe>
+                                </template>
+                                <template x-if="previewFile && !previewFile?.mime?.startsWith('image/') && !previewFile?.mime?.startsWith('audio/') && !previewFile?.mime?.startsWith('video/') && previewFile?.mime !== 'application/pdf'">
+                                    <div class="text-center py-8">
+                                        <span class="text-6xl block mb-4" x-text="previewFile?.icon"></span>
+                                        <p class="text-gray-500 dark:text-gray-400">Попередній перегляд недоступний</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        <span x-text="previewFile?.createdAt"></span>
+                                        <span x-show="previewFile?.creator"> &mdash; <span x-text="previewFile?.creator"></span></span>
+                                    </div>
+                                    <a :href="previewFile?.downloadUrl"
+                                       class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                        </svg>
+                                        Завантажити
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document editor modal -->
+                <div x-show="showDocEditor" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 md:p-10">
+                    <!-- Backdrop -->
+                    <div x-show="showDocEditor"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+                    <!-- Modal card -->
+                    <div x-show="showDocEditor"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                         class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col w-full max-w-5xl max-h-[90vh] overflow-hidden">
+
+                        <!-- Header -->
+                        <div class="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 shrink-0">
+                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <input type="text" x-model="docName"
+                                       class="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 focus:outline-none placeholder-gray-400"
+                                       placeholder="Назва документа...">
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0 ml-3">
+                                <span x-show="docSaving" x-transition class="text-xs text-blue-500">Збереження...</span>
+                                <span x-show="docSaved" x-transition class="text-xs text-green-500">Збережено</span>
+                                <button @click="saveDocument()" :disabled="docSaving"
+                                        class="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+                                    Зберегти
+                                </button>
+                                <button @click="closeDocEditor()"
+                                        class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Toolbar -->
+                        <div class="doc-toolbar" id="doc-toolbar">
+                            <select onchange="docExecBlock(this.value); this.value='';" title="Блок">
+                                <option value="">Формат</option>
+                                <option value="p">Текст</option>
+                                <option value="h1">Заголовок 1</option>
+                                <option value="h2">Заголовок 2</option>
+                                <option value="h3">Заголовок 3</option>
+                                <option value="blockquote">Цитата</option>
+                            </select>
+                            <select onchange="docExecFontSize(this.value); this.value='';" title="Розмір">
+                                <option value="">Розмір</option>
+                                <option value="1">10</option>
+                                <option value="2">13</option>
+                                <option value="3">16</option>
+                                <option value="4">18</option>
+                                <option value="5">24</option>
+                                <option value="6">32</option>
+                                <option value="7">48</option>
+                            </select>
+                            <div class="tb-sep"></div>
+                            <button class="tb-btn" onclick="docExec('bold')" title="Жирний"><b>B</b></button>
+                            <button class="tb-btn" onclick="docExec('italic')" title="Курсив"><i>I</i></button>
+                            <button class="tb-btn" onclick="docExec('underline')" title="Підкреслити"><u>U</u></button>
+                            <button class="tb-btn" onclick="docExec('strikeThrough')" title="Закреслити"><s>S</s></button>
+                            <div class="tb-sep"></div>
+                            <input type="color" value="#000000" onchange="docExecColor('foreColor', this.value)" title="Колір тексту">
+                            <input type="color" value="#ffffff" onchange="docExecColor('hiliteColor', this.value)" title="Колір фону">
+                            <div class="tb-sep"></div>
+                            <button class="tb-btn" onclick="docExec('justifyLeft')" title="Ліворуч">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+                            </button>
+                            <button class="tb-btn" onclick="docExec('justifyCenter')" title="По центру">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                            </button>
+                            <button class="tb-btn" onclick="docExec('justifyRight')" title="Праворуч">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+                            </button>
+                            <div class="tb-sep"></div>
+                            <button class="tb-btn" onclick="docExec('insertUnorderedList')" title="Список">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
+                            </button>
+                            <button class="tb-btn" onclick="docExec('insertOrderedList')" title="Нумерований список">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="20" y2="6"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="18" x2="20" y2="18"/><text x="3" y="8" font-size="8" fill="currentColor" stroke="none">1</text><text x="3" y="14" font-size="8" fill="currentColor" stroke="none">2</text><text x="3" y="20" font-size="8" fill="currentColor" stroke="none">3</text></svg>
+                            </button>
+                            <button class="tb-btn" onclick="docExec('outdent')" title="Зменшити відступ">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/><polyline points="7 9 3 12 7 15"/></svg>
+                            </button>
+                            <button class="tb-btn" onclick="docExec('indent')" title="Збільшити відступ">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/><polyline points="3 9 7 12 3 15"/></svg>
+                            </button>
+                            <div class="tb-sep"></div>
+                            <button class="tb-btn" onclick="docInsertLink()" title="Посилання">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                            </button>
+                            <button class="tb-btn" onclick="docInsertImage()" title="Зображення">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            </button>
+                            <button class="tb-btn" onclick="docExec('removeFormat')" title="Очистити форматування">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="4" x2="20" y2="20"/><path d="M6 4h8l-4 16"/></svg>
+                            </button>
+                        </div>
+                        <!-- Editable area -->
+                        <div class="flex-1 overflow-y-auto min-h-0">
+                            <div id="doc-editable" class="doc-editable" contenteditable="true" data-placeholder="Почніть вводити текст..."></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden forms for rename & delete -->
+                <form id="resRenameForm" method="POST" class="hidden">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="name" id="resRenameInput">
+                </form>
+                <form id="resDeleteForm" method="POST" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                </form>
             </div>
 
             <!-- Goals Tab -->
@@ -1373,8 +1690,254 @@
 
 </div>
 
+@push('styles')
+<style>
+    /* Custom document editor */
+    .doc-toolbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 10px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; position: sticky; top: 0; z-index: 10; }
+    .dark .doc-toolbar { background: #1e293b; border-bottom-color: #374151; }
+    .doc-toolbar .tb-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: none; background: none; cursor: pointer; color: #4b5563; font-size: 14px; transition: all .15s; }
+    .doc-toolbar .tb-btn:hover { background: #e5e7eb; color: #111827; }
+    .dark .doc-toolbar .tb-btn { color: #9ca3af; }
+    .dark .doc-toolbar .tb-btn:hover { background: #374151; color: #f3f4f6; }
+    .doc-toolbar .tb-btn.active { background: #dbeafe; color: #2563eb; }
+    .dark .doc-toolbar .tb-btn.active { background: #1e3a5f; color: #60a5fa; }
+    .doc-toolbar .tb-sep { width: 1px; height: 24px; background: #d1d5db; margin: 4px 4px; align-self: center; }
+    .dark .doc-toolbar .tb-sep { background: #4b5563; }
+    .doc-toolbar select { height: 32px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #374151; font-size: 13px; padding: 0 6px; cursor: pointer; }
+    .dark .doc-toolbar select { background: #1f2937; border-color: #4b5563; color: #d1d5db; }
+    .doc-toolbar input[type="color"] { width: 32px; height: 32px; border: 1px solid #d1d5db; border-radius: 6px; padding: 2px; cursor: pointer; background: #fff; }
+
+    .doc-editable { min-height: 400px; padding: 32px 40px; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.7; color: #202124; outline: none; }
+    .dark .doc-editable { color: #e2e8f0; }
+    .doc-editable:empty::before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }
+    .doc-editable h1 { font-size: 26px; margin: 20px 0 8px; font-weight: 700; }
+    .doc-editable h2 { font-size: 22px; margin: 18px 0 6px; font-weight: 600; }
+    .doc-editable h3 { font-size: 18px; margin: 16px 0 4px; font-weight: 600; }
+    .doc-editable p { margin: 0 0 8px; }
+    .doc-editable blockquote { border-left: 4px solid #4285f4; padding-left: 16px; color: #5f6368; margin: 16px 0; }
+    .doc-editable ul, .doc-editable ol { padding-left: 24px; margin: 8px 0; }
+    .doc-editable table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    .doc-editable td, .doc-editable th { border: 1px solid #dadce0; padding: 8px 12px; }
+    .doc-editable a { color: #1a73e8; text-decoration: underline; }
+    .doc-editable img { max-width: 100%; height: auto; border-radius: 4px; }
+    @media (max-width: 640px) {
+        .doc-editable { padding: 20px 16px; }
+    }
+</style>
+@endpush
+
 @push('scripts')
 <script>
+/* === Custom Document Editor (zero dependencies) === */
+function docExec(cmd, val) { document.execCommand(cmd, false, val || null); document.getElementById('doc-editable')?.focus(); }
+function docExecBlock(tag) { if (!tag) return; document.execCommand('formatBlock', false, tag); document.getElementById('doc-editable')?.focus(); }
+function docExecFontSize(size) { if (!size) return; document.execCommand('fontSize', false, size); document.getElementById('doc-editable')?.focus(); }
+function docExecColor(cmd, val) { document.execCommand(cmd, false, val); document.getElementById('doc-editable')?.focus(); }
+function docInsertLink() {
+    const url = prompt('URL посилання:', 'https://');
+    if (url) document.execCommand('createLink', false, url);
+    document.getElementById('doc-editable')?.focus();
+}
+function docInsertImage() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.execCommand('insertImage', false, e.target.result);
+        };
+        reader.readAsDataURL(file);
+    };
+    input.click();
+}
+
+function resourcesManager() {
+    return {
+        showCreateFolder: false,
+        showRename: false,
+        showDocEditor: false,
+        renameName: '',
+        menuOpen: false,
+        menuX: 0,
+        menuY: 0,
+        selectedId: null,
+        selectedName: '',
+        previewFile: null,
+        uploading: false,
+        uploadError: '',
+        docId: null,
+        docName: '',
+        docContent: '',
+        docSaving: false,
+        docSaved: false,
+        _docCreated: false,
+
+        openMenu(id, name, event) {
+            event.stopPropagation();
+            this.selectedId = id;
+            this.selectedName = name;
+            this.menuX = Math.min(event.clientX, window.innerWidth - 200);
+            this.menuY = Math.min(event.clientY, window.innerHeight - 100);
+            this.menuOpen = true;
+        },
+
+        showRenameModal() {
+            this.menuOpen = false;
+            this.renameName = this.selectedName;
+            this.showRename = true;
+            this.$nextTick(() => this.$refs.renameInput?.focus());
+        },
+
+        submitRename() {
+            if (!this.renameName.trim()) return;
+            const form = document.getElementById('resRenameForm');
+            form.action = `/resources/${this.selectedId}/rename`;
+            document.getElementById('resRenameInput').value = this.renameName;
+            form.submit();
+        },
+
+        showPreview(file) {
+            this.previewFile = file;
+        },
+
+        async uploadFile(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+            this.uploading = true;
+            this.uploadError = '';
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('parent_id', '{{ $currentFolder?->id ?? "" }}');
+                formData.append('_token', '{{ csrf_token() }}');
+
+                try {
+                    const response = await fetch('{{ route("ministries.resources.upload", $ministry) }}', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) {
+                        const data = await response.json();
+                        this.uploadError = data.message || 'Помилка завантаження';
+                    }
+                } catch (error) {
+                    this.uploadError = 'Помилка завантаження';
+                }
+            }
+
+            event.target.value = '';
+            this.uploading = false;
+            if (!this.uploadError) window.location.reload();
+        },
+
+        deleteItem() {
+            this.menuOpen = false;
+            if (!confirm('Видалити цей елемент?')) return;
+            const form = document.getElementById('resDeleteForm');
+            form.action = `/resources/${this.selectedId}`;
+            form.submit();
+        },
+
+        async createAndOpenDocument() {
+            try {
+                const response = await fetch('{{ route("ministries.resources.document.create", $ministry) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Новий документ',
+                        parent_id: '{{ $currentFolder?->id ?? "" }}' || null
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this._docCreated = true;
+                    this.openDocument({ id: data.id, name: 'Новий документ', content: '' });
+                } else {
+                    const err = await response.json();
+                    alert(err.message || 'Помилка');
+                }
+            } catch (error) {
+                alert('Помилка створення документа');
+            }
+        },
+
+        async openDocument(doc) {
+            this.docId = doc.id;
+            this.docName = doc.name;
+            this.docContent = doc.content || '';
+            this.showDocEditor = true;
+            this.docSaved = false;
+            document.body.style.overflow = 'hidden';
+
+            await this.$nextTick();
+
+            const editable = document.getElementById('doc-editable');
+            if (editable) {
+                editable.innerHTML = this.docContent;
+                editable.focus();
+                // Ctrl+S
+                editable.onkeydown = (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                        e.preventDefault();
+                        this.saveDocument();
+                    }
+                };
+            }
+        },
+
+        async saveDocument() {
+            const editable = document.getElementById('doc-editable');
+            if (!editable || !this.docId) return;
+            this.docSaving = true;
+            this.docSaved = false;
+
+            try {
+                const content = editable.innerHTML;
+                const response = await fetch(`/resources/${this.docId}/content`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ name: this.docName, content })
+                });
+
+                if (response.ok) {
+                    this.docSaved = true;
+                    setTimeout(() => this.docSaved = false, 3000);
+                } else {
+                    alert('Помилка збереження');
+                }
+            } catch (error) {
+                alert('Помилка збереження');
+            } finally {
+                this.docSaving = false;
+            }
+        },
+
+        closeDocEditor() {
+            const editable = document.getElementById('doc-editable');
+            if (editable) editable.innerHTML = '';
+            document.body.style.overflow = '';
+            this.showDocEditor = false;
+            if (this._docCreated) {
+                this._docCreated = false;
+                window.location.reload();
+            }
+        }
+    }
+}
+
 @php
     $allowedPeopleData = collect($ministry->allowed_person_ids ?? [])->map(function($id) {
         $p = \App\Models\Person::find($id);

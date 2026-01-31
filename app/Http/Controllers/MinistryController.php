@@ -122,10 +122,28 @@ class MinistryController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        // Get resources for this ministry (root level only)
+        // Resources: folder navigation
+        $folderId = request('folder');
+        $currentFolder = null;
+        $breadcrumbs = [];
+
+        if ($folderId) {
+            $currentFolder = Resource::where('id', $folderId)
+                ->where('church_id', $church->id)
+                ->where('ministry_id', $ministry->id)
+                ->where('type', 'folder')
+                ->first();
+
+            if ($currentFolder) {
+                $breadcrumbs = $currentFolder->getBreadcrumbs();
+            } else {
+                $folderId = null;
+            }
+        }
+
         $resources = Resource::where('church_id', $church->id)
             ->where('ministry_id', $ministry->id)
-            ->whereNull('parent_id')
+            ->where('parent_id', $currentFolder?->id)
             ->with('creator')
             ->orderByRaw("type = 'folder' DESC")
             ->orderBy('name')
@@ -149,7 +167,7 @@ class MinistryController extends Controller
                 ->get();
         }
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'registeredUsers', 'goalsStats', 'songs'));
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs'));
     }
 
     public function edit(Ministry $ministry)

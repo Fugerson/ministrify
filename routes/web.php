@@ -286,6 +286,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('ministries/{ministry}/resources/folder/{folder}', [ResourceController::class, 'ministryIndex'])->name('ministries.resources.folder');
     Route::post('ministries/{ministry}/resources/folder', [ResourceController::class, 'ministryCreateFolder'])->name('ministries.resources.folder.create');
     Route::post('ministries/{ministry}/resources/upload', [ResourceController::class, 'ministryUpload'])->name('ministries.resources.upload');
+    Route::post('ministries/{ministry}/resources/document', [ResourceController::class, 'ministryCreateDocument'])->name('ministries.resources.document.create');
+    Route::put('resources/{resource}/content', [ResourceController::class, 'updateDocument'])->name('resources.updateContent');
 
     // Ministry Goals & Tasks
     Route::prefix('ministries/{ministry}/goals')->name('ministries.goals.')->group(function () {

@@ -351,6 +351,72 @@ class ResourceController extends Controller
     }
 
     /**
+     * Create a document in ministry resources
+     */
+    public function ministryCreateDocument(Request $request, Ministry $ministry)
+    {
+        Gate::authorize('manage-ministry', $ministry);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'parent_id' => 'nullable|exists:resources,id',
+        ]);
+
+        $churchId = $this->getCurrentChurch()->id;
+
+        if ($validated['parent_id'] ?? null) {
+            Resource::where('id', $validated['parent_id'])
+                ->where('church_id', $churchId)
+                ->where('ministry_id', $ministry->id)
+                ->where('type', 'folder')
+                ->firstOrFail();
+        }
+
+        $resource = Resource::create([
+            'church_id' => $churchId,
+            'ministry_id' => $ministry->id,
+            'parent_id' => $validated['parent_id'] ?? null,
+            'created_by' => auth()->id(),
+            'name' => $validated['name'],
+            'type' => 'document',
+            'content' => '',
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'id' => $resource->id]);
+        }
+
+        return back()->with('success', 'Документ створено');
+    }
+
+    /**
+     * Update document content
+     */
+    public function updateDocument(Request $request, Resource $resource)
+    {
+        if ($resource->church_id !== $this->getCurrentChurch()->id) {
+            abort(404);
+        }
+
+        if (!$resource->isDocument()) {
+            abort(422, 'Це не документ');
+        }
+
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'content' => 'nullable|string|max:2000000',
+        ]);
+
+        $data = ['content' => $validated['content'] ?? ''];
+        if (!empty($validated['name'])) {
+            $data['name'] = $validated['name'];
+        }
+        $resource->update($data);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Upload file to ministry resources
      */
     public function ministryUpload(Request $request, Ministry $ministry)

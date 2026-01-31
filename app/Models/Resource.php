@@ -24,6 +24,7 @@ class Resource extends Model
         'mime_type',
         'icon',
         'description',
+        'content',
     ];
 
     // Max file size: 10MB
@@ -96,6 +97,11 @@ class Resource extends Model
         return $this->type === 'file';
     }
 
+    public function isDocument(): bool
+    {
+        return $this->type === 'document';
+    }
+
     public function getFormattedSizeAttribute(): string
     {
         if (!$this->file_size) {
@@ -118,6 +124,10 @@ class Resource extends Model
     {
         if ($this->isFolder()) {
             return $this->attributes['icon'] ?? '📁';
+        }
+
+        if ($this->isDocument()) {
+            return '📝';
         }
 
         // Determine icon based on mime type
