@@ -1612,12 +1612,12 @@
                 </nav>
             </div>
 
-            <div class="p-6">
+            <div class="p-4 sm:p-6">
                 <!-- Admin notice -->
                 <template x-if="isCurrentRoleAdmin()">
                     <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                         <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                             </svg>
                             <div>
@@ -1628,8 +1628,8 @@
                     </div>
                 </template>
 
-                <!-- Permissions table -->
-                <div class="overflow-x-auto">
+                <!-- Permissions table (desktop) -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full">
                         <thead>
                             <tr class="text-left border-b border-gray-200 dark:border-gray-700">
@@ -1672,9 +1672,38 @@
                     </table>
                 </div>
 
+                <!-- Permissions cards (mobile) -->
+                <div class="sm:hidden space-y-3">
+                    @foreach($permissionModules as $moduleKey => $module)
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                        <p class="font-medium text-gray-900 dark:text-white mb-2">{{ $module['label'] }}</p>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                            @foreach($permissionActions as $actionKey => $actionLabel)
+                                @if(in_array($actionKey, $module['actions'] ?? []))
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <template x-if="isCurrentRoleAdmin()">
+                                        <input type="checkbox" checked disabled
+                                               class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 bg-gray-100 dark:bg-gray-600 cursor-not-allowed">
+                                    </template>
+                                    <template x-if="!isCurrentRoleAdmin()">
+                                        <input type="checkbox"
+                                               x-model="rolePermissions[currentRoleId]['{{ $moduleKey }}']"
+                                               value="{{ $actionKey }}"
+                                               @change="markDirty()"
+                                               class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:bg-gray-700">
+                                    </template>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ $actionLabel }}</span>
+                                </label>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
                 <!-- Actions -->
                 <template x-if="!isCurrentRoleAdmin()">
-                    <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                         <button @click="resetToDefaults()"
                                 type="button"
                                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
@@ -1684,7 +1713,7 @@
                                 :disabled="!isDirty || saving"
                                 class="px-6 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                             <span x-show="!saving">Зберегти зміни</span>
-                            <span x-show="saving" class="flex items-center gap-2">
+                            <span x-show="saving" class="flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1719,19 +1748,20 @@
     <!-- Audit Log Tab -->
     <div x-show="activeTab === 'audit'" x-cloak class="space-y-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Журнал дій</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Останні 100 змін у системі</p>
             </div>
 
-            <div class="overflow-x-auto">
+            <!-- Desktop table -->
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Дата</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Користувач</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Дія</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Тип</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Тип</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Об'єкт</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Зміни</th>
                         </tr>
@@ -1769,7 +1799,7 @@
                                         {{ $log->action_label }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                                <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                                     {{ $log->model_label }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">
@@ -1798,6 +1828,48 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile cards -->
+            <div class="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                @forelse($auditLogs as $log)
+                    @php
+                        $color = $log->action_color;
+                        $colorClasses = match($color) {
+                            'green' => 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300',
+                            'blue' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+                            'red' => 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
+                            'purple' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
+                            default => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+                        };
+                    @endphp
+                    <div class="px-4 py-3">
+                        <div class="flex items-center justify-between gap-2 mb-1.5">
+                            <div class="flex items-center gap-2 min-w-0">
+                                @if($log->user)
+                                    <div class="w-6 h-6 shrink-0 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                        <span class="text-[10px] font-medium text-primary-600 dark:text-primary-400">
+                                            {{ mb_substr($log->user->name, 0, 1) }}
+                                        </span>
+                                    </div>
+                                @endif
+                                <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $log->user_name }}</span>
+                            </div>
+                            <span class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap shrink-0">{{ $log->created_at->format('d.m H:i') }}</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $colorClasses }}">
+                                {{ $log->action_label }}
+                            </span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">{{ $log->model_label }}</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ Str::limit($log->model_name, 25) }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                        Записів не знайдено
+                    </div>
+                @endforelse
             </div>
 
             @if($auditLogs->count() >= 100)

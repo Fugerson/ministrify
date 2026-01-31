@@ -5,17 +5,15 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Журнал дій</h1>
-            <p class="text-gray-500 dark:text-gray-400">Детальна історія всіх змін у системі</p>
-        </div>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Журнал дій</h1>
+        <p class="text-gray-500 dark:text-gray-400">Детальна історія всіх змін у системі</p>
     </div>
 
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <div>
+        <form method="GET" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
+            <div class="col-span-2 sm:col-span-3 md:col-span-1">
                 <input type="text" name="search" value="{{ request('search') }}"
                        placeholder="Пошук..."
                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm">
@@ -118,9 +116,9 @@
             </div>
             <div class="flex gap-2">
                 <input type="date" name="to" value="{{ request('to') }}"
-                       class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm"
+                       class="flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm"
                        placeholder="До">
-                <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700">
+                <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
@@ -153,24 +151,31 @@
                 @endphp
                 <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 border-l-4 {{ $borderColor }}">
                     <!-- Header Row -->
-                    <div class="flex flex-wrap items-center gap-3 mb-2">
-                        <!-- Timestamp -->
-                        <span class="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                            {{ $log->created_at->format('d.m.Y H:i:s') }}
-                        </span>
-
-                        <!-- User -->
-                        <div class="flex items-center gap-1.5">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <div class="flex items-center gap-1.5 min-w-0">
                             @if($log->user)
-                                <div class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                <div class="w-5 h-5 shrink-0 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                                     <span class="text-[10px] font-medium text-primary-600 dark:text-primary-400">
                                         {{ mb_substr($log->user->name, 0, 1) }}
                                     </span>
                                 </div>
                             @endif
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $log->user_name }}</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $log->user_name }}</span>
                         </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            @if($log->ip_address)
+                            <span class="text-[10px] text-gray-400 dark:text-gray-500 font-mono hidden sm:inline">
+                                {{ $log->ip_address }}
+                            </span>
+                            @endif
+                            <span class="text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">
+                                {{ $log->created_at->format('d.m.Y H:i') }}
+                            </span>
+                        </div>
+                    </div>
 
+                    <!-- Tags row -->
+                    <div class="flex flex-wrap items-center gap-1.5">
                         <!-- Action badge -->
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium {{ $colorClasses }}">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,31 +190,26 @@
                         </span>
 
                         <!-- Model name -->
-                        <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                            {{ $log->model_name }}
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white break-all">
+                            {{ Str::limit($log->model_name, 40) }}
                         </span>
-
-                        <!-- IP Address -->
-                        @if($log->ip_address)
-                        <span class="text-[10px] text-gray-400 dark:text-gray-500 font-mono ml-auto">
-                            IP: {{ $log->ip_address }}
-                        </span>
-                        @endif
                     </div>
 
                     <!-- Changes Details -->
                     @if($log->action === 'updated' && count($changes) > 0)
-                        <div class="mt-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                        <div class="mt-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 overflow-hidden">
                             <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Зміни:</div>
-                            <div class="space-y-1.5">
+                            <div class="space-y-2">
                                 @foreach($changes as $change)
-                                    <div class="flex items-start gap-2 text-sm">
-                                        <span class="font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">{{ $change['field'] }}:</span>
-                                        <span class="text-red-600 dark:text-red-400 line-through">{{ $change['old'] ?? '—' }}</span>
-                                        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                        </svg>
-                                        <span class="text-green-600 dark:text-green-400 font-medium">{{ $change['new'] ?? '—' }}</span>
+                                    <div class="text-sm">
+                                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $change['field'] }}:</span>
+                                        <div class="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                            <span class="text-red-600 dark:text-red-400 line-through break-all">{{ Str::limit($change['old'] ?? '—', 60) }}</span>
+                                            <svg class="w-3 h-3 text-gray-400 shrink-0 self-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                            </svg>
+                                            <span class="text-green-600 dark:text-green-400 font-medium break-all">{{ Str::limit($change['new'] ?? '—', 60) }}</span>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>
@@ -217,17 +217,17 @@
                     @elseif($log->action === 'created' && $log->new_values)
                         <div class="mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
                             <div class="text-xs font-semibold text-green-600 dark:text-green-400 uppercase mb-2">Створено з даними:</div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                 @php
                                     $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at'];
                                     $newVals = collect($log->new_values)->except($skip)->filter(fn($v) => $v !== null && $v !== '');
                                 @endphp
                                 @foreach($newVals->take(10) as $field => $value)
-                                    <div class="text-sm">
+                                    <div class="text-sm min-w-0">
                                         <span class="font-medium text-gray-600 dark:text-gray-400">{{ \App\Models\AuditLog::getFieldLabel($field) }}:</span>
-                                        <span class="text-gray-900 dark:text-white ml-1">
+                                        <span class="text-gray-900 dark:text-white ml-1 break-all">
                                             @if(is_array($value))
-                                                {{ json_encode($value, JSON_UNESCAPED_UNICODE) }}
+                                                {{ Str::limit(json_encode($value, JSON_UNESCAPED_UNICODE), 50) }}
                                             @elseif(is_bool($value))
                                                 {{ $value ? 'Так' : 'Ні' }}
                                             @else
@@ -237,24 +237,24 @@
                                     </div>
                                 @endforeach
                                 @if($newVals->count() > 10)
-                                    <div class="text-xs text-gray-500 col-span-2">+{{ $newVals->count() - 10 }} полів</div>
+                                    <div class="text-xs text-gray-500 sm:col-span-2">+{{ $newVals->count() - 10 }} полів</div>
                                 @endif
                             </div>
                         </div>
                     @elseif($log->action === 'deleted' && $log->old_values)
                         <div class="mt-3 bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
                             <div class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase mb-2">Видалено запис:</div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                 @php
                                     $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at'];
                                     $oldVals = collect($log->old_values)->except($skip)->filter(fn($v) => $v !== null && $v !== '');
                                 @endphp
                                 @foreach($oldVals->take(10) as $field => $value)
-                                    <div class="text-sm">
+                                    <div class="text-sm min-w-0">
                                         <span class="font-medium text-gray-600 dark:text-gray-400">{{ \App\Models\AuditLog::getFieldLabel($field) }}:</span>
-                                        <span class="text-red-700 dark:text-red-300 ml-1 line-through">
+                                        <span class="text-red-700 dark:text-red-300 ml-1 line-through break-all">
                                             @if(is_array($value))
-                                                {{ json_encode($value, JSON_UNESCAPED_UNICODE) }}
+                                                {{ Str::limit(json_encode($value, JSON_UNESCAPED_UNICODE), 50) }}
                                             @elseif(is_bool($value))
                                                 {{ $value ? 'Так' : 'Ні' }}
                                             @else
@@ -264,7 +264,7 @@
                                     </div>
                                 @endforeach
                                 @if($oldVals->count() > 10)
-                                    <div class="text-xs text-gray-500 col-span-2">+{{ $oldVals->count() - 10 }} полів</div>
+                                    <div class="text-xs text-gray-500 sm:col-span-2">+{{ $oldVals->count() - 10 }} полів</div>
                                 @endif
                             </div>
                         </div>
