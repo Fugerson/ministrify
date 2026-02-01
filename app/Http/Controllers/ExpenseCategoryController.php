@@ -9,11 +9,7 @@ class ExpenseCategoryController extends Controller
 {
     public function index()
     {
-        $categories = ExpenseCategory::where('church_id', $this->getCurrentChurch()->id)
-            ->withCount('expenses')
-            ->get();
-
-        return view('settings.expense-categories', compact('categories'));
+        return redirect()->route('settings.index');
     }
 
     public function store(Request $request)

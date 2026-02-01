@@ -16,7 +16,7 @@ class TeamController extends Controller
     {
         $church = $this->getChurchOrFail();
         $staffMembers = $church->staffMembers()->orderBy('sort_order')->get();
-        $roleCategories = StaffMember::ROLE_CATEGORIES;
+        $roleCategories = StaffMember::CATEGORIES;
 
         return view('website-builder.team.index', compact('church', 'staffMembers', 'roleCategories'));
     }
@@ -24,7 +24,7 @@ class TeamController extends Controller
     public function create()
     {
         $church = $this->getChurchOrFail();
-        $roleCategories = StaffMember::ROLE_CATEGORIES;
+        $roleCategories = StaffMember::CATEGORIES;
 
         return view('website-builder.team.create', compact('church', 'roleCategories'));
     }
@@ -36,7 +36,7 @@ class TeamController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'role' => 'required|string|max:255',
-            'role_category' => 'nullable|string|in:' . implode(',', array_keys(StaffMember::ROLE_CATEGORIES)),
+            'role_category' => 'nullable|string|in:' . implode(',', array_keys(StaffMember::CATEGORIES)),
             'bio' => 'nullable|string|max:2000',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:50',
@@ -63,7 +63,7 @@ class TeamController extends Controller
     {
         $this->authorize('view', $staffMember);
         $church = $this->getChurchOrFail();
-        $roleCategories = StaffMember::ROLE_CATEGORIES;
+        $roleCategories = StaffMember::CATEGORIES;
 
         return view('website-builder.team.edit', compact('church', 'staffMember', 'roleCategories'));
     }
@@ -75,7 +75,7 @@ class TeamController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'role' => 'required|string|max:255',
-            'role_category' => 'nullable|string|in:' . implode(',', array_keys(StaffMember::ROLE_CATEGORIES)),
+            'role_category' => 'nullable|string|in:' . implode(',', array_keys(StaffMember::CATEGORIES)),
             'bio' => 'nullable|string|max:2000',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:50',

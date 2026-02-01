@@ -352,6 +352,37 @@ class DashboardController extends Controller
     }
 
     /**
+     * Get birthdays for a specific month via AJAX
+     */
+    public function birthdays(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+        $month = (int) $request->get('month', now()->month);
+        $month = max(1, min(12, $month));
+
+        $people = Person::where('church_id', $church->id)
+            ->whereNotNull('birth_date')
+            ->whereMonth('birth_date', $month)
+            ->get()
+            ->sortBy(fn($p) => $p->birth_date->day)
+            ->values()
+            ->map(fn($p) => [
+                'id' => $p->id,
+                'name' => $p->full_name,
+                'initial' => mb_substr($p->first_name, 0, 1),
+                'day' => $p->birth_date->format('d'),
+                'month_short' => $p->birth_date->translatedFormat('M'),
+                'photo' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
+                'url' => route('people.show', $p),
+            ]);
+
+        return response()->json([
+            'count' => $people->count(),
+            'people' => $people,
+        ]);
+    }
+
+    /**
      * Get chart data via AJAX
      */
     public function chartData(Request $request)

@@ -113,7 +113,7 @@ class FamilyRelationshipController extends Controller
                     'full_name' => $relatedPerson->full_name,
                     'first_name' => $relatedPerson->first_name,
                     'photo' => $relatedPerson->photo ? Storage::url($relatedPerson->photo) : null,
-                    'relationship_label' => FamilyRelationship::relationshipLabels()[$validated['relationship_type']] ?? $validated['relationship_type'],
+                    'relationship_label' => FamilyRelationship::getTypes()[$validated['relationship_type']] ?? $validated['relationship_type'],
                 ],
             ]);
         }

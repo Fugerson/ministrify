@@ -908,20 +908,7 @@ class FinanceController extends Controller
     // Categories (unified)
     public function categories()
     {
-        $church = $this->getCurrentChurch();
-        $incomeCategories = TransactionCategory::where('church_id', $church->id)
-            ->forIncome()
-            ->orderBy('sort_order')
-            ->withCount('transactions')
-            ->get();
-
-        $expenseCategories = TransactionCategory::where('church_id', $church->id)
-            ->forExpense()
-            ->orderBy('sort_order')
-            ->withCount('transactions')
-            ->get();
-
-        return view('finances.categories.index', compact('incomeCategories', 'expenseCategories'));
+        return redirect()->route('finances.index');
     }
 
     public function storeCategory(Request $request)

@@ -13,15 +13,19 @@ return new class extends Migration
             $table->longText('content')->nullable()->after('description');
         });
 
-        DB::statement("ALTER TABLE resources MODIFY COLUMN type ENUM('folder', 'file', 'document')");
+        // ENUM modification — MySQL only, SQLite uses TEXT columns and has no ENUM
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE resources MODIFY COLUMN type ENUM('folder', 'file', 'document')");
+        }
     }
 
     public function down(): void
     {
-        // Move documents back to files before removing enum value
         DB::table('resources')->where('type', 'document')->update(['type' => 'file']);
 
-        DB::statement("ALTER TABLE resources MODIFY COLUMN type ENUM('folder', 'file')");
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE resources MODIFY COLUMN type ENUM('folder', 'file')");
+        }
 
         Schema::table('resources', function (Blueprint $table) {
             $table->dropColumn('content');

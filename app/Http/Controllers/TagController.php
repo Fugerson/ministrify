@@ -9,11 +9,7 @@ class TagController extends Controller
 {
     public function index()
     {
-        $tags = Tag::where('church_id', $this->getCurrentChurch()->id)
-            ->withCount('people')
-            ->get();
-
-        return view('settings.tags', compact('tags'));
+        return redirect()->route('settings.index');
     }
 
     public function store(Request $request)

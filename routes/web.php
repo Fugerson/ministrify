@@ -184,7 +184,7 @@ Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
 Route::get('two-factor/challenge', [\App\Http\Controllers\TwoFactorController::class, 'challenge'])->name('two-factor.challenge');
 Route::post('two-factor/verify', [\App\Http\Controllers\TwoFactorController::class, 'verify'])->name('two-factor.verify');
 
-Route::middleware('auth')->prefix('two-factor')->name('two-factor.')->group(function () {
+Route::middleware(['auth', 'church'])->prefix('two-factor')->name('two-factor.')->group(function () {
     Route::get('/', [\App\Http\Controllers\TwoFactorController::class, 'show'])->name('show');
     Route::get('enable', [\App\Http\Controllers\TwoFactorController::class, 'enable'])->name('enable');
     Route::post('confirm', [\App\Http\Controllers\TwoFactorController::class, 'confirm'])->name('confirm');
@@ -241,6 +241,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/charts', [DashboardController::class, 'chartData'])->name('dashboard.charts');
+    Route::get('dashboard/birthdays', [DashboardController::class, 'birthdays'])->name('dashboard.birthdays');
 
     // People
     Route::resource('people', PersonController::class);
@@ -271,7 +272,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     });
 
     // Tags
-    Route::resource('tags', TagController::class)->except(['show']);
+    Route::resource('tags', TagController::class)->except(['show', 'create', 'edit']);
 
     // Ministries
     Route::resource('ministries', MinistryController::class);
