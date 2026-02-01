@@ -13,33 +13,12 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Всі завдання команд в одному місці</p>
             </div>
 
-            <!-- Quick Stats -->
-            <div class="flex items-center gap-3">
-                <div class="flex items-center gap-3 sm:gap-6 px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                    <div class="text-center">
-                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $stats['total'] }}</p>
-                        <p class="text-xs text-gray-500">Всього</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-lg font-bold text-green-600 dark:text-green-400">{{ $stats['completed'] }}</p>
-                        <p class="text-xs text-gray-500">Готово</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-lg font-bold {{ $stats['overdue'] > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ $stats['overdue'] }}</p>
-                        <p class="text-xs text-gray-500">Прострочено</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ $stats['my_tasks'] }}</p>
-                        <p class="text-xs text-gray-500">Мої</p>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- Quick Filters Bar (Shortcut Style) -->
-        <div class="flex items-center gap-2 flex-wrap overflow-x-auto bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
+        <!-- Toolbar -->
+        <div class="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
             <!-- Search -->
-            <div class="relative flex-1 min-w-0 w-full sm:min-w-[200px] max-w-xs" x-data="{ showDropdown: false }" @click.away="showDropdown = false">
+            <div class="relative flex-1 min-w-0 sm:min-w-[180px] sm:max-w-xs" x-data="{ showDropdown: false }" @click.away="showDropdown = false">
                 <input type="text" x-model="searchQuery" placeholder="Пошук... (/)"
                        x-ref="searchInput"
                        @focus="showDropdown = true"
@@ -77,75 +56,137 @@
 
             <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
 
-            <!-- Epic Filter -->
-            <select x-model="filters.epic"
-                    class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Всі проєкти</option>
-                @foreach($epics as $epic)
-                    <option value="{{ $epic['id'] }}">{{ $epic['name'] }}</option>
-                @endforeach
-            </select>
-
-            <!-- Priority Filter -->
-            <select x-model="filters.priority"
-                    class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Пріоритет</option>
-                <option value="urgent">🔴 Терміново</option>
-                <option value="high">🟠 Високий</option>
-                <option value="medium">🟡 Середній</option>
-                <option value="low">⚪ Низький</option>
-            </select>
-
-            <!-- Assignee Filter -->
-            <select x-model="filters.assignee"
-                    class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Виконавець</option>
-                <option value="me">👤 Мої завдання</option>
-                <option value="unassigned">❓ Без виконавця</option>
-                @foreach($people as $person)
-                    <option value="{{ $person->id }}">{{ $person->full_name }}</option>
-                @endforeach
-            </select>
-
-            <!-- Ministry Filter -->
-            <div class="w-40">
-                <x-searchable-select
-                    name="ministry_filter_temp"
-                    :items="$ministries"
-                    :selected="null"
-                    labelKey="name"
-                    valueKey="id"
-                    colorKey="color"
-                    placeholder="Команда"
-                    nullText="Всі команди"
-                    nullable
-                    x-on:select-changed="filters.ministry = $event.detail.value || ''"
-                    class="[&_input]:py-2 [&_input]:px-3 [&_input]:text-sm [&_input]:bg-gray-50 [&_input]:dark:bg-gray-900 [&_input]:border-0"
-                />
-            </div>
-
-            <!-- Saved Views -->
-            <div class="hidden sm:flex items-center gap-1">
-                <button @click="applyPreset('overdue')"
-                        class="px-2 py-1.5 text-xs font-medium rounded-lg transition-colors"
-                        :class="activePreset === 'overdue' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                    Прострочені
-                </button>
-                <button @click="applyPreset('my')"
-                        class="px-2 py-1.5 text-xs font-medium rounded-lg transition-colors"
-                        :class="activePreset === 'my' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                    Мої
-                </button>
-            </div>
-
-            <!-- Clear Filters -->
-            <template x-if="hasActiveFilters">
-                <button @click="clearFilters()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+            <!-- Filters Button + Dropdown -->
+            <div class="relative" x-data="{ showFilters: false }" @click.away="showFilters = false">
+                <button @click="showFilters = !showFilters"
+                        class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        :class="activeFilterCount > 0 ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                     </svg>
+                    <span class="hidden sm:inline">Фільтри</span>
+                    <span x-show="activeFilterCount > 0"
+                          class="min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold rounded-full bg-primary-600 text-white"
+                          x-text="activeFilterCount"></span>
                 </button>
-            </template>
+
+                <!-- Dropdown Panel -->
+                <div x-show="showFilters" x-transition
+                     class="absolute left-0 sm:left-auto sm:right-auto z-50 mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
+                    <div class="p-3 space-y-3">
+                        <!-- Quick Presets -->
+                        <div class="flex items-center gap-2">
+                            <button @click="applyPreset('my')"
+                                    class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors text-center"
+                                    :class="activePreset === 'my' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
+                                Mої завдання
+                            </button>
+                            <button @click="applyPreset('overdue')"
+                                    class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors text-center"
+                                    :class="activePreset === 'overdue' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
+                                Прострочені
+                            </button>
+                        </div>
+
+                        <div class="h-px bg-gray-200 dark:bg-gray-700"></div>
+
+                        <!-- Epic -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Проєкт</label>
+                            <div class="flex flex-wrap gap-1.5">
+                                <template x-for="epic in epics" :key="epic.id">
+                                    <button @click="filters.epic = filters.epic == String(epic.id) ? '' : String(epic.id)"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all border"
+                                            :class="filters.epic == String(epic.id)
+                                                ? 'shadow-sm'
+                                                : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'"
+                                            :style="filters.epic == String(epic.id)
+                                                ? `border-color: ${epic.color}; background-color: ${epic.color}15; color: ${epic.color}`
+                                                : ''">
+                                        <span class="w-2 h-2 rounded-full flex-shrink-0" :style="`background-color: ${epic.color}`"></span>
+                                        <span x-text="epic.name"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Priority -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Пріоритет</label>
+                            <select x-model="filters.priority"
+                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
+                                <option value="">Всі</option>
+                                <option value="urgent">Терміново</option>
+                                <option value="high">Високий</option>
+                                <option value="medium">Середній</option>
+                                <option value="low">Низький</option>
+                            </select>
+                        </div>
+
+                        <!-- Assignee -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Виконавець</label>
+                            <select x-model="filters.assignee"
+                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
+                                <option value="">Всі</option>
+                                <option value="me">Мої завдання</option>
+                                <option value="unassigned">Без виконавця</option>
+                                @foreach($people as $person)
+                                    <option value="{{ $person->id }}">{{ $person->full_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Ministry -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Команда</label>
+                            <select x-model="filters.ministry"
+                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
+                                <option value="">Всі команди</option>
+                                @foreach($ministries as $ministry)
+                                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Clear -->
+                        <template x-if="activeFilterCount > 0">
+                            <button @click="clearFilters()" class="w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium">
+                                Скинути всі фільтри
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active filter chips -->
+            <div class="hidden sm:flex items-center gap-1.5 overflow-x-auto">
+                <template x-if="filters.epic">
+                    <button @click="filters.epic = ''" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
+                        <span class="w-2 h-2 rounded-full" :style="`background-color: ${epics.find(e => e.id == filters.epic)?.color}`"></span>
+                        <span x-text="epics.find(e => e.id == filters.epic)?.name"></span>
+                        <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </template>
+                <template x-if="filters.priority">
+                    <button @click="filters.priority = ''" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
+                        <span x-text="filterLabels.priority[filters.priority]"></span>
+                        <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </template>
+                <template x-if="filters.assignee">
+                    <button @click="filters.assignee = ''" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
+                        <span x-text="getAssigneeLabel(filters.assignee)"></span>
+                        <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </template>
+                <template x-if="filters.ministry">
+                    <button @click="filters.ministry = ''" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
+                        <span x-text="ministriesList.find(m => m.id == filters.ministry)?.name || 'Команда'"></span>
+                        <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </template>
+            </div>
 
             <div class="flex-1"></div>
 
@@ -155,20 +196,20 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                <span class="hidden sm:inline">Нове завдання</span>
+                <span class="hidden sm:inline">Завдання</span>
                 <kbd class="hidden sm:inline px-1.5 py-0.5 text-[10px] font-mono bg-primary-500 rounded">N</kbd>
             </button>
 
-            <button @click="showEpicModal = true"
-                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                    title="Новий проєкт">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button @click="editingEpic = null; newEpic = { name: '', color: '#6366f1', description: '' }; showEpicModal = true"
+                    class="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors border border-gray-200 dark:border-gray-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                 </svg>
+                <span class="hidden sm:inline">Проєкт</span>
             </button>
 
             <button @click="showShortcuts = true"
-                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors hidden sm:block"
                     title="Шорткати (?)">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -177,47 +218,8 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex gap-4">
-        <!-- Epics Sidebar -->
-        @if(count($epics) > 0)
-        <div class="hidden lg:block w-64 flex-shrink-0">
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-                <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Проєкти</h3>
-                    <button @click="showEpicModal = true" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="p-2 space-y-1 max-h-[calc(100vh-320px)] overflow-y-auto">
-                    @foreach($epics as $epic)
-                    <button @click="filters.epic = filters.epic == '{{ $epic['id'] }}' ? '' : '{{ $epic['id'] }}'"
-                            class="w-full p-2 rounded-lg text-left transition-all"
-                            :class="filters.epic == '{{ $epic['id'] }}' ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $epic['color'] }}"></div>
-                            <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $epic['name'] }}</span>
-                            <span class="text-xs text-gray-400 ml-auto">{{ $epic['total'] }}</span>
-                        </div>
-                        @if($epic['total'] > 0)
-                        <div class="mt-2 flex items-center gap-2">
-                            <div class="flex-1 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                                <div class="h-full rounded-full transition-all" style="width: {{ $epic['progress'] }}%; background-color: {{ $epic['color'] }}"></div>
-                            </div>
-                            <span class="text-[10px] text-gray-500">{{ $epic['completed'] }}/{{ $epic['total'] }}</span>
-                        </div>
-                        @endif
-                    </button>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-        @endif
-
-        <!-- Kanban Columns Container -->
-        <div class="flex-1 overflow-hidden">
+    <!-- Kanban Columns Container -->
+    <div class="overflow-hidden">
             <div class="kanban-container flex gap-4 pb-4 overflow-x-auto scrollbar-thin" id="kanban-columns">
                 @foreach($board->columns as $column)
                     @php
@@ -401,7 +403,6 @@
                 @endforeach
             </div>
         </div>
-    </div>
 
     <!-- Card Slide-Over Panel -->
     @include('boards._card_panel')
@@ -466,11 +467,17 @@ function churchBoard() {
             dueDate: ''
         },
         showEpicModal: false,
+        editingEpic: null,
+        epicModalLoading: false,
         newEpic: { name: '', color: '#6366f1', description: '' },
         cards: @json($board->columns->flatMap->cards->keyBy('id')),
         allCards: @json($allCardsData),
         epics: @json($epicsData),
         peopleList: @json($people->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null])),
+        ministriesList: @json($ministries->map(fn($m) => ['id' => $m->id, 'name' => $m->name])),
+        filterLabels: {
+            priority: { urgent: 'Терміново', high: 'Високий', medium: 'Середній', low: 'Низький' }
+        },
         showShortcuts: false,
         myPersonId: {{ auth()->user()->person?->id ?? 'null' }},
         boardId: {{ $board->id }},
@@ -479,6 +486,17 @@ function churchBoard() {
 
         get hasActiveFilters() {
             return this.filters.priority || this.filters.assignee || this.filters.ministry || this.filters.epic || this.searchQuery;
+        },
+
+        get activeFilterCount() {
+            return [this.filters.priority, this.filters.assignee, this.filters.ministry, this.filters.epic].filter(Boolean).length;
+        },
+
+        getAssigneeLabel(val) {
+            if (val === 'me') return 'Мої';
+            if (val === 'unassigned') return 'Без виконавця';
+            const p = this.peopleList.find(p => p.id == val);
+            return p ? p.name : val;
         },
 
         get filteredCards() {
@@ -532,6 +550,7 @@ function churchBoard() {
                     this.showShortcuts = false;
                     this.addCardModal.open = false;
                     this.showEpicModal = false;
+                    this.editingEpic = null;
                     break;
                 case 'n':
                 case 'N':
@@ -1323,9 +1342,16 @@ function churchBoard() {
             }
         },
 
+        openEditEpic(epic) {
+            this.editingEpic = epic.id;
+            this.newEpic = { name: epic.name, color: epic.color, description: epic.description || '' };
+            this.showEpicModal = true;
+        },
+
         async createEpic() {
             if (!this.newEpic.name.trim()) return;
 
+            this.epicModalLoading = true;
             try {
                 const response = await fetch(`/boards/${this.boardId}/epics`, {
                     method: 'POST',
@@ -1339,7 +1365,6 @@ function churchBoard() {
 
                 const result = await response.json();
                 if (result.success && result.epic) {
-                    // Add to epics array
                     const newEpic = {
                         id: result.epic.id,
                         name: result.epic.name,
@@ -1351,20 +1376,113 @@ function churchBoard() {
                     };
                     this.epics.push(newEpic);
 
-                    // Add to filter dropdown
-                    const filterSelect = document.querySelector('select[x-model="filters.epic"]');
-                    if (filterSelect) {
-                        const option = document.createElement('option');
-                        option.value = result.epic.id;
-                        option.textContent = result.epic.name;
-                        filterSelect.appendChild(option);
-                    }
-
-                    // Close modal and reset form
                     this.showEpicModal = false;
+                    this.editingEpic = null;
                     this.newEpic = { name: '', color: '#6366f1', description: '' };
 
                     if (window.showGlobalToast) showGlobalToast('Проєкт створено', 'success');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                this.epicModalLoading = false;
+            }
+        },
+
+        async updateEpic() {
+            if (!this.newEpic.name.trim() || !this.editingEpic) return;
+
+            this.epicModalLoading = true;
+            try {
+                const response = await fetch(`/boards/epics/${this.editingEpic}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(this.newEpic)
+                });
+
+                const result = await response.json();
+                if (result.success && result.epic) {
+                    // Update in epics array
+                    const idx = this.epics.findIndex(e => e.id === this.editingEpic);
+                    if (idx !== -1) {
+                        this.epics[idx].name = result.epic.name;
+                        this.epics[idx].color = result.epic.color;
+                        this.epics[idx].description = result.epic.description;
+                    }
+
+                    // Update epic badges on cards in DOM
+                    document.querySelectorAll(`[data-epic="${this.editingEpic}"]`).forEach(cardEl => {
+                        const topRow = cardEl.querySelector('.card-top-row');
+                        if (topRow) {
+                            const badge = topRow.querySelector('.epic-badge');
+                            if (badge) badge.remove();
+                            topRow.insertAdjacentHTML('afterbegin', this.getEpicBadgeHtml(result.epic));
+                        }
+                    });
+
+                    // Update allCards search data
+                    this.allCards.forEach(c => {
+                        if (c.epicId == this.editingEpic) {
+                            c.epicName = result.epic.name;
+                            c.epicColor = result.epic.color;
+                        }
+                    });
+
+                    this.showEpicModal = false;
+                    this.editingEpic = null;
+                    this.newEpic = { name: '', color: '#6366f1', description: '' };
+
+                    if (window.showGlobalToast) showGlobalToast('Проєкт оновлено', 'success');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                this.epicModalLoading = false;
+            }
+        },
+
+        async deleteEpic(epic) {
+            if (!confirm(`Видалити проєкт "${epic.name}"? Завдання залишаться.`)) return;
+
+            try {
+                const response = await fetch(`/boards/epics/${epic.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Remove from epics array
+                    this.epics = this.epics.filter(e => e.id !== epic.id);
+
+                    // Reset filter if this epic was active
+                    if (this.filters.epic == String(epic.id)) {
+                        this.filters.epic = '';
+                    }
+
+                    // Remove epic badges from cards
+                    document.querySelectorAll(`[data-epic="${epic.id}"]`).forEach(cardEl => {
+                        cardEl.dataset.epic = '';
+                        const badge = cardEl.querySelector('.epic-badge');
+                        if (badge) badge.remove();
+                    });
+
+                    // Update allCards
+                    this.allCards.forEach(c => {
+                        if (c.epicId == epic.id) {
+                            c.epicId = null;
+                            c.epicName = null;
+                            c.epicColor = null;
+                        }
+                    });
+
+                    if (window.showGlobalToast) showGlobalToast('Проєкт видалено', 'success');
                 }
             } catch (error) {
                 console.error('Error:', error);
