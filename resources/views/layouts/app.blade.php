@@ -722,6 +722,43 @@
     @include('partials.design-themes')
 </head>
 <body class="font-sans antialiased bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <!-- PWA Update Banner -->
+    <div x-data="{
+        show: false,
+        newWorker: null,
+        init() {
+            window.addEventListener('sw-update-available', (e) => {
+                this.newWorker = e.detail;
+                this.show = true;
+            });
+        },
+        update() {
+            if (this.newWorker) {
+                this.newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+        }
+    }" x-show="show" x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-full"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0 -translate-y-full"
+         class="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg safe-area-top">
+        <div class="flex items-center justify-between px-4 py-3 max-w-screen-xl mx-auto">
+            <div class="flex items-center gap-3 min-w-0">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span class="text-sm font-medium truncate">Доступна нова версія додатку</span>
+            </div>
+            <button @click="update()"
+                    class="flex-shrink-0 ml-3 px-4 py-1.5 bg-white text-blue-700 font-semibold rounded-lg text-sm hover:bg-blue-50 transition-colors">
+                Оновити
+            </button>
+        </div>
+    </div>
+
     <!-- Page Loader -->
     <div id="page-loader">
         <div class="loader-logo">
@@ -1224,7 +1261,6 @@
                         <span class="text-sm text-gray-500 dark:text-gray-400">Пошук...</span>
                         <kbd class="hidden sm:inline-flex items-center px-2 py-0.5 text-xs text-gray-400 bg-gray-200 dark:bg-gray-600 rounded">/</kbd>
                     </button>
-                    @yield('actions')
                     <!-- Profile Link -->
                     <x-user-profile-link />
                 </div>
@@ -1249,6 +1285,11 @@
                     <ul class="list-disc list-inside space-y-1">
                         @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
                     </ul>
+                </div>
+                @endif
+                @hasSection('actions')
+                <div class="flex flex-wrap items-center gap-2 mb-4">
+                    @yield('actions')
                 </div>
                 @endif
                 @yield('content')
@@ -1592,30 +1633,42 @@
 
     <!-- PWA Service Worker Registration & Install Prompt -->
     <script>
-        // Service Worker Registration
+        // Service Worker Registration with proper update flow
         if ('serviceWorker' in navigator) {
+            let refreshing = false;
+
+            // Auto-reload when new SW takes control
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
-                        // SW registered
+                        // Check for waiting SW on page load (e.g. user previously dismissed or missed update)
+                        if (registration.waiting) {
+                            window.dispatchEvent(new CustomEvent('sw-update-available', { detail: registration.waiting }));
+                        }
 
-                        // Check for updates
+                        // Listen for new SW installing
                         registration.addEventListener('updatefound', () => {
                             const newWorker = registration.installing;
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New version available
-                                    if (confirm('Доступна нова версія. Оновити?')) {
-                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
-                                        window.location.reload();
-                                    }
+                                    window.dispatchEvent(new CustomEvent('sw-update-available', { detail: newWorker }));
                                 }
                             });
                         });
+
+                        // Periodic update check — every 60 minutes
+                        setInterval(() => {
+                            registration.update();
+                        }, 60 * 60 * 1000);
                     })
-                    .catch(error => {
-                        // SW registration failed
-                    });
+                    .catch(() => {});
             });
         }
 

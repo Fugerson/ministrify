@@ -10,7 +10,7 @@ const PRECACHE_ASSETS = [
     '/icons/icon-512x512.png'
 ];
 
-// Install event - precache assets
+// Install event - precache assets (NO skipWaiting here — UI controls activation via SKIP_WAITING message)
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -23,7 +23,6 @@ self.addEventListener('install', (event) => {
                     )
                 );
             })
-            .then(() => self.skipWaiting())
     );
 });
 
