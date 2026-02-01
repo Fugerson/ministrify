@@ -722,64 +722,6 @@
     @include('partials.design-themes')
 </head>
 <body class="font-sans antialiased bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <!-- PWA Update Popup -->
-    <div x-data="{
-        show: false,
-        newWorker: null,
-        init() {
-            window.addEventListener('sw-update-available', (e) => {
-                this.newWorker = e.detail;
-                this.show = true;
-            });
-        },
-        update() {
-            if (this.newWorker) {
-                this.newWorker.postMessage({ type: 'SKIP_WAITING' });
-            }
-        }
-    }" x-show="show" x-cloak class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"
-             x-show="show"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"></div>
-        <!-- Card -->
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
-             x-show="show"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 scale-90 translate-y-4"
-             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-90 translate-y-4">
-            <!-- Gradient top -->
-            <div class="h-1.5 bg-gradient-to-r from-primary-500 via-blue-500 to-indigo-500"></div>
-            <div class="p-6 text-center">
-                <!-- Icon -->
-                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center">
-                    <svg class="w-7 h-7 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Нова версія</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Доступне оновлення додатку з покращеннями та виправленнями</p>
-                <div class="flex gap-3">
-                    <button @click="show = false"
-                            class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
-                        Пізніше
-                    </button>
-                    <button @click="update()"
-                            class="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors shadow-sm">
-                        Оновити
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Page Loader -->
     <div id="page-loader">
@@ -1670,17 +1612,17 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
-                        // Check for waiting SW on page load (e.g. user previously dismissed or missed update)
+                        // Auto-update: if SW already waiting, activate immediately
                         if (registration.waiting) {
-                            window.dispatchEvent(new CustomEvent('sw-update-available', { detail: registration.waiting }));
+                            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
                         }
 
-                        // Listen for new SW installing
+                        // Listen for new SW installing → auto-activate
                         registration.addEventListener('updatefound', () => {
                             const newWorker = registration.installing;
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    window.dispatchEvent(new CustomEvent('sw-update-available', { detail: newWorker }));
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
                                 }
                             });
                         });
