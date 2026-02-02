@@ -111,7 +111,7 @@ class SystemAdminController extends Controller
      */
     public function users(Request $request)
     {
-        $query = User::with('church');
+        $query = User::with(['church', 'churchRole']);
 
         // Include deleted users if requested
         if ($request->show_deleted) {

@@ -65,7 +65,6 @@
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Користувач</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Церква</th>
                         <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Роль</th>
-                        <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Статус</th>
                         <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Створено</th>
                         <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
                     </tr>
@@ -97,17 +96,14 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-center">
-                            <span class="px-2 py-1 text-xs rounded-full
-                                {{ $user->role === 'admin' ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : '' }}
-                                {{ $user->role === 'leader' ? 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' : '' }}
-                                {{ $user->role === 'volunteer' ? 'bg-green-100 dark:bg-green-600/20 text-green-700 dark:text-green-400' : '' }}
-                            ">{{ $user->role }}</span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
                             @if($user->is_super_admin)
                             <span class="px-2 py-1 bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 text-xs rounded-full">Super Admin</span>
+                            @elseif($user->churchRole)
+                            <span class="px-2 py-1 text-xs rounded-full
+                                {{ $user->churchRole->is_admin_role ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' }}
+                            ">{{ $user->churchRole->name }}</span>
                             @else
-                            <span class="px-2 py-1 bg-gray-100 dark:bg-gray-600/20 text-gray-600 dark:text-gray-400 text-xs rounded-full">Звичайний</span>
+                            <span class="px-2 py-1 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 text-xs rounded-full">Очікує</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-center text-gray-600 dark:text-gray-300 text-sm">
@@ -169,7 +165,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Користувачів не знайдено</td>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Користувачів не знайдено</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -251,14 +247,14 @@
             </div>
 
             <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                <span class="px-2 py-1 rounded-full
-                    {{ $user->role === 'admin' ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : '' }}
-                    {{ $user->role === 'leader' ? 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' : '' }}
-                    {{ $user->role === 'volunteer' ? 'bg-green-100 dark:bg-green-600/20 text-green-700 dark:text-green-400' : '' }}
-                ">{{ $user->role }}</span>
-
                 @if($user->is_super_admin)
                 <span class="px-2 py-1 bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 rounded-full">Super Admin</span>
+                @elseif($user->churchRole)
+                <span class="px-2 py-1 rounded-full
+                    {{ $user->churchRole->is_admin_role ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' }}
+                ">{{ $user->churchRole->name }}</span>
+                @else
+                <span class="px-2 py-1 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 rounded-full">Очікує</span>
                 @endif
 
                 @if($user->church)
