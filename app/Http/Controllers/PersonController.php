@@ -451,6 +451,7 @@ class PersonController extends Controller
 
         // Sync tags (admin only)
         if ($isAdmin) {
+            \Log::info('TAG SYNC DEBUG', ['person_id' => $person->id, 'user_id' => $user->id, 'request_tags' => $request->tags, 'all_input_keys' => array_keys($request->all())]);
             $person->tags()->sync($request->tags ?? []);
         }
 
