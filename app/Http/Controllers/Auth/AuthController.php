@@ -36,7 +36,6 @@ class AuthController extends Controller
                 $user->restore();
                 $user->update([
                     'church_role_id' => null,
-                    'role' => null,
                 ]);
 
                 Log::channel('security')->info('Soft-deleted user restored via login', [

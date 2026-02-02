@@ -49,7 +49,6 @@ class SocialAuthController extends Controller
             $user->restore();
             $user->update([
                 'church_role_id' => null,
-                'role' => null,
             ]);
 
             Log::channel('security')->info('Soft-deleted user restored via Google login', [
@@ -145,7 +144,6 @@ class SocialAuthController extends Controller
                 $existingUser->restore();
                 $existingUser->update([
                     'church_role_id' => null,
-                    'role' => null,
                     'church_id' => $church->id,
                 ]);
 
