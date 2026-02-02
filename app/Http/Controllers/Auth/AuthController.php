@@ -31,9 +31,13 @@ class AuthController extends Controller
         $user = \App\Models\User::withTrashed()->where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
-            // Restore if soft-deleted
+            // Restore if soft-deleted — reset role so admin must re-approve
             if ($user->trashed()) {
                 $user->restore();
+                $user->update([
+                    'church_role_id' => null,
+                    'role' => null,
+                ]);
 
                 Log::channel('security')->info('Soft-deleted user restored via login', [
                     'user_id' => $user->id,

@@ -44,9 +44,18 @@ class SocialAuthController extends Controller
             ->orWhere('email', $googleUser->getEmail())
             ->first();
 
-        // Restore if soft-deleted
+        // Restore if soft-deleted — reset role so admin must re-approve
         if ($user && $user->trashed()) {
             $user->restore();
+            $user->update([
+                'church_role_id' => null,
+                'role' => null,
+            ]);
+
+            Log::channel('security')->info('Soft-deleted user restored via Google login', [
+                'user_id' => $user->id,
+                'email' => $googleUser->getEmail(),
+            ]);
         }
 
         if ($user) {
@@ -134,6 +143,17 @@ class SocialAuthController extends Controller
         if ($existingUser) {
             if ($existingUser->trashed()) {
                 $existingUser->restore();
+                $existingUser->update([
+                    'church_role_id' => null,
+                    'role' => null,
+                    'church_id' => $church->id,
+                ]);
+
+                Log::channel('security')->info('Soft-deleted user restored via Google church join', [
+                    'user_id' => $existingUser->id,
+                    'email' => $googleUser->getEmail(),
+                    'church_id' => $church->id,
+                ]);
             }
             if (!$existingUser->google_id) {
                 $existingUser->update(['google_id' => $googleUser->getId()]);
