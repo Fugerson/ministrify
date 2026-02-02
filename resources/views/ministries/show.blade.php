@@ -1182,9 +1182,10 @@
                             <option :value="tag" x-text="tag"></option>
                         </template>
                     </select>
-                    <select x-model="sortBy"
+                    <select x-model="sortBy" @change="sortDir = (sortBy === 'popular' || sortBy === 'recent' || sortBy === 'bpm') ? 'desc' : 'asc'"
                             class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
                         <option value="title">За назвою</option>
+                        <option value="artist">За виконавцем</option>
                         <option value="recent">Нові</option>
                         <option value="popular">Популярні</option>
                     </select>
@@ -1193,13 +1194,28 @@
                 <!-- Songs List -->
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                     <!-- Header -->
-                    <div class="hidden md:grid md:grid-cols-12 gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        <div class="col-span-3">Назва</div>
-                        <div class="col-span-2">Виконавець</div>
-                        <div class="col-span-2 text-center">Тональність</div>
-                        <div class="col-span-1 text-center">BPM</div>
+                    <div class="hidden md:grid md:grid-cols-12 gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none">
+                        <div class="col-span-3 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1" @click="toggleSort('title')">
+                            Назва
+                            <svg x-show="sortBy === 'title'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        </div>
+                        <div class="col-span-2 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1" @click="toggleSort('artist')">
+                            Виконавець
+                            <svg x-show="sortBy === 'artist'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        </div>
+                        <div class="col-span-2 text-center cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center justify-center gap-1" @click="toggleSort('key')">
+                            Тональність
+                            <svg x-show="sortBy === 'key'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        </div>
+                        <div class="col-span-1 text-center cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center justify-center gap-1" @click="toggleSort('bpm')">
+                            BPM
+                            <svg x-show="sortBy === 'bpm'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        </div>
                         <div class="col-span-2">Теги</div>
-                        <div class="col-span-2 text-center">Використано</div>
+                        <div class="col-span-2 text-center cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center justify-center gap-1" @click="toggleSort('popular')">
+                            Використано
+                            <svg x-show="sortBy === 'popular'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        </div>
                     </div>
                     <!-- Rows -->
                     <template x-for="song in filteredSongs" :key="song.id">
@@ -2109,6 +2125,7 @@ function songsLibrary() {
         filterKey: '',
         filterTag: '',
         sortBy: 'title',
+        sortDir: 'asc',
         keyQuery: '',
         keyDropdownOpen: false,
         songKeysMap: @js(\App\Models\Song::KEYS),
@@ -2151,13 +2168,26 @@ function songsLibrary() {
             if (this.filterTag) {
                 result = result.filter(song => song.tags && song.tags.includes(this.filterTag));
             }
+            const dir = this.sortDir === 'asc' ? 1 : -1;
             return [...result].sort((a, b) => {
                 switch (this.sortBy) {
-                    case 'recent': return new Date(b.created_at) - new Date(a.created_at);
-                    case 'popular': return (b.times_used || 0) - (a.times_used || 0);
-                    default: return a.title.localeCompare(b.title, 'uk');
+                    case 'artist': return dir * (a.artist || '').localeCompare(b.artist || '', 'uk');
+                    case 'key': return dir * (a.key || '').localeCompare(b.key || '', 'uk');
+                    case 'bpm': return dir * ((a.bpm || 0) - (b.bpm || 0));
+                    case 'recent': return dir * (new Date(b.created_at) - new Date(a.created_at));
+                    case 'popular': return dir * ((b.times_used || 0) - (a.times_used || 0));
+                    default: return dir * a.title.localeCompare(b.title, 'uk');
                 }
             });
+        },
+
+        toggleSort(col) {
+            if (this.sortBy === col) {
+                this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortBy = col;
+                this.sortDir = (col === 'popular' || col === 'recent' || col === 'bpm') ? 'desc' : 'asc';
+            }
         },
 
         toggleSong(id) {
