@@ -159,9 +159,9 @@
                         @csrf
                         <div class="space-y-4">
                             <div class="text-sm text-gray-600 dark:text-gray-400">
-                                <p class="mb-2">Завантажте CSV або Excel файл з піснями. Підтримувані колонки:</p>
-                                <p class="font-mono text-xs bg-gray-50 dark:bg-gray-700 p-2 rounded">title, artist, key, bpm, lyrics, chords, ccli_number, youtube_url, spotify_url, tags, notes</p>
-                                <p class="mt-2">Також підтримуються українські назви: <span class="font-mono text-xs">nazva, avtor, tonalnist, tekst, akordy, ccli, youtube, spotify, tehy, notatky</span></p>
+                                <p class="mb-2">Завантажте CSV або Excel файл з піснями. Колонки розпізнаються автоматично:</p>
+                                <p class="font-mono text-xs bg-gray-50 dark:bg-gray-700 p-2 rounded leading-relaxed">title / name / назва, artist / автор, key / тональність, bpm, link / url, tags / статус / категорія, lyrics / текст, chords / акорди, notes / нотатки</p>
+                                <p class="mt-2 text-xs">Посилання YouTube/Spotify розподіляються автоматично. Тональність витягується з URL (напр. <span class="font-mono">#G</span>).</p>
                             </div>
 
                             <div>

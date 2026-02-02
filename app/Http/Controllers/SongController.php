@@ -348,8 +348,8 @@ class SongController extends Controller
             'Content-Disposition' => 'attachment; filename="songs_template.csv"',
         ];
 
-        $columns = ['title', 'artist', 'key', 'bpm', 'lyrics', 'chords', 'ccli_number', 'youtube_url', 'spotify_url', 'tags', 'notes'];
-        $example = ['Amazing Grace', 'John Newton', 'G', '72', '', '', '', '', '', 'worship,hymn', ''];
+        $columns = ['title', 'artist', 'key', 'bpm', 'link', 'tags', 'lyrics', 'chords', 'notes'];
+        $example = ['Amazing Grace', 'John Newton', 'G', '72', 'https://youtube.com/...', 'worship,hymn', '', '', ''];
 
         $callback = function () use ($columns, $example) {
             $file = fopen('php://output', 'w');
