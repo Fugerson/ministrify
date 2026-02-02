@@ -1421,6 +1421,32 @@
                                                   placeholder="Нотатки для команди"></textarea>
                                     </div>
 
+                                    <!-- Resource Links -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Посилання на ресурси</label>
+                                        <template x-for="(link, index) in form.resource_links" :key="index">
+                                            <div class="flex gap-2 mb-2">
+                                                <input x-model="link.label" type="text" placeholder="Назва"
+                                                       class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                                                <input x-model="link.url" type="url" placeholder="https://..."
+                                                       class="flex-[2] px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                                                <button type="button" @click="form.resource_links.splice(index, 1)"
+                                                        class="px-2 py-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </template>
+                                        <button type="button" @click="form.resource_links.push({label: '', url: ''})"
+                                                class="inline-flex items-center text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Додати посилання
+                                        </button>
+                                    </div>
+
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Текст</label>
                                         <textarea x-model="form.lyrics" rows="4"
@@ -1519,6 +1545,22 @@
                                         <p class="text-sm text-yellow-800 dark:text-yellow-200">
                                             <span class="font-medium">Коментарі:</span> <span x-text="viewingSong.notes"></span>
                                         </p>
+                                    </div>
+
+                                    <!-- Resource Links -->
+                                    <div x-show="viewingSong.resource_links && viewingSong.resource_links.length > 0" class="mb-4">
+                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ресурси</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            <template x-for="link in (viewingSong.resource_links || [])" :key="link.url">
+                                                <a :href="link.url" target="_blank" rel="noopener noreferrer"
+                                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+                                                    <span x-text="link.label"></span>
+                                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                    </svg>
+                                                </a>
+                                            </template>
+                                        </div>
                                     </div>
 
                                     <!-- Chords -->
@@ -2095,6 +2137,7 @@ function goalsManager() {
             'spotify_url' => $s->spotify_url,
             'tags' => $s->tags ?? [],
             'notes' => $s->notes,
+            'resource_links' => $s->resource_links ?? [],
             'times_used' => $s->times_used ?? 0,
             'created_at' => $s->created_at,
         ];
@@ -2135,7 +2178,8 @@ function songsLibrary() {
         showViewModal: false,
         form: {
             title: '', artist: '', key: '', bpm: '', lyrics: '', chords: '',
-            ccli_number: '', youtube_url: '', spotify_url: '', tags: [], new_tag: '', notes: ''
+            ccli_number: '', youtube_url: '', spotify_url: '', tags: [], new_tag: '', notes: '',
+            resource_links: []
         },
 
         get filteredSongs() {
@@ -2177,7 +2221,8 @@ function songsLibrary() {
         resetForm() {
             this.form = {
                 title: '', artist: '', key: '', bpm: '', lyrics: '', chords: '',
-                ccli_number: '', youtube_url: '', spotify_url: '', tags: [], new_tag: '', notes: ''
+                ccli_number: '', youtube_url: '', spotify_url: '', tags: [], new_tag: '', notes: '',
+                resource_links: []
             };
             this.keyQuery = '';
             this.keyDropdownOpen = false;
@@ -2210,7 +2255,8 @@ function songsLibrary() {
                 spotify_url: song.spotify_url || '',
                 tags: song.tags ? [...song.tags] : [],
                 new_tag: '',
-                notes: song.notes || ''
+                notes: song.notes || '',
+                resource_links: song.resource_links ? song.resource_links.map(l => ({...l})) : []
             };
             this.keyQuery = song.key || '';
             this.keyDropdownOpen = false;

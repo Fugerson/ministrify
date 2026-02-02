@@ -71,6 +71,9 @@ class SongController extends Controller
             'tags.*' => 'string|max:50',
             'new_tag' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:5000',
+            'resource_links' => 'nullable|array|max:20',
+            'resource_links.*.label' => 'required|string|max:255',
+            'resource_links.*.url' => 'required|url|max:500',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -79,6 +82,9 @@ class SongController extends Controller
         $validated['youtube_url'] = !empty($validated['youtube_url']) ? $validated['youtube_url'] : null;
         $validated['spotify_url'] = !empty($validated['spotify_url']) ? $validated['spotify_url'] : null;
         $validated['bpm'] = !empty($validated['bpm']) ? (int)$validated['bpm'] : null;
+
+        // Filter out empty links
+        $resourceLinks = collect($validated['resource_links'] ?? [])->filter(fn($l) => !empty($l['label']) && !empty($l['url']))->values()->all();
 
         // Combine selected tags with new tag
         $tags = $validated['tags'] ?? [];
@@ -101,6 +107,7 @@ class SongController extends Controller
             'spotify_url' => $validated['spotify_url'],
             'tags' => !empty($tags) ? array_values($tags) : null,
             'notes' => $validated['notes'],
+            'resource_links' => !empty($resourceLinks) ? $resourceLinks : null,
             'created_by' => auth()->id(),
         ]);
 
@@ -120,6 +127,7 @@ class SongController extends Controller
                     'spotify_url' => $song->spotify_url,
                     'tags' => $song->tags ?? [],
                     'notes' => $song->notes,
+                    'resource_links' => $song->resource_links ?? [],
                     'times_used' => $song->times_used ?? 0,
                     'created_at' => $song->created_at,
                 ]
@@ -182,12 +190,18 @@ class SongController extends Controller
             'tags.*' => 'string|max:50',
             'new_tag' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:5000',
+            'resource_links' => 'nullable|array|max:20',
+            'resource_links.*.label' => 'required|string|max:255',
+            'resource_links.*.url' => 'required|url|max:500',
         ]);
 
         // Clean empty values
         $validated['youtube_url'] = !empty($validated['youtube_url']) ? $validated['youtube_url'] : null;
         $validated['spotify_url'] = !empty($validated['spotify_url']) ? $validated['spotify_url'] : null;
         $validated['bpm'] = !empty($validated['bpm']) ? (int)$validated['bpm'] : null;
+
+        // Filter out empty links
+        $resourceLinks = collect($validated['resource_links'] ?? [])->filter(fn($l) => !empty($l['label']) && !empty($l['url']))->values()->all();
 
         // Combine selected tags with new tag
         $tags = $validated['tags'] ?? [];
@@ -209,6 +223,7 @@ class SongController extends Controller
             'spotify_url' => $validated['spotify_url'],
             'tags' => !empty($tags) ? array_values($tags) : null,
             'notes' => $validated['notes'],
+            'resource_links' => !empty($resourceLinks) ? $resourceLinks : null,
         ]);
 
         if ($request->wantsJson()) {
@@ -227,6 +242,7 @@ class SongController extends Controller
                     'spotify_url' => $song->spotify_url,
                     'tags' => $song->tags ?? [],
                     'notes' => $song->notes,
+                    'resource_links' => $song->resource_links ?? [],
                     'times_used' => $song->times_used ?? 0,
                     'created_at' => $song->created_at,
                 ]

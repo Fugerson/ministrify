@@ -26,6 +26,7 @@ class Song extends Model
         'spotify_url',
         'tags',
         'notes',
+        'resource_links',
         'times_used',
         'last_used_at',
         'created_by',
@@ -33,6 +34,7 @@ class Song extends Model
 
     protected $casts = [
         'tags' => 'array',
+        'resource_links' => 'array',
         'last_used_at' => 'date',
     ];
 
