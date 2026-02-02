@@ -49,20 +49,16 @@
         <!-- Actions -->
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <form method="POST" action="{{ route('boards.archive', $board) }}">
-                    @csrf
-                    <button type="submit" class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 text-sm font-medium">
-                        Архівувати
-                    </button>
-                </form>
-                <form method="POST" action="{{ route('boards.destroy', $board) }}"
-                      onsubmit="return confirm('Видалити цю дошку? Всі картки будуть втрачені.')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
-                        Видалити
-                    </button>
-                </form>
+                <button type="button"
+                        onclick="document.getElementById('archive-board-form').submit()"
+                        class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 text-sm font-medium">
+                    Архівувати
+                </button>
+                <button type="button"
+                        onclick="if(confirm('Видалити цю дошку? Всі картки будуть втрачені.')) { document.getElementById('delete-board-form').submit(); }"
+                        class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
+                    Видалити
+                </button>
             </div>
 
             <div class="flex items-center gap-3">
@@ -76,6 +72,14 @@
                 </button>
             </div>
         </div>
+    </form>
+
+    <form id="archive-board-form" method="POST" action="{{ route('boards.archive', $board) }}" class="hidden">
+        @csrf
+    </form>
+    <form id="delete-board-form" method="POST" action="{{ route('boards.destroy', $board) }}" class="hidden">
+        @csrf
+        @method('DELETE')
     </form>
 </div>
 @endsection

@@ -56,13 +56,11 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <form method="POST" action="{{ route('ministries.destroy', $ministry) }}" onsubmit="return confirm('Видалити команду? Ця дія незворотна.')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
-                    Видалити команду
-                </button>
-            </form>
+            <button type="button"
+                    onclick="if(confirm('Видалити команду? Ця дія незворотна.')) { document.getElementById('delete-ministry-form').submit(); }"
+                    class="text-red-600 hover:text-red-800 text-sm font-medium">
+                Видалити команду
+            </button>
 
             <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <a href="{{ route('ministries.show', $ministry) }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
@@ -73,6 +71,11 @@
                 </button>
             </div>
         </div>
+    </form>
+
+    <form id="delete-ministry-form" method="POST" action="{{ route('ministries.destroy', $ministry) }}" class="hidden">
+        @csrf
+        @method('DELETE')
     </form>
 </div>
 @endsection

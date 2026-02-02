@@ -107,14 +107,11 @@
 
         <div class="flex justify-between">
             @if($user->id !== auth()->id())
-            <form method="POST" action="{{ route('system.users.destroy', $user) }}"
-                  onsubmit="return confirm('Ви впевнені, що хочете видалити цього користувача?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="px-6 py-3 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300 font-medium rounded-xl">
-                    Видалити користувача
-                </button>
-            </form>
+            <button type="button"
+                    onclick="if(confirm('Ви впевнені, що хочете видалити цього користувача?')) { document.getElementById('delete-user-form').submit(); }"
+                    class="px-6 py-3 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300 font-medium rounded-xl">
+                Видалити користувача
+            </button>
             @else
             <div></div>
             @endif
@@ -131,5 +128,12 @@
             </div>
         </div>
     </form>
+
+    @if($user->id !== auth()->id())
+    <form id="delete-user-form" method="POST" action="{{ route('system.users.destroy', $user) }}" class="hidden">
+        @csrf
+        @method('DELETE')
+    </form>
+    @endif
 </div>
 @endsection

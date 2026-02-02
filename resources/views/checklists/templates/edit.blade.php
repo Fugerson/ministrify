@@ -82,14 +82,11 @@
 
         <!-- Actions -->
         <div class="flex items-center justify-between">
-            <form method="POST" action="{{ route('checklists.templates.destroy', $template) }}"
-                  onsubmit="return confirm('Видалити цей шаблон?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
-                    Видалити шаблон
-                </button>
-            </form>
+            <button type="button"
+                    onclick="if(confirm('Видалити цей шаблон?')) { document.getElementById('delete-template-form').submit(); }"
+                    class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
+                Видалити шаблон
+            </button>
 
             <div class="flex items-center gap-3">
                 <a href="{{ route('checklists.templates') }}"
@@ -102,6 +99,11 @@
                 </button>
             </div>
         </div>
+    </form>
+
+    <form id="delete-template-form" method="POST" action="{{ route('checklists.templates.destroy', $template) }}" class="hidden">
+        @csrf
+        @method('DELETE')
     </form>
 </div>
 

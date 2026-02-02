@@ -188,13 +188,11 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <form method="POST" action="{{ route('events.destroy', $event) }}" onsubmit="return confirm('Видалити подію?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
-                    Видалити подію
-                </button>
-            </form>
+            <button type="button"
+                    onclick="if(confirm('Видалити подію?')) { document.getElementById('delete-event-form').submit(); }"
+                    class="text-red-600 hover:text-red-800 text-sm font-medium">
+                Видалити подію
+            </button>
 
             <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <a href="{{ route('events.show', $event) }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
@@ -205,6 +203,11 @@
                 </button>
             </div>
         </div>
+    </form>
+
+    <form id="delete-event-form" method="POST" action="{{ route('events.destroy', $event) }}" class="hidden">
+        @csrf
+        @method('DELETE')
     </form>
 </div>
 @endsection

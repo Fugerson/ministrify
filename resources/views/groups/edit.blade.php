@@ -52,13 +52,11 @@
 
             <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 @can('delete', $group)
-                <form method="POST" action="{{ route('groups.destroy', $group) }}" onsubmit="return confirm('Видалити групу? Усі дані про членство будуть втрачені.')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-red-600 hover:text-red-700 text-sm font-medium">
-                        Видалити групу
-                    </button>
-                </form>
+                <button type="button"
+                        onclick="if(confirm('Видалити групу? Усі дані про членство будуть втрачені.')) { document.getElementById('delete-group-form').submit(); }"
+                        class="text-red-600 hover:text-red-700 text-sm font-medium">
+                    Видалити групу
+                </button>
                 @endcan
 
                 <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
@@ -71,6 +69,13 @@
                 </div>
             </div>
         </form>
+
+        @can('delete', $group)
+        <form id="delete-group-form" method="POST" action="{{ route('groups.destroy', $group) }}" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
+        @endcan
     </div>
 </div>
 @endsection
