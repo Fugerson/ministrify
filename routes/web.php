@@ -59,17 +59,15 @@ Route::get('health', function () {
     }
 
     return response()->json($status, $status['status'] === 'ok' ? 200 : 503);
-})->name('health');
+})->middleware('throttle:30,1')->name('health');
 
 // UptimeRobot webhook for Telegram alerts
 Route::match(['get', 'post'], 'webhook/uptime/{secret}', function ($secret, \Illuminate\Http\Request $request) {
     // Verify secret from config (set UPTIME_WEBHOOK_SECRET in .env)
     $configSecret = config('services.uptime.webhook_secret');
 
-    // Temporary fallback for backwards compatibility - remove after adding UPTIME_WEBHOOK_SECRET to .env
     if (!$configSecret) {
-        $configSecret = 'mnsfy2026alert';
-        \Log::warning('UptimeRobot webhook: UPTIME_WEBHOOK_SECRET not set in .env, using legacy secret');
+        abort(403);
     }
 
     if (!hash_equals($configSecret, $secret)) {
@@ -106,13 +104,14 @@ Route::match(['get', 'post'], 'webhook/uptime/{secret}', function ($secret, \Ill
     ]);
 
     return response()->json(['ok' => true]);
-})->withoutMiddleware(['web'])->name('uptime.webhook');
+})->middleware('throttle:10,1')->withoutMiddleware(['web'])->name('uptime.webhook');
 
 // QR Check-in (public with optional auth)
-Route::get('checkin/{token}', [QrCheckinController::class, 'show'])->name('checkin.show');
+Route::get('checkin/{token}', [QrCheckinController::class, 'show'])->middleware('throttle:30,1')->name('checkin.show');
 
 // Monobank webhook (public, no CSRF)
 Route::match(['get', 'post'], 'monobank/webhook/{secret}', [MonobankSyncController::class, 'webhook'])
+    ->middleware('throttle:60,1')
     ->name('monobank.webhook')
     ->withoutMiddleware(['web']);
 

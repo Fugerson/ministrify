@@ -123,6 +123,20 @@ class SocialAuthController extends Controller
             return redirect()->route('join')->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
+        // Check if user with this email already exists (e.g. registered via email before)
+        $existingUser = User::where('email', $googleUser->getEmail())->first();
+        if ($existingUser) {
+            if (!$existingUser->google_id) {
+                $existingUser->update(['google_id' => $googleUser->getId()]);
+            }
+            if (!$existingUser->hasVerifiedEmail()) {
+                $existingUser->markEmailAsVerified();
+            }
+            Auth::login($existingUser, true);
+            $request->session()->regenerate();
+            return redirect()->route('dashboard');
+        }
+
         // Parse name
         $nameParts = explode(' ', $googleUser->getName(), 2);
         $firstName = $nameParts[0];

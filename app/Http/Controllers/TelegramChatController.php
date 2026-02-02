@@ -6,6 +6,7 @@ use App\Models\Person;
 use App\Models\TelegramMessage;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TelegramChatController extends Controller
 {
@@ -56,11 +57,15 @@ class TelegramChatController extends Controller
         }
 
         // Mark all incoming messages as read
-        TelegramMessage::where('church_id', $church->id)
+        $updated = TelegramMessage::where('church_id', $church->id)
             ->where('person_id', $person->id)
             ->where('direction', 'incoming')
             ->where('is_read', false)
             ->update(['is_read' => true]);
+
+        if ($updated > 0) {
+            Cache::forget("church:{$church->id}:unread_telegram");
+        }
 
         // Get messages
         $messages = TelegramMessage::where('church_id', $church->id)

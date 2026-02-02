@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\Auditable;
 
@@ -297,6 +298,27 @@ class Church extends Model
     public function churchRoles(): HasMany
     {
         return $this->hasMany(ChurchRole::class);
+    }
+
+    /**
+     * Get cached ministries (TTL 600s / 10 min).
+     * Call Church::clearMinistriesCache($churchId) on ministry CRUD.
+     */
+    public function getCachedMinistries(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Cache::remember(
+            "church:{$this->id}:ministries",
+            600,
+            fn () => $this->ministries()->orderBy('name')->get()
+        );
+    }
+
+    /**
+     * Clear the cached ministries for a given church.
+     */
+    public static function clearMinistriesCache(int $churchId): void
+    {
+        Cache::forget("church:{$churchId}:ministries");
     }
 
     public function getPublicEventsAttribute()

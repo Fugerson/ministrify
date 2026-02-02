@@ -151,6 +151,7 @@ class LandingController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'church_role' => 'admin',
+            'membership_status' => 'member',
         ]);
 
         auth()->login($user);

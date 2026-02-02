@@ -44,11 +44,13 @@ class FinanceController extends Controller
             $periodLabel = $year . ' рік';
         }
 
-        // Calculate totals in UAH (using amount_uah for converted amounts)
-        // Note: Using ?? instead of ?: because sum() returning 0 is a valid value
-        $hasAmountUah = \Schema::hasColumn('transactions', 'amount_uah');
-        $totalIncome = $hasAmountUah ? ($incomeQuery->sum('amount_uah') ?? $incomeQuery->sum('amount')) : $incomeQuery->sum('amount');
-        $totalExpense = $hasAmountUah ? ($expenseQuery->sum('amount_uah') ?? $expenseQuery->sum('amount')) : $expenseQuery->sum('amount');
+        // Calculate totals in UAH (using amount_uah for converted amounts, fallback to amount)
+        $totalIncome = (clone $incomeQuery)
+            ->selectRaw('COALESCE(SUM(amount_uah), SUM(amount), 0) as total')
+            ->value('total') ?? 0;
+        $totalExpense = (clone $expenseQuery)
+            ->selectRaw('COALESCE(SUM(amount_uah), SUM(amount), 0) as total')
+            ->value('total') ?? 0;
         $periodBalance = $totalIncome - $totalExpense;
 
         // Overall balance (includes initial balance) - all in UAH
@@ -64,12 +66,12 @@ class FinanceController extends Controller
                 $initialBalance += ExchangeRate::toUah($amount, $currency);
             }
         }
-        $allTimeIncome = $hasAmountUah
-            ? (Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount_uah') ?? Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount'))
-            : Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount');
-        $allTimeExpense = $hasAmountUah
-            ? (Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount_uah') ?? Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount'))
-            : Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
+        $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()
+            ->selectRaw('COALESCE(SUM(amount_uah), SUM(amount), 0) as total')
+            ->value('total') ?? 0;
+        $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()
+            ->selectRaw('COALESCE(SUM(amount_uah), SUM(amount), 0) as total')
+            ->value('total') ?? 0;
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
 
         // Calculate balances per currency (all time)

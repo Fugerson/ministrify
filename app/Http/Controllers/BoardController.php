@@ -49,15 +49,12 @@ class BoardController extends Controller
             }
         }
 
-        // Load board with cards and epics
+        // Load board with cards and epics (comments, creator, attachments loaded via AJAX on card open)
         $board->load([
             'columns.cards.assignee',
             'columns.cards.ministry',
             'columns.cards.epic',
             'columns.cards.checklistItems',
-            'columns.cards.comments',
-            'columns.cards.creator',
-            'columns.cards.attachments',
             'epics',
         ]);
 
@@ -65,28 +62,37 @@ class BoardController extends Controller
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
 
-        // Get stats
-        $allCards = $board->columns->flatMap->cards;
+        // Get stats via SQL
+        $columnIds = $board->columns->pluck('id');
         $stats = [
-            'total' => $allCards->count(),
-            'completed' => $allCards->where('is_completed', true)->count(),
-            'overdue' => $allCards->filter(fn($c) => $c->due_date && $c->due_date->isPast() && !$c->is_completed)->count(),
-            'my_tasks' => $allCards->where('assigned_to', auth()->user()->person?->id)->count(),
+            'total' => BoardCard::whereIn('column_id', $columnIds)->count(),
+            'completed' => BoardCard::whereIn('column_id', $columnIds)->where('is_completed', true)->count(),
+            'overdue' => BoardCard::whereIn('column_id', $columnIds)->where('is_completed', false)
+                ->whereNotNull('due_date')->where('due_date', '<', now())->count(),
+            'my_tasks' => BoardCard::whereIn('column_id', $columnIds)
+                ->where('assigned_to', auth()->user()->person?->id)->count(),
         ];
 
-        // Get epic stats
-        $epics = $board->epics->map(function ($epic) use ($allCards) {
-            $epicCards = $allCards->where('epic_id', $epic->id);
+        // Get epic stats via single GROUP BY query
+        $epicStatsRaw = BoardCard::whereIn('column_id', $columnIds)
+            ->whereNotNull('epic_id')
+            ->selectRaw('epic_id, COUNT(*) as total, SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed')
+            ->groupBy('epic_id')
+            ->get()
+            ->keyBy('epic_id');
+
+        $epics = $board->epics->map(function ($epic) use ($epicStatsRaw) {
+            $stat = $epicStatsRaw[$epic->id] ?? null;
+            $total = $stat ? (int) $stat->total : 0;
+            $completed = $stat ? (int) $stat->completed : 0;
             return [
                 'id' => $epic->id,
                 'name' => $epic->name,
                 'color' => $epic->color,
                 'description' => $epic->description,
-                'total' => $epicCards->count(),
-                'completed' => $epicCards->where('is_completed', true)->count(),
-                'progress' => $epicCards->count() > 0
-                    ? round(($epicCards->where('is_completed', true)->count() / $epicCards->count()) * 100)
-                    : 0,
+                'total' => $total,
+                'completed' => $completed,
+                'progress' => $total > 0 ? round(($completed / $total) * 100) : 0,
             ];
         });
 

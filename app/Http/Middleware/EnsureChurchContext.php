@@ -6,6 +6,7 @@ use App\Models\Church;
 use App\Models\TelegramMessage;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureChurchContext
@@ -45,12 +46,16 @@ class EnsureChurchContext
         // Share church with all views
         view()->share('currentChurch', $church);
 
-        // Share unread Telegram messages count for admins
+        // Share unread Telegram messages count for admins (cached for 120s)
         if ($user->isAdmin()) {
-            $unreadTelegramCount = TelegramMessage::where('church_id', $church->id)
-                ->where('direction', 'incoming')
-                ->where('is_read', false)
-                ->count();
+            $unreadTelegramCount = Cache::remember(
+                "church:{$church->id}:unread_telegram",
+                120,
+                fn () => TelegramMessage::where('church_id', $church->id)
+                    ->where('direction', 'incoming')
+                    ->where('is_read', false)
+                    ->count()
+            );
             view()->share('unreadTelegramCount', $unreadTelegramCount);
         }
 

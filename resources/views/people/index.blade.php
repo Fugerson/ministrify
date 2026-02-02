@@ -296,6 +296,12 @@
         </div>
     </div>
 
+    @if($peopleLimited)
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-amber-800 dark:text-amber-200 text-sm">
+        Показано перші 1000 людей. Використовуйте пошук для уточнення.
+    </div>
+    @endif
+
     <!-- Table Container -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <!-- Table -->

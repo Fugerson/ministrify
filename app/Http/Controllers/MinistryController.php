@@ -60,7 +60,8 @@ class MinistryController extends Controller
             'monthly_budget' => 'nullable|numeric|min:0',
         ]);
 
-        $validated['church_id'] = $this->getCurrentChurch()->id;
+        $church = $this->getCurrentChurch();
+        $validated['church_id'] = $church->id;
         $ministry = Ministry::create($validated);
 
         // Create default positions if provided
@@ -74,6 +75,8 @@ class MinistryController extends Controller
                 }
             }
         }
+
+        \App\Models\Church::clearMinistriesCache($church->id);
 
         return redirect()->route('ministries.show', $ministry)
             ->with('success', 'Служіння створено.');
@@ -201,6 +204,8 @@ class MinistryController extends Controller
 
         $ministry->update($validated);
 
+        \App\Models\Church::clearMinistriesCache($ministry->church_id);
+
         return redirect()->route('ministries.show', $ministry)
             ->with('success', 'Служіння оновлено.');
     }
@@ -210,7 +215,10 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         $this->authorize('delete', $ministry);
 
+        $churchId = $ministry->church_id;
         $ministry->delete();
+
+        \App\Models\Church::clearMinistriesCache($churchId);
 
         return back()->with('success', 'Служіння видалено.');
     }

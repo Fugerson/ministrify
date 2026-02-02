@@ -74,6 +74,8 @@ class PersonController extends Controller
             ->limit(1000)
             ->get();
 
+        $peopleLimited = $people->count() >= 1000;
+
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries;
         $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
@@ -158,7 +160,7 @@ class PersonController extends Controller
                 ->get();
         }
 
-        return view('people.index', compact('people', 'tags', 'ministries', 'churchRoles', 'stats', 'shepherds', 'church'));
+        return view('people.index', compact('people', 'peopleLimited', 'tags', 'ministries', 'churchRoles', 'stats', 'shepherds', 'church'));
     }
 
     public function create()

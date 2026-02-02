@@ -13,21 +13,32 @@ abstract class Controller extends BaseController
     use AuthorizesRequests, ValidatesRequests;
 
     /**
+     * Per-request cache for current church to avoid repeated DB lookups.
+     */
+    private ?Church $cachedChurch = null;
+
+    /**
      * Get the current church context.
      * Handles super admin impersonation.
+     * Uses per-request cache to avoid repeated queries within the same request.
      */
     protected function getCurrentChurch(): Church
     {
+        if ($this->cachedChurch) {
+            return $this->cachedChurch;
+        }
+
         $user = auth()->user();
 
         // Super admin impersonation
         if ($user->is_super_admin && session('impersonate_church_id')) {
-            return Church::findOrFail(session('impersonate_church_id'));
+            return $this->cachedChurch = Church::findOrFail(session('impersonate_church_id'));
         }
 
-        // Super admin without impersonation - use first church as fallback
+        // Super admin without impersonation - redirect to system panel
         if ($user->is_super_admin && !$user->church_id) {
-            return Church::first();
+            abort(redirect()->route('system.index')
+                ->with('warning', 'Оберіть церкву для роботи.'));
         }
 
         $church = $user->church;
@@ -37,7 +48,7 @@ abstract class Controller extends BaseController
                 ->with('error', 'Ця функція доступна тільки для користувачів з церквою.'));
         }
 
-        return $church;
+        return $this->cachedChurch = $church;
     }
 
     /**
