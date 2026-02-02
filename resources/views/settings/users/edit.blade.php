@@ -35,7 +35,7 @@
               }
           }"
           @person-selected.window="personSelected = $event.detail.person"
-          @submit.prevent="submitForm()"
+          @submit.prevent="submitForm()">
         @csrf
         @method('PUT')
 
