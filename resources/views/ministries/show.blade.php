@@ -1190,29 +1190,56 @@
                     </select>
                 </div>
 
-                <!-- Songs Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Songs List -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                    <!-- Header -->
+                    <div class="hidden md:grid md:grid-cols-12 gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <div class="col-span-4">Назва</div>
+                        <div class="col-span-2">Виконавець</div>
+                        <div class="col-span-1 text-center">Тональність</div>
+                        <div class="col-span-1 text-center">BPM</div>
+                        <div class="col-span-3">Теги</div>
+                        <div class="col-span-1 text-center">Використано</div>
+                    </div>
+                    <!-- Rows -->
                     <template x-for="song in filteredSongs" :key="song.id">
                         <div @click="openSongModal(song)"
-                             class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 cursor-pointer hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 transition-all group">
-                            <div class="flex items-start justify-between mb-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
-                                    </svg>
-                                </div>
-                                <span x-show="song.key" class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-mono rounded" x-text="song.key"></span>
+                             class="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-2 px-4 py-3 cursor-pointer border-b border-gray-100 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors items-center group">
+                            <!-- Title (always visible) -->
+                            <div class="md:col-span-4 flex items-center gap-2 min-w-0">
+                                <span class="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate" x-text="song.title"></span>
                             </div>
-                            <h4 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 line-clamp-1" x-text="song.title"></h4>
-                            <p x-show="song.artist" class="text-sm text-gray-500 dark:text-gray-400 mt-1" x-text="song.artist"></p>
-                            <div x-show="song.tags && song.tags.length > 0" class="flex flex-wrap gap-1 mt-3">
-                                <template x-for="tag in song.tags.slice(0, 2)" :key="tag">
-                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full" x-text="tag"></span>
+                            <!-- Artist (always visible) -->
+                            <div class="md:col-span-2 min-w-0">
+                                <span class="text-sm text-gray-500 dark:text-gray-400 truncate block" x-text="song.artist || '—'"></span>
+                            </div>
+                            <!-- Key badge (always visible) -->
+                            <div class="md:col-span-1 md:text-center">
+                                <span x-show="song.key" class="inline-block px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-mono rounded" x-text="song.key"></span>
+                                <span x-show="!song.key" class="text-xs text-gray-400">—</span>
+                            </div>
+                            <!-- BPM (hidden on mobile) -->
+                            <div class="hidden md:block md:col-span-1 text-center text-sm text-gray-500 dark:text-gray-400">
+                                <span x-text="song.bpm || '—'"></span>
+                            </div>
+                            <!-- Tags (hidden on mobile) -->
+                            <div class="hidden md:flex md:col-span-3 flex-wrap gap-1 min-w-0">
+                                <template x-for="tag in (song.tags || []).slice(0, 3)" :key="tag">
+                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full truncate max-w-[120px]" x-text="tag"></span>
                                 </template>
+                                <span x-show="song.tags && song.tags.length > 3" class="text-xs text-gray-400" x-text="'+' + (song.tags.length - 3)"></span>
                             </div>
-                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-                                <span x-text="(song.times_used || 0) + ' раз'"></span>
+                            <!-- Times used (hidden on mobile) -->
+                            <div class="hidden md:block md:col-span-1 text-center text-sm text-gray-500 dark:text-gray-400">
+                                <span x-text="(song.times_used || 0)"></span>
+                            </div>
+                            <!-- Mobile: secondary info row -->
+                            <div class="md:hidden flex items-center gap-3 text-xs text-gray-400 mt-0.5">
                                 <span x-show="song.bpm" x-text="song.bpm + ' BPM'"></span>
+                                <span x-text="(song.times_used || 0) + ' раз'"></span>
+                                <template x-for="tag in (song.tags || []).slice(0, 2)" :key="tag">
+                                    <span class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full" x-text="tag"></span>
+                                </template>
                             </div>
                         </div>
                     </template>
