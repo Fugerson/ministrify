@@ -430,12 +430,27 @@ class PersonController extends Controller
 
         // Handle photo upload with WebP conversion
         if ($request->hasFile('photo')) {
-            // Delete old photo
-            $this->imageService->delete($person->photo);
-            $validated['photo'] = $this->imageService->storeProfilePhoto(
-                $request->file('photo'),
-                'people'
-            );
+            try {
+                // Delete old photo
+                $this->imageService->delete($person->photo);
+                $validated['photo'] = $this->imageService->storeProfilePhoto(
+                    $request->file('photo'),
+                    'people'
+                );
+            } catch (\Exception $e) {
+                \Log::error('Photo upload failed in update', [
+                    'person_id' => $person->id,
+                    'file_name' => $request->file('photo')->getClientOriginalName(),
+                    'file_size' => $request->file('photo')->getSize(),
+                    'file_mime' => $request->file('photo')->getMimeType(),
+                    'error' => $e->getMessage(),
+                ]);
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Не вдалося обробити фото. Спробуйте інший файл (JPG/PNG).'], 422);
+                }
+                return back()->withErrors(['photo' => 'Не вдалося обробити фото. Спробуйте інший файл (JPG/PNG).']);
+            }
         } elseif ($request->input('remove_photo') === '1') {
             // Remove photo if requested
             $this->imageService->delete($person->photo);
@@ -1114,23 +1129,38 @@ class PersonController extends Controller
             'photo' => 'required|image|max:5120', // 5MB max
         ]);
 
-        // Delete old photo if exists
-        if ($person->photo) {
-            $this->imageService->delete($person->photo);
+        try {
+            // Delete old photo if exists
+            if ($person->photo) {
+                $this->imageService->delete($person->photo);
+            }
+
+            // Store new photo
+            $path = $this->imageService->storeProfilePhoto(
+                $request->file('photo'),
+                'people'
+            );
+
+            $person->update(['photo' => $path]);
+
+            return response()->json([
+                'success' => true,
+                'photo_url' => \Illuminate\Support\Facades\Storage::url($path),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Photo upload failed', [
+                'person_id' => $person->id,
+                'file_name' => $request->file('photo')->getClientOriginalName(),
+                'file_size' => $request->file('photo')->getSize(),
+                'file_mime' => $request->file('photo')->getMimeType(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Не вдалося обробити фото. Спробуйте інший файл (JPG/PNG).',
+            ], 422);
         }
-
-        // Store new photo
-        $path = $this->imageService->storeProfilePhoto(
-            $request->file('photo'),
-            'people'
-        );
-
-        $person->update(['photo' => $path]);
-
-        return response()->json([
-            'success' => true,
-            'photo_url' => \Illuminate\Support\Facades\Storage::url($path),
-        ]);
     }
 
     /**
