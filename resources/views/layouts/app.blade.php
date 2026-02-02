@@ -18,7 +18,6 @@
         // Handle back/forward cache - check if user is still authenticated
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
-                // Page was loaded from bfcache, verify auth
                 fetch('/api/auth-check', { credentials: 'same-origin' })
                     .then(r => r.json())
                     .then(data => {
@@ -29,6 +28,32 @@
                     .catch(() => window.location.reload());
             }
         });
+
+        // Global fetch interceptor — auto-reload on expired session (401/419)
+        (function() {
+            const originalFetch = window.fetch;
+            let reloading = false;
+            window.fetch = function(...args) {
+                return originalFetch.apply(this, args).then(response => {
+                    if ((response.status === 401 || response.status === 419) && !reloading) {
+                        reloading = true;
+                        window.location.reload();
+                    }
+                    return response;
+                });
+            };
+        })();
+
+        // Periodic session check for idle tabs (every 5 min)
+        setInterval(function() {
+            if (document.hidden) return;
+            fetch('/api/auth-check', { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.authenticated) window.location.href = '/login';
+                })
+                .catch(() => {});
+        }, 5 * 60 * 1000);
     </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
