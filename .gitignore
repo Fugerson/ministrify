@@ -21,6 +21,9 @@ yarn-error.log
 /.idea
 /.vscode
 /bootstrap/cache/*.php
+!/bootstrap/cache/.gitkeep
 /storage/framework/
+!/storage/framework/.gitkeep
 /storage/logs/
+!/storage/logs/.gitkeep
 .github/
