@@ -38,10 +38,16 @@ class SocialAuthController extends Controller
                 ->with('error', 'Не вдалося увійти через Google. Спробуйте ще раз.');
         }
 
-        // Find user by google_id or email
-        $user = User::where('google_id', $googleUser->getId())
+        // Find user by google_id or email (including soft-deleted)
+        $user = User::withTrashed()
+            ->where('google_id', $googleUser->getId())
             ->orWhere('email', $googleUser->getEmail())
             ->first();
+
+        // Restore if soft-deleted
+        if ($user && $user->trashed()) {
+            $user->restore();
+        }
 
         if ($user) {
             // Update google_id if not set (user registered via email before)
@@ -123,9 +129,12 @@ class SocialAuthController extends Controller
             return redirect()->route('join')->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
-        // Check if user with this email already exists (e.g. registered via email before)
-        $existingUser = User::where('email', $googleUser->getEmail())->first();
+        // Check if user with this email already exists (including soft-deleted)
+        $existingUser = User::withTrashed()->where('email', $googleUser->getEmail())->first();
         if ($existingUser) {
+            if ($existingUser->trashed()) {
+                $existingUser->restore();
+            }
             if (!$existingUser->google_id) {
                 $existingUser->update(['google_id' => $googleUser->getId()]);
             }
