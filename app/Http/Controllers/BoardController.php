@@ -166,7 +166,7 @@ class BoardController extends Controller
         $this->authorizeBoard($board);
         $board->delete();
 
-        return back()->with('success', 'Дошку видалено.');
+        return redirect()->route('boards.index')->with('success', 'Дошку видалено.');
     }
 
     public function archive(Board $board)

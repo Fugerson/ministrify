@@ -115,7 +115,7 @@ class GroupController extends Controller
 
         $group->delete();
 
-        return back()->with('success', 'Групу видалено.');
+        return redirect()->route('groups.index')->with('success', 'Групу видалено.');
     }
 
     public function addMember(Request $request, Group $group)

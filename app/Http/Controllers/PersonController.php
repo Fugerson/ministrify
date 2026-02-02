@@ -495,7 +495,7 @@ class PersonController extends Controller
 
         $person->delete();
 
-        return back()->with('success', 'Людину видалено.');
+        return redirect()->route('people.index')->with('success', 'Людину видалено.');
     }
 
     public function restore(Person $person)

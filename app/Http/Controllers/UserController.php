@@ -239,7 +239,7 @@ class UserController extends Controller
 
         $user->delete();
 
-        return back()->with('success', 'Користувача видалено.');
+        return redirect()->route('users.index')->with('success', 'Користувача видалено.');
     }
 
     public function sendInvite(User $user)

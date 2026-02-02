@@ -122,7 +122,7 @@ class ChecklistController extends Controller
 
         $template->delete();
 
-        return back()->with('success', 'Шаблон видалено.');
+        return redirect()->route('checklists.templates')->with('success', 'Шаблон видалено.');
     }
 
     // Event Checklists

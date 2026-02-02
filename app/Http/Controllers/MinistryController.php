@@ -220,7 +220,7 @@ class MinistryController extends Controller
 
         \App\Models\Church::clearMinistriesCache($churchId);
 
-        return back()->with('success', 'Служіння видалено.');
+        return redirect()->route('ministries.index')->with('success', 'Служіння видалено.');
     }
 
     public function addMember(Request $request, Ministry $ministry)
