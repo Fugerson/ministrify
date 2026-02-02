@@ -719,15 +719,15 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('calendar', [\App\Http\Controllers\BlockoutDateController::class, 'calendar'])->name('calendar');
     });
 
-    // Scheduling Preferences (volunteer scheduling preferences)
-    Route::prefix('scheduling-preferences')->name('scheduling-preferences.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\SchedulingPreferenceController::class, 'index'])->name('index');
-        Route::put('/', [\App\Http\Controllers\SchedulingPreferenceController::class, 'update'])->name('update');
-        Route::put('ministry/{ministry}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'updateMinistry'])->name('ministry.update');
-        Route::delete('ministry/{ministry}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'deleteMinistry'])->name('ministry.delete');
-        Route::put('position/{position}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'updatePosition'])->name('position.update');
-        Route::delete('position/{position}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'deletePosition'])->name('position.delete');
-    });
+    // Scheduling Preferences — temporarily disabled
+    // Route::prefix('scheduling-preferences')->name('scheduling-preferences.')->group(function () {
+    //     Route::get('/', [\App\Http\Controllers\SchedulingPreferenceController::class, 'index'])->name('index');
+    //     Route::put('/', [\App\Http\Controllers\SchedulingPreferenceController::class, 'update'])->name('update');
+    //     Route::put('ministry/{ministry}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'updateMinistry'])->name('ministry.update');
+    //     Route::delete('ministry/{ministry}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'deleteMinistry'])->name('ministry.delete');
+    //     Route::put('position/{position}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'updatePosition'])->name('position.update');
+    //     Route::delete('position/{position}', [\App\Http\Controllers\SchedulingPreferenceController::class, 'deletePosition'])->name('position.delete');
+    // });
 
     // Groups
     Route::resource('groups', GroupController::class);
