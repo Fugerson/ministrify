@@ -27,10 +27,21 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // First check credentials without logging in
-        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        // First check credentials without logging in (including soft-deleted users)
+        $user = \App\Models\User::withTrashed()->where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Restore if soft-deleted
+            if ($user->trashed()) {
+                $user->restore();
+
+                Log::channel('security')->info('Soft-deleted user restored via login', [
+                    'user_id' => $user->id,
+                    'email' => $credentials['email'],
+                    'ip' => $request->ip(),
+                ]);
+            }
+
             // Check if 2FA is enabled
             if ($user->two_factor_confirmed_at) {
                 // Store user ID in session and redirect to 2FA challenge

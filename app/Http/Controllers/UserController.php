@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -48,7 +49,7 @@ class UserController extends Controller
         // If person_id provided, name/email are optional (will be taken from Person)
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:users,email',
+            'email' => ['nullable', 'email', Rule::unique('users')->whereNull('deleted_at')],
             'church_role_id' => ['required', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
             'person_id' => 'nullable|exists:people,id',
         ]);
@@ -69,7 +70,7 @@ class UserController extends Controller
                 return back()->withInput()->withErrors(['person_id' => 'Ця людина не має email. Додайте email в профілі або створіть користувача без прив\'язки.']);
             }
 
-            // Check if email is already taken by another user
+            // Check if email is already taken by another active user
             if (User::where('email', $email)->exists()) {
                 return back()->withInput()->withErrors(['person_id' => 'Користувач з таким email вже існує.']);
             }
@@ -83,13 +84,33 @@ class UserController extends Controller
         // Generate secure random password (user will reset via email)
         $password = Str::random(32);
 
-        $user = User::create([
-            'church_id' => $church->id,
-            'name' => $name,
-            'email' => $email,
-            'password' => Hash::make($password),
-            'church_role_id' => $validated['church_role_id'],
-        ]);
+        // Restore soft-deleted user or create new
+        $trashedUser = User::onlyTrashed()->where('email', $email)->first();
+
+        if ($trashedUser) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'church_id' => $church->id,
+                'name' => $name,
+                'password' => Hash::make($password),
+                'church_role_id' => $validated['church_role_id'],
+            ]);
+            $user = $trashedUser;
+
+            Log::channel('security')->info('Soft-deleted user restored via admin user creation', [
+                'user_id' => $user->id,
+                'email' => $email,
+                'church_id' => $church->id,
+            ]);
+        } else {
+            $user = User::create([
+                'church_id' => $church->id,
+                'name' => $name,
+                'email' => $email,
+                'password' => Hash::make($password),
+                'church_role_id' => $validated['church_role_id'],
+            ]);
+        }
 
         // Link to person if provided
         if (!empty($validated['person_id'])) {

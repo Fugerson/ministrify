@@ -14,7 +14,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class RegisterController extends Controller
 {
@@ -44,7 +46,7 @@ class RegisterController extends Controller
         $request->validate([
             'church_id' => ['required', 'exists:churches,id'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->whereNull('deleted_at')],
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'confirmed', new SecurePassword],
         ]);
@@ -54,6 +56,32 @@ class RegisterController extends Controller
         // Check if self-registration is enabled for this church
         if ($church->getSetting('self_registration_enabled') === false) {
             return back()->with('error', 'Ця церква не приймає нові реєстрації.');
+        }
+
+        // Check if a soft-deleted user with this email exists — restore instead of creating new
+        $trashedUser = User::onlyTrashed()->where('email', $request->email)->first();
+
+        if ($trashedUser) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'church_id' => $church->id,
+                'name' => $request->name,
+                'password' => Hash::make($request->password),
+                'church_role_id' => null,
+                'onboarding_completed' => true,
+            ]);
+
+            Log::channel('security')->info('Soft-deleted user restored via join', [
+                'user_id' => $trashedUser->id,
+                'email' => $request->email,
+                'church_id' => $church->id,
+                'ip' => $request->ip(),
+            ]);
+
+            Auth::login($trashedUser);
+
+            return redirect()->route('dashboard')
+                ->with('success', 'Ласкаво просимо назад! Ваш акаунт відновлено.');
         }
 
         DB::transaction(function () use ($request, $church) {
@@ -99,7 +127,7 @@ class RegisterController extends Controller
             'church_name' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->whereNull('deleted_at')],
             'password' => ['required', 'string', 'confirmed', new SecurePassword],
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
@@ -126,16 +154,36 @@ class RegisterController extends Controller
                 ],
             ]);
 
-            // Create admin user
+            // Restore soft-deleted user or create new admin user
             $adminRole = $church->churchRoles()->where('is_admin_role', true)->first();
-            $user = User::create([
-                'church_id' => $church->id,
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => 'admin',
-                'church_role_id' => $adminRole?->id,
-            ]);
+            $trashedUser = User::onlyTrashed()->where('email', $request->email)->first();
+
+            if ($trashedUser) {
+                $trashedUser->restore();
+                $trashedUser->update([
+                    'church_id' => $church->id,
+                    'name' => $request->name,
+                    'password' => Hash::make($request->password),
+                    'role' => 'admin',
+                    'church_role_id' => $adminRole?->id,
+                ]);
+                $user = $trashedUser;
+
+                Log::channel('security')->info('Soft-deleted user restored via church registration', [
+                    'user_id' => $user->id,
+                    'email' => $request->email,
+                    'church_id' => $church->id,
+                ]);
+            } else {
+                $user = User::create([
+                    'church_id' => $church->id,
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'role' => 'admin',
+                    'church_role_id' => $adminRole?->id,
+                ]);
+            }
 
             // Create default tags
             $defaultTags = [

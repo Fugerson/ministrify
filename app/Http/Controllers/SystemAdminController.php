@@ -14,8 +14,10 @@ use App\Models\AdminTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use App\Mail\SupportTicketReply;
 
 class SystemAdminController extends Controller
@@ -366,7 +368,7 @@ class SystemAdminController extends Controller
             'city' => 'required|string|max:255',
             'address' => 'nullable|string|max:500',
             'admin_name' => 'required|string|max:255',
-            'admin_email' => 'required|email|unique:users,email',
+            'admin_email' => ['required', 'email', Rule::unique('users')->whereNull('deleted_at')],
             'admin_password' => 'required|min:8',
         ]);
 
@@ -378,16 +380,36 @@ class SystemAdminController extends Controller
             'slug' => \Illuminate\Support\Str::slug($validated['name']),
         ]);
 
-        // Create admin user
+        // Restore soft-deleted user or create new admin user
         $adminRole = $church->churchRoles()->where('is_admin_role', true)->first();
-        $user = User::create([
-            'church_id' => $church->id,
-            'name' => $validated['admin_name'],
-            'email' => $validated['admin_email'],
-            'password' => Hash::make($validated['admin_password']),
-            'role' => 'admin',
-            'church_role_id' => $adminRole?->id,
-        ]);
+        $trashedUser = User::onlyTrashed()->where('email', $validated['admin_email'])->first();
+
+        if ($trashedUser) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'church_id' => $church->id,
+                'name' => $validated['admin_name'],
+                'password' => Hash::make($validated['admin_password']),
+                'role' => 'admin',
+                'church_role_id' => $adminRole?->id,
+            ]);
+            $user = $trashedUser;
+
+            Log::channel('security')->info('Soft-deleted user restored via system admin church creation', [
+                'user_id' => $user->id,
+                'email' => $validated['admin_email'],
+                'church_id' => $church->id,
+            ]);
+        } else {
+            $user = User::create([
+                'church_id' => $church->id,
+                'name' => $validated['admin_name'],
+                'email' => $validated['admin_email'],
+                'password' => Hash::make($validated['admin_password']),
+                'role' => 'admin',
+                'church_role_id' => $adminRole?->id,
+            ]);
+        }
 
         return redirect()->route('system.churches.index')
             ->with('success', "Церкву \"{$church->name}\" створено з адміністратором {$user->email}");

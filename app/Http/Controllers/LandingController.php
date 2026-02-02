@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Church;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class LandingController extends Controller
 {
@@ -118,7 +120,7 @@ class LandingController extends Controller
             'church_name' => 'required|string|max:255',
             'city' => 'required|string|max:100',
             'admin_name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', Rule::unique('users')->whereNull('deleted_at')],
             'phone' => 'nullable|string|max:20',
             'password' => 'required|min:8|confirmed',
         ]);
@@ -130,17 +132,38 @@ class LandingController extends Controller
             'slug' => \Str::slug($validated['church_name']) . '-' . \Str::random(4),
         ]);
 
-        // Create admin user
+        // Restore soft-deleted user or create new admin user
         $adminRole = $church->churchRoles()->where('is_admin_role', true)->first();
-        $user = \App\Models\User::create([
-            'name' => $validated['admin_name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'password' => bcrypt($validated['password']),
-            'church_id' => $church->id,
-            'role' => 'admin',
-            'church_role_id' => $adminRole?->id,
-        ]);
+        $trashedUser = \App\Models\User::onlyTrashed()->where('email', $validated['email'])->first();
+
+        if ($trashedUser) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'name' => $validated['admin_name'],
+                'phone' => $validated['phone'] ?? null,
+                'password' => bcrypt($validated['password']),
+                'church_id' => $church->id,
+                'role' => 'admin',
+                'church_role_id' => $adminRole?->id,
+            ]);
+            $user = $trashedUser;
+
+            Log::channel('security')->info('Soft-deleted user restored via landing registration', [
+                'user_id' => $user->id,
+                'email' => $validated['email'],
+                'church_id' => $church->id,
+            ]);
+        } else {
+            $user = \App\Models\User::create([
+                'name' => $validated['admin_name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+                'password' => bcrypt($validated['password']),
+                'church_id' => $church->id,
+                'role' => 'admin',
+                'church_role_id' => $adminRole?->id,
+            ]);
+        }
 
         // Create person record for admin
         \App\Models\Person::create([

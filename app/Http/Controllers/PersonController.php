@@ -12,9 +12,11 @@ use App\Imports\PeopleImport;
 use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\ImageService;
 
@@ -805,7 +807,7 @@ class PersonController extends Controller
         }
 
         $validated = $request->validate([
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', Rule::unique('users')->whereNull('deleted_at')],
             'church_role_id' => 'required|exists:church_roles,id',
         ]);
 
@@ -823,15 +825,35 @@ class PersonController extends Controller
         // Generate random password
         $password = Str::random(10);
 
-        // Create user with church_role_id
-        $user = User::create([
-            'church_id' => $church->id,
-            'name' => $person->full_name,
-            'email' => $validated['email'],
-            'password' => Hash::make($password),
-            'church_role_id' => $validated['church_role_id'],
-            'onboarding_completed' => true,
-        ]);
+        // Restore soft-deleted user or create new
+        $trashedUser = User::onlyTrashed()->where('email', $validated['email'])->first();
+
+        if ($trashedUser) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'church_id' => $church->id,
+                'name' => $person->full_name,
+                'password' => Hash::make($password),
+                'church_role_id' => $validated['church_role_id'],
+                'onboarding_completed' => true,
+            ]);
+            $user = $trashedUser;
+
+            Log::channel('security')->info('Soft-deleted user restored via createAccount', [
+                'user_id' => $user->id,
+                'email' => $validated['email'],
+                'church_id' => $church->id,
+            ]);
+        } else {
+            $user = User::create([
+                'church_id' => $church->id,
+                'name' => $person->full_name,
+                'email' => $validated['email'],
+                'password' => Hash::make($password),
+                'church_role_id' => $validated['church_role_id'],
+                'onboarding_completed' => true,
+            ]);
+        }
 
         // Link person to user
         $person->update(['user_id' => $user->id]);
