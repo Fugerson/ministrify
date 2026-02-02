@@ -1142,6 +1142,9 @@ function personProfile() {
                 });
 
                 if (response.ok) {
+                    // Clear file input so photo doesn't re-upload on next save
+                    const fileInput = form.querySelector('input[type="file"]');
+                    if (fileInput) fileInput.value = '';
                     this.saveStatus = 'saved';
                     setTimeout(() => {
                         this.saveStatus = 'idle';

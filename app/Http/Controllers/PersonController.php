@@ -412,7 +412,7 @@ class PersonController extends Controller
                 'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
                 'church_role_id' => 'nullable|exists:church_roles,id',
                 'notes' => 'nullable|string',
-                'photo' => 'nullable|image|max:2048',
+                'photo' => 'nullable|image|max:5120',
                 'tags' => 'nullable|array',
                 'ministries' => 'nullable|array',
             ]);
@@ -424,7 +424,7 @@ class PersonController extends Controller
                 'telegram_username' => 'nullable|string|max:255',
                 'address' => 'nullable|string|max:500',
                 'birth_date' => 'nullable|date',
-                'photo' => 'nullable|image|max:2048',
+                'photo' => 'nullable|image|max:5120',
             ]);
         }
 
@@ -445,11 +445,7 @@ class PersonController extends Controller
                     'file_mime' => $request->file('photo')->getMimeType(),
                     'error' => $e->getMessage(),
                 ]);
-
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json(['success' => false, 'message' => 'Не вдалося обробити фото. Спробуйте інший файл (JPG/PNG).'], 422);
-                }
-                return back()->withErrors(['photo' => 'Не вдалося обробити фото. Спробуйте інший файл (JPG/PNG).']);
+                // Don't return early — continue saving other fields (tags, etc.)
             }
         } elseif ($request->input('remove_photo') === '1') {
             // Remove photo if requested
