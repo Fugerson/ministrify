@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Song;
 use App\Models\Event;
+use App\Imports\SongsImport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SongController extends Controller
 {
@@ -321,5 +323,43 @@ class SongController extends Controller
         }
 
         return back()->with('success', 'Пісню видалено з події.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        $church = $this->getCurrentChurch();
+
+        try {
+            Excel::import(new SongsImport($church->id, auth()->id()), $request->file('file'));
+            return back()->with('success', 'Пісні успішно імпортовано.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Помилка імпорту: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="songs_template.csv"',
+        ];
+
+        $columns = ['title', 'artist', 'key', 'bpm', 'lyrics', 'chords', 'ccli_number', 'youtube_url', 'spotify_url', 'tags', 'notes'];
+        $example = ['Amazing Grace', 'John Newton', 'G', '72', '', '', '', '', '', 'worship,hymn', ''];
+
+        $callback = function () use ($columns, $example) {
+            $file = fopen('php://output', 'w');
+            // UTF-8 BOM for Excel compatibility
+            fwrite($file, "\xEF\xBB\xBF");
+            fputcsv($file, $columns);
+            fputcsv($file, $example);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
