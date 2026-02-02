@@ -870,7 +870,9 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('/', [\App\Http\Controllers\SongController::class, 'index'])->name('index');
         Route::get('create', [\App\Http\Controllers\SongController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\SongController::class, 'store'])->name('store');
-        Route::post('import', [\App\Http\Controllers\SongController::class, 'import'])->name('import');
+        Route::get('import', [\App\Http\Controllers\SongController::class, 'importPage'])->name('import.page');
+        Route::post('import/preview', [\App\Http\Controllers\SongController::class, 'importPreview'])->name('import.preview');
+        Route::post('import/process', [\App\Http\Controllers\SongController::class, 'importProcess'])->name('import.process');
         Route::get('template', [\App\Http\Controllers\SongController::class, 'downloadTemplate'])->name('template');
         Route::get('{song}', [\App\Http\Controllers\SongController::class, 'show'])->name('show');
         Route::get('{song}/edit', [\App\Http\Controllers\SongController::class, 'edit'])->name('edit');

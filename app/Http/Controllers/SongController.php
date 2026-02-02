@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Song;
 use App\Models\Event;
-use App\Imports\SongsImport;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
+use League\Csv\Reader;
 
 class SongController extends Controller
 {
@@ -341,20 +341,224 @@ class SongController extends Controller
         return back()->with('success', 'Пісню видалено з події.');
     }
 
-    public function import(Request $request)
+    public function importPage()
+    {
+        return view('songs.import');
+    }
+
+    public function importPreview(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:10240',
+        ]);
+
+        $file = $request->file('file');
+        $content = file_get_contents($file->getRealPath());
+
+        // Remove UTF-8 BOM if present
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
+
+        // Detect delimiter
+        $firstLine = strtok($content, "\n");
+        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ",")) ? "\t" : ",";
+
+        $csv = Reader::createFromString($content);
+        $csv->setDelimiter($delimiter);
+        $csv->setHeaderOffset(0);
+
+        $headers = $csv->getHeader();
+        $records = iterator_to_array($csv->getRecords());
+        $preview = array_slice($records, 0, 10);
+
+        $autoMappings = $this->detectSongMappings($headers);
+
+        return response()->json([
+            'success' => true,
+            'headers' => $headers,
+            'preview' => array_values($preview),
+            'totalRows' => count($records),
+            'autoMappings' => $autoMappings,
+        ]);
+    }
+
+    public function importProcess(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:10240',
+            'mappings' => 'required|array',
         ]);
 
         $church = $this->getCurrentChurch();
+        $mappings = $request->input('mappings');
 
+        $file = $request->file('file');
+        $content = file_get_contents($file->getRealPath());
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
+
+        $firstLine = strtok($content, "\n");
+        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ",")) ? "\t" : ",";
+
+        $csv = Reader::createFromString($content);
+        $csv->setDelimiter($delimiter);
+        $csv->setHeaderOffset(0);
+
+        $records = iterator_to_array($csv->getRecords());
+
+        DB::beginTransaction();
         try {
-            Excel::import(new SongsImport($church->id, auth()->id()), $request->file('file'));
-            return back()->with('success', 'Пісні успішно імпортовано.');
+            $imported = 0;
+            $skipped = 0;
+            $errors = [];
+
+            foreach ($records as $index => $row) {
+                try {
+                    $title = $this->getSongValue($row, $mappings, 'title');
+                    if (empty($title)) {
+                        $skipped++;
+                        continue;
+                    }
+
+                    $link = $this->getSongValue($row, $mappings, 'link');
+                    $youtubeUrl = null;
+                    $spotifyUrl = null;
+                    $extraNotes = null;
+
+                    if ($link) {
+                        if (preg_match('/youtube\.com|youtu\.be/i', $link)) {
+                            $youtubeUrl = $link;
+                        } elseif (preg_match('/spotify\.com/i', $link)) {
+                            $spotifyUrl = $link;
+                        } else {
+                            $extraNotes = $link;
+                        }
+                    }
+
+                    // Validate key
+                    $key = $this->getSongValue($row, $mappings, 'key');
+                    if ($key && !isset(Song::KEYS[$key])) {
+                        // Try extracting from link fragment
+                        $key = null;
+                    }
+                    if (!$key && $link) {
+                        $key = $this->extractKeyFromUrl($link);
+                    }
+
+                    // Validate BPM
+                    $bpm = $this->getSongValue($row, $mappings, 'bpm');
+                    if ($bpm) {
+                        $bpm = (int) $bpm;
+                        if ($bpm < 30 || $bpm > 300) $bpm = null;
+                    }
+
+                    // Parse tags
+                    $tagsRaw = $this->getSongValue($row, $mappings, 'tags');
+                    $tags = null;
+                    if ($tagsRaw) {
+                        $tags = array_values(array_unique(array_filter(
+                            array_map('trim', preg_split('/[,;|]/', $tagsRaw))
+                        )));
+                        if (empty($tags)) $tags = null;
+                    }
+
+                    // Notes
+                    $notes = $this->getSongValue($row, $mappings, 'notes');
+                    if ($extraNotes) {
+                        $notes = $notes ? $notes . "\n" . $extraNotes : $extraNotes;
+                    }
+
+                    Song::updateOrCreate(
+                        [
+                            'church_id' => $church->id,
+                            'title' => $title,
+                        ],
+                        [
+                            'artist' => $this->getSongValue($row, $mappings, 'artist'),
+                            'key' => $key,
+                            'bpm' => $bpm,
+                            'youtube_url' => $youtubeUrl,
+                            'spotify_url' => $spotifyUrl,
+                            'tags' => $tags,
+                            'lyrics' => $this->getSongValue($row, $mappings, 'lyrics'),
+                            'chords' => $this->getSongValue($row, $mappings, 'chords'),
+                            'notes' => $notes,
+                            'created_by' => auth()->id(),
+                        ]
+                    );
+                    $imported++;
+                } catch (\Exception $e) {
+                    $errors[] = "Рядок " . ($index + 2) . ": " . $e->getMessage();
+                    if (count($errors) > 10) {
+                        $errors[] = "... та інші помилки";
+                        break;
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'imported' => $imported,
+                'skipped' => $skipped,
+                'errors' => $errors,
+            ]);
         } catch (\Exception $e) {
-            return back()->with('error', 'Помилка імпорту: ' . $e->getMessage());
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
         }
+    }
+
+    protected function detectSongMappings(array $headers): array
+    {
+        $mappings = [];
+        $fields = [
+            'title' => ['title', 'name', 'song', 'назва', 'пісня', 'песня', 'наименование'],
+            'artist' => ['artist', 'author', 'автор', 'виконавець', 'исполнитель'],
+            'key' => ['key', 'тональність', 'тональность', 'tonality'],
+            'bpm' => ['bpm', 'tempo', 'темп'],
+            'link' => ['link', 'url', 'посилання', 'ссылка', 'лінк'],
+            'tags' => ['tags', 'tag', 'category', 'теги', 'тег', 'категорія', 'статус', 'категория'],
+            'lyrics' => ['lyrics', 'text', 'words', 'текст', 'слова'],
+            'chords' => ['chords', 'chord', 'акорди', 'аккорды'],
+            'notes' => ['notes', 'comment', 'нотатки', 'примітки', 'заметки'],
+        ];
+
+        foreach ($headers as $header) {
+            $headerLower = mb_strtolower(trim($header));
+            foreach ($fields as $field => $patterns) {
+                foreach ($patterns as $pattern) {
+                    if (str_contains($headerLower, $pattern)) {
+                        if (!isset($mappings[$field])) {
+                            $mappings[$field] = $header;
+                        }
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        return $mappings;
+    }
+
+    protected function getSongValue(array $row, array $mappings, string $field): ?string
+    {
+        if (empty($mappings[$field])) {
+            return null;
+        }
+        $value = $row[$mappings[$field]] ?? null;
+        return $value ? trim($value) : null;
+    }
+
+    protected function extractKeyFromUrl(?string $url): ?string
+    {
+        if (!$url) return null;
+        if (preg_match('/#([A-G][#b]?m?)/', $url, $m)) {
+            return isset(Song::KEYS[$m[1]]) ? $m[1] : null;
+        }
+        return null;
     }
 
     public function downloadTemplate()

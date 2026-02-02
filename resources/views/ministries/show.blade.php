@@ -1116,13 +1116,13 @@
                     </div>
                     <div class="flex items-center gap-2">
                         @can('manage-ministry', $ministry)
-                        <button @click="showImportModal = true"
+                        <a href="{{ route('songs.import.page') }}"
                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                             </svg>
                             Імпорт
-                        </button>
+                        </a>
                         <button @click="openCreateModal()"
                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1131,78 +1131,6 @@
                             Додати пісню
                         </button>
                         @endcan
-                    </div>
-                </div>
-
-                <!-- Import Modal -->
-                <div x-show="showImportModal" x-cloak
-                     class="fixed inset-0 z-50 overflow-y-auto"
-                     @keydown.escape.window="showImportModal = false">
-                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-                        <div x-show="showImportModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
-                             x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
-                             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                             class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
-                             @click="showImportModal = false"></div>
-
-                        <div x-show="showImportModal" x-transition:enter="ease-out duration-300"
-                             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                             x-transition:leave="ease-in duration-200"
-                             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                             class="relative inline-block w-full max-w-lg p-6 my-8 text-left align-middle bg-white dark:bg-gray-800 rounded-2xl shadow-xl transform transition-all">
-
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Імпорт пісень</h3>
-                                <button @click="showImportModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <form action="{{ route('songs.import') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="space-y-4">
-                                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                                        <p class="mb-2">Завантажте CSV або Excel файл з піснями. Колонки розпізнаються автоматично:</p>
-                                        <p class="font-mono text-xs bg-gray-50 dark:bg-gray-700 p-2 rounded leading-relaxed">title / name / назва, artist / автор, key / тональність, bpm, link / url, tags / статус / категорія, lyrics / текст, chords / акорди, notes / нотатки</p>
-                                        <p class="mt-2 text-xs">Посилання YouTube/Spotify розподіляються автоматично. Тональність витягується з URL (напр. <span class="font-mono">#G</span>).</p>
-                                    </div>
-
-                                    <div>
-                                        <a href="{{ route('songs.template') }}" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 underline">
-                                            Завантажити шаблон CSV
-                                        </a>
-                                    </div>
-
-                                    <div>
-                                        <input type="file" name="file" accept=".csv,.xlsx,.xls" required
-                                               class="block w-full text-sm text-gray-500 dark:text-gray-400
-                                                      file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-                                                      file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700
-                                                      dark:file:bg-primary-900/30 dark:file:text-primary-400
-                                                      hover:file:bg-primary-100 dark:hover:file:bg-primary-900/50">
-                                    </div>
-
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                                        Пісні з однаковою назвою будуть оновлені, а не продубльовані.
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-end gap-3 mt-6">
-                                    <button type="button" @click="showImportModal = false"
-                                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                                        Скасувати
-                                    </button>
-                                    <button type="submit"
-                                            class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
-                                        Імпортувати
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
                     </div>
                 </div>
 
@@ -2170,7 +2098,6 @@ function songsLibrary() {
             this.keyDropdownOpen = false;
         },
         expandedSong: null,
-        showImportModal: false,
         showModal: false,
         editingId: null,
         saving: false,
