@@ -112,9 +112,20 @@ class UserController extends Controller
             ]);
         }
 
-        // Link to person if provided
+        // Link to person if provided, otherwise create new Person (if not exists)
         if (!empty($validated['person_id'])) {
             $person->update(['user_id' => $user->id]);
+        } elseif (!$user->person) {
+            // Create new Person for user only if doesn't already exist
+            $nameParts = explode(' ', $name, 2);
+            Person::create([
+                'church_id' => $church->id,
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'email' => $email,
+                'membership_status' => 'member',
+            ]);
         }
 
         // Try to send password reset link

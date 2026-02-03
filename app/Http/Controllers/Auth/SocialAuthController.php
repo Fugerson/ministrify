@@ -51,6 +51,19 @@ class SocialAuthController extends Controller
                 'church_role_id' => null,
             ]);
 
+            // Create Person record if not exists
+            if ($user->church_id && !$user->person) {
+                $nameParts = explode(' ', $googleUser->getName(), 2);
+                \App\Models\Person::create([
+                    'church_id' => $user->church_id,
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $googleUser->getEmail(),
+                    'membership_status' => 'newcomer',
+                ]);
+            }
+
             Log::channel('security')->info('Soft-deleted user restored via Google login', [
                 'user_id' => $user->id,
                 'email' => $googleUser->getEmail(),
@@ -159,6 +172,20 @@ class SocialAuthController extends Controller
             if (!$existingUser->hasVerifiedEmail()) {
                 $existingUser->markEmailAsVerified();
             }
+
+            // Create Person record if not exists
+            if (!$existingUser->person) {
+                $nameParts = explode(' ', $googleUser->getName(), 2);
+                \App\Models\Person::create([
+                    'church_id' => $church->id,
+                    'user_id' => $existingUser->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $googleUser->getEmail(),
+                    'membership_status' => 'newcomer',
+                ]);
+            }
+
             Auth::login($existingUser, true);
             $request->session()->regenerate();
             return redirect()->route('dashboard');
@@ -270,28 +297,45 @@ class SocialAuthController extends Controller
             ->where('is_admin_role', true)
             ->first();
 
-        // Create admin user
-        $user = User::create([
-            'church_id' => $church->id,
-            'name' => $googleUser['name'],
-            'email' => $googleUser['email'],
-            'google_id' => $googleUser['id'],
-            'password' => bcrypt(\Illuminate\Support\Str::random(32)),
-            'email_verified_at' => now(),
-            'role' => 'admin',
-            'church_role_id' => $adminRole?->id,
-        ]);
+        // Restore soft-deleted user or create new admin user
+        $trashedUser = User::onlyTrashed()->where('email', $googleUser['email'])->first();
 
-        // Create Person record for admin
-        $nameParts = explode(' ', $googleUser['name'], 2);
-        \App\Models\Person::create([
-            'church_id' => $church->id,
-            'user_id' => $user->id,
-            'first_name' => $nameParts[0],
-            'last_name' => $nameParts[1] ?? '',
-            'email' => $googleUser['email'],
-            'membership_status' => 'member',
-        ]);
+        if ($trashedUser) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'church_id' => $church->id,
+                'name' => $googleUser['name'],
+                'google_id' => $googleUser['id'],
+                'email_verified_at' => now(),
+                'role' => 'admin',
+                'church_role_id' => $adminRole?->id,
+            ]);
+            $user = $trashedUser;
+        } else {
+            $user = User::create([
+                'church_id' => $church->id,
+                'name' => $googleUser['name'],
+                'email' => $googleUser['email'],
+                'google_id' => $googleUser['id'],
+                'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+                'email_verified_at' => now(),
+                'role' => 'admin',
+                'church_role_id' => $adminRole?->id,
+            ]);
+        }
+
+        // Create Person record for admin (if not already exists)
+        if (!$user->person) {
+            $nameParts = explode(' ', $googleUser['name'], 2);
+            \App\Models\Person::create([
+                'church_id' => $church->id,
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'email' => $googleUser['email'],
+                'membership_status' => 'member',
+            ]);
+        }
 
         // Create default tags
         $defaultTags = [

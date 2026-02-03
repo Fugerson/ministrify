@@ -38,9 +38,18 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Check if user has ANY church role assigned (not a pending self-registered user)
-        // Super admins always have access
+        // Super admins always have access (whether impersonating a church or not)
         Blade::if('hasChurchRole', function () {
-            return auth()->check() && (auth()->user()->is_super_admin || auth()->user()->churchRole !== null);
+            if (!auth()->check()) {
+                return false;
+            }
+            $user = auth()->user();
+            // Super admins always have access
+            if ($user->isSuperAdmin()) {
+                return true;
+            }
+            // Regular users need a church role
+            return $user->churchRole !== null;
         });
     }
 }

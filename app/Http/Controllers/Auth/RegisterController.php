@@ -71,6 +71,20 @@ class RegisterController extends Controller
                 'onboarding_completed' => true,
             ]);
 
+            // Create Person record if not exists
+            if (!$trashedUser->person) {
+                $nameParts = explode(' ', $request->name, 2);
+                Person::create([
+                    'church_id' => $church->id,
+                    'user_id' => $trashedUser->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'membership_status' => 'newcomer',
+                ]);
+            }
+
             Log::channel('security')->info('Soft-deleted user restored via join', [
                 'user_id' => $trashedUser->id,
                 'email' => $request->email,
@@ -189,17 +203,19 @@ class RegisterController extends Controller
                 ]);
             }
 
-            // Create Person record for admin
-            $nameParts = explode(' ', $request->name, 2);
-            Person::create([
-                'church_id' => $church->id,
-                'user_id' => $user->id,
-                'first_name' => $nameParts[0],
-                'last_name' => $nameParts[1] ?? '',
-                'email' => $request->email,
-                'phone' => $request->phone ?? null,
-                'membership_status' => 'member',
-            ]);
+            // Create Person record for admin (if not already exists)
+            if (!$user->person) {
+                $nameParts = explode(' ', $request->name, 2);
+                Person::create([
+                    'church_id' => $church->id,
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $request->email,
+                    'phone' => $request->phone ?? null,
+                    'membership_status' => 'member',
+                ]);
+            }
 
             // Create default tags
             $defaultTags = [

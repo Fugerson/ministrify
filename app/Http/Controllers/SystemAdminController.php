@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Church;
+use App\Models\ChurchRole;
 use App\Models\User;
 use App\Models\Person;
 use App\Models\Event;
@@ -426,16 +427,18 @@ class SystemAdminController extends Controller
             ]);
         }
 
-        // Create Person record for admin
-        $nameParts = explode(' ', $validated['admin_name'], 2);
-        \App\Models\Person::create([
-            'church_id' => $church->id,
-            'user_id' => $user->id,
-            'first_name' => $nameParts[0],
-            'last_name' => $nameParts[1] ?? '',
-            'email' => $validated['admin_email'],
-            'membership_status' => 'member',
-        ]);
+        // Create Person record for admin (if not already exists)
+        if (!$user->person) {
+            $nameParts = explode(' ', $validated['admin_name'], 2);
+            \App\Models\Person::create([
+                'church_id' => $church->id,
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'email' => $validated['admin_email'],
+                'membership_status' => 'member',
+            ]);
+        }
 
         return redirect()->route('system.churches.index')
             ->with('success', "Церкву \"{$church->name}\" створено з адміністратором {$user->email}");

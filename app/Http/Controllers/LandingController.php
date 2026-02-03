@@ -169,17 +169,19 @@ class LandingController extends Controller
             ]);
         }
 
-        // Create person record for admin
-        \App\Models\Person::create([
-            'church_id' => $church->id,
-            'user_id' => $user->id,
-            'first_name' => explode(' ', $validated['admin_name'])[0],
-            'last_name' => explode(' ', $validated['admin_name'])[1] ?? '',
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'church_role' => 'admin',
-            'membership_status' => 'member',
-        ]);
+        // Create person record for admin (if not already exists)
+        if (!$user->person) {
+            \App\Models\Person::create([
+                'church_id' => $church->id,
+                'user_id' => $user->id,
+                'first_name' => explode(' ', $validated['admin_name'])[0],
+                'last_name' => explode(' ', $validated['admin_name'])[1] ?? '',
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+                'church_role' => 'admin',
+                'membership_status' => 'member',
+            ]);
+        }
 
         auth()->login($user);
 
