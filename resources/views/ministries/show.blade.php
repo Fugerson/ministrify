@@ -2031,8 +2031,8 @@
 
                     <!-- Worship Roles Settings -->
                     <div x-data="worshipRolesManager()">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ролі музичного служіння</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Налаштуйте інструменти та ролі для команди прославлення</p>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Роли музыкального служения</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Настройте инструменты и роли для команды прославления</p>
 
                         <!-- Roles List -->
                         <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl">
@@ -2055,7 +2055,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                                     </svg>
                                                 </button>
-                                                <form action="{{ route('ministries.worship-roles.destroy', [$ministry, $role]) }}" method="POST" onsubmit="return confirm('Видалити роль?')" class="inline">
+                                                <form action="{{ route('ministries.worship-roles.destroy', [$ministry, $role]) }}" method="POST" onsubmit="return confirm('Удалить роль?')" class="inline">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded">
@@ -2075,7 +2075,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                         </svg>
                                     </div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Немає ролей. Додайте ролі нижче.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Нет ролей. Добавьте роли ниже.</p>
                                 </div>
                             @endif
 
@@ -2083,14 +2083,14 @@
                             <div class="p-3 border-t border-gray-200 dark:border-gray-600">
                                 <form action="{{ route('ministries.worship-roles.store', $ministry) }}" method="POST" class="flex flex-wrap gap-2">
                                     @csrf
-                                    <input type="text" name="name" placeholder="Назва ролі (напр. Вокал, Гітара)" required
+                                    <input type="text" name="name" placeholder="Название роли (напр. Вокал, Гитара)" required
                                            class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     <input type="text" name="icon" placeholder="🎵" maxlength="5"
                                            class="w-14 px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
                                     <input type="color" name="color" value="#6366f1"
                                            class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <button type="submit" class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
-                                        Додати
+                                        Добавить
                                     </button>
                                 </form>
                             </div>
@@ -2099,9 +2099,9 @@
                         <!-- Suggested Roles -->
                         @if($worshipRoles->count() === 0)
                         <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                            <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Рекомендовані ролі:</h4>
+                            <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Рекомендуемые роли:</h4>
                             <div class="flex flex-wrap gap-2">
-                                @foreach(['🎤 Ведучий вокал', '🎤 Бек-вокал', '🎸 Акустична гітара', '🎸 Електрогітара', '🎸 Бас', '🎹 Клавіші', '🥁 Барабани', '🎚 Звук', '💻 Медіа'] as $suggestion)
+                                @foreach(['🎤 Ведущий вокал', '🎤 Бэк-вокал', '🎸 Акустическая гитара', '🎸 Электрогитара', '🎸 Бас', '🎹 Клавиши', '🥁 Барабаны', '🎚 Звук', '💻 Медиа'] as $suggestion)
                                     <button type="button" @click="addSuggested('{{ $suggestion }}')"
                                             class="px-2.5 py-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 transition-colors">
                                         {{ $suggestion }}
@@ -2114,24 +2114,24 @@
                         <!-- Edit Role Modal -->
                         <div x-show="showEditModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showEditModal = false">
                             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md mx-4" @click.stop>
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редагувати роль</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редактировать роль</h3>
                                 <form :action="editFormAction" method="POST">
                                     @csrf
                                     @method('PUT')
                                     <div class="space-y-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Название</label>
                                             <input type="text" name="name" x-model="editName" required
                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Іконка</label>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Иконка</label>
                                                 <input type="text" name="icon" x-model="editIcon" maxlength="5"
                                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Цвет</label>
                                                 <input type="color" name="color" x-model="editColor"
                                                        class="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
                                             </div>
@@ -2139,10 +2139,10 @@
                                     </div>
                                     <div class="flex justify-end gap-2 mt-6">
                                         <button type="button" @click="showEditModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                                            Скасувати
+                                            Отмена
                                         </button>
                                         <button type="submit" class="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors">
-                                            Зберегти
+                                            Сохранить
                                         </button>
                                     </div>
                                 </form>
