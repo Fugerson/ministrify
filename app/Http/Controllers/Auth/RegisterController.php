@@ -189,6 +189,18 @@ class RegisterController extends Controller
                 ]);
             }
 
+            // Create Person record for admin
+            $nameParts = explode(' ', $request->name, 2);
+            Person::create([
+                'church_id' => $church->id,
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'email' => $request->email,
+                'phone' => $request->phone ?? null,
+                'membership_status' => 'member',
+            ]);
+
             // Create default tags
             $defaultTags = [
                 ['name' => 'Волонтер', 'color' => '#3b82f6'],

@@ -282,6 +282,17 @@ class SocialAuthController extends Controller
             'church_role_id' => $adminRole?->id,
         ]);
 
+        // Create Person record for admin
+        $nameParts = explode(' ', $googleUser['name'], 2);
+        \App\Models\Person::create([
+            'church_id' => $church->id,
+            'user_id' => $user->id,
+            'first_name' => $nameParts[0],
+            'last_name' => $nameParts[1] ?? '',
+            'email' => $googleUser['email'],
+            'membership_status' => 'member',
+        ]);
+
         // Create default tags
         $defaultTags = [
             ['name' => 'Волонтер', 'color' => '#3b82f6'],
