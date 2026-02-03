@@ -157,7 +157,8 @@ class SystemAdminController extends Controller
     public function editUser(User $user)
     {
         $churches = Church::orderBy('name')->get();
-        return view('system-admin.users.edit', compact('user', 'churches'));
+        $churchRoles = ChurchRole::with('church')->orderBy('church_id')->orderBy('sort_order')->get();
+        return view('system-admin.users.edit', compact('user', 'churches', 'churchRoles'));
     }
 
     /**
@@ -169,16 +170,26 @@ class SystemAdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'church_id' => 'nullable|exists:churches,id',
-            'role' => 'required|in:admin,leader,volunteer',
+            'church_role_id' => 'nullable|exists:church_roles,id',
             'is_super_admin' => 'boolean',
             'password' => 'nullable|min:8',
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        $user->church_id = $validated['church_id'];
-        $user->role = $validated['role'];
+        $user->church_role_id = $validated['church_role_id'];
         $user->is_super_admin = $request->boolean('is_super_admin');
+
+        // Sync church_id and legacy role field based on church_role
+        if ($validated['church_role_id']) {
+            $churchRole = ChurchRole::find($validated['church_role_id']);
+            if ($churchRole) {
+                $user->church_id = $churchRole->church_id;
+                $user->role = $churchRole->is_admin_role ? 'admin' : ($churchRole->slug === 'leader' ? 'leader' : 'volunteer');
+            }
+        } else {
+            $user->church_id = $validated['church_id'];
+        }
 
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
