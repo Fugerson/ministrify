@@ -245,24 +245,29 @@
                         </div>
                     </div>
 
+                    @php
+                        $calendarEventsData = $worshipEvents->map(function($e) use ($ministry) {
+                            return [
+                                'id' => $e->id,
+                                'title' => $e->title,
+                                'date' => $e->date->format('Y-m-d'),
+                                'day' => $e->date->format('d'),
+                                'time' => $e->time->format('H:i'),
+                                'fullDate' => $e->date->translatedFormat('l, j M'),
+                                'url' => route('ministries.worship-events.show', [$ministry, $e]),
+                                'songsCount' => $e->songs_count ?? 0,
+                                'teamCount' => $e->team_count ?? 0,
+                                'isPast' => $e->date->isPast(),
+                            ];
+                        })->values();
+                    @endphp
                     <script>
                         function worshipCalendar() {
                             return {
                                 currentYear: new Date().getFullYear(),
                                 currentMonth: new Date().getMonth(),
                                 today: new Date(),
-                                allEvents: @json($worshipEvents->map(fn($e) => [
-                                    'id' => $e->id,
-                                    'title' => $e->title,
-                                    'date' => $e->date->format('Y-m-d'),
-                                    'day' => $e->date->format('d'),
-                                    'time' => $e->time->format('H:i'),
-                                    'fullDate' => $e->date->translatedFormat('l, j M'),
-                                    'url' => route('ministries.worship-events.show', [$ministry, $e]),
-                                    'songsCount' => $e->songs_count ?? 0,
-                                    'teamCount' => $e->team_count ?? 0,
-                                    'isPast' => $e->date->isPast(),
-                                ])->values()),
+                                allEvents: @json($calendarEventsData),
                                 monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
 
                                 init() {
