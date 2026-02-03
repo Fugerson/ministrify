@@ -376,11 +376,17 @@ class OnboardingController extends Controller
                 continue;
             }
 
+            // Find matching ChurchRole for the legacy role name
+            $churchRole = \App\Models\ChurchRole::where('church_id', $church->id)
+                ->where('slug', $userData['role'])
+                ->first();
+
             $user = $church->users()->create([
                 'name' => $userData['name'],
                 'email' => $userData['email'],
                 'password' => Hash::make(Str::random(16)),
                 'role' => $userData['role'],
+                'church_role_id' => $churchRole?->id,
                 'onboarding_completed' => true, // Skip onboarding for invited users
             ]);
 

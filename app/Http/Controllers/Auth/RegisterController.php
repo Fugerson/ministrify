@@ -155,7 +155,11 @@ class RegisterController extends Controller
             ]);
 
             // Restore soft-deleted user or create new admin user
-            $adminRole = $church->churchRoles()->where('is_admin_role', true)->first();
+            // Query ChurchRole directly instead of via relationship - the relationship
+            // would return empty due to Eloquent caching (roles were just created in booted())
+            $adminRole = \App\Models\ChurchRole::where('church_id', $church->id)
+                ->where('is_admin_role', true)
+                ->first();
             $trashedUser = User::onlyTrashed()->where('email', $request->email)->first();
 
             if ($trashedUser) {

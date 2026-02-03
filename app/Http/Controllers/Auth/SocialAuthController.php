@@ -265,6 +265,11 @@ class SocialAuthController extends Controller
             ],
         ]);
 
+        // Get admin role - query directly instead of via relationship due to Eloquent caching
+        $adminRole = \App\Models\ChurchRole::where('church_id', $church->id)
+            ->where('is_admin_role', true)
+            ->first();
+
         // Create admin user
         $user = User::create([
             'church_id' => $church->id,
@@ -273,6 +278,8 @@ class SocialAuthController extends Controller
             'google_id' => $googleUser['id'],
             'password' => bcrypt(\Illuminate\Support\Str::random(32)),
             'email_verified_at' => now(),
+            'role' => 'admin',
+            'church_role_id' => $adminRole?->id,
         ]);
 
         // Create default tags
