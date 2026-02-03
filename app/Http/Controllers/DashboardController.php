@@ -2,22 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Announcement;
+use App\Models\Assignment;
 use App\Models\Attendance;
+use App\Models\AuditLog;
 use App\Models\Board;
 use App\Models\BoardCard;
+use App\Models\DonationCampaign;
 use App\Models\Event;
+use App\Models\FamilyRelationship;
 use App\Models\Group;
+use App\Models\MinistryGoal;
+use App\Models\OnlineDonation;
 use App\Models\Person;
+use App\Models\PrayerRequest;
+use App\Models\Sermon;
+use App\Models\Song;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    /**
-     * Allowed column widths for dashboard widgets (out of 12).
-     */
     private const ALLOWED_COLS = [3, 4, 6, 8, 12];
 
     public function index()
@@ -26,19 +34,15 @@ class DashboardController extends Controller
         $user = auth()->user();
         $isAdmin = $user->isAdmin();
 
-        // Resolve the dashboard layout
         $layout = $this->resolveLayout($church, $isAdmin);
 
-        // Collect only the enabled widget IDs
         $enabledWidgets = collect($layout['widgets'])
             ->where('enabled', true)
             ->pluck('id')
             ->toArray();
 
-        // Load data only for enabled widgets
         $viewData = $this->loadWidgetData($church, $user, $isAdmin, $enabledWidgets);
 
-        // Column class mapping
         $colClasses = [
             3  => 'md:col-span-3',
             4  => 'md:col-span-4',
@@ -47,7 +51,6 @@ class DashboardController extends Controller
             12 => 'md:col-span-12',
         ];
 
-        // All widget configs for the "add widget" panel
         $allWidgets = config('dashboard_widgets.widgets', []);
 
         return view('dashboard.index', array_merge($viewData, [
@@ -58,9 +61,6 @@ class DashboardController extends Controller
         ]));
     }
 
-    /**
-     * Resolve dashboard layout from church settings or default.
-     */
     private function resolveLayout($church, bool $isAdmin): array
     {
         $layout = $church->getSetting('dashboard_layout');
@@ -70,7 +70,6 @@ class DashboardController extends Controller
             $layout = $this->getDefaultLayout();
         }
 
-        // Merge any new widget types that were added to config but not yet in the saved layout
         $savedIds = collect($layout['widgets'])->pluck('id')->toArray();
         $maxOrder = collect($layout['widgets'])->max('order') ?? -1;
 
@@ -86,13 +85,11 @@ class DashboardController extends Controller
             }
         }
 
-        // Remove widgets that no longer exist in config
         $layout['widgets'] = collect($layout['widgets'])
             ->filter(fn($w) => isset($widgetRegistry[$w['id']]))
             ->values()
             ->toArray();
 
-        // Filter admin-only widgets for non-admin users
         if (!$isAdmin) {
             $layout['widgets'] = collect($layout['widgets'])
                 ->filter(fn($w) => !($widgetRegistry[$w['id']]['admin_only'] ?? false))
@@ -100,15 +97,11 @@ class DashboardController extends Controller
                 ->toArray();
         }
 
-        // Sort by order
         usort($layout['widgets'], fn($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
 
         return $layout;
     }
 
-    /**
-     * Get the default dashboard layout.
-     */
     public static function getDefaultLayout(): array
     {
         return [
@@ -129,9 +122,6 @@ class DashboardController extends Controller
         ];
     }
 
-    /**
-     * Load data for enabled widgets only.
-     */
     private function loadWidgetData($church, $user, bool $isAdmin, array $enabledWidgets): array
     {
         $data = [
@@ -146,20 +136,38 @@ class DashboardController extends Controller
             'growthData' => [],
             'financialData' => [],
             'expensesByCategory' => collect(),
+            // New widget data defaults
+            'prayerRequests' => collect(),
+            'announcements' => collect(),
+            'donationCampaigns' => collect(),
+            'ministryGoals' => collect(),
+            'recentSermons' => collect(),
+            'demographics' => [],
+            'newMembers' => collect(),
+            'groupHealth' => collect(),
+            'givingTrends' => [],
+            'shepherdData' => [],
+            'eventRegistrations' => collect(),
+            'volunteerSchedule' => collect(),
+            'recentActivity' => collect(),
+            'membershipStats' => [],
+            'popularSongs' => collect(),
+            'familyStats' => [],
+            'calendarEvents' => [],
+            'onlineDonations' => [],
+            'groupAttendanceCompare' => collect(),
         ];
 
-        // Stats are needed by stats_grid and financial_summary
+        // Stats needed by stats_grid and financial_summary
         $needsStats = array_intersect($enabledWidgets, ['stats_grid', 'financial_summary']);
         if (!empty($needsStats)) {
             $data['stats'] = $this->loadCachedStats($church);
         }
 
-        // Financial data for admin widgets
         if ($isAdmin && array_intersect($enabledWidgets, ['financial_summary', 'analytics_charts'])) {
             $this->loadFinancialData($church, $data);
         }
 
-        // Expenses for admin
         if ($isAdmin && in_array('expenses_breakdown', $enabledWidgets)) {
             $this->loadExpensesBreakdown($church, $data);
         }
@@ -196,8 +204,88 @@ class DashboardController extends Controller
             $data['growthData'] = $this->loadGrowthData($church);
         }
 
+        // ── New widget loaders ──
+
+        if (in_array('prayer_requests', $enabledWidgets)) {
+            $data['prayerRequests'] = $this->loadPrayerRequests($church);
+        }
+
+        if (in_array('announcements', $enabledWidgets)) {
+            $data['announcements'] = $this->loadAnnouncements($church);
+        }
+
+        if ($isAdmin && in_array('donation_campaigns', $enabledWidgets)) {
+            $data['donationCampaigns'] = $this->loadDonationCampaigns($church);
+        }
+
+        if ($isAdmin && in_array('ministry_goals', $enabledWidgets)) {
+            $data['ministryGoals'] = $this->loadMinistryGoals($church);
+        }
+
+        if (in_array('recent_sermons', $enabledWidgets)) {
+            $data['recentSermons'] = $this->loadRecentSermons($church);
+        }
+
+        if ($isAdmin && in_array('member_demographics', $enabledWidgets)) {
+            $data['demographics'] = $this->loadDemographics($church);
+        }
+
+        if ($isAdmin && in_array('new_members', $enabledWidgets)) {
+            $data['newMembers'] = $this->loadNewMembers($church);
+        }
+
+        if ($isAdmin && in_array('group_health', $enabledWidgets)) {
+            $data['groupHealth'] = $this->loadGroupHealth($church);
+        }
+
+        if ($isAdmin && in_array('giving_trends', $enabledWidgets)) {
+            $data['givingTrends'] = $this->loadGivingTrends($church);
+        }
+
+        if ($isAdmin && in_array('shepherd_overview', $enabledWidgets)) {
+            $data['shepherdData'] = $this->loadShepherdOverview($church);
+        }
+
+        if (in_array('event_registrations', $enabledWidgets)) {
+            $data['eventRegistrations'] = $this->loadEventRegistrations($church);
+        }
+
+        if (in_array('volunteer_schedule', $enabledWidgets)) {
+            $data['volunteerSchedule'] = $this->loadVolunteerSchedule($church, $user);
+        }
+
+        if ($isAdmin && in_array('recent_activity', $enabledWidgets)) {
+            $data['recentActivity'] = $this->loadRecentActivity($church);
+        }
+
+        if ($isAdmin && in_array('membership_funnel', $enabledWidgets)) {
+            $data['membershipStats'] = $this->loadMembershipFunnel($church);
+        }
+
+        if (in_array('popular_songs', $enabledWidgets)) {
+            $data['popularSongs'] = $this->loadPopularSongs($church);
+        }
+
+        if ($isAdmin && in_array('family_stats', $enabledWidgets)) {
+            $data['familyStats'] = $this->loadFamilyStats($church);
+        }
+
+        if (in_array('calendar_mini', $enabledWidgets)) {
+            $data['calendarEvents'] = $this->loadCalendarEvents($church);
+        }
+
+        if ($isAdmin && in_array('online_donations', $enabledWidgets)) {
+            $data['onlineDonations'] = $this->loadOnlineDonations($church);
+        }
+
+        if ($isAdmin && in_array('group_attendance_compare', $enabledWidgets)) {
+            $data['groupAttendanceCompare'] = $this->loadGroupAttendanceCompare($church);
+        }
+
         return $data;
     }
+
+    // ── Existing loaders ──
 
     private function loadCachedStats($church): array
     {
@@ -221,7 +309,7 @@ class DashboardController extends Controller
                 ->whereYear('created_at', now()->year)
                 ->count();
 
-            $ageStatsRaw = \DB::table('people')
+            $ageStatsRaw = DB::table('people')
                 ->where('church_id', $church->id)
                 ->whereNull('deleted_at')
                 ->whereNotNull('birth_date')
@@ -244,19 +332,19 @@ class DashboardController extends Controller
 
             $peopleTrend = Person::where('church_id', $church->id)
                 ->where('created_at', '>=', $threeMonthsAgo)->count();
-            $volunteersThreeMonthsAgo = \DB::table('ministry_person')
+            $volunteersThreeMonthsAgo = DB::table('ministry_person')
                 ->whereIn('ministry_id', $ministryIds)
                 ->where('created_at', '<', $threeMonthsAgo)
                 ->distinct('person_id')->count('person_id');
 
             $ministriesList = $church->ministries()->withCount('members')->orderByDesc('members_count')->get();
-            $activeVolunteers = \DB::table('ministry_person')
+            $activeVolunteers = DB::table('ministry_person')
                 ->whereIn('ministry_id', $ministryIds)
                 ->distinct('person_id')->count('person_id');
             $ministriesWithEvents = $church->ministries()
                 ->whereHas('events', fn($q) => $q->where('date', '>=', now()))->count();
 
-            $groupStatsRaw = \DB::table('groups')
+            $groupStatsRaw = DB::table('groups')
                 ->where('church_id', $church->id)
                 ->selectRaw("
                     COUNT(*) as total,
@@ -272,7 +360,7 @@ class DashboardController extends Controller
             $vacationGroups = (int) ($groupStatsRaw->vacation ?? 0);
 
             $totalGroupMembers = $activeGroups > 0
-                ? \DB::table('group_person')
+                ? DB::table('group_person')
                     ->join('groups', 'group_person.group_id', '=', 'groups.id')
                     ->where('groups.church_id', $church->id)
                     ->where('groups.status', 'active')
@@ -280,7 +368,7 @@ class DashboardController extends Controller
                     ->count('group_person.person_id')
                 : 0;
 
-            $eventStatsRaw = \DB::table('events')
+            $eventStatsRaw = DB::table('events')
                 ->where('church_id', $church->id)
                 ->whereMonth('date', now()->month)
                 ->whereYear('date', now()->year)
@@ -465,7 +553,6 @@ class DashboardController extends Controller
 
         $data['financialData'] = $financialData;
 
-        // Current month totals
         $currentKey = now()->year . '-' . now()->month;
         $currentMonthData = $financialGrouped[$currentKey] ?? collect();
         $data['stats']['income_this_month'] = $currentMonthData->where('direction', 'in')->sum('total');
@@ -520,9 +607,450 @@ class DashboardController extends Controller
         return $growthData;
     }
 
-    /**
-     * Save dashboard layout (admin only).
-     */
+    // ── New widget loaders ──
+
+    private function loadPrayerRequests($church)
+    {
+        return PrayerRequest::where('church_id', $church->id)
+            ->where('status', 'active')
+            ->with('person')
+            ->orderByDesc('is_urgent')
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+    }
+
+    private function loadAnnouncements($church)
+    {
+        return Announcement::where('church_id', $church->id)
+            ->where('is_published', true)
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', now());
+            })
+            ->with('author')
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('published_at')
+            ->limit(5)
+            ->get();
+    }
+
+    private function loadDonationCampaigns($church)
+    {
+        return DonationCampaign::where('church_id', $church->id)
+            ->where('is_active', true)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    private function loadMinistryGoals($church)
+    {
+        return MinistryGoal::where('church_id', $church->id)
+            ->whereIn('status', ['active', 'in_progress'])
+            ->with('ministry')
+            ->orderByDesc('priority')
+            ->orderBy('due_date')
+            ->limit(8)
+            ->get();
+    }
+
+    private function loadRecentSermons($church)
+    {
+        return Sermon::where('church_id', $church->id)
+            ->with('speaker')
+            ->orderByDesc('sermon_date')
+            ->limit(4)
+            ->get();
+    }
+
+    private function loadDemographics($church): array
+    {
+        $today = now();
+
+        $genderStats = DB::table('people')
+            ->where('church_id', $church->id)
+            ->whereNull('deleted_at')
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN birth_date IS NOT NULL THEN 1 ELSE 0 END) as with_birthdate,
+                SUM(CASE WHEN gender = 'male' THEN 1 ELSE 0 END) as male,
+                SUM(CASE WHEN gender = 'female' THEN 1 ELSE 0 END) as female,
+                SUM(CASE WHEN gender IS NULL OR gender = '' THEN 1 ELSE 0 END) as unknown_gender
+            ")
+            ->first();
+
+        $ageGroups = DB::table('people')
+            ->where('church_id', $church->id)
+            ->whereNull('deleted_at')
+            ->whereNotNull('birth_date')
+            ->selectRaw("
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17 THEN 1 ELSE 0 END) as teens,
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35 THEN 1 ELSE 0 END) as youth,
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59 THEN 1 ELSE 0 END) as adults,
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60 THEN 1 ELSE 0 END) as seniors
+            ", [$today, $today, $today, $today, $today])
+            ->first();
+
+        return [
+            'total' => (int) ($genderStats->total ?? 0),
+            'with_birthdate' => (int) ($genderStats->with_birthdate ?? 0),
+            'male' => (int) ($genderStats->male ?? 0),
+            'female' => (int) ($genderStats->female ?? 0),
+            'unknown_gender' => (int) ($genderStats->unknown_gender ?? 0),
+            'age_groups' => [
+                'children' => (int) ($ageGroups->children ?? 0),
+                'teens' => (int) ($ageGroups->teens ?? 0),
+                'youth' => (int) ($ageGroups->youth ?? 0),
+                'adults' => (int) ($ageGroups->adults ?? 0),
+                'seniors' => (int) ($ageGroups->seniors ?? 0),
+            ],
+        ];
+    }
+
+    private function loadNewMembers($church)
+    {
+        return Person::where('church_id', $church->id)
+            ->orderByDesc('created_at')
+            ->limit(8)
+            ->get();
+    }
+
+    private function loadGroupHealth($church)
+    {
+        return Group::where('church_id', $church->id)
+            ->where('status', 'active')
+            ->withCount('members')
+            ->with('leader')
+            ->get()
+            ->map(function ($group) {
+                $lastAttendance = Attendance::where('attendable_type', Group::class)
+                    ->where('attendable_id', $group->id)
+                    ->orderByDesc('date')
+                    ->first();
+
+                $avgAttendance = Attendance::where('attendable_type', Group::class)
+                    ->where('attendable_id', $group->id)
+                    ->where('date', '>=', now()->subWeeks(8))
+                    ->avg('total_count') ?? 0;
+
+                $recentCounts = Attendance::where('attendable_type', Group::class)
+                    ->where('attendable_id', $group->id)
+                    ->orderByDesc('date')
+                    ->limit(4)
+                    ->pluck('total_count')
+                    ->reverse()
+                    ->values()
+                    ->toArray();
+
+                $trend = 'stable';
+                if (count($recentCounts) >= 2) {
+                    $last = end($recentCounts);
+                    $prev = $recentCounts[count($recentCounts) - 2];
+                    if ($last > $prev) $trend = 'up';
+                    elseif ($last < $prev) $trend = 'down';
+                }
+
+                return [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'status' => $group->status,
+                    'members_count' => $group->members_count,
+                    'last_attendance_date' => $lastAttendance?->date,
+                    'avg_attendance' => round($avgAttendance),
+                    'attendance_trend' => $trend,
+                    'leader_name' => $group->leader?->full_name,
+                ];
+            })
+            ->sortByDesc('avg_attendance')
+            ->values();
+    }
+
+    private function loadGivingTrends($church): array
+    {
+        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+
+        $raw = Transaction::where('church_id', $church->id)
+            ->incoming()
+            ->completed()
+            ->where('date', '>=', $sixMonthsAgo)
+            ->selectRaw("YEAR(date) as year, MONTH(date) as month, source_type, SUM(amount) as total")
+            ->groupBy('year', 'month', 'source_type')
+            ->get()
+            ->groupBy(fn($item) => $item->year . '-' . $item->month);
+
+        $trends = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $key = $month->year . '-' . $month->month;
+            $monthData = $raw[$key] ?? collect();
+
+            $tithes = $monthData->where('source_type', 'tithe')->sum('total');
+            $offerings = $monthData->where('source_type', 'offering')->sum('total');
+            $donations = $monthData->whereIn('source_type', ['donation', 'income'])->sum('total');
+
+            $trends[] = [
+                'month' => $month->translatedFormat('M'),
+                'tithes' => $tithes,
+                'offerings' => $offerings,
+                'donations' => $donations,
+                'total' => $tithes + $offerings + $donations,
+            ];
+        }
+
+        return $trends;
+    }
+
+    private function loadShepherdOverview($church): array
+    {
+        // Count sheep per shepherd
+        $shepherdList = Person::where('church_id', $church->id)
+            ->where('is_shepherd', true)
+            ->get()
+            ->map(function ($shepherd) use ($church) {
+                $sheepCount = Person::where('church_id', $church->id)
+                    ->where('shepherd_id', $shepherd->id)
+                    ->count();
+                return [
+                    'id' => $shepherd->id,
+                    'full_name' => $shepherd->full_name,
+                    'first_name' => $shepherd->first_name,
+                    'sheep_count' => $sheepCount,
+                ];
+            })
+            ->sortByDesc('sheep_count')
+            ->values();
+
+        $totalSheep = Person::where('church_id', $church->id)
+            ->whereNotNull('shepherd_id')
+            ->count();
+
+        $unassigned = Person::where('church_id', $church->id)
+            ->whereNull('shepherd_id')
+            ->where('is_shepherd', false)
+            ->count();
+
+        return [
+            'total_shepherds' => $shepherdList->count(),
+            'total_sheep' => $totalSheep,
+            'unassigned_count' => $unassigned,
+            'shepherds' => $shepherdList->take(10),
+        ];
+    }
+
+    private function loadEventRegistrations($church)
+    {
+        return Event::where('church_id', $church->id)
+            ->where('date', '>=', now())
+            ->where('allow_registration', true)
+            ->with('ministry')
+            ->withCount(['registrations as confirmed_registrations_count' => function ($q) {
+                $q->where('status', 'confirmed');
+            }])
+            ->orderBy('date')
+            ->limit(5)
+            ->get();
+    }
+
+    private function loadVolunteerSchedule($church, $user)
+    {
+        return Assignment::whereHas('event', function ($q) use ($church) {
+            $q->where('church_id', $church->id)
+              ->where('date', '>=', now())
+              ->where('date', '<=', now()->addDays(7));
+        })
+        ->where('status', 'confirmed')
+        ->with(['event.ministry', 'position', 'person'])
+        ->get()
+        ->sortBy('event.date');
+    }
+
+    private function loadRecentActivity($church)
+    {
+        return AuditLog::where('church_id', $church->id)
+            ->with('user')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get()
+            ->map(fn($log) => [
+                'type' => $log->action ?? 'updated',
+                'model_type' => class_basename($log->auditable_type ?? ''),
+                'description' => $log->description ?? ($log->action . ' ' . class_basename($log->auditable_type ?? '')),
+                'user_name' => $log->user?->name ?? 'Система',
+                'created_at' => $log->created_at,
+            ]);
+    }
+
+    private function loadMembershipFunnel($church): array
+    {
+        $stats = DB::table('people')
+            ->where('church_id', $church->id)
+            ->whereNull('deleted_at')
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN membership_status = 'guest' THEN 1 ELSE 0 END) as guest,
+                SUM(CASE WHEN membership_status = 'regular' THEN 1 ELSE 0 END) as regular,
+                SUM(CASE WHEN membership_status = 'member' THEN 1 ELSE 0 END) as member,
+                SUM(CASE WHEN membership_status = 'active_member' THEN 1 ELSE 0 END) as active_member,
+                SUM(CASE WHEN membership_status = 'leader' THEN 1 ELSE 0 END) as leader,
+                SUM(CASE WHEN membership_status IS NULL OR membership_status = '' THEN 1 ELSE 0 END) as unset
+            ")
+            ->first();
+
+        return [
+            'total' => (int) ($stats->total ?? 0),
+            'guest' => (int) ($stats->guest ?? 0),
+            'regular' => (int) ($stats->regular ?? 0),
+            'member' => (int) ($stats->member ?? 0),
+            'active_member' => (int) ($stats->active_member ?? 0),
+            'leader' => (int) ($stats->leader ?? 0),
+            'unset' => (int) ($stats->unset ?? 0),
+        ];
+    }
+
+    private function loadPopularSongs($church)
+    {
+        return Song::where('church_id', $church->id)
+            ->where('times_used', '>', 0)
+            ->orderByDesc('times_used')
+            ->limit(8)
+            ->get();
+    }
+
+    private function loadFamilyStats($church): array
+    {
+        $totalPeople = Person::where('church_id', $church->id)->count();
+
+        $totalRelationships = FamilyRelationship::whereHas('person', fn($q) => $q->where('church_id', $church->id))
+            ->count();
+
+        $peopleWithFamily = DB::table('family_relationships')
+            ->join('people', 'family_relationships.person_id', '=', 'people.id')
+            ->where('people.church_id', $church->id)
+            ->whereNull('people.deleted_at')
+            ->distinct('family_relationships.person_id')
+            ->count('family_relationships.person_id');
+
+        $marriedCouples = FamilyRelationship::where('relationship_type', 'spouse')
+            ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
+            ->count();
+        // Divide by 2 since spouse relationship is bidirectional
+        $marriedCouples = intdiv($marriedCouples, 2);
+
+        $childrenCount = FamilyRelationship::where('relationship_type', 'child')
+            ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
+            ->distinct('person_id')
+            ->count('person_id');
+
+        // Estimate families (unique parent-child clusters)
+        $totalFamilies = $marriedCouples > 0 ? $marriedCouples : 0;
+        $avgFamilySize = $totalFamilies > 0 ? round($peopleWithFamily / $totalFamilies, 1) : 0;
+
+        return [
+            'total_families' => $totalFamilies,
+            'total_with_family' => $peopleWithFamily,
+            'total_without_family' => $totalPeople - $peopleWithFamily,
+            'married_couples' => $marriedCouples,
+            'children_count' => $childrenCount,
+            'avg_family_size' => $avgFamilySize,
+        ];
+    }
+
+    private function loadCalendarEvents($church): array
+    {
+        $start = now()->startOfMonth();
+        $end = now()->endOfMonth();
+
+        return Event::where('church_id', $church->id)
+            ->whereBetween('date', [$start, $end])
+            ->pluck('date')
+            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    private function loadOnlineDonations($church): array
+    {
+        $thisMonth = OnlineDonation::where('church_id', $church->id)
+            ->where('status', 'success')
+            ->whereMonth('paid_at', now()->month)
+            ->whereYear('paid_at', now()->year);
+
+        $lastMonth = OnlineDonation::where('church_id', $church->id)
+            ->where('status', 'success')
+            ->whereMonth('paid_at', now()->subMonth()->month)
+            ->whereYear('paid_at', now()->subMonth()->year);
+
+        $totalThisMonth = (clone $thisMonth)->sum('amount');
+        $totalLastMonth = (clone $lastMonth)->sum('amount');
+        $countThisMonth = (clone $thisMonth)->count();
+
+        $changePercent = $totalLastMonth > 0
+            ? round(($totalThisMonth - $totalLastMonth) / $totalLastMonth * 100, 1)
+            : 0;
+
+        $recurring = OnlineDonation::where('church_id', $church->id)
+            ->where('status', 'success')
+            ->where('is_recurring', true);
+
+        $recent = OnlineDonation::where('church_id', $church->id)
+            ->where('status', 'success')
+            ->orderByDesc('paid_at')
+            ->limit(5)
+            ->get();
+
+        return [
+            'total_this_month' => $totalThisMonth,
+            'total_last_month' => $totalLastMonth,
+            'count_this_month' => $countThisMonth,
+            'avg_donation' => $countThisMonth > 0 ? round($totalThisMonth / $countThisMonth, 2) : 0,
+            'recurring_count' => (clone $recurring)->distinct('person_id')->count('person_id') ?: (clone $recurring)->count(),
+            'recurring_amount' => (clone $recurring)->whereMonth('paid_at', now()->month)->sum('amount'),
+            'change_percent' => $changePercent,
+            'recent' => $recent,
+        ];
+    }
+
+    private function loadGroupAttendanceCompare($church)
+    {
+        return Group::where('church_id', $church->id)
+            ->where('status', 'active')
+            ->withCount('members')
+            ->get()
+            ->map(function ($group) {
+                $attendances = Attendance::where('attendable_type', Group::class)
+                    ->where('attendable_id', $group->id)
+                    ->where('date', '>=', now()->subWeeks(4))
+                    ->orderBy('date')
+                    ->get();
+
+                $avgAttendance = $attendances->avg('total_count') ?? 0;
+                $attendanceRate = $group->members_count > 0
+                    ? round($avgAttendance / $group->members_count * 100)
+                    : 0;
+
+                $last4 = $attendances->take(-4)->pluck('total_count')->toArray();
+                while (count($last4) < 4) {
+                    array_unshift($last4, 0);
+                }
+
+                return [
+                    'name' => $group->name,
+                    'color' => $group->color ?? '#3b82f6',
+                    'avg_attendance' => round($avgAttendance),
+                    'members_count' => $group->members_count,
+                    'attendance_rate' => min($attendanceRate, 100),
+                    'last_4_weeks' => $last4,
+                ];
+            })
+            ->filter(fn($g) => $g['members_count'] > 0)
+            ->sortByDesc('attendance_rate')
+            ->values();
+    }
+
+    // ── API endpoints ──
+
     public function saveLayout(Request $request)
     {
         $church = $this->getCurrentChurch();
@@ -542,7 +1070,6 @@ class DashboardController extends Controller
 
         $widgetRegistry = config('dashboard_widgets.widgets', []);
 
-        // Filter to only valid widget IDs
         $widgets = collect($validated['widgets'])
             ->filter(fn($w) => isset($widgetRegistry[$w['id']]))
             ->map(fn($w) => [
@@ -562,15 +1089,11 @@ class DashboardController extends Controller
 
         $church->setSetting('dashboard_layout', $layout);
 
-        // Clear dashboard stats cache so layout changes take effect
         Cache::forget("dashboard_stats_{$church->id}");
 
         return response()->json(['success' => true]);
     }
 
-    /**
-     * Get birthdays for a specific month via AJAX
-     */
     public function birthdays(Request $request)
     {
         $church = $this->getCurrentChurch();
@@ -599,9 +1122,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * Get chart data via AJAX
-     */
     public function chartData(Request $request)
     {
         $church = $this->getCurrentChurch();
@@ -625,6 +1145,25 @@ class DashboardController extends Controller
         }
 
         return response()->json($data);
+    }
+
+    public function calendarEventsApi(Request $request)
+    {
+        $church = $this->getCurrentChurch();
+        $month = (int) $request->get('month', now()->month);
+        $year = (int) $request->get('year', now()->year);
+
+        $start = Carbon::create($year, $month, 1)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+
+        $events = Event::where('church_id', $church->id)
+            ->whereBetween('date', [$start, $end])
+            ->pluck('date')
+            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->unique()
+            ->values();
+
+        return response()->json(['dates' => $events]);
     }
 
     private function getAttendanceChartData($church): array

@@ -242,6 +242,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('dashboard/charts', [DashboardController::class, 'chartData'])->name('dashboard.charts');
     Route::get('dashboard/birthdays', [DashboardController::class, 'birthdays'])->name('dashboard.birthdays');
     Route::post('dashboard/layout', [DashboardController::class, 'saveLayout'])->name('dashboard.layout.save');
+    Route::get('dashboard/calendar-events', [DashboardController::class, 'calendarEventsApi'])->name('dashboard.calendar-events');
 
     // People
     Route::resource('people', PersonController::class);
