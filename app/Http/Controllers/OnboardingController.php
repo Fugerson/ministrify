@@ -377,8 +377,10 @@ class OnboardingController extends Controller
             }
 
             // Find matching ChurchRole for the legacy role name
+            // Map legacy 'admin' role to 'administrator' slug
+            $roleSlug = $userData['role'] === 'admin' ? 'administrator' : $userData['role'];
             $churchRole = \App\Models\ChurchRole::where('church_id', $church->id)
-                ->where('slug', $userData['role'])
+                ->where('slug', $roleSlug)
                 ->first();
 
             $user = $church->users()->create([
