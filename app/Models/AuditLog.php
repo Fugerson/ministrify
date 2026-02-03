@@ -482,6 +482,12 @@ class AuditLog extends Model
             }
         }
 
+        // Position/Order fields - show as ordinal number
+        if (in_array($field, ['position', 'order', 'sort_order'])) {
+            $pos = (int) $value + 1; // Convert 0-indexed to 1-indexed for display
+            return "№{$pos}";
+        }
+
         // Gender
         if ($field === 'gender') {
             return match($value) {
