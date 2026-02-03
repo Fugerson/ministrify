@@ -125,59 +125,116 @@
         <div class="p-6">
             <div x-show="activeTab === 'schedule'"{{ $tab !== 'schedule' ? ' style="display:none"' : '' }}>
                 @if($ministry->is_worship_ministry)
-                    {{-- Worship ministry: show events with music and statistics link --}}
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Події</h3>
-                        <a href="{{ route('ministries.worship-stats', $ministry) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                            Статистика
-                        </a>
-                    </div>
-
-                    @if($worshipEvents->count() > 0)
-                        <div class="space-y-2">
-                            @foreach($worshipEvents as $event)
-                                <a href="{{ route('ministries.worship-events.show', [$ministry, $event]) }}"
-                                   class="block p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $event->date->isPast() ? 'opacity-60' : '' }}">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 text-white">
-                                                <span class="text-xs font-bold">{{ $event->date->format('d') }}</span>
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $event->title }}</p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->date->translatedFormat('l, j M') }} о {{ $event->time->format('H:i') }}</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                                            @if($event->songs_count > 0)
-                                                <span class="flex items-center gap-1">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                                                    </svg>
-                                                    {{ $event->songs_count }}
-                                                </span>
-                                            @endif
-                                            @if($event->team_count > 0)
-                                                <span class="flex items-center gap-1">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                                                    </svg>
-                                                    {{ $event->team_count }}
-                                                </span>
-                                            @endif
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </a>
-                            @endforeach
+                    {{-- Worship ministry: calendar view --}}
+                    @php
+                        $worshipEventsGrouped = $worshipEvents->groupBy(fn($e) => $e->date->format('Y-m-d'));
+                    @endphp
+                    <div x-data="worshipCalendar()" x-init="init()">
+                        {{-- Header --}}
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <button @click="prevMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white min-w-[160px] text-center" x-text="monthYearLabel"></h3>
+                                <button @click="nextMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                                <button @click="goToToday()" class="ml-2 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Сьогодні</button>
+                            </div>
+                            <a href="{{ route('ministries.worship-stats', $ministry) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Статистика
+                            </a>
                         </div>
-                    @else
-                        <div class="text-center py-8">
+
+                        {{-- Day names --}}
+                        <div class="grid grid-cols-7 mb-1">
+                            <template x-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']" :key="day">
+                                <div class="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2" x-text="day"></div>
+                            </template>
+                        </div>
+
+                        {{-- Calendar grid --}}
+                        <div class="grid grid-cols-7 border-t border-l border-gray-200 dark:border-gray-700">
+                            <template x-for="(day, index) in calendarDays" :key="index">
+                                <div class="border-r border-b border-gray-200 dark:border-gray-700 min-h-[80px] sm:min-h-[100px] p-1"
+                                     :class="{ 'bg-gray-50 dark:bg-gray-800/50': !day.isCurrentMonth, 'bg-white dark:bg-gray-800': day.isCurrentMonth }">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-medium"
+                                              :class="{
+                                                  'text-gray-400 dark:text-gray-600': !day.isCurrentMonth,
+                                                  'text-gray-700 dark:text-gray-300': day.isCurrentMonth && !day.isToday,
+                                                  'bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center': day.isToday
+                                              }"
+                                              x-text="day.date"></span>
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <template x-for="event in day.events.slice(0, 2)" :key="event.id">
+                                            <a :href="event.url"
+                                               class="block px-1 py-0.5 text-xs rounded truncate transition-colors"
+                                               :class="event.isPast ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60'">
+                                                <span x-text="event.time" class="font-medium"></span>
+                                                <span x-text="event.title" class="hidden sm:inline"></span>
+                                            </a>
+                                        </template>
+                                        <template x-if="day.events.length > 2">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 px-1" x-text="'+' + (day.events.length - 2) + ' ще'"></div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        {{-- Events list below calendar --}}
+                        <div class="mt-6" x-show="currentMonthEvents.length > 0">
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Події цього місяця</h4>
+                            <div class="space-y-2">
+                                <template x-for="event in currentMonthEvents" :key="event.id">
+                                    <a :href="event.url"
+                                       class="block p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                       :class="{ 'opacity-60': event.isPast }">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                                                    <span class="text-xs font-bold" x-text="event.day"></span>
+                                                </div>
+                                                <div>
+                                                    <p class="font-medium text-gray-900 dark:text-white text-sm" x-text="event.title"></p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="event.fullDate + ' о ' + event.time"></p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                                <template x-if="event.songsCount > 0">
+                                                    <span class="flex items-center gap-1">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                                        </svg>
+                                                        <span x-text="event.songsCount"></span>
+                                                    </span>
+                                                </template>
+                                                <template x-if="event.teamCount > 0">
+                                                    <span class="flex items-center gap-1">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                                                        </svg>
+                                                        <span x-text="event.teamCount"></span>
+                                                    </span>
+                                                </template>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+
+                        {{-- Empty state --}}
+                        <div x-show="allEvents.length === 0" class="text-center py-8">
                             <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
@@ -186,7 +243,129 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">Немає запланованих подій</p>
                             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Створіть подію з галочкою "Подія з музичним супроводом"</p>
                         </div>
-                    @endif
+                    </div>
+
+                    <script>
+                        function worshipCalendar() {
+                            return {
+                                currentYear: new Date().getFullYear(),
+                                currentMonth: new Date().getMonth(),
+                                today: new Date(),
+                                allEvents: @json($worshipEvents->map(fn($e) => [
+                                    'id' => $e->id,
+                                    'title' => $e->title,
+                                    'date' => $e->date->format('Y-m-d'),
+                                    'day' => $e->date->format('d'),
+                                    'time' => $e->time->format('H:i'),
+                                    'fullDate' => $e->date->translatedFormat('l, j M'),
+                                    'url' => route('ministries.worship-events.show', [$ministry, $e]),
+                                    'songsCount' => $e->songs_count ?? 0,
+                                    'teamCount' => $e->team_count ?? 0,
+                                    'isPast' => $e->date->isPast(),
+                                ])->values()),
+                                monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
+
+                                init() {
+                                    // Start from current month
+                                },
+
+                                get monthYearLabel() {
+                                    return this.monthNames[this.currentMonth] + ' ' + this.currentYear;
+                                },
+
+                                get calendarDays() {
+                                    const days = [];
+                                    const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                                    const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+
+                                    // Get day of week (0 = Sunday, adjust for Monday start)
+                                    let startDay = firstDay.getDay();
+                                    startDay = startDay === 0 ? 6 : startDay - 1;
+
+                                    // Previous month days
+                                    const prevLastDay = new Date(this.currentYear, this.currentMonth, 0).getDate();
+                                    for (let i = startDay - 1; i >= 0; i--) {
+                                        const d = prevLastDay - i;
+                                        const dateStr = this.formatDate(this.currentYear, this.currentMonth - 1, d);
+                                        days.push({
+                                            date: d,
+                                            isCurrentMonth: false,
+                                            isToday: false,
+                                            events: this.getEventsForDate(dateStr)
+                                        });
+                                    }
+
+                                    // Current month days
+                                    for (let d = 1; d <= lastDay.getDate(); d++) {
+                                        const dateStr = this.formatDate(this.currentYear, this.currentMonth, d);
+                                        const isToday = this.today.getFullYear() === this.currentYear &&
+                                                       this.today.getMonth() === this.currentMonth &&
+                                                       this.today.getDate() === d;
+                                        days.push({
+                                            date: d,
+                                            isCurrentMonth: true,
+                                            isToday: isToday,
+                                            events: this.getEventsForDate(dateStr)
+                                        });
+                                    }
+
+                                    // Next month days (fill to 42 cells = 6 rows)
+                                    const remaining = 42 - days.length;
+                                    for (let d = 1; d <= remaining; d++) {
+                                        const dateStr = this.formatDate(this.currentYear, this.currentMonth + 1, d);
+                                        days.push({
+                                            date: d,
+                                            isCurrentMonth: false,
+                                            isToday: false,
+                                            events: this.getEventsForDate(dateStr)
+                                        });
+                                    }
+
+                                    return days;
+                                },
+
+                                get currentMonthEvents() {
+                                    return this.allEvents.filter(e => {
+                                        const d = new Date(e.date);
+                                        return d.getFullYear() === this.currentYear && d.getMonth() === this.currentMonth;
+                                    }).sort((a, b) => new Date(a.date) - new Date(b.date));
+                                },
+
+                                formatDate(year, month, day) {
+                                    const y = month < 0 ? year - 1 : (month > 11 ? year + 1 : year);
+                                    const m = month < 0 ? 11 : (month > 11 ? 0 : month);
+                                    return `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                },
+
+                                getEventsForDate(dateStr) {
+                                    return this.allEvents.filter(e => e.date === dateStr);
+                                },
+
+                                prevMonth() {
+                                    if (this.currentMonth === 0) {
+                                        this.currentMonth = 11;
+                                        this.currentYear--;
+                                    } else {
+                                        this.currentMonth--;
+                                    }
+                                },
+
+                                nextMonth() {
+                                    if (this.currentMonth === 11) {
+                                        this.currentMonth = 0;
+                                        this.currentYear++;
+                                    } else {
+                                        this.currentMonth++;
+                                    }
+                                },
+
+                                goToToday() {
+                                    this.currentYear = this.today.getFullYear();
+                                    this.currentMonth = this.today.getMonth();
+                                }
+                            };
+                        }
+                    </script>
                 @else
                     {{-- Regular ministry: show ministry events --}}
                     @if($ministry->events->count() > 0)
