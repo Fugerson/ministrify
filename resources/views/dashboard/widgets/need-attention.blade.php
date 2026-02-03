@@ -1,5 +1,4 @@
 {{-- Need Attention Widget (Admin Only) --}}
-@if(count($needAttention) > 0)
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-2">
@@ -8,6 +7,7 @@
         </div>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Не відвідували 3+ тижні</p>
     </div>
+    @if(count($needAttention) > 0)
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
         @foreach($needAttention as $person)
         <div class="flex items-center justify-between p-4">
@@ -32,5 +32,14 @@
         </div>
         @endforeach
     </div>
+    @else
+    <div class="p-8 text-center">
+        <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">Всі відвідують регулярно</p>
+    </div>
+    @endif
 </div>
-@endif

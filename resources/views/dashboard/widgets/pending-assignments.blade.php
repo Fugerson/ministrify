@@ -1,5 +1,4 @@
 {{-- Pending Assignments Widget --}}
-@if(count($pendingAssignments) > 0)
 <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl border border-amber-100 dark:border-amber-800 p-4">
     <div class="flex items-start gap-3">
         <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center flex-shrink-0">
@@ -9,6 +8,7 @@
         </div>
         <div class="flex-1">
             <h3 class="font-semibold text-gray-900 dark:text-white">Очікує підтвердження</h3>
+            @if(count($pendingAssignments) > 0)
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">У вас {{ count($pendingAssignments) }} призначень</p>
             <div class="mt-3 space-y-2">
                 @foreach($pendingAssignments->take(3) as $assignment)
@@ -38,7 +38,9 @@
                 </div>
                 @endforeach
             </div>
+            @else
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Немає призначень для підтвердження</p>
+            @endif
         </div>
     </div>
 </div>
-@endif
