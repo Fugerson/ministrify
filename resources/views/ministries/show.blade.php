@@ -268,7 +268,7 @@
                                      x-transition:leave="ease-in duration-200"
                                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col"
                                      @click.stop>
                                     {{-- Header --}}
                                     <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -300,10 +300,10 @@
                                     </div>
 
                                     {{-- Content --}}
-                                    <div x-show="!modalLoading" class="p-4 flex-1 overflow-y-auto">
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div x-show="!modalLoading" class="p-4 flex-1 overflow-y-auto overflow-x-hidden">
+                                        <div class="flex flex-col lg:flex-row gap-4">
                                             {{-- Songs Section --}}
-                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:flex-1">
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
                                                     <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
@@ -354,7 +354,7 @@
                                             </div>
 
                                             {{-- Team Section --}}
-                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:flex-1">
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
                                                     <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
