@@ -11,14 +11,19 @@ Laravel 10 + Blade + Alpine.js + Tailwind CSS. Multi-tenancy через church_i
 ssh -p 2222 root@49.12.100.17 "cd /var/www/ministrify && git pull && docker compose -f docker-compose.prod.yml down && docker compose -f docker-compose.prod.yml up -d --build && sleep 15 && docker compose -f docker-compose.prod.yml exec -T app php artisan optimize:clear"
 ```
 
-## 🚨 ЗАБОРОНЕНО НА ПРОДІ
+## 🚨 ЗАБОРОНЕНО (ПРОД + ЛОКАЛЬНО)
 
 ```bash
-# НІКОЛИ - видаляє всі дані!
+# НІКОЛИ НЕ ВИКОНУВАТИ - видаляє всі дані!
 php artisan migrate:fresh
 php artisan migrate:reset
 php artisan db:wipe
+docker compose down -v          # видаляє volumes з базою!
+docker volume rm ...            # видаляє дані!
 ```
+
+**Це стосується І продакшена, І локальної бази!**
+Локальна база містить важливі тестові дані - її теж не можна стирати.
 
 **Перед міграціями:** `./backup.sh`
 **Бекапи:** `/var/www/ministrify/backups/` (кожні 6 годин, 30 останніх)
