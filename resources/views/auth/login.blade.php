@@ -81,7 +81,7 @@
     </div>
     <div>
         <p class="text-sm text-gray-500 dark:text-gray-400">Хочете зареєструвати нову церкву?</p>
-        <a href="{{ route('register') }}" class="mt-1 inline-flex items-center text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm">
+        <a href="{{ route('register') }}" class="mt-1 inline-flex items-center text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
             Реєстрація церкви →
         </a>
     </div>
