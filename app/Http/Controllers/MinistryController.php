@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Board;
+use App\Models\Event;
 use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Resource;
@@ -162,15 +163,24 @@ class MinistryController extends Controller
             'overdue_tasks' => $ministry->tasks()->overdue()->count(),
         ];
 
-        // Load songs for worship ministries
+        // Load songs and worship events for worship ministries
         $songs = [];
+        $worshipEvents = collect();
         if ($ministry->is_worship_ministry) {
             $songs = Song::where('church_id', $church->id)
                 ->orderBy('title')
                 ->get();
+
+            $worshipEvents = Event::where('church_id', $church->id)
+                ->where('has_music', true)
+                ->where('date', '>=', now()->subDays(7))
+                ->withCount(['songs as songs_count', 'worshipTeam as team_count'])
+                ->orderBy('date')
+                ->orderBy('time')
+                ->get();
         }
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs'));
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'worshipEvents'));
     }
 
     public function edit(Ministry $ministry)

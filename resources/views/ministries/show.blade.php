@@ -99,13 +99,14 @@
                     Ресурси
                 </button>
                 @if($ministry->is_worship_ministry)
-                <a href="{{ route('ministries.worship-events', $ministry) }}"
-                   class="px-3 sm:px-6 py-3 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 text-sm font-medium flex items-center gap-1">
+                <button @click="setTab('worship-events')" type="button"
+                   :class="activeTab === 'worship-events' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                     </svg>
-                    Музичні події
-                </a>
+                    Події
+                </button>
                 <button @click="setTab('songs')" type="button"
                    :class="activeTab === 'songs' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
@@ -1108,6 +1109,73 @@
                 </a>
             </div>
             @endcan
+
+            <!-- Worship Events Tab (for worship ministries) -->
+            @if($ministry->is_worship_ministry)
+            <div x-show="activeTab === 'worship-events'"{{ $tab !== 'worship-events' ? ' style="display:none"' : '' }}>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Події з музичним супроводом</h3>
+                    <a href="{{ route('ministries.worship-stats', $ministry) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        Статистика
+                    </a>
+                </div>
+
+                @if($worshipEvents->count() > 0)
+                    <div class="space-y-2">
+                        @foreach($worshipEvents as $event)
+                            <a href="{{ route('ministries.worship-events.show', [$ministry, $event]) }}"
+                               class="block p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $event->date->isPast() ? 'opacity-60' : '' }}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                                            <span class="text-xs font-bold">{{ $event->date->format('d') }}</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $event->title }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->date->translatedFormat('l, j M') }} о {{ $event->time->format('H:i') }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                        @if($event->songs_count > 0)
+                                            <span class="flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                                </svg>
+                                                {{ $event->songs_count }}
+                                            </span>
+                                        @endif
+                                        @if($event->team_count > 0)
+                                            <span class="flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                                                </svg>
+                                                {{ $event->team_count }}
+                                            </span>
+                                        @endif
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                            </svg>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Немає подій з музичним супроводом</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Створіть подію з галочкою "Подія з музичним супроводом"</p>
+                    </div>
+                @endif
+            </div>
+            @endif
 
             <!-- Songs Library Tab (for worship ministries) -->
             @if($ministry->is_worship_ministry)
