@@ -8,6 +8,7 @@ use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Resource;
 use App\Models\Song;
+use App\Models\WorshipRole;
 use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -163,9 +164,10 @@ class MinistryController extends Controller
             'overdue_tasks' => $ministry->tasks()->overdue()->count(),
         ];
 
-        // Load songs and worship events for worship ministries
+        // Load songs, worship events, and worship roles for worship ministries
         $songs = [];
         $worshipEvents = collect();
+        $worshipRoles = collect();
         if ($ministry->is_worship_ministry) {
             $songs = Song::where('church_id', $church->id)
                 ->orderBy('title')
@@ -178,9 +180,13 @@ class MinistryController extends Controller
                 ->orderBy('date')
                 ->orderBy('time')
                 ->get();
+
+            $worshipRoles = WorshipRole::where('church_id', $church->id)
+                ->orderBy('sort_order')
+                ->get();
         }
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'worshipEvents'));
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'worshipEvents', 'worshipRoles'));
     }
 
     public function edit(Ministry $ministry)
@@ -366,6 +372,70 @@ class MinistryController extends Controller
             'visibility' => $ministry->visibility,
             'allowed_person_ids' => $ministry->allowed_person_ids,
         ]);
+    }
+
+    public function storeWorshipRole(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('manage-ministry', $ministry);
+
+        if (!$ministry->is_worship_ministry) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'icon' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:20',
+        ]);
+
+        $maxOrder = WorshipRole::where('church_id', $this->getCurrentChurch()->id)->max('sort_order') ?? 0;
+
+        WorshipRole::create([
+            'church_id' => $this->getCurrentChurch()->id,
+            'name' => $validated['name'],
+            'icon' => $validated['icon'] ?? null,
+            'color' => $validated['color'] ?? null,
+            'sort_order' => $maxOrder + 1,
+        ]);
+
+        return back()->with('success', 'Роль додано');
+    }
+
+    public function updateWorshipRole(Request $request, Ministry $ministry, WorshipRole $role)
+    {
+        $this->authorizeChurch($ministry);
+        $this->authorizeChurch($role);
+        Gate::authorize('manage-ministry', $ministry);
+
+        if (!$ministry->is_worship_ministry) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'icon' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:20',
+        ]);
+
+        $role->update($validated);
+
+        return back()->with('success', 'Роль оновлено');
+    }
+
+    public function destroyWorshipRole(Ministry $ministry, WorshipRole $role)
+    {
+        $this->authorizeChurch($ministry);
+        $this->authorizeChurch($role);
+        Gate::authorize('manage-ministry', $ministry);
+
+        if (!$ministry->is_worship_ministry) {
+            abort(404);
+        }
+
+        $role->delete();
+
+        return back()->with('success', 'Роль видалено');
     }
 
     protected function authorizeChurch($model): void

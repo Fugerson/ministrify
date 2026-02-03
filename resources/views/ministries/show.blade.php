@@ -2025,6 +2025,163 @@
                     </div>
 
                 </div>
+
+                    @if($ministry->is_worship_ministry)
+                    <hr class="border-gray-200 dark:border-gray-700">
+
+                    <!-- Worship Roles Settings -->
+                    <div x-data="worshipRolesManager()">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ролі музичного служіння</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Налаштуйте інструменти та ролі для команди прославлення</p>
+
+                        <!-- Roles List -->
+                        <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                            @if($worshipRoles->count() > 0)
+                                <div class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    @foreach($worshipRoles as $role)
+                                        <div class="p-3 flex items-center justify-between group">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base"
+                                                     style="background-color: {{ $role->color ?? '#6366f1' }}20; color: {{ $role->color ?? '#6366f1' }}">
+                                                    {{ $role->icon ?? '🎵' }}
+                                                </div>
+                                                <span class="font-medium text-gray-900 dark:text-white text-sm">{{ $role->name }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button type="button"
+                                                        @click="editRole({{ $role->id }}, '{{ addslashes($role->name) }}', '{{ $role->icon }}', '{{ $role->color }}')"
+                                                        class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                    </svg>
+                                                </button>
+                                                <form action="{{ route('ministries.worship-roles.destroy', [$ministry, $role]) }}" method="POST" onsubmit="return confirm('Видалити роль?')" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="p-6 text-center">
+                                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Немає ролей. Додайте ролі нижче.</p>
+                                </div>
+                            @endif
+
+                            <!-- Add Role Form -->
+                            <div class="p-3 border-t border-gray-200 dark:border-gray-600">
+                                <form action="{{ route('ministries.worship-roles.store', $ministry) }}" method="POST" class="flex flex-wrap gap-2">
+                                    @csrf
+                                    <input type="text" name="name" placeholder="Назва ролі (напр. Вокал, Гітара)" required
+                                           class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <input type="text" name="icon" placeholder="🎵" maxlength="5"
+                                           class="w-14 px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                    <input type="color" name="color" value="#6366f1"
+                                           class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
+                                        Додати
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Suggested Roles -->
+                        @if($worshipRoles->count() === 0)
+                        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                            <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Рекомендовані ролі:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach(['🎤 Ведучий вокал', '🎤 Бек-вокал', '🎸 Акустична гітара', '🎸 Електрогітара', '🎸 Бас', '🎹 Клавіші', '🥁 Барабани', '🎚 Звук', '💻 Медіа'] as $suggestion)
+                                    <button type="button" @click="addSuggested('{{ $suggestion }}')"
+                                            class="px-2.5 py-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 transition-colors">
+                                        {{ $suggestion }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Edit Role Modal -->
+                        <div x-show="showEditModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showEditModal = false">
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md mx-4" @click.stop>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редагувати роль</h3>
+                                <form :action="editFormAction" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
+                                            <input type="text" name="name" x-model="editName" required
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Іконка</label>
+                                                <input type="text" name="icon" x-model="editIcon" maxlength="5"
+                                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                                                <input type="color" name="color" x-model="editColor"
+                                                       class="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end gap-2 mt-6">
+                                        <button type="button" @click="showEditModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                            Скасувати
+                                        </button>
+                                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors">
+                                            Зберегти
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function worshipRolesManager() {
+                            return {
+                                showEditModal: false,
+                                editFormAction: '',
+                                editName: '',
+                                editIcon: '',
+                                editColor: '#6366f1',
+
+                                editRole(id, name, icon, color) {
+                                    this.editFormAction = '/ministries/{{ $ministry->id }}/worship-roles/' + id;
+                                    this.editName = name;
+                                    this.editIcon = icon || '';
+                                    this.editColor = color || '#6366f1';
+                                    this.showEditModal = true;
+                                },
+
+                                addSuggested(text) {
+                                    const parts = text.split(' ');
+                                    const icon = parts[0];
+                                    const name = parts.slice(1).join(' ');
+
+                                    const form = document.querySelector('form[action*="worship-roles"][method="POST"]:not([action*="update"])');
+                                    form.querySelector('input[name="name"]').value = name;
+                                    form.querySelector('input[name="icon"]').value = icon;
+                                    form.submit();
+                                }
+                            };
+                        }
+                    </script>
+                    @endif
+            </div>
             </div>
             @endcan
         </div>
