@@ -617,6 +617,14 @@ class ServicePlanController extends Controller
             // Set person status to pending
             $item->setPersonStatus($personId, 'pending');
 
+            // Log notification sent
+            $this->logAuditAction('notification_sent', 'Event', $event->id, $event->title, [
+                'plan_item_id' => $item->id,
+                'plan_item_title' => $item->title,
+                'person_id' => $personId,
+                'person_name' => $person->full_name,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Запит надіслано в Telegram',

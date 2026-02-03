@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
+use App\Models\AuditLog;
 use App\Models\Board;
 use App\Models\Event;
 use App\Models\Ministry;
@@ -488,6 +489,13 @@ class EventController extends Controller
         // Recalculate counts
         $attendance->recalculateCounts();
 
+        // Log attendance saved
+        $this->logAuditAction('attendance_saved', 'Event', $event->id, $event->title, [
+            'present_count' => count($presentIds),
+            'guests_count' => $validated['guests_count'] ?? 0,
+            'date' => $event->date?->format('Y-m-d'),
+        ]);
+
         return response()->json(['success' => true]);
     }
 
@@ -663,6 +671,15 @@ class EventController extends Controller
 
         $result = $calendarService->importFromIcal($request->file('file'), $church, $ministry);
 
+        // Log import
+        $this->logAuditAction('imported', 'Event', null, 'Імпорт з iCal файлу', [
+            'ministry_id' => $ministry->id,
+            'ministry_name' => $ministry->name,
+            'total_imported' => $result['total_imported'],
+            'total_skipped' => $result['total_skipped'],
+            'total_errors' => $result['total_errors'],
+        ]);
+
         $message = "Імпортовано подій: {$result['total_imported']}";
         if ($result['total_skipped'] > 0) {
             $message .= ", пропущено: {$result['total_skipped']}";
@@ -728,6 +745,15 @@ class EventController extends Controller
             // Update last sync time
             $church->setSetting('google_calendar_last_sync', now()->toIso8601String());
 
+            // Log calendar sync
+            $this->logAuditAction('calendar_synced', 'Event', null, 'Синхронізація з Google Calendar', [
+                'ministry_id' => $ministry->id,
+                'ministry_name' => $ministry->name,
+                'total_imported' => $result['total_imported'],
+                'total_skipped' => $result['total_skipped'],
+                'total_errors' => $result['total_errors'],
+            ]);
+
             $message = "Синхронізовано подій: {$result['total_imported']}";
             if ($result['total_skipped'] > 0) {
                 $message .= ", пропущено (дублікати): {$result['total_skipped']}";
@@ -779,6 +805,14 @@ class EventController extends Controller
 
             $church->setSetting('google_calendar_last_sync', now()->toIso8601String());
 
+            // Log quick sync
+            $this->logAuditAction('calendar_synced', 'Event', null, 'Швидка синхронізація Google Calendar', [
+                'ministry_id' => $ministry->id,
+                'ministry_name' => $ministry->name,
+                'total_imported' => $result['total_imported'],
+                'total_skipped' => $result['total_skipped'],
+            ]);
+
             $message = "Синхронізовано подій: {$result['total_imported']}";
             if ($result['total_skipped'] > 0) {
                 $message .= ", пропущено (дублікати): {$result['total_skipped']}";
@@ -807,6 +841,11 @@ class EventController extends Controller
         $church->setSetting('google_calendar_url', $request->google_calendar_url);
         $church->setSetting('google_calendar_ministry_id', $request->google_calendar_ministry_id);
 
+        // Log settings saved
+        $this->logAuditAction('google_calendar_connected', 'Church', $church->id, $church->name, [
+            'ministry_id' => $request->google_calendar_ministry_id,
+        ]);
+
         return response()->json(['success' => true]);
     }
 
@@ -823,6 +862,9 @@ class EventController extends Controller
         unset($settings['google_calendar_last_sync']);
         $church->settings = $settings;
         $church->save();
+
+        // Log settings removed
+        $this->logAuditAction('google_calendar_disconnected', 'Church', $church->id, $church->name);
 
         return redirect()->route('schedule')->with('success', 'Налаштування синхронізації видалено');
     }

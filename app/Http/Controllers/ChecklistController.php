@@ -163,6 +163,13 @@ class ChecklistController extends Controller
             }
         }
 
+        // Log checklist creation
+        $this->logAuditAction('checklist_created', 'Event', $event->id, $event->title, [
+            'checklist_id' => $checklist->id,
+            'template_id' => $validated['template_id'] ?? null,
+            'items_count' => $checklist->items->count(),
+        ]);
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,

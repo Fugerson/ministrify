@@ -132,6 +132,14 @@ class GroupController extends Controller
             'joined_at' => now(),
         ]);
 
+        // Log member added
+        $person = Person::find($validated['person_id']);
+        $this->logAuditAction('member_added', 'Group', $group->id, $group->name, [
+            'person_id' => $validated['person_id'],
+            'person_name' => $person?->full_name,
+            'role' => $validated['role'] ?? 'member',
+        ]);
+
         return back()->with('success', 'Учасника додано');
     }
 
@@ -140,6 +148,12 @@ class GroupController extends Controller
         $this->authorize('update', $group);
 
         $group->members()->detach($person->id);
+
+        // Log member removed
+        $this->logAuditAction('member_removed', 'Group', $group->id, $group->name, [
+            'person_id' => $person->id,
+            'person_name' => $person->full_name,
+        ]);
 
         return back()->with('success', 'Учасника видалено');
     }
@@ -162,7 +176,19 @@ class GroupController extends Controller
             $group->update(['leader_id' => $person->id]);
         }
 
+        // Get old role before updating
+        $oldRole = $group->members()->where('person_id', $person->id)->first()?->pivot?->role ?? 'member';
+
         $group->members()->updateExistingPivot($person->id, ['role' => $validated['role']]);
+
+        // Log role change
+        $this->logAuditAction('member_role_changed', 'Group', $group->id, $group->name, [
+            'person_id' => $person->id,
+            'person_name' => $person->full_name,
+            'new_role' => $validated['role'],
+        ], [
+            'old_role' => $oldRole,
+        ]);
 
         $roleLabel = Group::ROLES[$validated['role']] ?? $validated['role'];
         return back()->with('success', "Роль змінено на: {$roleLabel}");

@@ -222,6 +222,12 @@ class MonobankSyncController extends Controller
 
         $service->saveToken($church, $request->token, $accountId);
 
+        // Log Monobank connection
+        $this->logAuditAction('settings_updated', 'Church', $church->id, $church->name, [
+            'action' => 'monobank_connected',
+            'client_name' => $validation['name'],
+        ]);
+
         return redirect()->route('finances.monobank.index')
             ->with('success', "Monobank підключено! Ім'я: {$validation['name']}");
     }
@@ -250,6 +256,11 @@ class MonobankSyncController extends Controller
         $service = new MonobankPersonalService();
         $service->disconnect($church);
 
+        // Log Monobank disconnection
+        $this->logAuditAction('settings_updated', 'Church', $church->id, $church->name, [
+            'action' => 'monobank_disconnected',
+        ]);
+
         return redirect()->route('finances.monobank.index')
             ->with('success', 'Monobank відключено');
     }
@@ -268,6 +279,13 @@ class MonobankSyncController extends Controller
         if ($result['error']) {
             return back()->with('error', $result['error']);
         }
+
+        // Log sync action
+        $this->logAuditAction('monobank_synced', 'Church', $church->id, $church->name, [
+            'imported' => $result['imported'],
+            'skipped' => $result['skipped'],
+            'days' => $days,
+        ]);
 
         $message = "Синхронізовано: {$result['imported']} нових транзакцій";
         if ($result['skipped'] > 0) {
@@ -482,6 +500,14 @@ class MonobankSyncController extends Controller
             );
 
             $imported++;
+        }
+
+        // Log bulk import
+        if ($imported > 0) {
+            $this->logAuditAction('imported', 'Transaction', null, 'Масовий імпорт з Monobank', [
+                'count' => $imported,
+                'category_id' => $request->category_id,
+            ]);
         }
 
         return back()->with('success', "Імпортовано {$imported} транзакцій");

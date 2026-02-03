@@ -87,6 +87,11 @@ class SettingsController extends Controller
 
         $church->update($validated);
 
+        // Log settings update
+        $this->logAuditAction('settings_updated', 'Church', $church->id, $church->name, [
+            'updated_fields' => array_keys($validated),
+        ]);
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
         }
@@ -187,6 +192,11 @@ class SettingsController extends Controller
 
         $church->update(['settings' => $settings]);
 
+        // Log notification settings update
+        $this->logAuditAction('notification_settings_updated', 'Church', $church->id, $church->name, [
+            'notifications' => $settings['notifications'],
+        ]);
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
         }
@@ -202,6 +212,11 @@ class SettingsController extends Controller
         $settings['self_registration_enabled'] = $request->boolean('enabled');
 
         $church->update(['settings' => $settings]);
+
+        // Log self registration setting
+        $this->logAuditAction('settings_updated', 'Church', $church->id, $church->name, [
+            'self_registration_enabled' => $settings['self_registration_enabled'],
+        ]);
 
         return response()->json(['success' => true]);
     }
@@ -242,6 +257,12 @@ class SettingsController extends Controller
 
         $church->update($validated);
 
+        // Log public site settings update
+        $this->logAuditAction('public_site_updated', 'Church', $church->id, $church->name, [
+            'public_site_enabled' => $validated['public_site_enabled'],
+            'slug' => $validated['slug'],
+        ]);
+
         return back()->with('success', 'Налаштування публічного сайту оновлено.');
     }
 
@@ -270,6 +291,12 @@ class SettingsController extends Controller
             ],
         ]);
 
+        // Log payment settings update
+        $this->logAuditAction('payment_settings_updated', 'Church', $church->id, $church->name, [
+            'liqpay_enabled' => $validated['liqpay_enabled'] ?? false,
+            'monobank_enabled' => $validated['monobank_enabled'] ?? false,
+        ]);
+
         return back()->with('success', 'Налаштування платежів оновлено.');
     }
 
@@ -283,7 +310,15 @@ class SettingsController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
+        $oldColor = $church->primary_color;
         $church->update(['primary_color' => $validated['primary_color']]);
+
+        // Log theme color change
+        $this->logAuditAction('theme_updated', 'Church', $church->id, $church->name, [
+            'primary_color' => $validated['primary_color'],
+        ], [
+            'primary_color' => $oldColor,
+        ]);
 
         return back();
     }
@@ -298,7 +333,15 @@ class SettingsController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
+        $oldTheme = $church->design_theme;
         $church->update(['design_theme' => $validated['design_theme']]);
+
+        // Log theme change
+        $this->logAuditAction('theme_updated', 'Church', $church->id, $church->name, [
+            'design_theme' => $validated['design_theme'],
+        ], [
+            'design_theme' => $oldTheme,
+        ]);
 
         return back()->with('success', 'Стиль дизайну оновлено!');
     }
@@ -329,10 +372,22 @@ class SettingsController extends Controller
         // Also update legacy field for backwards compatibility
         $uahBalance = $balances['UAH'] ?? 0;
 
+        $oldBalances = $church->initial_balances;
+        $oldDate = $church->initial_balance_date;
+
         $church->update([
             'initial_balances' => $balances ?: null,
             'initial_balance' => $uahBalance,
             'initial_balance_date' => $validated['initial_balance_date'],
+        ]);
+
+        // Log finance settings update
+        $this->logAuditAction('finance_settings_updated', 'Church', $church->id, $church->name, [
+            'initial_balances' => $balances,
+            'initial_balance_date' => $validated['initial_balance_date'],
+        ], [
+            'initial_balances' => $oldBalances,
+            'initial_balance_date' => $oldDate,
         ]);
 
         if ($request->wantsJson()) {
@@ -359,8 +414,17 @@ class SettingsController extends Controller
         }
 
         $church = $this->getCurrentChurch();
+        $oldCurrencies = $church->enabled_currencies;
+
         $church->update([
             'enabled_currencies' => $currencies,
+        ]);
+
+        // Log currency settings update
+        $this->logAuditAction('currency_settings_updated', 'Church', $church->id, $church->name, [
+            'enabled_currencies' => $currencies,
+        ], [
+            'enabled_currencies' => $oldCurrencies,
         ]);
 
         // Auto-sync exchange rates if foreign currency enabled

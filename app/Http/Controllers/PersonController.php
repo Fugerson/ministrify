@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\ChurchRole;
 use App\Models\Person;
 use App\Models\Tag;
@@ -514,6 +515,12 @@ class PersonController extends Controller
         $ids = $request->has('ids') ? explode(',', $request->get('ids')) : null;
         $filename = 'people_' . now()->format('Y-m-d') . '.xlsx';
 
+        // Log export action
+        $this->logAuditAction('exported', 'Person', null, 'Експорт списку людей', [
+            'count' => $ids ? count($ids) : 'all',
+            'filename' => $filename,
+        ]);
+
         return Excel::download(new PeopleExport($church->id, $ids), $filename);
     }
 
@@ -527,6 +534,12 @@ class PersonController extends Controller
 
         try {
             Excel::import(new PeopleImport($church->id), $request->file('file'));
+
+            // Log import action
+            $this->logAuditAction('imported', 'Person', null, 'Імпорт списку людей', [
+                'filename' => $request->file('file')->getClientOriginalName(),
+            ]);
+
             return back()->with('success', 'Людей успішно імпортовано.');
         } catch (\Exception $e) {
             return back()->with('error', 'Помилка імпорту: ' . $e->getMessage());
@@ -749,6 +762,9 @@ class PersonController extends Controller
 
         $user->person->update(['telegram_chat_id' => null]);
 
+        // Log telegram unlink
+        $this->logAuditAction('telegram_unlinked', 'Person', $user->person->id, $user->person->full_name);
+
         return back()->with('success', 'Telegram від\'єднано');
     }
 
@@ -778,7 +794,17 @@ class PersonController extends Controller
         $hadNoRole = $person->user->church_role_id === null;
         $newRoleId = $validated['church_role_id'] ?: null;
 
+        $oldRoleId = $person->user->church_role_id;
         $person->user->update(['church_role_id' => $newRoleId]);
+
+        // Log role change
+        $oldRoleName = $oldRoleId ? \App\Models\ChurchRole::find($oldRoleId)?->name : 'Без ролі';
+        $newRoleName = $newRoleId ? \App\Models\ChurchRole::find($newRoleId)?->name : 'Без ролі';
+        $this->logAuditAction('role_changed', 'User', $person->user->id, $person->full_name, [
+            'new_role' => $newRoleName,
+        ], [
+            'old_role' => $oldRoleName,
+        ]);
 
         // Send notification if access was granted
         if ($hadNoRole && $newRoleId !== null) {
@@ -805,7 +831,15 @@ class PersonController extends Controller
             'email' => 'required|email|unique:users,email,' . $person->user->id,
         ]);
 
+        $oldEmail = $person->user->email;
         $person->user->update(['email' => $validated['email']]);
+
+        // Log email change
+        $this->logAuditAction('email_changed', 'User', $person->user->id, $person->full_name, [
+            'new_email' => $validated['email'],
+        ], [
+            'old_email' => $oldEmail,
+        ]);
 
         return response()->json(['success' => true]);
     }
@@ -902,6 +936,9 @@ class PersonController extends Controller
         $token = Password::createToken($person->user);
         $person->user->sendPasswordResetNotification($token);
 
+        // Log password reset
+        $this->logAuditAction('password_reset', 'User', $person->user->id, $person->full_name);
+
         return response()->json([
             'success' => true,
             'password' => $password,
@@ -946,7 +983,17 @@ class PersonController extends Controller
             }
         }
 
+        $oldShepherdId = $person->shepherd_id;
         $person->update(['shepherd_id' => $shepherdId]);
+
+        // Log shepherd change
+        $oldShepherdName = $oldShepherdId ? Person::find($oldShepherdId)?->full_name : null;
+        $newShepherdName = $shepherdId ? Person::find($shepherdId)?->full_name : null;
+        $this->logAuditAction('shepherd_assigned', 'Person', $person->id, $person->full_name, [
+            'shepherd' => $newShepherdName ?? 'Знято',
+        ], [
+            'shepherd' => $oldShepherdName ?? 'Не призначено',
+        ]);
 
         return response()->json(['success' => true]);
     }
@@ -1102,6 +1149,15 @@ class PersonController extends Controller
             }
         }
 
+        // Log quick edit action
+        if ($stats['created'] > 0 || $stats['updated'] > 0 || $stats['deleted'] > 0) {
+            $this->logAuditAction('quick_edit_saved', 'Person', null, 'Швидке редагування', [
+                'created' => $stats['created'],
+                'updated' => $stats['updated'],
+                'deleted' => $stats['deleted'],
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'stats' => $stats,
@@ -1215,6 +1271,12 @@ class PersonController extends Controller
                     $person->ministries()->syncWithoutDetaching([$ministry->id]);
                 }
 
+                // Log bulk ministry assignment
+                $this->logAuditAction('bulk_ministry_assigned', 'Ministry', $ministry->id, $ministry->name, [
+                    'people_count' => $people->count(),
+                    'person_ids' => $ids,
+                ]);
+
                 return response()->json([
                     'success' => true,
                     'message' => "Додано {$people->count()} людей до служіння «{$ministry->name}»",
@@ -1230,6 +1292,12 @@ class PersonController extends Controller
                 foreach ($people as $person) {
                     $person->tags()->syncWithoutDetaching([$tag->id]);
                 }
+
+                // Log bulk tag assignment
+                $this->logAuditAction('bulk_tag_assigned', 'Tag', $tag->id, $tag->name, [
+                    'people_count' => $people->count(),
+                    'person_ids' => $ids,
+                ]);
 
                 return response()->json([
                     'success' => true,
@@ -1260,6 +1328,12 @@ class PersonController extends Controller
                         }
                     }
                 }
+
+                // Log bulk message send
+                $this->logAuditAction('bulk_message_sent', 'Person', null, 'Масова розсилка', [
+                    'sent_count' => $sent,
+                    'total_selected' => count($ids),
+                ]);
 
                 return response()->json([
                     'success' => true,
@@ -1333,6 +1407,16 @@ class PersonController extends Controller
                     $message .= " Без email: {$noEmail}.";
                 }
 
+                // Log bulk access grant
+                if ($created > 0) {
+                    $this->logAuditAction('bulk_access_granted', 'User', null, 'Масове надання доступу', [
+                        'created' => $created,
+                        'skipped' => $skipped,
+                        'no_email' => $noEmail,
+                        'role' => $churchRole->name,
+                    ]);
+                }
+
                 return response()->json([
                     'success' => true,
                     'message' => $message,
@@ -1340,9 +1424,16 @@ class PersonController extends Controller
                 ]);
 
             case 'delete':
+                $deletedNames = $people->pluck('full_name')->toArray();
                 foreach ($people as $person) {
                     $person->delete(); // Soft delete
                 }
+
+                // Log bulk delete
+                $this->logAuditAction('bulk_deleted', 'Person', null, 'Масове видалення', [
+                    'count' => count($deletedNames),
+                    'names' => array_slice($deletedNames, 0, 10), // Store first 10 names
+                ]);
 
                 return response()->json([
                     'success' => true,

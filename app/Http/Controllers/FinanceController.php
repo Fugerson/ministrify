@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CurrencyHelper;
+use App\Models\AuditLog;
 use App\Models\Church;
 use App\Models\DonationCampaign;
 use App\Models\ExchangeRate;
@@ -349,6 +350,14 @@ class FinanceController extends Controller
         }
 
         $transactions = $query->orderBy('date', 'desc')->get();
+
+        // Log export
+        $this->logAuditAction('exported', 'Transaction', null, 'Експорт фінансового журналу', [
+            'period' => $period,
+            'start_date' => $dates['start']->format('Y-m-d'),
+            'end_date' => $dates['end']->format('Y-m-d'),
+            'count' => $transactions->count(),
+        ]);
 
         $filename = 'journal_' . $dates['start']->format('Y-m-d') . '_' . $dates['end']->format('Y-m-d') . '.csv';
 
@@ -1046,6 +1055,14 @@ class FinanceController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
+        $existingBudget = MinistryBudget::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('year', $validated['year'])
+            ->where('month', $validated['month'])
+            ->first();
+
+        $oldBudget = $existingBudget?->monthly_budget;
+
         MinistryBudget::updateOrCreate(
             [
                 'church_id' => $church->id,
@@ -1058,6 +1075,15 @@ class FinanceController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]
         );
+
+        // Log budget update
+        $this->logAuditAction('budget_updated', 'Ministry', $ministry->id, $ministry->name, [
+            'monthly_budget' => $validated['monthly_budget'],
+            'year' => $validated['year'],
+            'month' => $validated['month'],
+        ], [
+            'monthly_budget' => $oldBudget,
+        ]);
 
         return back()->with('success', "Бюджет для \"{$ministry->name}\" оновлено.");
     }

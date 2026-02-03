@@ -242,6 +242,14 @@ class MinistryController extends Controller
             'position_ids' => json_encode($validated['position_ids'] ?? []),
         ]);
 
+        // Log member added
+        $person = Person::find($validated['person_id']);
+        $this->logAuditAction('member_added', 'Ministry', $ministry->id, $ministry->name, [
+            'person_id' => $validated['person_id'],
+            'person_name' => $person?->full_name,
+            'position_ids' => $validated['position_ids'] ?? [],
+        ]);
+
         return back()->with('success', 'Учасника додано.');
     }
 
@@ -251,6 +259,12 @@ class MinistryController extends Controller
         Gate::authorize('manage-ministry', $ministry);
 
         $ministry->members()->detach($person->id);
+
+        // Log member removed
+        $this->logAuditAction('member_removed', 'Ministry', $ministry->id, $ministry->name, [
+            'person_id' => $person->id,
+            'person_name' => $person->full_name,
+        ]);
 
         return back()->with('success', 'Учасника видалено.');
     }
@@ -264,8 +278,21 @@ class MinistryController extends Controller
             'position_ids' => 'nullable|array',
         ]);
 
+        // Get old positions
+        $oldPivot = $ministry->members()->where('person_id', $person->id)->first()?->pivot;
+        $oldPositionIds = $oldPivot ? json_decode($oldPivot->position_ids ?? '[]', true) : [];
+
         $ministry->members()->updateExistingPivot($person->id, [
             'position_ids' => json_encode($validated['position_ids'] ?? []),
+        ]);
+
+        // Log positions update
+        $this->logAuditAction('positions_updated', 'Ministry', $ministry->id, $ministry->name, [
+            'person_id' => $person->id,
+            'person_name' => $person->full_name,
+            'new_position_ids' => $validated['position_ids'] ?? [],
+        ], [
+            'old_position_ids' => $oldPositionIds,
         ]);
 
         return back()->with('success', 'Позиції оновлено.');
@@ -276,8 +303,16 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('manage-ministry', $ministry);
 
+        $oldValue = $ministry->is_private;
         $ministry->update([
             'is_private' => !$ministry->is_private,
+        ]);
+
+        // Log privacy toggle
+        $this->logAuditAction('privacy_toggled', 'Ministry', $ministry->id, $ministry->name, [
+            'is_private' => $ministry->is_private,
+        ], [
+            'is_private' => $oldValue,
         ]);
 
         return response()->json([
@@ -297,11 +332,23 @@ class MinistryController extends Controller
             'allowed_person_ids.*' => 'integer|exists:people,id',
         ]);
 
+        $oldVisibility = $ministry->visibility;
+        $oldAllowedIds = $ministry->allowed_person_ids;
+
         $ministry->update([
             'visibility' => $validated['visibility'],
             'allowed_person_ids' => $validated['allowed_person_ids'] ?? [],
             // Also update is_private for backwards compatibility
             'is_private' => $validated['visibility'] !== 'public',
+        ]);
+
+        // Log visibility update
+        $this->logAuditAction('visibility_updated', 'Ministry', $ministry->id, $ministry->name, [
+            'visibility' => $validated['visibility'],
+            'allowed_person_ids' => $validated['allowed_person_ids'] ?? [],
+        ], [
+            'visibility' => $oldVisibility,
+            'allowed_person_ids' => $oldAllowedIds,
         ]);
 
         return response()->json([

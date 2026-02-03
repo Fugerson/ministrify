@@ -198,6 +198,11 @@ class ChurchRoleController extends Controller
         // Create defaults
         ChurchRole::createDefaultsForChurch($church->id);
 
+        // Log reset action
+        $this->logAuditAction('settings_updated', 'Church', $church->id, $church->name, [
+            'action' => 'reset_church_roles_to_defaults',
+        ]);
+
         return response()->json(['success' => true]);
     }
 

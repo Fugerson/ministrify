@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Church;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -127,5 +128,59 @@ abstract class Controller extends BaseController
         }
 
         return $model;
+    }
+
+    /**
+     * Log a custom audit action.
+     * Use for actions that don't automatically trigger model events.
+     *
+     * @param string $action Action name (e.g., 'exported', 'imported', 'bulk_deleted')
+     * @param string $modelType Model class name without namespace (e.g., 'Person')
+     * @param int|null $modelId Model ID if applicable
+     * @param string|null $modelName Human-readable model name
+     * @param array|null $newValues Additional data to log
+     * @param array|null $oldValues Previous state if applicable
+     * @param string|null $notes Additional notes
+     */
+    protected function logAuditAction(
+        string $action,
+        string $modelType,
+        ?int $modelId = null,
+        ?string $modelName = null,
+        ?array $newValues = null,
+        ?array $oldValues = null,
+        ?string $notes = null
+    ): void {
+        if (!auth()->check()) {
+            return;
+        }
+
+        $user = auth()->user();
+
+        // Skip logging for super admin
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $churchId = $this->cachedChurch?->id ?? $user->church_id ?? null;
+
+        if (!$churchId) {
+            return;
+        }
+
+        AuditLog::create([
+            'church_id' => $churchId,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action' => $action,
+            'model_type' => 'App\\Models\\' . $modelType,
+            'model_id' => $modelId,
+            'model_name' => $modelName,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'notes' => $notes,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
     }
 }

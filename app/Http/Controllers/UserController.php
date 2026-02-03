@@ -266,6 +266,12 @@ class UserController extends Controller
             return back()->with('error', 'Помилка надсилання: ' . $e->getMessage());
         }
 
+        // Log invite sent
+        $this->logAuditAction('sent', 'User', $user->id, $user->name, [
+            'type' => 'invite',
+            'email' => $user->email,
+        ]);
+
         return back()->with('success', 'Запрошення надіслано на ' . $user->email);
     }
 
