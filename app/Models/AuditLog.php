@@ -667,17 +667,50 @@ class AuditLog extends Model
             'google_id', 'calendar_token', 'telegram_bot_token',
         ];
 
+        // Collect raw changes first
+        $rawChanges = [];
         foreach ($new as $key => $value) {
             if (in_array($key, $skip)) continue;
 
             $oldValue = $old[$key] ?? null;
             if ($oldValue !== $value) {
-                $changes[] = [
-                    'field' => self::getFieldLabel($key),
-                    'old' => $this->formatValue($oldValue, $key),
-                    'new' => $this->formatValue($value, $key),
-                ];
+                $rawChanges[$key] = ['old' => $oldValue, 'new' => $value];
             }
+        }
+
+        // Smart descriptions for common patterns
+        $modelClass = class_basename($this->auditable_type ?? '');
+
+        // BoardCard: only position changed = card was reordered
+        if ($modelClass === 'BoardCard' && count($rawChanges) === 1 && isset($rawChanges['position'])) {
+            $oldPos = (int)$rawChanges['position']['old'];
+            $newPos = (int)$rawChanges['position']['new'];
+            $direction = $newPos < $oldPos ? 'вгору' : 'вниз';
+            return [[
+                'field' => 'Дія',
+                'old' => null,
+                'new' => "Картку переміщено {$direction} в списку",
+            ]];
+        }
+
+        // BoardCard: column_id changed = card moved to another column
+        if ($modelClass === 'BoardCard' && isset($rawChanges['column_id'])) {
+            $changes[] = [
+                'field' => 'Дія',
+                'old' => null,
+                'new' => 'Картку переміщено в іншу колонку',
+            ];
+            unset($rawChanges['column_id']);
+            unset($rawChanges['position']); // position change is implied
+        }
+
+        // Convert remaining raw changes to formatted changes
+        foreach ($rawChanges as $key => $vals) {
+            $changes[] = [
+                'field' => self::getFieldLabel($key),
+                'old' => $this->formatValue($vals['old'], $key),
+                'new' => $this->formatValue($vals['new'], $key),
+            ];
         }
 
         return $changes;
