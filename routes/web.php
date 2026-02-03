@@ -299,6 +299,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('ministries/{ministry}/worship-events', [WorshipTeamController::class, 'events'])->name('ministries.worship-events');
     Route::get('ministries/{ministry}/worship-stats', [WorshipTeamController::class, 'stats'])->name('ministries.worship-stats');
     Route::get('ministries/{ministry}/worship-events/{event}', [WorshipTeamController::class, 'eventShow'])->name('ministries.worship-events.show');
+    Route::get('ministries/{ministry}/worship-events/{event}/data', [WorshipTeamController::class, 'eventData'])->name('ministries.worship-events.data');
     Route::post('events/{event}/songs', [WorshipTeamController::class, 'addSong'])->name('events.songs.add');
     Route::delete('events/{event}/songs/{song}', [WorshipTeamController::class, 'removeSong'])->name('events.songs.remove');
     Route::post('events/{event}/songs/reorder', [WorshipTeamController::class, 'reorderSongs'])->name('events.songs.reorder');

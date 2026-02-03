@@ -173,12 +173,12 @@
                                     </div>
                                     <div class="space-y-0.5">
                                         <template x-for="event in day.events.slice(0, 2)" :key="event.id">
-                                            <a :href="event.url"
-                                               class="block px-1 py-0.5 text-xs rounded truncate transition-colors"
+                                            <button @click="openEventModal(event)"
+                                               class="block w-full text-left px-1 py-0.5 text-xs rounded truncate transition-colors cursor-pointer"
                                                :class="event.isPast ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60'">
                                                 <span x-text="event.time" class="font-medium"></span>
                                                 <span x-text="event.title" class="hidden sm:inline"></span>
-                                            </a>
+                                            </button>
                                         </template>
                                         <template x-if="day.events.length > 2">
                                             <div class="text-xs text-gray-500 dark:text-gray-400 px-1" x-text="'+' + (day.events.length - 2) + ' ще'"></div>
@@ -193,8 +193,8 @@
                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Події цього місяця</h4>
                             <div class="space-y-2">
                                 <template x-for="event in currentMonthEvents" :key="event.id">
-                                    <a :href="event.url"
-                                       class="block p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                    <button @click="openEventModal(event)"
+                                       class="block w-full text-left p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
                                        :class="{ 'opacity-60': event.isPast }">
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center gap-3">
@@ -228,7 +228,7 @@
                                                 </svg>
                                             </div>
                                         </div>
-                                    </a>
+                                    </button>
                                 </template>
                             </div>
                         </div>
@@ -243,6 +243,186 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">Немає запланованих подій</p>
                             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Створіть подію з галочкою "Подія з музичним супроводом"</p>
                         </div>
+
+                        {{-- Event Detail Modal --}}
+                        <div x-show="showModal" x-cloak
+                             class="fixed inset-0 z-50 overflow-y-auto"
+                             @keydown.escape.window="closeModal()">
+                            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                                {{-- Backdrop --}}
+                                <div x-show="showModal"
+                                     x-transition:enter="ease-out duration-300"
+                                     x-transition:enter-start="opacity-0"
+                                     x-transition:enter-end="opacity-100"
+                                     x-transition:leave="ease-in duration-200"
+                                     x-transition:leave-start="opacity-100"
+                                     x-transition:leave-end="opacity-0"
+                                     class="fixed inset-0 bg-black/50"
+                                     @click="closeModal()"></div>
+
+                                {{-- Modal Panel --}}
+                                <div x-show="showModal"
+                                     x-transition:enter="ease-out duration-300"
+                                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                     x-transition:leave="ease-in duration-200"
+                                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl mx-4 overflow-hidden"
+                                     @click.stop>
+                                    {{-- Header --}}
+                                    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="modalEvent?.title"></h3>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                <span x-text="modalEvent?.date"></span> о <span x-text="modalEvent?.time"></span>
+                                            </p>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <a :href="modalRoutes.eventUrl" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                                                Перейти до події
+                                            </a>
+                                            <button @click="closeModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- Loading state --}}
+                                    <div x-show="modalLoading" class="p-8 text-center">
+                                        <svg class="animate-spin h-8 w-8 text-purple-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Завантаження...</p>
+                                    </div>
+
+                                    {{-- Content --}}
+                                    <div x-show="!modalLoading" class="p-4 max-h-[70vh] overflow-y-auto">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {{-- Songs Section --}}
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
+                                                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                                    </svg>
+                                                    Пісні
+                                                </h4>
+
+                                                <template x-if="modalSongs.length > 0">
+                                                    <div class="space-y-2 mb-3">
+                                                        <template x-for="(song, index) in modalSongs" :key="song.id">
+                                                            <div class="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded-lg group">
+                                                                <span class="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-medium" x-text="index + 1"></span>
+                                                                <div class="flex-1 min-w-0">
+                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="song.title"></p>
+                                                                    <template x-if="song.key">
+                                                                        <span class="text-xs text-gray-500 dark:text-gray-400" x-text="'Тональність: ' + song.key"></span>
+                                                                    </template>
+                                                                </div>
+                                                                <button @click="removeSong(song.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+
+                                                <template x-if="modalSongs.length === 0">
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Пісні ще не додані</p>
+                                                </template>
+
+                                                {{-- Add song form --}}
+                                                <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
+                                                    <div class="flex gap-2">
+                                                        <select x-model="selectedSongId" class="flex-1 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                            <option value="">Оберіть пісню...</option>
+                                                            <template x-for="song in modalAvailableSongs.filter(s => !s.inEvent)" :key="song.id">
+                                                                <option :value="song.id" x-text="song.title + (song.key ? ' (' + song.key + ')' : '')"></option>
+                                                            </template>
+                                                        </select>
+                                                        <input type="text" x-model="selectedKey" placeholder="Тон." class="w-14 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                        <button @click="addSong()" :disabled="!selectedSongId" class="px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Team Section --}}
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
+                                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                                    </svg>
+                                                    Команда
+                                                </h4>
+
+                                                <template x-if="modalRoles.length > 0">
+                                                    <div class="space-y-3 mb-3">
+                                                        <template x-for="role in modalRoles" :key="role.id">
+                                                            <div class="p-2 bg-white dark:bg-gray-800 rounded-lg">
+                                                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1" x-text="role.name"></p>
+                                                                <template x-if="modalTeam.filter(t => t.role_id == role.id).length > 0">
+                                                                    <div class="space-y-1">
+                                                                        <template x-for="member in modalTeam.filter(t => t.role_id == role.id)" :key="member.id">
+                                                                            <div class="flex items-center justify-between py-0.5 group">
+                                                                                <span class="text-sm text-gray-900 dark:text-white" x-text="member.person_name"></span>
+                                                                                <button @click="removeTeamMember(member.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                                    </svg>
+                                                                                </button>
+                                                                            </div>
+                                                                        </template>
+                                                                    </div>
+                                                                </template>
+                                                                <template x-if="modalTeam.filter(t => t.role_id == role.id).length === 0">
+                                                                    <p class="text-xs text-gray-400 dark:text-gray-500">Не призначено</p>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+
+                                                <template x-if="modalRoles.length === 0">
+                                                    <div class="text-center py-3">
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">Спочатку налаштуйте ролі в налаштуваннях служіння</p>
+                                                    </div>
+                                                </template>
+
+                                                {{-- Add team member form --}}
+                                                <template x-if="modalRoles.length > 0">
+                                                    <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
+                                                        <div class="grid grid-cols-2 gap-2 mb-2">
+                                                            <select x-model="selectedPersonId" class="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                                <option value="">Учасник...</option>
+                                                                <template x-for="member in modalMembers" :key="member.id">
+                                                                    <option :value="member.id" x-text="member.name"></option>
+                                                                </template>
+                                                            </select>
+                                                            <select x-model="selectedRoleId" class="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                                <option value="">Роль...</option>
+                                                                <template x-for="role in modalRoles" :key="role.id">
+                                                                    <option :value="role.id" x-text="role.name"></option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                        <button @click="addTeamMember()" :disabled="!selectedPersonId || !selectedRoleId" class="w-full px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                                            Додати учасника
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     @php
@@ -254,7 +434,7 @@
                                 'day' => $e->date->format('d'),
                                 'time' => $e->time->format('H:i'),
                                 'fullDate' => $e->date->translatedFormat('l, j M'),
-                                'url' => route('ministries.worship-events.show', [$ministry, $e]),
+                                'dataUrl' => route('ministries.worship-events.data', [$ministry, $e]),
                                 'songsCount' => $e->songs_count ?? 0,
                                 'teamCount' => $e->team_count ?? 0,
                                 'isPast' => $e->date->isPast(),
@@ -270,8 +450,182 @@
                                 allEvents: @json($calendarEventsData),
                                 monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
 
+                                // Modal state
+                                showModal: false,
+                                modalLoading: false,
+                                modalEvent: null,
+                                modalSongs: [],
+                                modalTeam: [],
+                                modalRoles: [],
+                                modalMembers: [],
+                                modalAvailableSongs: [],
+                                modalRoutes: {},
+
+                                // Form state
+                                selectedSongId: '',
+                                selectedKey: '',
+                                selectedPersonId: '',
+                                selectedRoleId: '',
+
                                 init() {
                                     // Start from current month
+                                },
+
+                                async openEventModal(event) {
+                                    this.showModal = true;
+                                    this.modalLoading = true;
+                                    this.modalEvent = { title: event.title, date: event.fullDate, time: event.time };
+
+                                    try {
+                                        const response = await fetch(event.dataUrl);
+                                        const data = await response.json();
+
+                                        this.modalEvent = data.event;
+                                        this.modalSongs = data.songs;
+                                        this.modalTeam = data.team;
+                                        this.modalRoles = data.worshipRoles;
+                                        this.modalMembers = data.members;
+                                        this.modalAvailableSongs = data.availableSongs;
+                                        this.modalRoutes = data.routes;
+                                    } catch (error) {
+                                        console.error('Error loading event:', error);
+                                    }
+
+                                    this.modalLoading = false;
+                                },
+
+                                closeModal() {
+                                    this.showModal = false;
+                                    this.modalEvent = null;
+                                    this.selectedSongId = '';
+                                    this.selectedKey = '';
+                                    this.selectedPersonId = '';
+                                    this.selectedRoleId = '';
+                                },
+
+                                async addSong() {
+                                    if (!this.selectedSongId) return;
+
+                                    const formData = new FormData();
+                                    formData.append('song_id', this.selectedSongId);
+                                    formData.append('key', this.selectedKey);
+
+                                    try {
+                                        const response = await fetch(this.modalRoutes.addSong, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json'
+                                            },
+                                            body: formData
+                                        });
+
+                                        if (response.ok) {
+                                            // Add to local list
+                                            const song = this.modalAvailableSongs.find(s => s.id == this.selectedSongId);
+                                            if (song) {
+                                                this.modalSongs.push({
+                                                    id: song.id,
+                                                    title: song.title,
+                                                    key: this.selectedKey || song.key
+                                                });
+                                                song.inEvent = true;
+                                            }
+                                            this.selectedSongId = '';
+                                            this.selectedKey = '';
+
+                                            // Update calendar event counts
+                                            const evt = this.allEvents.find(e => e.id == this.modalEvent.id);
+                                            if (evt) evt.songsCount++;
+                                        }
+                                    } catch (error) {
+                                        console.error('Error adding song:', error);
+                                    }
+                                },
+
+                                async removeSong(songId) {
+                                    try {
+                                        const response = await fetch(this.modalRoutes.addSong.replace('/songs', '/songs/' + songId), {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json'
+                                            }
+                                        });
+
+                                        if (response.ok) {
+                                            this.modalSongs = this.modalSongs.filter(s => s.id !== songId);
+                                            const song = this.modalAvailableSongs.find(s => s.id == songId);
+                                            if (song) song.inEvent = false;
+
+                                            const evt = this.allEvents.find(e => e.id == this.modalEvent.id);
+                                            if (evt && evt.songsCount > 0) evt.songsCount--;
+                                        }
+                                    } catch (error) {
+                                        console.error('Error removing song:', error);
+                                    }
+                                },
+
+                                async addTeamMember() {
+                                    if (!this.selectedPersonId || !this.selectedRoleId) return;
+
+                                    const formData = new FormData();
+                                    formData.append('person_id', this.selectedPersonId);
+                                    formData.append('worship_role_id', this.selectedRoleId);
+
+                                    try {
+                                        const response = await fetch(this.modalRoutes.addTeam, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json'
+                                            },
+                                            body: formData
+                                        });
+
+                                        if (response.ok) {
+                                            const person = this.modalMembers.find(m => m.id == this.selectedPersonId);
+                                            const role = this.modalRoles.find(r => r.id == this.selectedRoleId);
+                                            if (person && role) {
+                                                const result = await response.json();
+                                                this.modalTeam.push({
+                                                    id: result.id || Date.now(),
+                                                    person_id: person.id,
+                                                    person_name: person.name,
+                                                    role_id: role.id,
+                                                    role_name: role.name
+                                                });
+
+                                                const evt = this.allEvents.find(e => e.id == this.modalEvent.id);
+                                                if (evt) evt.teamCount++;
+                                            }
+                                            this.selectedPersonId = '';
+                                            this.selectedRoleId = '';
+                                        }
+                                    } catch (error) {
+                                        console.error('Error adding team member:', error);
+                                    }
+                                },
+
+                                async removeTeamMember(memberId) {
+                                    try {
+                                        const response = await fetch(this.modalRoutes.addTeam.replace('/worship-team', '/worship-team/' + memberId), {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json'
+                                            }
+                                        });
+
+                                        if (response.ok) {
+                                            this.modalTeam = this.modalTeam.filter(t => t.id !== memberId);
+
+                                            const evt = this.allEvents.find(e => e.id == this.modalEvent.id);
+                                            if (evt && evt.teamCount > 0) evt.teamCount--;
+                                        }
+                                    } catch (error) {
+                                        console.error('Error removing team member:', error);
+                                    }
                                 },
 
                                 get monthYearLabel() {

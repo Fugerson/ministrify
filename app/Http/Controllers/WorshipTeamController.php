@@ -184,6 +184,77 @@ class WorshipTeamController extends Controller
     }
 
     /**
+     * Get worship event data as JSON for modal
+     */
+    public function eventData(Ministry $ministry, Event $event)
+    {
+        $this->authorizeChurch($ministry);
+        $this->authorizeChurch($event);
+
+        if (!$ministry->is_worship_ministry || !$event->has_music) {
+            abort(404);
+        }
+
+        $event->load(['songs', 'worshipTeam.person', 'worshipTeam.worshipRole']);
+
+        $worshipRoles = WorshipRole::where('church_id', $this->getCurrentChurch()->id)
+            ->orderBy('sort_order')
+            ->get();
+
+        // Get ministry members
+        $members = $ministry->members()->get();
+        if ($ministry->leader && !$members->contains('id', $ministry->leader->id)) {
+            $members->prepend($ministry->leader);
+        }
+
+        // Get all church songs
+        $availableSongs = Song::where('church_id', $this->getCurrentChurch()->id)
+            ->orderBy('title')
+            ->get();
+
+        return response()->json([
+            'event' => [
+                'id' => $event->id,
+                'title' => $event->title,
+                'date' => $event->date->translatedFormat('l, j F Y'),
+                'time' => $event->time->format('H:i'),
+            ],
+            'songs' => $event->songs->map(fn($s) => [
+                'id' => $s->id,
+                'title' => $s->title,
+                'key' => $s->pivot->key,
+                'url' => route('songs.show', $s),
+            ]),
+            'team' => $event->worshipTeam->map(fn($t) => [
+                'id' => $t->id,
+                'person_id' => $t->person_id,
+                'person_name' => $t->person->full_name,
+                'role_id' => $t->worship_role_id,
+                'role_name' => $t->worshipRole->name,
+            ]),
+            'worshipRoles' => $worshipRoles->map(fn($r) => [
+                'id' => $r->id,
+                'name' => $r->name,
+            ]),
+            'members' => $members->map(fn($m) => [
+                'id' => $m->id,
+                'name' => $m->full_name,
+            ]),
+            'availableSongs' => $availableSongs->map(fn($s) => [
+                'id' => $s->id,
+                'title' => $s->title,
+                'key' => $s->key,
+                'inEvent' => $event->songs->contains('id', $s->id),
+            ]),
+            'routes' => [
+                'addSong' => route('events.songs.add', $event),
+                'addTeam' => route('events.worship-team.add', $event),
+                'eventUrl' => route('events.show', $event),
+            ],
+        ]);
+    }
+
+    /**
      * Add a song to an event
      */
     public function addSong(Request $request, Event $event)
@@ -203,17 +274,25 @@ class WorshipTeamController extends Controller
             'key' => $validated['key'] ?? null,
         ]);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Пісню додано');
     }
 
     /**
      * Remove a song from an event
      */
-    public function removeSong(Event $event, Song $song)
+    public function removeSong(Request $request, Event $event, Song $song)
     {
         $this->authorizeChurch($event);
 
         $event->songs()->detach($song->id);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Пісню видалено');
     }
@@ -257,15 +336,22 @@ class WorshipTeamController extends Controller
             ->exists();
 
         if ($exists) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Ця людина вже призначена на цю роль'], 422);
+            }
             return back()->with('error', 'Ця людина вже призначена на цю роль');
         }
 
-        EventWorshipTeam::create([
+        $member = EventWorshipTeam::create([
             'event_id' => $event->id,
             'person_id' => $validated['person_id'],
             'worship_role_id' => $validated['worship_role_id'],
             'notes' => $validated['notes'] ?? null,
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'id' => $member->id]);
+        }
 
         return back()->with('success', 'Учасника додано');
     }
@@ -273,7 +359,7 @@ class WorshipTeamController extends Controller
     /**
      * Remove a team member from an event
      */
-    public function removeTeamMember(Event $event, EventWorshipTeam $member)
+    public function removeTeamMember(Request $request, Event $event, EventWorshipTeam $member)
     {
         $this->authorizeChurch($event);
 
@@ -282,6 +368,10 @@ class WorshipTeamController extends Controller
         }
 
         $member->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Учасника видалено');
     }
