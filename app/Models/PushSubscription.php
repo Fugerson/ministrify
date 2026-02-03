@@ -49,7 +49,7 @@ class PushSubscription extends Model
     /**
      * Update last used timestamp
      */
-    public function touch(): bool
+    public function touchLastUsed(): bool
     {
         $this->last_used_at = now();
         return $this->save();

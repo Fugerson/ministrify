@@ -77,7 +77,7 @@ class WebPushService
                     'user_id' => $subscription->user_id,
                     'title' => $payload['title'] ?? 'Ministrify',
                 ]);
-                $subscription->touch();
+                $subscription->touchLastUsed();
                 return true;
             }
 
