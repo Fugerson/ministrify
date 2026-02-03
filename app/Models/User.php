@@ -80,7 +80,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
-        return $this->churchRole?->is_admin_role === true;
+        // Super admins are always admins in any church context
+        return $this->is_super_admin || $this->churchRole?->is_admin_role === true;
     }
 
     public function isLeader(): bool
