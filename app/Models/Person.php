@@ -189,6 +189,16 @@ class Person extends Model
         return $this->hasMany(EventResponsibility::class);
     }
 
+    public function worshipSkills(): HasMany
+    {
+        return $this->hasMany(PersonWorshipSkill::class);
+    }
+
+    public function eventWorshipTeam(): HasMany
+    {
+        return $this->hasMany(EventWorshipTeam::class);
+    }
+
     public function unavailableDates(): HasMany
     {
         return $this->hasMany(UnavailableDate::class);

@@ -114,6 +114,21 @@
                     @endif
                 </div>
 
+                <!-- Music Ministry Option -->
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="has_music" id="has_music" value="1"
+                               {{ old('has_music', $event->has_music) ? 'checked' : '' }}
+                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
+                        <label for="has_music" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Подія з музичним супроводом
+                        </label>
+                    </div>
+                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                        Увімкніть, щоб подія відображалась в порталі музичних команд
+                    </p>
+                </div>
+
                 <!-- Attendance Tracking Option -->
                 @if($currentChurch->attendance_enabled)
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-600">

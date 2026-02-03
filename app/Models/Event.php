@@ -36,6 +36,7 @@ class Event extends Model
         'qr_checkin_enabled',
         'track_attendance',
         'is_service',
+        'has_music',
         'service_type',
         'reminder_settings',
         'google_event_id',
@@ -49,6 +50,7 @@ class Event extends Model
         'time' => 'datetime:H:i',
         'is_public' => 'boolean',
         'is_service' => 'boolean',
+        'has_music' => 'boolean',
         'allow_registration' => 'boolean',
         'registration_deadline' => 'datetime',
         'qr_checkin_enabled' => 'boolean',
@@ -145,6 +147,11 @@ class Event extends Model
             ->withPivot(['order', 'key', 'notes'])
             ->withTimestamps()
             ->orderBy('event_songs.order');
+    }
+
+    public function worshipTeam(): HasMany
+    {
+        return $this->hasMany(EventWorshipTeam::class);
     }
 
     public function hasServicePlan(): bool

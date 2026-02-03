@@ -28,6 +28,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MigrationController;
 use App\Http\Controllers\TelegramBroadcastController;
+use App\Http\Controllers\WorshipTeamController;
 use App\Http\Controllers\TelegramChatController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\QrCheckinController;
@@ -290,6 +291,26 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('ministries/{ministry}/resources/upload', [ResourceController::class, 'ministryUpload'])->name('ministries.resources.upload');
     Route::post('ministries/{ministry}/resources/document', [ResourceController::class, 'ministryCreateDocument'])->name('ministries.resources.document.create');
     Route::put('resources/{resource}/content', [ResourceController::class, 'updateDocument'])->name('resources.updateContent');
+
+    // Worship Team (for ministries with is_worship_ministry)
+    Route::get('ministries/{ministry}/worship-events', [WorshipTeamController::class, 'events'])->name('ministries.worship-events');
+    Route::get('ministries/{ministry}/worship-stats', [WorshipTeamController::class, 'stats'])->name('ministries.worship-stats');
+    Route::get('ministries/{ministry}/worship-events/{event}', [WorshipTeamController::class, 'eventShow'])->name('ministries.worship-events.show');
+    Route::post('events/{event}/songs', [WorshipTeamController::class, 'addSong'])->name('events.songs.add');
+    Route::delete('events/{event}/songs/{song}', [WorshipTeamController::class, 'removeSong'])->name('events.songs.remove');
+    Route::post('events/{event}/songs/reorder', [WorshipTeamController::class, 'reorderSongs'])->name('events.songs.reorder');
+    Route::post('events/{event}/worship-team', [WorshipTeamController::class, 'addTeamMember'])->name('events.worship-team.add');
+    Route::delete('events/{event}/worship-team/{member}', [WorshipTeamController::class, 'removeTeamMember'])->name('events.worship-team.remove');
+
+    // Worship Roles Settings
+    Route::get('settings/worship-roles', [WorshipTeamController::class, 'roles'])->name('settings.worship-roles');
+    Route::post('settings/worship-roles', [WorshipTeamController::class, 'storeRole'])->name('settings.worship-roles.store');
+    Route::put('settings/worship-roles/{role}', [WorshipTeamController::class, 'updateRole'])->name('settings.worship-roles.update');
+    Route::delete('settings/worship-roles/{role}', [WorshipTeamController::class, 'destroyRole'])->name('settings.worship-roles.destroy');
+
+    // Person worship skills
+    Route::put('people/{person}/worship-skills', [WorshipTeamController::class, 'updateSkills'])->name('people.worship-skills.update');
+    Route::get('worship-roles/{role}/members', [WorshipTeamController::class, 'getMembersWithSkill'])->name('worship-roles.members');
 
     // Ministry Goals & Tasks
     Route::prefix('ministries/{ministry}/goals')->name('ministries.goals.')->group(function () {

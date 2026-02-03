@@ -191,6 +191,7 @@ class EventController extends Controller
             'recurrence_end_count' => 'nullable|integer|min:2|max:365',
             'recurrence_end_date' => 'nullable|date',
             'is_service' => 'nullable|boolean',
+            'has_music' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
             'track_attendance' => 'nullable|boolean',
             'reminders' => 'nullable|array',
@@ -202,6 +203,7 @@ class EventController extends Controller
         ]);
 
         $validated['is_service'] = $request->boolean('is_service');
+        $validated['has_music'] = $request->boolean('has_music');
         $validated['track_attendance'] = $request->boolean('track_attendance');
 
         // Process reminder settings
@@ -344,6 +346,7 @@ class EventController extends Controller
             'time' => 'sometimes|date_format:H:i',
             'notes' => 'nullable|string',
             'is_service' => 'nullable|boolean',
+            'has_music' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
             'track_attendance' => 'nullable|boolean',
             'reminders' => 'nullable|array',
@@ -358,6 +361,9 @@ class EventController extends Controller
 
         if ($request->has('is_service')) {
             $validated['is_service'] = $request->boolean('is_service');
+        }
+        if ($request->has('has_music')) {
+            $validated['has_music'] = $request->boolean('has_music');
         }
         if ($request->has('track_attendance')) {
             $validated['track_attendance'] = $request->boolean('track_attendance');
@@ -535,6 +541,7 @@ class EventController extends Controller
                 'time' => $parentEvent->time,
                 'notes' => $parentEvent->notes,
                 'is_service' => $parentEvent->is_service,
+                'has_music' => $parentEvent->has_music,
                 'track_attendance' => $parentEvent->track_attendance,
                 'parent_event_id' => $parentEvent->id,
             ]);
