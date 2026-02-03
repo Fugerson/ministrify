@@ -200,7 +200,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     Route::get('churches/create', [SystemAdminController::class, 'createChurch'])->name('churches.create');
     Route::post('churches', [SystemAdminController::class, 'storeChurch'])->name('churches.store');
     Route::get('churches/{church}', [SystemAdminController::class, 'showChurch'])->name('churches.show');
-    Route::post('churches/{church}/switch', [SystemAdminController::class, 'switchToChurch'])->name('churches.switch');
+    Route::match(['get', 'post'], 'churches/{church}/switch', [SystemAdminController::class, 'switchToChurch'])->name('churches.switch');
     Route::delete('churches/{church}', [SystemAdminController::class, 'destroyChurch'])->name('churches.destroy');
 
     // Users
