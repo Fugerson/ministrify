@@ -129,26 +129,28 @@
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
     }
 
-    /* Glass cards */
+    /* Glass cards - Light mode: more opaque for readability */
     .bg-white, .dark\:bg-gray-800 {
-        background: rgba(255, 255, 255, 0.15) !important;
+        background: rgba(255, 255, 255, 0.85) !important;
         backdrop-filter: blur(20px) !important;
         -webkit-backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
     }
     .dark .bg-white, .dark .dark\:bg-gray-800 {
         background: rgba(0, 0, 0, 0.3) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
     }
 
-    /* Text adjustments */
-    .text-gray-900, .text-gray-800, .text-gray-700 { color: #fff !important; }
-    .text-gray-600, .text-gray-500, .text-gray-400 { color: rgba(255,255,255,0.7) !important; }
-    .dark .text-gray-100, .dark .text-white { color: #fff !important; }
+    /* Text - Light mode: keep dark text for readability */
+    /* Text - Dark mode: white text */
+    .dark .text-gray-900, .dark .text-gray-800, .dark .text-gray-700 { color: #fff !important; }
+    .dark .text-gray-600, .dark .text-gray-500, .dark .text-gray-400 { color: rgba(255,255,255,0.7) !important; }
 
     /* Sidebar glass */
     aside, .sidebar {
-        background: rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.25) !important;
         backdrop-filter: blur(20px) !important;
     }
     .dark aside, .dark .sidebar {
@@ -160,13 +162,21 @@
         box-shadow: 0 0 20px rgba(99, 102, 241, 0.5) !important;
     }
 
-    /* Inputs */
+    /* Inputs - Light mode */
     input, select, textarea {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        color: #1f2937 !important;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(107, 114, 128, 0.8) !important; }
+
+    /* Inputs - Dark mode */
+    .dark input, .dark select, .dark textarea {
         background: rgba(255, 255, 255, 0.1) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         color: #fff !important;
     }
-    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.5) !important; }
+    .dark input::placeholder, .dark textarea::placeholder { color: rgba(255,255,255,0.5) !important; }
 
 
 /* ========================================
