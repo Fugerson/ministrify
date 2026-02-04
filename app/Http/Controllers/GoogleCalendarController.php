@@ -115,6 +115,9 @@ class GoogleCalendarController extends Controller
 
         $calendarId = $request->input('calendar_id', 'primary');
 
+        // Save selected calendar_id for auto-sync
+        $this->saveSelectedCalendar($user, $calendarId);
+
         $result = $this->googleCalendar->syncChurchEvents($user, $church, $calendarId);
 
         if ($result['success']) {
@@ -143,6 +146,9 @@ class GoogleCalendarController extends Controller
             'calendar_id' => 'required|string',
             'ministry_id' => 'nullable|integer|exists:ministries,id',
         ]);
+
+        // Save selected calendar_id for auto-sync
+        $this->saveSelectedCalendar($user, $validated['calendar_id']);
 
         $result = $this->googleCalendar->fullSync(
             $user,
@@ -248,6 +254,18 @@ class GoogleCalendarController extends Controller
         );
 
         return response()->json($result);
+    }
+
+    /**
+     * Save selected calendar ID to user settings for auto-sync
+     */
+    protected function saveSelectedCalendar($user, string $calendarId): void
+    {
+        $settings = $user->settings ?? [];
+        if (isset($settings['google_calendar'])) {
+            $settings['google_calendar']['calendar_id'] = $calendarId;
+            $user->update(['settings' => $settings]);
+        }
     }
 
     /**

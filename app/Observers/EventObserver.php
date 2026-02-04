@@ -9,16 +9,20 @@ use Illuminate\Support\Facades\Log;
 class EventObserver
 {
     /**
+     * Handle the Event "created" event.
+     * Auto-push new events to Google Calendar if any user has it connected.
+     */
+    public function created(Event $event): void
+    {
+        $this->pushToGoogle($event);
+    }
+
+    /**
      * Handle the Event "updated" event.
      * Sync changes to Google Calendar if connected.
      */
     public function updated(Event $event): void
     {
-        // Skip if no Google sync or if being synced FROM Google
-        if (!$event->google_event_id || !$event->google_calendar_id) {
-            return;
-        }
-
         // Skip if only google_* fields were updated (avoid infinite loop)
         $changedFields = array_keys($event->getChanges());
         $googleFields = ['google_event_id', 'google_calendar_id', 'google_synced_at', 'google_sync_status'];
@@ -26,7 +30,7 @@ class EventObserver
             return;
         }
 
-        $this->syncToGoogle($event);
+        $this->pushToGoogle($event);
     }
 
     /**
@@ -39,7 +43,6 @@ class EventObserver
             return;
         }
 
-        // Get user who can sync (church admin or event creator)
         $user = $this->getSyncUser($event);
         if (!$user) {
             return;
@@ -61,12 +64,17 @@ class EventObserver
     }
 
     /**
-     * Sync event to Google Calendar
+     * Push event to Google Calendar (create or update)
      */
-    protected function syncToGoogle(Event $event): void
+    protected function pushToGoogle(Event $event): void
     {
         $user = $this->getSyncUser($event);
         if (!$user) {
+            return;
+        }
+
+        $calendarId = $this->getCalendarId($user);
+        if (!$calendarId) {
             return;
         }
 
@@ -78,21 +86,37 @@ class EventObserver
                 return;
             }
 
-            $result = $service->updateEvent(
-                $accessToken,
-                $event->google_calendar_id,
-                $event->google_event_id,
-                $event
-            );
+            if ($event->google_event_id && $event->google_calendar_id) {
+                // Update existing Google event
+                $result = $service->updateEvent(
+                    $accessToken,
+                    $event->google_calendar_id,
+                    $event->google_event_id,
+                    $event
+                );
 
-            if ($result) {
-                // Update sync timestamp without triggering observer again
-                Event::withoutEvents(function () use ($event) {
-                    $event->update([
-                        'google_synced_at' => now(),
-                        'google_sync_status' => 'synced',
-                    ]);
-                });
+                if ($result) {
+                    Event::withoutEvents(function () use ($event) {
+                        $event->update([
+                            'google_synced_at' => now(),
+                            'google_sync_status' => 'synced',
+                        ]);
+                    });
+                }
+            } else {
+                // Create new event in Google
+                $result = $service->createEvent($accessToken, $calendarId, $event);
+
+                if ($result && isset($result['id'])) {
+                    Event::withoutEvents(function () use ($event, $result, $calendarId) {
+                        $event->update([
+                            'google_event_id' => $result['id'],
+                            'google_calendar_id' => $calendarId,
+                            'google_synced_at' => now(),
+                            'google_sync_status' => 'synced',
+                        ]);
+                    });
+                }
             }
         } catch (\Exception $e) {
             Log::warning('EventObserver: Failed to sync to Google Calendar', [
@@ -107,9 +131,17 @@ class EventObserver
      */
     protected function getSyncUser(Event $event): ?\App\Models\User
     {
-        // Find a user from the same church with Google Calendar connected
         return \App\Models\User::where('church_id', $event->church_id)
             ->whereNotNull('settings->google_calendar->access_token')
             ->first();
+    }
+
+    /**
+     * Get the calendar ID from user settings (saved during manual sync)
+     */
+    protected function getCalendarId(\App\Models\User $user): ?string
+    {
+        $settings = $user->settings ?? [];
+        return $settings['google_calendar']['calendar_id'] ?? 'primary';
     }
 }
