@@ -218,6 +218,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
 
     // Support Tickets
     Route::get('support', [SystemAdminController::class, 'supportTickets'])->name('support.index');
+    Route::post('support/update-status', [SystemAdminController::class, 'updateTicketStatus'])->name('support.update.status');
     Route::get('support/{ticket}', [SystemAdminController::class, 'showSupportTicket'])->name('support.show');
     Route::post('support/{ticket}/reply', [SystemAdminController::class, 'replySupportTicket'])->name('support.reply');
     Route::put('support/{ticket}', [SystemAdminController::class, 'updateSupportTicket'])->name('support.update');

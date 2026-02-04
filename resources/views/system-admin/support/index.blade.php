@@ -1,160 +1,270 @@
 @extends('layouts.system-admin')
 
-@section('title', 'Підтримка')
+@section('title', 'Підтримка - Kanban')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Відкриті</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['open'] }}</p>
-                </div>
-                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                    </svg>
-                </div>
-            </div>
+<div x-data="supportKanban()" class="h-[calc(100vh-180px)]">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Підтримка</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Тікети від адміністраторів церков</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Очікують відповіді</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['waiting'] }}</p>
-                </div>
-                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Вирішено</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['resolved'] }}</p>
-                </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-            </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                Всього: <span class="font-semibold text-gray-900 dark:text-white" x-text="allTickets.length"></span>
+            </span>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-        <form action="{{ route('system.support.index') }}" method="GET" class="flex flex-wrap gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Пошук..."
-                       class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+    <!-- Kanban Board -->
+    <div class="flex gap-4 h-full overflow-x-auto pb-4">
+        <!-- Column: До роботи -->
+        <div class="flex-1 min-w-[320px] max-w-[400px] bg-gray-100 dark:bg-gray-800/50 rounded-xl flex flex-col">
+            <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                        <h3 class="font-semibold text-gray-900 dark:text-white">До роботи</h3>
+                    </div>
+                    <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 rounded-full" x-text="todoTickets.length"></span>
+                </div>
             </div>
-            <select name="status" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Відкриті</option>
-                <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>Всі</option>
-                <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>В роботі</option>
-                <option value="waiting" {{ request('status') === 'waiting' ? 'selected' : '' }}>Очікують відповіді</option>
-                <option value="resolved" {{ request('status') === 'resolved' ? 'selected' : '' }}>Вирішено</option>
-                <option value="closed" {{ request('status') === 'closed' ? 'selected' : '' }}>Закриті</option>
-            </select>
-            <select name="category" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Всі категорії</option>
-                <option value="bug" {{ request('category') === 'bug' ? 'selected' : '' }}>Помилки</option>
-                <option value="question" {{ request('category') === 'question' ? 'selected' : '' }}>Питання</option>
-                <option value="feature" {{ request('category') === 'feature' ? 'selected' : '' }}>Пропозиції</option>
-                <option value="other" {{ request('category') === 'other' ? 'selected' : '' }}>Інше</option>
-            </select>
-            <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
-                Фільтрувати
-            </button>
-        </form>
-    </div>
+            <div class="flex-1 overflow-y-auto p-3 space-y-3"
+                 @dragover.prevent="dragOver($event)"
+                 @drop="dropTicket($event, 'open')">
+                <template x-for="ticket in todoTickets" :key="ticket.id">
+                    <div x-html="ticketCard(ticket)"></div>
+                </template>
+                <template x-if="todoTickets.length === 0">
+                    <div class="text-center py-8 text-gray-400 dark:text-gray-500">
+                        <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                        </svg>
+                        <p class="text-sm">Немає нових тікетів</p>
+                    </div>
+                </template>
+            </div>
+        </div>
 
-    <!-- Tickets List -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-        @if($tickets->isEmpty())
-            <div class="p-12 text-center">
-                <svg class="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                </svg>
-                <p class="text-gray-500 dark:text-gray-400">Немає тікетів</p>
+        <!-- Column: В процесі -->
+        <div class="flex-1 min-w-[320px] max-w-[400px] bg-gray-100 dark:bg-gray-800/50 rounded-xl flex flex-col">
+            <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <h3 class="font-semibold text-gray-900 dark:text-white">В процесі</h3>
+                    </div>
+                    <span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 rounded-full" x-text="inProgressTickets.length"></span>
+                </div>
             </div>
-        @else
-            <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700/50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Тема</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Користувач</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Категорія</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Статус</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Оновлено</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дії</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @foreach($tickets as $ticket)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" onclick="window.location='{{ route('system.support.show', $ticket) }}'">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    @if($ticket->unreadMessagesForAdmin() > 0)
-                                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-                                    @endif
-                                    <span class="text-gray-900 dark:text-white font-medium">{{ Str::limit($ticket->subject, 50) }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div>
-                                    @if($ticket->user)
-                                        <p class="text-gray-900 dark:text-white">{{ $ticket->user->name }}</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $ticket->church?->name ?? 'Без церкви' }}</p>
-                                    @else
-                                        <p class="text-gray-900 dark:text-white">{{ $ticket->guest_name }}</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $ticket->guest_email }} <span class="text-yellow-600 dark:text-yellow-400">(гість)</span></p>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-{{ $ticket->category_color }}-100 dark:bg-{{ $ticket->category_color }}-500/20 text-{{ $ticket->category_color }}-700 dark:text-{{ $ticket->category_color }}-400">
-                                    {{ $ticket->category_label }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-{{ $ticket->status_color }}-100 dark:bg-{{ $ticket->status_color }}-500/20 text-{{ $ticket->status_color }}-700 dark:text-{{ $ticket->status_color }}-400">
-                                    {{ $ticket->status_label }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $ticket->last_reply_at?->diffForHumans() ?? $ticket->created_at->diffForHumans() }}
-                            </td>
-                            <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
-                                <form method="POST" action="{{ route('system.support.destroy', $ticket) }}"
-                                      onsubmit="return confirm('Видалити тікет?')" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Видалити">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="flex-1 overflow-y-auto p-3 space-y-3"
+                 @dragover.prevent="dragOver($event)"
+                 @drop="dropTicket($event, 'in_progress')">
+                <template x-for="ticket in inProgressTickets" :key="ticket.id">
+                    <div x-html="ticketCard(ticket)"></div>
+                </template>
+                <template x-if="inProgressTickets.length === 0">
+                    <div class="text-center py-8 text-gray-400 dark:text-gray-500">
+                        <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm">Нічого в роботі</p>
+                    </div>
+                </template>
             </div>
-        @endif
-    </div>
+        </div>
 
-    <div>
-        {{ $tickets->links() }}
+        <!-- Column: Готово -->
+        <div class="flex-1 min-w-[320px] max-w-[400px] bg-gray-100 dark:bg-gray-800/50 rounded-xl flex flex-col">
+            <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <h3 class="font-semibold text-gray-900 dark:text-white">Готово</h3>
+                    </div>
+                    <span class="px-2 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300 rounded-full" x-text="doneTickets.length"></span>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-3 space-y-3"
+                 @dragover.prevent="dragOver($event)"
+                 @drop="dropTicket($event, 'resolved')">
+                <template x-for="ticket in doneTickets" :key="ticket.id">
+                    <div x-html="ticketCard(ticket, true)"></div>
+                </template>
+                <template x-if="doneTickets.length === 0">
+                    <div class="text-center py-8 text-gray-400 dark:text-gray-500">
+                        <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm">Виконаних немає</p>
+                    </div>
+                </template>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Ticket Card Template (hidden) -->
+<template id="ticket-card-template">
+    <div class="ticket-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 cursor-pointer hover:shadow-md transition-all"
+         draggable="true">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="category-badge px-2 py-0.5 text-xs font-medium rounded-full"></span>
+            <span class="priority-badge px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 hidden"></span>
+            <span class="unread-badge ml-auto px-1.5 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full hidden"></span>
+        </div>
+        <h4 class="subject font-medium text-gray-900 dark:text-white text-sm mb-2 line-clamp-2"></h4>
+        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+            <div class="flex items-center gap-1 truncate">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="user-name truncate"></span>
+            </div>
+            <span class="time-ago text-gray-400 dark:text-gray-500"></span>
+        </div>
+        <div class="church-info mt-1 text-xs text-gray-400 dark:text-gray-500 truncate flex items-center gap-1 hidden">
+            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            <span class="church-name truncate"></span>
+        </div>
+    </div>
+</template>
+
+<script>
+function supportKanban() {
+    return {
+        allTickets: @json($ticketsData),
+        draggedTicket: null,
+        updateUrl: '{{ route("system.support.update.status") }}',
+
+        get todoTickets() {
+            return this.allTickets.filter(t => t.status === 'open');
+        },
+
+        get inProgressTickets() {
+            return this.allTickets.filter(t => ['in_progress', 'waiting'].includes(t.status));
+        },
+
+        get doneTickets() {
+            return this.allTickets.filter(t => ['resolved', 'closed'].includes(t.status));
+        },
+
+        getCategoryClass(category) {
+            const classes = {
+                'bug': 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300',
+                'question': 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300',
+                'feature': 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300',
+                'other': 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-300',
+            };
+            return classes[category] || classes['other'];
+        },
+
+        ticketCard(ticket, isDone = false) {
+            const categoryClass = this.getCategoryClass(ticket.category);
+            const priorityBadge = (ticket.priority === 'urgent' || ticket.priority === 'high')
+                ? `<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300">${ticket.priority_label}</span>`
+                : '';
+            const unreadBadge = ticket.unread > 0
+                ? `<span class="ml-auto px-1.5 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full">${ticket.unread}</span>`
+                : '';
+            const churchInfo = ticket.church_name
+                ? `<div class="mt-1 text-xs text-gray-400 dark:text-gray-500 truncate flex items-center gap-1">
+                    <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span class="truncate">${ticket.church_name}</span>
+                </div>`
+                : '';
+
+            return `
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 cursor-pointer hover:shadow-md transition-all ${isDone ? 'opacity-70' : ''}"
+                     draggable="true"
+                     ondragstart="supportKanbanDragStart(event, ${ticket.id})"
+                     ondragend="supportKanbanDragEnd(event)"
+                     onclick="window.location.href='${ticket.show_url}'">
+                    <div class="flex items-center gap-2 mb-2 flex-wrap">
+                        <span class="px-2 py-0.5 text-xs font-medium rounded-full ${categoryClass}">${ticket.category_label}</span>
+                        ${priorityBadge}
+                        ${unreadBadge}
+                    </div>
+                    <h4 class="font-medium text-gray-900 dark:text-white text-sm mb-2 line-clamp-2">${ticket.subject}</h4>
+                    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center gap-1 truncate">
+                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span class="truncate">${ticket.user_name}</span>
+                        </div>
+                        <span class="text-gray-400 dark:text-gray-500">${ticket.time_ago}</span>
+                    </div>
+                    ${churchInfo}
+                </div>
+            `;
+        },
+
+        dragOver(event) {
+            event.preventDefault();
+        },
+
+        async dropTicket(event, newStatus) {
+            event.preventDefault();
+            const ticketId = event.dataTransfer.getData('text/plain');
+            if (!ticketId) return;
+
+            const ticket = this.allTickets.find(t => t.id == ticketId);
+            if (!ticket) return;
+
+            const oldStatus = ticket.status;
+
+            // Optimistically update UI
+            ticket.status = newStatus;
+
+            try {
+                const response = await fetch(this.updateUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ticket_id: ticketId,
+                        status: newStatus
+                    })
+                });
+
+                if (!response.ok) {
+                    ticket.status = oldStatus;
+                }
+            } catch (error) {
+                ticket.status = oldStatus;
+                console.error('Error updating ticket:', error);
+            }
+        }
+    };
+}
+
+// Global functions for drag-drop (needed because of dynamic HTML)
+function supportKanbanDragStart(event, ticketId) {
+    event.dataTransfer.setData('text/plain', ticketId);
+    event.dataTransfer.effectAllowed = 'move';
+    event.target.classList.add('opacity-50', 'rotate-1', 'scale-105');
+}
+
+function supportKanbanDragEnd(event) {
+    event.target.classList.remove('opacity-50', 'rotate-1', 'scale-105');
+}
+</script>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
 @endsection

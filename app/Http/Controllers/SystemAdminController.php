@@ -622,35 +622,32 @@ class SystemAdminController extends Controller
     }
 
     /**
-     * Support tickets list
+     * Support tickets list (Kanban view)
      */
     public function supportTickets(Request $request)
     {
-        $query = SupportTicket::with(['user', 'church', 'latestMessage']);
+        // Get all tickets for Kanban (no pagination, recent first)
+        $tickets = SupportTicket::with(['user', 'church'])
+            ->orderByDesc('updated_at')
+            ->get();
 
-        if ($request->status && $request->status !== 'all') {
-            if ($request->status === 'open') {
-                $query->open();
-            } else {
-                $query->where('status', $request->status);
-            }
-        } else {
-            $query->open(); // Default to open tickets
-        }
-
-        if ($request->category) {
-            $query->where('category', $request->category);
-        }
-
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('subject', 'like', "%{$request->search}%")
-                  ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$request->search}%")
-                      ->orWhere('email', 'like', "%{$request->search}%"));
-            });
-        }
-
-        $tickets = $query->orderByDesc('last_reply_at')->paginate(20);
+        // Transform for frontend
+        $ticketsData = $tickets->map(function ($ticket) {
+            return [
+                'id' => $ticket->id,
+                'subject' => $ticket->subject,
+                'category' => $ticket->category,
+                'category_label' => $ticket->category_label,
+                'priority' => $ticket->priority,
+                'priority_label' => $ticket->priority_label,
+                'status' => $ticket->status,
+                'user_name' => $ticket->user?->name ?? $ticket->guest_name ?? 'Гість',
+                'church_name' => $ticket->church?->name,
+                'time_ago' => $ticket->updated_at->diffForHumans(),
+                'unread' => $ticket->unreadMessagesForAdmin(),
+                'show_url' => route('system.support.show', $ticket),
+            ];
+        });
 
         $stats = [
             'open' => SupportTicket::open()->count(),
@@ -658,7 +655,29 @@ class SystemAdminController extends Controller
             'resolved' => SupportTicket::where('status', 'resolved')->count(),
         ];
 
-        return view('system-admin.support.index', compact('tickets', 'stats'));
+        return view('system-admin.support.index', compact('ticketsData', 'stats'));
+    }
+
+    /**
+     * Update ticket status via AJAX (for Kanban drag-drop)
+     */
+    public function updateTicketStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'ticket_id' => 'required|exists:support_tickets,id',
+            'status' => 'required|in:open,in_progress,waiting,resolved,closed',
+        ]);
+
+        $ticket = SupportTicket::findOrFail($validated['ticket_id']);
+        $ticket->status = $validated['status'];
+
+        if ($validated['status'] === 'resolved') {
+            $ticket->resolved_at = now();
+        }
+
+        $ticket->save();
+
+        return response()->json(['success' => true]);
     }
 
     /**
