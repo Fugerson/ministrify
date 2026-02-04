@@ -215,6 +215,24 @@
                     'btn' => 'rounded-xl',
                     'accent' => 'bg-gradient-to-r from-emerald-500 to-teal-500'
                 ],
+                [
+                    'id' => 'ocean',
+                    'name' => 'Океан',
+                    'desc' => 'Глибокий, спокійний, морські хвилі',
+                    'preview' => 'bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 dark:from-cyan-950/50 dark:via-blue-950/50 dark:to-indigo-950/50',
+                    'card' => 'rounded-2xl shadow-lg shadow-blue-100/50 dark:shadow-none border border-blue-200/50 dark:border-blue-800/30',
+                    'btn' => 'rounded-xl',
+                    'accent' => 'bg-gradient-to-r from-cyan-500 to-blue-600'
+                ],
+                [
+                    'id' => 'sunset',
+                    'name' => 'Захід',
+                    'desc' => 'Теплий, романтичний, пурпурний захід',
+                    'preview' => 'bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-300 dark:from-pink-950/50 dark:via-purple-950/50 dark:to-indigo-950/50',
+                    'card' => 'rounded-2xl shadow-lg shadow-purple-100/50 dark:shadow-none border border-purple-200/50 dark:border-purple-800/30',
+                    'btn' => 'rounded-xl',
+                    'accent' => 'bg-gradient-to-r from-pink-500 to-purple-600'
+                ],
             ];
         @endphp
 

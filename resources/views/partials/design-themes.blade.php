@@ -272,5 +272,123 @@
     .border-gray-200, .border-gray-300 { border-color: rgba(34, 197, 94, 0.2) !important; }
     .dark .dark\:border-gray-700, .dark .dark\:border-gray-600 { border-color: rgba(34, 197, 94, 0.15) !important; }
 
+
+/* ========================================
+   DESIGN THEME: ОКЕАН (Ocean)
+   Deep blue, calming waves, sea vibes
+   ======================================== */
+@elseif($designTheme === 'ocean')
+    body {
+        background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 50%, #c7d2fe 100%) !important;
+    }
+    .dark body {
+        background: linear-gradient(135deg, #083344 0%, #0c4a6e 50%, #1e3a5f 100%) !important;
+    }
+
+    /* Ocean cards */
+    .bg-white, [class*="dark:bg-gray-800"] {
+        background: rgba(255, 255, 255, 0.92) !important;
+        border: 1px solid rgba(6, 182, 212, 0.2) !important;
+        box-shadow: 0 4px 20px rgba(6, 182, 212, 0.1), 0 1px 3px rgba(0,0,0,0.04) !important;
+    }
+    .dark .bg-white, .dark [class*="dark:bg-gray-800"] {
+        background: rgba(8, 51, 68, 0.9) !important;
+        border: 1px solid rgba(6, 182, 212, 0.2) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Sidebar - wave gradient */
+    aside {
+        background: linear-gradient(180deg, #ecfeff 0%, #ffffff 100%) !important;
+        border-right: 1px solid rgba(6, 182, 212, 0.25) !important;
+    }
+    .dark aside {
+        background: linear-gradient(180deg, rgba(8, 51, 68, 0.95) 0%, rgba(12, 74, 110, 0.98) 100%) !important;
+        border-right: 1px solid rgba(6, 182, 212, 0.2) !important;
+    }
+
+    /* Ocean blue buttons */
+    .bg-primary-600, .bg-primary-500 {
+        background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%) !important;
+        box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3) !important;
+    }
+    .bg-primary-600:hover, .bg-primary-500:hover {
+        background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%) !important;
+    }
+
+    /* Ocean accents */
+    .bg-primary-50, .bg-primary-100 { background: rgba(207, 250, 254, 0.7) !important; }
+    .dark .dark\:bg-primary-900\/50 { background: rgba(8, 51, 68, 0.6) !important; }
+    .text-primary-700 { color: #0e7490 !important; }
+    .text-primary-600 { color: #0891b2 !important; }
+    .dark .dark\:text-primary-300, .dark .dark\:text-primary-400 { color: #67e8f9 !important; }
+
+    /* Soft hover */
+    .hover\:bg-gray-100:hover { background: rgba(207, 250, 254, 0.5) !important; }
+    .dark .dark\:hover\:bg-gray-700:hover { background: rgba(14, 116, 144, 0.3) !important; }
+
+    /* Border colors */
+    .border-gray-200, .border-gray-300 { border-color: rgba(6, 182, 212, 0.2) !important; }
+    .dark .dark\:border-gray-700, .dark .dark\:border-gray-600 { border-color: rgba(6, 182, 212, 0.2) !important; }
+
+
+/* ========================================
+   DESIGN THEME: ЗАХІД (Sunset)
+   Warm purple/pink sunset, romantic vibes
+   ======================================== */
+@elseif($designTheme === 'sunset')
+    body {
+        background: linear-gradient(135deg, #fce7f3 0%, #f3e8ff 50%, #e0e7ff 100%) !important;
+    }
+    .dark body {
+        background: linear-gradient(135deg, #4a1d4e 0%, #3b0d60 50%, #312e81 100%) !important;
+    }
+
+    /* Sunset cards */
+    .bg-white, [class*="dark:bg-gray-800"] {
+        background: rgba(255, 255, 255, 0.92) !important;
+        border: 1px solid rgba(168, 85, 247, 0.2) !important;
+        box-shadow: 0 4px 20px rgba(168, 85, 247, 0.1), 0 1px 3px rgba(0,0,0,0.04) !important;
+    }
+    .dark .bg-white, .dark [class*="dark:bg-gray-800"] {
+        background: rgba(59, 13, 96, 0.85) !important;
+        border: 1px solid rgba(168, 85, 247, 0.25) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Sidebar - sunset gradient */
+    aside {
+        background: linear-gradient(180deg, #fdf2f8 0%, #ffffff 100%) !important;
+        border-right: 1px solid rgba(168, 85, 247, 0.2) !important;
+    }
+    .dark aside {
+        background: linear-gradient(180deg, rgba(59, 13, 96, 0.95) 0%, rgba(74, 29, 78, 0.98) 100%) !important;
+        border-right: 1px solid rgba(168, 85, 247, 0.25) !important;
+    }
+
+    /* Sunset purple buttons */
+    .bg-primary-600, .bg-primary-500 {
+        background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%) !important;
+        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3) !important;
+    }
+    .bg-primary-600:hover, .bg-primary-500:hover {
+        background: linear-gradient(135deg, #f472b6 0%, #c084fc 100%) !important;
+    }
+
+    /* Sunset accents */
+    .bg-primary-50, .bg-primary-100 { background: rgba(250, 232, 255, 0.7) !important; }
+    .dark .dark\:bg-primary-900\/50 { background: rgba(88, 28, 135, 0.5) !important; }
+    .text-primary-700 { color: #7e22ce !important; }
+    .text-primary-600 { color: #9333ea !important; }
+    .dark .dark\:text-primary-300, .dark .dark\:text-primary-400 { color: #d8b4fe !important; }
+
+    /* Soft hover */
+    .hover\:bg-gray-100:hover { background: rgba(250, 232, 255, 0.5) !important; }
+    .dark .dark\:hover\:bg-gray-700:hover { background: rgba(126, 34, 206, 0.3) !important; }
+
+    /* Border colors */
+    .border-gray-200, .border-gray-300 { border-color: rgba(168, 85, 247, 0.2) !important; }
+    .dark .dark\:border-gray-700, .dark .dark\:border-gray-600 { border-color: rgba(168, 85, 247, 0.2) !important; }
+
 @endif
 </style>
