@@ -659,20 +659,27 @@ class SystemAdminController extends Controller
     }
 
     /**
-     * Update ticket status via AJAX (for Kanban drag-drop)
+     * Update ticket status/priority via AJAX (for Kanban drag-drop)
      */
     public function updateTicketStatus(Request $request)
     {
         $validated = $request->validate([
             'ticket_id' => 'required|exists:support_tickets,id',
-            'status' => 'required|in:open,in_progress,waiting,resolved,closed',
+            'status' => 'nullable|in:open,in_progress,waiting,resolved,closed',
+            'priority' => 'nullable|in:low,normal,high,urgent',
         ]);
 
         $ticket = SupportTicket::findOrFail($validated['ticket_id']);
-        $ticket->status = $validated['status'];
 
-        if ($validated['status'] === 'resolved') {
-            $ticket->resolved_at = now();
+        if (!empty($validated['status'])) {
+            $ticket->status = $validated['status'];
+            if ($validated['status'] === 'resolved') {
+                $ticket->resolved_at = now();
+            }
+        }
+
+        if (!empty($validated['priority'])) {
+            $ticket->priority = $validated['priority'];
         }
 
         $ticket->save();

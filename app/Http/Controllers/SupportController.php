@@ -15,9 +15,26 @@ class SupportController extends Controller
         $tickets = SupportTicket::where('user_id', $user->id)
             ->with(['latestMessage'])
             ->orderByDesc('updated_at')
-            ->paginate(20);
+            ->get();
 
-        return view('support.index', compact('tickets'));
+        // Transform for Kanban view
+        $ticketsData = $tickets->map(function ($ticket) {
+            return [
+                'id' => $ticket->id,
+                'subject' => $ticket->subject,
+                'category' => $ticket->category,
+                'category_label' => $ticket->category_label,
+                'priority' => $ticket->priority,
+                'priority_label' => $ticket->priority_label,
+                'status' => $ticket->status,
+                'status_label' => $ticket->status_label,
+                'time_ago' => $ticket->updated_at->diffForHumans(),
+                'unread' => $ticket->unreadMessagesForUser(),
+                'show_url' => route('support.show', $ticket),
+            ];
+        });
+
+        return view('support.index', compact('ticketsData'));
     }
 
     public function create()
