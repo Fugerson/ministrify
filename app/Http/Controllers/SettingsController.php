@@ -346,6 +346,26 @@ class SettingsController extends Controller
         return back()->with('success', 'Стиль дизайну оновлено!');
     }
 
+    public function updateMenuPosition(Request $request)
+    {
+        $validated = $request->validate([
+            'menu_position' => 'required|string|in:left,right,top,bottom',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $oldPosition = $church->menu_position;
+        $church->update(['menu_position' => $validated['menu_position']]);
+
+        // Log menu position change
+        $this->logAuditAction('theme_updated', 'Church', $church->id, $church->name, [
+            'menu_position' => $validated['menu_position'],
+        ], [
+            'menu_position' => $oldPosition,
+        ]);
+
+        return back()->with('success', 'Позицію меню оновлено!');
+    }
+
     /**
      * Update finance settings (initial balance - multi-currency)
      */

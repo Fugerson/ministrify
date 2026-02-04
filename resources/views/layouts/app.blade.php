@@ -791,13 +791,98 @@
         })();
     </script>
     <div class="page-content">
-    <div x-data="{ sidebarOpen: false }" class="min-h-screen flex max-w-[100vw] overflow-x-clip"
+    @php $menuPosition = $currentChurch->menu_position ?? 'left'; @endphp
+    <div x-data="{ sidebarOpen: false }" class="min-h-screen flex max-w-[100vw] overflow-x-clip menu-position-wrapper"
          @keydown.window.prevent.cmd.k="searchOpen = true"
          @keydown.window.prevent.ctrl.k="searchOpen = true"
          @keydown.window.escape="searchOpen = false; fabOpen = false">
 
+        @if($menuPosition === 'top')
+        <!-- Top Navigation Bar -->
+        <nav class="top-nav-bar hidden lg:flex fixed top-0 left-0 right-0 z-40 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 items-center justify-between">
+            <div class="flex items-center gap-6">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
+                    @if($currentChurch->logo)
+                    <img src="/storage/{{ $currentChurch->logo }}" alt="{{ $currentChurch->name }}" class="w-8 h-8 rounded-lg object-contain">
+                    @else
+                    <span class="text-xl">⛪</span>
+                    @endif
+                    <span class="font-bold text-gray-900 dark:text-white">{{ $currentChurch->name ?? 'Ministrify' }}</span>
+                </a>
+                <div class="flex items-center gap-1">
+                    <a href="{{ route('dashboard') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">Головна</a>
+                    @hasChurchRole
+                    @if(auth()->user()->canView('people'))<a href="{{ route('people.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">Люди</a>@endif
+                    @if(auth()->user()->canView('groups'))<a href="{{ route('groups.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">Групи</a>@endif
+                    @if(auth()->user()->canView('ministries'))<a href="{{ route('ministries.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">Команди</a>@endif
+                    @if(auth()->user()->canView('events'))<a href="{{ route('schedule') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">Розклад</a>@endif
+                    @if(auth()->user()->canView('finances'))<a href="{{ route('finances.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">Фінанси</a>@endif
+                    @endhasChurchRole
+                    @admin
+                    <a href="{{ route('settings.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">Налаштування</a>
+                    @endadmin
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button @click="searchOpen = true" class="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></button>
+                <button onclick="toggleTheme()" class="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-5 h-5 text-yellow-500 dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg><svg class="w-5 h-5 text-indigo-400 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg></button>
+                <x-user-profile-link />
+            </div>
+        </nav>
+        @endif
+
+        @if($menuPosition === 'bottom')
+        <!-- Bottom Dock Navigation -->
+        <nav class="bottom-dock-nav hidden lg:flex fixed bottom-0 left-0 right-0 z-40 h-16 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 items-center justify-center gap-2">
+            <a href="{{ route('dashboard') }}" class="flex flex-col items-center px-4 py-2 rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="text-xs mt-0.5">Головна</span>
+            </a>
+            @hasChurchRole
+            @if(auth()->user()->canView('people'))
+            <a href="{{ route('people.index') }}" class="flex flex-col items-center px-4 py-2 rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
+                <span class="text-xs mt-0.5">Люди</span>
+            </a>
+            @endif
+            @if(auth()->user()->canView('events'))
+            <a href="{{ route('schedule') }}" class="flex flex-col items-center px-4 py-2 rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span class="text-xs mt-0.5">Розклад</span>
+            </a>
+            @endif
+            @if(auth()->user()->canView('groups'))
+            <a href="{{ route('groups.index') }}" class="flex flex-col items-center px-4 py-2 rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span class="text-xs mt-0.5">Групи</span>
+            </a>
+            @endif
+            @if(auth()->user()->canView('finances'))
+            <a href="{{ route('finances.index') }}" class="flex flex-col items-center px-4 py-2 rounded-xl {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <span class="text-xs mt-0.5">Фінанси</span>
+            </a>
+            @endif
+            @endhasChurchRole
+            @admin
+            <a href="{{ route('settings.index') }}" class="flex flex-col items-center px-4 py-2 rounded-xl {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span class="text-xs mt-0.5">Налаштування</span>
+            </a>
+            @endadmin
+            <button @click="searchOpen = true" class="flex flex-col items-center px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span class="text-xs mt-0.5">Пошук</span>
+            </button>
+            <a href="{{ route('my-profile') }}" class="flex flex-col items-center px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <x-user-avatar size="sm" />
+                <span class="text-xs mt-0.5">Профіль</span>
+            </a>
+        </nav>
+        @endif
+
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+        <aside class="desktop-sidebar hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
             <div class="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
@@ -1181,7 +1266,7 @@
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 min-w-0 lg:pl-64">
+        <div class="main-content-area flex-1 min-w-0 lg:pl-64 {{ $menuPosition === 'top' ? 'lg:pt-16' : '' }} {{ $menuPosition === 'bottom' ? 'lg:pb-20' : '' }}">
             <!-- Mobile Header -->
             <header class="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
                 <div class="flex items-center justify-between h-14 px-3">

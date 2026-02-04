@@ -272,6 +272,66 @@
             </div>
         </div>
 
+        <!-- Menu Position Selection -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Позиція меню</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть розташування навігаційного меню</p>
+            </div>
+
+            <div class="p-6">
+                @php
+                    $currentPosition = $church->menu_position ?? 'left';
+                    $menuPositions = [
+                        [
+                            'id' => 'left',
+                            'name' => 'Зліва',
+                            'desc' => 'Класична бічна панель',
+                            'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="20" height="50" rx="2" class="fill-primary-500"/><rect x="30" y="5" width="65" height="50" rx="2" class="fill-gray-200 dark:fill-gray-700"/></svg>'
+                        ],
+                        [
+                            'id' => 'right',
+                            'name' => 'Справа',
+                            'desc' => 'Меню справа',
+                            'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="65" height="50" rx="2" class="fill-gray-200 dark:fill-gray-700"/><rect x="75" y="5" width="20" height="50" rx="2" class="fill-primary-500"/></svg>'
+                        ],
+                        [
+                            'id' => 'top',
+                            'name' => 'Зверху',
+                            'desc' => 'Горизонтальне меню',
+                            'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="90" height="12" rx="2" class="fill-primary-500"/><rect x="5" y="22" width="90" height="33" rx="2" class="fill-gray-200 dark:fill-gray-700"/></svg>'
+                        ],
+                        [
+                            'id' => 'bottom',
+                            'name' => 'Знизу',
+                            'desc' => 'Мобільний стиль',
+                            'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="90" height="38" rx="2" class="fill-gray-200 dark:fill-gray-700"/><rect x="5" y="48" width="90" height="10" rx="2" class="fill-primary-500"/></svg>'
+                        ],
+                    ];
+                @endphp
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    @foreach($menuPositions as $position)
+                        <form method="POST" action="{{ route('settings.menu-position') }}">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="menu_position" value="{{ $position['id'] }}">
+                            <button type="submit"
+                                    class="w-full p-4 rounded-xl border-2 transition-all hover:scale-[1.02] {{ $currentPosition === $position['id'] ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }}">
+                                <div class="h-16 mb-3">
+                                    {!! $position['icon'] !!}
+                                </div>
+                                <h3 class="font-semibold text-gray-900 dark:text-white text-sm">{{ $position['name'] }}</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $position['desc'] }}</p>
+                                @if($currentPosition === $position['id'])
+                                    <span class="inline-block mt-2 text-xs bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">Активний</span>
+                                @endif
+                            </button>
+                        </form>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
         <!-- Color Presets -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">

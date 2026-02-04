@@ -1,8 +1,74 @@
 @php
     $designTheme = $currentChurch->design_theme ?? 'modern';
+    $menuPosition = $currentChurch->menu_position ?? 'left';
 @endphp
 
 <style>
+/* ========================================
+   MENU POSITION STYLES
+   ======================================== */
+@if($menuPosition === 'right')
+    /* Right Sidebar Layout */
+    .menu-position-wrapper {
+        flex-direction: row-reverse !important;
+    }
+    .desktop-sidebar {
+        left: auto !important;
+        right: 0 !important;
+        border-right: none !important;
+        border-left: 1px solid var(--border-color, rgba(229, 231, 235, 1)) !important;
+    }
+    .dark .desktop-sidebar {
+        border-left-color: rgba(55, 65, 81, 1) !important;
+    }
+    .main-content-area {
+        padding-left: 0 !important;
+        padding-right: 16rem !important; /* lg:pr-64 */
+    }
+    @media (max-width: 1023px) {
+        .main-content-area {
+            padding-right: 0 !important;
+        }
+    }
+@elseif($menuPosition === 'top')
+    /* Top Navigation Layout */
+    .desktop-sidebar {
+        display: none !important;
+    }
+    .main-content-area {
+        padding-left: 0 !important;
+    }
+    .top-nav-bar {
+        display: flex !important;
+    }
+    /* Hide desktop header since top nav has everything */
+    @media (min-width: 1024px) {
+        .main-content-area > header.hidden.lg\\:flex {
+            display: none !important;
+        }
+        .mobile-bottom-nav {
+            display: none !important;
+        }
+    }
+@elseif($menuPosition === 'bottom')
+    /* Bottom Dock Layout */
+    .desktop-sidebar {
+        display: none !important;
+    }
+    .main-content-area {
+        padding-left: 0 !important;
+        padding-bottom: 5rem !important;
+    }
+    .bottom-dock-nav {
+        display: flex !important;
+    }
+    @media (min-width: 1024px) {
+        .mobile-bottom-nav {
+            display: none !important;
+        }
+    }
+@endif
+
 /* ========================================
    DESIGN THEME: РАНОК (Morning) - Default
    Fresh, light, peach/coral sunrise tones

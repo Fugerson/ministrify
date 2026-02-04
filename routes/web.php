@@ -562,6 +562,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('payments', [SettingsController::class, 'updatePaymentSettings'])->name('payments');
         Route::put('theme-color', [SettingsController::class, 'updateThemeColor'])->name('theme-color');
         Route::put('design-theme', [SettingsController::class, 'updateDesignTheme'])->name('design-theme');
+        Route::put('menu-position', [SettingsController::class, 'updateMenuPosition'])->name('menu-position');
         Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
         Route::put('currencies', [SettingsController::class, 'updateCurrencies'])->name('currencies');
 

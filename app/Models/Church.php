@@ -30,6 +30,7 @@ class Church extends Model
         'logo',
         'primary_color',
         'design_theme',
+        'menu_position',
         'telegram_bot_token',
         'settings',
         'payment_settings',
