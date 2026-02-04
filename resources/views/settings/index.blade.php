@@ -844,14 +844,13 @@
         </div>
     </div>
 
-    {{-- TEMPORARILY DISABLED - Google Calendar OAuth Integration
+    <!-- Google Calendar OAuth Integration -->
     @php
         $googleCalendarSettings = auth()->user()->settings['google_calendar'] ?? null;
         $isGoogleConnected = $googleCalendarSettings && !empty($googleCalendarSettings['access_token']);
     @endphp
-    --}}
-    {{-- <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-         x-data="googleCalendarSync({{ $isGoogleConnected ? 'true' : 'false' }})"
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="googleCalendarSync({{ $isGoogleConnected ? 'true' : 'false' }})">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -1266,7 +1265,7 @@
         }
     }
     </script>
-    </div> --}}
+    </div>
 
     <!-- Data Tab -->
     <div x-show="activeTab === 'data'" x-cloak class="space-y-6">
