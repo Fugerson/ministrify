@@ -43,6 +43,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('exchange-rates:sync')
             ->dailyAt('10:30')
             ->description('Sync exchange rates from NBU');
+
+        // Monitor backup health every 6 hours
+        $schedule->command('backup:monitor')
+            ->everySixHours()
+            ->description('Check backup size and age, alert if issues');
     }
 
     protected function commands(): void
