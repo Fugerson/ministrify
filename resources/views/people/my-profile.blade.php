@@ -532,7 +532,7 @@
                 <div class="p-6">
                     @php
                         $themes = [
-                            ['id' => '', 'name' => 'Церковна', 'desc' => 'Тема церкви', 'colors' => ['#fef7f0', '#fdf2f8', '#fef3c7']],
+                            ['id' => '', 'name' => 'Класична', 'desc' => 'За замовчуванням', 'colors' => ['#fef7f0', '#fdf2f8', '#fef3c7']],
                             ['id' => 'modern', 'name' => 'Ранок', 'desc' => 'Персиковий світанок', 'colors' => ['#fce7f3', '#fed7aa', '#fef3c7']],
                             ['id' => 'glass', 'name' => 'Вечір', 'desc' => 'Золоті акценти', 'colors' => ['#1e1b4b', '#172554', '#fbbf24']],
                             ['id' => 'corporate', 'name' => 'Природа', 'desc' => 'Лісові тони', 'colors' => ['#ecfdf5', '#d1fae5', '#10b981']],
