@@ -126,7 +126,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
                     @if($member->photo)
                         <div class="h-56 overflow-hidden">
-                            <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->name }}" class="w-full h-full object-cover">
+                            <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->name }}" class="w-full h-full object-cover" loading="lazy">
                         </div>
                     @else
                         <div class="h-56 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
@@ -193,7 +193,7 @@
                    class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary-200 transition-all duration-300">
                     @if($event->cover_image)
                         <div class="h-48 overflow-hidden">
-                            <img src="{{ Storage::url($event->cover_image) }}" alt="{{ $event->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ Storage::url($event->cover_image) }}" alt="{{ $event->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
                         </div>
                     @else
                         <div class="h-48 bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
@@ -283,7 +283,7 @@
                    class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary-200 transition-all duration-300">
                     @if($group->cover_image)
                         <div class="h-40 overflow-hidden">
-                            <img src="{{ Storage::url($group->cover_image) }}" alt="{{ $group->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ Storage::url($group->cover_image) }}" alt="{{ $group->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
                         </div>
                     @else
                         <div class="h-40 flex items-center justify-center" style="background: linear-gradient(135deg, {{ $group->color ?? '#6366f1' }} 0%, {{ $group->color ?? '#6366f1' }}99 100%);">
@@ -331,7 +331,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
                     @if($sermon->thumbnail)
                         <div class="h-48 overflow-hidden">
-                            <img src="{{ Storage::url($sermon->thumbnail) }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover">
+                            <img src="{{ Storage::url($sermon->thumbnail) }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover" loading="lazy">
                         </div>
                     @elseif($sermon->video_url && str_contains($sermon->video_url, 'youtube'))
                         @php
@@ -340,7 +340,7 @@
                         @endphp
                         @if($videoId)
                             <div class="h-48 overflow-hidden">
-                                <img src="https://img.youtube.com/vi/{{ $videoId }}/maxresdefault.jpg" alt="{{ $sermon->title }}" class="w-full h-full object-cover">
+                                <img src="https://img.youtube.com/vi/{{ $videoId }}/maxresdefault.jpg" alt="{{ $sermon->title }}" class="w-full h-full object-cover" loading="lazy">
                             </div>
                         @endif
                     @else
@@ -399,7 +399,7 @@
                 @if($gallery->images && count($gallery->images) > 0)
                     @foreach(array_slice($gallery->images, 0, 4) as $image)
                         <div class="aspect-square rounded-xl overflow-hidden">
-                            <img src="{{ Storage::url($image) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                            <img src="{{ Storage::url($image) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" loading="lazy">
                         </div>
                     @endforeach
                 @endif
@@ -427,7 +427,7 @@
                     <p class="text-gray-600 leading-relaxed mb-4">{{ $testimonial->content }}</p>
                     <div class="flex items-center gap-3">
                         @if($testimonial->photo)
-                            <img src="{{ Storage::url($testimonial->photo) }}" alt="{{ $testimonial->author_name }}" class="w-10 h-10 rounded-full object-cover">
+                            <img src="{{ Storage::url($testimonial->photo) }}" alt="{{ $testimonial->author_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
                         @else
                             <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
                                 <span class="text-primary-600 font-semibold">{{ substr($testimonial->author_name, 0, 1) }}</span>
@@ -461,7 +461,7 @@
                 <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
                     @if($post->featured_image)
                         <div class="h-48 overflow-hidden">
-                            <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" class="w-full h-full object-cover">
+                            <img src="{{ Storage::url($post->featured_image) }}" alt="{{ $post->title }}" class="w-full h-full object-cover" loading="lazy">
                         </div>
                     @endif
                     <div class="p-5">

@@ -50,7 +50,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden group">
                     <a href="{{ route('website-builder.gallery.show', $gallery) }}" class="block aspect-video bg-gray-100 dark:bg-gray-700 relative">
                         @if($gallery->cover_photo)
-                            <img src="{{ Storage::url($gallery->cover_photo) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover">
+                            <img src="{{ Storage::url($gallery->cover_photo) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover" loading="lazy">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <svg class="w-12 h-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

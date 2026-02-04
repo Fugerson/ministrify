@@ -19,12 +19,20 @@ use App\Models\PrayerRequest;
 use App\Models\Sermon;
 use App\Models\Song;
 use App\Models\Transaction;
+use App\Services\DashboardCacheService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
+{
+    private DashboardCacheService $cacheService;
+
+    public function __construct(DashboardCacheService $cacheService)
+    {
+        $this->cacheService = $cacheService;
+    }
 {
     private const ALLOWED_COLS = [3, 4, 6, 8, 12];
 
@@ -482,15 +490,17 @@ class DashboardController extends Controller
 
     private function loadNeedAttention($church)
     {
-        $threeWeeksAgo = now()->subWeeks(3);
+        return $this->cacheService->remember('need_attention', $church, function () use ($church) {
+            $threeWeeksAgo = now()->subWeeks(3);
 
-        return Person::where('church_id', $church->id)
-            ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
-                $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
-                  ->where('present', true);
-            })
-            ->limit(5)
-            ->get();
+            return Person::where('church_id', $church->id)
+                ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
+                    $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
+                      ->where('present', true);
+                })
+                ->limit(5)
+                ->get();
+        });
     }
 
     private function loadMinistryBudgets($church)
@@ -599,27 +609,29 @@ class DashboardController extends Controller
 
     private function loadGrowthData($church): array
     {
-        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
-        $growthRaw = Person::where('church_id', $church->id)
-            ->where('joined_date', '>=', $sixMonthsAgo)
-            ->selectRaw('YEAR(joined_date) as year, MONTH(joined_date) as month, COUNT(*) as count')
-            ->groupBy('year', 'month')
-            ->orderBy('year')
-            ->orderBy('month')
-            ->get()
-            ->keyBy(fn($item) => $item->year . '-' . $item->month);
+        return $this->cacheService->remember('growth', $church, function () use ($church) {
+            $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+            $growthRaw = Person::where('church_id', $church->id)
+                ->where('joined_date', '>=', $sixMonthsAgo)
+                ->selectRaw('YEAR(joined_date) as year, MONTH(joined_date) as month, COUNT(*) as count')
+                ->groupBy('year', 'month')
+                ->orderBy('year')
+                ->orderBy('month')
+                ->get()
+                ->keyBy(fn($item) => $item->year . '-' . $item->month);
 
-        $growthData = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $month = now()->subMonths($i);
-            $key = $month->year . '-' . $month->month;
-            $growthData[] = [
-                'month' => $month->translatedFormat('M'),
-                'count' => $growthRaw[$key]->count ?? 0,
-            ];
-        }
+            $growthData = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $month = now()->subMonths($i);
+                $key = $month->year . '-' . $month->month;
+                $growthData[] = [
+                    'month' => $month->translatedFormat('M'),
+                    'count' => $growthRaw[$key]->count ?? 0,
+                ];
+            }
 
-        return $growthData;
+            return $growthData;
+        });
     }
 
     // ── New widget loaders ──
@@ -680,47 +692,49 @@ class DashboardController extends Controller
 
     private function loadDemographics($church): array
     {
-        $today = now();
+        return $this->cacheService->remember('demographics', $church, function () use ($church) {
+            $today = now();
 
-        $genderStats = DB::table('people')
-            ->where('church_id', $church->id)
-            ->whereNull('deleted_at')
-            ->selectRaw("
-                COUNT(*) as total,
-                SUM(CASE WHEN birth_date IS NOT NULL THEN 1 ELSE 0 END) as with_birthdate,
-                SUM(CASE WHEN gender = 'male' THEN 1 ELSE 0 END) as male,
-                SUM(CASE WHEN gender = 'female' THEN 1 ELSE 0 END) as female,
-                SUM(CASE WHEN gender IS NULL OR gender = '' THEN 1 ELSE 0 END) as unknown_gender
-            ")
-            ->first();
+            $genderStats = DB::table('people')
+                ->where('church_id', $church->id)
+                ->whereNull('deleted_at')
+                ->selectRaw("
+                    COUNT(*) as total,
+                    SUM(CASE WHEN birth_date IS NOT NULL THEN 1 ELSE 0 END) as with_birthdate,
+                    SUM(CASE WHEN gender = 'male' THEN 1 ELSE 0 END) as male,
+                    SUM(CASE WHEN gender = 'female' THEN 1 ELSE 0 END) as female,
+                    SUM(CASE WHEN gender IS NULL OR gender = '' THEN 1 ELSE 0 END) as unknown_gender
+                ")
+                ->first();
 
-        $ageGroups = DB::table('people')
-            ->where('church_id', $church->id)
-            ->whereNull('deleted_at')
-            ->whereNotNull('birth_date')
-            ->selectRaw("
-                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
-                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17 THEN 1 ELSE 0 END) as teens,
-                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35 THEN 1 ELSE 0 END) as youth,
-                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59 THEN 1 ELSE 0 END) as adults,
-                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60 THEN 1 ELSE 0 END) as seniors
-            ", [$today, $today, $today, $today, $today])
-            ->first();
+            $ageGroups = DB::table('people')
+                ->where('church_id', $church->id)
+                ->whereNull('deleted_at')
+                ->whereNotNull('birth_date')
+                ->selectRaw("
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17 THEN 1 ELSE 0 END) as teens,
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35 THEN 1 ELSE 0 END) as youth,
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59 THEN 1 ELSE 0 END) as adults,
+                    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60 THEN 1 ELSE 0 END) as seniors
+                ", [$today, $today, $today, $today, $today])
+                ->first();
 
-        return [
-            'total' => (int) ($genderStats->total ?? 0),
-            'with_birthdate' => (int) ($genderStats->with_birthdate ?? 0),
-            'male' => (int) ($genderStats->male ?? 0),
-            'female' => (int) ($genderStats->female ?? 0),
-            'unknown_gender' => (int) ($genderStats->unknown_gender ?? 0),
-            'age_groups' => [
-                'children' => (int) ($ageGroups->children ?? 0),
-                'teens' => (int) ($ageGroups->teens ?? 0),
-                'youth' => (int) ($ageGroups->youth ?? 0),
-                'adults' => (int) ($ageGroups->adults ?? 0),
-                'seniors' => (int) ($ageGroups->seniors ?? 0),
-            ],
-        ];
+            return [
+                'total' => (int) ($genderStats->total ?? 0),
+                'with_birthdate' => (int) ($genderStats->with_birthdate ?? 0),
+                'male' => (int) ($genderStats->male ?? 0),
+                'female' => (int) ($genderStats->female ?? 0),
+                'unknown_gender' => (int) ($genderStats->unknown_gender ?? 0),
+                'age_groups' => [
+                    'children' => (int) ($ageGroups->children ?? 0),
+                    'teens' => (int) ($ageGroups->teens ?? 0),
+                    'youth' => (int) ($ageGroups->youth ?? 0),
+                    'adults' => (int) ($ageGroups->adults ?? 0),
+                    'seniors' => (int) ($ageGroups->seniors ?? 0),
+                ],
+            ];
+        });
     }
 
     private function loadNewMembers($church)
@@ -733,30 +747,35 @@ class DashboardController extends Controller
 
     private function loadGroupHealth($church)
     {
-        return Group::where('church_id', $church->id)
-            ->where('status', 'active')
-            ->withCount('members')
-            ->with('leader')
-            ->get()
-            ->map(function ($group) {
-                $lastAttendance = Attendance::where('attendable_type', Group::class)
-                    ->where('attendable_id', $group->id)
-                    ->orderByDesc('date')
-                    ->first();
+        return $this->cacheService->remember('group_health', $church, function () use ($church) {
+            $groups = Group::where('church_id', $church->id)
+                ->where('status', 'active')
+                ->withCount('members')
+                ->with('leader')
+                ->get();
 
-                $avgAttendance = Attendance::where('attendable_type', Group::class)
-                    ->where('attendable_id', $group->id)
-                    ->where('date', '>=', now()->subWeeks(8))
-                    ->avg('total_count') ?? 0;
+            if ($groups->isEmpty()) {
+                return collect();
+            }
 
-                $recentCounts = Attendance::where('attendable_type', Group::class)
-                    ->where('attendable_id', $group->id)
-                    ->orderByDesc('date')
-                    ->limit(4)
-                    ->pluck('total_count')
-                    ->reverse()
-                    ->values()
-                    ->toArray();
+            $groupIds = $groups->pluck('id');
+            $eightWeeksAgo = now()->subWeeks(8);
+
+            // Batch query: get all attendance data for all groups at once
+            $attendanceData = Attendance::where('attendable_type', Group::class)
+                ->whereIn('attendable_id', $groupIds)
+                ->where('date', '>=', $eightWeeksAgo)
+                ->select('attendable_id', 'date', 'total_count')
+                ->orderByDesc('date')
+                ->get()
+                ->groupBy('attendable_id');
+
+            return $groups->map(function ($group) use ($attendanceData) {
+                $groupAttendance = $attendanceData->get($group->id, collect());
+
+                $lastAttendance = $groupAttendance->first();
+                $avgAttendance = $groupAttendance->avg('total_count') ?? 0;
+                $recentCounts = $groupAttendance->take(4)->pluck('total_count')->reverse()->values()->toArray();
 
                 $trend = 'stable';
                 if (count($recentCounts) >= 2) {
@@ -779,41 +798,44 @@ class DashboardController extends Controller
             })
             ->sortByDesc('avg_attendance')
             ->values();
+        });
     }
 
     private function loadGivingTrends($church): array
     {
-        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+        return $this->cacheService->remember('giving_trends', $church, function () use ($church) {
+            $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
 
-        $raw = Transaction::where('church_id', $church->id)
-            ->incoming()
-            ->completed()
-            ->where('date', '>=', $sixMonthsAgo)
-            ->selectRaw("YEAR(date) as year, MONTH(date) as month, source_type, SUM(amount) as total")
-            ->groupBy('year', 'month', 'source_type')
-            ->get()
-            ->groupBy(fn($item) => $item->year . '-' . $item->month);
+            $raw = Transaction::where('church_id', $church->id)
+                ->incoming()
+                ->completed()
+                ->where('date', '>=', $sixMonthsAgo)
+                ->selectRaw("YEAR(date) as year, MONTH(date) as month, source_type, SUM(amount) as total")
+                ->groupBy('year', 'month', 'source_type')
+                ->get()
+                ->groupBy(fn($item) => $item->year . '-' . $item->month);
 
-        $trends = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $month = now()->subMonths($i);
-            $key = $month->year . '-' . $month->month;
-            $monthData = $raw[$key] ?? collect();
+            $trends = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $month = now()->subMonths($i);
+                $key = $month->year . '-' . $month->month;
+                $monthData = $raw[$key] ?? collect();
 
-            $tithes = $monthData->where('source_type', 'tithe')->sum('total');
-            $offerings = $monthData->where('source_type', 'offering')->sum('total');
-            $donations = $monthData->whereIn('source_type', ['donation', 'income'])->sum('total');
+                $tithes = $monthData->where('source_type', 'tithe')->sum('total');
+                $offerings = $monthData->where('source_type', 'offering')->sum('total');
+                $donations = $monthData->whereIn('source_type', ['donation', 'income'])->sum('total');
 
-            $trends[] = [
-                'month' => $month->translatedFormat('M'),
-                'tithes' => $tithes,
-                'offerings' => $offerings,
-                'donations' => $donations,
-                'total' => $tithes + $offerings + $donations,
-            ];
-        }
+                $trends[] = [
+                    'month' => $month->translatedFormat('M'),
+                    'tithes' => $tithes,
+                    'offerings' => $offerings,
+                    'donations' => $donations,
+                    'total' => $tithes + $offerings + $donations,
+                ];
+            }
 
-        return $trends;
+            return $trends;
+        });
     }
 
     private function loadShepherdOverview($church): array

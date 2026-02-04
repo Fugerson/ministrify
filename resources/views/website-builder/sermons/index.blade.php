@@ -57,9 +57,9 @@
                     <!-- Thumbnail -->
                     <div class="w-24 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex-shrink-0 overflow-hidden relative">
                         @if($sermon->thumbnail)
-                            <img src="{{ Storage::url($sermon->thumbnail) }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover">
+                            <img src="{{ Storage::url($sermon->thumbnail) }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover" loading="lazy">
                         @elseif($sermon->youtube_thumbnail)
-                            <img src="{{ $sermon->youtube_thumbnail }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover">
+                            <img src="{{ $sermon->youtube_thumbnail }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover" loading="lazy">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
