@@ -190,30 +190,30 @@
             $designThemes = [
                 [
                     'id' => 'modern',
-                    'name' => 'Класичний',
-                    'desc' => 'Чистий, професійний, м\'які тіні та заокруглення',
-                    'preview' => 'bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-slate-900',
-                    'card' => 'rounded-xl shadow-md border border-gray-100 dark:border-gray-700',
-                    'btn' => 'rounded-lg',
-                    'accent' => 'bg-blue-500'
+                    'name' => 'Ранок',
+                    'desc' => 'Свіжий, легкий, персиковий світанок',
+                    'preview' => 'bg-gradient-to-br from-rose-200 via-orange-100 to-amber-100 dark:from-rose-900/40 dark:via-orange-900/30 dark:to-amber-900/30',
+                    'card' => 'rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-none border border-rose-100/50 dark:border-rose-800/30',
+                    'btn' => 'rounded-xl',
+                    'accent' => 'bg-gradient-to-r from-rose-400 to-orange-400'
                 ],
                 [
                     'id' => 'glass',
-                    'name' => 'Елегантний',
-                    'desc' => 'Преміум вигляд з глибокими відтінками та градієнтами',
-                    'preview' => 'bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700',
-                    'card' => 'rounded-2xl shadow-xl bg-white/95 dark:bg-gray-800/95 backdrop-blur',
+                    'name' => 'Вечір',
+                    'desc' => 'Глибокий, затишний, золоті акценти',
+                    'preview' => 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900',
+                    'card' => 'rounded-2xl shadow-xl shadow-amber-500/10 border border-amber-400/20 dark:border-amber-400/10',
                     'btn' => 'rounded-xl',
-                    'accent' => 'bg-violet-500'
+                    'accent' => 'bg-gradient-to-r from-amber-400 to-yellow-500'
                 ],
                 [
                     'id' => 'corporate',
-                    'name' => 'Теплий',
-                    'desc' => 'Привітний, затишний, теплі відтінки',
-                    'preview' => 'bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-amber-950 dark:via-orange-950 dark:to-rose-950',
-                    'card' => 'rounded-2xl shadow-lg border border-amber-100 dark:border-amber-900/50',
+                    'name' => 'Природа',
+                    'desc' => 'Живий, натуральний, лісові тони',
+                    'preview' => 'bg-gradient-to-br from-emerald-100 via-green-50 to-teal-100 dark:from-emerald-950/50 dark:via-green-950/40 dark:to-teal-950/50',
+                    'card' => 'rounded-2xl shadow-lg shadow-emerald-100/50 dark:shadow-none border border-emerald-200/50 dark:border-emerald-800/30',
                     'btn' => 'rounded-xl',
-                    'accent' => 'bg-amber-500'
+                    'accent' => 'bg-gradient-to-r from-emerald-500 to-teal-500'
                 ],
             ];
         @endphp
@@ -282,12 +282,12 @@
             <div class="p-6">
                 @php
                     $colorPresets = [
-                        ['color' => '#3b82f6', 'name' => 'Синій'],
-                        ['color' => '#8b5cf6', 'name' => 'Фіолетовий'],
-                        ['color' => '#10b981', 'name' => 'Смарагдовий'],
-                        ['color' => '#f59e0b', 'name' => 'Бурштиновий'],
-                        ['color' => '#ec4899', 'name' => 'Рожевий'],
-                        ['color' => '#06b6d4', 'name' => 'Блакитний'],
+                        ['color' => '#f97316', 'name' => 'Захід сонця'],
+                        ['color' => '#eab308', 'name' => 'Золотий'],
+                        ['color' => '#10b981', 'name' => 'Смарагд'],
+                        ['color' => '#6366f1', 'name' => 'Індіго'],
+                        ['color' => '#ec4899', 'name' => 'Троянда'],
+                        ['color' => '#0ea5e9', 'name' => 'Небо'],
                     ];
                 @endphp
                 <div class="flex flex-wrap gap-3">
