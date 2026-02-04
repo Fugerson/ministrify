@@ -77,9 +77,13 @@
 .desktop-sidebar.lg\:w-16 .sidebar-icon { margin-right: 0 !important; }
 .desktop-sidebar.lg\:w-16 nav a,
 .desktop-sidebar.lg\:w-16 nav button { justify-content: center !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+.desktop-sidebar.lg\:w-16 nav a svg,
+.desktop-sidebar.lg\:w-16 nav button svg { margin-right: 0 !important; }
 .desktop-sidebar.lg\:w-16 .sidebar-divider-text { display: none !important; }
 .desktop-sidebar.lg\:w-16 .sidebar-badge { position: absolute !important; top: -4px !important; right: -4px !important; }
 .desktop-sidebar.lg\:w-16 nav > div:has(.sidebar-badge) { position: relative !important; }
+.desktop-sidebar.lg\:w-16 nav > div a { justify-content: center !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+.desktop-sidebar.lg\:w-16 nav > div a svg { margin-right: 0 !important; }
 
 /* Main content padding adjustment for collapsed sidebar */
 .main-content-area { transition: padding-left 0.3s ease; }

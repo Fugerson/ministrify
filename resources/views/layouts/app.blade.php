@@ -966,11 +966,11 @@
 
         <!-- Desktop Sidebar -->
         <aside x-data="{ collapsed: localStorage.getItem('sidebar_collapsed') === 'true' }"
-               x-init="$watch('collapsed', val => localStorage.setItem('sidebar_collapsed', val))"
+               x-init="$watch('collapsed', val => { localStorage.setItem('sidebar_collapsed', val); window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: val })) })"
                :class="collapsed ? 'lg:w-16' : 'lg:w-64'"
                class="desktop-sidebar hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300">
-            <div class="flex items-center justify-between h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0" :class="collapsed ? 'px-3' : 'px-6'">
-                <a href="{{ route('dashboard') }}" class="flex items-center space-x-2 overflow-hidden">
+            <div class="flex items-center h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0" :class="collapsed ? 'justify-center px-2' : 'justify-between px-6'">
+                <a href="{{ route('dashboard') }}" class="flex items-center flex-shrink-0" :class="collapsed ? 'justify-center' : 'space-x-2 overflow-hidden'">
                     @if($currentChurch->logo)
                     <img src="/storage/{{ $currentChurch->logo }}" alt="{{ $currentChurch->name }}" class="w-8 h-8 rounded-lg object-contain flex-shrink-0">
                     @else
@@ -978,9 +978,8 @@
                     @endif
                     <span x-show="!collapsed" x-cloak class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ $currentChurch->name ?? 'Ministrify' }}</span>
                 </a>
-                <button @click="collapsed = !collapsed" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" :class="collapsed ? 'ml-0' : 'ml-2'" title="Згорнути меню">
-                    <svg x-show="!collapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
-                    <svg x-show="collapsed" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                <button x-show="!collapsed" @click="collapsed = true" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0" title="Згорнути меню">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
                 </button>
             </div>
 
@@ -1169,6 +1168,13 @@
             </div>
             @endif
 
+            <!-- Expand button at bottom when collapsed -->
+            <div x-show="collapsed" x-cloak class="flex-shrink-0 p-2 border-t border-gray-200 dark:border-gray-700">
+                <button @click="collapsed = false" class="w-full flex items-center justify-center p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Розгорнути меню">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+
         </aside>
 
         <!-- Mobile Sidebar (overlay) -->
@@ -1347,20 +1353,9 @@
 
         <!-- Main Content -->
         <div id="main-content" class="main-content-area flex-1 min-w-0 {{ $menuPosition === 'top' ? 'lg:pt-16' : '' }} {{ $menuPosition === 'bottom' ? 'lg:pb-20' : '' }}"
-             :class="{ 'lg:pl-64': !document.querySelector('.desktop-sidebar')?.classList.contains('lg:w-16'), 'lg:pl-16': document.querySelector('.desktop-sidebar')?.classList.contains('lg:w-16') }"
-             x-init="
-                const updatePadding = () => {
-                    const collapsed = localStorage.getItem('sidebar_collapsed') === 'true';
-                    $el.classList.toggle('lg:pl-64', !collapsed);
-                    $el.classList.toggle('lg:pl-16', collapsed);
-                };
-                updatePadding();
-                window.addEventListener('storage', updatePadding);
-                // Also watch for changes within the same page
-                const observer = new MutationObserver(updatePadding);
-                const sidebar = document.querySelector('.desktop-sidebar');
-                if (sidebar) observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-             ">
+             x-data="{ sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true' }"
+             x-on:sidebar-toggle.window="sidebarCollapsed = $event.detail"
+             :class="sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'">
             <!-- Mobile Header -->
             <header class="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
                 <div class="flex items-center justify-between h-14 px-3">
