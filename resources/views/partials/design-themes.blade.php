@@ -31,40 +31,33 @@
         }
     }
 @elseif($menuPosition === 'top')
-    /* Top Navigation Layout */
-    .desktop-sidebar {
-        display: none !important;
-    }
-    .main-content-area {
-        padding-left: 0 !important;
-    }
-    .top-nav-bar {
-        display: flex !important;
-    }
-    /* Hide desktop header since top nav has everything */
+    /* Top Navigation Layout - desktop only */
     @media (min-width: 1024px) {
-        .main-content-area > header.hidden.lg\\:flex {
+        .desktop-sidebar {
             display: none !important;
         }
-        .mobile-bottom-nav {
+        .main-content-area {
+            padding-left: 0 !important;
+        }
+        .top-nav-bar {
+            display: flex !important;
+        }
+        .main-content-area > header.hidden.lg\\:flex {
             display: none !important;
         }
     }
 @elseif($menuPosition === 'bottom')
-    /* Bottom Dock Layout */
-    .desktop-sidebar {
-        display: none !important;
-    }
-    .main-content-area {
-        padding-left: 0 !important;
-        padding-bottom: 5rem !important;
-    }
-    .bottom-dock-nav {
-        display: flex !important;
-    }
+    /* Bottom Dock Layout - desktop only */
     @media (min-width: 1024px) {
-        .mobile-bottom-nav {
+        .desktop-sidebar {
             display: none !important;
+        }
+        .main-content-area {
+            padding-left: 0 !important;
+            padding-bottom: 5rem !important;
+        }
+        .bottom-dock-nav {
+            display: flex !important;
         }
     }
 @endif
