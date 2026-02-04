@@ -969,7 +969,7 @@
                x-init="$watch('collapsed', val => { localStorage.setItem('sidebar_collapsed', val); window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: val })) })"
                @mouseenter="hovered = true" @mouseleave="hovered = false"
                :class="collapsed ? 'lg:w-16' : 'lg:w-64'"
-               class="desktop-sidebar hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300">
+               class="desktop-sidebar hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-visible">
 
             <!-- Toggle button on sidebar edge -->
             <button @click="collapsed = !collapsed"
