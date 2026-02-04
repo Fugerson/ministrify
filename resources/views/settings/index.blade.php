@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-4 md:space-y-6" x-data="{
-    activeTab: new URLSearchParams(window.location.search).get('tab') || localStorage.getItem('settings_tab') || 'general',
+    activeTab: (() => { let t = new URLSearchParams(window.location.search).get('tab') || localStorage.getItem('settings_tab') || 'general'; return t === 'theme' ? 'general' : t; })(),
     setTab(tab) {
         this.activeTab = tab;
         localStorage.setItem('settings_tab', tab);
@@ -21,11 +21,6 @@
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'general' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 Загальні
-            </button>
-            <button @click="setTab('theme')"
-                    :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'theme' }"
-                    class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Тема
             </button>
             <button @click="setTab('public')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'public' }"
@@ -179,121 +174,6 @@
         </div>
     </div>
 
-    </div>
-
-    <!-- Theme Tab -->
-    <div x-show="activeTab === 'theme'" x-cloak class="space-y-6">
-        @php
-            $currentColor = $church->primary_color ?? '#3b82f6';
-        @endphp
-
-        <!-- Menu Position Selection -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Позиція меню</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть розташування навігаційного меню</p>
-            </div>
-
-            <div class="p-6">
-                @php
-                    $currentPosition = $church->menu_position ?? 'left';
-                    $menuPositions = [
-                        [
-                            'id' => 'left',
-                            'name' => 'Зліва',
-                            'desc' => 'Класична бічна панель',
-                            'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="20" height="50" rx="2" class="fill-primary-500"/><rect x="30" y="5" width="65" height="50" rx="2" class="fill-gray-200 dark:fill-gray-700"/></svg>'
-                        ],
-                        [
-                            'id' => 'right',
-                            'name' => 'Справа',
-                            'desc' => 'Меню справа',
-                            'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="65" height="50" rx="2" class="fill-gray-200 dark:fill-gray-700"/><rect x="75" y="5" width="20" height="50" rx="2" class="fill-primary-500"/></svg>'
-                        ],
-                        [
-                            'id' => 'top',
-                            'name' => 'Зверху',
-                            'desc' => 'Горизонтальне меню',
-                            'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="90" height="12" rx="2" class="fill-primary-500"/><rect x="5" y="22" width="90" height="33" rx="2" class="fill-gray-200 dark:fill-gray-700"/></svg>'
-                        ],
-                        [
-                            'id' => 'bottom',
-                            'name' => 'Знизу',
-                            'desc' => 'Мобільний стиль',
-                            'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="90" height="38" rx="2" class="fill-gray-200 dark:fill-gray-700"/><rect x="5" y="48" width="90" height="10" rx="2" class="fill-primary-500"/></svg>'
-                        ],
-                    ];
-                @endphp
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    @foreach($menuPositions as $position)
-                        <form method="POST" action="{{ route('settings.menu-position') }}">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="menu_position" value="{{ $position['id'] }}">
-                            <button type="submit"
-                                    class="w-full p-4 rounded-xl border-2 transition-all hover:scale-[1.02] {{ $currentPosition === $position['id'] ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }}">
-                                <div class="h-16 mb-3">
-                                    {!! $position['icon'] !!}
-                                </div>
-                                <h3 class="font-semibold text-gray-900 dark:text-white text-sm">{{ $position['name'] }}</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $position['desc'] }}</p>
-                                @if($currentPosition === $position['id'])
-                                    <span class="inline-block mt-2 text-xs bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">Активний</span>
-                                @endif
-                            </button>
-                        </form>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <!-- Color Presets -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Акцентний колір</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть основний колір інтерфейсу</p>
-            </div>
-
-            <div class="p-6">
-                @php
-                    $colorPresets = [
-                        ['color' => '#f97316', 'name' => 'Захід сонця'],
-                        ['color' => '#eab308', 'name' => 'Золотий'],
-                        ['color' => '#10b981', 'name' => 'Смарагд'],
-                        ['color' => '#6366f1', 'name' => 'Індіго'],
-                        ['color' => '#ec4899', 'name' => 'Троянда'],
-                        ['color' => '#0ea5e9', 'name' => 'Небо'],
-                    ];
-                @endphp
-                <div class="flex flex-wrap gap-3">
-                    @foreach($colorPresets as $preset)
-                        <form method="POST" action="{{ route('settings.theme-color') }}" class="inline">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="primary_color" value="{{ $preset['color'] }}">
-                            <button type="submit"
-                                    class="group relative w-12 h-12 rounded-xl border-2 transition-all hover:scale-110 {{ $currentColor === $preset['color'] ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-500' }}"
-                                    style="background-color: {{ $preset['color'] }}"
-                                    title="{{ $preset['name'] }}">
-                                @if($currentColor === $preset['color'])
-                                    <svg class="w-5 h-5 text-white absolute inset-0 m-auto" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                    </svg>
-                                @endif
-                            </button>
-                        </form>
-                    @endforeach
-                    <!-- Custom color picker -->
-                    <form method="POST" action="{{ route('settings.theme-color') }}" class="inline-flex items-center gap-2">
-                        @csrf
-                        @method('PUT')
-                        <input type="color" name="primary_color" value="{{ $currentColor }}"
-                               class="w-12 h-12 rounded-xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer"
-                               onchange="this.form.submit()">
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Public Site Tab -->
