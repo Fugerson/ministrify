@@ -218,18 +218,31 @@
                                         </div>
                                     </a>
                                 @else
+                                    @php
+                                        $isMultiDay = $item->is_multi_day ?? false;
+                                        $isFirstDay = $item->is_first_day ?? true;
+                                        $isLastDay = $item->is_last_day ?? true;
+                                        $roundedClass = $isMultiDay ? ($isFirstDay ? 'rounded-l-lg rounded-r-none' : ($isLastDay ? 'rounded-r-lg rounded-l-none' : 'rounded-none')) : 'rounded-lg';
+                                    @endphp
                                     <a href="{{ route('events.show', $item->original) }}"
-                                       class="block p-2 rounded-lg text-xs transition-all hover:shadow-md"
-                                       style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30; border-left: 3px solid {{ $item->ministry_display_color ?? '#3b82f6' }};">
-                                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ $item->time ? $item->time->format('H:i') : '--:--' }}</p>
+                                       class="block p-2 {{ $roundedClass }} text-xs transition-all hover:shadow-md {{ $isMultiDay && !$isFirstDay ? '-ml-2 pl-4' : '' }}"
+                                       style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30; border-left: {{ $isFirstDay ? '3px' : '0' }} solid {{ $item->ministry_display_color ?? '#3b82f6' }};">
+                                        @if($isFirstDay)
+                                            <p class="font-medium text-gray-900 dark:text-white truncate">{{ $item->time ? $item->time->format('H:i') : ($isMultiDay ? '' : '--:--') }}</p>
+                                        @endif
                                         <p class="text-gray-700 dark:text-gray-300 truncate">{{ $item->title }}</p>
-                                        <div class="flex items-center mt-1">
-                                            @if($item->original->isFullyStaffed())
-                                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                                            @else
-                                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                                            @endif
-                                        </div>
+                                        @if($isFirstDay)
+                                            <div class="flex items-center mt-1 gap-1">
+                                                @if($item->original->isFullyStaffed())
+                                                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                                @else
+                                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                                @endif
+                                                @if($isMultiDay)
+                                                    <span class="text-[10px] text-gray-500">{{ $item->original->date->format('d') }}-{{ $item->original->end_date->format('d.m') }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </a>
                                 @endif
                             @endforeach

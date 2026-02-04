@@ -21,7 +21,9 @@ class Event extends Model
         'ministry_id',
         'title',
         'date',
+        'end_date',
         'time',
+        'end_time',
         'notes',
         'recurrence_rule',
         'parent_event_id',
@@ -47,7 +49,9 @@ class Event extends Model
 
     protected $casts = [
         'date' => 'date',
+        'end_date' => 'date',
         'time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i',
         'is_public' => 'boolean',
         'is_service' => 'boolean',
         'has_music' => 'boolean',

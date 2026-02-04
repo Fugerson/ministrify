@@ -277,25 +277,58 @@ class GoogleCalendarService
      */
     private function convertToGoogleEvent(Event $event): array
     {
-        $startDateTime = Carbon::parse($event->date->format('Y-m-d'));
-        if ($event->time) {
-            $startDateTime = $startDateTime->setTimeFromTimeString($event->time->format('H:i:s'));
-        }
-
-        $endDateTime = (clone $startDateTime)->addHour();
-
         $googleEvent = [
             'summary' => $event->title,
             'description' => $this->buildEventDescription($event),
-            'start' => [
+        ];
+
+        // Determine if this is an all-day event (no time specified)
+        $isAllDay = !$event->time;
+
+        if ($isAllDay) {
+            // All-day event - use date format
+            $googleEvent['start'] = [
+                'date' => $event->date->format('Y-m-d'),
+                'timeZone' => 'Europe/Kiev',
+            ];
+
+            // For all-day events, Google expects end date to be the day AFTER the last day
+            $endDate = $event->end_date ?? $event->date;
+            $googleEvent['end'] = [
+                'date' => Carbon::parse($endDate)->addDay()->format('Y-m-d'),
+                'timeZone' => 'Europe/Kiev',
+            ];
+        } else {
+            // Timed event - use dateTime format
+            $startDateTime = Carbon::parse($event->date->format('Y-m-d'))
+                ->setTimeFromTimeString($event->time->format('H:i:s'));
+
+            $googleEvent['start'] = [
                 'dateTime' => $startDateTime->toRfc3339String(),
                 'timeZone' => 'Europe/Kiev',
-            ],
-            'end' => [
+            ];
+
+            // Calculate end time
+            if ($event->end_date && $event->end_time) {
+                $endDateTime = Carbon::parse($event->end_date->format('Y-m-d'))
+                    ->setTimeFromTimeString($event->end_time->format('H:i:s'));
+            } elseif ($event->end_time) {
+                $endDateTime = Carbon::parse($event->date->format('Y-m-d'))
+                    ->setTimeFromTimeString($event->end_time->format('H:i:s'));
+            } elseif ($event->end_date) {
+                // Multi-day event with times
+                $endDateTime = Carbon::parse($event->end_date->format('Y-m-d'))
+                    ->setTimeFromTimeString($event->time->format('H:i:s'));
+            } else {
+                // Default: 1 hour duration
+                $endDateTime = (clone $startDateTime)->addHour();
+            }
+
+            $googleEvent['end'] = [
                 'dateTime' => $endDateTime->toRfc3339String(),
                 'timeZone' => 'Europe/Kiev',
-            ],
-        ];
+            ];
+        }
 
         if ($event->location) {
             $googleEvent['location'] = $event->location;
@@ -528,6 +561,13 @@ class GoogleCalendarService
 
         // Parse start time
         $start = $googleEvent['start'] ?? [];
+        $end = $googleEvent['end'] ?? [];
+
+        $date = null;
+        $time = null;
+        $endDate = null;
+        $endTime = null;
+
         if (isset($start['dateTime'])) {
             $startDt = Carbon::parse($start['dateTime']);
             $date = $startDt->format('Y-m-d');
@@ -539,10 +579,29 @@ class GoogleCalendarService
             return null;
         }
 
+        // Parse end time
+        if (isset($end['dateTime'])) {
+            $endDt = Carbon::parse($end['dateTime']);
+            $endDate = $endDt->format('Y-m-d');
+            $endTime = $endDt->format('H:i');
+        } elseif (isset($end['date'])) {
+            // For all-day events, Google sets end date to the day AFTER the last day
+            // So we need to subtract 1 day
+            $endDate = Carbon::parse($end['date'])->subDay()->format('Y-m-d');
+            $endTime = null;
+        }
+
+        // If end_date equals start date, don't store it (single-day event)
+        if ($endDate === $date) {
+            $endDate = null;
+        }
+
         return [
             'title' => $summary,
             'date' => $date,
+            'end_date' => $endDate,
             'time' => $time,
+            'end_time' => $endTime,
             'notes' => $googleEvent['description'] ?? null,
             'location' => $googleEvent['location'] ?? null,
         ];

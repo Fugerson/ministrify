@@ -65,8 +65,18 @@ class EventController extends Controller
             $currentWeek = null;
         }
 
+        // Include events that span into this date range (multi-day events)
         $events = Event::where('church_id', $church->id)
-            ->whereBetween('date', [$startDate, $endDate])
+            ->where(function ($q) use ($startDate, $endDate) {
+                // Events starting in range
+                $q->whereBetween('date', [$startDate, $endDate])
+                    // OR events that started before but end in/after range
+                    ->orWhere(function ($q2) use ($startDate, $endDate) {
+                        $q2->where('date', '<', $startDate)
+                           ->whereNotNull('end_date')
+                           ->where('end_date', '>=', $startDate);
+                    });
+            })
             ->with(['ministry', 'responsibilities.person'])
             ->orderBy('date')
             ->orderBy('time')
@@ -84,18 +94,37 @@ class EventController extends Controller
         $calendarItems = collect();
 
         foreach ($events as $event) {
-            $calendarItems->push((object)[
-                'type' => 'event',
-                'id' => $event->id,
-                'title' => $event->title,
-                'date' => $event->date,
-                'time' => $event->time,
-                'ministry' => $event->ministry,
-                'ministry_id' => $event->ministry_id,
-                'ministry_display_name' => $event->ministry_display_name,
-                'ministry_display_color' => $event->ministry_display_color,
-                'original' => $event,
-            ]);
+            // For multi-day events, create an entry for each day
+            $eventStart = Carbon::parse($event->date);
+            $eventEnd = $event->end_date ? Carbon::parse($event->end_date) : $eventStart;
+
+            // Clip to view range
+            $displayStart = $eventStart->max($startDate);
+            $displayEnd = $eventEnd->min($endDate);
+
+            $currentDate = $displayStart->copy();
+            while ($currentDate <= $displayEnd) {
+                $isFirstDay = $currentDate->isSameDay($eventStart);
+                $isLastDay = $currentDate->isSameDay($eventEnd);
+                $isMultiDay = !$eventStart->isSameDay($eventEnd);
+
+                $calendarItems->push((object)[
+                    'type' => 'event',
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'date' => $currentDate->copy(),
+                    'time' => $isFirstDay ? $event->time : null,
+                    'ministry' => $event->ministry,
+                    'ministry_id' => $event->ministry_id,
+                    'ministry_display_name' => $event->ministry_display_name,
+                    'ministry_display_color' => $event->ministry_display_color,
+                    'original' => $event,
+                    'is_multi_day' => $isMultiDay,
+                    'is_first_day' => $isFirstDay,
+                    'is_last_day' => $isLastDay,
+                ]);
+                $currentDate->addDay();
+            }
         }
 
         foreach ($meetings as $meeting) {
