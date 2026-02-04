@@ -969,8 +969,8 @@
                x-init="$watch('collapsed', val => { localStorage.setItem('sidebar_collapsed', val); window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: val })) })"
                :class="collapsed ? 'lg:w-16' : 'lg:w-64'"
                class="desktop-sidebar hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300">
-            <div class="flex items-center h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0" :class="collapsed ? 'justify-center px-2' : 'justify-between px-6'">
-                <a href="{{ route('dashboard') }}" class="flex items-center flex-shrink-0" :class="collapsed ? 'justify-center' : 'space-x-2 overflow-hidden'">
+            <div class="flex items-center h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0" :class="collapsed ? 'justify-between px-2' : 'justify-between px-4'">
+                <a href="{{ route('dashboard') }}" class="flex items-center flex-shrink-0 min-w-0" :class="collapsed ? '' : 'space-x-2 overflow-hidden'">
                     @if($currentChurch->logo)
                     <img src="/storage/{{ $currentChurch->logo }}" alt="{{ $currentChurch->name }}" class="w-8 h-8 rounded-lg object-contain flex-shrink-0">
                     @else
@@ -978,8 +978,9 @@
                     @endif
                     <span x-show="!collapsed" x-cloak class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ $currentChurch->name ?? 'Ministrify' }}</span>
                 </a>
-                <button x-show="!collapsed" @click="collapsed = true" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0" title="Згорнути меню">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+                <button @click="collapsed = !collapsed" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0" :title="collapsed ? 'Розгорнути меню' : 'Згорнути меню'">
+                    <svg x-show="!collapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+                    <svg x-show="collapsed" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
                 </button>
             </div>
 
@@ -1167,13 +1168,6 @@
                 </form>
             </div>
             @endif
-
-            <!-- Expand button at bottom when collapsed -->
-            <div x-show="collapsed" x-cloak class="flex-shrink-0 p-2 border-t border-gray-200 dark:border-gray-700">
-                <button @click="collapsed = false" class="w-full flex items-center justify-center p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Розгорнути меню">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
-                </button>
-            </div>
 
         </aside>
 
