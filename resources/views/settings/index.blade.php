@@ -850,7 +850,7 @@
         $isGoogleConnected = $googleCalendarSettings && !empty($googleCalendarSettings['access_token']);
     @endphp
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-         x-data="googleCalendarSync()">
+         x-data="googleCalendarSync({{ $isGoogleConnected ? 'true' : 'false' }})"
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -1119,8 +1119,9 @@
     </div>
 
     <script>
-    function googleCalendarSync() {
+    function googleCalendarSync(isConnected = false) {
         return {
+            isConnected: isConnected,
             loading: false,
             message: '',
             success: false,
@@ -1132,7 +1133,9 @@
             resolutions: {},
 
             async init() {
-                await this.loadCalendars();
+                if (this.isConnected) {
+                    await this.loadCalendars();
+                }
             },
 
             async loadCalendars() {
