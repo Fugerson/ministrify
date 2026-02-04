@@ -190,59 +190,30 @@
             $designThemes = [
                 [
                     'id' => 'modern',
-                    'name' => 'Сучасний',
-                    'desc' => 'Заокруглені кути, м\'які тіні, сучасний вигляд',
-                    'preview' => 'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900',
-                    'card' => 'rounded-2xl shadow-lg',
-                    'btn' => 'rounded-xl'
-                ],
-                [
-                    'id' => 'minimal',
-                    'name' => 'Мінімалістичний',
-                    'desc' => 'Чисті лінії, гострі кути, без тіней',
-                    'preview' => 'bg-gray-50 dark:bg-gray-950',
-                    'card' => 'rounded border',
-                    'btn' => 'rounded-sm uppercase text-xs tracking-wider'
-                ],
-                [
-                    'id' => 'brutalist',
-                    'name' => 'Бруталізм',
-                    'desc' => 'Сміливий, різкий, високий контраст',
-                    'preview' => 'bg-white dark:bg-black',
-                    'card' => 'border-2 border-black dark:border-white',
-                    'btn' => 'border-2 border-black dark:border-white uppercase font-bold'
+                    'name' => 'Класичний',
+                    'desc' => 'Чистий, професійний, м\'які тіні та заокруглення',
+                    'preview' => 'bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-slate-900',
+                    'card' => 'rounded-xl shadow-md border border-gray-100 dark:border-gray-700',
+                    'btn' => 'rounded-lg',
+                    'accent' => 'bg-blue-500'
                 ],
                 [
                     'id' => 'glass',
-                    'name' => 'Скло',
-                    'desc' => 'Прозорість, розмиття, ефект матового скла',
-                    'preview' => 'bg-gradient-to-br from-purple-500 to-pink-500',
-                    'card' => 'rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30',
-                    'btn' => 'rounded-xl bg-white/20 backdrop-blur'
-                ],
-                [
-                    'id' => 'neumorphism',
-                    'name' => 'Неоморфізм',
-                    'desc' => 'М\'який UI, випуклі форми, внутрішні тіні',
-                    'preview' => 'bg-gray-200 dark:bg-gray-800',
-                    'card' => 'rounded-2xl shadow-[9px_9px_16px_rgba(163,177,198,0.6),-9px_-9px_16px_rgba(255,255,255,0.8)]',
-                    'btn' => 'rounded-xl'
+                    'name' => 'Елегантний',
+                    'desc' => 'Преміум вигляд з глибокими відтінками та градієнтами',
+                    'preview' => 'bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700',
+                    'card' => 'rounded-2xl shadow-xl bg-white/95 dark:bg-gray-800/95 backdrop-blur',
+                    'btn' => 'rounded-xl',
+                    'accent' => 'bg-violet-500'
                 ],
                 [
                     'id' => 'corporate',
-                    'name' => 'Корпоративний',
-                    'desc' => 'Професійний, стриманий, класичний',
-                    'preview' => 'bg-slate-50 dark:bg-slate-900',
-                    'card' => 'rounded-lg shadow-sm border',
-                    'btn' => 'rounded-md font-semibold tracking-wide'
-                ],
-                [
-                    'id' => 'playful',
-                    'name' => 'Грайливий',
-                    'desc' => 'Кольоровий, веселий, великі заокруглення',
-                    'preview' => 'bg-gradient-to-br from-yellow-200 via-pink-200 to-purple-300',
-                    'card' => 'rounded-3xl border-3 border-purple-400 shadow-xl',
-                    'btn' => 'rounded-full font-bold'
+                    'name' => 'Теплий',
+                    'desc' => 'Привітний, затишний, теплі відтінки',
+                    'preview' => 'bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-amber-950 dark:via-orange-950 dark:to-rose-950',
+                    'card' => 'rounded-2xl shadow-lg border border-amber-100 dark:border-amber-900/50',
+                    'btn' => 'rounded-xl',
+                    'accent' => 'bg-amber-500'
                 ],
             ];
         @endphp
@@ -314,15 +285,9 @@
                         ['color' => '#3b82f6', 'name' => 'Синій'],
                         ['color' => '#8b5cf6', 'name' => 'Фіолетовий'],
                         ['color' => '#10b981', 'name' => 'Смарагдовий'],
-                        ['color' => '#ef4444', 'name' => 'Червоний'],
                         ['color' => '#f59e0b', 'name' => 'Бурштиновий'],
                         ['color' => '#ec4899', 'name' => 'Рожевий'],
-                        ['color' => '#6366f1', 'name' => 'Індіго'],
-                        ['color' => '#14b8a6', 'name' => 'Бірюзовий'],
-                        ['color' => '#84cc16', 'name' => 'Лайм'],
-                        ['color' => '#f97316', 'name' => 'Помаранч'],
                         ['color' => '#06b6d4', 'name' => 'Блакитний'],
-                        ['color' => '#a855f7', 'name' => 'Пурпур'],
                     ];
                 @endphp
                 <div class="flex flex-wrap gap-3">
