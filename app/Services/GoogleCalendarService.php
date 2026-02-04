@@ -770,4 +770,258 @@ class GoogleCalendarService
 
         return $deleted;
     }
+
+    /**
+     * Preview import - detect conflicts before importing
+     * Conflicts are detected by time overlap, not by title matching
+     */
+    public function previewImport(User $user, Church $church, string $calendarId, ?int $ministryId = null): array
+    {
+        $accessToken = $this->getValidToken($user);
+        if (!$accessToken) {
+            return ['success' => false, 'error' => 'No valid access token'];
+        }
+
+        $googleEvents = $this->fetchEventsFromGoogle($accessToken, $calendarId);
+
+        $preview = [
+            'new' => [],      // Events that don't exist locally
+            'updates' => [],  // Events already linked by google_event_id
+            'conflicts' => [], // Events that overlap in time with existing local events
+        ];
+
+        foreach ($googleEvents as $googleEvent) {
+            // Skip cancelled events
+            if (($googleEvent['status'] ?? '') === 'cancelled') {
+                continue;
+            }
+
+            // Skip events that originated from Ministrify
+            $description = $googleEvent['description'] ?? '';
+            if (str_contains($description, 'Створено в Ministrify')) {
+                continue;
+            }
+
+            $eventData = $this->parseGoogleEvent($googleEvent);
+            if (!$eventData) {
+                continue;
+            }
+
+            // Check if already linked by google_event_id
+            $linkedEvent = Event::where('church_id', $church->id)
+                ->where('google_event_id', $googleEvent['id'])
+                ->first();
+
+            if ($linkedEvent) {
+                $preview['updates'][] = [
+                    'google_event' => [
+                        'id' => $googleEvent['id'],
+                        'title' => $eventData['title'],
+                        'date' => $eventData['date'],
+                        'end_date' => $eventData['end_date'],
+                        'time' => $eventData['time'],
+                        'end_time' => $eventData['end_time'],
+                        'location' => $eventData['location'],
+                    ],
+                    'local_event' => [
+                        'id' => $linkedEvent->id,
+                        'title' => $linkedEvent->title,
+                        'date' => $linkedEvent->date->format('Y-m-d'),
+                        'end_date' => $linkedEvent->end_date?->format('Y-m-d'),
+                        'time' => $linkedEvent->time?->format('H:i'),
+                        'end_time' => $linkedEvent->end_time?->format('H:i'),
+                    ],
+                ];
+                continue;
+            }
+
+            // Find conflicts by time overlap
+            $conflicts = $this->findConflictingEvents($church, $eventData, $ministryId);
+
+            if ($conflicts->isNotEmpty()) {
+                $preview['conflicts'][] = [
+                    'google_event' => [
+                        'id' => $googleEvent['id'],
+                        'title' => $eventData['title'],
+                        'date' => $eventData['date'],
+                        'end_date' => $eventData['end_date'],
+                        'time' => $eventData['time'],
+                        'end_time' => $eventData['end_time'],
+                        'location' => $eventData['location'],
+                    ],
+                    'conflicting_events' => $conflicts->map(fn($e) => [
+                        'id' => $e->id,
+                        'title' => $e->title,
+                        'date' => $e->date->format('Y-m-d'),
+                        'end_date' => $e->end_date?->format('Y-m-d'),
+                        'time' => $e->time?->format('H:i'),
+                        'end_time' => $e->end_time?->format('H:i'),
+                        'ministry' => $e->ministry?->name,
+                    ])->toArray(),
+                ];
+            } else {
+                $preview['new'][] = [
+                    'google_event' => [
+                        'id' => $googleEvent['id'],
+                        'title' => $eventData['title'],
+                        'date' => $eventData['date'],
+                        'end_date' => $eventData['end_date'],
+                        'time' => $eventData['time'],
+                        'end_time' => $eventData['end_time'],
+                        'location' => $eventData['location'],
+                    ],
+                ];
+            }
+        }
+
+        return [
+            'success' => true,
+            'preview' => $preview,
+            'counts' => [
+                'new' => count($preview['new']),
+                'updates' => count($preview['updates']),
+                'conflicts' => count($preview['conflicts']),
+            ],
+        ];
+    }
+
+    /**
+     * Find events that conflict (overlap in time) with the given event data
+     */
+    protected function findConflictingEvents(Church $church, array $eventData, ?int $ministryId): \Illuminate\Support\Collection
+    {
+        $date = Carbon::parse($eventData['date']);
+        $endDate = $eventData['end_date'] ? Carbon::parse($eventData['end_date']) : $date;
+
+        $query = Event::where('church_id', $church->id)
+            ->whereNull('google_event_id') // Only unlinked events
+            ->where(function ($q) use ($date, $endDate) {
+                // Event overlaps if:
+                // local.start <= google.end AND local.end >= google.start
+                $q->where(function ($inner) use ($date, $endDate) {
+                    $inner->where('date', '<=', $endDate)
+                        ->where(function ($w) use ($date) {
+                            $w->where('end_date', '>=', $date)
+                                ->orWhere(function ($orQ) use ($date) {
+                                    $orQ->whereNull('end_date')
+                                        ->where('date', '>=', $date);
+                                });
+                        });
+                });
+            });
+
+        if ($ministryId) {
+            $query->where('ministry_id', $ministryId);
+        }
+
+        return $query->with('ministry')->get();
+    }
+
+    /**
+     * Import events with user-specified conflict resolution
+     */
+    public function importWithResolution(
+        User $user,
+        Church $church,
+        string $calendarId,
+        ?int $ministryId,
+        array $resolutions
+    ): array {
+        $accessToken = $this->getValidToken($user);
+        if (!$accessToken) {
+            return ['success' => false, 'error' => 'No valid access token'];
+        }
+
+        $results = [
+            'imported' => 0,
+            'skipped' => 0,
+            'replaced' => 0,
+            'errors' => [],
+        ];
+
+        // Build a map of resolutions by google_event_id
+        $resolutionMap = collect($resolutions)->keyBy('google_event_id');
+
+        $googleEvents = $this->fetchEventsFromGoogle($accessToken, $calendarId);
+
+        foreach ($googleEvents as $googleEvent) {
+            $googleId = $googleEvent['id'];
+            $resolution = $resolutionMap->get($googleId);
+
+            if (!$resolution) {
+                continue; // Not in resolution list, skip
+            }
+
+            $action = $resolution['action'];
+
+            if ($action === 'skip') {
+                $results['skipped']++;
+                continue;
+            }
+
+            // Skip cancelled events
+            if (($googleEvent['status'] ?? '') === 'cancelled') {
+                $results['skipped']++;
+                continue;
+            }
+
+            $eventData = $this->parseGoogleEvent($googleEvent);
+            if (!$eventData) {
+                $results['skipped']++;
+                continue;
+            }
+
+            try {
+                if ($action === 'replace' && !empty($resolution['local_event_id'])) {
+                    // Replace: update existing local event and link to Google
+                    $localEvent = Event::where('church_id', $church->id)
+                        ->find($resolution['local_event_id']);
+
+                    if ($localEvent) {
+                        $localEvent->update(array_merge($eventData, [
+                            'google_event_id' => $googleId,
+                            'google_calendar_id' => $calendarId,
+                            'google_synced_at' => now(),
+                            'google_sync_status' => 'synced',
+                        ]));
+                        $results['replaced']++;
+                    } else {
+                        // Event not found, import as new
+                        $this->createEventFromGoogle($church, $eventData, $googleId, $calendarId, $ministryId);
+                        $results['imported']++;
+                    }
+                } else {
+                    // Import as new event
+                    $this->createEventFromGoogle($church, $eventData, $googleId, $calendarId, $ministryId);
+                    $results['imported']++;
+                }
+            } catch (\Exception $e) {
+                $results['errors'][] = "Event {$googleId}: " . $e->getMessage();
+            }
+
+            usleep(50000); // 50ms rate limiting
+        }
+
+        return array_merge(['success' => true], $results);
+    }
+
+    /**
+     * Create a new event from Google Calendar data
+     */
+    protected function createEventFromGoogle(
+        Church $church,
+        array $eventData,
+        string $googleId,
+        string $calendarId,
+        ?int $ministryId
+    ): Event {
+        return Event::create(array_merge($eventData, [
+            'church_id' => $church->id,
+            'ministry_id' => $ministryId,
+            'google_event_id' => $googleId,
+            'google_calendar_id' => $calendarId,
+            'google_synced_at' => now(),
+            'google_sync_status' => 'synced',
+        ]));
+    }
 }

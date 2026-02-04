@@ -226,4 +226,66 @@ class GoogleCalendarController extends Controller
 
         return back()->with('error', $result['error'] ?? 'Імпорт не вдався');
     }
+
+    /**
+     * Preview import - detect conflicts before importing
+     */
+    public function previewImport(Request $request)
+    {
+        $user = auth()->user();
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'calendar_id' => 'required|string',
+            'ministry_id' => 'nullable|integer|exists:ministries,id',
+        ]);
+
+        $result = $this->googleCalendar->previewImport(
+            $user,
+            $church,
+            $validated['calendar_id'],
+            $validated['ministry_id'] ?? null
+        );
+
+        return response()->json($result);
+    }
+
+    /**
+     * Import with conflict resolution
+     */
+    public function importWithResolution(Request $request)
+    {
+        $user = auth()->user();
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'calendar_id' => 'required|string',
+            'ministry_id' => 'nullable|integer|exists:ministries,id',
+            'resolutions' => 'required|array',
+            'resolutions.*.google_event_id' => 'required|string',
+            'resolutions.*.action' => 'required|in:skip,import,replace',
+            'resolutions.*.local_event_id' => 'nullable|integer',
+        ]);
+
+        $result = $this->googleCalendar->importWithResolution(
+            $user,
+            $church,
+            $validated['calendar_id'],
+            $validated['ministry_id'] ?? null,
+            $validated['resolutions']
+        );
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => "Імпортовано: {$result['imported']} подій, пропущено: {$result['skipped']}, замінено: {$result['replaced']}",
+                'details' => $result,
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'error' => $result['error'] ?? 'Import failed',
+        ], 400);
+    }
 }

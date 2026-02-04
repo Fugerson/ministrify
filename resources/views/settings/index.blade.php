@@ -843,6 +843,425 @@
             </div>
         </div>
     </div>
+
+    <!-- Google Calendar OAuth Integration -->
+    @php
+        $googleCalendarSettings = auth()->user()->settings['google_calendar'] ?? null;
+        $isGoogleConnected = $googleCalendarSettings && !empty($googleCalendarSettings['access_token']);
+    @endphp
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="googleCalendarSync()">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Google Calendar API</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Двостороння синхронізація з вашим Google Calendar</p>
+                    </div>
+                </div>
+                @if($isGoogleConnected)
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        Підключено
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="p-6">
+            @if($isGoogleConnected)
+                <!-- Connected State -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-sm text-green-700 dark:text-green-300">
+                                Підключено {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
+                            </span>
+                        </div>
+                        <form action="{{ route('settings.google-calendar.disconnect') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">
+                                Відключити
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Sync Actions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <button @click="previewImport()"
+                                :disabled="loading"
+                                class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-xl transition-colors">
+                            <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            </svg>
+                            <svg x-show="loading" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span x-text="loading ? 'Завантаження...' : 'Імпорт з Google'"></span>
+                        </button>
+                        <button @click="fullSync()"
+                                :disabled="loading"
+                                class="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 disabled:opacity-50 text-white font-medium rounded-xl transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Повна синхронізація
+                        </button>
+                    </div>
+
+                    <!-- Calendar & Ministry Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Календар Google</label>
+                            <select x-model="calendarId" @change="loadCalendars()"
+                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+                                <option value="primary">Основний календар</option>
+                                <template x-for="cal in calendars" :key="cal.id">
+                                    <option :value="cal.id" x-text="cal.summary"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Команда для імпорту</label>
+                            <select x-model="ministryId"
+                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+                                <option value="">Без команди</option>
+                                @foreach($ministries as $ministry)
+                                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Status Message -->
+                    <div x-show="message" x-transition
+                         :class="success ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'"
+                         class="p-4 rounded-xl border text-sm">
+                        <span x-text="message"></span>
+                    </div>
+                </div>
+            @else
+                <!-- Not Connected State -->
+                <div class="text-center py-6">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Підключіть Google Calendar для двосторонньої синхронізації подій
+                    </p>
+                    <a href="{{ route('settings.google-calendar.redirect') }}"
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 dark:bg-gray-700 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-medium rounded-xl transition-colors shadow-sm">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Підключити Google Calendar
+                    </a>
+                </div>
+            @endif
+        </div>
+
+        <!-- Conflict Resolution Modal -->
+        <div x-show="showConflictModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showConflictModal = false"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Перегляд імпорту</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть як обробити конфлікти</p>
+                        </div>
+                        <button @click="showConflictModal = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="p-6 overflow-y-auto max-h-[60vh] space-y-6">
+                        <!-- Summary -->
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
+                                <p class="text-2xl font-bold text-green-600 dark:text-green-400" x-text="preview.counts?.new || 0"></p>
+                                <p class="text-sm text-green-700 dark:text-green-300">Нових</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
+                                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" x-text="preview.counts?.updates || 0"></p>
+                                <p class="text-sm text-blue-700 dark:text-blue-300">Оновлень</p>
+                            </div>
+                            <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-center">
+                                <p class="text-2xl font-bold text-amber-600 dark:text-amber-400" x-text="preview.counts?.conflicts || 0"></p>
+                                <p class="text-sm text-amber-700 dark:text-amber-300">Конфліктів</p>
+                            </div>
+                        </div>
+
+                        <!-- Conflicts Section -->
+                        <template x-if="preview.preview?.conflicts?.length > 0">
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                    Конфлікти (перекриття часу)
+                                </h4>
+                                <div class="space-y-3">
+                                    <template x-for="(conflict, idx) in preview.preview.conflicts" :key="idx">
+                                        <div class="p-4 border border-amber-200 dark:border-amber-800 rounded-xl bg-amber-50/50 dark:bg-amber-900/10">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <!-- Google Event -->
+                                                <div class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Google Calendar</p>
+                                                    <p class="font-medium text-gray-900 dark:text-white" x-text="conflict.google_event.title"></p>
+                                                    <p class="text-sm text-gray-600 dark:text-gray-400" x-text="formatDate(conflict.google_event.date, conflict.google_event.end_date, conflict.google_event.time)"></p>
+                                                </div>
+                                                <!-- Local Events -->
+                                                <div class="space-y-2">
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Існуючі події:</p>
+                                                    <template x-for="local in conflict.conflicting_events" :key="local.id">
+                                                        <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm">
+                                                            <p class="font-medium text-gray-900 dark:text-white" x-text="local.title"></p>
+                                                            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDate(local.date, local.end_date, local.time)"></p>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <!-- Action -->
+                                            <div class="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800">
+                                                <div class="flex flex-wrap gap-2">
+                                                    <label class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border cursor-pointer hover:border-primary-500"
+                                                           :class="resolutions[conflict.google_event.id]?.action === 'skip' ? 'border-primary-500 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600'">
+                                                        <input type="radio" :name="'conflict_' + idx" value="skip"
+                                                               @change="setResolution(conflict.google_event.id, 'skip')"
+                                                               :checked="resolutions[conflict.google_event.id]?.action === 'skip'"
+                                                               class="text-primary-600">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">Пропустити</span>
+                                                    </label>
+                                                    <label class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border cursor-pointer hover:border-primary-500"
+                                                           :class="resolutions[conflict.google_event.id]?.action === 'import' ? 'border-primary-500 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600'">
+                                                        <input type="radio" :name="'conflict_' + idx" value="import"
+                                                               @change="setResolution(conflict.google_event.id, 'import')"
+                                                               :checked="resolutions[conflict.google_event.id]?.action === 'import'"
+                                                               class="text-primary-600">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">Імпортувати як нову</span>
+                                                    </label>
+                                                    <template x-for="local in conflict.conflicting_events" :key="'replace_' + local.id">
+                                                        <label class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border cursor-pointer hover:border-primary-500"
+                                                               :class="resolutions[conflict.google_event.id]?.action === 'replace' && resolutions[conflict.google_event.id]?.local_event_id === local.id ? 'border-primary-500 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600'">
+                                                            <input type="radio" :name="'conflict_' + idx" value="replace"
+                                                                   @change="setResolution(conflict.google_event.id, 'replace', local.id)"
+                                                                   :checked="resolutions[conflict.google_event.id]?.action === 'replace' && resolutions[conflict.google_event.id]?.local_event_id === local.id"
+                                                                   class="text-primary-600">
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">Замінити "<span x-text="local.title"></span>"</span>
+                                                        </label>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- New Events Section -->
+                        <template x-if="preview.preview?.new?.length > 0">
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Нові події (<span x-text="preview.preview.new.length"></span>)
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <template x-for="event in preview.preview.new.slice(0, 6)" :key="event.google_event.id">
+                                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                            <p class="font-medium text-gray-900 dark:text-white" x-text="event.google_event.title"></p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400" x-text="formatDate(event.google_event.date, event.google_event.end_date, event.google_event.time)"></p>
+                                        </div>
+                                    </template>
+                                </div>
+                                <p x-show="preview.preview.new.length > 6" class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                    + ще <span x-text="preview.preview.new.length - 6"></span> подій
+                                </p>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-700/50">
+                        <button @click="showConflictModal = false"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl transition-colors">
+                            Скасувати
+                        </button>
+                        <button @click="applyImport()"
+                                :disabled="loading"
+                                class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors inline-flex items-center gap-2">
+                            <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span x-text="loading ? 'Імпорт...' : 'Імпортувати'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function googleCalendarSync() {
+        return {
+            loading: false,
+            message: '',
+            success: false,
+            calendarId: 'primary',
+            ministryId: '',
+            calendars: [],
+            showConflictModal: false,
+            preview: {},
+            resolutions: {},
+
+            async init() {
+                await this.loadCalendars();
+            },
+
+            async loadCalendars() {
+                try {
+                    const res = await fetch('{{ route("settings.google-calendar.calendars") }}');
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.calendars = data.calendars || [];
+                    }
+                } catch (e) {
+                    console.error('Failed to load calendars', e);
+                }
+            },
+
+            async previewImport() {
+                this.loading = true;
+                this.message = '';
+                try {
+                    const res = await fetch('{{ route("settings.google-calendar.preview-import") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            calendar_id: this.calendarId,
+                            ministry_id: this.ministryId || null
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.preview = data;
+                        this.resolutions = {};
+                        // Default all conflicts to 'skip'
+                        (data.preview?.conflicts || []).forEach(c => {
+                            this.resolutions[c.google_event.id] = { action: 'skip' };
+                        });
+                        // Default all new to 'import'
+                        (data.preview?.new || []).forEach(n => {
+                            this.resolutions[n.google_event.id] = { action: 'import' };
+                        });
+                        this.showConflictModal = true;
+                    } else {
+                        this.message = data.error || 'Помилка завантаження';
+                        this.success = false;
+                    }
+                } catch (e) {
+                    this.message = 'Помилка з\'єднання';
+                    this.success = false;
+                }
+                this.loading = false;
+            },
+
+            setResolution(googleEventId, action, localEventId = null) {
+                this.resolutions[googleEventId] = {
+                    google_event_id: googleEventId,
+                    action: action,
+                    local_event_id: localEventId
+                };
+            },
+
+            async applyImport() {
+                this.loading = true;
+                try {
+                    const resolutionsArray = Object.values(this.resolutions);
+                    const res = await fetch('{{ route("settings.google-calendar.import-with-resolution") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            calendar_id: this.calendarId,
+                            ministry_id: this.ministryId || null,
+                            resolutions: resolutionsArray
+                        })
+                    });
+                    const data = await res.json();
+                    this.showConflictModal = false;
+                    this.message = data.message || (data.success ? 'Імпорт завершено' : 'Помилка імпорту');
+                    this.success = data.success;
+                } catch (e) {
+                    this.message = 'Помилка з\'єднання';
+                    this.success = false;
+                }
+                this.loading = false;
+            },
+
+            async fullSync() {
+                this.loading = true;
+                this.message = '';
+                try {
+                    const res = await fetch('{{ route("settings.google-calendar.full-sync") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            calendar_id: this.calendarId,
+                            ministry_id: this.ministryId || null
+                        })
+                    });
+                    const data = await res.json();
+                    this.message = data.message || (data.success ? 'Синхронізацію завершено' : 'Помилка синхронізації');
+                    this.success = data.success;
+                } catch (e) {
+                    this.message = 'Помилка з\'єднання';
+                    this.success = false;
+                }
+                this.loading = false;
+            },
+
+            formatDate(date, endDate, time) {
+                let str = date;
+                if (endDate && endDate !== date) {
+                    str += ' - ' + endDate;
+                }
+                if (time) {
+                    str += ' о ' + time;
+                }
+                return str;
+            }
+        }
+    }
+    </script>
     </div>
 
     <!-- Data Tab -->
