@@ -11,6 +11,7 @@ class SupportMessage extends Model
         'ticket_id',
         'user_id',
         'message',
+        'attachments',
         'is_from_admin',
         'is_internal',
         'read_at',
@@ -20,6 +21,7 @@ class SupportMessage extends Model
         'is_from_admin' => 'boolean',
         'is_internal' => 'boolean',
         'read_at' => 'datetime',
+        'attachments' => 'array',
     ];
 
     public function ticket(): BelongsTo

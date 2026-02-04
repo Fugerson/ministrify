@@ -16,7 +16,7 @@
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">Новий запит до підтримки</h1>
         </div>
 
-        <form action="{{ route('support.store') }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route('support.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
             @csrf
 
             <div>
@@ -49,6 +49,38 @@
                           placeholder="Детально опишіть вашу проблему або питання. Чим більше деталей, тим швидше ми зможемо допомогти."
                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('message') }}</textarea>
                 @error('message')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div x-data="{ files: [] }">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Скріншоти (необов'язково)</label>
+                <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 transition-colors">
+                    <input type="file" name="attachments[]" multiple accept="image/*,.pdf"
+                           @change="files = Array.from($event.target.files)"
+                           class="hidden" id="attachments">
+                    <label for="attachments" class="cursor-pointer">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Натисніть для вибору файлів</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">PNG, JPG, PDF до 5MB</p>
+                    </label>
+                </div>
+                <template x-if="files.length > 0">
+                    <div class="mt-3 space-y-2">
+                        <template x-for="(file, index) in files" :key="index">
+                            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span x-text="file.name"></span>
+                                <span class="text-xs text-gray-400" x-text="'(' + (file.size / 1024 / 1024).toFixed(2) + ' MB)'"></span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                @error('attachments.*')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>

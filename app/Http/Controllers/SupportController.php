@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SupportController extends Controller
 {
@@ -48,6 +49,7 @@ class SupportController extends Controller
             'subject' => 'required|string|max:255',
             'category' => 'required|in:bug,question,feature,other',
             'message' => 'required|string|max:10000',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,pdf|max:5120',
         ]);
 
         $user = auth()->user();
@@ -62,10 +64,13 @@ class SupportController extends Controller
             'last_reply_at' => now(),
         ]);
 
+        $attachments = $this->uploadAttachments($request, $ticket->id);
+
         SupportMessage::create([
             'ticket_id' => $ticket->id,
             'user_id' => $user->id,
             'message' => $validated['message'],
+            'attachments' => $attachments,
             'is_from_admin' => false,
         ]);
 
@@ -104,12 +109,16 @@ class SupportController extends Controller
 
         $validated = $request->validate([
             'message' => 'required|string|max:10000',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,pdf|max:5120',
         ]);
+
+        $attachments = $this->uploadAttachments($request, $ticket->id);
 
         SupportMessage::create([
             'ticket_id' => $ticket->id,
             'user_id' => auth()->id(),
             'message' => $validated['message'],
+            'attachments' => $attachments,
             'is_from_admin' => false,
         ]);
 
@@ -120,6 +129,26 @@ class SupportController extends Controller
 
         return redirect()->route('support.show', $ticket)
             ->with('success', 'Повідомлення надіслано!');
+    }
+
+    private function uploadAttachments(Request $request, int $ticketId): ?array
+    {
+        if (!$request->hasFile('attachments')) {
+            return null;
+        }
+
+        $attachments = [];
+        foreach ($request->file('attachments') as $file) {
+            $path = $file->store("support/{$ticketId}", 'public');
+            $attachments[] = [
+                'name' => $file->getClientOriginalName(),
+                'path' => $path,
+                'size' => $file->getSize(),
+                'mime' => $file->getMimeType(),
+            ];
+        }
+
+        return $attachments ?: null;
     }
 
     public function close(SupportTicket $ticket)
