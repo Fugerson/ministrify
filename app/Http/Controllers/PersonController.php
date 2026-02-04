@@ -800,6 +800,20 @@ class PersonController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function updateMenuPosition(Request $request)
+    {
+        $validated = $request->validate([
+            'menu_position' => 'required|string|in:left,right,top,bottom',
+        ]);
+
+        $user = auth()->user();
+        $settings = $user->settings ?? [];
+        $settings['menu_position'] = $validated['menu_position'];
+        $user->update(['settings' => $settings]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function updateRole(Request $request, Person $person)
     {
         $this->authorizeChurch($person);

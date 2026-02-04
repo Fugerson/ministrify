@@ -720,6 +720,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('my-profile/telegram/generate-code', [PersonController::class, 'generateTelegramCode'])->name('my-profile.telegram.generate');
     Route::delete('my-profile/telegram/unlink', [PersonController::class, 'unlinkTelegram'])->name('my-profile.telegram.unlink');
     Route::post('my-profile/theme', [PersonController::class, 'updateTheme'])->name('my-profile.theme');
+    Route::post('my-profile/menu-position', [PersonController::class, 'updateMenuPosition'])->name('my-profile.menu-position');
 
     // Music Stand (for musicians)
     Route::prefix('music-stand')->name('music-stand.')->group(function () {

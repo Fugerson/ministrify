@@ -440,12 +440,68 @@
                 </template>
             </div>
 
+            <!-- Menu Position -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
+                 x-data="{
+                     currentPosition: '{{ auth()->user()->settings['menu_position'] ?? ($currentChurch->menu_position ?? 'left') }}',
+                     saving: false,
+                     async setPosition(position) {
+                         this.saving = true;
+                         try {
+                             const response = await fetch('{{ route('my-profile.menu-position') }}', {
+                                 method: 'POST',
+                                 headers: {
+                                     'Content-Type': 'application/json',
+                                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                     'Accept': 'application/json'
+                                 },
+                                 body: JSON.stringify({ menu_position: position })
+                             });
+                             if (response.ok) {
+                                 this.currentPosition = position;
+                                 setTimeout(() => window.location.reload(), 500);
+                             }
+                         } catch (e) {
+                             console.error('Menu position update error:', e);
+                         }
+                         this.saving = false;
+                     }
+                 }">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Позиція меню</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть розташування навігаційного меню</p>
+                </div>
+                <div class="p-6">
+                    @php
+                        $menuPositions = [
+                            ['id' => 'left', 'name' => 'Зліва', 'desc' => 'Класична бічна панель', 'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="20" height="50" rx="2" class="fill-primary-500"/><rect x="30" y="5" width="65" height="50" rx="2" class="fill-gray-200 dark:fill-gray-700"/></svg>'],
+                            ['id' => 'right', 'name' => 'Справа', 'desc' => 'Меню справа', 'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="65" height="50" rx="2" class="fill-gray-200 dark:fill-gray-700"/><rect x="75" y="5" width="20" height="50" rx="2" class="fill-primary-500"/></svg>'],
+                            ['id' => 'top', 'name' => 'Зверху', 'desc' => 'Горизонтальне меню', 'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="90" height="12" rx="2" class="fill-primary-500"/><rect x="5" y="22" width="90" height="33" rx="2" class="fill-gray-200 dark:fill-gray-700"/></svg>'],
+                            ['id' => 'bottom', 'name' => 'Знизу', 'desc' => 'Мобільний стиль', 'icon' => '<svg class="w-full h-full" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="90" height="38" rx="2" class="fill-gray-200 dark:fill-gray-700"/><rect x="5" y="48" width="90" height="10" rx="2" class="fill-primary-500"/></svg>'],
+                        ];
+                    @endphp
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        @foreach($menuPositions as $position)
+                            <button type="button" @click="setPosition('{{ $position['id'] }}')" :disabled="saving"
+                                    class="w-full p-4 rounded-xl border-2 transition-all hover:scale-[1.02]"
+                                    :class="currentPosition === '{{ $position['id'] }}' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
+                                <div class="h-16 mb-3">
+                                    {!! $position['icon'] !!}
+                                </div>
+                                <h3 class="font-semibold text-gray-900 dark:text-white text-sm">{{ $position['name'] }}</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $position['desc'] }}</p>
+                                <span x-show="currentPosition === '{{ $position['id'] }}'" x-cloak class="inline-block mt-2 text-xs bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">Активний</span>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
             <!-- Theme Settings -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
                  x-data="{
                      currentTheme: '{{ auth()->user()->settings['design_theme'] ?? '' }}',
                      saving: false,
-                     saved: false,
                      async setTheme(theme) {
                          this.saving = true;
                          try {
@@ -460,8 +516,6 @@
                              });
                              if (response.ok) {
                                  this.currentTheme = theme;
-                                 this.saved = true;
-                                 setTimeout(() => this.saved = false, 2000);
                                  setTimeout(() => window.location.reload(), 500);
                              }
                          } catch (e) {
@@ -470,53 +524,39 @@
                          this.saving = false;
                      }
                  }">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/50 dark:to-purple-900/50 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Тема оформлення</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Персоналізуй зовнішній вигляд</p>
-                    </div>
-                    <div x-show="saved" x-cloak class="ml-auto text-green-600 dark:text-green-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </div>
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Тема оформлення</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Персоналізуй зовнішній вигляд</p>
                 </div>
 
-                @php
-                    $themes = [
-                        ['id' => '', 'name' => 'Церковна', 'desc' => 'Тема церкви', 'colors' => ['#fef7f0', '#fdf2f8', '#fef3c7']],
-                        ['id' => 'modern', 'name' => 'Ранок', 'desc' => 'Персиковий світанок', 'colors' => ['#fce7f3', '#fed7aa', '#fef3c7']],
-                        ['id' => 'glass', 'name' => 'Вечір', 'desc' => 'Золоті акценти', 'colors' => ['#1e1b4b', '#172554', '#fbbf24']],
-                        ['id' => 'corporate', 'name' => 'Природа', 'desc' => 'Лісові тони', 'colors' => ['#ecfdf5', '#d1fae5', '#10b981']],
-                        ['id' => 'ocean', 'name' => 'Океан', 'desc' => 'Морські хвилі', 'colors' => ['#ecfeff', '#e0f2fe', '#06b6d4']],
-                        ['id' => 'sunset', 'name' => 'Захід', 'desc' => 'Пурпурний захід', 'colors' => ['#fce7f3', '#f3e8ff', '#a855f7']],
-                    ];
-                @endphp
+                <div class="p-6">
+                    @php
+                        $themes = [
+                            ['id' => '', 'name' => 'Церковна', 'desc' => 'Тема церкви', 'colors' => ['#fef7f0', '#fdf2f8', '#fef3c7']],
+                            ['id' => 'modern', 'name' => 'Ранок', 'desc' => 'Персиковий світанок', 'colors' => ['#fce7f3', '#fed7aa', '#fef3c7']],
+                            ['id' => 'glass', 'name' => 'Вечір', 'desc' => 'Золоті акценти', 'colors' => ['#1e1b4b', '#172554', '#fbbf24']],
+                            ['id' => 'corporate', 'name' => 'Природа', 'desc' => 'Лісові тони', 'colors' => ['#ecfdf5', '#d1fae5', '#10b981']],
+                            ['id' => 'ocean', 'name' => 'Океан', 'desc' => 'Морські хвилі', 'colors' => ['#ecfeff', '#e0f2fe', '#06b6d4']],
+                            ['id' => 'sunset', 'name' => 'Захід', 'desc' => 'Пурпурний захід', 'colors' => ['#fce7f3', '#f3e8ff', '#a855f7']],
+                        ];
+                    @endphp
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    @foreach($themes as $theme)
-                    <button type="button" @click="setTheme('{{ $theme['id'] }}')" :disabled="saving"
-                            class="relative p-3 rounded-xl border-2 transition-all text-left hover:scale-[1.02]"
-                            :class="currentTheme === '{{ $theme['id'] }}' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
-                        <div class="flex gap-1 mb-2">
-                            @foreach($theme['colors'] as $color)
-                            <div class="w-5 h-5 rounded-full shadow-sm" style="background-color: {{ $color }}"></div>
-                            @endforeach
-                        </div>
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $theme['name'] }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $theme['desc'] }}</p>
-                        <div x-show="currentTheme === '{{ $theme['id'] }}'" class="absolute top-2 right-2 w-5 h-5 bg-primary-500 rounded-full flex items-center justify-center">
-                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                    </button>
-                    @endforeach
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        @foreach($themes as $theme)
+                        <button type="button" @click="setTheme('{{ $theme['id'] }}')" :disabled="saving"
+                                class="relative p-4 rounded-xl border-2 transition-all text-left hover:scale-[1.02]"
+                                :class="currentTheme === '{{ $theme['id'] }}' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
+                            <div class="flex gap-1.5 mb-2">
+                                @foreach($theme['colors'] as $color)
+                                <div class="w-6 h-6 rounded-full shadow-sm border border-gray-200 dark:border-gray-600" style="background-color: {{ $color }}"></div>
+                                @endforeach
+                            </div>
+                            <h3 class="font-semibold text-gray-900 dark:text-white text-sm">{{ $theme['name'] }}</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $theme['desc'] }}</p>
+                            <span x-show="currentTheme === '{{ $theme['id'] }}'" x-cloak class="inline-block mt-2 text-xs bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">Активний</span>
+                        </button>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>

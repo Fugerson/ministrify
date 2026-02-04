@@ -1,7 +1,8 @@
 @php
     $userTheme = auth()->check() ? (auth()->user()->settings['design_theme'] ?? '') : '';
     $designTheme = $userTheme ?: ($currentChurch->design_theme ?? 'modern');
-    $menuPosition = $currentChurch->menu_position ?? 'left';
+    $userMenuPosition = auth()->check() ? (auth()->user()->settings['menu_position'] ?? '') : '';
+    $menuPosition = $userMenuPosition ?: ($currentChurch->menu_position ?? 'left');
 @endphp
 
 <style>
