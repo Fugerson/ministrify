@@ -11,8 +11,17 @@
                 <h1 class="text-xl font-bold text-gray-900 dark:text-white">Підтримка</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Тікети від адміністраторів церков</p>
             </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">
-                Всього: <span class="font-semibold text-gray-900 dark:text-white" x-text="allTickets.length"></span>
+            <div class="flex items-center gap-4">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    Всього: <span class="font-semibold text-gray-900 dark:text-white" x-text="allTickets.length"></span>
+                </div>
+                <button @click="showCreateModal = true"
+                        class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Мій тікет
+                </button>
             </div>
         </div>
 
@@ -261,6 +270,100 @@
             </div>
         </div>
     </div>
+
+    <!-- Create Ticket Modal -->
+    <div x-show="showCreateModal" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @keydown.escape.window="showCreateModal = false">
+        <!-- Backdrop -->
+        <div x-show="showCreateModal"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black/50"
+             @click="showCreateModal = false"></div>
+
+        <!-- Modal -->
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div x-show="showCreateModal"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 @click.stop
+                 class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-xl shadow-xl">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Новий тікет</h3>
+                    <button @click="showCreateModal = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тема</label>
+                        <input type="text" x-model="createForm.subject"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                               placeholder="Опишіть проблему коротко">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                            <select x-model="createForm.category"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                <option value="bug">🐛 Помилка</option>
+                                <option value="feature">💡 Фіча</option>
+                                <option value="question">❓ Питання</option>
+                                <option value="other">📝 Інше</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пріоритет</label>
+                            <select x-model="createForm.priority"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                <option value="low">⚪ Низький</option>
+                                <option value="normal">🟡 Нормальний</option>
+                                <option value="high">🟠 Високий</option>
+                                <option value="urgent">🔴 Терміновий</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                        <textarea x-model="createForm.message" rows="4"
+                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                                  placeholder="Детальний опис..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                    <button @click="showCreateModal = false"
+                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        Скасувати
+                    </button>
+                    <button @click="createTicket()"
+                            :disabled="createLoading || !createForm.subject || !createForm.message"
+                            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span x-show="!createLoading">Створити</span>
+                        <span x-show="createLoading">Збереження...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -350,7 +453,12 @@ function supportKanban() {
                     </svg>
                     ${this.escapeHtml(ticket.church_name)}
                 </div>`
-                : '';
+                : (ticket.is_own ? `<div class="mt-1.5 text-[11px] text-primary-500 dark:text-primary-400 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Мій тікет
+                </div>` : '');
 
             return `
                 <div class="bg-white dark:bg-gray-700 rounded-xl border border-gray-100 dark:border-gray-600 p-3 cursor-pointer hover:shadow-md hover:border-gray-200 dark:hover:border-gray-500 transition-all">
@@ -488,6 +596,43 @@ function supportKanban() {
             } catch (error) {
                 console.error('Error deleting ticket:', error);
             }
+        },
+
+        // Create modal
+        showCreateModal: false,
+        createForm: {
+            subject: '',
+            category: 'bug',
+            priority: 'normal',
+            message: ''
+        },
+        createLoading: false,
+
+        async createTicket() {
+            if (!this.createForm.subject || !this.createForm.message) return;
+
+            this.createLoading = true;
+            try {
+                const response = await fetch('{{ route("system.support.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(this.createForm)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    this.allTickets.unshift(data.ticket);
+                    this.showCreateModal = false;
+                    this.createForm = { subject: '', category: 'bug', priority: 'normal', message: '' };
+                }
+            } catch (error) {
+                console.error('Error creating ticket:', error);
+            }
+            this.createLoading = false;
         }
     };
 }

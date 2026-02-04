@@ -633,6 +633,7 @@ class SystemAdminController extends Controller
 
         // Transform for frontend
         $ticketsData = $tickets->map(function ($ticket) {
+            $isOwn = $ticket->church_id === null && $ticket->user_id === auth()->id();
             return [
                 'id' => $ticket->id,
                 'subject' => $ticket->subject,
@@ -646,6 +647,7 @@ class SystemAdminController extends Controller
                 'time_ago' => $ticket->updated_at->diffForHumans(),
                 'unread' => $ticket->unreadMessagesForAdmin(),
                 'show_url' => route('system.support.show', $ticket),
+                'is_own' => $isOwn,
             ];
         });
 
@@ -656,6 +658,61 @@ class SystemAdminController extends Controller
         ];
 
         return view('system-admin.support.index', compact('ticketsData', 'stats'));
+    }
+
+    /**
+     * Store system admin's own ticket
+     */
+    public function storeSupportTicket(Request $request)
+    {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'category' => 'required|in:bug,question,feature,other',
+            'message' => 'required|string|max:10000',
+            'priority' => 'required|in:low,normal,high,urgent',
+        ]);
+
+        $ticket = SupportTicket::create([
+            'user_id' => auth()->id(),
+            'church_id' => null, // System admin's own ticket
+            'subject' => $validated['subject'],
+            'category' => $validated['category'],
+            'priority' => $validated['priority'],
+            'status' => 'open',
+            'last_reply_at' => now(),
+        ]);
+
+        SupportMessage::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => auth()->id(),
+            'message' => $validated['message'],
+            'is_from_admin' => true,
+            'is_internal' => true,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'ticket' => [
+                    'id' => $ticket->id,
+                    'subject' => $ticket->subject,
+                    'category' => $ticket->category,
+                    'category_label' => $ticket->category_label,
+                    'priority' => $ticket->priority,
+                    'priority_label' => $ticket->priority_label,
+                    'status' => $ticket->status,
+                    'user_name' => auth()->user()->name,
+                    'church_name' => null,
+                    'time_ago' => 'щойно',
+                    'unread' => 0,
+                    'show_url' => route('system.support.show', $ticket),
+                    'is_own' => true,
+                ],
+            ]);
+        }
+
+        return redirect()->route('system.support.index')
+            ->with('success', 'Тікет створено!');
     }
 
     /**
