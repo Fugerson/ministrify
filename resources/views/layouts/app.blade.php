@@ -791,7 +791,10 @@
         })();
     </script>
     <div class="page-content">
-    @php $menuPosition = $currentChurch->menu_position ?? 'left'; @endphp
+    @php
+        $userMenuPosition = auth()->check() ? (auth()->user()->settings['menu_position'] ?? '') : '';
+        $menuPosition = $userMenuPosition ?: ($currentChurch->menu_position ?? 'left');
+    @endphp
     <div x-data="{ sidebarOpen: false }" class="min-h-screen flex max-w-[100vw] overflow-x-clip menu-position-wrapper"
          @keydown.window.prevent.cmd.k="searchOpen = true"
          @keydown.window.prevent.ctrl.k="searchOpen = true"
