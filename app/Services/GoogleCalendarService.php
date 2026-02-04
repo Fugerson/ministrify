@@ -122,19 +122,47 @@ class GoogleCalendarService
                 return null;
             }
 
-            $newToken = $this->refreshToken($googleCalendar['refresh_token']);
-            if (!$newToken) {
-                return null;
+            // Use cache lock to prevent race condition on token refresh
+            $lockKey = "google_token_refresh_{$user->id}";
+            $lock = Cache::lock($lockKey, 30);
+
+            try {
+                if ($lock->get()) {
+                    // Re-fetch user to get latest token (another process may have refreshed it)
+                    $user->refresh();
+                    $settings = $user->settings ?? [];
+                    $googleCalendar = $settings['google_calendar'] ?? null;
+
+                    // Check again if token was already refreshed
+                    $expiresAt = $googleCalendar['expires_at'] ?? 0;
+                    if (time() < $expiresAt - 60) {
+                        return $googleCalendar['access_token'];
+                    }
+
+                    $newToken = $this->refreshToken($googleCalendar['refresh_token']);
+                    if (!$newToken) {
+                        return null;
+                    }
+
+                    // Update user settings with new token
+                    $settings['google_calendar'] = array_merge($googleCalendar, [
+                        'access_token' => $newToken['access_token'],
+                        'expires_at' => time() + ($newToken['expires_in'] ?? 3600),
+                    ]);
+                    $user->update(['settings' => $settings]);
+
+                    return $newToken['access_token'];
+                } else {
+                    // Another process is refreshing, wait and retry
+                    usleep(500000); // 500ms
+                    $user->refresh();
+                    $settings = $user->settings ?? [];
+                    $googleCalendar = $settings['google_calendar'] ?? null;
+                    return $googleCalendar['access_token'] ?? null;
+                }
+            } finally {
+                $lock->release();
             }
-
-            // Update user settings with new token
-            $settings['google_calendar'] = array_merge($googleCalendar, [
-                'access_token' => $newToken['access_token'],
-                'expires_at' => time() + ($newToken['expires_in'] ?? 3600),
-            ]);
-            $user->update(['settings' => $settings]);
-
-            return $newToken['access_token'];
         }
 
         return $googleCalendar['access_token'];

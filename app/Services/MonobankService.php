@@ -101,23 +101,49 @@ class MonobankService
         }
     }
 
+    /**
+     * Monobank public key for webhook signature verification
+     * From: https://api.monobank.ua/docs/acquiring.html
+     */
+    private const MONOBANK_PUBLIC_KEY = "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFb1pGckM0alhaS3pnVXlxTXFlNmVkblVMNXl2QQordSs5d3RkakVqRjEyTjNkdm8vS2FaQ0hGQ0RBVUlHTVU0Z1FKUHZlL0pPdWVvSElQQnpWMUlxTUNnPT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==";
+
     public function verifySignature(string $body, string $signature): bool
     {
-        // TODO: Implement proper Monobank signature verification
-        // Monobank uses ECDSA signature with their public key
-        // For now, we rely on unique references and webhook secrets
-        // See: https://api.monobank.ua/docs/acquiring.html#tag/Vebhuki
-
         if (empty($signature)) {
             \Log::warning('MonobankService: Webhook received without signature');
-            return true; // Allow for backwards compatibility
+            return false;
         }
 
-        // Log for monitoring - helps detect potential abuse
-        \Log::info('MonobankService: Webhook signature present but not verified', [
-            'signature_length' => strlen($signature),
-        ]);
+        try {
+            $publicKeyPem = base64_decode(self::MONOBANK_PUBLIC_KEY);
+            $publicKey = openssl_pkey_get_public($publicKeyPem);
 
-        return true;
+            if (!$publicKey) {
+                \Log::error('MonobankService: Failed to load public key');
+                return false;
+            }
+
+            $signatureDecoded = base64_decode($signature);
+            $result = openssl_verify($body, $signatureDecoded, $publicKey, OPENSSL_ALGO_SHA256);
+
+            if ($result === 1) {
+                return true;
+            } elseif ($result === 0) {
+                \Log::warning('MonobankService: Invalid webhook signature', [
+                    'body_length' => strlen($body),
+                ]);
+                return false;
+            } else {
+                \Log::error('MonobankService: Signature verification error', [
+                    'error' => openssl_error_string(),
+                ]);
+                return false;
+            }
+        } catch (\Exception $e) {
+            \Log::error('MonobankService: Signature verification exception', [
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
     }
 }

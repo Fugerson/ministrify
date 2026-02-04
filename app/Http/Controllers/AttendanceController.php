@@ -89,7 +89,13 @@ class AttendanceController extends Controller
 
         // Create attendance records
         if (!empty($validated['present'])) {
-            foreach ($validated['present'] as $personId) {
+            // Validate all person IDs belong to this church
+            $validPersonIds = Person::where('church_id', $church->id)
+                ->whereIn('id', $validated['present'])
+                ->pluck('id')
+                ->toArray();
+
+            foreach ($validPersonIds as $personId) {
                 AttendanceRecord::create([
                     'attendance_id' => $attendance->id,
                     'person_id' => $personId,
@@ -149,7 +155,14 @@ class AttendanceController extends Controller
         $attendance->records()->delete();
 
         if (!empty($validated['present'])) {
-            foreach ($validated['present'] as $personId) {
+            // Validate all person IDs belong to this church
+            $church = $this->getCurrentChurch();
+            $validPersonIds = Person::where('church_id', $church->id)
+                ->whereIn('id', $validated['present'])
+                ->pluck('id')
+                ->toArray();
+
+            foreach ($validPersonIds as $personId) {
                 AttendanceRecord::create([
                     'attendance_id' => $attendance->id,
                     'person_id' => $personId,
