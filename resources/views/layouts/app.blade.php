@@ -1136,12 +1136,12 @@
         <div x-show="sidebarOpen" x-cloak class="lg:hidden fixed inset-0 z-40 bg-black/50" @click="sidebarOpen = false"></div>
         <aside x-show="sidebarOpen" x-cloak
                x-transition:enter="transform transition ease-out duration-300"
-               x-transition:enter-start="-translate-x-full"
+               x-transition:enter-start="{{ $menuPosition === 'right' ? 'translate-x-full' : '-translate-x-full' }}"
                x-transition:enter-end="translate-x-0"
                x-transition:leave="transform transition ease-in duration-200"
                x-transition:leave-start="translate-x-0"
-               x-transition:leave-end="-translate-x-full"
-               class="lg:hidden fixed inset-y-0 left-0 z-50 w-[calc(100vw-3rem)] max-w-72 bg-white dark:bg-gray-800 shadow-xl flex flex-col">
+               x-transition:leave-end="{{ $menuPosition === 'right' ? 'translate-x-full' : '-translate-x-full' }}"
+               class="lg:hidden fixed inset-y-0 {{ $menuPosition === 'right' ? 'right-0' : 'left-0' }} z-50 w-[calc(100vw-3rem)] max-w-72 bg-white dark:bg-gray-800 shadow-xl flex flex-col">
             <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
@@ -1313,8 +1313,8 @@
              :class="sidebarCollapsed ? '{{ $menuPosition === 'right' ? 'lg:pr-16' : 'lg:pl-16' }}' : '{{ $menuPosition === 'right' ? 'lg:pr-64' : 'lg:pl-64' }}'">
             <!-- Mobile Header -->
             <header class="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
-                <div class="flex items-center justify-between h-14 px-3">
-                    <button @click="sidebarOpen = true" class="w-11 h-11 flex items-center justify-center -ml-2 text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
+                <div class="flex items-center justify-between h-14 px-3 {{ $menuPosition === 'right' ? 'flex-row-reverse' : '' }}">
+                    <button @click="sidebarOpen = true" class="w-11 h-11 flex items-center justify-center {{ $menuPosition === 'right' ? '-mr-2' : '-ml-2' }} text-gray-600 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
                     <button @click="searchOpen = true" class="flex-1 mx-2 flex items-center justify-center space-x-2 h-10 px-3 bg-gray-100 dark:bg-gray-700 rounded-xl active:bg-gray-200 dark:active:bg-gray-600">
