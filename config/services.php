@@ -27,6 +27,6 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),  // For Socialite (Google Login)
-        'redirect_uri' => env('GOOGLE_CALENDAR_REDIRECT_URI', '/settings/google-calendar/callback'),  // For Google Calendar
+        'redirect_uri' => env('GOOGLE_REDIRECT_URI', env('APP_URL') . '/settings/google-calendar/callback'),  // For Google Calendar
     ],
 ];
