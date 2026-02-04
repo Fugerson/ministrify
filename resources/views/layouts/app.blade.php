@@ -965,11 +965,28 @@
         @endif
 
         <!-- Desktop Sidebar -->
-        <aside x-data="{ collapsed: localStorage.getItem('sidebar_collapsed') === 'true' }"
+        <aside x-data="{ collapsed: localStorage.getItem('sidebar_collapsed') === 'true', hovered: false }"
                x-init="$watch('collapsed', val => { localStorage.setItem('sidebar_collapsed', val); window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: val })) })"
+               @mouseenter="hovered = true" @mouseleave="hovered = false"
                :class="collapsed ? 'lg:w-16' : 'lg:w-64'"
                class="desktop-sidebar hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300">
-            <div class="flex items-center h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0" :class="collapsed ? 'justify-between px-2' : 'justify-between px-4'">
+
+            <!-- Toggle button on sidebar edge -->
+            <button @click="collapsed = !collapsed"
+                    x-show="hovered" x-cloak
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-75"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-75"
+                    class="absolute top-7 -right-3 z-40 w-6 h-6 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full shadow-md flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer"
+                    :title="collapsed ? 'Розгорнути' : 'Згорнути'">
+                <svg x-show="!collapsed" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                <svg x-show="collapsed" x-cloak class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <div class="flex items-center h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0" :class="collapsed ? 'justify-center px-2' : 'px-6'">
                 <a href="{{ route('dashboard') }}" class="flex items-center flex-shrink-0 min-w-0" :class="collapsed ? '' : 'space-x-2 overflow-hidden'">
                     @if($currentChurch->logo)
                     <img src="/storage/{{ $currentChurch->logo }}" alt="{{ $currentChurch->name }}" class="w-8 h-8 rounded-lg object-contain flex-shrink-0">
@@ -978,10 +995,6 @@
                     @endif
                     <span x-show="!collapsed" x-cloak class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ $currentChurch->name ?? 'Ministrify' }}</span>
                 </a>
-                <button @click="collapsed = !collapsed" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0" :title="collapsed ? 'Розгорнути меню' : 'Згорнути меню'">
-                    <svg x-show="!collapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
-                    <svg x-show="collapsed" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
-                </button>
             </div>
 
             <nav id="sidebar-nav" class="flex-1 py-4 space-y-1 overflow-y-auto no-scrollbar" :class="collapsed ? 'px-2' : 'px-4'">
