@@ -347,17 +347,17 @@
                             $isCurrentMonth = $calendarDate->month == $month;
                             $isPast = $calendarDate->isPast() && !$isToday;
                         @endphp
-                        <div class="sm:min-h-[100px] lg:min-h-[120px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                        <div class="sm:min-h-[140px] lg:min-h-[160px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }}">
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-sm font-medium {{ $isToday ? 'w-7 h-7 flex items-center justify-center rounded-full bg-primary-600 text-white' : ($isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-600') }}">
                                     {{ $calendarDate->format('j') }}
                                 </span>
-                                @if($dayEvents->count() > 2)
-                                    <span class="text-xs text-gray-500 dark:text-gray-500">+{{ $dayEvents->count() - 2 }}</span>
+                                @if($dayEvents->count() > 5)
+                                    <span class="text-xs text-gray-500 dark:text-gray-500">+{{ $dayEvents->count() - 5 }}</span>
                                 @endif
                             </div>
-                            <div class="space-y-1">
-                                @foreach($dayEvents->take(2) as $item)
+                            <div class="space-y-0.5">
+                                @foreach($dayEvents->take(5) as $item)
                                     @if($item->type === 'meeting')
                                         <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
                                            class="block px-1.5 py-0.5 rounded text-xs truncate transition-colors hover:opacity-80 {{ $isPast && !$isToday ? 'opacity-60' : '' }}"
