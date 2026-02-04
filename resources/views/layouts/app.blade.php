@@ -972,10 +972,15 @@
 
             <!-- Toggle button on sidebar edge -->
             <button @click="collapsed = !collapsed"
-                    class="absolute top-20 -right-3 z-50 w-6 h-6 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full shadow-md flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer"
+                    class="absolute top-20 z-50 w-6 h-6 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full shadow-md flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer {{ $menuPosition === 'right' ? '-left-3' : '-right-3' }}"
                     :title="collapsed ? 'Розгорнути' : 'Згорнути'">
+                @if($menuPosition === 'right')
+                <svg x-show="!collapsed" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                <svg x-show="collapsed" x-cloak class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                @else
                 <svg x-show="!collapsed" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                 <svg x-show="collapsed" x-cloak class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                @endif
             </button>
 
             <div class="flex items-center h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0" :class="collapsed ? 'justify-center px-2' : 'px-6'">
@@ -1354,7 +1359,7 @@
         <div id="main-content" class="main-content-area flex-1 min-w-0 {{ $menuPosition === 'top' ? 'lg:pt-16' : '' }} {{ $menuPosition === 'bottom' ? 'lg:pb-20' : '' }}"
              x-data="{ sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true' }"
              x-on:sidebar-toggle.window="sidebarCollapsed = $event.detail"
-             :class="sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'">
+             :class="sidebarCollapsed ? '{{ $menuPosition === 'right' ? 'lg:pr-16' : 'lg:pl-16' }}' : '{{ $menuPosition === 'right' ? 'lg:pr-64' : 'lg:pl-64' }}'">
             <!-- Mobile Header -->
             <header class="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm safe-top">
                 <div class="flex items-center justify-between h-14 px-3">

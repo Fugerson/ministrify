@@ -24,7 +24,6 @@
     }
     .main-content-area {
         padding-left: 0 !important;
-        padding-right: 16rem !important; /* lg:pr-64 */
     }
     @media (max-width: 1023px) {
         .main-content-area {
@@ -86,7 +85,7 @@
 .desktop-sidebar.lg\:w-16 nav > div a svg { margin-right: 0 !important; }
 
 /* Main content padding adjustment for collapsed sidebar */
-.main-content-area { transition: padding-left 0.3s ease; }
+.main-content-area { transition: padding-left 0.3s ease, padding-right 0.3s ease; }
 
 /* ========================================
    DESIGN THEME: РАНОК (Morning) - Default
