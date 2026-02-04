@@ -33,7 +33,7 @@ class DashboardController extends Controller
     {
         $this->cacheService = $cacheService;
     }
-{
+
     private const ALLOWED_COLS = [3, 4, 6, 8, 12];
 
     public function index()
