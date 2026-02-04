@@ -285,9 +285,19 @@
                     </div>
                 @endif
 
-                <input type="file" name="hero_image" accept="image/*"
-                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Рекомендований розмір: 1920x1080px, до 5MB</p>
+                <div x-data="{ fileName: '' }" class="relative">
+                    <input type="file" name="hero_image" accept="image/*" class="sr-only" x-ref="heroInput" @change="fileName = $event.target.files[0]?.name || ''">
+                    <label @click="$refs.heroInput.click()" class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group">
+                        <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">Обрати зображення</p>
+                            <p x-show="fileName" x-text="fileName" class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate"></p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">1920x1080px, до 5MB</p>
+                        </div>
+                    </label>
+                </div>
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">

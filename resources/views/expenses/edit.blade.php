@@ -116,8 +116,19 @@
                             <img src="{{ Storage::url($expense->receipt_photo) }}" class="max-w-xs rounded-lg">
                         </div>
                     @endif
-                    <input type="file" name="receipt_photo" id="receipt_photo" accept="image/*"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                    <div x-data="{ fileName: '' }" class="relative">
+                        <input type="file" name="receipt_photo" id="receipt_photo" accept="image/*" class="sr-only" x-ref="receiptInput" @change="fileName = $event.target.files[0]?.name || ''">
+                        <label @click="$refs.receiptInput.click()" class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group">
+                            <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors">
+                                <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">Обрати фото чека</p>
+                                <p x-show="fileName" x-text="fileName" class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate"></p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WebP</p>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
                 <div>
