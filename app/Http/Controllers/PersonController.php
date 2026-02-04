@@ -168,6 +168,10 @@ class PersonController extends Controller
 
     public function create()
     {
+        if (!auth()->user()->canCreate('people')) {
+            return redirect()->route('people.index')->with('error', 'У вас немає прав для створення записів.');
+        }
+
         $church = $this->getCurrentChurch();
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries()->with('positions')->get();
@@ -178,6 +182,10 @@ class PersonController extends Controller
 
     public function store(Request $request)
     {
+        if (!auth()->user()->canCreate('people')) {
+            return redirect()->route('people.index')->with('error', 'У вас немає прав для створення записів.');
+        }
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -372,6 +380,13 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
+        $user = auth()->user();
+        $isOwnProfile = $user->person && $user->person->id === $person->id;
+
+        if (!$isOwnProfile && !$user->canEdit('people')) {
+            return redirect()->route('people.index')->with('error', 'У вас немає прав для редагування записів.');
+        }
+
         $church = $this->getCurrentChurch();
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries()->with('positions')->get();
@@ -388,15 +403,15 @@ class PersonController extends Controller
 
         $user = auth()->user();
         $isOwnProfile = $user->person && $user->person->id === $person->id;
-        $isAdmin = $user->isAdmin();
+        $canEditPeople = $user->canEdit('people');
 
-        // If not admin and not own profile, deny access
-        if (!$isAdmin && !$isOwnProfile) {
+        // If not own profile and no edit permission, deny access
+        if (!$isOwnProfile && !$canEditPeople) {
             abort(403, 'У вас немає дозволу редагувати цей профіль.');
         }
 
-        // Different validation rules for admin vs own profile
-        if ($isAdmin) {
+        // Different validation rules for users with edit permission vs own profile
+        if ($canEditPeople) {
             $validated = $request->validate([
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
@@ -493,6 +508,10 @@ class PersonController extends Controller
     public function destroy(Person $person)
     {
         $this->authorizeChurch($person);
+
+        if (!auth()->user()->canDelete('people')) {
+            return redirect()->route('people.index')->with('error', 'У вас немає прав для видалення записів.');
+        }
 
         $person->delete();
 

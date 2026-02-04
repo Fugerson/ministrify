@@ -9,17 +9,17 @@ class EventPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->canView('events');
     }
 
     public function view(User $user, Event $event): bool
     {
-        return $user->church_id === $event->church_id;
+        return $user->church_id === $event->church_id && $user->canView('events');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole(['admin', 'leader']);
+        return $user->canCreate('events');
     }
 
     public function update(User $user, Event $event): bool
@@ -28,13 +28,14 @@ class EventPolicy
             return false;
         }
 
-        if ($user->isAdmin()) {
+        // User with edit permission can update any event
+        if ($user->canEdit('events')) {
             return true;
         }
 
         // Ministry leader can update events in their ministry
-        if ($user->isLeader() && $user->person && $event->ministry) {
-            return $event->ministry->leader_id === $user->person->id;
+        if ($user->person && $event->ministry && $event->ministry->leader_id === $user->person->id) {
+            return true;
         }
 
         return false;
@@ -42,12 +43,12 @@ class EventPolicy
 
     public function delete(User $user, Event $event): bool
     {
-        return $user->church_id === $event->church_id && $user->isAdmin();
+        return $user->church_id === $event->church_id && $user->canDelete('events');
     }
 
     /**
      * Determine if user can manage service plan
-     * Accessible by: admins, ministry leaders, and assigned volunteers
+     * Accessible by: users with edit permission, ministry leaders, and assigned volunteers
      */
     public function managePlan(User $user, Event $event): bool
     {
@@ -56,8 +57,8 @@ class EventPolicy
             return false;
         }
 
-        // Admins always have access
-        if ($user->isAdmin()) {
+        // Users with edit permission always have access
+        if ($user->canEdit('events')) {
             return true;
         }
 

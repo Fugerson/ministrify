@@ -191,6 +191,8 @@ class EventController extends Controller
 
     public function create(Request $request)
     {
+        $this->authorize('create', Event::class);
+
         $church = $this->getCurrentChurch();
         $user = auth()->user();
 
@@ -209,6 +211,8 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Event::class);
+
         $validated = $request->validate([
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'title' => 'required|string|max:255',
@@ -342,13 +346,7 @@ class EventController extends Controller
     public function edit(Event $event)
     {
         $this->authorizeChurch($event);
-
-        // Authorize ministry management if event has ministry
-        if ($event->ministry) {
-            Gate::authorize('manage-ministry', $event->ministry);
-        } elseif (!$this->isAdmin()) {
-            abort(403, 'Тільки адміністратор може редагувати події без служіння.');
-        }
+        $this->authorize('update', $event);
 
         $church = $this->getCurrentChurch();
         $ministries = Ministry::where('church_id', $church->id)->get();
@@ -359,13 +357,7 @@ class EventController extends Controller
     public function update(Request $request, Event $event)
     {
         $this->authorizeChurch($event);
-
-        // Authorize ministry management if event has ministry
-        if ($event->ministry) {
-            Gate::authorize('manage-ministry', $event->ministry);
-        } elseif (!$this->isAdmin()) {
-            abort(403, 'Тільки адміністратор може редагувати події без служіння.');
-        }
+        $this->authorize('update', $event);
 
         // Support partial updates for AJAX
         $rules = [
@@ -444,13 +436,7 @@ class EventController extends Controller
     public function destroy(Request $request, Event $event)
     {
         $this->authorizeChurch($event);
-
-        // Authorize ministry management if event has ministry
-        if ($event->ministry) {
-            Gate::authorize('manage-ministry', $event->ministry);
-        } elseif (!$this->isAdmin()) {
-            abort(403, 'Тільки адміністратор може видаляти події без служіння.');
-        }
+        $this->authorize('delete', $event);
 
         $deleteSeries = $request->boolean('delete_series');
 

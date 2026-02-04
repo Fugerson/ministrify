@@ -26,6 +26,8 @@ class GroupController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Group::class);
+
         $people = Person::where('church_id', $this->getCurrentChurch()->id)
             ->orderBy('first_name')
             ->get();
@@ -35,6 +37,8 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Group::class);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
