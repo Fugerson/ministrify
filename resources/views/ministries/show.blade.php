@@ -268,7 +268,7 @@
                                      x-transition:leave="ease-in duration-200"
                                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col"
+                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col"
                                      @click.stop>
                                     {{-- Header --}}
                                     <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -302,8 +302,8 @@
                                     {{-- Content --}}
                                     <div x-show="!modalLoading" class="p-4 flex-1 overflow-y-auto overflow-x-hidden">
                                         <div class="flex flex-col lg:flex-row gap-4">
-                                            {{-- Songs Section --}}
-                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:flex-1">
+                                            {{-- Songs Section (Left) --}}
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:w-1/3 overflow-hidden">
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
                                                     <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
@@ -312,17 +312,22 @@
                                                 </h4>
 
                                                 <template x-if="modalSongs.length > 0">
-                                                    <div class="space-y-2 mb-3">
+                                                    <div class="space-y-1 mb-3">
                                                         <template x-for="(song, index) in modalSongs" :key="song.id">
-                                                            <div class="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded-lg group">
+                                                            <div @click="selectSong(song)"
+                                                                 :class="selectedSongForTeam && selectedSongForTeam.id == song.id ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                                                                 class="flex items-center gap-2 p-2 rounded-lg cursor-pointer group transition-all">
                                                                 <span class="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-medium" x-text="index + 1"></span>
                                                                 <div class="flex-1 min-w-0">
                                                                     <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="song.title"></p>
-                                                                    <template x-if="song.key">
-                                                                        <span class="text-xs text-gray-500 dark:text-gray-400" x-text="'Тональність: ' + song.key"></span>
-                                                                    </template>
+                                                                    <div class="flex items-center gap-2">
+                                                                        <template x-if="song.key">
+                                                                            <span class="text-xs text-gray-500 dark:text-gray-400" x-text="song.key"></span>
+                                                                        </template>
+                                                                        <span class="text-xs text-blue-500" x-text="(new Set(song.team?.map(t => t.person_id) || [])).size + ' уч.'"></span>
+                                                                    </div>
                                                                 </div>
-                                                                <button @click="removeSong(song.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button @click.stop="removeSong(song.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                                     </svg>
@@ -338,83 +343,88 @@
 
                                                 {{-- Add song form --}}
                                                 <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
-                                                    <div class="flex gap-2">
-                                                        <select x-model="selectedSongId" class="flex-1 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                                            <option value="">Оберіть пісню...</option>
-                                                            <template x-for="song in modalAvailableSongs.filter(s => !s.inEvent)" :key="song.id">
-                                                                <option :value="song.id" x-text="song.title + (song.key ? ' (' + song.key + ')' : '')"></option>
-                                                            </template>
-                                                        </select>
-                                                        <input type="text" x-model="selectedKey" placeholder="Тон." class="w-14 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                                        <button @click="addSong()" :disabled="!selectedSongId" class="px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                                    <div class="flex gap-2 items-center">
+                                                        <div class="flex-1 min-w-0">
+                                                            <select x-model="selectedSongId"
+                                                                    x-effect="updateSongSelect($el)"
+                                                                    class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white truncate">
+                                                            </select>
+                                                        </div>
+                                                        <input type="text" x-model="selectedKey" placeholder="Тон." class="w-14 shrink-0 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                        <button @click="addSong()" :disabled="!selectedSongId" class="shrink-0 px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                                             +
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {{-- Team Section --}}
-                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:flex-1">
-                                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
-                                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                                    </svg>
-                                                    Команда
-                                                </h4>
+                                            {{-- Team Section (Right) - shows team for selected song --}}
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:flex-1 flex flex-col">
+                                                <template x-if="selectedSongForTeam">
+                                                    <div class="flex flex-col h-full">
+                                                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
+                                                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                                            </svg>
+                                                            Команда: <span class="text-purple-600 dark:text-purple-400" x-text="selectedSongForTeam.title"></span>
+                                                        </h4>
 
-                                                <template x-if="modalRoles.length > 0">
-                                                    <div class="space-y-3 mb-3">
-                                                        <template x-for="role in modalRoles" :key="role.id">
-                                                            <div class="p-2 bg-white dark:bg-gray-800 rounded-lg">
-                                                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1" x-text="role.name"></p>
-                                                                <template x-if="modalTeam.filter(t => t.role_id == role.id).length > 0">
-                                                                    <div class="space-y-1">
-                                                                        <template x-for="member in modalTeam.filter(t => t.role_id == role.id)" :key="member.id">
-                                                                            <div class="flex items-center justify-between py-0.5 group">
-                                                                                <span class="text-sm text-gray-900 dark:text-white" x-text="member.person_name"></span>
-                                                                                <button @click="removeTeamMember(member.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                                                    </svg>
-                                                                                </button>
+                                                        {{-- Team members list (only show assigned people) --}}
+                                                        <div class="flex-1 overflow-y-auto mb-3">
+                                                            <template x-if="selectedSongForTeam.team && selectedSongForTeam.team.length > 0">
+                                                                <div class="space-y-2">
+                                                                    <template x-for="member in selectedSongForTeam.team" :key="member.id">
+                                                                        <div class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg group">
+                                                                            <div class="flex items-center gap-2">
+                                                                                <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="member.person_name"></span>
+                                                                                <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" x-text="member.role_name"></span>
                                                                             </div>
-                                                                        </template>
-                                                                    </div>
-                                                                </template>
-                                                                <template x-if="modalTeam.filter(t => t.role_id == role.id).length === 0">
-                                                                    <p class="text-xs text-gray-400 dark:text-gray-500">Не призначено</p>
-                                                                </template>
+                                                                            <button @click="removeTeamMember(member.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                                </svg>
+                                                                            </button>
+                                                                        </div>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                            <template x-if="!selectedSongForTeam.team || selectedSongForTeam.team.length === 0">
+                                                                <div class="text-center py-6">
+                                                                    <svg class="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                                                    </svg>
+                                                                    <p class="text-sm text-gray-400 dark:text-gray-500">Команда не призначена</p>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+
+                                                        {{-- Add team member form --}}
+                                                        <template x-if="modalRoles.length > 0">
+                                                            <div class="border-t border-gray-200 dark:border-gray-600 pt-3 mt-auto">
+                                                                <div class="grid grid-cols-2 gap-2 mb-2">
+                                                                    <select x-model="selectedPersonId"
+                                                                            x-effect="updateMemberSelect($el)"
+                                                                            class="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                                    </select>
+                                                                    <select x-model="selectedRoleId"
+                                                                            x-effect="updateRoleSelect($el)"
+                                                                            class="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                                    </select>
+                                                                </div>
+                                                                <button @click="addTeamMember()" :disabled="!selectedPersonId || !selectedRoleId" class="w-full px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                                                    Додати учасника
+                                                                </button>
                                                             </div>
                                                         </template>
                                                     </div>
                                                 </template>
 
-                                                <template x-if="modalRoles.length === 0">
-                                                    <div class="text-center py-3">
-                                                        <p class="text-sm text-gray-500 dark:text-gray-400">Спочатку налаштуйте ролі в налаштуваннях служіння</p>
-                                                    </div>
-                                                </template>
-
-                                                {{-- Add team member form --}}
-                                                <template x-if="modalRoles.length > 0">
-                                                    <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
-                                                        <div class="grid grid-cols-2 gap-2 mb-2">
-                                                            <select x-model="selectedPersonId" class="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                                                <option value="">Учасник...</option>
-                                                                <template x-for="member in modalMembers" :key="member.id">
-                                                                    <option :value="member.id" x-text="member.name"></option>
-                                                                </template>
-                                                            </select>
-                                                            <select x-model="selectedRoleId" class="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                                                <option value="">Роль...</option>
-                                                                <template x-for="role in modalRoles" :key="role.id">
-                                                                    <option :value="role.id" x-text="role.name"></option>
-                                                                </template>
-                                                            </select>
-                                                        </div>
-                                                        <button @click="addTeamMember()" :disabled="!selectedPersonId || !selectedRoleId" class="w-full px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                                            Додати учасника
-                                                        </button>
+                                                <template x-if="!selectedSongForTeam">
+                                                    <div class="flex flex-col items-center justify-center h-full py-8 text-center">
+                                                        <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                                        </svg>
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть пісню зліва,<br>щоб призначити команду</p>
                                                     </div>
                                                 </template>
                                             </div>
@@ -454,8 +464,7 @@
                                 showModal: false,
                                 modalLoading: false,
                                 modalEvent: null,
-                                modalSongs: [],
-                                modalTeam: [],
+                                modalSongs: [], // Each song has .team array
                                 modalRoles: [],
                                 modalMembers: [],
                                 modalAvailableSongs: [],
@@ -466,6 +475,7 @@
                                 selectedKey: '',
                                 selectedPersonId: '',
                                 selectedRoleId: '',
+                                selectedSongForTeam: null, // Currently selected song for team editing
 
                                 init() {
                                     // Start from current month
@@ -475,18 +485,23 @@
                                     this.showModal = true;
                                     this.modalLoading = true;
                                     this.modalEvent = { title: event.title, date: event.fullDate, time: event.time };
+                                    this.selectedSongForTeam = null;
 
                                     try {
                                         const response = await fetch(event.dataUrl);
                                         const data = await response.json();
 
                                         this.modalEvent = data.event;
-                                        this.modalSongs = data.songs;
-                                        this.modalTeam = data.team;
+                                        this.modalSongs = data.songs; // Each song now has .team array
                                         this.modalRoles = data.worshipRoles;
                                         this.modalMembers = data.members;
                                         this.modalAvailableSongs = data.availableSongs;
                                         this.modalRoutes = data.routes;
+
+                                        // Auto-select first song if available
+                                        if (this.modalSongs.length > 0) {
+                                            this.selectedSongForTeam = this.modalSongs[0];
+                                        }
                                     } catch (error) {
                                         console.error('Error loading event:', error);
                                     }
@@ -501,6 +516,40 @@
                                     this.selectedKey = '';
                                     this.selectedPersonId = '';
                                     this.selectedRoleId = '';
+                                    this.selectedSongForTeam = null;
+                                },
+
+                                selectSong(song) {
+                                    this.selectedSongForTeam = song;
+                                },
+
+                                getSongTeamByRole(roleId) {
+                                    if (!this.selectedSongForTeam || !this.selectedSongForTeam.team) return [];
+                                    return this.selectedSongForTeam.team.filter(t => t.role_id == roleId);
+                                },
+
+                                updateSongSelect(el) {
+                                    let html = '<option value="">Оберіть пісню...</option>';
+                                    this.modalAvailableSongs.filter(s => !s.inEvent).forEach(s => {
+                                        html += '<option value="' + s.id + '">' + s.title + (s.key ? ' (' + s.key + ')' : '') + '</option>';
+                                    });
+                                    el.innerHTML = html;
+                                },
+
+                                updateMemberSelect(el) {
+                                    let html = '<option value="">Учасник...</option>';
+                                    this.modalMembers.forEach(m => {
+                                        html += '<option value="' + m.id + '">' + m.name + '</option>';
+                                    });
+                                    el.innerHTML = html;
+                                },
+
+                                updateRoleSelect(el) {
+                                    let html = '<option value="">Роль...</option>';
+                                    this.modalRoles.forEach(r => {
+                                        html += '<option value="' + r.id + '">' + r.name + '</option>';
+                                    });
+                                    el.innerHTML = html;
                                 },
 
                                 async addSong() {
@@ -521,15 +570,22 @@
                                         });
 
                                         if (response.ok) {
-                                            // Add to local list
+                                            const result = await response.json();
+                                            // Add to local list with empty team
                                             const song = this.modalAvailableSongs.find(s => s.id == this.selectedSongId);
                                             if (song) {
-                                                this.modalSongs.push({
+                                                const newSong = {
                                                     id: song.id,
+                                                    event_song_id: result.event_song_id,
                                                     title: song.title,
-                                                    key: this.selectedKey || song.key
-                                                });
+                                                    key: this.selectedKey || song.key,
+                                                    team: [] // Empty team for new song
+                                                };
+                                                this.modalSongs.push(newSong);
                                                 song.inEvent = true;
+
+                                                // Auto-select the new song
+                                                this.selectedSongForTeam = newSong;
                                             }
                                             this.selectedSongId = '';
                                             this.selectedKey = '';
@@ -554,9 +610,19 @@
                                         });
 
                                         if (response.ok) {
+                                            // Clear selection if removing selected song
+                                            if (this.selectedSongForTeam && this.selectedSongForTeam.id === songId) {
+                                                this.selectedSongForTeam = null;
+                                            }
+
                                             this.modalSongs = this.modalSongs.filter(s => s.id !== songId);
                                             const song = this.modalAvailableSongs.find(s => s.id == songId);
                                             if (song) song.inEvent = false;
+
+                                            // Select first remaining song
+                                            if (!this.selectedSongForTeam && this.modalSongs.length > 0) {
+                                                this.selectedSongForTeam = this.modalSongs[0];
+                                            }
 
                                             const evt = this.allEvents.find(e => e.id == this.modalEvent.id);
                                             if (evt && evt.songsCount > 0) evt.songsCount--;
@@ -567,11 +633,12 @@
                                 },
 
                                 async addTeamMember() {
-                                    if (!this.selectedPersonId || !this.selectedRoleId) return;
+                                    if (!this.selectedPersonId || !this.selectedRoleId || !this.selectedSongForTeam) return;
 
                                     const formData = new FormData();
                                     formData.append('person_id', this.selectedPersonId);
                                     formData.append('worship_role_id', this.selectedRoleId);
+                                    formData.append('event_song_id', this.selectedSongForTeam.event_song_id);
 
                                     try {
                                         const response = await fetch(this.modalRoutes.addTeam, {
@@ -588,7 +655,11 @@
                                             const role = this.modalRoles.find(r => r.id == this.selectedRoleId);
                                             if (person && role) {
                                                 const result = await response.json();
-                                                this.modalTeam.push({
+                                                // Add to the selected song's team
+                                                if (!this.selectedSongForTeam.team) {
+                                                    this.selectedSongForTeam.team = [];
+                                                }
+                                                this.selectedSongForTeam.team.push({
                                                     id: result.id || Date.now(),
                                                     person_id: person.id,
                                                     person_name: person.name,
@@ -618,7 +689,10 @@
                                         });
 
                                         if (response.ok) {
-                                            this.modalTeam = this.modalTeam.filter(t => t.id !== memberId);
+                                            // Remove from the selected song's team
+                                            if (this.selectedSongForTeam && this.selectedSongForTeam.team) {
+                                                this.selectedSongForTeam.team = this.selectedSongForTeam.team.filter(t => t.id !== memberId);
+                                            }
 
                                             const evt = this.allEvents.find(e => e.id == this.modalEvent.id);
                                             if (evt && evt.teamCount > 0) evt.teamCount--;
@@ -2383,157 +2457,124 @@
                     @if($ministry->is_worship_ministry)
                     <hr class="border-gray-200 dark:border-gray-700">
 
-                    <!-- Worship Roles Settings -->
-                    <div x-data="worshipRolesManager()">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Роли музыкального служения</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Настройте инструменты и роли для команды прославления</p>
+                    <!-- Worship Roles Settings (AJAX) -->
+                    <div x-data="worshipRolesManager()" x-init="init(@js($worshipRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'icon' => $r->icon ?? '🎵', 'color' => $r->color ?? '#6366f1'])->values()), '{{ route('ministries.worship-roles.store', $ministry) }}', '{{ url('ministries/' . $ministry->id . '/worship-roles') }}')">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ролі музичного служіння</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Налаштуйте інструменти та ролі для команди прославлення</p>
 
                         <!-- Roles List -->
                         <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl">
-                            @if($worshipRoles->count() > 0)
+                            <template x-if="roles.length > 0">
                                 <div class="divide-y divide-gray-200 dark:divide-gray-600">
-                                    @foreach($worshipRoles as $role)
+                                    <template x-for="role in roles" :key="role.id">
                                         <div class="p-3 flex items-center justify-between group">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base"
-                                                     style="background-color: {{ $role->color ?? '#6366f1' }}20; color: {{ $role->color ?? '#6366f1' }}">
-                                                    {{ $role->icon ?? '🎵' }}
-                                                </div>
-                                                <span class="font-medium text-gray-900 dark:text-white text-sm">{{ $role->name }}</span>
+                                                     :style="`background-color: ${role.color}20; color: ${role.color}`"
+                                                     x-text="role.icon"></div>
+                                                <span class="font-medium text-gray-900 dark:text-white text-sm" x-text="role.name"></span>
                                             </div>
                                             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button type="button"
-                                                        @click="editRole({{ $role->id }}, '{{ addslashes($role->name) }}', '{{ $role->icon }}', '{{ $role->color }}')"
+                                                <button type="button" @click="openEdit(role)"
                                                         class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                                     </svg>
                                                 </button>
-                                                <form action="{{ route('ministries.worship-roles.destroy', [$ministry, $role]) }}" method="POST" onsubmit="return confirm('Удалить роль?')" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                        </svg>
-                                                    </button>
-                                                </form>
+                                                <button type="button" @click="deleteRole(role.id)"
+                                                        class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    </template>
                                 </div>
-                            @else
+                            </template>
+                            <template x-if="roles.length === 0">
                                 <div class="p-6 text-center">
                                     <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
                                         <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                         </svg>
                                     </div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Нет ролей. Добавьте роли ниже.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Немає ролей. Оберіть із рекомендованих або додайте свою.</p>
                                 </div>
-                            @endif
+                            </template>
 
                             <!-- Add Role Form -->
                             <div class="p-3 border-t border-gray-200 dark:border-gray-600">
-                                <form action="{{ route('ministries.worship-roles.store', $ministry) }}" method="POST" class="flex flex-wrap gap-2">
-                                    @csrf
-                                    <input type="text" name="name" placeholder="Название роли (напр. Вокал, Гитара)" required
+                                <div class="flex flex-wrap gap-2">
+                                    <input type="text" x-model="newName" placeholder="Назва ролі (напр. Вокал, Гітара)"
+                                           @keydown.enter.prevent="addRole(newName, newIcon, newColor)"
                                            class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <input type="text" name="icon" placeholder="🎵" maxlength="5"
+                                    <input type="text" x-model="newIcon" placeholder="🎵" maxlength="5"
                                            class="w-14 px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
-                                    <input type="color" name="color" value="#6366f1"
+                                    <input type="color" x-model="newColor"
                                            class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
-                                        Добавить
+                                    <button type="button" @click="addRole(newName, newIcon, newColor)"
+                                            :disabled="!newName || loading"
+                                            class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                        <span x-show="!loading">Додати</span>
+                                        <span x-show="loading">...</span>
                                     </button>
-                                </form>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Suggested Roles -->
-                        @if($worshipRoles->count() === 0)
-                        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                            <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Рекомендуемые роли:</h4>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach(['🎤 Ведущий вокал', '🎤 Бэк-вокал', '🎸 Акустическая гитара', '🎸 Электрогитара', '🎸 Бас', '🎹 Клавиши', '🥁 Барабаны', '🎚 Звук', '💻 Медиа'] as $suggestion)
-                                    <button type="button" @click="addSuggested('{{ $suggestion }}')"
-                                            class="px-2.5 py-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 transition-colors">
-                                        {{ $suggestion }}
-                                    </button>
-                                @endforeach
+                        <!-- Suggested/Default Roles (always visible if there are available ones) -->
+                        <template x-if="availableDefaults.length > 0">
+                            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Швидке додавання:</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <template x-for="def in availableDefaults" :key="def.name">
+                                        <button type="button" @click="addRole(def.name, def.icon, def.color)"
+                                                :disabled="loading"
+                                                class="px-2.5 py-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 transition-colors disabled:opacity-50">
+                                            <span x-text="def.icon + ' ' + def.name"></span>
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
-                        </div>
-                        @endif
+                        </template>
 
                         <!-- Edit Role Modal -->
-                        <div x-show="showEditModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showEditModal = false">
+                        <div x-show="showEditModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showEditModal = false" @keydown.escape.window="showEditModal = false">
                             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md mx-4" @click.stop>
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редактировать роль</h3>
-                                <form :action="editFormAction" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="space-y-4">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редагувати роль</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
+                                        <input type="text" x-model="editName" @keydown.enter.prevent="saveEdit()"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Название</label>
-                                            <input type="text" name="name" x-model="editName" required
-                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Іконка</label>
+                                            <input type="text" x-model="editIcon" maxlength="5"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
                                         </div>
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Иконка</label>
-                                                <input type="text" name="icon" x-model="editIcon" maxlength="5"
-                                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Цвет</label>
-                                                <input type="color" name="color" x-model="editColor"
-                                                       class="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                            </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                                            <input type="color" x-model="editColor"
+                                                   class="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
                                         </div>
                                     </div>
-                                    <div class="flex justify-end gap-2 mt-6">
-                                        <button type="button" @click="showEditModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                                            Отмена
-                                        </button>
-                                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors">
-                                            Сохранить
+                                </div>
+                                <div class="flex justify-end gap-2 mt-6">
+                                    <button type="button" @click="showEditModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                        Скасувати
+                                    </button>
+                                    <button type="button" @click="saveEdit()" :disabled="!editName || loading"
+                                            class="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                        Зберегти
                                         </button>
                                     </div>
-                                </form>
                             </div>
                         </div>
                     </div>
 
-                    <script>
-                        function worshipRolesManager() {
-                            return {
-                                showEditModal: false,
-                                editFormAction: '',
-                                editName: '',
-                                editIcon: '',
-                                editColor: '#6366f1',
-
-                                editRole(id, name, icon, color) {
-                                    this.editFormAction = '/ministries/{{ $ministry->id }}/worship-roles/' + id;
-                                    this.editName = name;
-                                    this.editIcon = icon || '';
-                                    this.editColor = color || '#6366f1';
-                                    this.showEditModal = true;
-                                },
-
-                                addSuggested(text) {
-                                    const parts = text.split(' ');
-                                    const icon = parts[0];
-                                    const name = parts.slice(1).join(' ');
-
-                                    const form = document.querySelector('form[action*="worship-roles"][method="POST"]:not([action*="update"])');
-                                    form.querySelector('input[name="name"]').value = name;
-                                    form.querySelector('input[name="icon"]').value = icon;
-                                    form.submit();
-                                }
-                            };
-                        }
-                    </script>
                     @endif
             </div>
             </div>
@@ -2605,6 +2646,129 @@ function docInsertImage() {
         reader.readAsDataURL(file);
     };
     input.click();
+}
+
+/* === Worship Roles Manager === */
+function worshipRolesManager() {
+    return {
+        roles: [],
+        defaultRoles: [
+            {icon: '🎤', name: 'Ведучий вокал', color: '#dc2626'},
+            {icon: '🎤', name: 'Бек-вокал', color: '#f97316'},
+            {icon: '🎸', name: 'Акустична гітара', color: '#84cc16'},
+            {icon: '🎸', name: 'Електрогітара', color: '#22c55e'},
+            {icon: '🎸', name: 'Бас', color: '#14b8a6'},
+            {icon: '🎹', name: 'Клавіші', color: '#3b82f6'},
+            {icon: '🥁', name: 'Барабани', color: '#8b5cf6'},
+            {icon: '🎚', name: 'Звук', color: '#ec4899'},
+            {icon: '💻', name: 'Медіа', color: '#6366f1'},
+        ],
+        storeUrl: '',
+        baseUrl: '',
+        newName: '',
+        newIcon: '🎵',
+        newColor: '#6366f1',
+        loading: false,
+        showEditModal: false,
+        editId: null,
+        editName: '',
+        editIcon: '',
+        editColor: '',
+
+        init(roles, storeUrl, baseUrl) {
+            this.roles = roles;
+            this.storeUrl = storeUrl;
+            this.baseUrl = baseUrl;
+        },
+
+        get availableDefaults() {
+            return this.defaultRoles.filter(d => !this.roles.some(r => r.name === d.name));
+        },
+
+        async addRole(name, icon, color) {
+            if (!name || this.loading) return;
+            this.loading = true;
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('icon', icon || '🎵');
+            formData.append('color', color || '#6366f1');
+
+            try {
+                const res = await fetch(this.storeUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    this.roles.push({ id: data.id, name, icon: icon || '🎵', color: color || '#6366f1' });
+                    this.newName = '';
+                    this.newIcon = '🎵';
+                    this.newColor = '#6366f1';
+                }
+            } catch (e) { console.error(e); }
+            this.loading = false;
+        },
+
+        async deleteRole(id) {
+            if (!confirm('Видалити роль?')) return;
+
+            try {
+                const res = await fetch(this.baseUrl + '/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json'
+                    }
+                });
+                if (res.ok) {
+                    this.roles = this.roles.filter(r => r.id !== id);
+                }
+            } catch (e) { console.error(e); }
+        },
+
+        openEdit(role) {
+            this.editId = role.id;
+            this.editName = role.name;
+            this.editIcon = role.icon;
+            this.editColor = role.color;
+            this.showEditModal = true;
+        },
+
+        async saveEdit() {
+            if (!this.editName || this.loading) return;
+            this.loading = true;
+
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+            formData.append('name', this.editName);
+            formData.append('icon', this.editIcon || '🎵');
+            formData.append('color', this.editColor || '#6366f1');
+
+            try {
+                const res = await fetch(this.baseUrl + '/' + this.editId, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                if (res.ok) {
+                    const idx = this.roles.findIndex(r => r.id === this.editId);
+                    if (idx !== -1) {
+                        this.roles[idx] = { id: this.editId, name: this.editName, icon: this.editIcon || '🎵', color: this.editColor || '#6366f1' };
+                    }
+                    this.showEditModal = false;
+                }
+            } catch (e) { console.error(e); }
+            this.loading = false;
+        }
+    };
 }
 
 function resourcesManager() {

@@ -391,13 +391,17 @@ class MinistryController extends Controller
 
         $maxOrder = WorshipRole::where('church_id', $this->getCurrentChurch()->id)->max('sort_order') ?? 0;
 
-        WorshipRole::create([
+        $role = WorshipRole::create([
             'church_id' => $this->getCurrentChurch()->id,
             'name' => $validated['name'],
             'icon' => $validated['icon'] ?? null,
             'color' => $validated['color'] ?? null,
             'sort_order' => $maxOrder + 1,
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'id' => $role->id]);
+        }
 
         return back()->with('success', 'Роль додано');
     }
@@ -420,10 +424,14 @@ class MinistryController extends Controller
 
         $role->update($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Роль оновлено');
     }
 
-    public function destroyWorshipRole(Ministry $ministry, WorshipRole $role)
+    public function destroyWorshipRole(Request $request, Ministry $ministry, WorshipRole $role)
     {
         $this->authorizeChurch($ministry);
         $this->authorizeChurch($role);
@@ -434,6 +442,10 @@ class MinistryController extends Controller
         }
 
         $role->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Роль видалено');
     }

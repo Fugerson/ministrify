@@ -14,6 +14,7 @@ class EventWorshipTeam extends Model
 
     protected $fillable = [
         'event_id',
+        'event_song_id',
         'person_id',
         'worship_role_id',
         'notes',

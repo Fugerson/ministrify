@@ -87,13 +87,13 @@
         <!-- Toggles -->
         <div class="mt-4 flex items-center gap-6">
             <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="isService" @change="saveField('is_service', isService)"
+                <input type="checkbox" x-model="isService" @change="saveField('is_service', isService); $store.event.isService = isService"
                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                 <span class="text-sm text-gray-600 dark:text-gray-400">Подія з планом</span>
             </label>
             @if($currentChurch->attendance_enabled)
             <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="trackAttendance" @change="saveField('track_attendance', trackAttendance)"
+                <input type="checkbox" x-model="trackAttendance" @change="saveField('track_attendance', trackAttendance); $store.event.trackAttendance = trackAttendance"
                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                 <span class="text-sm text-gray-600 dark:text-gray-400">Відвідуваність</span>
             </label>
@@ -129,8 +129,7 @@
         <!-- Main content (full width) -->
         <div class="space-y-6">
             <!-- План події -->
-            @if($event->is_service)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="planEditor()">
+            <div x-show="$store.event.isService" x-cloak class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="planEditor()">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -609,9 +608,9 @@
                     <span x-text="message"></span>
                 </div>
             </div>
-            @else
+
             {{-- Simple responsibility form for non-service events --}}
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div x-show="!$store.event.isService" x-cloak class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Відповідальності</h2>
                 <form method="POST" action="{{ route('events.responsibilities.store', $event) }}" class="flex gap-2">
                     @csrf
@@ -622,11 +621,10 @@
                     </button>
                 </form>
             </div>
-            @endif
 
             <!-- Attendance Section -->
-            @if($event->track_attendance && $currentChurch->attendance_enabled)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="attendanceManager()">
+            @if($currentChurch->attendance_enabled)
+            <div x-show="$store.event.trackAttendance" x-cloak class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="attendanceManager()">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -1017,6 +1015,14 @@
 
 @push('scripts')
 <script>
+// Alpine store for shared event state
+document.addEventListener('alpine:init', () => {
+    Alpine.store('event', {
+        isService: {{ $event->is_service ? 'true' : 'false' }},
+        trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }}
+    });
+});
+
 // Songs data for autocomplete
 const SONGS_DATA = @json($songsForAutocomplete ?? []);
 

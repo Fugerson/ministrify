@@ -212,6 +212,9 @@ class WorshipTeamController extends Controller
             ->orderBy('title')
             ->get();
 
+        // Group team by event_song_id
+        $teamBySong = $event->worshipTeam->groupBy('event_song_id');
+
         return response()->json([
             'event' => [
                 'id' => $event->id,
@@ -219,19 +222,23 @@ class WorshipTeamController extends Controller
                 'date' => $event->date->translatedFormat('l, j F Y'),
                 'time' => $event->time->format('H:i'),
             ],
-            'songs' => $event->songs->map(fn($s) => [
-                'id' => $s->id,
-                'title' => $s->title,
-                'key' => $s->pivot->key,
-                'url' => route('songs.show', $s),
-            ]),
-            'team' => $event->worshipTeam->map(fn($t) => [
-                'id' => $t->id,
-                'person_id' => $t->person_id,
-                'person_name' => $t->person->full_name,
-                'role_id' => $t->worship_role_id,
-                'role_name' => $t->worshipRole->name,
-            ]),
+            'songs' => $event->songs->map(function($s) use ($teamBySong) {
+                $songTeam = $teamBySong->get($s->pivot->id, collect());
+                return [
+                    'id' => $s->id,
+                    'event_song_id' => $s->pivot->id,
+                    'title' => $s->title,
+                    'key' => $s->pivot->key,
+                    'url' => route('songs.show', $s),
+                    'team' => $songTeam->map(fn($t) => [
+                        'id' => $t->id,
+                        'person_id' => $t->person_id,
+                        'person_name' => $t->person->full_name,
+                        'role_id' => $t->worship_role_id,
+                        'role_name' => $t->worshipRole->name,
+                    ])->values(),
+                ];
+            }),
             'worshipRoles' => $worshipRoles->map(fn($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
@@ -274,8 +281,14 @@ class WorshipTeamController extends Controller
             'key' => $validated['key'] ?? null,
         ]);
 
+        // Get the pivot ID (event_song_id)
+        $eventSongId = \DB::table('event_songs')
+            ->where('event_id', $event->id)
+            ->where('song_id', $validated['song_id'])
+            ->value('id');
+
         if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'event_song_id' => $eventSongId]);
         }
 
         return back()->with('success', 'Пісню додано');
@@ -287,6 +300,17 @@ class WorshipTeamController extends Controller
     public function removeSong(Request $request, Event $event, Song $song)
     {
         $this->authorizeChurch($event);
+
+        // Get the event_song_id before detaching
+        $eventSongId = \DB::table('event_songs')
+            ->where('event_id', $event->id)
+            ->where('song_id', $song->id)
+            ->value('id');
+
+        // Remove team members assigned to this song
+        if ($eventSongId) {
+            EventWorshipTeam::where('event_song_id', $eventSongId)->delete();
+        }
 
         $event->songs()->detach($song->id);
 
@@ -326,24 +350,31 @@ class WorshipTeamController extends Controller
         $validated = $request->validate([
             'person_id' => 'required|exists:people,id',
             'worship_role_id' => 'required|exists:worship_roles,id',
+            'event_song_id' => 'nullable|exists:event_songs,id',
             'notes' => 'nullable|string|max:255',
         ]);
 
-        // Check if already exists
-        $exists = EventWorshipTeam::where('event_id', $event->id)
+        // Check if already exists for this song
+        $query = EventWorshipTeam::where('event_id', $event->id)
             ->where('person_id', $validated['person_id'])
-            ->where('worship_role_id', $validated['worship_role_id'])
-            ->exists();
+            ->where('worship_role_id', $validated['worship_role_id']);
 
-        if ($exists) {
+        if (!empty($validated['event_song_id'])) {
+            $query->where('event_song_id', $validated['event_song_id']);
+        } else {
+            $query->whereNull('event_song_id');
+        }
+
+        if ($query->exists()) {
             if ($request->wantsJson()) {
-                return response()->json(['error' => 'Ця людина вже призначена на цю роль'], 422);
+                return response()->json(['error' => 'Ця людина вже призначена на цю роль для цієї пісні'], 422);
             }
-            return back()->with('error', 'Ця людина вже призначена на цю роль');
+            return back()->with('error', 'Ця людина вже призначена на цю роль для цієї пісні');
         }
 
         $member = EventWorshipTeam::create([
             'event_id' => $event->id,
+            'event_song_id' => $validated['event_song_id'] ?? null,
             'person_id' => $validated['person_id'],
             'worship_role_id' => $validated['worship_role_id'],
             'notes' => $validated['notes'] ?? null,

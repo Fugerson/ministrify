@@ -144,7 +144,7 @@ class Event extends Model
     public function songs(): BelongsToMany
     {
         return $this->belongsToMany(Song::class, 'event_songs')
-            ->withPivot(['order', 'key', 'notes'])
+            ->withPivot(['id', 'order', 'key', 'notes'])
             ->withTimestamps()
             ->orderBy('event_songs.order');
     }
