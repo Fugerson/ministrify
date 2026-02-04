@@ -786,6 +786,20 @@ class PersonController extends Controller
         return back()->with('success', 'Telegram від\'єднано');
     }
 
+    public function updateTheme(Request $request)
+    {
+        $validated = $request->validate([
+            'design_theme' => 'required|string|in:,modern,glass,corporate,ocean,sunset',
+        ]);
+
+        $user = auth()->user();
+        $settings = $user->settings ?? [];
+        $settings['design_theme'] = $validated['design_theme'];
+        $user->update(['settings' => $settings]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function updateRole(Request $request, Person $person)
     {
         $this->authorizeChurch($person);
