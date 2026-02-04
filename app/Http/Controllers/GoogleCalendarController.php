@@ -163,10 +163,17 @@ class GoogleCalendarController extends Controller
 
             $message = "Синхронізовано: ";
             $message .= "→ Google: {$toGoogle['created']} створено, {$toGoogle['updated']} оновлено";
-            if ($toGoogle['deleted'] > 0) {
+            if (($toGoogle['deleted'] ?? 0) > 0) {
                 $message .= ", {$toGoogle['deleted']} видалено";
             }
+            if (($toGoogle['failed'] ?? 0) > 0) {
+                $message .= ", {$toGoogle['failed']} помилок";
+            }
+            $skipped = $toGoogle['skipped'] ?? 0;
             $message .= "; ← Google: {$fromGoogle['created']} імпортовано, {$fromGoogle['updated']} оновлено";
+            if (!empty($result['errors'])) {
+                $message .= " | Помилки: " . implode('; ', array_slice($result['errors'], 0, 3));
+            }
 
             if ($request->wantsJson()) {
                 return response()->json([

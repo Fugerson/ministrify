@@ -658,11 +658,19 @@ class GoogleCalendarService
             ->when($ministryId, fn($q) => $q->where('ministry_id', $ministryId))
             ->get();
 
+        Log::info('fullSync: pushing ' . $localEvents->count() . ' events to Google', [
+            'church_id' => $church->id,
+            'calendar_id' => $calendarId,
+            'ministry_id' => $ministryId,
+            'unsynced' => $localEvents->whereNull('google_event_id')->count(),
+        ]);
+
         foreach ($localEvents as $event) {
             try {
                 $result = $this->syncEventToGoogle($accessToken, $calendarId, $event);
-                $results['to_google'][$result]++;
+                $results['to_google'][$result] = ($results['to_google'][$result] ?? 0) + 1;
             } catch (\Exception $e) {
+                Log::error('fullSync push error', ['event_id' => $event->id, 'error' => $e->getMessage()]);
                 $results['errors'][] = "Push {$event->id}: " . $e->getMessage();
                 $results['to_google']['failed']++;
             }
@@ -720,6 +728,7 @@ class GoogleCalendarService
         }
 
         // Create new event in Google
+        Log::info('syncEventToGoogle: creating new', ['event_id' => $event->id, 'title' => $event->title]);
         $result = $this->createEvent($accessToken, $calendarId, $event);
         if ($result && isset($result['id'])) {
             $event->update([
