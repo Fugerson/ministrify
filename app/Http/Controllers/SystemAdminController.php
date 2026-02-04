@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use App\Mail\SupportTicketReply;
 
@@ -670,6 +671,7 @@ class SystemAdminController extends Controller
             'category' => 'required|in:bug,question,feature,other',
             'message' => 'required|string|max:10000',
             'priority' => 'required|in:low,normal,high,urgent',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,pdf|max:5120',
         ]);
 
         $ticket = SupportTicket::create([
@@ -682,10 +684,26 @@ class SystemAdminController extends Controller
             'last_reply_at' => now(),
         ]);
 
+        // Handle attachments
+        $attachments = null;
+        if ($request->hasFile('attachments')) {
+            $attachments = [];
+            foreach ($request->file('attachments') as $file) {
+                $path = $file->store("support/{$ticket->id}", 'public');
+                $attachments[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                ];
+            }
+        }
+
         SupportMessage::create([
             'ticket_id' => $ticket->id,
             'user_id' => auth()->id(),
             'message' => $validated['message'],
+            'attachments' => $attachments,
             'is_from_admin' => true,
             'is_internal' => true,
         ]);

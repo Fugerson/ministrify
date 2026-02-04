@@ -343,8 +343,53 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
                         <textarea x-model="createForm.message" rows="4"
+                                  @paste="handlePaste($event)"
                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                                  placeholder="Детальний опис..."></textarea>
+                                  placeholder="Детальний опис... (Ctrl+V для вставки скріншоту)"></textarea>
+                    </div>
+
+                    <!-- Attachments -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Файли</label>
+                        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 text-center hover:border-primary-500 transition-colors"
+                             @dragover.prevent="$el.classList.add('border-primary-500')"
+                             @dragleave.prevent="$el.classList.remove('border-primary-500')"
+                             @drop.prevent="handleDrop($event)">
+                            <input type="file" multiple accept="image/*,.pdf"
+                                   @change="addFiles($event.target.files)"
+                                   class="hidden" id="ticket-attachments" x-ref="fileInput">
+                            <label for="ticket-attachments" class="cursor-pointer">
+                                <svg class="w-6 h-6 mx-auto text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Перетягніть або натисніть • Ctrl+V для скріншоту</p>
+                            </label>
+                        </div>
+                        <!-- Preview attached files -->
+                        <template x-if="createForm.files.length > 0">
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <template x-for="(file, index) in createForm.files" :key="index">
+                                    <div class="relative group">
+                                        <template x-if="file.type.startsWith('image/')">
+                                            <img :src="file.preview" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600">
+                                        </template>
+                                        <template x-if="!file.type.startsWith('image/')">
+                                            <div class="w-16 h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                </svg>
+                                            </div>
+                                        </template>
+                                        <button type="button" @click="removeFile(index)"
+                                                class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
                     </div>
                 </div>
 
@@ -604,30 +649,92 @@ function supportKanban() {
             subject: '',
             category: 'bug',
             priority: 'normal',
-            message: ''
+            message: '',
+            files: []
         },
         createLoading: false,
+
+        addFiles(fileList) {
+            for (const file of fileList) {
+                if (file.size > 5 * 1024 * 1024) continue; // Max 5MB
+                const fileObj = {
+                    file: file,
+                    name: file.name,
+                    type: file.type,
+                    preview: null
+                };
+                if (file.type.startsWith('image/')) {
+                    fileObj.preview = URL.createObjectURL(file);
+                }
+                this.createForm.files.push(fileObj);
+            }
+        },
+
+        removeFile(index) {
+            if (this.createForm.files[index].preview) {
+                URL.revokeObjectURL(this.createForm.files[index].preview);
+            }
+            this.createForm.files.splice(index, 1);
+        },
+
+        handlePaste(event) {
+            const items = event.clipboardData?.items;
+            if (!items) return;
+
+            for (const item of items) {
+                if (item.type.startsWith('image/')) {
+                    event.preventDefault();
+                    const file = item.getAsFile();
+                    if (file) {
+                        const renamedFile = new File([file], `screenshot-${Date.now()}.png`, { type: file.type });
+                        this.addFiles([renamedFile]);
+                    }
+                    break;
+                }
+            }
+        },
+
+        handleDrop(event) {
+            event.target.classList.remove('border-primary-500');
+            const files = event.dataTransfer?.files;
+            if (files) {
+                this.addFiles(files);
+            }
+        },
 
         async createTicket() {
             if (!this.createForm.subject || !this.createForm.message) return;
 
             this.createLoading = true;
             try {
+                const formData = new FormData();
+                formData.append('subject', this.createForm.subject);
+                formData.append('category', this.createForm.category);
+                formData.append('priority', this.createForm.priority);
+                formData.append('message', this.createForm.message);
+
+                for (const fileObj of this.createForm.files) {
+                    formData.append('attachments[]', fileObj.file);
+                }
+
                 const response = await fetch('{{ route("system.support.store") }}', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': this.csrfToken,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(this.createForm)
+                    body: formData
                 });
 
                 const data = await response.json();
                 if (data.success) {
                     this.allTickets.unshift(data.ticket);
                     this.showCreateModal = false;
-                    this.createForm = { subject: '', category: 'bug', priority: 'normal', message: '' };
+                    // Clean up previews
+                    for (const f of this.createForm.files) {
+                        if (f.preview) URL.revokeObjectURL(f.preview);
+                    }
+                    this.createForm = { subject: '', category: 'bug', priority: 'normal', message: '', files: [] };
                 }
             } catch (error) {
                 console.error('Error creating ticket:', error);
