@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $user = auth()->user();
         $isAdmin = $user->isAdmin();
 
-        $layout = $this->resolveLayout($church, $isAdmin);
+        $layout = $this->resolveLayout($church, $user, $isAdmin);
 
         $enabledWidgets = collect($layout['widgets'])
             ->where('enabled', true)
@@ -61,7 +61,7 @@ class DashboardController extends Controller
         ]));
     }
 
-    private function resolveLayout($church, bool $isAdmin): array
+    private function resolveLayout($church, $user, bool $isAdmin): array
     {
         $layout = $church->getSetting('dashboard_layout');
         $widgetRegistry = config('dashboard_widgets.widgets', []);
@@ -96,6 +96,18 @@ class DashboardController extends Controller
                 ->values()
                 ->toArray();
         }
+
+        // Filter widgets by required permissions
+        $layout['widgets'] = collect($layout['widgets'])
+            ->filter(function ($w) use ($widgetRegistry, $user) {
+                $requiredPermission = $widgetRegistry[$w['id']]['requires_permission'] ?? null;
+                if ($requiredPermission) {
+                    return $user->canView($requiredPermission);
+                }
+                return true;
+            })
+            ->values()
+            ->toArray();
 
         usort($layout['widgets'], fn($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
 
@@ -164,11 +176,14 @@ class DashboardController extends Controller
             $data['stats'] = $this->loadCachedStats($church);
         }
 
-        if ($isAdmin && array_intersect($enabledWidgets, ['financial_summary', 'analytics_charts'])) {
+        // Financial widgets - check finances permission instead of admin
+        $canViewFinances = $user->canView('finances');
+
+        if ($canViewFinances && array_intersect($enabledWidgets, ['financial_summary', 'analytics_charts'])) {
             $this->loadFinancialData($church, $data);
         }
 
-        if ($isAdmin && in_array('expenses_breakdown', $enabledWidgets)) {
+        if ($canViewFinances && in_array('expenses_breakdown', $enabledWidgets)) {
             $this->loadExpensesBreakdown($church, $data);
         }
 
@@ -192,7 +207,7 @@ class DashboardController extends Controller
             $data['needAttention'] = $this->loadNeedAttention($church);
         }
 
-        if ($isAdmin && in_array('ministry_budgets', $enabledWidgets)) {
+        if ($canViewFinances && in_array('ministry_budgets', $enabledWidgets)) {
             $data['ministryBudgets'] = $this->loadMinistryBudgets($church);
         }
 
@@ -200,7 +215,7 @@ class DashboardController extends Controller
             $data['urgentTasks'] = $this->loadUrgentTasks($church);
         }
 
-        if ($isAdmin && in_array('financial_summary', $enabledWidgets)) {
+        if ($canViewFinances && in_array('financial_summary', $enabledWidgets)) {
             $data['growthData'] = $this->loadGrowthData($church);
         }
 
@@ -214,7 +229,7 @@ class DashboardController extends Controller
             $data['announcements'] = $this->loadAnnouncements($church);
         }
 
-        if ($isAdmin && in_array('donation_campaigns', $enabledWidgets)) {
+        if ($canViewFinances && in_array('donation_campaigns', $enabledWidgets)) {
             $data['donationCampaigns'] = $this->loadDonationCampaigns($church);
         }
 
@@ -238,7 +253,7 @@ class DashboardController extends Controller
             $data['groupHealth'] = $this->loadGroupHealth($church);
         }
 
-        if ($isAdmin && in_array('giving_trends', $enabledWidgets)) {
+        if ($canViewFinances && in_array('giving_trends', $enabledWidgets)) {
             $data['givingTrends'] = $this->loadGivingTrends($church);
         }
 
@@ -274,7 +289,7 @@ class DashboardController extends Controller
             $data['calendarEvents'] = $this->loadCalendarEvents($church);
         }
 
-        if ($isAdmin && in_array('online_donations', $enabledWidgets)) {
+        if ($canViewFinances && in_array('online_donations', $enabledWidgets)) {
             $data['onlineDonations'] = $this->loadOnlineDonations($church);
         }
 
@@ -1125,6 +1140,7 @@ class DashboardController extends Controller
     public function chartData(Request $request)
     {
         $church = $this->getCurrentChurch();
+        $user = auth()->user();
         $type = $request->get('type', 'attendance');
 
         switch ($type) {
@@ -1135,6 +1151,10 @@ class DashboardController extends Controller
                 $data = $this->getGrowthChartData($church);
                 break;
             case 'financial':
+                // Require finances permission for financial chart data
+                if (!$user->canView('finances')) {
+                    abort(403, 'Немає доступу до фінансових даних');
+                }
                 $data = $this->getFinancialChartData($church);
                 break;
             case 'ministries':

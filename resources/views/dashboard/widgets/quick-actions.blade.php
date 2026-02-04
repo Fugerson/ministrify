@@ -26,8 +26,8 @@
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Створити подію</span>
             </a>
 
-            {{-- Нова транзакція (admin) --}}
-            @admin
+            {{-- Нова транзакція --}}
+            @if(auth()->user()->canCreate('finances'))
             <a href="{{ route('finances.incomes.create') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 hover:shadow-md transition-all group">
                 <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
                 </div>
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Нова транзакція</span>
             </a>
-            @endadmin
+            @endif
 
             {{-- Написати оголошення (admin) --}}
             @admin

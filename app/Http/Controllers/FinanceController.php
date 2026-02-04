@@ -284,6 +284,10 @@ class FinanceController extends Controller
      */
     public function journal(Request $request)
     {
+        if (!auth()->user()->canView('finances')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+        }
+
         $church = $this->getCurrentChurch();
 
         // Always load a full year of data for client-side period switching
@@ -329,6 +333,10 @@ class FinanceController extends Controller
      */
     public function journalExport(Request $request)
     {
+        if (!auth()->user()->canView('finances')) {
+            abort(403, 'Немає доступу до фінансових даних');
+        }
+
         $church = $this->getCurrentChurch();
 
         $period = $request->get('period', 'month');
@@ -439,6 +447,10 @@ class FinanceController extends Controller
     // Income/Transactions list
     public function incomes(Request $request)
     {
+        if (!auth()->user()->canView('finances')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+        }
+
         $church = $this->getCurrentChurch();
 
         $year = $request->get('year', now()->year);
@@ -471,6 +483,10 @@ class FinanceController extends Controller
 
     public function createIncome()
     {
+        if (!auth()->user()->canCreate('finances')) {
+            return redirect()->route('finances.index')->with('error', 'У вас немає прав для створення записів.');
+        }
+
         $church = $this->getCurrentChurch();
         $categories = TransactionCategory::where('church_id', $church->id)
             ->forIncome()
@@ -484,6 +500,10 @@ class FinanceController extends Controller
 
     public function storeIncome(Request $request)
     {
+        if (!auth()->user()->canCreate('finances')) {
+            abort(403, 'У вас немає прав для створення записів.');
+        }
+
         $validated = $request->validate([
             'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
             'amount' => 'required|numeric|min:0.01',
@@ -532,6 +552,10 @@ class FinanceController extends Controller
 
     public function editIncome(Transaction $income)
     {
+        if (!auth()->user()->canEdit('finances')) {
+            return redirect()->route('finances.incomes')->with('error', 'У вас немає прав для редагування записів.');
+        }
+
         $this->authorizeChurch($income);
 
         $church = $this->getCurrentChurch();
@@ -547,6 +571,10 @@ class FinanceController extends Controller
 
     public function updateIncome(Request $request, Transaction $income)
     {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403, 'У вас немає прав для редагування записів.');
+        }
+
         $this->authorizeChurch($income);
 
         $validated = $request->validate([
@@ -575,6 +603,10 @@ class FinanceController extends Controller
 
     public function destroyIncome(Transaction $income)
     {
+        if (!auth()->user()->canDelete('finances')) {
+            abort(403, 'У вас немає прав для видалення записів.');
+        }
+
         $this->authorizeChurch($income);
         $income->delete();
 
@@ -584,6 +616,10 @@ class FinanceController extends Controller
     // Expenses
     public function expenses(Request $request)
     {
+        if (!auth()->user()->canView('finances')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+        }
+
         $church = $this->getCurrentChurch();
 
         $year = $request->get('year', now()->year);
@@ -625,6 +661,10 @@ class FinanceController extends Controller
 
     public function createExpense(Request $request)
     {
+        if (!auth()->user()->canCreate('finances')) {
+            return redirect()->route('finances.expenses.index')->with('error', 'У вас немає прав для створення записів.');
+        }
+
         $church = $this->getCurrentChurch();
         $categories = TransactionCategory::where('church_id', $church->id)
             ->forExpense()
@@ -640,6 +680,10 @@ class FinanceController extends Controller
 
     public function storeExpense(Request $request)
     {
+        if (!auth()->user()->canCreate('finances')) {
+            abort(403, 'У вас немає прав для створення записів.');
+        }
+
         $validated = $request->validate([
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'amount' => 'required|numeric|min:0.01',
@@ -729,6 +773,10 @@ class FinanceController extends Controller
 
     public function editExpense(Transaction $expense)
     {
+        if (!auth()->user()->canEdit('finances')) {
+            return redirect()->route('finances.expenses.index')->with('error', 'У вас немає прав для редагування записів.');
+        }
+
         $this->authorizeChurch($expense);
 
         $church = $this->getCurrentChurch();
@@ -747,6 +795,10 @@ class FinanceController extends Controller
 
     public function updateExpense(Request $request, Transaction $expense)
     {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403, 'У вас немає прав для редагування записів.');
+        }
+
         $this->authorizeChurch($expense);
 
         $validated = $request->validate([
@@ -842,6 +894,10 @@ class FinanceController extends Controller
 
     public function destroyExpense(Request $request, Transaction $expense)
     {
+        if (!auth()->user()->canDelete('finances')) {
+            abort(403, 'У вас немає прав для видалення записів.');
+        }
+
         $this->authorizeChurch($expense);
         $ministryId = $expense->ministry_id;
         $expense->delete();
@@ -858,6 +914,10 @@ class FinanceController extends Controller
     // Currency Exchange
     public function createExchange()
     {
+        if (!auth()->user()->canCreate('finances')) {
+            return redirect()->route('finances.index')->with('error', 'У вас немає прав для створення записів.');
+        }
+
         $church = $this->getCurrentChurch();
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
@@ -867,6 +927,10 @@ class FinanceController extends Controller
 
     public function storeExchange(Request $request)
     {
+        if (!auth()->user()->canCreate('finances')) {
+            abort(403, 'У вас немає прав для створення записів.');
+        }
+
         $validated = $request->validate([
             'from_currency' => 'required|in:UAH,USD,EUR',
             'to_currency' => 'required|in:UAH,USD,EUR|different:from_currency',
@@ -924,6 +988,10 @@ class FinanceController extends Controller
 
     public function storeCategory(Request $request)
     {
+        if (!auth()->user()->canCreate('finances')) {
+            abort(403, 'У вас немає прав для створення категорій.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:income,expense',
@@ -948,6 +1016,10 @@ class FinanceController extends Controller
 
     public function updateCategory(Request $request, TransactionCategory $category)
     {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403, 'У вас немає прав для редагування категорій.');
+        }
+
         if ($category->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
@@ -968,6 +1040,10 @@ class FinanceController extends Controller
 
     public function destroyCategory(TransactionCategory $category)
     {
+        if (!auth()->user()->canDelete('finances')) {
+            abort(403, 'У вас немає прав для видалення категорій.');
+        }
+
         if ($category->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
@@ -984,6 +1060,10 @@ class FinanceController extends Controller
     // Team Budgets
     public function budgets(Request $request)
     {
+        if (!auth()->user()->canView('finances')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+        }
+
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
         $month = $request->get('month', now()->month);
@@ -1042,6 +1122,10 @@ class FinanceController extends Controller
 
     public function updateBudget(Request $request, Ministry $ministry)
     {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403, 'У вас немає прав для редагування бюджетів.');
+        }
+
         $church = $this->getCurrentChurch();
 
         if ($ministry->church_id !== $church->id) {
@@ -1091,6 +1175,10 @@ class FinanceController extends Controller
     // Analytics API
     public function chartData(Request $request)
     {
+        if (!auth()->user()->canView('finances')) {
+            abort(403, 'Немає доступу до фінансових даних');
+        }
+
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
 
@@ -1250,6 +1338,10 @@ class FinanceController extends Controller
      */
     public function cards()
     {
+        if (!auth()->user()->canView('finances')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+        }
+
         $church = $this->getCurrentChurch();
 
         // Check connection status for both banks

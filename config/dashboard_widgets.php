@@ -63,7 +63,8 @@ return [
             'icon' => 'banknotes',
             'default_cols' => 12,
             'min_cols' => 6,
-            'admin_only' => true,
+            'admin_only' => false,
+            'requires_permission' => 'finances',
             'partial' => 'dashboard.widgets.financial-summary',
         ],
         'ministry_budgets' => [
@@ -72,7 +73,8 @@ return [
             'icon' => 'currency-dollar',
             'default_cols' => 6,
             'min_cols' => 4,
-            'admin_only' => true,
+            'admin_only' => false,
+            'requires_permission' => 'finances',
             'partial' => 'dashboard.widgets.ministry-budgets',
         ],
         'expenses_breakdown' => [
@@ -81,7 +83,8 @@ return [
             'icon' => 'receipt-percent',
             'default_cols' => 6,
             'min_cols' => 4,
-            'admin_only' => true,
+            'admin_only' => false,
+            'requires_permission' => 'finances',
             'partial' => 'dashboard.widgets.expenses-breakdown',
         ],
         'need_attention' => [
@@ -128,7 +131,8 @@ return [
             'icon' => 'gift',
             'default_cols' => 6,
             'min_cols' => 4,
-            'admin_only' => true,
+            'admin_only' => false,
+            'requires_permission' => 'finances',
             'partial' => 'dashboard.widgets.donation-campaigns',
         ],
         'ministry_goals' => [
@@ -182,7 +186,8 @@ return [
             'icon' => 'arrow-trending-up',
             'default_cols' => 6,
             'min_cols' => 4,
-            'admin_only' => true,
+            'admin_only' => false,
+            'requires_permission' => 'finances',
             'partial' => 'dashboard.widgets.giving-trends',
         ],
         'shepherd_overview' => [
@@ -272,7 +277,8 @@ return [
             'icon' => 'credit-card',
             'default_cols' => 6,
             'min_cols' => 4,
-            'admin_only' => true,
+            'admin_only' => false,
+            'requires_permission' => 'finances',
             'partial' => 'dashboard.widgets.online-donations',
         ],
         'group_attendance_compare' => [
