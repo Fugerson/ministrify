@@ -38,11 +38,41 @@ class AuditLog extends Model
     }
 
     /**
+     * Allowed model types for auditing (security: prevent arbitrary class instantiation)
+     */
+    private const ALLOWED_MODEL_TYPES = [
+        \App\Models\Person::class,
+        \App\Models\User::class,
+        \App\Models\Event::class,
+        \App\Models\Ministry::class,
+        \App\Models\Group::class,
+        \App\Models\Transaction::class,
+        \App\Models\Church::class,
+        \App\Models\Attendance::class,
+        \App\Models\Assignment::class,
+        \App\Models\Board::class,
+        \App\Models\BoardCard::class,
+        \App\Models\Song::class,
+        \App\Models\Sermon::class,
+        \App\Models\PrayerRequest::class,
+        \App\Models\Announcement::class,
+        \App\Models\ChurchRole::class,
+    ];
+
+    /**
      * Get the audited model
      */
     public function auditable()
     {
         if ($this->model_type && $this->model_id) {
+            // Security: validate model_type against whitelist before instantiation
+            if (!in_array($this->model_type, self::ALLOWED_MODEL_TYPES, true)) {
+                \Log::warning('AuditLog: Attempted to access invalid model type', [
+                    'model_type' => $this->model_type,
+                    'model_id' => $this->model_id,
+                ]);
+                return null;
+            }
             return $this->model_type::find($this->model_id);
         }
         return null;

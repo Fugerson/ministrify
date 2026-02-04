@@ -46,7 +46,7 @@ class TransactionPolicy
      */
     public function createIncome(User $user): bool
     {
-        return $user->canCreate('incomes');
+        return $user->canCreate('finances');
     }
 
     /**
@@ -54,7 +54,7 @@ class TransactionPolicy
      */
     public function createExpense(User $user): bool
     {
-        return $user->canCreate('expenses');
+        return $user->canCreate('finances');
     }
 
     /**
@@ -62,7 +62,7 @@ class TransactionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->canCreate('incomes') || $user->canCreate('expenses');
+        return $user->canCreate('finances') || $user->canCreate('finances');
     }
 
     /**
@@ -82,8 +82,8 @@ class TransactionPolicy
         }
 
         return $transaction->isIncome
-            ? $user->canUpdate('incomes')
-            : $user->canUpdate('expenses');
+            ? $user->canEdit('finances')
+            : $user->canEdit('finances');
     }
 
     /**
@@ -96,8 +96,8 @@ class TransactionPolicy
         }
 
         return $transaction->isIncome
-            ? $user->canDelete('incomes')
-            : $user->canDelete('expenses');
+            ? $user->canDelete('finances')
+            : $user->canDelete('finances');
     }
 
     /**
@@ -121,6 +121,6 @@ class TransactionPolicy
      */
     public function manageCategories(User $user): bool
     {
-        return $user->canUpdate('finances');
+        return $user->canEdit('finances');
     }
 }

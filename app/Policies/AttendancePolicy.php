@@ -124,7 +124,7 @@ class AttendancePolicy
             }
         }
 
-        return $user->canUpdate('attendance');
+        return $user->canEdit('attendance');
     }
 
     /**

@@ -70,7 +70,7 @@ class PersonPolicy
             }
         }
 
-        return $user->canUpdate('people');
+        return $user->canEdit('people');
     }
 
     /**
@@ -132,7 +132,7 @@ class PersonPolicy
             }
         }
 
-        return $user->canUpdate('people');
+        return $user->canEdit('people');
     }
 
     /**

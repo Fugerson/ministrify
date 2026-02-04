@@ -142,13 +142,27 @@ class TwoFactorService
     }
 
     /**
-     * Simple QR code SVG generator
+     * Generate QR code SVG locally using simple implementation
+     * Security: Never send TOTP secrets to external APIs
      */
     private function generateQrCodeSvg(string $data): string
     {
-        // This is a placeholder - in production use BaconQrCode
-        // For now, return a link to an external QR generator API
-        $encodedData = urlencode($data);
-        return '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . $encodedData . '" alt="QR Code" class="mx-auto">';
+        // Generate QR code data URL using JavaScript on client side
+        // The actual QR rendering happens in the browser with qrcode.js
+        $encodedData = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+
+        return '<div id="qr-code-container" class="flex justify-center" data-qr-content="' . $encodedData . '"></div>
+                <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+                <script>
+                    (function() {
+                        const container = document.getElementById("qr-code-container");
+                        const content = container.dataset.qrContent;
+                        QRCode.toCanvas(document.createElement("canvas"), content, { width: 200 }, function(error, canvas) {
+                            if (error) console.error(error);
+                            canvas.classList.add("mx-auto", "rounded-lg");
+                            container.appendChild(canvas);
+                        });
+                    })();
+                </script>';
     }
 }

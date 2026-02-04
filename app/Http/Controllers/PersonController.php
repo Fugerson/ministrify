@@ -469,21 +469,20 @@ class PersonController extends Controller
             $validated['photo'] = null;
         }
 
-        // Handle empty church_role_id (admin only)
-        if ($isAdmin && isset($validated['church_role_id']) && $validated['church_role_id'] === '') {
+        // Handle empty church_role_id (users with edit permission only)
+        if ($canEditPeople && isset($validated['church_role_id']) && $validated['church_role_id'] === '') {
             $validated['church_role_id'] = null;
         }
 
         $person->update($validated);
 
-        // Sync tags (admin only)
-        if ($isAdmin) {
-            \Log::info('TAG SYNC DEBUG', ['person_id' => $person->id, 'user_id' => $user->id, 'request_tags' => $request->tags, 'all_input_keys' => array_keys($request->all())]);
+        // Sync tags (users with edit permission only)
+        if ($canEditPeople) {
             $person->tags()->sync($request->tags ?? []);
         }
 
-        // Sync ministries with positions (admin only)
-        if ($isAdmin) {
+        // Sync ministries with positions (users with edit permission only)
+        if ($canEditPeople) {
             $person->ministries()->detach();
             if ($request->has('ministries')) {
                 foreach ($request->ministries as $ministryId => $data) {
