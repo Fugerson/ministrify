@@ -471,17 +471,17 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('incomes', [FinanceController::class, 'incomes'])->name('incomes');
         Route::get('incomes/create', [FinanceController::class, 'createIncome'])->name('incomes.create');
         Route::post('incomes', [FinanceController::class, 'storeIncome'])->name('incomes.store');
-        Route::get('incomes/{income}/edit', [FinanceController::class, 'editIncome'])->name('incomes.edit');
-        Route::put('incomes/{income}', [FinanceController::class, 'updateIncome'])->name('incomes.update');
-        Route::delete('incomes/{income}', [FinanceController::class, 'destroyIncome'])->name('incomes.destroy');
+        Route::get('incomes/{transaction}/edit', [FinanceController::class, 'editIncome'])->name('incomes.edit');
+        Route::put('incomes/{transaction}', [FinanceController::class, 'updateIncome'])->name('incomes.update');
+        Route::delete('incomes/{transaction}', [FinanceController::class, 'destroyIncome'])->name('incomes.destroy');
 
         // Expenses (using Transaction model)
         Route::get('expenses', [FinanceController::class, 'expenses'])->name('expenses.index');
         Route::get('expenses/create', [FinanceController::class, 'createExpense'])->name('expenses.create');
         Route::post('expenses', [FinanceController::class, 'storeExpense'])->name('expenses.store');
-        Route::get('expenses/{expense}/edit', [FinanceController::class, 'editExpense'])->name('expenses.edit');
-        Route::put('expenses/{expense}', [FinanceController::class, 'updateExpense'])->name('expenses.update');
-        Route::delete('expenses/{expense}', [FinanceController::class, 'destroyExpense'])->name('expenses.destroy');
+        Route::get('expenses/{transaction}/edit', [FinanceController::class, 'editExpense'])->name('expenses.edit');
+        Route::put('expenses/{transaction}', [FinanceController::class, 'updateExpense'])->name('expenses.update');
+        Route::delete('expenses/{transaction}', [FinanceController::class, 'destroyExpense'])->name('expenses.destroy');
 
         // Currency Exchange
         Route::get('exchange', [FinanceController::class, 'createExchange'])->name('exchange.create');

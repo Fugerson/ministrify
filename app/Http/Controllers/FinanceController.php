@@ -550,13 +550,13 @@ class FinanceController extends Controller
             ->with('success', 'Надходження додано.');
     }
 
-    public function editIncome(Transaction $income)
+    public function editIncome(Transaction $transaction)
     {
         if (!auth()->user()->canEdit('finances')) {
             return redirect()->route('finances.incomes')->with('error', 'У вас немає прав для редагування записів.');
         }
 
-        $this->authorizeChurch($income);
+        $this->authorizeChurch($transaction);
 
         $church = $this->getCurrentChurch();
         $categories = TransactionCategory::where('church_id', $church->id)
@@ -565,17 +565,18 @@ class FinanceController extends Controller
             ->get();
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
+        $income = $transaction;
 
         return view('finances.incomes.edit', compact('income', 'categories', 'enabledCurrencies', 'exchangeRates'));
     }
 
-    public function updateIncome(Request $request, Transaction $income)
+    public function updateIncome(Request $request, Transaction $transaction)
     {
         if (!auth()->user()->canEdit('finances')) {
             abort(403, 'У вас немає прав для редагування записів.');
         }
 
-        $this->authorizeChurch($income);
+        $this->authorizeChurch($transaction);
 
         $validated = $request->validate([
             'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
@@ -595,20 +596,20 @@ class FinanceController extends Controller
         }
         $validated['currency'] = $validated['currency'] ?? 'UAH';
 
-        $income->update($validated);
+        $transaction->update($validated);
 
         return redirect()->route('finances.incomes')
             ->with('success', 'Надходження оновлено.');
     }
 
-    public function destroyIncome(Transaction $income)
+    public function destroyIncome(Transaction $transaction)
     {
         if (!auth()->user()->canDelete('finances')) {
             abort(403, 'У вас немає прав для видалення записів.');
         }
 
-        $this->authorizeChurch($income);
-        $income->delete();
+        $this->authorizeChurch($transaction);
+        $transaction->delete();
 
         return back()->with('success', 'Надходження видалено.');
     }
@@ -771,13 +772,13 @@ class FinanceController extends Controller
             ->with('budget_warning', $budgetWarning);
     }
 
-    public function editExpense(Transaction $expense)
+    public function editExpense(Transaction $transaction)
     {
         if (!auth()->user()->canEdit('finances')) {
             return redirect()->route('finances.expenses.index')->with('error', 'У вас немає прав для редагування записів.');
         }
 
-        $this->authorizeChurch($expense);
+        $this->authorizeChurch($transaction);
 
         $church = $this->getCurrentChurch();
         $categories = TransactionCategory::where('church_id', $church->id)
@@ -788,18 +789,19 @@ class FinanceController extends Controller
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
-        $expense->load('attachments');
+        $transaction->load('attachments');
+        $expense = $transaction;
 
         return view('finances.expenses.edit', compact('expense', 'categories', 'ministries', 'enabledCurrencies', 'exchangeRates'));
     }
 
-    public function updateExpense(Request $request, Transaction $expense)
+    public function updateExpense(Request $request, Transaction $transaction)
     {
         if (!auth()->user()->canEdit('finances')) {
             abort(403, 'У вас немає прав для редагування записів.');
         }
 
-        $this->authorizeChurch($expense);
+        $this->authorizeChurch($transaction);
 
         $validated = $request->validate([
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
@@ -823,14 +825,14 @@ class FinanceController extends Controller
         // Check ministry budget limits (only if amount increased or ministry changed)
         $budgetWarning = null;
         $newMinistryId = $validated['ministry_id'] ?? null;
-        $amountDifference = (float) $validated['amount'] - (float) $expense->amount;
+        $amountDifference = (float) $validated['amount'] - (float) $transaction->amount;
 
         // Check budget if: ministry changed to new one, or amount increased for same ministry
         if ($newMinistryId) {
             $ministry = Ministry::find($newMinistryId);
             if ($ministry) {
                 // Calculate effective new expense for budget check
-                $checkAmount = ($expense->ministry_id === $newMinistryId)
+                $checkAmount = ($transaction->ministry_id === $newMinistryId)
                     ? $amountDifference  // Same ministry - only check the increase
                     : (float) $validated['amount'];  // New ministry - check full amount
 
@@ -851,11 +853,11 @@ class FinanceController extends Controller
             }
         }
 
-        $expense->update($validated);
+        $transaction->update($validated);
 
         // Delete marked attachments
         if (!empty($validated['delete_attachments'])) {
-            $expense->attachments()
+            $transaction->attachments()
                 ->whereIn('id', $validated['delete_attachments'])
                 ->get()
                 ->each(fn ($att) => $att->delete());
@@ -867,7 +869,7 @@ class FinanceController extends Controller
             foreach ($request->file('receipts') as $file) {
                 $path = $file->store("receipts/{$church->id}", 'public');
 
-                $expense->attachments()->create([
+                $transaction->attachments()->create([
                     'filename' => basename($path),
                     'original_name' => $file->getClientOriginalName(),
                     'path' => $path,
@@ -892,15 +894,15 @@ class FinanceController extends Controller
             ->with('success', $message);
     }
 
-    public function destroyExpense(Request $request, Transaction $expense)
+    public function destroyExpense(Request $request, Transaction $transaction)
     {
         if (!auth()->user()->canDelete('finances')) {
             abort(403, 'У вас немає прав для видалення записів.');
         }
 
-        $this->authorizeChurch($expense);
-        $ministryId = $expense->ministry_id;
-        $expense->delete();
+        $this->authorizeChurch($transaction);
+        $ministryId = $transaction->ministry_id;
+        $transaction->delete();
 
         // Redirect back to ministry page if requested
         if ($request->input('redirect_to') === 'ministry' && $ministryId) {
