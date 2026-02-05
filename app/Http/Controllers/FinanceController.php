@@ -478,7 +478,10 @@ class FinanceController extends Controller
             'offerings' => Transaction::where('church_id', $church->id)->incoming()->completed()->forMonth($year, $month)->offerings()->sum('amount'),
         ];
 
-        return view('finances.incomes.index', compact('incomes', 'categories', 'year', 'month', 'totals'));
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
+
+        return view('finances.incomes.index', compact('incomes', 'categories', 'year', 'month', 'totals', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function createIncome()
@@ -701,7 +704,10 @@ class FinanceController extends Controller
             'spent' => $spent,
         ];
 
-        return view('finances.expenses.index', compact('expenses', 'categories', 'year', 'month', 'totals', 'ministries'));
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
+
+        return view('finances.expenses.index', compact('expenses', 'categories', 'year', 'month', 'totals', 'ministries', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function createExpense(Request $request)
@@ -1084,6 +1090,13 @@ class FinanceController extends Controller
             // Link back
             $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
         });
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Обмін валюти зареєстровано!',
+            ]);
+        }
 
         return redirect()->route('finances.index')->with('success', 'Обмін валюти зареєстровано.');
     }
