@@ -611,7 +611,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
         $transaction->delete();
 
-        return back()->with('success', 'Надходження видалено.');
+        return redirect()->route('finances.incomes')->with('success', 'Надходження видалено.');
     }
 
     // Expenses
