@@ -804,6 +804,28 @@
                          class="p-4 rounded-xl border text-sm">
                         <span x-text="message"></span>
                     </div>
+
+                    <!-- Danger Zone: Delete Events -->
+                    <div class="border border-red-200 dark:border-red-800/50 rounded-xl p-4 mt-2">
+                        <h4 class="text-sm font-medium text-red-600 dark:text-red-400 mb-3">Видалення подій (тест)</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <button @click="deleteEvents('synced')"
+                                    :disabled="loading"
+                                    class="px-3 py-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 text-sm rounded-lg transition-colors disabled:opacity-50">
+                                Синхронізовані
+                            </button>
+                            <button @click="deleteEvents('imported')"
+                                    :disabled="loading"
+                                    class="px-3 py-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 text-sm rounded-lg transition-colors disabled:opacity-50">
+                                Імпортовані з Google
+                            </button>
+                            <button @click="deleteEvents('all')"
+                                    :disabled="loading"
+                                    class="px-3 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
+                                Всі події
+                            </button>
+                        </div>
+                    </div>
                 </div>
             @else
                 <!-- Not Connected State -->
@@ -1101,6 +1123,31 @@
                     });
                     const data = await res.json();
                     this.message = data.message || (data.success ? 'Синхронізацію завершено' : 'Помилка синхронізації');
+                    this.success = data.success;
+                } catch (e) {
+                    this.message = 'Помилка з\'єднання';
+                    this.success = false;
+                }
+                this.loading = false;
+            },
+
+            async deleteEvents(scope) {
+                const labels = { synced: 'синхронізовані', imported: 'імпортовані з Google', all: 'ВСІ' };
+                if (!confirm(`Видалити ${labels[scope]} події? Цю дію не можна скасувати.`)) return;
+                this.loading = true;
+                this.message = '';
+                try {
+                    const res = await fetch('{{ route("settings.google-calendar.delete-events") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ scope })
+                    });
+                    const data = await res.json();
+                    this.message = data.message || (data.success ? 'Видалено' : 'Помилка');
                     this.success = data.success;
                 } catch (e) {
                     this.message = 'Помилка з\'єднання';

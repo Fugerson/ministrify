@@ -581,6 +581,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('google-calendar/import', [\App\Http\Controllers\GoogleCalendarController::class, 'importFromGoogle'])->name('google-calendar.import');
         Route::post('google-calendar/preview-import', [\App\Http\Controllers\GoogleCalendarController::class, 'previewImport'])->name('google-calendar.preview-import');
         Route::post('google-calendar/import-with-resolution', [\App\Http\Controllers\GoogleCalendarController::class, 'importWithResolution'])->name('google-calendar.import-with-resolution');
+        Route::post('google-calendar/delete-events', [\App\Http\Controllers\GoogleCalendarController::class, 'deleteEvents'])->name('google-calendar.delete-events');
 
         // Expense categories
         Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->only(['index', 'store', 'update', 'destroy']);

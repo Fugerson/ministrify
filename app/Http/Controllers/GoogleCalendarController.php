@@ -323,4 +323,44 @@ class GoogleCalendarController extends Controller
             'error' => $result['error'] ?? 'Import failed',
         ], 400);
     }
+
+    /**
+     * Delete events (for testing)
+     */
+    public function deleteEvents(Request $request)
+    {
+        $validated = $request->validate([
+            'scope' => 'required|in:synced,imported,all',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $query = \App\Models\Event::where('church_id', $church->id);
+
+        switch ($validated['scope']) {
+            case 'synced':
+                $query->whereNotNull('google_event_id');
+                break;
+            case 'imported':
+                // Events that have google_event_id but were not created locally
+                // (no way to distinguish perfectly, so delete events with google_event_id
+                // that have description containing 'Створено в Ministrify' = local, else imported)
+                $query->whereNotNull('google_event_id')
+                    ->where(function ($q) {
+                        $q->whereNull('notes')
+                          ->orWhere('notes', 'not like', '%Створено в Ministrify%');
+                    });
+                break;
+            case 'all':
+                // All events for this church
+                break;
+        }
+
+        $count = $query->count();
+        $query->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Видалено {$count} подій",
+        ]);
+    }
 }
