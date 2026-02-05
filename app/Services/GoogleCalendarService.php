@@ -96,8 +96,13 @@ class GoogleCalendarService
             if ($response->successful()) {
                 return $response->json();
             }
+
+            Log::error('Google token refresh failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
         } catch (\Exception $e) {
-            Log::error('Google token refresh failed', ['error' => $e->getMessage()]);
+            Log::error('Google token refresh exception', ['error' => $e->getMessage()]);
         }
 
         return null;
@@ -119,6 +124,7 @@ class GoogleCalendarService
         $expiresAt = $googleCalendar['expires_at'] ?? 0;
         if (time() >= $expiresAt - 60) { // Refresh 1 minute before expiry
             if (empty($googleCalendar['refresh_token'])) {
+                Log::warning('Google token expired and no refresh_token available', ['user_id' => $user->id]);
                 return null;
             }
 
@@ -716,27 +722,33 @@ class GoogleCalendarService
             // Update in Google
             $result = $this->updateEvent($accessToken, $calendarId, $event->google_event_id, $event);
             if ($result) {
-                $event->update([
-                    'google_synced_at' => now(),
-                    'google_sync_status' => 'synced',
-                ]);
+                Event::withoutEvents(function () use ($event) {
+                    $event->update([
+                        'google_synced_at' => now(),
+                        'google_sync_status' => 'synced',
+                    ]);
+                });
                 return 'updated';
             }
 
             // If update fails (event deleted in Google?), try to create
-            $event->update(['google_event_id' => null]);
+            Event::withoutEvents(function () use ($event) {
+                $event->update(['google_event_id' => null]);
+            });
         }
 
         // Create new event in Google
         Log::info('syncEventToGoogle: creating new', ['event_id' => $event->id, 'title' => $event->title]);
         $result = $this->createEvent($accessToken, $calendarId, $event);
         if ($result && isset($result['id'])) {
-            $event->update([
-                'google_event_id' => $result['id'],
-                'google_calendar_id' => $calendarId,
-                'google_synced_at' => now(),
-                'google_sync_status' => 'synced',
-            ]);
+            Event::withoutEvents(function () use ($event, $result, $calendarId) {
+                $event->update([
+                    'google_event_id' => $result['id'],
+                    'google_calendar_id' => $calendarId,
+                    'google_synced_at' => now(),
+                    'google_sync_status' => 'synced',
+                ]);
+            });
             return 'created';
         }
 
@@ -759,12 +771,14 @@ class GoogleCalendarService
 
             if (!$googleEvent || ($googleEvent['status'] ?? '') === 'cancelled') {
                 // Event was deleted in Google - mark as unsynced
-                $event->update([
-                    'google_event_id' => null,
-                    'google_calendar_id' => null,
-                    'google_synced_at' => null,
-                    'google_sync_status' => null,
-                ]);
+                Event::withoutEvents(function () use ($event) {
+                    $event->update([
+                        'google_event_id' => null,
+                        'google_calendar_id' => null,
+                        'google_synced_at' => null,
+                        'google_sync_status' => null,
+                    ]);
+                });
                 $results['to_google']['deleted']++;
             }
 
@@ -777,12 +791,14 @@ class GoogleCalendarService
      */
     public function unlinkEvent(Event $event): void
     {
-        $event->update([
-            'google_event_id' => null,
-            'google_calendar_id' => null,
-            'google_synced_at' => null,
-            'google_sync_status' => null,
-        ]);
+        Event::withoutEvents(function () use ($event) {
+            $event->update([
+                'google_event_id' => null,
+                'google_calendar_id' => null,
+                'google_synced_at' => null,
+                'google_sync_status' => null,
+            ]);
+        });
     }
 
     /**

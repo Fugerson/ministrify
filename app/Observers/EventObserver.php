@@ -25,8 +25,8 @@ class EventObserver
     {
         // Skip if only google_* fields were updated (avoid infinite loop)
         $changedFields = array_keys($event->getChanges());
-        $googleFields = ['google_event_id', 'google_calendar_id', 'google_synced_at', 'google_sync_status'];
-        if (empty(array_diff($changedFields, $googleFields))) {
+        $ignoredFields = ['google_event_id', 'google_calendar_id', 'google_synced_at', 'google_sync_status', 'updated_at'];
+        if (empty(array_diff($changedFields, $ignoredFields))) {
             return;
         }
 

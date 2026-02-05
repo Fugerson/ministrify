@@ -139,6 +139,8 @@ class GoogleCalendarController extends Controller
      */
     public function fullSync(Request $request)
     {
+        set_time_limit(120);
+
         $user = auth()->user();
         $church = $this->getCurrentChurch();
 
@@ -150,12 +152,20 @@ class GoogleCalendarController extends Controller
         // Save selected calendar_id for auto-sync
         $this->saveSelectedCalendar($user, $validated['calendar_id']);
 
-        $result = $this->googleCalendar->fullSync(
-            $user,
-            $church,
-            $validated['calendar_id'],
-            $validated['ministry_id'] ?? null
-        );
+        try {
+            $result = $this->googleCalendar->fullSync(
+                $user,
+                $church,
+                $validated['calendar_id'],
+                $validated['ministry_id'] ?? null
+            );
+        } catch (\Exception $e) {
+            \Log::error('fullSync controller error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Помилка синхронізації: ' . $e->getMessage(),
+            ], 500);
+        }
 
         if ($result['success']) {
             $toGoogle = $result['to_google'];
