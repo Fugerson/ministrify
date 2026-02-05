@@ -4,7 +4,7 @@
 
 @section('actions')
 <div class="flex items-center space-x-2">
-    <button type="button" onclick="document.dispatchEvent(new CustomEvent('open-income-modal'))"
+    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); document.dispatchEvent(new CustomEvent('open-income-modal')); return false;"
        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -348,7 +348,9 @@
 </div>
 
 <script>
+console.log('[DEBUG] Script loaded');
 document.addEventListener('alpine:init', () => {
+    console.log('[DEBUG] alpine:init fired');
     Alpine.data('incomesManager', () => ({
         modalOpen: false,
         deleteModalOpen: false,
@@ -368,8 +370,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         init() {
+            console.log('[DEBUG] incomesManager init()');
             // Listen for global event from header button
-            document.addEventListener('open-income-modal', () => this.openCreate());
+            document.addEventListener('open-income-modal', () => {
+                console.log('[DEBUG] open-income-modal event received');
+                this.openCreate();
+            });
         },
 
         openCreate() {

@@ -11,7 +11,7 @@
         </svg>
         Надходження
     </a>
-    <button type="button" onclick="document.dispatchEvent(new CustomEvent('open-expense-modal'))"
+    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); document.dispatchEvent(new CustomEvent('open-expense-modal')); return false;"
        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -421,7 +421,9 @@
 </div>
 
 <script>
+console.log('[DEBUG] Expenses script loaded');
 document.addEventListener('alpine:init', () => {
+    console.log('[DEBUG] alpine:init fired (expenses)');
     Alpine.data('expensesManager', () => ({
         modalOpen: false,
         deleteModalOpen: false,
@@ -446,8 +448,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         init() {
+            console.log('[DEBUG] expensesManager init()');
             // Listen for global event from header button
-            document.addEventListener('open-expense-modal', () => this.openCreate());
+            document.addEventListener('open-expense-modal', () => {
+                console.log('[DEBUG] open-expense-modal event received');
+                this.openCreate();
+            });
         },
 
         openCreate() {
