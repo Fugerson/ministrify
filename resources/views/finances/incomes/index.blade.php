@@ -4,7 +4,7 @@
 
 @section('actions')
 <div class="flex items-center space-x-2">
-    <button type="button" onclick="window.openIncomeModal && window.openIncomeModal()"
+    <button type="button" onclick="document.dispatchEvent(new CustomEvent('open-income-modal'))"
        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -368,8 +368,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         init() {
-            // Expose openCreate to window for header button
-            window.openIncomeModal = () => this.openCreate();
+            // Listen for global event from header button
+            document.addEventListener('open-income-modal', () => this.openCreate());
         },
 
         openCreate() {

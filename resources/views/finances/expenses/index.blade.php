@@ -11,7 +11,7 @@
         </svg>
         Надходження
     </a>
-    <button type="button" onclick="window.openExpenseModal && window.openExpenseModal()"
+    <button type="button" onclick="document.dispatchEvent(new CustomEvent('open-expense-modal'))"
        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -446,8 +446,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         init() {
-            // Expose openCreate to window for header button
-            window.openExpenseModal = () => this.openCreate();
+            // Listen for global event from header button
+            document.addEventListener('open-expense-modal', () => this.openCreate());
         },
 
         openCreate() {
