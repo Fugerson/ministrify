@@ -29,7 +29,7 @@
 @endsection
 
 @section('content')
-<div x-data="expensesManager()" x-cloak>
+<div x-data="expensesManager" x-cloak>
 @include('finances.partials.tabs')
 
 <div id="finance-content">
@@ -421,8 +421,8 @@
 </div>
 
 <script>
-function expensesManager() {
-    return {
+document.addEventListener('alpine:init', () => {
+    Alpine.data('expensesManager', () => ({
         modalOpen: false,
         deleteModalOpen: false,
         isEdit: false,
@@ -609,7 +609,7 @@ function expensesManager() {
                 force_over_budget: false
             };
         }
-    }
-}
+    }));
+});
 </script>
 @endsection

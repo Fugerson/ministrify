@@ -29,7 +29,7 @@
 @endsection
 
 @section('content')
-<div x-data="incomesManager()" x-cloak>
+<div x-data="incomesManager" x-cloak>
 @include('finances.partials.tabs')
 
 <div id="finance-content">
@@ -348,8 +348,8 @@
 </div>
 
 <script>
-function incomesManager() {
-    return {
+document.addEventListener('alpine:init', () => {
+    Alpine.data('incomesManager', () => ({
         modalOpen: false,
         deleteModalOpen: false,
         isEdit: false,
@@ -516,7 +516,7 @@ function incomesManager() {
                 is_anonymous: true
             };
         }
-    }
-}
+    }));
+});
 </script>
 @endsection
