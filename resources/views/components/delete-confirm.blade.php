@@ -6,9 +6,49 @@
     'buttonText' => 'Видалити',
     'icon' => true,
     'method' => 'DELETE',
+    'ajax' => false,
+    'redirect' => null,
 ])
 
-<div x-data="{ open: false }" class="inline">
+<div x-data="{
+    open: false,
+    loading: false,
+    async submitDelete() {
+        this.loading = true;
+        try {
+            const response = await fetch('{{ $action }}', {
+                method: '{{ $method }}',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                this.open = false;
+                if (typeof showToast === 'function') {
+                    showToast('success', data.message || 'Видалено!');
+                }
+                @if($redirect)
+                    setTimeout(() => window.location.href = '{{ $redirect }}', 500);
+                @else
+                    setTimeout(() => window.location.href = '{{ url()->previous() }}', 500);
+                @endif
+            } else {
+                if (typeof showToast === 'function') {
+                    showToast('error', data.message || 'Помилка видалення');
+                }
+            }
+        } catch (e) {
+            if (typeof showToast === 'function') {
+                showToast('error', 'Помилка з\'єднання');
+            }
+        } finally {
+            this.loading = false;
+        }
+    }
+}" class="inline">
     {{-- Trigger Button --}}
     <button type="button" @click="open = true" {{ $attributes->merge(['class' => $buttonClass]) }}>
         @if($slot->isNotEmpty())
@@ -78,14 +118,22 @@
                                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
                             Скасувати
                         </button>
-                        <form method="POST" action="{{ $action }}" class="inline">
-                            @csrf
-                            @method($method)
-                            <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                                {{ $buttonText }}
+                        @if($ajax)
+                            <button type="button" @click="submitDelete()" :disabled="loading"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50">
+                                <span x-show="!loading">{{ $buttonText }}</span>
+                                <span x-show="loading">Видалення...</span>
                             </button>
-                        </form>
+                        @else
+                            <form method="POST" action="{{ $action }}" class="inline">
+                                @csrf
+                                @method($method)
+                                <button type="submit"
+                                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                                    {{ $buttonText }}
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>
