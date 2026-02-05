@@ -425,10 +425,6 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('calendar/export', [EventController::class, 'exportIcal'])->name('calendar.export');
     Route::get('calendar/import', [EventController::class, 'importForm'])->name('calendar.import');
     Route::post('calendar/import', [EventController::class, 'importIcal'])->name('calendar.import.store');
-    Route::post('calendar/import/url', [EventController::class, 'importFromUrl'])->name('calendar.import.url');
-    Route::post('calendar/sync', [EventController::class, 'quickSync'])->name('calendar.sync');
-    Route::post('calendar/google-settings', [EventController::class, 'saveGoogleSettings'])->name('calendar.google-settings');
-    Route::delete('calendar/google-settings', [EventController::class, 'removeGoogleSettings'])->name('calendar.google-settings.remove');
     Route::get('events/{event}/google', [EventController::class, 'addToGoogle'])->name('events.google');
 
     // Rotation

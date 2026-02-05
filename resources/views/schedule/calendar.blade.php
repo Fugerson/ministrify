@@ -93,31 +93,42 @@
 
                 <!-- Google Calendar Sync Button -->
                 @leader
-                @php
-                    $hasGoogleSync = $church->getSetting('google_calendar_url') && $church->getSetting('google_calendar_ministry_id');
-                    $lastSync = $church->getSetting('google_calendar_last_sync');
-                    $syncMinistry = $hasGoogleSync ? \App\Models\Ministry::find($church->getSetting('google_calendar_ministry_id')) : null;
-                @endphp
-                @if($hasGoogleSync)
-                    <form action="{{ route('calendar.sync') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit"
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all shadow-sm hover:shadow"
-                                title="Синхронізація: {{ $syncMinistry?->name }}{{ $lastSync ? ' | Остання: ' . \Carbon\Carbon::parse($lastSync)->diffForHumans() : '' }}">
-                            <svg class="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
+                @if($isGoogleConnected)
+                    <div x-data="{ syncing: false, message: '', error: false }" class="inline-flex items-center gap-2">
+                        <button @click="
+                            syncing = true; message = ''; error = false;
+                            fetch('{{ route('settings.google-calendar.full-sync') }}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                                body: JSON.stringify({ calendar_id: '{{ $googleCalendarId }}' })
+                            })
+                            .then(r => r.json())
+                            .then(data => { syncing = false; message = data.message || data.error || 'Готово'; error = !data.success; })
+                            .catch(e => { syncing = false; message = 'Помилка з\'єднання'; error = true; })
+                        "
+                                :disabled="syncing"
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all shadow-sm hover:shadow disabled:opacity-50">
+                            <svg x-show="!syncing" class="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zM9.857 17.143H6.857v-3h3v3zm0-4.286H6.857V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3z"/>
                             </svg>
-                            Синхронізувати
+                            <svg x-show="syncing" x-cloak class="w-4 h-4 mr-1.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <span x-text="syncing ? 'Синхронізація...' : 'Синхронізувати'">Синхронізувати</span>
                         </button>
-                    </form>
+                        <template x-if="message">
+                            <span x-text="message" :class="error ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'" class="text-xs max-w-[200px] truncate" x-transition></span>
+                        </template>
+                    </div>
                 @else
-                    <button onclick="showGoogleSyncModal()"
-                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors">
+                    <a href="{{ route('settings.index') }}#google-calendar"
+                       class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors">
                         <svg class="w-4 h-4 mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zM9.857 17.143H6.857v-3h3v3zm0-4.286H6.857V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3z"/>
                         </svg>
                         Google Calendar
-                    </button>
+                    </a>
                 @endif
                 @endleader
 
@@ -154,7 +165,7 @@
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
-                                Імпорт з Google Calendar
+                                Імпорт з файлу (.ics)
                             </a>
                             @endleader
                             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
@@ -647,112 +658,6 @@
     </div>
 </div>
 
-<!-- Google Sync Modal -->
-@leader
-<div id="googleSyncModal" class="fixed inset-0 z-50 hidden">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="hideGoogleSyncModal()"></div>
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zM9.857 17.143H6.857v-3h3v3zm0-4.286H6.857V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Google Calendar</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Налаштування синхронізації</p>
-                    </div>
-                </div>
-                <button onclick="hideGoogleSyncModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <form action="{{ route('calendar.import.url') }}" method="POST" class="p-6 space-y-5">
-                @csrf
-                <input type="hidden" name="save_settings" value="1">
-
-                <!-- Instructions -->
-                <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                    <div class="flex gap-3">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <div class="text-sm text-blue-700 dark:text-blue-300">
-                            <p class="font-medium mb-1">Як отримати посилання:</p>
-                            <ol class="list-decimal list-inside space-y-0.5 text-blue-600 dark:text-blue-400">
-                                <li>Відкрийте Google Calendar</li>
-                                <li>Налаштування календаря → Інтеграція</li>
-                                <li>Скопіюйте "Публічна адреса iCal"</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Google Calendar URL -->
-                <div>
-                    <label for="google_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Посилання Google Calendar (iCal)
-                    </label>
-                    <input type="url" name="calendar_url" id="google_url" required
-                           placeholder="https://calendar.google.com/calendar/ical/..."
-                           value="{{ $church->getSetting('google_calendar_url') }}"
-                           class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-
-                <!-- Ministry -->
-                <div>
-                    <label for="google_ministry" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Команда для імпортованих подій
-                    </label>
-                    <select name="ministry_id" id="google_ministry" required
-                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Виберіть команду...</option>
-                        @foreach($ministries as $ministry)
-                            <option value="{{ $ministry->id }}" {{ $church->getSetting('google_calendar_ministry_id') == $ministry->id ? 'selected' : '' }}>
-                                {{ $ministry->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Date Range -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">З дати</label>
-                        <input type="date" name="start_date" value="{{ now()->subMonth()->format('Y-m-d') }}"
-                               class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">До дати</label>
-                        <input type="date" name="end_date" value="{{ now()->addMonths(3)->format('Y-m-d') }}"
-                               class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button type="button" onclick="hideGoogleSyncModal()"
-                            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                        Скасувати
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-xl transition-all shadow-sm hover:shadow inline-flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        Синхронізувати
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endleader
-
 <script>
 function showSubscriptionModal() {
     document.getElementById('subscriptionModal').classList.remove('hidden');
@@ -760,15 +665,6 @@ function showSubscriptionModal() {
 
 function hideSubscriptionModal() {
     document.getElementById('subscriptionModal').classList.add('hidden');
-}
-
-function showGoogleSyncModal() {
-    document.getElementById('googleSyncModal').classList.remove('hidden');
-}
-
-function hideGoogleSyncModal() {
-    const el = document.getElementById('googleSyncModal');
-    if (el) el.classList.add('hidden');
 }
 
 function copyIcalUrl(e) {
@@ -788,7 +684,6 @@ function copyIcalUrl(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideSubscriptionModal();
-        hideGoogleSyncModal();
     }
 });
 </script>
