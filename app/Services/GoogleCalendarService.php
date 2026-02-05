@@ -543,11 +543,13 @@ class GoogleCalendarService
                 return 'skipped'; // Local is newer or same
             }
 
-            // Update existing event
-            $existingEvent->update(array_merge($eventData, [
-                'google_synced_at' => now(),
-                'google_sync_status' => 'synced',
-            ]));
+            // Update existing event (suppress observer - already synced from Google)
+            Event::withoutEvents(function () use ($existingEvent, $eventData) {
+                $existingEvent->update(array_merge($eventData, [
+                    'google_synced_at' => now(),
+                    'google_sync_status' => 'synced',
+                ]));
+            });
 
             return 'updated';
         }
@@ -561,24 +563,28 @@ class GoogleCalendarService
 
         if ($duplicate) {
             // Link existing event to Google
-            $duplicate->update([
+            Event::withoutEvents(function () use ($duplicate, $googleEvent, $calendarId) {
+                $duplicate->update([
+                    'google_event_id' => $googleEvent['id'],
+                    'google_calendar_id' => $calendarId,
+                    'google_synced_at' => now(),
+                    'google_sync_status' => 'synced',
+                ]);
+            });
+            return 'updated';
+        }
+
+        // Create new event (suppress observer - already exists in Google)
+        Event::withoutEvents(function () use ($eventData, $church, $ministryId, $googleEvent, $calendarId) {
+            Event::create(array_merge($eventData, [
+                'church_id' => $church->id,
+                'ministry_id' => $ministryId,
                 'google_event_id' => $googleEvent['id'],
                 'google_calendar_id' => $calendarId,
                 'google_synced_at' => now(),
                 'google_sync_status' => 'synced',
-            ]);
-            return 'updated';
-        }
-
-        // Create new event
-        Event::create(array_merge($eventData, [
-            'church_id' => $church->id,
-            'ministry_id' => $ministryId,
-            'google_event_id' => $googleEvent['id'],
-            'google_calendar_id' => $calendarId,
-            'google_synced_at' => now(),
-            'google_sync_status' => 'synced',
-        ]));
+            ]));
+        });
 
         return 'created';
     }
@@ -1031,12 +1037,14 @@ class GoogleCalendarService
                         ->find($resolution['local_event_id']);
 
                     if ($localEvent) {
-                        $localEvent->update(array_merge($eventData, [
-                            'google_event_id' => $googleId,
-                            'google_calendar_id' => $calendarId,
-                            'google_synced_at' => now(),
-                            'google_sync_status' => 'synced',
-                        ]));
+                        Event::withoutEvents(function () use ($localEvent, $eventData, $googleId, $calendarId) {
+                            $localEvent->update(array_merge($eventData, [
+                                'google_event_id' => $googleId,
+                                'google_calendar_id' => $calendarId,
+                                'google_synced_at' => now(),
+                                'google_sync_status' => 'synced',
+                            ]));
+                        });
                         $results['replaced']++;
                     } else {
                         // Event not found, import as new
@@ -1068,13 +1076,15 @@ class GoogleCalendarService
         string $calendarId,
         ?int $ministryId
     ): Event {
-        return Event::create(array_merge($eventData, [
-            'church_id' => $church->id,
-            'ministry_id' => $ministryId,
-            'google_event_id' => $googleId,
-            'google_calendar_id' => $calendarId,
-            'google_synced_at' => now(),
-            'google_sync_status' => 'synced',
-        ]));
+        return Event::withoutEvents(function () use ($eventData, $church, $ministryId, $googleId, $calendarId) {
+            return Event::create(array_merge($eventData, [
+                'church_id' => $church->id,
+                'ministry_id' => $ministryId,
+                'google_event_id' => $googleId,
+                'google_calendar_id' => $calendarId,
+                'google_synced_at' => now(),
+                'google_sync_status' => 'synced',
+            ]));
+        });
     }
 }
