@@ -113,8 +113,6 @@
         }
     </script>
 
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
     <!-- Driver.js - Guided Tour -->
@@ -1666,6 +1664,10 @@
     </script>
 
     @stack('scripts')
+
+    <!-- Alpine.js - loaded after page scripts to ensure x-data functions are defined -->
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Toast Notifications -->
     @include('components.toast')
