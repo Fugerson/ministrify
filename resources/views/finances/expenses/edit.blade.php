@@ -16,10 +16,12 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Редагувати витрату</h2>
             <x-delete-confirm
                 :action="route('finances.expenses.destroy', $expense)"
+                :redirect="route('finances.expenses.index')"
                 title="Видалити витрату?"
                 message="Ви впевнені, що хочете видалити цю витрату? Цю дію неможливо скасувати."
                 button-text="Видалити"
                 :icon="false"
+                :ajax="true"
                 class="text-sm"
             />
         </div>

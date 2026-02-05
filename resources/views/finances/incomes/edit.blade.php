@@ -16,10 +16,12 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Редагувати надходження</h2>
             <x-delete-confirm
                 :action="route('finances.incomes.destroy', $income)"
+                :redirect="route('finances.incomes')"
                 title="Видалити надходження?"
                 message="Ви впевнені, що хочете видалити це надходження? Цю дію неможливо скасувати."
                 button-text="Видалити"
                 :icon="false"
+                :ajax="true"
                 class="text-sm"
             />
         </div>
