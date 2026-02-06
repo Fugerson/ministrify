@@ -73,21 +73,33 @@ function financePeriodFilter() {
         },
 
         init() {
-            // Load period from localStorage
-            const saved = localStorage.getItem('financePeriod');
-            const savedCustom = localStorage.getItem('financeCustomRange');
+            // Check if URL has date params - if so, use them instead of localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlStart = urlParams.get('start_date');
+            const urlEnd = urlParams.get('end_date');
 
-            if (savedCustom) {
-                try {
-                    const parsed = JSON.parse(savedCustom);
-                    if (parsed.start && parsed.end) {
-                        this.customMode = true;
-                        this.customStart = parsed.start;
-                        this.customEnd = parsed.end;
-                    }
-                } catch (e) {}
-            } else if (saved && this.periodLabels[saved]) {
-                this.activePeriod = saved;
+            if (urlStart && urlEnd) {
+                // URL has dates - use custom mode with these dates
+                this.customMode = true;
+                this.customStart = urlStart;
+                this.customEnd = urlEnd;
+            } else {
+                // Load period from localStorage
+                const saved = localStorage.getItem('financePeriod');
+                const savedCustom = localStorage.getItem('financeCustomRange');
+
+                if (savedCustom) {
+                    try {
+                        const parsed = JSON.parse(savedCustom);
+                        if (parsed.start && parsed.end) {
+                            this.customMode = true;
+                            this.customStart = parsed.start;
+                            this.customEnd = parsed.end;
+                        }
+                    } catch (e) {}
+                } else if (saved && this.periodLabels[saved]) {
+                    this.activePeriod = saved;
+                }
             }
 
             // Expose period globally
@@ -223,26 +235,30 @@ window._periodReloadInitialized = false;
 window.handlePeriodReload = function(detail) {
     if (!detail || !detail.dateRange) return;
 
-    const { start, end } = detail.dateRange;
-    const startDate = start instanceof Date ? start.toISOString().split('T')[0] : start;
-    const endDate = end instanceof Date ? end.toISOString().split('T')[0] : end;
-
     const url = new URL(window.location.href);
     const currentStart = url.searchParams.get('start_date');
     const currentEnd = url.searchParams.get('end_date');
 
-    // Skip reload if this is initial load and we're using default month period
-    // or if the dates already match
+    // On initial load, if URL already has date params, respect them and don't reload
     if (!window._periodReloadInitialized) {
         window._periodReloadInitialized = true;
-        // If URL has no dates but period is default month, don't reload
+        // URL already has dates - don't override with localStorage period
+        if (currentStart && currentEnd) {
+            return;
+        }
+        // No dates in URL but using default month - don't reload
         if (!currentStart && !currentEnd && detail.period === 'month' && !detail.customMode) {
             return;
         }
-        // If URL already has matching dates, don't reload
-        if (currentStart === startDate && currentEnd === endDate) {
-            return;
-        }
+    }
+
+    const { start, end } = detail.dateRange;
+    const startDate = start instanceof Date ? start.toISOString().split('T')[0] : start;
+    const endDate = end instanceof Date ? end.toISOString().split('T')[0] : end;
+
+    // If dates already match, don't reload
+    if (currentStart === startDate && currentEnd === endDate) {
+        return;
     }
 
     // Remove old params
