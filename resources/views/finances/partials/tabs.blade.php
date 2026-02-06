@@ -9,9 +9,10 @@
         ['id' => 'cards', 'route' => 'finances.cards', 'label' => 'Моя карта'],
     ];
     $activeTab = collect($tabs)->first(fn($t) => $t['route'] === $currentRoute)['id'] ?? 'analytics';
+    $showFilters = !in_array($activeTab, ['cards']);
 @endphp
 
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm mb-4" x-data="{ activeTab: '{{ $activeTab }}', loading: false }">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm mb-4" x-data="{ activeTab: '{{ $activeTab }}', loading: false }" x-init="$el.dataset.showFilters = '{{ $showFilters ? 'true' : 'false' }}'">
     <nav class="flex overflow-x-auto items-center" aria-label="Tabs">
         @foreach($tabs as $tab)
             <button type="button"
@@ -80,3 +81,6 @@
         </svg>
     </div>
 </div>
+
+{{-- Universal filters (shown on all tabs except "Моя карта") --}}
+@include('finances.partials.filters')

@@ -85,37 +85,7 @@ function exportButton() {
 @include('finances.partials.tabs')
 
 <div id="finance-content">
-<div x-data="journalApp()" class="space-y-4">
-    <!-- Period Selector -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div class="flex flex-wrap items-center gap-3">
-            <!-- Quick Period Buttons -->
-            <div class="flex flex-wrap gap-2">
-                <template x-for="[key, label] in Object.entries(periodLabels)" :key="key">
-                    <button type="button"
-                            @click="setPeriod(key)"
-                            :class="activePeriod === key ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
-                            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
-                            x-text="label">
-                    </button>
-                </template>
-            </div>
-
-            <!-- Date Display -->
-            <div class="flex-1 text-center">
-                <span class="text-sm text-gray-500 dark:text-gray-400" x-text="dateRangeDisplay"></span>
-            </div>
-
-            <!-- Balance Info -->
-            <div class="text-right">
-                <span class="text-sm text-gray-500 dark:text-gray-400">Баланс:</span>
-                <span class="ml-1 font-semibold" :class="currentBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
-                      x-text="formatNumber(currentBalance) + ' ₴'">
-                </span>
-            </div>
-        </div>
-    </div>
-
+<div x-data="journalApp()" class="space-y-4" @finance-period-changed.window="handlePeriodChange($event.detail)">
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
@@ -151,54 +121,6 @@ function exportButton() {
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Сума</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Баланс</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16"></th>
-                    </tr>
-                    <!-- Filter Row -->
-                    <tr class="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                        <td class="px-4 py-2"></td>
-                        <td class="px-4 py-2">
-                            <div class="relative">
-                                <svg class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
-                                <input type="text" x-model.debounce.300ms="filters.search" placeholder="Пошук..."
-                                       class="w-full pl-8 pr-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs">
-                            </div>
-                        </td>
-                        <td class="px-4 py-2">
-                            <select x-model="filters.category_id"
-                                    class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs">
-                                <option value="">Всі</option>
-                                @foreach($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </td>
-                        <td class="px-4 py-2">
-                            <select x-model="filters.ministry_id"
-                                    class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs">
-                                <option value="">Всі</option>
-                                @foreach($ministries as $ministry)
-                                <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                                @endforeach
-                            </select>
-                        </td>
-                        <td class="px-4 py-2">
-                            <select x-model="filters.direction"
-                                    class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs">
-                                <option value="">Всі</option>
-                                <option value="in">+</option>
-                                <option value="out">-</option>
-                            </select>
-                        </td>
-                        <td class="px-4 py-2"></td>
-                        <td class="px-4 py-2 text-center">
-                            <button type="button" x-show="hasActiveFilters" @click="resetFilters()"
-                               class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Скинути фільтри">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </td>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -408,15 +330,9 @@ function journalApp() {
         loading: false,
         transaction: null,
 
-        // Period state
-        activePeriod: '{{ $initialPeriod }}',
-        periodLabels: {
-            'today': 'Сьогодні',
-            'week': 'Тиждень',
-            'month': 'Місяць',
-            'quarter': 'Квартал',
-            'year': 'Рік'
-        },
+        // Period state - synced with global filter
+        activePeriod: localStorage.getItem('financePeriod') || 'month',
+        customDateRange: null,
 
         // Filter state
         filters: {
@@ -432,12 +348,30 @@ function journalApp() {
         currentBalance: {{ $currentBalance }},
         paymentMethods: @json(\App\Models\Transaction::PAYMENT_METHODS),
 
+        // Handle global period change
+        handlePeriodChange(detail) {
+            if (detail) {
+                if (detail.customMode && detail.dateRange) {
+                    this.customDateRange = detail.dateRange;
+                    this.activePeriod = null;
+                } else if (detail.period) {
+                    this.customDateRange = null;
+                    this.activePeriod = detail.period;
+                }
+            }
+        },
+
         get hasActiveFilters() {
             return this.filters.search || this.filters.category_id || this.filters.ministry_id || this.filters.direction;
         },
 
         // Calculate date range for current period
         get dateRange() {
+            // Use custom date range if set
+            if (this.customDateRange && this.customDateRange.start && this.customDateRange.end) {
+                return this.customDateRange;
+            }
+
             const now = new Date();
             let start, end;
 
@@ -470,12 +404,6 @@ function journalApp() {
             }
 
             return { start, end };
-        },
-
-        get dateRangeDisplay() {
-            const { start, end } = this.dateRange;
-            const formatDate = (d) => d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            return formatDate(start) + ' — ' + formatDate(end);
         },
 
         // Filter transactions by current period
@@ -557,14 +485,6 @@ function journalApp() {
             }
 
             return result;
-        },
-
-        setPeriod(period) {
-            this.activePeriod = period;
-            // Update URL without reload
-            const url = new URL(window.location.href);
-            url.searchParams.set('period', period);
-            window.history.replaceState({}, '', url.toString());
         },
 
         resetFilters() {

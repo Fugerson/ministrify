@@ -478,12 +478,20 @@ class FinanceController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        $year = $request->get('year', now()->year);
-        $month = $request->get('month', now()->month);
+        // Support both old year/month and new start_date/end_date params
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
+            $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
+        } else {
+            $year = $request->get('year', now()->year);
+            $month = $request->get('month', now()->month);
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+        }
 
         $query = Transaction::where('church_id', $church->id)
             ->incoming()
-            ->forMonth($year, $month)
+            ->whereBetween('date', [$startDate, $endDate])
             ->with(['category', 'person', 'recorder']);
 
         if ($categoryId = $request->get('category')) {
@@ -498,15 +506,17 @@ class FinanceController extends Controller
             ->get();
 
         $totals = [
-            'total' => Transaction::where('church_id', $church->id)->incoming()->completed()->forMonth($year, $month)->sum('amount'),
-            'tithes' => Transaction::where('church_id', $church->id)->incoming()->completed()->forMonth($year, $month)->tithes()->sum('amount'),
-            'offerings' => Transaction::where('church_id', $church->id)->incoming()->completed()->forMonth($year, $month)->offerings()->sum('amount'),
+            'total' => Transaction::where('church_id', $church->id)
+                ->incoming()
+                ->completed()
+                ->whereBetween('date', [$startDate, $endDate])
+                ->sum('amount'),
         ];
 
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
-        return view('finances.incomes.index', compact('incomes', 'categories', 'year', 'month', 'totals', 'enabledCurrencies', 'exchangeRates'));
+        return view('finances.incomes.index', compact('incomes', 'categories', 'totals', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function createIncome()
@@ -695,12 +705,20 @@ class FinanceController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        $year = $request->get('year', now()->year);
-        $month = $request->get('month', now()->month);
+        // Support both old year/month and new start_date/end_date params
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
+            $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
+        } else {
+            $year = $request->get('year', now()->year);
+            $month = $request->get('month', now()->month);
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+        }
 
         $query = Transaction::where('church_id', $church->id)
             ->outgoing()
-            ->forMonth($year, $month)
+            ->whereBetween('date', [$startDate, $endDate])
             ->with(['category', 'ministry', 'recorder']);
 
         if ($categoryId = $request->get('category')) {
@@ -717,7 +735,7 @@ class FinanceController extends Controller
         $spent = Transaction::where('church_id', $church->id)
             ->outgoing()
             ->completed()
-            ->forMonth($year, $month)
+            ->whereBetween('date', [$startDate, $endDate])
             ->sum('amount');
 
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
@@ -732,7 +750,7 @@ class FinanceController extends Controller
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
-        return view('finances.expenses.index', compact('expenses', 'categories', 'year', 'month', 'totals', 'ministries', 'enabledCurrencies', 'exchangeRates'));
+        return view('finances.expenses.index', compact('expenses', 'categories', 'totals', 'ministries', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function createExpense(Request $request)

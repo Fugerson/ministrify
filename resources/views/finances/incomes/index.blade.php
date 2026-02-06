@@ -296,35 +296,13 @@ window.incomesManager = function() {
 <div x-data="incomesManager()" x-cloak>
 @include('finances.partials.tabs')
 
-<div id="finance-content">
-@php
-    $months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
-@endphp
-
+<div id="finance-content" x-data="{ }" @finance-period-changed.window="handlePeriodReload($event.detail)">
 <div class="space-y-6">
 
     <!-- Summary card -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                <a href="{{ route('finances.incomes', ['year' => $month == 1 ? $year - 1 : $year, 'month' => $month == 1 ? 12 : $month - 1]) }}"
-                   class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </a>
-                <h2 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{{ $months[$month - 1] }} {{ $year }}</h2>
-                <a href="{{ route('finances.incomes', ['year' => $month == 12 ? $year + 1 : $year, 'month' => $month == 12 ? 1 : $month + 1]) }}"
-                   class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-            </div>
-        </div>
-
         <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 inline-block">
-            <p class="text-sm text-green-600 dark:text-green-400">Загалом за місяць</p>
+            <p class="text-sm text-green-600 dark:text-green-400">Загалом за період</p>
             <p class="text-2xl font-bold text-green-700 dark:text-green-300">{{ number_format($totals['total'], 0, ',', ' ') }} ₴</p>
         </div>
     </div>
@@ -333,8 +311,12 @@ window.incomesManager = function() {
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-3 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <form method="GET" class="flex items-center space-x-4">
-                <input type="hidden" name="year" value="{{ $year }}">
-                <input type="hidden" name="month" value="{{ $month }}">
+                @if(request('start_date'))
+                    <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+                @endif
+                @if(request('end_date'))
+                    <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+                @endif
                 <select name="category" onchange="this.form.submit()"
                         class="w-full sm:w-auto px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     <option value="">Усі категорії</option>
