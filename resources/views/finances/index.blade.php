@@ -4,27 +4,27 @@
 
 @section('actions')
 <div id="finance-actions" class="flex flex-wrap gap-2">
-    <a href="{{ route('finances.incomes.create') }}"
+    <button type="button" onclick="window.openIncomeModal && window.openIncomeModal()"
        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
         Надходження
-    </a>
-    <a href="{{ route('finances.expenses.create') }}"
+    </button>
+    <button type="button" onclick="window.openExpenseModal && window.openExpenseModal()"
        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
         </svg>
         Витрата
-    </a>
-    <a href="{{ route('finances.exchange.create') }}"
+    </button>
+    <button type="button" onclick="window.openExchangeModal && window.openExchangeModal()"
        class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
         </svg>
         Обмін
-    </a>
+    </button>
 </div>
 @endsection
 
@@ -677,4 +677,509 @@ function financesDashboard() {
 }
 </script>
 </div><!-- /finance-content -->
+
+<!-- Income Modal -->
+<div x-data="incomeModal()" x-cloak>
+    <div x-show="modalOpen"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="fixed inset-0 bg-black/50" @click="modalOpen = false"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg relative"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 @click.stop>
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додати надходження</h3>
+                    <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <form @submit.prevent="submit()" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума *</label>
+                        <div class="flex gap-2">
+                            <input type="number" x-model="formData.amount" step="0.01" min="0.01" required
+                                   class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                                   :class="{ 'border-red-500': errors.amount }">
+                            <select x-model="formData.currency"
+                                    class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                @foreach($enabledCurrencies ?? ['UAH', 'USD', 'EUR'] as $curr)
+                                    <option value="{{ $curr }}">{{ $curr }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <p class="text-red-500 text-sm mt-1" x-show="errors.amount" x-text="errors.amount?.[0]"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
+                        <input type="date" x-model="formData.date" required
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія *</label>
+                        <select x-model="formData.category_id" required
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                            <option value="">Оберіть категорію</option>
+                            @foreach($incomeCategories ?? [] as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->icon ?? '💰' }} {{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати *</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                                   :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-900/20': formData.payment_method === 'cash' }">
+                                <input type="radio" x-model="formData.payment_method" value="cash" class="sr-only">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">💵 Готівка</span>
+                            </label>
+                            <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                                   :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-900/20': formData.payment_method === 'card' }">
+                                <input type="radio" x-model="formData.payment_method" value="card" class="sr-only">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">💳 Картка</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                        <textarea x-model="formData.notes" rows="2"
+                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <button type="button" @click="modalOpen = false"
+                                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">
+                            Скасувати
+                        </button>
+                        <button type="submit" :disabled="loading"
+                                class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl disabled:opacity-50">
+                            <span x-show="!loading">Додати</span>
+                            <span x-show="loading">Збереження...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Expense Modal -->
+<div x-data="expenseModal()" x-cloak>
+    <div x-show="modalOpen"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="fixed inset-0 bg-black/50" @click="modalOpen = false"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg relative"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 @click.stop>
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додати витрату</h3>
+                    <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <form @submit.prevent="submit()" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума *</label>
+                        <div class="flex gap-2">
+                            <input type="number" x-model="formData.amount" step="0.01" min="0.01" required
+                                   class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                                   :class="{ 'border-red-500': errors.amount }">
+                            <select x-model="formData.currency"
+                                    class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                @foreach($enabledCurrencies ?? ['UAH', 'USD', 'EUR'] as $curr)
+                                    <option value="{{ $curr }}">{{ $curr }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <p class="text-red-500 text-sm mt-1" x-show="errors.amount" x-text="errors.amount?.[0]"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис *</label>
+                        <input type="text" x-model="formData.description" required maxlength="255"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
+                        <input type="date" x-model="formData.date" required
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
+                        <select x-model="formData.ministry_id"
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                            <option value="">Без команди</option>
+                            @foreach($ministries ?? [] as $ministry)
+                                <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                        <select x-model="formData.category_id"
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                            <option value="">Без категорії</option>
+                            @foreach($expenseCategories ?? [] as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                                   :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-900/20': formData.payment_method === 'cash' }">
+                                <input type="radio" x-model="formData.payment_method" value="cash" class="sr-only">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">💵 Готівка</span>
+                            </label>
+                            <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                                   :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-900/20': formData.payment_method === 'card' }">
+                                <input type="radio" x-model="formData.payment_method" value="card" class="sr-only">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">💳 Картка</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <button type="button" @click="modalOpen = false"
+                                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">
+                            Скасувати
+                        </button>
+                        <button type="submit" :disabled="loading"
+                                class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl disabled:opacity-50">
+                            <span x-show="!loading">Додати</span>
+                            <span x-show="loading">Збереження...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exchange Modal -->
+<div x-data="exchangeModal()" x-cloak>
+    <div x-show="modalOpen"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="fixed inset-0 bg-black/50" @click="modalOpen = false"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg relative"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 @click.stop>
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Обмін валюти</h3>
+                    <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <form @submit.prevent="submit()" class="p-6 space-y-4">
+                    <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                        <label class="block text-sm font-medium text-red-700 dark:text-red-300 mb-2">Віддаєте</label>
+                        <div class="flex gap-2">
+                            <input type="number" x-model="formData.from_amount" @input="calculate()" step="0.01" min="0.01" required
+                                   class="flex-1 px-4 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <select x-model="formData.from_currency" @change="updateRate()"
+                                    class="w-24 px-2 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                @foreach($enabledCurrencies ?? ['UAH', 'USD', 'EUR'] as $curr)
+                                    <option value="{{ $curr }}">{{ $curr }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 flex items-center justify-center gap-2 text-sm">
+                        <span>1</span>
+                        <span x-text="formData.from_currency !== 'UAH' ? formData.from_currency : formData.to_currency" class="font-medium"></span>
+                        <span>=</span>
+                        <input type="number" x-model="rate" @input="calculate()" step="0.0001" min="0.0001"
+                               class="w-24 px-2 py-1 text-center border border-amber-200 dark:border-amber-800 rounded-lg bg-white dark:bg-gray-700">
+                        <span class="font-medium">₴</span>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                        <label class="block text-sm font-medium text-green-700 dark:text-green-300 mb-2">Отримуєте</label>
+                        <div class="flex gap-2">
+                            <input type="number" x-model="formData.to_amount" step="0.01" min="0.01" required readonly
+                                   class="flex-1 px-4 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-white">
+                            <select x-model="formData.to_currency" @change="updateRate()"
+                                    class="w-24 px-2 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                @foreach($enabledCurrencies ?? ['UAH', 'USD', 'EUR'] as $curr)
+                                    <option value="{{ $curr }}">{{ $curr }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата</label>
+                        <input type="date" x-model="formData.date" required
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                        <input type="text" x-model="formData.notes" maxlength="500"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                               placeholder="Де обміняли...">
+                    </div>
+                    <div x-show="formData.from_currency === formData.to_currency" class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
+                        <p class="text-sm text-red-700 dark:text-red-300">Оберіть різні валюти</p>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <button type="button" @click="modalOpen = false"
+                                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            Скасувати
+                        </button>
+                        <button type="submit" :disabled="loading || formData.from_currency === formData.to_currency"
+                                class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg disabled:opacity-50">
+                            <span x-show="!loading">Обміняти</span>
+                            <span x-show="loading">Обмін...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+window.incomeModal = function() {
+    return {
+        modalOpen: false,
+        loading: false,
+        errors: {},
+        formData: {
+            amount: '',
+            currency: 'UAH',
+            category_id: '',
+            date: new Date().toISOString().split('T')[0],
+            payment_method: 'cash',
+            notes: '',
+            is_anonymous: true
+        },
+        init() {
+            window.openIncomeModal = () => this.openModal();
+        },
+        openModal() {
+            this.formData = {
+                amount: '',
+                currency: 'UAH',
+                category_id: '',
+                date: new Date().toISOString().split('T')[0],
+                payment_method: 'cash',
+                notes: '',
+                is_anonymous: true
+            };
+            this.errors = {};
+            this.modalOpen = true;
+        },
+        async submit() {
+            this.loading = true;
+            this.errors = {};
+            try {
+                const response = await fetch('/finances/incomes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else if (response.status === 422) {
+                    this.errors = data.errors || {};
+                } else {
+                    showToast('error', data.message || 'Помилка збереження');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+
+window.expenseModal = function() {
+    return {
+        modalOpen: false,
+        loading: false,
+        errors: {},
+        formData: {
+            amount: '',
+            currency: 'UAH',
+            description: '',
+            category_id: '',
+            ministry_id: '',
+            date: new Date().toISOString().split('T')[0],
+            payment_method: 'cash'
+        },
+        init() {
+            window.openExpenseModal = () => this.openModal();
+        },
+        openModal() {
+            this.formData = {
+                amount: '',
+                currency: 'UAH',
+                description: '',
+                category_id: '',
+                ministry_id: '',
+                date: new Date().toISOString().split('T')[0],
+                payment_method: 'cash'
+            };
+            this.errors = {};
+            this.modalOpen = true;
+        },
+        async submit() {
+            this.loading = true;
+            this.errors = {};
+            try {
+                const response = await fetch('/finances/expenses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else if (response.status === 422) {
+                    this.errors = data.errors || {};
+                    if (data.message) showToast('error', data.message);
+                } else {
+                    showToast('error', data.message || 'Помилка збереження');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+
+window.exchangeModal = function() {
+    return {
+        modalOpen: false,
+        loading: false,
+        rate: {{ $exchangeRates['USD'] ?? 41 }},
+        nbuRates: @json($exchangeRates ?? ['USD' => 41, 'EUR' => 45]),
+        formData: {
+            from_currency: 'USD',
+            to_currency: 'UAH',
+            from_amount: '',
+            to_amount: '',
+            date: new Date().toISOString().split('T')[0],
+            notes: ''
+        },
+        init() {
+            window.openExchangeModal = () => this.openModal();
+        },
+        openModal() {
+            this.formData = {
+                from_currency: 'USD',
+                to_currency: 'UAH',
+                from_amount: '',
+                to_amount: '',
+                date: new Date().toISOString().split('T')[0],
+                notes: ''
+            };
+            this.updateRate();
+            this.modalOpen = true;
+        },
+        updateRate() {
+            const from = this.formData.from_currency;
+            const to = this.formData.to_currency;
+            if (from !== 'UAH' && to === 'UAH') {
+                this.rate = this.nbuRates[from] || 1;
+            } else if (from === 'UAH' && to !== 'UAH') {
+                this.rate = this.nbuRates[to] || 1;
+            } else {
+                this.rate = 1;
+            }
+            this.calculate();
+        },
+        calculate() {
+            const from = this.formData.from_currency;
+            const to = this.formData.to_currency;
+            const amount = parseFloat(this.formData.from_amount) || 0;
+            if (amount <= 0) {
+                this.formData.to_amount = '';
+                return;
+            }
+            if (from !== 'UAH' && to === 'UAH') {
+                this.formData.to_amount = (amount * this.rate).toFixed(2);
+            } else if (from === 'UAH' && to !== 'UAH') {
+                this.formData.to_amount = (amount / this.rate).toFixed(2);
+            } else {
+                this.formData.to_amount = (amount * this.rate).toFixed(2);
+            }
+        },
+        async submit() {
+            this.loading = true;
+            try {
+                const response = await fetch('/finances/exchange', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    showToast('error', data.message || 'Помилка');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+</script>
+@endpush
 @endsection

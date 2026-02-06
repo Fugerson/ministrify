@@ -264,6 +264,17 @@ class FinanceController extends Controller
             ->limit(10)
             ->get();
 
+        // Categories and ministries for modal forms
+        $incomeCategories = TransactionCategory::where('church_id', $church->id)
+            ->forIncome()
+            ->orderBy('sort_order')
+            ->get();
+        $expenseCategories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->orderBy('sort_order')
+            ->get();
+        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+
         return view('finances.index', compact(
             'church', 'year', 'month', 'periodLabel',
             'totalIncome', 'totalExpense', 'periodBalance',
@@ -275,7 +286,8 @@ class FinanceController extends Controller
             'incomeByCategory', 'expenseByCategory', 'expenseByMinistry',
             'recentIncomes', 'recentExpenses',
             'yearComparison',
-            'quickStats', 'activeCampaigns', 'paymentMethods', 'activityFeed'
+            'quickStats', 'activeCampaigns', 'paymentMethods', 'activityFeed',
+            'incomeCategories', 'expenseCategories', 'ministries'
         ));
     }
 
@@ -322,9 +334,22 @@ class FinanceController extends Controller
         // Initial period from request or default to month
         $initialPeriod = $request->get('period', 'month');
 
+        // For modal forms
+        $incomeCategories = TransactionCategory::where('church_id', $church->id)
+            ->forIncome()
+            ->orderBy('sort_order')
+            ->get();
+        $expenseCategories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->orderBy('sort_order')
+            ->get();
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
+
         return view('finances.journal', compact(
             'transactions', 'initialPeriod', 'balanceBeforeYear', 'currentBalance',
-            'categories', 'ministries', 'people'
+            'categories', 'ministries', 'people',
+            'incomeCategories', 'expenseCategories', 'enabledCurrencies', 'exchangeRates'
         ));
     }
 
@@ -1232,12 +1257,23 @@ class FinanceController extends Controller
             ->limit(10)
             ->get();
 
+        // For expense edit modal
+        $expenseCategories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->orderBy('sort_order')
+            ->get();
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
+
         return view('finances.budgets.index', compact(
             'ministries',
             'totals',
             'expensesMissingReceipts',
             'year',
-            'month'
+            'month',
+            'expenseCategories',
+            'enabledCurrencies',
+            'exchangeRates'
         ));
     }
 
