@@ -617,11 +617,22 @@ function journalApp() {
 
         openEditModal(transaction) {
             this.showModal = false;
-            if (transaction.direction === 'in') {
-                window.openIncomeEditModal && window.openIncomeEditModal(transaction);
-            } else {
-                window.openExpenseEditModal && window.openExpenseEditModal(transaction);
-            }
+            // Small delay to let details modal close before opening edit modal
+            setTimeout(() => {
+                if (transaction.direction === 'in') {
+                    if (typeof window.openIncomeEditModal === 'function') {
+                        window.openIncomeEditModal(transaction);
+                    } else {
+                        console.error('openIncomeEditModal not found');
+                    }
+                } else {
+                    if (typeof window.openExpenseEditModal === 'function') {
+                        window.openExpenseEditModal(transaction);
+                    } else {
+                        console.error('openExpenseEditModal not found');
+                    }
+                }
+            }, 50);
         },
 
         // Update or add transaction without page reload
