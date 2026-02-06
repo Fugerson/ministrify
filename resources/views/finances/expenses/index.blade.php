@@ -574,7 +574,7 @@ window.expensesManager = function() {
                 </div>
 
                 <!-- Amount + Currency -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума *</label>
                         <div class="flex gap-2">
@@ -613,7 +613,7 @@ window.expensesManager = function() {
                 </div>
 
                 <!-- Category + Expense Type -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
                         <select x-model="formData.category_id"
