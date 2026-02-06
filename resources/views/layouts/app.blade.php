@@ -1331,11 +1331,6 @@
                                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                             </svg>
                         </button>
-                        <button @click="$dispatch('open-page-help')" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </button>
                         <a href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center">
                             <x-user-avatar size="md" />
                         </a>
@@ -1364,14 +1359,6 @@
                         </svg>
                         <svg id="theme-moon-desktop" class="w-5 h-5 text-indigo-400 hidden" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-                        </svg>
-                    </button>
-                    <!-- Help Button -->
-                    <button @click="$dispatch('open-page-help')"
-                            class="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                            title="Довідка (?)">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </button>
                     <!-- Search Button -->
@@ -1672,37 +1659,6 @@
     <!-- Toast Notifications -->
     @include('components.toast')
 
-    <!-- Page Help System -->
-    @php
-        $routeName = request()->route()?->getName() ?? 'dashboard';
-        $pageKey = match(true) {
-            str_starts_with($routeName, 'dashboard') => 'dashboard',
-            str_starts_with($routeName, 'people') => 'people',
-            str_starts_with($routeName, 'ministries') => 'ministries',
-            str_starts_with($routeName, 'schedule') || str_starts_with($routeName, 'events.index') || str_starts_with($routeName, 'events.create') => 'schedule',
-            $routeName === 'events.show' => 'events.show',
-            str_starts_with($routeName, 'boards.show') => 'boards.show',
-            str_starts_with($routeName, 'boards') => 'boards',
-            str_starts_with($routeName, 'groups') => 'groups',
-            str_starts_with($routeName, 'expenses') || str_starts_with($routeName, 'finances') => 'finances',
-            str_starts_with($routeName, 'settings') => 'settings',
-            str_starts_with($routeName, 'attendance') => 'attendance',
-            str_starts_with($routeName, 'resources') => 'resources',
-            str_starts_with($routeName, 'messages') => 'messages',
-            str_starts_with($routeName, 'prayer-requests') => 'prayer-requests',
-            str_starts_with($routeName, 'songs') => 'songs',
-            str_starts_with($routeName, 'reports') => 'reports',
-            str_starts_with($routeName, 'announcements') => 'announcements',
-            str_starts_with($routeName, 'private-messages') || str_starts_with($routeName, 'pm.') => 'private-messages',
-            str_starts_with($routeName, 'donations') => 'donations',
-            str_starts_with($routeName, 'rotation') => 'rotation',
-            str_starts_with($routeName, 'security') => 'security',
-            default => null,
-        };
-    @endphp
-    @if($pageKey)
-        <x-page-help :page="$pageKey" />
-    @endif
 
     <!-- Show session messages as toasts -->
     @if(session('success'))
