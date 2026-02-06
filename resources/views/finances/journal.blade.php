@@ -4,6 +4,7 @@
 
 @section('actions')
 <div class="flex items-center space-x-2" x-data="exportButton()">
+    @if(auth()->user()->canCreate('finances'))
     <button type="button" onclick="window.openIncomeModal && window.openIncomeModal()"
        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,6 +27,7 @@
         </svg>
         Обмін
     </button>
+    @endif
     @endif
     <button @click="downloadExport()"
             :disabled="exporting"
@@ -306,6 +308,7 @@ function exportButton() {
 
                     <!-- Footer -->
                     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                        @if(auth()->user()->canEdit('finances'))
                         <button type="button" @click="openEditModal(transaction)"
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,6 +316,9 @@ function exportButton() {
                             </svg>
                             Редагувати
                         </button>
+                        @else
+                        <div></div>
+                        @endif
                         <button @click="showModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                             Закрити
                         </button>

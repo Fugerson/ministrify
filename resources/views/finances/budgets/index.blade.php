@@ -179,6 +179,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-center">
+                            @if(auth()->user()->canEdit('finances'))
                             <button @click="openBudgetModal({{ $item['ministry']->id }}, '{{ $item['ministry']->name }}', {{ $item['monthly_budget'] }}, '{{ $item['budget']?->notes ?? '' }}')"
                                     class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                     title="Редагувати бюджет">
@@ -186,6 +187,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
                             </button>
+                            @endif
                         </td>
                     </tr>
                     @empty

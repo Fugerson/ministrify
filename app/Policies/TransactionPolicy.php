@@ -62,7 +62,7 @@ class TransactionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->canCreate('finances') || $user->canCreate('finances');
+        return $user->canCreate('finances');
     }
 
     /**
@@ -81,9 +81,7 @@ class TransactionPolicy
             }
         }
 
-        return $transaction->isIncome
-            ? $user->canEdit('finances')
-            : $user->canEdit('finances');
+        return $user->canEdit('finances');
     }
 
     /**
@@ -95,9 +93,7 @@ class TransactionPolicy
             return false;
         }
 
-        return $transaction->isIncome
-            ? $user->canDelete('finances')
-            : $user->canDelete('finances');
+        return $user->canDelete('finances');
     }
 
     /**

@@ -3,6 +3,7 @@
 @section('title', 'Фінанси')
 
 @section('actions')
+@if(auth()->user()->canCreate('finances'))
 <div id="finance-actions" class="flex flex-wrap gap-2">
     <button type="button" onclick="window.openIncomeModal && window.openIncomeModal()"
        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
@@ -26,6 +27,7 @@
         Обмін
     </button>
 </div>
+@endif
 @endsection
 
 @section('content')
