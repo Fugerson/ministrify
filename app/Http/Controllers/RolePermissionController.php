@@ -46,6 +46,7 @@ class RolePermissionController extends Controller
             'role_id' => 'required|integer|exists:church_roles,id',
             'permissions' => 'required|array',
             'permissions.*' => 'array',
+            'permissions.*.*' => 'string',
         ]);
 
         $role = ChurchRole::where('id', $validated['role_id'])
@@ -86,6 +87,9 @@ class RolePermissionController extends Controller
             ->first();
 
         if (!$role) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Роль не знайдена'], 404);
+            }
             return back()->with('error', 'Роль не знайдена');
         }
 
@@ -93,6 +97,16 @@ class RolePermissionController extends Controller
         $role->permissions()->delete();
         $role->clearPermissionCache();
 
-        return back()->with('success', 'Права доступу скинуто');
+        // Re-create default permissions based on role slug
+        $defaults = ChurchRole::DEFAULT_PERMISSIONS[$role->slug] ?? [];
+        if (!empty($defaults)) {
+            $role->setPermissions($defaults);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Права доступу скинуто до стандартних');
     }
 }

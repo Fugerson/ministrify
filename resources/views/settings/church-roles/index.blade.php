@@ -321,15 +321,12 @@ function churchRolesManager() {
         },
 
         togglePermission(module, action) {
-            if (!this.permissions[module]) {
-                this.permissions[module] = [];
-            }
-
-            const idx = this.permissions[module].indexOf(action);
+            const current = this.permissions[module] || [];
+            const idx = current.indexOf(action);
             if (idx > -1) {
-                this.permissions[module].splice(idx, 1);
+                this.permissions = { ...this.permissions, [module]: current.filter((_, i) => i !== idx) };
             } else {
-                this.permissions[module].push(action);
+                this.permissions = { ...this.permissions, [module]: [...current, action] };
             }
         },
 

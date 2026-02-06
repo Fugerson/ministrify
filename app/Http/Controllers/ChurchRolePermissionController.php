@@ -37,6 +37,7 @@ class ChurchRolePermissionController extends Controller
         $validated = $request->validate([
             'permissions' => 'required|array',
             'permissions.*' => 'array',
+            'permissions.*.*' => 'string',
         ]);
 
         $churchRole->setPermissions($validated['permissions']);

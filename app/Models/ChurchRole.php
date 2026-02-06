@@ -116,10 +116,10 @@ class ChurchRole extends Model
     public function getAllPermissions(): array
     {
         if ($this->is_admin_role) {
-            // Return all permissions for admin role
+            // Return only valid actions per module for admin role
             $result = [];
-            foreach (array_keys(ChurchRolePermission::MODULES) as $module) {
-                $result[$module] = array_keys(ChurchRolePermission::ACTIONS);
+            foreach (ChurchRolePermission::MODULES as $module => $config) {
+                $result[$module] = $config['actions'];
             }
             return $result;
         }
@@ -145,9 +145,18 @@ class ChurchRole extends Model
     public function setPermissions(array $permissions): void
     {
         foreach ($permissions as $module => $actions) {
+            // Skip invalid modules
+            if (!array_key_exists($module, ChurchRolePermission::MODULES)) {
+                continue;
+            }
+
+            // Filter to only valid actions for this module
+            $allowedActions = ChurchRolePermission::MODULES[$module]['actions'];
+            $validActions = array_values(array_intersect((array) $actions, $allowedActions));
+
             ChurchRolePermission::updateOrCreate(
                 ['church_role_id' => $this->id, 'module' => $module],
-                ['actions' => $actions]
+                ['actions' => $validActions]
             );
         }
 
