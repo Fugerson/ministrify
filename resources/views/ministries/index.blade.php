@@ -3,7 +3,7 @@
 @section('title', 'Команди')
 
 @section('actions')
-@admin
+@if(auth()->user()->canCreate('ministries'))
 <a href="{{ route('ministries.create') }}"
    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -11,7 +11,7 @@
     </svg>
     Додати
 </a>
-@endadmin
+@endif
 @endsection
 
 @section('content')
@@ -75,11 +75,11 @@
     @empty
         <div class="col-span-full text-center py-8 md:py-12">
             <p class="text-gray-500 dark:text-gray-400">Ще немає команд.</p>
-            @admin
+            @if(auth()->user()->canCreate('ministries'))
             <a href="{{ route('ministries.create') }}" class="mt-2 inline-block text-primary-600 dark:text-primary-400 hover:text-primary-500">
                 Створити першу команду
             </a>
-            @endadmin
+            @endif
         </div>
     @endforelse
     </div>

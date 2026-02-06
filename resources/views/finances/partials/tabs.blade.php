@@ -24,8 +24,8 @@
             </a>
         @endforeach
 
-        <!-- Settings link for admins -->
-        @admin
+        <!-- Settings link -->
+        @if(auth()->user()->canView('settings'))
         <a href="{{ route('settings.index') }}?tab=data"
            onclick="localStorage.setItem('settings_tab', 'data')"
            class="ml-auto mr-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
@@ -35,7 +35,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
         </a>
-        @endadmin
+        @endif
     </nav>
 </div>
 

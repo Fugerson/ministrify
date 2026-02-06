@@ -3,7 +3,7 @@
 @section('title', 'Розклад')
 
 @section('actions')
-@leader
+@if(auth()->user()->canCreate('events'))
 <a href="{{ route('events.create') }}"
    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -11,7 +11,7 @@
     </svg>
     Нова подія
 </a>
-@endleader
+@endif
 @endsection
 
 @section('content')
@@ -92,7 +92,7 @@
                 </a>
 
                 <!-- Google Calendar Sync Button -->
-                @leader
+                @if(auth()->user()->canEdit('events'))
                 @if($isGoogleConnected)
                     <div x-data="{ syncing: false, message: '', error: false }" class="inline-flex items-center gap-2">
                         <button @click="
@@ -130,7 +130,7 @@
                         Google Calendar
                     </a>
                 @endif
-                @endleader
+                @endif
 
                 <!-- Export/Import Dropdown -->
                 <div class="relative" x-data="{ open: false }">
@@ -159,7 +159,7 @@
                                 Експорт поточного періоду
                             </a>
                             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-                            @leader
+                            @if(auth()->user()->canCreate('events'))
                             <a href="{{ route('calendar.import') }}"
                                class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +167,7 @@
                                 </svg>
                                 Імпорт з файлу (.ics)
                             </a>
-                            @endleader
+                            @endif
                             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                             <button onclick="showSubscriptionModal()"
                                     class="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -501,14 +501,14 @@
                             </svg>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400">Немає подій у цьому місяці</p>
-                        @leader
+                        @if(auth()->user()->canCreate('events'))
                         <a href="{{ route('events.create') }}" class="mt-3 inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
                             Створити подію
                         </a>
-                        @endleader
+                        @endif
                     </div>
                 @endif
             </div>

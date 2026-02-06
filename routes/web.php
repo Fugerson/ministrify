@@ -457,8 +457,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::delete('items/{item}', [ChecklistController::class, 'deleteItem'])->name('items.delete');
     });
 
-    // Finances (admin and leaders)
-    Route::middleware('role:admin,leader')->prefix('finances')->name('finances.')->group(function () {
+    // Finances
+    Route::middleware('permission:finances')->prefix('finances')->name('finances.')->group(function () {
         // Dashboard
         Route::get('/', [FinanceController::class, 'index'])->name('index');
         Route::get('chart-data', [FinanceController::class, 'chartData'])->name('chart-data');
@@ -535,7 +535,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     });
 
     // Legacy expenses routes redirect
-    Route::middleware('role:admin,leader')->group(function () {
+    Route::middleware('permission:finances')->group(function () {
         Route::get('expenses', fn() => redirect()->route('finances.expenses.index'))->name('expenses.index');
         Route::get('expenses/create', fn() => redirect()->route('finances.expenses.create'))->name('expenses.create');
     });
@@ -544,8 +544,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::resource('attendance', AttendanceController::class);
     Route::get('attendance-stats', [AttendanceController::class, 'stats'])->name('attendance.stats');
 
-    // Settings (admin only)
-    Route::middleware('role:admin')->prefix('settings')->name('settings.')->group(function () {
+    // Settings
+    Route::middleware('permission:settings')->prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::put('church', [SettingsController::class, 'updateChurch'])->name('church');
         Route::put('telegram', [SettingsController::class, 'updateTelegram'])->name('telegram');
@@ -640,7 +640,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     });
 
     // Website Builder (admin only)
-    Route::middleware('role:admin')->prefix('website-builder')->name('website-builder.')->group(function () {
+    Route::middleware('permission:website')->prefix('website-builder')->name('website-builder.')->group(function () {
         // Dashboard
         Route::get('/', [\App\Http\Controllers\WebsiteBuilder\WebsiteBuilderController::class, 'index'])->name('index');
         Route::get('preview', [\App\Http\Controllers\WebsiteBuilder\WebsiteBuilderController::class, 'preview'])->name('preview');
@@ -800,8 +800,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('dismiss-hint', [OnboardingController::class, 'dismissHint'])->name('dismiss-hint');
     });
 
-    // Messages (admin and leaders)
-    Route::middleware('role:admin,leader')->prefix('messages')->name('messages.')->group(function () {
+    // Messages (mass mailing)
+    Route::middleware('permission:announcements,create')->prefix('messages')->name('messages.')->group(function () {
         Route::get('/', [MessageController::class, 'index'])->name('index');
         Route::get('create', [MessageController::class, 'create'])->name('create');
         Route::post('preview', [MessageController::class, 'preview'])->name('preview');
@@ -879,17 +879,17 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     // Church Announcements
     Route::prefix('announcements')->name('announcements.')->group(function () {
         Route::get('/', [AnnouncementController::class, 'index'])->name('index');
-        Route::get('create', [AnnouncementController::class, 'create'])->name('create')->middleware('role:admin,leader');
-        Route::post('/', [AnnouncementController::class, 'store'])->name('store')->middleware('role:admin,leader');
+        Route::get('create', [AnnouncementController::class, 'create'])->name('create')->middleware('permission:announcements,create');
+        Route::post('/', [AnnouncementController::class, 'store'])->name('store')->middleware('permission:announcements,create');
         Route::get('{announcement}', [AnnouncementController::class, 'show'])->name('show');
-        Route::get('{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit')->middleware('role:admin,leader');
-        Route::put('{announcement}', [AnnouncementController::class, 'update'])->name('update')->middleware('role:admin,leader');
-        Route::delete('{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy')->middleware('role:admin,leader');
-        Route::post('{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('pin')->middleware('role:admin,leader');
+        Route::get('{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit')->middleware('permission:announcements,edit');
+        Route::put('{announcement}', [AnnouncementController::class, 'update'])->name('update')->middleware('permission:announcements,edit');
+        Route::delete('{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy')->middleware('permission:announcements,delete');
+        Route::post('{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('pin')->middleware('permission:announcements,edit');
     });
 
-    // Donations (admin and leaders)
-    Route::middleware('role:admin,leader')->prefix('donations')->name('donations.')->group(function () {
+    // Donations
+    Route::middleware('permission:finances')->prefix('donations')->name('donations.')->group(function () {
         Route::get('/', [\App\Http\Controllers\DonationController::class, 'index'])->name('index');
         Route::get('qr', [\App\Http\Controllers\DonationController::class, 'qrCode'])->name('qr');
         Route::get('export', [\App\Http\Controllers\DonationController::class, 'export'])->name('export');
@@ -899,7 +899,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     });
 
     // Songs Library
-    Route::middleware('role:admin,leader')->prefix('songs')->name('songs.')->group(function () {
+    Route::middleware('permission:ministries')->prefix('songs')->name('songs.')->group(function () {
         Route::get('/', [\App\Http\Controllers\SongController::class, 'index'])->name('index');
         Route::get('create', [\App\Http\Controllers\SongController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\SongController::class, 'store'])->name('store');
@@ -926,8 +926,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::delete('{resource}', [\App\Http\Controllers\ResourceController::class, 'destroy'])->name('destroy');
     });
 
-    // Reports (admin and leaders)
-    Route::middleware('role:admin,leader')->prefix('reports')->name('reports.')->group(function () {
+    // Reports
+    Route::middleware('permission:reports')->prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ReportsController::class, 'index'])->name('index');
         Route::get('attendance', [\App\Http\Controllers\ReportsController::class, 'attendance'])->name('attendance');
         Route::get('finances', [\App\Http\Controllers\ReportsController::class, 'finances'])->name('finances');

@@ -1096,7 +1096,7 @@
             Назад до списку
         </a>
 
-        @admin
+        @if(auth()->user()->canDelete('people'))
         <form method="POST" action="{{ route('people.destroy', $person) }}"
               onsubmit="return confirm('Ви впевнені, що хочете видалити цю людину?')">
             @csrf
@@ -1105,7 +1105,7 @@
                 Видалити
             </button>
         </form>
-        @endadmin
+        @endif
     </div>
 </div>
 

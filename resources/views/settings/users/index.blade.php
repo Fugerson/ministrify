@@ -6,14 +6,14 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Користувачі</h1>
-        @admin
+        @if(auth()->user()->canEdit('settings'))
         <a href="{{ route('settings.users.create') }}" class="inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 text-sm font-medium">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
             Запросити
         </a>
-        @endadmin
+        @endif
     </div>
 
     @php
@@ -165,7 +165,7 @@
                                     }
                                 }
                             }">
-                            @admin
+                            @if(auth()->user()->canEdit('settings'))
                             @if($user->id !== auth()->id())
                             {{-- Editable role --}}
                             <div x-show="!editing">
@@ -221,7 +221,7 @@
                                 Без ролі
                             </span>
                             @endif
-                            @endadmin
+                            @endif
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
                             <span class="inline-flex items-center text-sm text-green-600 dark:text-green-400">
@@ -230,7 +230,7 @@
                             </span>
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm font-medium">
-                            @admin
+                            @if(auth()->user()->canEdit('settings'))
                             @if($user->id !== auth()->id())
                             <a href="{{ route('settings.users.edit', $user) }}" class="p-2 inline-flex text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,7 +249,7 @@
                             @else
                             <span class="text-gray-400 dark:text-gray-500 text-xs">Це ви</span>
                             @endif
-                            @endadmin
+                            @endif
                         </td>
                     </tr>
                     @endforeach

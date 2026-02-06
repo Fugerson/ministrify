@@ -45,11 +45,11 @@
                 </a>
             </div>
 
-            @admin
+            @if(auth()->user()->canView('finances'))
             <a href="{{ route('finances.index') }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm">
                 Повний звіт
             </a>
-            @endadmin
+            @endif
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

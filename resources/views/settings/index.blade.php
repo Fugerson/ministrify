@@ -1754,7 +1754,7 @@
     <!-- Users Tab -->
     <div x-show="activeTab === 'users'" x-cloak class="space-y-6">
         <!-- Self-registration setting -->
-        @admin
+        @if(auth()->user()->canEdit('settings'))
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
              x-data="{
                  enabled: {{ $church->getSetting('self_registration_enabled') !== false ? 'true' : 'false' }},
@@ -1807,7 +1807,7 @@
                 </div>
             </div>
         </div>
-        @endadmin
+        @endif
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -1815,14 +1815,14 @@
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Користувачі системи</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $users->count() }} {{ trans_choice('користувач|користувачі|користувачів', $users->count()) }}</p>
                 </div>
-                @admin
+                @if(auth()->user()->canEdit('settings'))
                 <a href="{{ route('settings.users.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
                     Запросити
                 </a>
-                @endadmin
+                @endif
             </div>
 
             <div class="overflow-x-auto">
@@ -1876,7 +1876,7 @@
                                 </span>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm font-medium">
-                                @admin
+                                @if(auth()->user()->canEdit('settings'))
                                 @if($user->id !== auth()->id())
                                 <a href="{{ route('settings.users.edit', $user) }}" class="p-2 inline-flex text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1895,7 +1895,7 @@
                                 @else
                                 <span class="text-gray-400 dark:text-gray-500 text-xs">Це ви</span>
                                 @endif
-                                @endadmin
+                                @endif
                             </td>
                         </tr>
                         @endforeach

@@ -3,7 +3,7 @@
 @section('title', 'Події')
 
 @section('actions')
-@leader
+@if(auth()->user()->canCreate('events'))
 <a href="{{ route('events.create') }}"
    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -11,7 +11,7 @@
     </svg>
     Нова подія
 </a>
-@endleader
+@endif
 @endsection
 
 @section('content')
@@ -106,7 +106,7 @@
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Немає подій</h3>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Найближчі події не заплановано.</p>
-                @leader
+                @if(auth()->user()->canCreate('events'))
                 <div class="mt-6">
                     <a href="{{ route('events.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
@@ -116,7 +116,7 @@
                         Створити подію
                     </a>
                 </div>
-                @endleader
+                @endif
             </div>
         @endif
     </div>

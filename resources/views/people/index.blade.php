@@ -4,14 +4,14 @@
 
 @section('actions')
 <div class="flex items-center gap-2">
-    @admin
+    @if(auth()->user()->canEdit('people'))
     <a href="{{ route('people.quick-edit') }}" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-xl transition-colors" title="Швидке редагування">
         <svg class="w-4 h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
         </svg>
         <span class="hidden sm:inline">Швидке редагування</span>
     </a>
-    @endadmin
+    @endif
     <a href="{{ route('people.create') }}" id="people-add-btn" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -24,7 +24,7 @@
 @section('content')
 <div x-data="peopleTable()" class="space-y-4">
     <!-- Bulk Actions Toolbar -->
-    @admin
+    @if(auth()->user()->canEdit('people'))
     <div x-show="selectedIds.length > 0" x-cloak
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
@@ -93,7 +93,7 @@
             </div>
         </div>
     </div>
-    @endadmin
+    @endif
     <!-- Search & Filter Bar -->
     <div id="people-search-bar" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row gap-4">
@@ -309,7 +309,7 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        @admin
+                        @if(auth()->user()->canEdit('people'))
                         <th class="px-4 py-3 w-10">
                             <input type="checkbox"
                                    @change="toggleSelectAll($event.target.checked)"
@@ -317,7 +317,7 @@
                                    :indeterminate.prop="isPartiallySelected"
                                    class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 cursor-pointer">
                         </th>
-                        @endadmin
+                        @endif
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Ім'я
                         </th>
@@ -360,7 +360,7 @@
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
                         :class="{ 'bg-primary-50 dark:bg-primary-900/20': selectedIds.includes({{ $person->id }}) }"
                         onclick="window.location='{{ route('people.show', $person) }}'">
-                        @admin
+                        @if(auth()->user()->canEdit('people'))
                         <!-- Checkbox -->
                         <td class="px-4 py-3" onclick="event.stopPropagation()">
                             <input type="checkbox"
@@ -369,7 +369,7 @@
                                    :checked="selectedIds.includes({{ $person->id }})"
                                    class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 cursor-pointer">
                         </td>
-                        @endadmin
+                        @endif
                         <!-- Name -->
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
@@ -587,7 +587,7 @@
     </div>
 
     <!-- Export/Import -->
-    @admin
+    @if(auth()->user()->canEdit('people'))
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row gap-3">
             <a href="{{ route('people.export') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
@@ -604,10 +604,10 @@
             </a>
         </div>
     </div>
-    @endadmin
+    @endif
 
     <!-- Bulk Action Modal -->
-    @admin
+    @if(auth()->user()->canEdit('people'))
     <div x-show="showBulkModal" x-cloak
          class="fixed inset-0 z-50 overflow-y-auto"
          @keydown.escape.window="showBulkModal = false">
@@ -770,7 +770,7 @@
             </div>
         </div>
     </div>
-    @endadmin
+    @endif
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
