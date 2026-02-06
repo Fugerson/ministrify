@@ -1,8 +1,8 @@
 @php
     $currentRoute = Route::currentRouteName();
     $tabs = [
-        ['id' => 'journal', 'route' => 'finances.journal', 'label' => 'Журнал'],
         ['id' => 'analytics', 'route' => 'finances.index', 'label' => 'Аналітика'],
+        ['id' => 'journal', 'route' => 'finances.journal', 'label' => 'Журнал'],
         ['id' => 'incomes', 'route' => 'finances.incomes', 'label' => 'Надходження'],
         ['id' => 'expenses', 'route' => 'finances.expenses.index', 'label' => 'Витрати'],
         ['id' => 'budgets', 'route' => 'finances.budgets', 'label' => 'Бюджети'],
