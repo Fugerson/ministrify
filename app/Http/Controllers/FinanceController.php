@@ -777,6 +777,40 @@ class FinanceController extends Controller
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
+        // Return JSON for AJAX requests
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'expenses' => $expenses->map(function ($expense) {
+                    return [
+                        'id' => $expense->id,
+                        'date' => $expense->date->format('d.m'),
+                        'date_full' => $expense->date->format('Y-m-d'),
+                        'description' => $expense->description,
+                        'notes' => $expense->notes,
+                        'ministry_name' => $expense->ministry?->name ?? '-',
+                        'category_name' => $expense->category?->name ?? '-',
+                        'payment_method' => $expense->payment_method_label,
+                        'amount' => $expense->amount,
+                        'amount_formatted' => CurrencyHelper::format($expense->amount, $expense->currency ?? 'UAH'),
+                        'currency' => $expense->currency ?? 'UAH',
+                        'amount_uah' => $expense->amount_uah,
+                    ];
+                }),
+                'totals' => [
+                    'budget' => $totals['budget'],
+                    'spent' => $totals['spent'],
+                    'remaining' => $totals['budget'] - $totals['spent'],
+                    'budget_formatted' => number_format($totals['budget'], 0, ',', ' ') . ' ₴',
+                    'spent_formatted' => number_format($totals['spent'], 0, ',', ' ') . ' ₴',
+                    'remaining_formatted' => number_format($totals['budget'] - $totals['spent'], 0, ',', ' ') . ' ₴',
+                ],
+                'has_more_pages' => $expenses->hasMorePages(),
+                'current_page' => $expenses->currentPage(),
+                'last_page' => $expenses->lastPage(),
+            ]);
+        }
+
         return view('finances.expenses.index', compact('expenses', 'categories', 'totals', 'ministries', 'enabledCurrencies', 'exchangeRates'));
     }
 

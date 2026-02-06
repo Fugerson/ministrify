@@ -126,23 +126,28 @@ window.exchangeManager = function() {
 };
 
 // AJAX filter for incomes (no page reload)
+@php
+$incomesJson = $incomes->map(function($i) {
+    return [
+        'id' => $i->id,
+        'date' => $i->date->format('d.m'),
+        'date_full' => $i->date->format('Y-m-d'),
+        'category_name' => $i->category?->name ?? 'Без категорії',
+        'category_icon' => $i->category?->icon ?? '💰',
+        'category_color' => $i->category?->color ?? '#3B82F6',
+        'payment_method' => $i->payment_method_label,
+        'amount' => $i->amount,
+        'amount_formatted' => \App\Helpers\CurrencyHelper::format($i->amount, $i->currency ?? 'UAH'),
+        'currency' => $i->currency ?? 'UAH',
+        'amount_uah' => $i->amount_uah,
+    ];
+});
+@endphp
 window.incomesFilter = function() {
     return {
         loading: false,
-        incomes: @json($incomes->map(fn($i) => [
-            'id' => $i->id,
-            'date' => $i->date->format('d.m'),
-            'date_full' => $i->date->format('Y-m-d'),
-            'category_name' => $i->category?->name ?? 'Без категорії',
-            'category_icon' => $i->category?->icon ?? '💰',
-            'category_color' => $i->category?->color ?? '#3B82F6',
-            'payment_method' => $i->payment_method_label,
-            'amount' => $i->amount,
-            'amount_formatted' => \App\Helpers\CurrencyHelper::format($i->amount, $i->currency ?? 'UAH'),
-            'currency' => $i->currency ?? 'UAH',
-            'amount_uah' => $i->amount_uah,
-        ])),
-        totalFormatted: '{{ number_format($totals['total'], 0, ',', ' ') }} ₴',
+        incomes: @json($incomesJson),
+        totalFormatted: '{{ number_format($totals["total"], 0, ",", " ") }} ₴',
 
         async onPeriodChange(detail) {
             if (!detail || !detail.dateRange || !detail.isUserAction) return;
