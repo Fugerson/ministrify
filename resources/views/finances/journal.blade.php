@@ -628,6 +628,264 @@ function journalApp() {
 </script>
 </div><!-- /finance-content -->
 
+<script>
+window.incomeModal = function() {
+    return {
+        modalOpen: false,
+        loading: false,
+        isEdit: false,
+        editId: null,
+        errors: {},
+        formData: {
+            amount: '',
+            currency: 'UAH',
+            category_id: '',
+            date: new Date().toISOString().split('T')[0],
+            payment_method: 'cash',
+            notes: '',
+            is_anonymous: true
+        },
+        init() {
+            window.openIncomeModal = () => this.openCreate();
+            window.openIncomeEditModal = (t) => this.openEdit(t);
+        },
+        openCreate() {
+            this.isEdit = false;
+            this.editId = null;
+            this.formData = {
+                amount: '',
+                currency: 'UAH',
+                category_id: '',
+                date: new Date().toISOString().split('T')[0],
+                payment_method: 'cash',
+                notes: '',
+                is_anonymous: true
+            };
+            this.errors = {};
+            this.modalOpen = true;
+        },
+        openEdit(transaction) {
+            this.isEdit = true;
+            this.editId = transaction.id;
+            this.formData = {
+                amount: transaction.amount,
+                currency: transaction.currency || 'UAH',
+                category_id: transaction.category_id || '',
+                date: transaction.date.split('T')[0],
+                payment_method: transaction.payment_method || 'cash',
+                notes: transaction.notes || '',
+                is_anonymous: true
+            };
+            this.errors = {};
+            this.modalOpen = true;
+        },
+        async submit() {
+            this.loading = true;
+            this.errors = {};
+            const url = this.isEdit ? `/finances/incomes/${this.editId}` : '/finances/incomes';
+            try {
+                const response = await fetch(url, {
+                    method: this.isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else if (response.status === 422) {
+                    this.errors = data.errors || {};
+                } else {
+                    showToast('error', data.message || 'Помилка збереження');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+
+window.expenseModal = function() {
+    return {
+        modalOpen: false,
+        loading: false,
+        isEdit: false,
+        editId: null,
+        errors: {},
+        formData: {
+            amount: '',
+            currency: 'UAH',
+            description: '',
+            category_id: '',
+            ministry_id: '',
+            date: new Date().toISOString().split('T')[0],
+            payment_method: 'cash'
+        },
+        init() {
+            window.openExpenseModal = () => this.openCreate();
+            window.openExpenseEditModal = (t) => this.openEdit(t);
+        },
+        openCreate() {
+            this.isEdit = false;
+            this.editId = null;
+            this.formData = {
+                amount: '',
+                currency: 'UAH',
+                description: '',
+                category_id: '',
+                ministry_id: '',
+                date: new Date().toISOString().split('T')[0],
+                payment_method: 'cash'
+            };
+            this.errors = {};
+            this.modalOpen = true;
+        },
+        openEdit(transaction) {
+            this.isEdit = true;
+            this.editId = transaction.id;
+            this.formData = {
+                amount: transaction.amount,
+                currency: transaction.currency || 'UAH',
+                description: transaction.description || '',
+                category_id: transaction.category_id || '',
+                ministry_id: transaction.ministry_id || '',
+                date: transaction.date.split('T')[0],
+                payment_method: transaction.payment_method || 'cash'
+            };
+            this.errors = {};
+            this.modalOpen = true;
+        },
+        async submit() {
+            this.loading = true;
+            this.errors = {};
+            const url = this.isEdit ? `/finances/expenses/${this.editId}` : '/finances/expenses';
+            try {
+                const response = await fetch(url, {
+                    method: this.isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else if (response.status === 422) {
+                    this.errors = data.errors || {};
+                    if (data.message) showToast('error', data.message);
+                } else {
+                    showToast('error', data.message || 'Помилка збереження');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+
+window.exchangeModal = function() {
+    return {
+        modalOpen: false,
+        loading: false,
+        rate: {{ $exchangeRates['USD'] ?? 41 }},
+        nbuRates: @json($exchangeRates ?? ['USD' => 41, 'EUR' => 45]),
+        formData: {
+            from_currency: 'USD',
+            to_currency: 'UAH',
+            from_amount: '',
+            to_amount: '',
+            date: new Date().toISOString().split('T')[0],
+            notes: ''
+        },
+        init() {
+            window.openExchangeModal = () => this.openModal();
+        },
+        openModal() {
+            this.formData = {
+                from_currency: 'USD',
+                to_currency: 'UAH',
+                from_amount: '',
+                to_amount: '',
+                date: new Date().toISOString().split('T')[0],
+                notes: ''
+            };
+            this.updateRate();
+            this.modalOpen = true;
+        },
+        updateRate() {
+            const from = this.formData.from_currency;
+            const to = this.formData.to_currency;
+            if (from !== 'UAH' && to === 'UAH') {
+                this.rate = this.nbuRates[from] || 1;
+            } else if (from === 'UAH' && to !== 'UAH') {
+                this.rate = this.nbuRates[to] || 1;
+            } else {
+                this.rate = 1;
+            }
+            this.calculate();
+        },
+        calculate() {
+            const from = this.formData.from_currency;
+            const to = this.formData.to_currency;
+            const amount = parseFloat(this.formData.from_amount) || 0;
+            if (amount <= 0) {
+                this.formData.to_amount = '';
+                return;
+            }
+            if (from !== 'UAH' && to === 'UAH') {
+                this.formData.to_amount = (amount * this.rate).toFixed(2);
+            } else if (from === 'UAH' && to !== 'UAH') {
+                this.formData.to_amount = (amount / this.rate).toFixed(2);
+            } else {
+                this.formData.to_amount = (amount * this.rate).toFixed(2);
+            }
+        },
+        async submit() {
+            this.loading = true;
+            try {
+                const response = await fetch('/finances/exchange', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    showToast('error', data.message || 'Помилка');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+</script>
+
 <!-- Income Create/Edit Modal -->
 <div x-data="incomeModal()" x-cloak>
     <div x-show="modalOpen"
@@ -912,264 +1170,4 @@ function journalApp() {
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-window.incomeModal = function() {
-    return {
-        modalOpen: false,
-        loading: false,
-        isEdit: false,
-        editId: null,
-        errors: {},
-        formData: {
-            amount: '',
-            currency: 'UAH',
-            category_id: '',
-            date: new Date().toISOString().split('T')[0],
-            payment_method: 'cash',
-            notes: '',
-            is_anonymous: true
-        },
-        init() {
-            window.openIncomeModal = () => this.openCreate();
-            window.openIncomeEditModal = (t) => this.openEdit(t);
-        },
-        openCreate() {
-            this.isEdit = false;
-            this.editId = null;
-            this.formData = {
-                amount: '',
-                currency: 'UAH',
-                category_id: '',
-                date: new Date().toISOString().split('T')[0],
-                payment_method: 'cash',
-                notes: '',
-                is_anonymous: true
-            };
-            this.errors = {};
-            this.modalOpen = true;
-        },
-        openEdit(transaction) {
-            this.isEdit = true;
-            this.editId = transaction.id;
-            this.formData = {
-                amount: transaction.amount,
-                currency: transaction.currency || 'UAH',
-                category_id: transaction.category_id || '',
-                date: transaction.date.split('T')[0],
-                payment_method: transaction.payment_method || 'cash',
-                notes: transaction.notes || '',
-                is_anonymous: true
-            };
-            this.errors = {};
-            this.modalOpen = true;
-        },
-        async submit() {
-            this.loading = true;
-            this.errors = {};
-            const url = this.isEdit ? `/finances/incomes/${this.editId}` : '/finances/incomes';
-            try {
-                const response = await fetch(url, {
-                    method: this.isEdit ? 'PUT' : 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(this.formData)
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
-                } else if (response.status === 422) {
-                    this.errors = data.errors || {};
-                } else {
-                    showToast('error', data.message || 'Помилка збереження');
-                }
-            } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-
-window.expenseModal = function() {
-    return {
-        modalOpen: false,
-        loading: false,
-        isEdit: false,
-        editId: null,
-        errors: {},
-        formData: {
-            amount: '',
-            currency: 'UAH',
-            description: '',
-            category_id: '',
-            ministry_id: '',
-            date: new Date().toISOString().split('T')[0],
-            payment_method: 'cash'
-        },
-        init() {
-            window.openExpenseModal = () => this.openCreate();
-            window.openExpenseEditModal = (t) => this.openEdit(t);
-        },
-        openCreate() {
-            this.isEdit = false;
-            this.editId = null;
-            this.formData = {
-                amount: '',
-                currency: 'UAH',
-                description: '',
-                category_id: '',
-                ministry_id: '',
-                date: new Date().toISOString().split('T')[0],
-                payment_method: 'cash'
-            };
-            this.errors = {};
-            this.modalOpen = true;
-        },
-        openEdit(transaction) {
-            this.isEdit = true;
-            this.editId = transaction.id;
-            this.formData = {
-                amount: transaction.amount,
-                currency: transaction.currency || 'UAH',
-                description: transaction.description || '',
-                category_id: transaction.category_id || '',
-                ministry_id: transaction.ministry_id || '',
-                date: transaction.date.split('T')[0],
-                payment_method: transaction.payment_method || 'cash'
-            };
-            this.errors = {};
-            this.modalOpen = true;
-        },
-        async submit() {
-            this.loading = true;
-            this.errors = {};
-            const url = this.isEdit ? `/finances/expenses/${this.editId}` : '/finances/expenses';
-            try {
-                const response = await fetch(url, {
-                    method: this.isEdit ? 'PUT' : 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(this.formData)
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
-                } else if (response.status === 422) {
-                    this.errors = data.errors || {};
-                    if (data.message) showToast('error', data.message);
-                } else {
-                    showToast('error', data.message || 'Помилка збереження');
-                }
-            } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-
-window.exchangeModal = function() {
-    return {
-        modalOpen: false,
-        loading: false,
-        rate: {{ $exchangeRates['USD'] ?? 41 }},
-        nbuRates: @json($exchangeRates ?? ['USD' => 41, 'EUR' => 45]),
-        formData: {
-            from_currency: 'USD',
-            to_currency: 'UAH',
-            from_amount: '',
-            to_amount: '',
-            date: new Date().toISOString().split('T')[0],
-            notes: ''
-        },
-        init() {
-            window.openExchangeModal = () => this.openModal();
-        },
-        openModal() {
-            this.formData = {
-                from_currency: 'USD',
-                to_currency: 'UAH',
-                from_amount: '',
-                to_amount: '',
-                date: new Date().toISOString().split('T')[0],
-                notes: ''
-            };
-            this.updateRate();
-            this.modalOpen = true;
-        },
-        updateRate() {
-            const from = this.formData.from_currency;
-            const to = this.formData.to_currency;
-            if (from !== 'UAH' && to === 'UAH') {
-                this.rate = this.nbuRates[from] || 1;
-            } else if (from === 'UAH' && to !== 'UAH') {
-                this.rate = this.nbuRates[to] || 1;
-            } else {
-                this.rate = 1;
-            }
-            this.calculate();
-        },
-        calculate() {
-            const from = this.formData.from_currency;
-            const to = this.formData.to_currency;
-            const amount = parseFloat(this.formData.from_amount) || 0;
-            if (amount <= 0) {
-                this.formData.to_amount = '';
-                return;
-            }
-            if (from !== 'UAH' && to === 'UAH') {
-                this.formData.to_amount = (amount * this.rate).toFixed(2);
-            } else if (from === 'UAH' && to !== 'UAH') {
-                this.formData.to_amount = (amount / this.rate).toFixed(2);
-            } else {
-                this.formData.to_amount = (amount * this.rate).toFixed(2);
-            }
-        },
-        async submit() {
-            this.loading = true;
-            try {
-                const response = await fetch('/finances/exchange', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(this.formData)
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
-                } else {
-                    showToast('error', data.message || 'Помилка');
-                }
-            } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-</script>
-@endpush
 @endsection
