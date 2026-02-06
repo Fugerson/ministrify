@@ -47,7 +47,7 @@
             </div>
             <div>
                 <div class="font-medium text-gray-900 dark:text-white">Приєднатися до церкви</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">Мене запросили і я маю код запрошення</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Моя церква вже є в системі</div>
             </div>
         </label>
     </div>
@@ -78,14 +78,22 @@
     <!-- Join church fields -->
     <div x-show="action === 'join_church'" x-cloak class="space-y-4">
         <div>
-            <label for="invite_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Код запрошення</label>
-            <input type="text" name="invite_code" id="invite_code" value="{{ old('invite_code') }}"
-                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all uppercase tracking-widest text-center font-mono"
-                   placeholder="ABC123">
-            @error('invite_code')
+            <label for="church_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Оберіть церкву</label>
+            <select name="church_id" id="church_id"
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
+                <option value="">-- Оберіть церкву --</option>
+                @foreach($churches as $church)
+                    <option value="{{ $church->id }}" {{ old('church_id') == $church->id ? 'selected' : '' }}>
+                        {{ $church->name }}{{ $church->city ? ' — ' . $church->city : '' }}
+                    </option>
+                @endforeach
+            </select>
+            @error('church_id')
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
             @enderror
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Код можна отримати у адміністратора вашої церкви</p>
+            @if($churches->isEmpty())
+                <p class="mt-2 text-sm text-amber-600 dark:text-amber-400">Наразі немає церков, які приймають нових учасників. Зверніться до адміністратора вашої церкви.</p>
+            @endif
         </div>
     </div>
 

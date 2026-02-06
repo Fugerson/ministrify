@@ -310,11 +310,12 @@ function mySchedule() {
             this.pendingActions++;
 
             // Register for background sync if supported
-            if ('serviceWorker' in navigator && 'sync' in window.registration) {
+            if ('serviceWorker' in navigator) {
                 try {
-                    await navigator.serviceWorker.ready.then(reg => {
-                        return reg.sync.register('sync-schedule-actions');
-                    });
+                    const reg = await navigator.serviceWorker.ready;
+                    if ('sync' in reg) {
+                        await reg.sync.register('sync-schedule-actions');
+                    }
                 } catch (e) {
                     // Background sync not available
                 }

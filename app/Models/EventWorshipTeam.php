@@ -34,4 +34,9 @@ class EventWorshipTeam extends Model
     {
         return $this->belongsTo(WorshipRole::class);
     }
+
+    public function eventSong(): BelongsTo
+    {
+        return $this->belongsTo(EventSong::class);
+    }
 }

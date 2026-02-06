@@ -180,9 +180,9 @@ Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
 
-// Two-Factor Authentication
+// Two-Factor Authentication (throttled to prevent brute force)
 Route::get('two-factor/challenge', [\App\Http\Controllers\TwoFactorController::class, 'challenge'])->name('two-factor.challenge');
-Route::post('two-factor/verify', [\App\Http\Controllers\TwoFactorController::class, 'verify'])->name('two-factor.verify');
+Route::post('two-factor/verify', [\App\Http\Controllers\TwoFactorController::class, 'verify'])->middleware('throttle:5,1')->name('two-factor.verify');
 
 Route::middleware(['auth', 'church'])->prefix('two-factor')->name('two-factor.')->group(function () {
     Route::get('/', [\App\Http\Controllers\TwoFactorController::class, 'show'])->name('show');

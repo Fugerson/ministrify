@@ -237,7 +237,13 @@ class SocialAuthController extends Controller
             return redirect()->route('login');
         }
 
-        return view('auth.google-register', compact('googleUser'));
+        // Get churches that allow self-registration
+        $churches = Church::where('settings->self_registration_enabled', true)
+            ->orWhereNull('settings->self_registration_enabled')
+            ->orderBy('name')
+            ->get(['id', 'name', 'city']);
+
+        return view('auth.google-register', compact('googleUser', 'churches'));
     }
 
     /**
@@ -255,7 +261,7 @@ class SocialAuthController extends Controller
             'action' => 'required|in:create_church,join_church',
             'church_name' => 'required_if:action,create_church|nullable|string|max:255',
             'city' => 'required_if:action,create_church|nullable|string|max:255',
-            'invite_code' => 'required_if:action,join_church|nullable|string',
+            'church_id' => 'required_if:action,join_church|nullable|exists:churches,id',
         ]);
 
         if ($validated['action'] === 'create_church') {
@@ -376,8 +382,60 @@ class SocialAuthController extends Controller
      */
     protected function joinChurchWithGoogleUser(Request $request, array $googleUser, array $validated)
     {
-        // TODO: Implement invite code logic
-        // For now, show error
-        return back()->with('error', 'Функція приєднання до церкви за кодом ще в розробці.');
+        $church = Church::findOrFail($validated['church_id']);
+
+        // Check if self-registration is enabled for this church
+        if ($church->getSetting('self_registration_enabled') === false) {
+            return back()->with('error', 'Ця церква не приймає нові реєстрації.');
+        }
+
+        // Restore soft-deleted user or create new user
+        $trashedUser = User::onlyTrashed()->where('email', $googleUser['email'])->first();
+
+        if ($trashedUser) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'church_id' => $church->id,
+                'name' => $googleUser['name'],
+                'google_id' => $googleUser['id'],
+                'email_verified_at' => now(),
+                'role' => 'user',
+                'church_role_id' => null,
+                'onboarding_completed' => true,
+            ]);
+            $user = $trashedUser;
+        } else {
+            $user = User::create([
+                'church_id' => $church->id,
+                'name' => $googleUser['name'],
+                'email' => $googleUser['email'],
+                'google_id' => $googleUser['id'],
+                'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+                'email_verified_at' => now(),
+                'role' => 'user',
+                'onboarding_completed' => true,
+            ]);
+        }
+
+        // Create Person record if not exists
+        if (!$user->person) {
+            $nameParts = explode(' ', $googleUser['name'], 2);
+            \App\Models\Person::create([
+                'church_id' => $church->id,
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'email' => $googleUser['email'],
+                'membership_status' => 'newcomer',
+            ]);
+        }
+
+        // Clear session and login
+        $request->session()->forget('google_user');
+        Auth::login($user, true);
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Ласкаво просимо до ' . $church->name . '!');
     }
 }

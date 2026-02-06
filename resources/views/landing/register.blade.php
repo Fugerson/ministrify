@@ -169,8 +169,8 @@
                     <input type="checkbox" id="terms" name="terms" required
                            class="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                     <label for="terms" class="text-sm text-gray-600 dark:text-gray-400">
-                        Я погоджуюсь з <a href="#" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">умовами використання</a>
-                        та <a href="#" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">політикою конфіденційності</a>
+                        Я погоджуюсь з <a href="{{ route('landing.terms') }}" target="_blank" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">умовами використання</a>
+                        та <a href="{{ route('landing.privacy') }}" target="_blank" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">політикою конфіденційності</a>
                     </label>
                 </div>
 

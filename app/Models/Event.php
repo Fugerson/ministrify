@@ -61,6 +61,7 @@ class Event extends Model
         'track_attendance' => 'boolean',
         'reminder_settings' => 'array',
         'google_synced_at' => 'datetime',
+        'google_sync_status' => 'string',
     ];
 
     // Service types
