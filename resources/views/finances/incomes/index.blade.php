@@ -601,7 +601,7 @@ window.incomesManager = function() {
                     amount: data.transaction.amount,
                     currency: data.transaction.currency || 'UAH',
                     category_id: data.transaction.category_id || '',
-                    date: data.transaction.date.split('T')[0],
+                    date: data.transaction.date.substring(0, 10),
                     payment_method: data.transaction.payment_method || 'cash',
                     notes: data.transaction.notes || '',
                     is_anonymous: true

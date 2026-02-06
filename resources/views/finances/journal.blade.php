@@ -698,7 +698,7 @@ window.incomeModal = function() {
                 amount: transaction.amount,
                 currency: transaction.currency || 'UAH',
                 category_id: transaction.category_id || '',
-                date: transaction.date.split('T')[0],
+                date: transaction.date.substring(0, 10),
                 payment_method: transaction.payment_method || 'cash',
                 notes: transaction.notes || '',
                 is_anonymous: true
@@ -787,7 +787,7 @@ window.expenseModal = function() {
                 description: transaction.description || '',
                 category_id: transaction.category_id || '',
                 ministry_id: transaction.ministry_id || '',
-                date: transaction.date.split('T')[0],
+                date: transaction.date.substring(0, 10),
                 payment_method: transaction.payment_method || 'cash'
             };
             this.errors = {};

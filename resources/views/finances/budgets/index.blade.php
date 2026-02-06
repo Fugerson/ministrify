@@ -517,7 +517,7 @@ window.expenseEditModal = function() {
                     description: t.description || '',
                     category_id: t.category_id || '',
                     ministry_id: t.ministry_id || '',
-                    date: t.date.split('T')[0]
+                    date: t.date.substring(0, 10)
                 };
                 this.existingAttachments = t.attachments || [];
                 if (this.$refs.fileInput) this.$refs.fileInput.value = '';

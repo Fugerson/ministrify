@@ -740,7 +740,7 @@ window.expensesManager = function() {
                     currency: data.transaction.currency || 'UAH',
                     ministry_id: data.transaction.ministry_id || '',
                     category_id: data.transaction.category_id || '',
-                    date: data.transaction.date.split('T')[0],
+                    date: data.transaction.date.substring(0, 10),
                     description: data.transaction.description || '',
                     payment_method: data.transaction.payment_method || 'card',
                     expense_type: data.transaction.expense_type || '',
