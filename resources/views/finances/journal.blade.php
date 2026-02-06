@@ -622,6 +622,33 @@ function journalApp() {
             } else {
                 window.openExpenseEditModal && window.openExpenseEditModal(transaction);
             }
+        },
+
+        // Update or add transaction without page reload
+        updateTransaction(transaction, isNew = false) {
+            if (isNew) {
+                // Add new transaction to the beginning
+                this.allTransactions.unshift(transaction);
+            } else {
+                // Update existing transaction
+                const index = this.allTransactions.findIndex(t => t.id === transaction.id);
+                if (index !== -1) {
+                    this.allTransactions[index] = transaction;
+                }
+            }
+        },
+
+        removeTransaction(id) {
+            const index = this.allTransactions.findIndex(t => t.id === id);
+            if (index !== -1) {
+                this.allTransactions.splice(index, 1);
+            }
+        },
+
+        init() {
+            // Expose update functions globally
+            window.journalUpdateTransaction = (t, isNew) => this.updateTransaction(t, isNew);
+            window.journalRemoveTransaction = (id) => this.removeTransaction(id);
         }
     }
 }
@@ -698,7 +725,10 @@ window.incomeModal = function() {
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
+                    // Update transaction on the fly
+                    if (data.transaction && window.journalUpdateTransaction) {
+                        window.journalUpdateTransaction(data.transaction, !this.isEdit);
+                    }
                 } else if (response.status === 422) {
                     this.errors = data.errors || {};
                 } else {
@@ -782,7 +812,10 @@ window.expenseModal = function() {
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
+                    // Update transaction on the fly
+                    if (data.transaction && window.journalUpdateTransaction) {
+                        window.journalUpdateTransaction(data.transaction, !this.isEdit);
+                    }
                 } else if (response.status === 422) {
                     this.errors = data.errors || {};
                     if (data.message) showToast('error', data.message);
