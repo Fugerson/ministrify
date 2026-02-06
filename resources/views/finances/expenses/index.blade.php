@@ -157,7 +157,7 @@ window.expensesFilter = function() {
         remainingFormatted: '{{ number_format($totals["budget"] - $totals["spent"], 0, ",", " ") }} ₴',
 
         init() {
-            // expenses already loaded via @json above
+            // data pre-loaded from server
         },
 
         async onPeriodChange(detail) {
