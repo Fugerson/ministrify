@@ -125,6 +125,64 @@ window.exchangeManager = function() {
     };
 };
 
+// AJAX filter for expenses (no page reload)
+window.expensesFilter = function() {
+    return {
+        loading: false,
+        expenses: [],
+        budget: {{ $totals['budget'] }},
+        spent: {{ $totals['spent'] }},
+        remaining: {{ $totals['budget'] - $totals['spent'] }},
+        budgetFormatted: '{{ number_format($totals["budget"], 0, ",", " ") }} ₴',
+        spentFormatted: '{{ number_format($totals["spent"], 0, ",", " ") }} ₴',
+        remainingFormatted: '{{ number_format($totals["budget"] - $totals["spent"], 0, ",", " ") }} ₴',
+
+        init() {
+            this.expenses = @json($expensesJson);
+        },
+
+        async onPeriodChange(detail) {
+            if (!detail || !detail.dateRange || !detail.isUserAction) return;
+
+            this.loading = true;
+            const { start, end } = detail.dateRange;
+            const startDate = start instanceof Date ? start.toISOString().split('T')[0] : start;
+            const endDate = end instanceof Date ? end.toISOString().split('T')[0] : end;
+
+            // Update URL without reload
+            const url = new URL(window.location.href);
+            url.searchParams.set('start_date', startDate);
+            url.searchParams.set('end_date', endDate);
+            url.searchParams.delete('year');
+            url.searchParams.delete('month');
+            history.replaceState(null, '', url.toString());
+
+            try {
+                const response = await fetch(`/finances/expenses?start_date=${startDate}&end_date=${endDate}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.expenses = data.expenses;
+                    this.budget = data.totals.budget;
+                    this.spent = data.totals.spent;
+                    this.remaining = data.totals.remaining;
+                    this.budgetFormatted = data.totals.budget_formatted;
+                    this.spentFormatted = data.totals.spent_formatted;
+                    this.remainingFormatted = data.totals.remaining_formatted;
+                }
+            } catch (e) {
+                console.error('Filter error:', e);
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+
 window.expensesManager = function() {
     return {
         modalOpen: false,
@@ -375,7 +433,26 @@ window.expensesManager = function() {
 <div x-data="expensesManager()" x-cloak>
 @include('finances.partials.tabs')
 
-<div id="finance-content" x-data @finance-period-changed.window="handlePeriodReload($event.detail)">
+@php
+$expensesJson = $expenses->map(function($e) {
+    return [
+        'id' => $e->id,
+        'date' => $e->date->format('d.m'),
+        'date_full' => $e->date->format('Y-m-d'),
+        'description' => $e->description,
+        'notes' => $e->notes,
+        'ministry_name' => $e->ministry?->name ?? '-',
+        'category_name' => $e->category?->name ?? '-',
+        'payment_method' => $e->payment_method_label,
+        'amount' => $e->amount,
+        'amount_formatted' => \App\Helpers\CurrencyHelper::format($e->amount, $e->currency ?? 'UAH'),
+        'currency' => $e->currency ?? 'UAH',
+        'amount_uah' => $e->amount_uah,
+    ];
+});
+$remaining = $totals['budget'] - $totals['spent'];
+@endphp
+<div id="finance-content" x-data="expensesFilter()" @finance-period-changed.window="onPeriodChange($event.detail)">
 <div class="space-y-6">
 
     <!-- Summary card -->
@@ -383,16 +460,16 @@ window.expensesManager = function() {
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
             <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                 <p class="text-sm text-blue-600 dark:text-blue-400">Бюджет</p>
-                <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ number_format($totals['budget'], 0, ',', ' ') }} ₴</p>
+                <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" x-text="budgetFormatted">{{ number_format($totals['budget'], 0, ',', ' ') }} ₴</p>
             </div>
             <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
                 <p class="text-sm text-red-600 dark:text-red-400">Витрачено</p>
-                <p class="text-2xl font-bold text-red-700 dark:text-red-300">{{ number_format($totals['spent'], 0, ',', ' ') }} ₴</p>
+                <p class="text-2xl font-bold text-red-700 dark:text-red-300" x-text="spentFormatted">{{ number_format($totals['spent'], 0, ',', ' ') }} ₴</p>
             </div>
-            <div class="bg-{{ $totals['budget'] - $totals['spent'] < 0 ? 'orange' : 'green' }}-50 dark:bg-{{ $totals['budget'] - $totals['spent'] < 0 ? 'orange' : 'green' }}-900/20 rounded-lg p-4">
-                <p class="text-sm {{ $totals['budget'] - $totals['spent'] < 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400' }}">Залишок</p>
-                <p class="text-2xl font-bold {{ $totals['budget'] - $totals['spent'] < 0 ? 'text-orange-700 dark:text-orange-300' : 'text-green-700 dark:text-green-300' }}">
-                    {{ number_format($totals['budget'] - $totals['spent'], 0, ',', ' ') }} ₴
+            <div :class="remaining < 0 ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-green-50 dark:bg-green-900/20'" class="rounded-lg p-4">
+                <p class="text-sm" :class="remaining < 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'">Залишок</p>
+                <p class="text-2xl font-bold" :class="remaining < 0 ? 'text-orange-700 dark:text-orange-300' : 'text-green-700 dark:text-green-300'" x-text="remainingFormatted">
+                    {{ number_format($remaining, 0, ',', ' ') }} ₴
                 </p>
             </div>
         </div>
@@ -433,44 +510,58 @@ window.expensesManager = function() {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse($expenses as $expense)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50" data-expense-id="{{ $expense->id }}">
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                {{ $expense->date->format('d.m') }}
+                    <!-- Loading indicator -->
+                    <template x-if="loading">
+                        <tr>
+                            <td colspan="6" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <svg class="animate-spin h-6 w-6 mx-auto text-primary-600" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </td>
+                        </tr>
+                    </template>
+
+                    <!-- Empty state -->
+                    <template x-if="!loading && expenses.length === 0">
+                        <tr>
+                            <td colspan="6" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                Немає витрат за цей період
+                            </td>
+                        </tr>
+                    </template>
+
+                    <!-- Data rows -->
+                    <template x-for="expense in expenses" :key="expense.id">
+                        <tr x-show="!loading" class="hover:bg-gray-50 dark:hover:bg-gray-700/50" :data-expense-id="expense.id">
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" x-text="expense.date">
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
-                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px] sm:max-w-none">{{ $expense->description }}</p>
-                                @if($expense->notes)
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">{{ Str::limit($expense->notes, 50) }}</p>
-                                @endif
-                                <!-- Mobile: show ministry under description -->
-                                <p class="md:hidden text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $expense->ministry?->name ?? '' }}</p>
+                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px] sm:max-w-none" x-text="expense.description"></p>
+                                <template x-if="expense.notes">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block" x-text="expense.notes.substring(0, 50) + (expense.notes.length > 50 ? '...' : '')"></p>
+                                </template>
+                                <p class="md:hidden text-xs text-gray-400 dark:text-gray-500 mt-0.5" x-text="expense.ministry_name !== '-' ? expense.ministry_name : ''"></p>
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
-                                {{ $expense->ministry?->name ?? '-' }}
+                            <td class="px-3 md:px-6 py-3 md:py-4 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell" x-text="expense.ministry_name">
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell">
-                                {{ $expense->category?->name ?? '-' }}
+                            <td class="px-3 md:px-6 py-3 md:py-4 text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell" x-text="expense.category_name">
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
-                                <span class="text-sm font-semibold text-red-600 dark:text-red-400">
-                                    -{{ \App\Helpers\CurrencyHelper::format($expense->amount, $expense->currency ?? 'UAH') }}
-                                </span>
-                                @if(($expense->currency ?? 'UAH') !== 'UAH' && $expense->amount_uah)
-                                <span class="block text-xs text-gray-400 dark:text-gray-500">
-                                    {{ number_format($expense->amount_uah, 0, ',', ' ') }} ₴
-                                </span>
-                                @endif
+                                <span class="text-sm font-semibold text-red-600 dark:text-red-400" x-text="'-' + expense.amount_formatted"></span>
+                                <template x-if="expense.currency !== 'UAH' && expense.amount_uah">
+                                    <span class="block text-xs text-gray-400 dark:text-gray-500" x-text="Math.round(expense.amount_uah).toLocaleString('uk-UA') + ' ₴'"></span>
+                                </template>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm">
                                 <div class="flex items-center justify-end gap-1">
-                                    <button type="button" @click.prevent.stop="openEdit({{ $expense->id }})"
+                                    <button type="button" @click.prevent.stop="$root.openEdit(expense.id)"
                                             class="p-2 text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
                                     </button>
-                                    <button type="button" @click.prevent.stop="confirmDelete({{ $expense->id }})"
+                                    <button type="button" @click.prevent.stop="$root.confirmDelete(expense.id)"
                                             class="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -479,13 +570,7 @@ window.expensesManager = function() {
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                Немає витрат за цей місяць
-                            </td>
-                        </tr>
-                    @endforelse
+                    </template>
                 </tbody>
             </table>
         </div>
