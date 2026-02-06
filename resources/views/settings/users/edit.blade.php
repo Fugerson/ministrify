@@ -314,6 +314,12 @@
         </div>
     </div>
 
+    @php
+        $modulesJson = collect(\App\Models\ChurchRolePermission::MODULES)->map(function($m, $k) {
+            return ['key' => $k, 'label' => $m['label'], 'actions' => $m['actions']];
+        })->values();
+        $actionsJson = \App\Models\ChurchRolePermission::ACTIONS;
+    @endphp
     <script>
     function permissionOverrides() {
         return {
@@ -322,11 +328,9 @@
             roleName: '',
             rolePermissions: {},
             overrides: {},
-            modules: @json(collect(\App\Models\ChurchRolePermission::MODULES)->map(function($m, $k) {
-                return ['key' => $k, 'label' => $m['label'], 'actions' => $m['actions']];
-            })->values()),
+            modules: @json($modulesJson),
             allActions: ['view', 'create', 'edit', 'delete'],
-            actionLabels: @json(\App\Models\ChurchRolePermission::ACTIONS),
+            actionLabels: @json($actionsJson),
 
             async loadPermissions() {
                 try {

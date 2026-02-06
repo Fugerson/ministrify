@@ -2052,6 +2052,169 @@
             </div>
         </div>
 
+        <!-- Per-User Permission Overrides -->
+        @php
+            $nonAdminUsers = $users->filter(fn($u) => $u->church_role_id && !$u->churchRole?->is_admin_role)->values();
+        @endphp
+        @if($nonAdminUsers->count() > 0)
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
+             x-data="userOverridesManager()">
+            <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Персональні права</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Додаткові права для конкретних користувачів понад їхню роль</p>
+            </div>
+
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                @foreach($nonAdminUsers as $u)
+                <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3"
+                     x-data="{ expanded: false }">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="flex-shrink-0 h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                            <span class="text-gray-600 dark:text-gray-300 font-medium text-sm">{{ mb_substr($u->name, 0, 1) }}</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $u->name }}</div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full"
+                                      style="background-color: {{ $u->churchRole->color }}30; color: {{ $u->churchRole->color }}">
+                                    {{ $u->churchRole->name }}
+                                </span>
+                                {{-- Override badges --}}
+                                @if(!empty($u->permission_overrides))
+                                    @foreach($u->permission_overrides as $mod => $actions)
+                                        @foreach($actions as $act)
+                                        <span class="inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
+                                            {{ $permissionModules[$mod]['label'] ?? $mod }}: {{ $permissionActions[$act] ?? $act }}
+                                        </span>
+                                        @endforeach
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <button @click="openUserModal({{ $u->id }}, @js($u->name), @js($u->churchRole->name))"
+                            class="flex-shrink-0 px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
+                        Налаштувати
+                    </button>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- User Permissions Modal --}}
+            <div x-show="showModal" x-cloak
+                 class="fixed inset-0 z-50 overflow-y-auto"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0">
+                <div class="flex items-start justify-center min-h-screen px-4 py-8">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity" @click="showModal = false"></div>
+                    <div class="relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl transform transition-all w-full max-w-3xl mx-4"
+                         x-transition:enter="ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                         @keydown.escape.window="showModal = false">
+
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-1">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додаткові права</h3>
+                                <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                <span class="font-medium text-gray-700 dark:text-gray-300" x-text="modalUserName"></span>
+                                — роль: <span x-text="modalRoleName"></span>
+                            </p>
+
+                            {{-- Legend --}}
+                            <div class="flex flex-wrap items-center gap-4 mb-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span class="inline-flex items-center gap-1">
+                                    <span class="w-4 h-4 rounded bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    </span>
+                                    Від ролі
+                                </span>
+                                <span class="inline-flex items-center gap-1">
+                                    <span class="w-4 h-4 rounded bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-400 dark:border-purple-500"></span>
+                                    Додатково
+                                </span>
+                                <span class="inline-flex items-center gap-1">
+                                    <span class="w-4 h-4 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-300 dark:text-gray-600">&mdash;</span>
+                                    Недоступно
+                                </span>
+                            </div>
+
+                            {{-- Permissions Table --}}
+                            <div class="overflow-x-auto -mx-6 px-6">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                                            <th class="text-left py-2 pr-4 font-medium text-gray-600 dark:text-gray-400">Модуль</th>
+                                            @foreach($permissionActions as $actKey => $actLabel)
+                                            <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">{{ mb_substr($actLabel, 0, 6) }}.</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                        @foreach($permissionModules as $modKey => $mod)
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                            <td class="py-2.5 pr-4">
+                                                <span class="font-medium text-gray-900 dark:text-white">{{ $mod['label'] }}</span>
+                                            </td>
+                                            @foreach($permissionActions as $actKey => $actLabel)
+                                            <td class="text-center py-2.5 px-2">
+                                                @if(in_array($actKey, $mod['actions']))
+                                                {{-- Role permission (green check) --}}
+                                                <template x-if="isRolePerm('{{ $modKey }}', '{{ $actKey }}')">
+                                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-green-100 dark:bg-green-900/40">
+                                                        <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                                    </span>
+                                                </template>
+                                                {{-- Override checkbox (purple) --}}
+                                                <template x-if="!isRolePerm('{{ $modKey }}', '{{ $actKey }}')">
+                                                    <label class="inline-flex items-center justify-center cursor-pointer">
+                                                        <input type="checkbox"
+                                                               :checked="isOverride('{{ $modKey }}', '{{ $actKey }}')"
+                                                               @change="toggleOverride('{{ $modKey }}', '{{ $actKey }}')"
+                                                               class="w-5 h-5 rounded border-2 border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-500 focus:ring-purple-500 dark:focus:ring-purple-600 bg-white dark:bg-gray-700 cursor-pointer">
+                                                    </label>
+                                                </template>
+                                                @else
+                                                <span class="text-gray-300 dark:text-gray-600">&mdash;</span>
+                                                @endif
+                                            </td>
+                                            @endforeach
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {{-- Modal Footer --}}
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-end gap-3">
+                            <button type="button" @click="showModal = false"
+                                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                Скасувати
+                            </button>
+                            <button type="button" @click="saveUserOverrides()"
+                                    :disabled="savingUser"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                                <span x-show="!savingUser">Зберегти</span>
+                                <span x-show="savingUser" x-cloak>Збереження...</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Info -->
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
             <div class="flex gap-3">
@@ -2063,6 +2226,7 @@
                     <ul class="list-disc list-inside space-y-1 text-blue-700 dark:text-blue-300">
                         <li>Ролі з <strong>повним доступом</strong> (позначені щитом) мають доступ до всіх функцій</li>
                         <li>Для інших ролей налаштуйте окремі права для кожного модуля</li>
+                        <li><strong>Персональні права</strong> — додаткові дозволи для конкретних користувачів понад їхню роль</li>
                         <li><a href="{{ route('settings.church-roles.index') }}" class="underline">Керувати ролями</a> можна на сторінці "Церковні ролі"</li>
                     </ul>
                 </div>
@@ -2299,6 +2463,85 @@ function permissionsManager() {
             }
         }
     }
+}
+
+function userOverridesManager() {
+    const actionLabels = @json(\App\Models\ChurchRolePermission::ACTIONS);
+
+    return {
+        showModal: false,
+        savingUser: false,
+        modalUserId: null,
+        modalUserName: '',
+        modalRoleName: '',
+        rolePerms: {},
+        overrides: {},
+
+        async openUserModal(userId, userName, roleName) {
+            this.modalUserId = userId;
+            this.modalUserName = userName;
+            this.modalRoleName = roleName;
+            this.rolePerms = {};
+            this.overrides = {};
+
+            try {
+                const res = await fetch(`/settings/users/${userId}/permissions`);
+                const data = await res.json();
+                this.rolePerms = data.role_permissions || {};
+                this.overrides = JSON.parse(JSON.stringify(data.overrides || {}));
+                this.showModal = true;
+            } catch (e) {
+                console.error('Failed to load permissions', e);
+                if (window.showGlobalToast) showGlobalToast('Помилка завантаження', 'error');
+            }
+        },
+
+        isRolePerm(mod, action) {
+            return (this.rolePerms[mod] || []).includes(action);
+        },
+
+        isOverride(mod, action) {
+            return (this.overrides[mod] || []).includes(action);
+        },
+
+        toggleOverride(mod, action) {
+            if (!this.overrides[mod]) this.overrides[mod] = [];
+            const idx = this.overrides[mod].indexOf(action);
+            if (idx === -1) {
+                this.overrides[mod].push(action);
+            } else {
+                this.overrides[mod].splice(idx, 1);
+            }
+            if (this.overrides[mod].length === 0) delete this.overrides[mod];
+        },
+
+        async saveUserOverrides() {
+            this.savingUser = true;
+            try {
+                const res = await fetch(`/settings/users/${this.modalUserId}/permissions`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ overrides: this.overrides }),
+                });
+                if (res.ok) {
+                    this.showModal = false;
+                    if (window.showGlobalToast) showGlobalToast('Додаткові права збережено', 'success');
+                    window.location.reload();
+                } else {
+                    throw new Error('Failed');
+                }
+            } catch (e) {
+                console.error(e);
+                if (window.showGlobalToast) showGlobalToast('Помилка збереження', 'error');
+            } finally {
+                this.savingUser = false;
+            }
+        },
+    };
 }
 </script>
 @endpush
