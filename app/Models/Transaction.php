@@ -103,28 +103,26 @@ class Transaction extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'amount_uah' => 'decimal:2',
+        'date' => 'date',
         'is_anonymous' => 'boolean',
         'payment_data' => 'array',
         'paid_at' => 'datetime',
     ];
 
     /**
-     * Get the date attribute formatted as Y-m-d for JSON serialization.
-     * Prevents timezone shift when converting to JSON.
+     * Convert the model to an array.
+     * Formats date as Y-m-d to prevent timezone shift in JSON.
      */
-    public function getDateAttribute($value): ?string
+    public function toArray(): array
     {
-        if (!$value) {
-            return null;
+        $array = parent::toArray();
+
+        // Format date without timezone to prevent day shift
+        if (isset($array['date']) && $this->date) {
+            $array['date'] = $this->date->format('Y-m-d');
         }
 
-        // If already a string in Y-m-d format, return as is
-        if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
-            return $value;
-        }
-
-        // Convert to Carbon and format without timezone issues
-        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+        return $array;
     }
 
     protected static function boot(): void
