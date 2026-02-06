@@ -107,10 +107,10 @@ function financePeriodFilter() {
             window.financeDateRange = this.dateRange;
             window.financeCustomMode = this.customMode;
 
-            // Dispatch initial event
+            // Dispatch initial event (not a user action, won't trigger reload)
             this.$nextTick(() => {
                 window.dispatchEvent(new CustomEvent('finance-period-changed', {
-                    detail: { period: this.activePeriod, dateRange: this.dateRange, customMode: this.customMode }
+                    detail: { period: this.activePeriod, dateRange: this.dateRange, customMode: this.customMode, isUserAction: false }
                 }));
             });
         },
@@ -209,7 +209,7 @@ function financePeriodFilter() {
             window.financeDateRange = this.dateRange;
             window.financeCustomMode = this.customMode;
             window.dispatchEvent(new CustomEvent('finance-period-changed', {
-                detail: { period: this.activePeriod, dateRange: this.dateRange, customMode: this.customMode }
+                detail: { period: this.activePeriod, dateRange: this.dateRange, customMode: this.customMode, isUserAction: true }
             }));
         },
 
@@ -230,33 +230,21 @@ window.getFinanceDateRange = function() {
 };
 
 // Handler for pages that need to reload (incomes, expenses)
-// Tracks if this is the initial load to avoid unnecessary reloads
-window._periodReloadInitialized = false;
+// Only reloads on user action, not on initial load
 window.handlePeriodReload = function(detail) {
     if (!detail || !detail.dateRange) return;
 
+    // Only reload on user action (button click), not on init
+    if (!detail.isUserAction) return;
+
     const url = new URL(window.location.href);
-    const currentStart = url.searchParams.get('start_date');
-    const currentEnd = url.searchParams.get('end_date');
-
-    // On initial load, if URL already has date params, respect them and don't reload
-    if (!window._periodReloadInitialized) {
-        window._periodReloadInitialized = true;
-        // URL already has dates - don't override with localStorage period
-        if (currentStart && currentEnd) {
-            return;
-        }
-        // No dates in URL but using default month - don't reload
-        if (!currentStart && !currentEnd && detail.period === 'month' && !detail.customMode) {
-            return;
-        }
-    }
-
     const { start, end } = detail.dateRange;
     const startDate = start instanceof Date ? start.toISOString().split('T')[0] : start;
     const endDate = end instanceof Date ? end.toISOString().split('T')[0] : end;
 
     // If dates already match, don't reload
+    const currentStart = url.searchParams.get('start_date');
+    const currentEnd = url.searchParams.get('end_date');
     if (currentStart === startDate && currentEnd === endDate) {
         return;
     }
