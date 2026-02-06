@@ -510,7 +510,7 @@ class FinanceController extends Controller
                 ->incoming()
                 ->completed()
                 ->whereBetween('date', [$startDate, $endDate])
-                ->sum('amount'),
+                ->sum('amount_uah'),
         ];
 
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
@@ -736,7 +736,7 @@ class FinanceController extends Controller
             ->outgoing()
             ->completed()
             ->whereBetween('date', [$startDate, $endDate])
-            ->sum('amount');
+            ->sum('amount_uah');
 
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
 
