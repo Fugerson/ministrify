@@ -319,6 +319,126 @@ function budgetsPage() {
 </script>
 </div><!-- /finance-content -->
 
+<!-- Script must be defined BEFORE Alpine component that uses it -->
+<script>
+window.expenseEditModal = function() {
+    return {
+        modalOpen: false,
+        loading: false,
+        loadingData: false,
+        editId: null,
+        existingAttachments: [],
+        deleteAttachments: [],
+        selectedFiles: [],
+        formData: {
+            amount: '',
+            currency: 'UAH',
+            description: '',
+            category_id: '',
+            ministry_id: '',
+            date: ''
+        },
+        init() {
+            window.openExpenseEdit = (id) => this.openEdit(id);
+        },
+        async openEdit(id) {
+            this.editId = id;
+            this.loadingData = true;
+            this.modalOpen = true;
+            this.existingAttachments = [];
+            this.deleteAttachments = [];
+            this.selectedFiles = [];
+
+            try {
+                const response = await fetch(`/finances/expenses/${id}/edit`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                const t = data.transaction;
+
+                this.formData = {
+                    amount: t.amount,
+                    currency: t.currency || 'UAH',
+                    description: t.description || '',
+                    category_id: t.category_id || '',
+                    ministry_id: t.ministry_id || '',
+                    date: t.date.substring(0, 10)
+                };
+                this.existingAttachments = t.attachments || [];
+                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+            } catch (e) {
+                showToast('error', 'Помилка завантаження');
+                this.modalOpen = false;
+            } finally {
+                this.loadingData = false;
+            }
+        },
+        handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            this.selectedFiles = files.slice(0, 10);
+        },
+        removeFile(index) {
+            this.selectedFiles.splice(index, 1);
+            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+        },
+        toggleDeleteAttachment(id) {
+            const idx = this.deleteAttachments.indexOf(id);
+            if (idx === -1) {
+                this.deleteAttachments.push(id);
+            } else {
+                this.deleteAttachments.splice(idx, 1);
+            }
+        },
+        async submit() {
+            this.loading = true;
+            try {
+                const formData = new FormData();
+                formData.append('_method', 'PUT');
+                formData.append('amount', this.formData.amount);
+                formData.append('currency', this.formData.currency);
+                formData.append('description', this.formData.description);
+                formData.append('category_id', this.formData.category_id || '');
+                formData.append('ministry_id', this.formData.ministry_id || '');
+                formData.append('date', this.formData.date);
+
+                this.selectedFiles.forEach(file => {
+                    formData.append('receipts[]', file);
+                });
+
+                this.deleteAttachments.forEach(id => {
+                    formData.append('delete_attachments[]', id);
+                });
+
+                const response = await fetch(`/finances/expenses/${this.editId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    showToast('error', data.message || 'Помилка збереження');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+</script>
+
 <!-- Expense Edit Modal -->
 <div x-data="expenseEditModal()" x-cloak>
     <div x-show="modalOpen"
@@ -470,127 +590,4 @@ function budgetsPage() {
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-window.expenseEditModal = function() {
-    return {
-        modalOpen: false,
-        loading: false,
-        loadingData: false,
-        editId: null,
-        existingAttachments: [],
-        deleteAttachments: [],
-        selectedFiles: [],
-        formData: {
-            amount: '',
-            currency: 'UAH',
-            description: '',
-            category_id: '',
-            ministry_id: '',
-            date: ''
-        },
-        init() {
-            window.openExpenseEdit = (id) => this.openEdit(id);
-        },
-        async openEdit(id) {
-            this.editId = id;
-            this.loadingData = true;
-            this.modalOpen = true;
-            this.existingAttachments = [];
-            this.deleteAttachments = [];
-            this.selectedFiles = [];
-
-            try {
-                const response = await fetch(`/finances/expenses/${id}/edit`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-                const t = data.transaction;
-
-                this.formData = {
-                    amount: t.amount,
-                    currency: t.currency || 'UAH',
-                    description: t.description || '',
-                    category_id: t.category_id || '',
-                    ministry_id: t.ministry_id || '',
-                    date: t.date.substring(0, 10)
-                };
-                this.existingAttachments = t.attachments || [];
-                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-            } catch (e) {
-                showToast('error', 'Помилка завантаження');
-                this.modalOpen = false;
-            } finally {
-                this.loadingData = false;
-            }
-        },
-        handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            this.selectedFiles = files.slice(0, 10);
-        },
-        removeFile(index) {
-            this.selectedFiles.splice(index, 1);
-            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-        },
-        toggleDeleteAttachment(id) {
-            const idx = this.deleteAttachments.indexOf(id);
-            if (idx === -1) {
-                this.deleteAttachments.push(id);
-            } else {
-                this.deleteAttachments.splice(idx, 1);
-            }
-        },
-        async submit() {
-            this.loading = true;
-            try {
-                const formData = new FormData();
-                formData.append('_method', 'PUT');
-                formData.append('amount', this.formData.amount);
-                formData.append('currency', this.formData.currency);
-                formData.append('description', this.formData.description);
-                formData.append('category_id', this.formData.category_id || '');
-                formData.append('ministry_id', this.formData.ministry_id || '');
-                formData.append('date', this.formData.date);
-
-                // Add files
-                this.selectedFiles.forEach(file => {
-                    formData.append('receipts[]', file);
-                });
-
-                // Add attachments to delete
-                this.deleteAttachments.forEach(id => {
-                    formData.append('delete_attachments[]', id);
-                });
-
-                const response = await fetch(`/finances/expenses/${this.editId}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
-                } else {
-                    showToast('error', data.message || 'Помилка збереження');
-                }
-            } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-</script>
-@endpush
 @endsection

@@ -29,6 +29,347 @@
 @endsection
 
 @section('content')
+<!-- Scripts must be defined BEFORE Alpine components that use them -->
+<script>
+window.exchangeManager = function() {
+    return {
+        modalOpen: false,
+        loading: false,
+        rate: {{ $exchangeRates['USD'] ?? 41 }},
+        nbuRates: @json($exchangeRates ?? ['USD' => 41, 'EUR' => 45]),
+        formData: {
+            from_currency: 'USD',
+            to_currency: 'UAH',
+            from_amount: '',
+            to_amount: '',
+            date: new Date().toISOString().split('T')[0],
+            notes: ''
+        },
+
+        init() {
+            window.openExchangeModal = () => this.openModal();
+        },
+
+        openModal() {
+            this.formData = {
+                from_currency: 'USD',
+                to_currency: 'UAH',
+                from_amount: '',
+                to_amount: '',
+                date: new Date().toISOString().split('T')[0],
+                notes: ''
+            };
+            this.updateRate();
+            this.modalOpen = true;
+        },
+
+        updateRate() {
+            const from = this.formData.from_currency;
+            const to = this.formData.to_currency;
+            if (from !== 'UAH' && to === 'UAH') {
+                this.rate = this.nbuRates[from] || 1;
+            } else if (from === 'UAH' && to !== 'UAH') {
+                this.rate = this.nbuRates[to] || 1;
+            } else {
+                this.rate = 1;
+            }
+            this.calculate();
+        },
+
+        calculate() {
+            const from = this.formData.from_currency;
+            const to = this.formData.to_currency;
+            const amount = parseFloat(this.formData.from_amount) || 0;
+            if (amount <= 0) {
+                this.formData.to_amount = '';
+                return;
+            }
+            if (from !== 'UAH' && to === 'UAH') {
+                this.formData.to_amount = (amount * this.rate).toFixed(2);
+            } else if (from === 'UAH' && to !== 'UAH') {
+                this.formData.to_amount = (amount / this.rate).toFixed(2);
+            } else {
+                this.formData.to_amount = (amount * this.rate).toFixed(2);
+            }
+        },
+
+        async submit() {
+            this.loading = true;
+            try {
+                const response = await fetch('/finances/exchange', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    showToast('error', data.message || 'Помилка');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+
+window.expensesManager = function() {
+    return {
+        modalOpen: false,
+        deleteModalOpen: false,
+        isEdit: false,
+        editId: null,
+        deleteId: null,
+        loading: false,
+        errors: {},
+        budgetExceeded: false,
+        budgetMessage: '',
+        existingAttachments: [],
+        deleteAttachments: [],
+        selectedFiles: [],
+        formData: {
+            amount: '',
+            currency: 'UAH',
+            ministry_id: '',
+            category_id: '',
+            date: new Date().toISOString().split('T')[0],
+            description: '',
+            payment_method: 'card',
+            expense_type: '',
+            notes: '',
+            force_over_budget: false
+        },
+
+        init() {
+            window.openExpenseModal = () => this.openCreate();
+        },
+
+        openCreate() {
+            this.isEdit = false;
+            this.editId = null;
+            this.resetForm();
+            this.errors = {};
+            this.budgetExceeded = false;
+            this.budgetMessage = '';
+            this.existingAttachments = [];
+            this.deleteAttachments = [];
+            this.selectedFiles = [];
+            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+            this.modalOpen = true;
+        },
+
+        async openEdit(id) {
+            this.loading = true;
+            this.errors = {};
+            this.budgetExceeded = false;
+            this.budgetMessage = '';
+            this.existingAttachments = [];
+            this.deleteAttachments = [];
+            this.selectedFiles = [];
+
+            try {
+                const response = await fetch(`/finances/expenses/${id}/edit`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load');
+
+                const data = await response.json();
+
+                this.formData = {
+                    amount: data.transaction.amount,
+                    currency: data.transaction.currency || 'UAH',
+                    ministry_id: data.transaction.ministry_id || '',
+                    category_id: data.transaction.category_id || '',
+                    date: data.transaction.date.substring(0, 10),
+                    description: data.transaction.description || '',
+                    payment_method: data.transaction.payment_method || 'card',
+                    expense_type: data.transaction.expense_type || '',
+                    notes: data.transaction.notes || '',
+                    force_over_budget: false
+                };
+
+                this.existingAttachments = data.transaction.attachments || [];
+                this.isEdit = true;
+                this.editId = id;
+                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+                this.modalOpen = true;
+            } catch (error) {
+                showToast('error', 'Помилка завантаження даних');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            this.selectedFiles = files.slice(0, 10);
+        },
+
+        removeFile(index) {
+            this.selectedFiles.splice(index, 1);
+            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+        },
+
+        toggleDeleteAttachment(id) {
+            const idx = this.deleteAttachments.indexOf(id);
+            if (idx === -1) {
+                this.deleteAttachments.push(id);
+            } else {
+                this.deleteAttachments.splice(idx, 1);
+            }
+        },
+
+        async submit() {
+            this.loading = true;
+            this.errors = {};
+
+            const url = this.isEdit
+                ? `/finances/expenses/${this.editId}`
+                : '/finances/expenses';
+
+            try {
+                const formData = new FormData();
+                formData.append('amount', this.formData.amount);
+                formData.append('currency', this.formData.currency);
+                formData.append('ministry_id', this.formData.ministry_id || '');
+                formData.append('category_id', this.formData.category_id || '');
+                formData.append('date', this.formData.date);
+                formData.append('description', this.formData.description);
+                formData.append('payment_method', this.formData.payment_method || '');
+                formData.append('expense_type', this.formData.expense_type || '');
+                formData.append('notes', this.formData.notes || '');
+                if (this.formData.force_over_budget) {
+                    formData.append('force_over_budget', '1');
+                }
+
+                this.selectedFiles.forEach((file, i) => {
+                    formData.append('receipts[]', file);
+                });
+
+                this.deleteAttachments.forEach(id => {
+                    formData.append('delete_attachments[]', id);
+                });
+
+                if (this.isEdit) {
+                    formData.append('_method', 'PUT');
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else if (response.status === 422) {
+                    if (data.budget_exceeded) {
+                        this.budgetExceeded = true;
+                        this.budgetMessage = data.message;
+                    } else {
+                        this.errors = data.errors || {};
+                        if (data.message && !data.errors) {
+                            showToast('error', data.message);
+                        }
+                    }
+                } else {
+                    showToast('error', data.message || 'Помилка збереження');
+                }
+            } catch (error) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        confirmDelete(id) {
+            this.deleteId = id;
+            this.deleteModalOpen = true;
+        },
+
+        async deleteExpense() {
+            if (!this.deleteId) return;
+
+            this.loading = true;
+
+            try {
+                const response = await fetch(`/finances/expenses/${this.deleteId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    this.deleteModalOpen = false;
+                    showToast('success', data.message);
+
+                    const row = document.querySelector(`tr[data-expense-id="${this.deleteId}"]`);
+                    if (row) {
+                        row.style.transition = 'opacity 0.3s';
+                        row.style.opacity = '0';
+                        setTimeout(() => row.remove(), 300);
+                    }
+
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('error', data.message || 'Помилка видалення');
+                }
+            } catch (error) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+                this.deleteId = null;
+            }
+        },
+
+        resetForm() {
+            this.formData = {
+                amount: '',
+                currency: 'UAH',
+                ministry_id: '',
+                category_id: '',
+                date: new Date().toISOString().split('T')[0],
+                description: '',
+                payment_method: 'card',
+                expense_type: '',
+                notes: '',
+                force_over_budget: false
+            };
+            this.existingAttachments = [];
+            this.deleteAttachments = [];
+            this.selectedFiles = [];
+        }
+    }
+};
+</script>
+
 <div x-data="expensesManager()" x-cloak>
 @include('finances.partials.tabs')
 
@@ -573,355 +914,4 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-window.exchangeManager = function() {
-    return {
-        modalOpen: false,
-        loading: false,
-        rate: {{ $exchangeRates['USD'] ?? 41 }},
-        nbuRates: @json($exchangeRates ?? ['USD' => 41, 'EUR' => 45]),
-        formData: {
-            from_currency: 'USD',
-            to_currency: 'UAH',
-            from_amount: '',
-            to_amount: '',
-            date: new Date().toISOString().split('T')[0],
-            notes: ''
-        },
-
-        init() {
-            window.openExchangeModal = () => this.openModal();
-        },
-
-        openModal() {
-            this.formData = {
-                from_currency: 'USD',
-                to_currency: 'UAH',
-                from_amount: '',
-                to_amount: '',
-                date: new Date().toISOString().split('T')[0],
-                notes: ''
-            };
-            this.updateRate();
-            this.modalOpen = true;
-        },
-
-        updateRate() {
-            const from = this.formData.from_currency;
-            const to = this.formData.to_currency;
-            if (from !== 'UAH' && to === 'UAH') {
-                this.rate = this.nbuRates[from] || 1;
-            } else if (from === 'UAH' && to !== 'UAH') {
-                this.rate = this.nbuRates[to] || 1;
-            } else {
-                this.rate = 1;
-            }
-            this.calculate();
-        },
-
-        calculate() {
-            const from = this.formData.from_currency;
-            const to = this.formData.to_currency;
-            const amount = parseFloat(this.formData.from_amount) || 0;
-            if (amount <= 0) {
-                this.formData.to_amount = '';
-                return;
-            }
-            if (from !== 'UAH' && to === 'UAH') {
-                this.formData.to_amount = (amount * this.rate).toFixed(2);
-            } else if (from === 'UAH' && to !== 'UAH') {
-                this.formData.to_amount = (amount / this.rate).toFixed(2);
-            } else {
-                this.formData.to_amount = (amount * this.rate).toFixed(2);
-            }
-        },
-
-        async submit() {
-            this.loading = true;
-            try {
-                const response = await fetch('/finances/exchange', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(this.formData)
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
-                } else {
-                    showToast('error', data.message || 'Помилка');
-                }
-            } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-
-window.expensesManager = function() {
-    return {
-        modalOpen: false,
-        deleteModalOpen: false,
-        isEdit: false,
-        editId: null,
-        deleteId: null,
-        loading: false,
-        errors: {},
-        budgetExceeded: false,
-        budgetMessage: '',
-        existingAttachments: [],
-        deleteAttachments: [],
-        selectedFiles: [],
-        formData: {
-            amount: '',
-            currency: 'UAH',
-            ministry_id: '',
-            category_id: '',
-            date: new Date().toISOString().split('T')[0],
-            description: '',
-            payment_method: 'card',
-            expense_type: '',
-            notes: '',
-            force_over_budget: false
-        },
-
-        init() {
-            // Expose openCreate to window for header button
-            window.openExpenseModal = () => this.openCreate();
-        },
-
-        openCreate() {
-            this.isEdit = false;
-            this.editId = null;
-            this.resetForm();
-            this.errors = {};
-            this.budgetExceeded = false;
-            this.budgetMessage = '';
-            this.existingAttachments = [];
-            this.deleteAttachments = [];
-            this.selectedFiles = [];
-            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-            this.modalOpen = true;
-        },
-
-        async openEdit(id) {
-            this.loading = true;
-            this.errors = {};
-            this.budgetExceeded = false;
-            this.budgetMessage = '';
-            this.existingAttachments = [];
-            this.deleteAttachments = [];
-            this.selectedFiles = [];
-
-            try {
-                const response = await fetch(`/finances/expenses/${id}/edit`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to load');
-
-                const data = await response.json();
-
-                this.formData = {
-                    amount: data.transaction.amount,
-                    currency: data.transaction.currency || 'UAH',
-                    ministry_id: data.transaction.ministry_id || '',
-                    category_id: data.transaction.category_id || '',
-                    date: data.transaction.date.substring(0, 10),
-                    description: data.transaction.description || '',
-                    payment_method: data.transaction.payment_method || 'card',
-                    expense_type: data.transaction.expense_type || '',
-                    notes: data.transaction.notes || '',
-                    force_over_budget: false
-                };
-
-                this.existingAttachments = data.transaction.attachments || [];
-                this.isEdit = true;
-                this.editId = id;
-                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-                this.modalOpen = true;
-            } catch (error) {
-                showToast('error', 'Помилка завантаження даних');
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            this.selectedFiles = files.slice(0, 10); // Max 10 files
-        },
-
-        removeFile(index) {
-            this.selectedFiles.splice(index, 1);
-            // Reset file input
-            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-        },
-
-        toggleDeleteAttachment(id) {
-            const idx = this.deleteAttachments.indexOf(id);
-            if (idx === -1) {
-                this.deleteAttachments.push(id);
-            } else {
-                this.deleteAttachments.splice(idx, 1);
-            }
-        },
-
-        async submit() {
-            this.loading = true;
-            this.errors = {};
-
-            const url = this.isEdit
-                ? `/finances/expenses/${this.editId}`
-                : '/finances/expenses';
-
-            try {
-                // Use FormData to support file uploads
-                const formData = new FormData();
-                formData.append('amount', this.formData.amount);
-                formData.append('currency', this.formData.currency);
-                formData.append('ministry_id', this.formData.ministry_id || '');
-                formData.append('category_id', this.formData.category_id || '');
-                formData.append('date', this.formData.date);
-                formData.append('description', this.formData.description);
-                formData.append('payment_method', this.formData.payment_method || '');
-                formData.append('expense_type', this.formData.expense_type || '');
-                formData.append('notes', this.formData.notes || '');
-                if (this.formData.force_over_budget) {
-                    formData.append('force_over_budget', '1');
-                }
-
-                // Add files
-                this.selectedFiles.forEach((file, i) => {
-                    formData.append('receipts[]', file);
-                });
-
-                // Add attachments to delete (edit mode)
-                this.deleteAttachments.forEach(id => {
-                    formData.append('delete_attachments[]', id);
-                });
-
-                // For PUT requests, we need to use POST with _method
-                if (this.isEdit) {
-                    formData.append('_method', 'PUT');
-                }
-
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
-                    // Reload page to show updated data
-                    setTimeout(() => location.reload(), 500);
-                } else if (response.status === 422) {
-                    if (data.budget_exceeded) {
-                        this.budgetExceeded = true;
-                        this.budgetMessage = data.message;
-                    } else {
-                        this.errors = data.errors || {};
-                        if (data.message && !data.errors) {
-                            showToast('error', data.message);
-                        }
-                    }
-                } else {
-                    showToast('error', data.message || 'Помилка збереження');
-                }
-            } catch (error) {
-                showToast('error', 'Помилка з\'єднання');
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        confirmDelete(id) {
-            this.deleteId = id;
-            this.deleteModalOpen = true;
-        },
-
-        async deleteExpense() {
-            if (!this.deleteId) return;
-
-            this.loading = true;
-
-            try {
-                const response = await fetch(`/finances/expenses/${this.deleteId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    this.deleteModalOpen = false;
-                    showToast('success', data.message);
-
-                    // Remove row from table
-                    const row = document.querySelector(`tr[data-expense-id="${this.deleteId}"]`);
-                    if (row) {
-                        row.style.transition = 'opacity 0.3s';
-                        row.style.opacity = '0';
-                        setTimeout(() => row.remove(), 300);
-                    }
-
-                    // Reload after short delay to update totals
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showToast('error', data.message || 'Помилка видалення');
-                }
-            } catch (error) {
-                showToast('error', 'Помилка з\'єднання');
-            } finally {
-                this.loading = false;
-                this.deleteId = null;
-            }
-        },
-
-        resetForm() {
-            this.formData = {
-                amount: '',
-                currency: 'UAH',
-                ministry_id: '',
-                category_id: '',
-                date: new Date().toISOString().split('T')[0],
-                description: '',
-                payment_method: 'card',
-                expense_type: '',
-                notes: '',
-                force_over_budget: false
-            };
-            this.existingAttachments = [];
-            this.deleteAttachments = [];
-            this.selectedFiles = [];
-        }
-    }
-};
-</script>
-@endpush
 @endsection
