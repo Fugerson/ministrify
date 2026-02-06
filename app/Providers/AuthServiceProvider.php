@@ -39,11 +39,17 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         // Ministry management
-        Gate::define('manage-ministry', function (User $user, Ministry $ministry) {
+        Gate::define('manage-ministry', function (User $user, ?Ministry $ministry = null) {
+            if (!$ministry) {
+                return false;
+            }
             return $user->canManageMinistry($ministry);
         });
 
-        Gate::define('view-ministry', function (User $user, Ministry $ministry) {
+        Gate::define('view-ministry', function (User $user, ?Ministry $ministry = null) {
+            if (!$ministry) {
+                return false;
+            }
             // All users with view permission can see ministries in their church
             if ($user->canView('ministries') && $user->church_id === $ministry->church_id) {
                 return true;
@@ -62,7 +68,10 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         // Person management
-        Gate::define('manage-person', function (User $user, Person $person) {
+        Gate::define('manage-person', function (User $user, ?Person $person = null) {
+            if (!$person) {
+                return false;
+            }
             // Leaders can manage people in their ministries
             if ($user->isLeader() && $user->person) {
                 $leaderMinistryIds = $user->person->leadingMinistries()->pluck('id')->toArray();
@@ -73,7 +82,10 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         // Volunteer self-management
-        Gate::define('manage-own-profile', function (User $user, Person $person) {
+        Gate::define('manage-own-profile', function (User $user, ?Person $person = null) {
+            if (!$person) {
+                return false;
+            }
             return $user->person && $user->person->id === $person->id;
         });
     }
