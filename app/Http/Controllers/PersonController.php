@@ -340,7 +340,7 @@ class PersonController extends Controller
         $churchRoles = collect();
         $shepherds = collect();
         $church = $this->getCurrentChurch();
-        $canEditProfile = auth()->user()->isAdmin() || $isOwnProfile;
+        $canEditProfile = auth()->user()->isAdmin() || auth()->user()->canEdit('people') || $isOwnProfile;
 
         if ($canEditProfile) {
             $tags = Tag::where('church_id', $church->id)->get();
@@ -996,7 +996,7 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin() && !auth()->user()->canEdit('people')) {
             return response()->json(['message' => 'Недостатньо прав'], 403);
         }
 

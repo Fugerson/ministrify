@@ -103,7 +103,7 @@
 
                 <!-- Info -->
                 <div class="flex-1">
-                    @if($isAdmin)
+                    @if($canEdit)
                         <div class="flex items-center gap-2">
                             <input type="text" name="first_name" value="{{ old('first_name', $person->first_name) }}" required
                                    class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 w-auto"
@@ -116,7 +116,7 @@
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $person->full_name }}</h1>
                     @endif
                     <div class="flex flex-wrap gap-2 mt-2">
-                        @if($isAdmin)
+                        @if($canEdit)
                             <div x-data="{
                                 showPicker: false,
                                 selectedTags: {{ json_encode($person->tags->pluck('id')->toArray()) }},
@@ -264,7 +264,7 @@
                 @endif
             </div>
 
-            @if($isAdmin)
+            @if($canEdit)
             <!-- Additional Admin Fields -->
             <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
@@ -628,7 +628,7 @@
         </div>
     </div>
 
-    @if($isAdmin)
+    @if($canEdit)
     <!-- Ministries (Admin editable) -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 mt-6">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Команди</h2>
@@ -674,7 +674,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <!-- Ministries & Groups -->
         <div class="lg:col-span-2 space-y-6">
-            @if(!$isAdmin)
+            @if(!$canEdit)
             <!-- Ministries (View only for non-admins) -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -881,7 +881,7 @@
 
     <!-- Family Relationships -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-6"
-         @if($isAdmin) x-data="familyManager()" @endif>
+         @if($canEdit) x-data="familyManager()" @endif>
         <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -889,7 +889,7 @@
                 </svg>
                 <h2 class="font-semibold text-gray-900 dark:text-white">Сім'я</h2>
             </div>
-            @if($isAdmin)
+            @if($canEdit)
             <button @click="showAddModal = true" type="button"
                     class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -900,7 +900,7 @@
             @endif
         </div>
 
-        @if($isAdmin)
+        @if($canEdit)
         <template x-if="familyMembers.length > 0">
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 <template x-for="member in familyMembers" :key="member.relationship_id">
@@ -977,7 +977,7 @@
         @endif
         @endif
 
-        @if($isAdmin)
+        @if($canEdit)
         <!-- Add Family Modal -->
         <template x-teleport="body">
             <div x-show="showAddModal" x-cloak
@@ -1071,7 +1071,7 @@
     <!-- Notes -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 mt-6">
         <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Нотатки</h2>
-        @if($isAdmin)
+        @if($canEdit)
             <textarea name="notes" rows="3" placeholder="Додаткова інформація про людину..."
                       class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm">{{ old('notes', $person->notes) }}</textarea>
         @else
@@ -1469,7 +1469,7 @@ function avatarUpload() {
     }
 }
 
-@if($isAdmin)
+@if($canEdit)
 function familyManager() {
     return {
         showAddModal: false,
