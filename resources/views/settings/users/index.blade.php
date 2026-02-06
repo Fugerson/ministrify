@@ -49,7 +49,7 @@
                     <div x-show="showRoleSelect" x-cloak class="flex items-center gap-2">
                         <select x-model="selectedRole" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                             <option value="">Оберіть роль</option>
-                            @foreach(\App\Models\ChurchRole::where('church_id', auth()->user()->church_id)->orderBy('sort_order')->get() as $role)
+                            @foreach($churchRoles as $role)
                             <option value="{{ $role->id }}">{{ $role->name }}</option>
                             @endforeach
                         </select>
@@ -131,7 +131,86 @@
                             </div>
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">{{ $user->email }}</td>
-                        <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                        <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap"
+                            x-data="{
+                                editing: false,
+                                saving: false,
+                                currentRoleId: {{ $user->church_role_id ? $user->church_role_id : 'null' }},
+                                selectedRoleId: '{{ $user->church_role_id ?? '' }}',
+                                async saveRole() {
+                                    this.saving = true;
+                                    try {
+                                        const res = await fetch('{{ route('settings.users.update', $user) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json',
+                                            },
+                                            body: JSON.stringify({
+                                                _method: 'PUT',
+                                                name: @js($user->name),
+                                                email: @js($user->email),
+                                                church_role_id: this.selectedRoleId || null,
+                                                person_id: {{ $user->person?->id ?? 'null' }},
+                                            }),
+                                        });
+                                        if (res.ok || res.status === 302) {
+                                            window.location.reload();
+                                        }
+                                    } catch (e) {
+                                        console.error(e);
+                                    } finally {
+                                        this.saving = false;
+                                    }
+                                }
+                            }">
+                            @admin
+                            @if($user->id !== auth()->id())
+                            {{-- Editable role --}}
+                            <div x-show="!editing">
+                                @if($user->churchRole)
+                                <button @click="editing = true" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+                                        style="background-color: {{ $user->churchRole->color }}30; color: {{ $user->churchRole->color }}"
+                                        title="Натисніть щоб змінити роль">
+                                    {{ $user->churchRole->name }}
+                                    <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                @else
+                                <button @click="editing = true" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+                                        title="Натисніть щоб призначити роль">
+                                    Без ролі
+                                    <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                @endif
+                            </div>
+                            <div x-show="editing" x-cloak class="flex items-center gap-1">
+                                <select x-model="selectedRoleId" class="text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1 pl-2 pr-7">
+                                    <option value="">Без ролі</option>
+                                    @foreach($churchRoles as $role)
+                                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button @click="saveRole()" :disabled="saving"
+                                        class="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                                <button @click="editing = false; selectedRoleId = '{{ $user->church_role_id ?? '' }}'"
+                                        class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                            @else
+                            {{-- Own role - not editable --}}
+                            @if($user->churchRole)
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                  style="background-color: {{ $user->churchRole->color }}30; color: {{ $user->churchRole->color }}">
+                                {{ $user->churchRole->name }}
+                            </span>
+                            @endif
+                            @endif
+                            @else
+                            {{-- Non-admin view --}}
                             @if($user->churchRole)
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                                   style="background-color: {{ $user->churchRole->color }}30; color: {{ $user->churchRole->color }}">
@@ -142,6 +221,7 @@
                                 Без ролі
                             </span>
                             @endif
+                            @endadmin
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
                             <span class="inline-flex items-center text-sm text-green-600 dark:text-green-400">

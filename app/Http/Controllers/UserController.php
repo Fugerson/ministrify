@@ -20,12 +20,18 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::where('church_id', $this->getCurrentChurch()->id)
+        $church = $this->getCurrentChurch();
+
+        $users = User::where('church_id', $church->id)
             ->with(['person', 'churchRole'])
             ->orderBy('name')
             ->get();
 
-        return view('settings.users.index', compact('users'));
+        $churchRoles = ChurchRole::where('church_id', $church->id)
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('settings.users.index', compact('users', 'churchRoles'));
     }
 
     public function create()
@@ -231,6 +237,10 @@ class UserController extends Controller
         if ($hadNoRole && $churchRoleId !== null) {
             $role = ChurchRole::find($churchRoleId);
             $user->notify(new AccessGranted($role->name, $church->name));
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Користувача оновлено.']);
         }
 
         return redirect()->route('settings.users.index')
