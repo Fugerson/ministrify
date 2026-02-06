@@ -309,18 +309,17 @@ class UserController extends Controller
             return response()->json(['message' => 'Адмін-роль вже має повний доступ.'], 400);
         }
 
-        $validated = $request->validate([
-            'overrides' => 'present|array',
-            'overrides.*' => 'array',
-            'overrides.*.*' => 'string|in:view,create,edit,delete',
-        ]);
+        $overridesInput = $request->input('overrides', []);
+        if (!is_array($overridesInput)) {
+            $overridesInput = [];
+        }
 
         // Strip actions already granted by role
         $rolePermissions = $user->churchRole ? $user->churchRole->getAllPermissions() : [];
         $cleanOverrides = [];
 
-        foreach ($validated['overrides'] as $module => $actions) {
-            if (!array_key_exists($module, ChurchRolePermission::MODULES)) {
+        foreach ($overridesInput as $module => $actions) {
+            if (!is_array($actions) || !array_key_exists($module, ChurchRolePermission::MODULES)) {
                 continue;
             }
 

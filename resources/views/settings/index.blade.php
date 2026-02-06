@@ -2518,24 +2518,27 @@ function userOverridesManager() {
         async saveUserOverrides() {
             this.savingUser = true;
             try {
+                const payload = { overrides: Object.keys(this.overrides).length ? this.overrides : {} };
                 const res = await fetch(`/settings/users/${this.modalUserId}/permissions`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({ overrides: this.overrides }),
+                    body: JSON.stringify(payload),
                 });
+                const data = await res.json();
                 if (res.ok) {
                     this.showModal = false;
                     if (window.showGlobalToast) showGlobalToast('Додаткові права збережено', 'success');
                     window.location.reload();
                 } else {
-                    throw new Error('Failed');
+                    console.error('Save failed:', data);
+                    if (window.showGlobalToast) showGlobalToast(data.message || 'Помилка збереження', 'error');
                 }
             } catch (e) {
-                console.error(e);
+                console.error('Save error:', e);
                 if (window.showGlobalToast) showGlobalToast('Помилка збереження', 'error');
             } finally {
                 this.savingUser = false;

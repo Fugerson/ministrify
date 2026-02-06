@@ -389,19 +389,22 @@
             async saveOverrides() {
                 this.saving = true;
                 try {
+                    const payload = { overrides: Object.keys(this.overrides).length ? this.overrides : {} };
                     const res = await fetch('{{ route("settings.users.permissions.update", $user) }}', {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({ overrides: this.overrides }),
+                        body: JSON.stringify(payload),
                     });
                     const data = await res.json();
                     if (res.ok) {
                         this.overrides = data.overrides || {};
                         this.showModal = false;
+                    } else {
+                        console.error('Save failed:', data);
                     }
                 } catch (e) {
                     console.error('Failed to save permissions', e);
