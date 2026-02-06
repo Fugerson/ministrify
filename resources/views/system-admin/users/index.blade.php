@@ -74,9 +74,13 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 {{ $user->trashed() ? 'bg-red-50 dark:bg-red-900/10' : '' }}">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
+                                @if($user->person?->photo)
+                                <img src="{{ Storage::url($user->person->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover mr-3 {{ $user->trashed() ? 'opacity-50' : '' }}">
+                                @else
                                 <div class="w-10 h-10 rounded-full {{ $user->trashed() ? 'bg-red-400' : ($user->is_super_admin ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-600') }} flex items-center justify-center mr-3">
                                     <span class="text-sm font-medium text-white">{{ mb_substr($user->name, 0, 1) }}</span>
                                 </div>
+                                @endif
                                 <div>
                                     <p class="font-medium {{ $user->trashed() ? 'text-red-600 dark:text-red-400 line-through' : 'text-gray-900 dark:text-white' }}">{{ $user->name }}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
@@ -185,9 +189,13 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 {{ $user->trashed() ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10' : '' }}">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center min-w-0">
+                    @if($user->person?->photo)
+                    <img src="{{ Storage::url($user->person->photo) }}" alt="" class="w-10 h-10 shrink-0 rounded-full object-cover mr-3 {{ $user->trashed() ? 'opacity-50' : '' }}">
+                    @else
                     <div class="w-10 h-10 shrink-0 rounded-full {{ $user->trashed() ? 'bg-red-400' : ($user->is_super_admin ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-600') }} flex items-center justify-center mr-3">
                         <span class="text-sm font-medium text-white">{{ mb_substr($user->name, 0, 1) }}</span>
                     </div>
+                    @endif
                     <div class="min-w-0">
                         <p class="font-medium truncate {{ $user->trashed() ? 'text-red-600 dark:text-red-400 line-through' : 'text-gray-900 dark:text-white' }}">{{ $user->name }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $user->email }}</p>
