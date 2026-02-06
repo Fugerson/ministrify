@@ -398,12 +398,60 @@ function budgetsPage() {
                         </select>
                     </div>
 
-                    <!-- File upload notice -->
-                    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
-                        <p class="text-sm text-amber-700 dark:text-amber-300">
-                            Для додавання чеку (файлу) перейдіть на
-                            <a :href="'/finances/expenses/' + editId + '/edit'" class="underline font-medium">повну сторінку редагування</a>
-                        </p>
+                    <!-- Existing Attachments -->
+                    <div x-show="existingAttachments.length > 0">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Прикріплені чеки</label>
+                        <div class="space-y-2">
+                            <template x-for="att in existingAttachments" :key="att.id">
+                                <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                                     :class="{ 'opacity-50 line-through': deleteAttachments.includes(att.id) }">
+                                    <div class="flex items-center gap-2">
+                                        <template x-if="att.is_image">
+                                            <img :src="att.url" class="w-10 h-10 object-cover rounded">
+                                        </template>
+                                        <template x-if="!att.is_image">
+                                            <div class="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+                                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                            </div>
+                                        </template>
+                                        <div>
+                                            <a :href="att.url" target="_blank" class="text-sm text-primary-600 dark:text-primary-400 hover:underline" x-text="att.original_name"></a>
+                                            <p class="text-xs text-gray-500" x-text="att.formatted_size"></p>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="toggleDeleteAttachment(att.id)"
+                                            class="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                            :class="{ 'bg-red-100 dark:bg-red-900/30': deleteAttachments.includes(att.id) }">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Додати чеки</label>
+                        <input type="file" x-ref="fileInput" @change="handleFileSelect" multiple accept="image/*,.pdf"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700 dark:file:bg-primary-900/30 dark:file:text-primary-300">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Максимум 10 файлів по 10 МБ (JPG, PNG, PDF)</p>
+                        <!-- Selected files preview -->
+                        <div x-show="selectedFiles.length > 0" class="mt-2 space-y-1">
+                            <template x-for="(file, index) in selectedFiles" :key="index">
+                                <div class="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm">
+                                    <span class="text-green-700 dark:text-green-300 truncate" x-text="file.name"></span>
+                                    <button type="button" @click="removeFile(index)" class="p-1 text-red-600 hover:bg-red-50 rounded">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -431,6 +479,9 @@ window.expenseEditModal = function() {
         loading: false,
         loadingData: false,
         editId: null,
+        existingAttachments: [],
+        deleteAttachments: [],
+        selectedFiles: [],
         formData: {
             amount: '',
             currency: 'UAH',
@@ -446,6 +497,9 @@ window.expenseEditModal = function() {
             this.editId = id;
             this.loadingData = true;
             this.modalOpen = true;
+            this.existingAttachments = [];
+            this.deleteAttachments = [];
+            this.selectedFiles = [];
 
             try {
                 const response = await fetch(`/finances/expenses/${id}/edit`, {
@@ -465,6 +519,8 @@ window.expenseEditModal = function() {
                     ministry_id: t.ministry_id || '',
                     date: t.date.split('T')[0]
                 };
+                this.existingAttachments = t.attachments || [];
+                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
             } catch (e) {
                 showToast('error', 'Помилка завантаження');
                 this.modalOpen = false;
@@ -472,18 +528,52 @@ window.expenseEditModal = function() {
                 this.loadingData = false;
             }
         },
+        handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            this.selectedFiles = files.slice(0, 10);
+        },
+        removeFile(index) {
+            this.selectedFiles.splice(index, 1);
+            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+        },
+        toggleDeleteAttachment(id) {
+            const idx = this.deleteAttachments.indexOf(id);
+            if (idx === -1) {
+                this.deleteAttachments.push(id);
+            } else {
+                this.deleteAttachments.splice(idx, 1);
+            }
+        },
         async submit() {
             this.loading = true;
             try {
+                const formData = new FormData();
+                formData.append('_method', 'PUT');
+                formData.append('amount', this.formData.amount);
+                formData.append('currency', this.formData.currency);
+                formData.append('description', this.formData.description);
+                formData.append('category_id', this.formData.category_id || '');
+                formData.append('ministry_id', this.formData.ministry_id || '');
+                formData.append('date', this.formData.date);
+
+                // Add files
+                this.selectedFiles.forEach(file => {
+                    formData.append('receipts[]', file);
+                });
+
+                // Add attachments to delete
+                this.deleteAttachments.forEach(id => {
+                    formData.append('delete_attachments[]', id);
+                });
+
                 const response = await fetch(`/finances/expenses/${this.editId}`, {
-                    method: 'PUT',
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(this.formData)
+                    body: formData
                 });
                 const data = await response.json();
                 if (response.ok && data.success) {

@@ -2576,9 +2576,29 @@
                     </div>
 
                     @endif
+
+                    <hr class="border-gray-200 dark:border-gray-700">
+
+                    <!-- Danger Zone -->
+                    <div class="p-6 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 rounded-xl">
+                        <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">Небезпечна зона</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            Видалення команди є незворотнім. Всі дані команди (цілі, задачі, ресурси) будуть втрачені.
+                        </p>
+                        <button type="button"
+                                onclick="if(confirm('Видалити команду «{{ $ministry->name }}»? Ця дія незворотна і видалить всі дані команди.')) { document.getElementById('delete-ministry-form').submit(); }"
+                                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+                            Видалити команду
+                        </button>
+                    </div>
             </div>
             </div>
             @endcan
+
+            <form id="delete-ministry-form" method="POST" action="{{ route('ministries.destroy', $ministry) }}" class="hidden">
+                @csrf
+                @method('DELETE')
+            </form>
         </div>
     </div>
 

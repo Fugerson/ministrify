@@ -21,6 +21,12 @@ class TransactionAttachment extends Model
         'size' => 'integer',
     ];
 
+    protected $appends = [
+        'url',
+        'is_image',
+        'formatted_size',
+    ];
+
     public function transaction(): BelongsTo
     {
         return $this->belongsTo(Transaction::class);
