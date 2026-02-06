@@ -561,11 +561,11 @@ window.expensesManager = function() {
             <form @submit.prevent="submit()" class="p-6 space-y-4">
                 <!-- Ministry -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда *</label>
-                    <select x-model="formData.ministry_id" required
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
+                    <select x-model="formData.ministry_id"
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                             :class="{ 'border-red-500': errors.ministry_id }">
-                        <option value="">Оберіть команду</option>
+                        <option value="">Без команди</option>
                         @foreach($ministries as $ministry)
                             <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                         @endforeach
