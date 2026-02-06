@@ -18,6 +18,7 @@
         </svg>
         Витрата
     </a>
+    @if(count($enabledCurrencies) > 1)
     <button type="button" onclick="window.openExchangeModal && window.openExchangeModal()"
        class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,6 +26,7 @@
         </svg>
         Обмін
     </button>
+    @endif
 </div>
 @endsection
 
@@ -609,6 +611,7 @@ window.incomesManager = function() {
 
 </div>
 
+@if(count($enabledCurrencies) > 1)
 <!-- Exchange Modal -->
 <div x-data="exchangeManager()" x-cloak>
     <div x-show="modalOpen"
@@ -716,4 +719,5 @@ window.incomesManager = function() {
         </div>
     </div>
 </div>
+@endif
 @endsection

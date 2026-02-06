@@ -18,6 +18,7 @@
         </svg>
         Витрата
     </button>
+    @if(count($enabledCurrencies) > 1)
     <button type="button" onclick="window.openExchangeModal && window.openExchangeModal()"
        class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,6 +26,7 @@
         </svg>
         Обмін
     </button>
+    @endif
     <button @click="downloadExport()"
             :disabled="exporting"
             class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg transition-colors">
@@ -1124,6 +1126,7 @@ window.exchangeModal = function() {
     </div>
 </div>
 
+@if(count($enabledCurrencies) > 1)
 <!-- Exchange Modal -->
 <div x-data="exchangeModal()" x-cloak>
     <div x-show="modalOpen"
@@ -1214,4 +1217,5 @@ window.exchangeModal = function() {
         </div>
     </div>
 </div>
+@endif
 @endsection
