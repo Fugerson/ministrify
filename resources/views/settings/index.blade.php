@@ -2466,7 +2466,15 @@ function permissionsManager() {
 }
 
 function userOverridesManager() {
-    const actionLabels = @json(\App\Models\ChurchRolePermission::ACTIONS);
+    // Pre-embedded data for each non-admin user
+    const usersData = {
+        @foreach($users->filter(fn($u) => $u->church_role_id && !$u->churchRole?->is_admin_role) as $u)
+        {{ $u->id }}: {
+            rolePerms: @json($u->churchRole->getAllPermissions()),
+            overrides: @json($u->permission_overrides ?? (object)[]),
+        },
+        @endforeach
+    };
 
     return {
         showModal: false,
@@ -2477,23 +2485,14 @@ function userOverridesManager() {
         rolePerms: {},
         overrides: {},
 
-        async openUserModal(userId, userName, roleName) {
+        openUserModal(userId, userName, roleName) {
             this.modalUserId = userId;
             this.modalUserName = userName;
             this.modalRoleName = roleName;
-            this.rolePerms = {};
-            this.overrides = {};
-
-            try {
-                const res = await fetch(`/settings/users/${userId}/permissions`);
-                const data = await res.json();
-                this.rolePerms = data.role_permissions || {};
-                this.overrides = JSON.parse(JSON.stringify(data.overrides || {}));
-                this.showModal = true;
-            } catch (e) {
-                console.error('Failed to load permissions', e);
-                if (window.showGlobalToast) showGlobalToast('Помилка завантаження', 'error');
-            }
+            const d = usersData[userId] || {};
+            this.rolePerms = JSON.parse(JSON.stringify(d.rolePerms || {}));
+            this.overrides = JSON.parse(JSON.stringify(d.overrides || {}));
+            this.showModal = true;
         },
 
         isRolePerm(mod, action) {
@@ -2505,20 +2504,27 @@ function userOverridesManager() {
         },
 
         toggleOverride(mod, action) {
-            if (!this.overrides[mod]) this.overrides[mod] = [];
-            const idx = this.overrides[mod].indexOf(action);
-            if (idx === -1) {
-                this.overrides[mod].push(action);
+            if (!this.overrides[mod]) {
+                this.overrides = { ...this.overrides, [mod]: [action] };
             } else {
-                this.overrides[mod].splice(idx, 1);
+                const idx = this.overrides[mod].indexOf(action);
+                if (idx === -1) {
+                    this.overrides = { ...this.overrides, [mod]: [...this.overrides[mod], action] };
+                } else {
+                    const newActions = this.overrides[mod].filter((_, i) => i !== idx);
+                    if (newActions.length === 0) {
+                        const { [mod]: _, ...rest } = this.overrides;
+                        this.overrides = rest;
+                    } else {
+                        this.overrides = { ...this.overrides, [mod]: newActions };
+                    }
+                }
             }
-            if (this.overrides[mod].length === 0) delete this.overrides[mod];
         },
 
         async saveUserOverrides() {
             this.savingUser = true;
             try {
-                const payload = { overrides: Object.keys(this.overrides).length ? this.overrides : {} };
                 const res = await fetch(`/settings/users/${this.modalUserId}/permissions`, {
                     method: 'PUT',
                     headers: {
@@ -2526,7 +2532,7 @@ function userOverridesManager() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify(payload),
+                    body: JSON.stringify({ overrides: this.overrides }),
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -2534,11 +2540,9 @@ function userOverridesManager() {
                     if (window.showGlobalToast) showGlobalToast('Додаткові права збережено', 'success');
                     window.location.reload();
                 } else {
-                    console.error('Save failed:', data);
                     if (window.showGlobalToast) showGlobalToast(data.message || 'Помилка збереження', 'error');
                 }
             } catch (e) {
-                console.error('Save error:', e);
                 if (window.showGlobalToast) showGlobalToast('Помилка збереження', 'error');
             } finally {
                 this.savingUser = false;

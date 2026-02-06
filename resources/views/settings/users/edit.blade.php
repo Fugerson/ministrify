@@ -177,7 +177,6 @@
     @if($user->church_role_id && !$user->churchRole?->is_admin_role)
     <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
          x-data="permissionOverrides()"
-         x-init="loadPermissions()">
 
         <div class="flex items-center justify-between mb-4">
             <div>
@@ -319,30 +318,20 @@
             return ['key' => $k, 'label' => $m['label'], 'actions' => $m['actions']];
         })->values();
         $actionsJson = \App\Models\ChurchRolePermission::ACTIONS;
+        $rolePermsJson = $user->churchRole ? $user->churchRole->getAllPermissions() : [];
+        $overridesJson = $user->permission_overrides ?? (object)[];
     @endphp
     <script>
     function permissionOverrides() {
         return {
             showModal: false,
             saving: false,
-            roleName: '',
-            rolePermissions: {},
-            overrides: {},
+            roleName: @json($user->churchRole?->name ?? 'Без ролі'),
+            rolePermissions: @json($rolePermsJson),
+            overrides: JSON.parse(@json(json_encode($overridesJson))),
             modules: @json($modulesJson),
             allActions: ['view', 'create', 'edit', 'delete'],
             actionLabels: @json($actionsJson),
-
-            async loadPermissions() {
-                try {
-                    const res = await fetch('{{ route("settings.users.permissions", $user) }}');
-                    const data = await res.json();
-                    this.rolePermissions = data.role_permissions || {};
-                    this.overrides = data.overrides || {};
-                    this.roleName = data.role_name;
-                } catch (e) {
-                    console.error('Failed to load permissions', e);
-                }
-            },
 
             isRolePermission(module, action) {
                 return (this.rolePermissions[module] || []).includes(action);
@@ -354,16 +343,20 @@
 
             toggleOverride(module, action) {
                 if (!this.overrides[module]) {
-                    this.overrides[module] = [];
-                }
-                const idx = this.overrides[module].indexOf(action);
-                if (idx === -1) {
-                    this.overrides[module].push(action);
+                    this.overrides = { ...this.overrides, [module]: [action] };
                 } else {
-                    this.overrides[module].splice(idx, 1);
-                }
-                if (this.overrides[module].length === 0) {
-                    delete this.overrides[module];
+                    const idx = this.overrides[module].indexOf(action);
+                    if (idx === -1) {
+                        this.overrides = { ...this.overrides, [module]: [...this.overrides[module], action] };
+                    } else {
+                        const newActions = this.overrides[module].filter((_, i) => i !== idx);
+                        if (newActions.length === 0) {
+                            const { [module]: _, ...rest } = this.overrides;
+                            this.overrides = rest;
+                        } else {
+                            this.overrides = { ...this.overrides, [module]: newActions };
+                        }
+                    }
                 }
             },
 
@@ -389,7 +382,6 @@
             async saveOverrides() {
                 this.saving = true;
                 try {
-                    const payload = { overrides: Object.keys(this.overrides).length ? this.overrides : {} };
                     const res = await fetch('{{ route("settings.users.permissions.update", $user) }}', {
                         method: 'PUT',
                         headers: {
@@ -397,14 +389,12 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify(payload),
+                        body: JSON.stringify({ overrides: this.overrides }),
                     });
                     const data = await res.json();
                     if (res.ok) {
                         this.overrides = data.overrides || {};
                         this.showModal = false;
-                    } else {
-                        console.error('Save failed:', data);
                     }
                 } catch (e) {
                     console.error('Failed to save permissions', e);
