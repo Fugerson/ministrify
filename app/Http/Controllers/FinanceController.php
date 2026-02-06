@@ -516,6 +516,33 @@ class FinanceController extends Controller
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
+        // Return JSON for AJAX requests
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'incomes' => $incomes->map(function ($income) {
+                    return [
+                        'id' => $income->id,
+                        'date' => $income->date->format('d.m'),
+                        'date_full' => $income->date->format('Y-m-d'),
+                        'category_name' => $income->category?->name ?? 'Без категорії',
+                        'category_icon' => $income->category?->icon ?? '💰',
+                        'category_color' => $income->category?->color ?? '#3B82F6',
+                        'payment_method' => $income->payment_method_label,
+                        'amount' => $income->amount,
+                        'amount_formatted' => CurrencyHelper::format($income->amount, $income->currency ?? 'UAH'),
+                        'currency' => $income->currency ?? 'UAH',
+                        'amount_uah' => $income->amount_uah,
+                    ];
+                }),
+                'total' => $totals['total'],
+                'total_formatted' => number_format($totals['total'], 0, ',', ' ') . ' ₴',
+                'has_more_pages' => $incomes->hasMorePages(),
+                'current_page' => $incomes->currentPage(),
+                'last_page' => $incomes->lastPage(),
+            ]);
+        }
+
         return view('finances.incomes.index', compact('incomes', 'categories', 'totals', 'enabledCurrencies', 'exchangeRates'));
     }
 

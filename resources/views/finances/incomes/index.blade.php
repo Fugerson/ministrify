@@ -125,6 +125,62 @@ window.exchangeManager = function() {
     };
 };
 
+// AJAX filter for incomes (no page reload)
+window.incomesFilter = function() {
+    return {
+        loading: false,
+        incomes: @json($incomes->map(fn($i) => [
+            'id' => $i->id,
+            'date' => $i->date->format('d.m'),
+            'date_full' => $i->date->format('Y-m-d'),
+            'category_name' => $i->category?->name ?? 'Без категорії',
+            'category_icon' => $i->category?->icon ?? '💰',
+            'category_color' => $i->category?->color ?? '#3B82F6',
+            'payment_method' => $i->payment_method_label,
+            'amount' => $i->amount,
+            'amount_formatted' => \App\Helpers\CurrencyHelper::format($i->amount, $i->currency ?? 'UAH'),
+            'currency' => $i->currency ?? 'UAH',
+            'amount_uah' => $i->amount_uah,
+        ])),
+        totalFormatted: '{{ number_format($totals['total'], 0, ',', ' ') }} ₴',
+
+        async onPeriodChange(detail) {
+            if (!detail || !detail.dateRange || !detail.isUserAction) return;
+
+            this.loading = true;
+            const { start, end } = detail.dateRange;
+            const startDate = start instanceof Date ? start.toISOString().split('T')[0] : start;
+            const endDate = end instanceof Date ? end.toISOString().split('T')[0] : end;
+
+            // Update URL without reload (for bookmarking)
+            const url = new URL(window.location.href);
+            url.searchParams.set('start_date', startDate);
+            url.searchParams.set('end_date', endDate);
+            url.searchParams.delete('year');
+            url.searchParams.delete('month');
+            history.replaceState(null, '', url.toString());
+
+            try {
+                const response = await fetch(`/finances/incomes?start_date=${startDate}&end_date=${endDate}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.incomes = data.incomes;
+                    this.totalFormatted = data.total_formatted;
+                }
+            } catch (e) {
+                console.error('Filter error:', e);
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+
 window.incomesManager = function() {
     return {
         modalOpen: false,
@@ -296,14 +352,14 @@ window.incomesManager = function() {
 <div x-data="incomesManager()" x-cloak>
 @include('finances.partials.tabs')
 
-<div id="finance-content" x-data @finance-period-changed.window="handlePeriodReload($event.detail)">
+<div id="finance-content" x-data="incomesFilter()" @finance-period-changed.window="onPeriodChange($event.detail)">
 <div class="space-y-6">
 
     <!-- Summary card -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 inline-block">
             <p class="text-sm text-green-600 dark:text-green-400">Загалом за період</p>
-            <p class="text-2xl font-bold text-green-700 dark:text-green-300">{{ number_format($totals['total'], 0, ',', ' ') }} ₴</p>
+            <p class="text-2xl font-bold text-green-700 dark:text-green-300" x-text="totalFormatted">{{ number_format($totals['total'], 0, ',', ' ') }} ₴</p>
         </div>
     </div>
 
@@ -341,42 +397,59 @@ window.incomesManager = function() {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse($incomes as $income)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50" data-income-id="{{ $income->id }}">
+                    <!-- Loading indicator -->
+                    <template x-if="loading">
+                        <tr>
+                            <td colspan="5" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <svg class="animate-spin h-6 w-6 mx-auto text-primary-600" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </td>
+                        </tr>
+                    </template>
+
+                    <!-- Empty state -->
+                    <template x-if="!loading && incomes.length === 0">
+                        <tr>
+                            <td colspan="5" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                Немає надходжень за цей період
+                            </td>
+                        </tr>
+                    </template>
+
+                    <!-- Data rows -->
+                    <template x-for="income in incomes" :key="income.id">
+                        <tr x-show="!loading" class="hover:bg-gray-50 dark:hover:bg-gray-700/50" :data-income-id="income.id">
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 dark:text-white">{{ $income->date->format('d.m') }}</div>
-                                <!-- Mobile: show category under date -->
+                                <div class="text-sm text-gray-900 dark:text-white" x-text="income.date"></div>
                                 <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                    {{ $income->category?->icon ?? '💰' }} {{ $income->category?->name ?? 'Без категорії' }}
+                                    <span x-text="income.category_icon"></span> <span x-text="income.category_name"></span>
                                 </div>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: {{ $income->category?->color ?? '#3B82F6' }}30; color: {{ $income->category?->color ?? '#3B82F6' }}">
-                                    {{ $income->category?->icon ?? '💰' }} {{ $income->category?->name ?? 'Без категорії' }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                      :style="`background-color: ${income.category_color}30; color: ${income.category_color}`">
+                                    <span x-text="income.category_icon"></span>&nbsp;<span x-text="income.category_name"></span>
                                 </span>
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
-                                {{ $income->payment_method_label }}
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell" x-text="income.payment_method">
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
-                                <span class="text-sm font-semibold text-green-600 dark:text-green-400">
-                                    +{{ \App\Helpers\CurrencyHelper::format($income->amount, $income->currency ?? 'UAH') }}
-                                </span>
-                                @if(($income->currency ?? 'UAH') !== 'UAH' && $income->amount_uah)
-                                <span class="block text-xs text-gray-400 dark:text-gray-500">
-                                    {{ number_format($income->amount_uah, 0, ',', ' ') }} ₴
-                                </span>
-                                @endif
+                                <span class="text-sm font-semibold text-green-600 dark:text-green-400" x-text="'+' + income.amount_formatted"></span>
+                                <template x-if="income.currency !== 'UAH' && income.amount_uah">
+                                    <span class="block text-xs text-gray-400 dark:text-gray-500" x-text="Math.round(income.amount_uah).toLocaleString('uk-UA') + ' ₴'"></span>
+                                </template>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm">
                                 <div class="flex items-center justify-end gap-1">
-                                    <button type="button" @click.prevent.stop="openEdit({{ $income->id }})"
+                                    <button type="button" @click.prevent.stop="$root.openEdit(income.id)"
                                             class="p-2 text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
                                     </button>
-                                    <button type="button" @click.prevent.stop="confirmDelete({{ $income->id }})"
+                                    <button type="button" @click.prevent.stop="$root.confirmDelete(income.id)"
                                             class="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -385,13 +458,7 @@ window.incomesManager = function() {
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                Немає надходжень за цей місяць
-                            </td>
-                        </tr>
-                    @endforelse
+                    </template>
                 </tbody>
             </table>
         </div>
