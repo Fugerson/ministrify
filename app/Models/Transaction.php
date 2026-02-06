@@ -103,11 +103,29 @@ class Transaction extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'amount_uah' => 'decimal:2',
-        'date' => 'date',
         'is_anonymous' => 'boolean',
         'payment_data' => 'array',
         'paid_at' => 'datetime',
     ];
+
+    /**
+     * Get the date attribute formatted as Y-m-d for JSON serialization.
+     * Prevents timezone shift when converting to JSON.
+     */
+    public function getDateAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        // If already a string in Y-m-d format, return as is
+        if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return $value;
+        }
+
+        // Convert to Carbon and format without timezone issues
+        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+    }
 
     protected static function boot(): void
     {
