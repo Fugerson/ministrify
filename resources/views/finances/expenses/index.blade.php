@@ -161,15 +161,21 @@ window.expensesFilter = function() {
         },
 
         async onPeriodChange(detail) {
-            if (!detail || !detail.dateRange || !detail.isUserAction) return;
+            if (!detail || !detail.dateRange) return;
 
-            this.loading = true;
             const { start, end } = detail.dateRange;
             const startDate = start instanceof Date ? start.toISOString().split('T')[0] : start;
             const endDate = end instanceof Date ? end.toISOString().split('T')[0] : end;
 
-            // Update URL without reload
+            // Skip if URL already has matching dates (server already rendered correct data)
             const url = new URL(window.location.href);
+            if (url.searchParams.get('start_date') === startDate && url.searchParams.get('end_date') === endDate) {
+                return;
+            }
+
+            this.loading = true;
+
+            // Update URL without reload
             url.searchParams.set('start_date', startDate);
             url.searchParams.set('end_date', endDate);
             url.searchParams.delete('year');

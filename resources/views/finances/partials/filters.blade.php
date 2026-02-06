@@ -229,13 +229,9 @@ window.getFinanceDateRange = function() {
     return window.financeDateRange || null;
 };
 
-// Handler for pages that need to reload (incomes, expenses)
-// Only reloads on user action, not on initial load
+// Handler for pages that need to reload (journal, budgets)
 window.handlePeriodReload = function(detail) {
     if (!detail || !detail.dateRange) return;
-
-    // Only reload on user action (button click), not on init
-    if (!detail.isUserAction) return;
 
     const url = new URL(window.location.href);
     const { start, end } = detail.dateRange;
