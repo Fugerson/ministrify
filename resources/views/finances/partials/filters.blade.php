@@ -73,32 +73,30 @@ function financePeriodFilter() {
         },
 
         init() {
-            // Check if URL has date params - if so, use them instead of localStorage
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlStart = urlParams.get('start_date');
-            const urlEnd = urlParams.get('end_date');
+            // localStorage is the source of truth for user's period selection
+            const saved = localStorage.getItem('financePeriod');
+            const savedCustom = localStorage.getItem('financeCustomRange');
 
-            if (urlStart && urlEnd) {
-                // URL has dates - use custom mode with these dates
-                this.customMode = true;
-                this.customStart = urlStart;
-                this.customEnd = urlEnd;
+            if (savedCustom) {
+                try {
+                    const parsed = JSON.parse(savedCustom);
+                    if (parsed.start && parsed.end) {
+                        this.customMode = true;
+                        this.customStart = parsed.start;
+                        this.customEnd = parsed.end;
+                    }
+                } catch (e) {}
+            } else if (saved && this.periodLabels[saved]) {
+                this.activePeriod = saved;
             } else {
-                // Load period from localStorage
-                const saved = localStorage.getItem('financePeriod');
-                const savedCustom = localStorage.getItem('financeCustomRange');
-
-                if (savedCustom) {
-                    try {
-                        const parsed = JSON.parse(savedCustom);
-                        if (parsed.start && parsed.end) {
-                            this.customMode = true;
-                            this.customStart = parsed.start;
-                            this.customEnd = parsed.end;
-                        }
-                    } catch (e) {}
-                } else if (saved && this.periodLabels[saved]) {
-                    this.activePeriod = saved;
+                // Fallback: URL params (e.g. shared link with no localStorage)
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlStart = urlParams.get('start_date');
+                const urlEnd = urlParams.get('end_date');
+                if (urlStart && urlEnd) {
+                    this.customMode = true;
+                    this.customStart = urlStart;
+                    this.customEnd = urlEnd;
                 }
             }
 
