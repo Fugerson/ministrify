@@ -171,8 +171,8 @@ function financePeriodFilter() {
                     const now = new Date();
                     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
                     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                    this.customStart = firstDay.toISOString().split('T')[0];
-                    this.customEnd = lastDay.toISOString().split('T')[0];
+                    this.customStart = formatDateLocal(firstDay);
+                    this.customEnd = formatDateLocal(lastDay);
                 }
                 this.saveCustomRange();
             } else {
@@ -220,6 +220,12 @@ function financePeriodFilter() {
     }
 }
 
+// Format Date to YYYY-MM-DD in local timezone (not UTC!)
+window.formatDateLocal = function(d) {
+    if (!(d instanceof Date)) return d;
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
+
 // Global helper to get current period
 window.getFinancePeriod = function() {
     return window.financePeriod || 'month';
@@ -235,8 +241,8 @@ window.handlePeriodReload = function(detail) {
 
     const url = new URL(window.location.href);
     const { start, end } = detail.dateRange;
-    const startDate = start instanceof Date ? start.toISOString().split('T')[0] : start;
-    const endDate = end instanceof Date ? end.toISOString().split('T')[0] : end;
+    const startDate = formatDateLocal(start);
+    const endDate = formatDateLocal(end);
 
     // If dates already match, don't reload
     const currentStart = url.searchParams.get('start_date');

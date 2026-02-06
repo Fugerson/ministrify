@@ -153,8 +153,8 @@ window.incomesFilter = function() {
             if (!detail || !detail.dateRange) return;
 
             const { start, end } = detail.dateRange;
-            const startDate = start instanceof Date ? start.toISOString().split('T')[0] : start;
-            const endDate = end instanceof Date ? end.toISOString().split('T')[0] : end;
+            const startDate = formatDateLocal(start);
+            const endDate = formatDateLocal(end);
 
             // Skip if URL already has matching dates (server already rendered correct data)
             const url = new URL(window.location.href);
