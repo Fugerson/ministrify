@@ -601,6 +601,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         // Users management
         Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show']);
         Route::post('users/{user}/invite', [\App\Http\Controllers\UserController::class, 'sendInvite'])->name('users.invite');
+        Route::get('users/{user}/permissions', [\App\Http\Controllers\UserController::class, 'getPermissions'])->name('users.permissions');
+        Route::put('users/{user}/permissions', [\App\Http\Controllers\UserController::class, 'updatePermissions'])->name('users.permissions.update');
 
         // Audit Logs
         Route::get('audit-logs', [\App\Http\Controllers\AuditLogController::class, 'index'])->name('audit-logs.index');

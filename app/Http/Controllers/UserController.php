@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChurchRole;
+use App\Models\ChurchRolePermission;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -273,6 +274,66 @@ class UserController extends Controller
         ]);
 
         return back()->with('success', 'Запрошення надіслано на ' . $user->email);
+    }
+
+    public function getPermissions(User $user)
+    {
+        $this->authorizeChurch($user);
+
+        $rolePermissions = $user->churchRole ? $user->churchRole->getAllPermissions() : [];
+        $overrides = $user->getPermissionOverrides();
+
+        return response()->json([
+            'role_permissions' => $rolePermissions,
+            'overrides' => $overrides,
+            'role_name' => $user->churchRole?->name ?? 'Без ролі',
+            'is_admin_role' => $user->churchRole?->is_admin_role ?? false,
+        ]);
+    }
+
+    public function updatePermissions(Request $request, User $user)
+    {
+        $this->authorizeChurch($user);
+
+        if ($user->churchRole?->is_admin_role) {
+            return response()->json(['message' => 'Адмін-роль вже має повний доступ.'], 400);
+        }
+
+        $validated = $request->validate([
+            'overrides' => 'present|array',
+            'overrides.*' => 'array',
+            'overrides.*.*' => 'string|in:view,create,edit,delete',
+        ]);
+
+        // Strip actions already granted by role
+        $rolePermissions = $user->churchRole ? $user->churchRole->getAllPermissions() : [];
+        $cleanOverrides = [];
+
+        foreach ($validated['overrides'] as $module => $actions) {
+            if (!array_key_exists($module, ChurchRolePermission::MODULES)) {
+                continue;
+            }
+
+            $allowedActions = ChurchRolePermission::MODULES[$module]['actions'];
+            $roleActions = $rolePermissions[$module] ?? [];
+
+            // Keep only actions that are allowed for this module and not already in role
+            $extra = array_values(array_intersect(
+                array_diff($actions, $roleActions),
+                $allowedActions
+            ));
+
+            if (!empty($extra)) {
+                $cleanOverrides[$module] = $extra;
+            }
+        }
+
+        $user->setPermissionOverrides($cleanOverrides);
+
+        return response()->json([
+            'message' => 'Додаткові права збережено.',
+            'overrides' => $cleanOverrides,
+        ]);
     }
 
     protected function authorizeChurch($model): void

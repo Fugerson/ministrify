@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'onboarding_state',
         'onboarding_started_at',
         'onboarding_completed_at',
+        'permission_overrides',
     ];
 
     protected $hidden = [
@@ -53,6 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'onboarding_started_at' => 'datetime',
         'onboarding_completed_at' => 'datetime',
         'is_super_admin' => 'boolean',
+        'permission_overrides' => 'array',
     ];
 
     public function church(): BelongsTo
@@ -160,9 +162,15 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
-        // Use ChurchRole permission system
-        if ($this->churchRole) {
-            return $this->churchRole->hasPermission($module, $action);
+        // Check role-based permissions
+        if ($this->churchRole && $this->churchRole->hasPermission($module, $action)) {
+            return true;
+        }
+
+        // Check per-user permission overrides
+        $overrides = $this->permission_overrides ?? [];
+        if (isset($overrides[$module]) && in_array($action, $overrides[$module])) {
+            return true;
         }
 
         return false;
@@ -199,6 +207,39 @@ class User extends Authenticatable implements MustVerifyEmail
     public function canDelete(string $module): bool
     {
         return $this->hasPermission($module, 'delete');
+    }
+
+    /**
+     * Get all effective permissions (role + overrides combined)
+     */
+    public function getEffectivePermissions(): array
+    {
+        $rolePermissions = $this->churchRole ? $this->churchRole->getAllPermissions() : [];
+        $overrides = $this->permission_overrides ?? [];
+
+        $effective = $rolePermissions;
+        foreach ($overrides as $module => $actions) {
+            $existing = $effective[$module] ?? [];
+            $effective[$module] = array_values(array_unique(array_merge($existing, $actions)));
+        }
+
+        return $effective;
+    }
+
+    /**
+     * Get per-user permission overrides
+     */
+    public function getPermissionOverrides(): array
+    {
+        return $this->permission_overrides ?? [];
+    }
+
+    /**
+     * Set per-user permission overrides
+     */
+    public function setPermissionOverrides(array $overrides): void
+    {
+        $this->update(['permission_overrides' => $overrides ?: null]);
     }
 
     public function canManageMinistry(Ministry $ministry): bool

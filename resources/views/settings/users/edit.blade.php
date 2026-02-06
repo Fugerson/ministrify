@@ -172,5 +172,242 @@
             </div>
         </div>
     </form>
+
+    {{-- Permission Overrides Section (hidden for admin roles) --}}
+    @if($user->church_role_id && !$user->churchRole?->is_admin_role)
+    <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+         x-data="permissionOverrides()"
+         x-init="loadPermissions()">
+
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додаткові права</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Персональні права понад роль користувача</p>
+            </div>
+            <button type="button" @click="showModal = true"
+                    class="px-4 py-2 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-xl hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
+                Налаштувати
+            </button>
+        </div>
+
+        {{-- Override badges --}}
+        <div class="flex flex-wrap gap-2" x-show="hasOverrides()" x-cloak>
+            <template x-for="badge in getOverrideBadges()" :key="badge.key">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
+                    <span x-text="badge.label"></span>
+                </span>
+            </template>
+        </div>
+        <p x-show="!hasOverrides()" class="text-sm text-gray-400 dark:text-gray-500">Додаткових прав не призначено</p>
+
+        {{-- Permissions Modal --}}
+        <div x-show="showModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            <div class="flex items-start justify-center min-h-screen px-4 py-8">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity" @click="showModal = false"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl transform transition-all w-full max-w-3xl mx-4"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                     @keydown.escape.window="showModal = false">
+
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Налаштування прав</h3>
+                            <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            Роль: <span class="font-medium text-gray-700 dark:text-gray-300" x-text="roleName"></span>
+                        </p>
+
+                        {{-- Legend --}}
+                        <div class="flex flex-wrap items-center gap-4 mb-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span class="inline-flex items-center gap-1">
+                                <span class="w-4 h-4 rounded bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                                Від ролі
+                            </span>
+                            <span class="inline-flex items-center gap-1">
+                                <span class="w-4 h-4 rounded bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-400 dark:border-purple-500"></span>
+                                Додатково
+                            </span>
+                            <span class="inline-flex items-center gap-1">
+                                <span class="w-4 h-4 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-300 dark:text-gray-600">&mdash;</span>
+                                Недоступно
+                            </span>
+                        </div>
+
+                        {{-- Permissions Table --}}
+                        <div class="overflow-x-auto -mx-6 px-6">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <th class="text-left py-2 pr-4 font-medium text-gray-600 dark:text-gray-400">Модуль</th>
+                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">Перегляд</th>
+                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">Створ.</th>
+                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">Редаг.</th>
+                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">Видал.</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                    <template x-for="mod in modules" :key="mod.key">
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                            <td class="py-2.5 pr-4">
+                                                <span class="font-medium text-gray-900 dark:text-white" x-text="mod.label"></span>
+                                            </td>
+                                            <template x-for="action in allActions" :key="action">
+                                                <td class="text-center py-2.5 px-2">
+                                                    {{-- Not allowed for this module --}}
+                                                    <template x-if="!mod.actions.includes(action)">
+                                                        <span class="text-gray-300 dark:text-gray-600">&mdash;</span>
+                                                    </template>
+                                                    {{-- Already granted by role --}}
+                                                    <template x-if="mod.actions.includes(action) && isRolePermission(mod.key, action)">
+                                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-green-100 dark:bg-green-900/40">
+                                                            <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                                        </span>
+                                                    </template>
+                                                    {{-- Available as override --}}
+                                                    <template x-if="mod.actions.includes(action) && !isRolePermission(mod.key, action)">
+                                                        <label class="inline-flex items-center justify-center cursor-pointer">
+                                                            <input type="checkbox"
+                                                                   :checked="isOverride(mod.key, action)"
+                                                                   @change="toggleOverride(mod.key, action)"
+                                                                   class="w-5 h-5 rounded border-2 border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-500 focus:ring-purple-500 dark:focus:ring-purple-600 bg-white dark:bg-gray-700 cursor-pointer">
+                                                        </label>
+                                                    </template>
+                                                </td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- Modal Footer --}}
+                    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-end gap-3">
+                        <button type="button" @click="showModal = false"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            Скасувати
+                        </button>
+                        <button type="button" @click="saveOverrides()"
+                                :disabled="saving"
+                                class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                            <span x-show="!saving">Зберегти</span>
+                            <span x-show="saving" x-cloak>Збереження...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function permissionOverrides() {
+        return {
+            showModal: false,
+            saving: false,
+            roleName: '',
+            rolePermissions: {},
+            overrides: {},
+            modules: @json(collect(\App\Models\ChurchRolePermission::MODULES)->map(function($m, $k) {
+                return ['key' => $k, 'label' => $m['label'], 'actions' => $m['actions']];
+            })->values()),
+            allActions: ['view', 'create', 'edit', 'delete'],
+            actionLabels: @json(\App\Models\ChurchRolePermission::ACTIONS),
+
+            async loadPermissions() {
+                try {
+                    const res = await fetch('{{ route("settings.users.permissions", $user) }}');
+                    const data = await res.json();
+                    this.rolePermissions = data.role_permissions || {};
+                    this.overrides = data.overrides || {};
+                    this.roleName = data.role_name;
+                } catch (e) {
+                    console.error('Failed to load permissions', e);
+                }
+            },
+
+            isRolePermission(module, action) {
+                return (this.rolePermissions[module] || []).includes(action);
+            },
+
+            isOverride(module, action) {
+                return (this.overrides[module] || []).includes(action);
+            },
+
+            toggleOverride(module, action) {
+                if (!this.overrides[module]) {
+                    this.overrides[module] = [];
+                }
+                const idx = this.overrides[module].indexOf(action);
+                if (idx === -1) {
+                    this.overrides[module].push(action);
+                } else {
+                    this.overrides[module].splice(idx, 1);
+                }
+                if (this.overrides[module].length === 0) {
+                    delete this.overrides[module];
+                }
+            },
+
+            hasOverrides() {
+                return Object.keys(this.overrides).length > 0;
+            },
+
+            getOverrideBadges() {
+                const badges = [];
+                for (const [module, actions] of Object.entries(this.overrides)) {
+                    const mod = this.modules.find(m => m.key === module);
+                    if (!mod) continue;
+                    for (const action of actions) {
+                        badges.push({
+                            key: module + '_' + action,
+                            label: mod.label + ': ' + (this.actionLabels[action] || action),
+                        });
+                    }
+                }
+                return badges;
+            },
+
+            async saveOverrides() {
+                this.saving = true;
+                try {
+                    const res = await fetch('{{ route("settings.users.permissions.update", $user) }}', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ overrides: this.overrides }),
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        this.overrides = data.overrides || {};
+                        this.showModal = false;
+                    }
+                } catch (e) {
+                    console.error('Failed to save permissions', e);
+                } finally {
+                    this.saving = false;
+                }
+            },
+        };
+    }
+    </script>
+    @endif
 </div>
 @endsection
