@@ -375,7 +375,7 @@ window.expensesManager = function() {
 <div x-data="expensesManager()" x-cloak>
 @include('finances.partials.tabs')
 
-<div id="finance-content" x-data="{ }" @finance-period-changed.window="handlePeriodReload($event.detail)">
+<div id="finance-content">
 <div class="space-y-6">
 
     <!-- Summary card -->
