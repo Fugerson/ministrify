@@ -126,10 +126,29 @@ window.exchangeManager = function() {
 };
 
 // AJAX filter for expenses (no page reload)
+@php
+$remaining = $totals['budget'] - $totals['spent'];
+$expensesJson = $expenses->map(function($e) {
+    return [
+        'id' => $e->id,
+        'date' => $e->date->format('d.m'),
+        'date_full' => $e->date->format('Y-m-d'),
+        'description' => $e->description,
+        'notes' => $e->notes,
+        'ministry_name' => $e->ministry?->name ?? '-',
+        'category_name' => $e->category?->name ?? '-',
+        'payment_method' => $e->payment_method_label,
+        'amount' => $e->amount,
+        'amount_formatted' => \App\Helpers\CurrencyHelper::format($e->amount, $e->currency ?? 'UAH'),
+        'currency' => $e->currency ?? 'UAH',
+        'amount_uah' => $e->amount_uah,
+    ];
+});
+@endphp
 window.expensesFilter = function() {
     return {
         loading: false,
-        expenses: [],
+        expenses: @json($expensesJson),
         budget: {{ $totals['budget'] }},
         spent: {{ $totals['spent'] }},
         remaining: {{ $totals['budget'] - $totals['spent'] }},
@@ -138,7 +157,7 @@ window.expensesFilter = function() {
         remainingFormatted: '{{ number_format($totals["budget"] - $totals["spent"], 0, ",", " ") }} ₴',
 
         init() {
-            this.expenses = @json($expensesJson);
+            // expenses already loaded via @json above
         },
 
         async onPeriodChange(detail) {
@@ -433,25 +452,6 @@ window.expensesManager = function() {
 <div x-data="expensesManager()" x-cloak>
 @include('finances.partials.tabs')
 
-@php
-$expensesJson = $expenses->map(function($e) {
-    return [
-        'id' => $e->id,
-        'date' => $e->date->format('d.m'),
-        'date_full' => $e->date->format('Y-m-d'),
-        'description' => $e->description,
-        'notes' => $e->notes,
-        'ministry_name' => $e->ministry?->name ?? '-',
-        'category_name' => $e->category?->name ?? '-',
-        'payment_method' => $e->payment_method_label,
-        'amount' => $e->amount,
-        'amount_formatted' => \App\Helpers\CurrencyHelper::format($e->amount, $e->currency ?? 'UAH'),
-        'currency' => $e->currency ?? 'UAH',
-        'amount_uah' => $e->amount_uah,
-    ];
-});
-$remaining = $totals['budget'] - $totals['spent'];
-@endphp
 <div id="finance-content" x-data="expensesFilter()" @finance-period-changed.window="onPeriodChange($event.detail)">
 <div class="space-y-6">
 
