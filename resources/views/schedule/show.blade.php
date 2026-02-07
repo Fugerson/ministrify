@@ -91,6 +91,11 @@
                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                 <span class="text-sm text-gray-600 dark:text-gray-400">Подія з планом</span>
             </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" x-model="hasMusic" @change="saveField('has_music', hasMusic)"
+                       class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Музичний супровід</span>
+            </label>
             @if($currentChurch->attendance_enabled)
             <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" x-model="trackAttendance" @change="saveField('track_attendance', trackAttendance); $store.event.trackAttendance = trackAttendance"
@@ -1025,6 +1030,7 @@
 document.addEventListener('alpine:init', () => {
     Alpine.store('event', {
         isService: {{ $event->is_service ? 'true' : 'false' }},
+        hasMusic: {{ $event->has_music ? 'true' : 'false' }},
         trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }}
     });
 });
@@ -1352,6 +1358,7 @@ function eventEditor() {
         ministryId: @json($event->ministry_id),
         ministryColor: @json($event->ministry?->color ?? '#3b82f6'),
         isService: {{ $event->is_service ? 'true' : 'false' }},
+        hasMusic: {{ $event->has_music ? 'true' : 'false' }},
         trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }},
         ministries: {!! $ministriesJson !!},
 
@@ -1363,6 +1370,7 @@ function eventEditor() {
             notes: @json($event->notes ?? ''),
             ministryId: @json($event->ministry_id),
             isService: {{ $event->is_service ? 'true' : 'false' }},
+            hasMusic: {{ $event->has_music ? 'true' : 'false' }},
             trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }}
         },
 
@@ -1370,6 +1378,7 @@ function eventEditor() {
             // Check if value actually changed
             const originalKey = field === 'ministry_id' ? 'ministryId' :
                                field === 'is_service' ? 'isService' :
+                               field === 'has_music' ? 'hasMusic' :
                                field === 'track_attendance' ? 'trackAttendance' : field;
             if (this._original[originalKey] === value) {
                 return; // No change, skip save
