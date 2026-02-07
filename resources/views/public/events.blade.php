@@ -36,7 +36,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <h3 class="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">{{ $event->title }}</h3>
-                                <p class="text-sm text-gray-500">{{ $event->time->format('H:i') }}@if($event->location) &bull; {{ $event->location }}@endif</p>
+                                <p class="text-sm text-gray-500">{{ $event->time?->format('H:i') }}@if($event->location) &bull; {{ $event->location }}@endif</p>
                             </div>
                         </div>
                         @if($event->public_description)

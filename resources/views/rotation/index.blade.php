@@ -71,7 +71,7 @@
                         <div class="flex items-center gap-2">
                             @php
                                 $filled = $event->assignments->count();
-                                $total = $event->ministry->positions->sum('max_per_event') ?: $event->ministry->positions->count();
+                                $total = $event->ministry ? ($event->ministry->positions->sum('max_per_event') ?: $event->ministry->positions->count()) : 0;
                                 $percentage = $total > 0 ? ($filled / $total) * 100 : 0;
                             @endphp
                             <div class="w-16 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">

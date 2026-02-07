@@ -770,12 +770,15 @@
             <x-linked-cards entityType="event" :entityId="$event->id" :boards="$boards" />
 
             <!-- Checklist -->
+            @if($event->ministry)
             @can('manage-ministry', $event->ministry)
                 <x-event-checklist :event="$event" :templates="$checklistTemplates" />
             @endcan
+            @endif
 
             <!-- Reminders -->
             @if($currentChurch->telegram_bot_token)
+            @if($event->ministry)
             @can('manage-ministry', $event->ministry)
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
                  x-data="reminderManager()">
@@ -864,6 +867,7 @@
             </div>
             @endcan
             @endif
+            @endif
 
             <!-- Quick Actions -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
@@ -886,6 +890,7 @@
                         <span>Назад до розкладу</span>
                     </a>
 
+                    @if($event->ministry)
                     @can('manage-ministry', $event->ministry)
                         @php
                             $hasRelatedEvents = $event->parent_event_id || $event->childEvents()->count() > 0;
@@ -1004,6 +1009,7 @@
                             </template>
                         </div>
                     @endcan
+                    @endif
                 </div>
             </div>
         </div>

@@ -15,7 +15,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $event->title }}</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ $event->date->translatedFormat('l, j F Y') }} о {{ $event->time->format('H:i') }}
+                    {{ $event->date->translatedFormat('l, j F Y') }} о {{ $event->time?->format('H:i') }}
                 </p>
             </div>
         </div>

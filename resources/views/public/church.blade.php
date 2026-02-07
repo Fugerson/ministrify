@@ -210,7 +210,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <h3 class="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors truncate">{{ $event->title }}</h3>
-                                <p class="text-sm text-gray-500">{{ $event->time->format('H:i') }}@if($event->location) &bull; {{ $event->location }}@endif</p>
+                                <p class="text-sm text-gray-500">{{ $event->time?->format('H:i') }}@if($event->location) &bull; {{ $event->location }}@endif</p>
                             </div>
                         </div>
                         @if($event->allow_registration)
@@ -299,7 +299,7 @@
                                 @if($group->meeting_schedule)
                                     {{ $group->meeting_schedule }}
                                 @else
-                                    {{ $group->meeting_day_name }}, {{ $group->meeting_time->format('H:i') }}
+                                    {{ $group->meeting_day_name }}@if($group->meeting_time), {{ $group->meeting_time->format('H:i') }}@endif
                                 @endif
                             </p>
                         @endif

@@ -31,6 +31,7 @@ class PositionController extends Controller
     public function update(Request $request, Position $position)
     {
         $ministry = $position->ministry;
+        abort_unless($ministry, 404);
         $this->authorizeChurch($ministry);
         Gate::authorize('manage-ministry', $ministry);
 
@@ -46,6 +47,7 @@ class PositionController extends Controller
     public function destroy(Position $position)
     {
         $ministry = $position->ministry;
+        abort_unless($ministry, 404);
         $this->authorizeChurch($ministry);
         Gate::authorize('manage-ministry', $ministry);
 

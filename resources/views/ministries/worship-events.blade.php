@@ -41,7 +41,7 @@
                                 <div>
                                     <h3 class="font-medium text-gray-900 dark:text-white">{{ $event->title }}</h3>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $event->date->translatedFormat('l') }} о {{ $event->time->format('H:i') }}
+                                        {{ $event->date->translatedFormat('l') }} о {{ $event->time?->format('H:i') }}
                                     </p>
                                     <div class="flex items-center gap-3 mt-1">
                                         @if($event->songs->count() > 0)

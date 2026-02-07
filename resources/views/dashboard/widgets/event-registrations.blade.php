@@ -28,7 +28,7 @@
                         @endif
                     </div>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                        {{ $event->date->format('d.m.Y') }} &bull; {{ $event->time->format('H:i') }}
+                        {{ $event->date->format('d.m.Y') }} &bull; {{ $event->time?->format('H:i') }}
                     </p>
 
                     {{-- Registration progress bar --}}

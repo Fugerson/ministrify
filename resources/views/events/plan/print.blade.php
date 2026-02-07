@@ -228,7 +228,7 @@
         <div class="church-name">{{ $event->church->name }}</div>
         <div class="event-title">{{ $event->title }}</div>
         <div class="event-date">{{ $event->date->translatedFormat('l, d F Y') }}</div>
-        <div class="event-time">Початок: {{ $event->time->format('H:i') }}</div>
+        <div class="event-time">@if($event->time)Початок: {{ $event->time->format('H:i') }}@endif</div>
     </div>
 
     @php

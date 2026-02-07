@@ -814,7 +814,7 @@
                                         </div>
                                         <div>
                                             <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $event->title }}</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->date->format('d.m.Y') }} о {{ $event->time->format('H:i') }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->date->format('d.m.Y') }} о {{ $event->time?->format('H:i') }}</p>
                                         </div>
                                     </div>
                                 </a>

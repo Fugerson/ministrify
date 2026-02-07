@@ -164,6 +164,7 @@ class GalleryController extends Controller
 
     public function updatePhoto(Request $request, GalleryPhoto $photo)
     {
+        abort_unless($photo->gallery, 404);
         $this->authorize('update', $photo->gallery);
 
         $validated = $request->validate([
@@ -178,6 +179,7 @@ class GalleryController extends Controller
 
     public function deletePhoto(GalleryPhoto $photo)
     {
+        abort_unless($photo->gallery, 404);
         $this->authorize('update', $photo->gallery);
 
         if ($photo->file_path) {

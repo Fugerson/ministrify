@@ -21,7 +21,7 @@
                     <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
                     @endif
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->date->format('d.m') }} &bull; {{ $event->time->format('H:i') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->date->format('d.m') }} &bull; {{ $event->time?->format('H:i') }}</p>
             </div>
             <div class="text-right flex-shrink-0">
                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $event->filled_positions_count }}/{{ $event->total_positions_count }}</p>
