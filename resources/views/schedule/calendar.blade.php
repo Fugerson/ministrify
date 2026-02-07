@@ -193,11 +193,13 @@
                     @php
                         $isToday = $dayDate->isToday();
                     @endphp
-                    <div class="p-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0 {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/30' : '' }}">
-                        <p class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">{{ $daysShort[$i] }}</p>
-                        <p class="text-lg font-semibold mt-1 {{ $isToday ? 'text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">
-                            {{ $dayDate->format('d') }}
-                        </p>
+                    <div class="p-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0">
+                        <p class="text-xs font-medium uppercase {{ $isToday ? 'text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400' }}">{{ $daysShort[$i] }}</p>
+                        <div class="flex justify-center mt-1">
+                            <span class="{{ $isToday ? 'w-8 h-8 flex items-center justify-center rounded-full bg-primary-600 text-white font-bold text-lg' : 'text-lg font-semibold text-gray-900 dark:text-white' }}">
+                                {{ $dayDate->format('d') }}
+                            </span>
+                        </div>
                     </div>
                     @php $dayDate->addDay(); @endphp
                 @endfor
@@ -213,7 +215,7 @@
                         $isToday = $dayDate->isToday();
                         $isPast = $dayDate->isPast() && !$isToday;
                     @endphp
-                    <div class="border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-2 {{ $isToday ? 'bg-primary-50/50 dark:bg-primary-900/20' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
+                    <div class="border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-2 {{ $isToday ? 'bg-primary-50/30 dark:bg-primary-900/10 ring-1 ring-inset ring-primary-200 dark:ring-primary-800' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
                         <div class="space-y-2">
                             @foreach($dayEvents as $item)
                                 @if($item->type === 'meeting')
@@ -276,10 +278,10 @@
                         $isPast = $dayDate->isPast() && !$isToday;
                     @endphp
                     @if($dayEvents->count() > 0)
-                    <div class="p-4 {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
-                        <div class="flex items-baseline mb-2">
-                            <span class="text-lg font-bold {{ $isToday ? 'text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">{{ $dayDate->format('d') }}</span>
-                            <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">{{ $daysShort[$i] }}@if($isToday) <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">(Сьогодні)</span>@endif</span>
+                    <div class="p-4 {{ $isToday ? 'border-l-4 border-l-primary-500 bg-primary-50/50 dark:bg-primary-900/10' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="{{ $isToday ? 'w-8 h-8 flex items-center justify-center rounded-full bg-primary-600 text-white font-bold text-sm' : 'text-lg font-bold text-gray-900 dark:text-white' }}">{{ $dayDate->format('d') }}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ $daysShort[$i] }}@if($isToday) <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">Сьогодні</span>@endif</span>
                         </div>
                         <div class="space-y-2">
                             @foreach($dayEvents as $item)
@@ -358,9 +360,9 @@
                             $isCurrentMonth = $calendarDate->month == $month;
                             $isPast = $calendarDate->isPast() && !$isToday;
                         @endphp
-                        <div class="sm:min-h-[140px] lg:min-h-[160px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                        <div class="sm:min-h-[140px] lg:min-h-[160px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50/40 dark:bg-primary-900/10 ring-1 ring-inset ring-primary-300 dark:ring-primary-700' : '' }}">
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-medium {{ $isToday ? 'w-7 h-7 flex items-center justify-center rounded-full bg-primary-600 text-white' : ($isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-600') }}">
+                                <span class="text-sm font-medium {{ $isToday ? 'w-7 h-7 flex items-center justify-center rounded-full bg-primary-600 text-white shadow-sm' : ($isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-600') }}">
                                     {{ $calendarDate->format('j') }}
                                 </span>
                                 @if($dayEvents->count() > 5)
@@ -417,15 +419,15 @@
                     @endphp
 
                     @if($dayEvents->count() > 0)
-                        <div class="p-4 {{ $isToday ? 'bg-primary-50 dark:bg-primary-900/20' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
-                            <div class="flex items-baseline mb-3">
-                                <span class="text-lg font-bold {{ $isToday ? 'text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">
+                        <div class="p-4 {{ $isToday ? 'border-l-4 border-l-primary-500 bg-primary-50/50 dark:bg-primary-900/10' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="{{ $isToday ? 'w-8 h-8 flex items-center justify-center rounded-full bg-primary-600 text-white font-bold text-sm' : 'text-lg font-bold text-gray-900 dark:text-white' }}">
                                     {{ $currentDate->format('d') }}
                                 </span>
-                                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ $dayOfWeek }}
                                     @if($isToday)
-                                        <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">(Сьогодні)</span>
+                                        <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">Сьогодні</span>
                                     @endif
                                 </span>
                             </div>
