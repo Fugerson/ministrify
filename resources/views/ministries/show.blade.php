@@ -303,7 +303,7 @@
                                     <div x-show="!modalLoading" class="p-4 flex-1 overflow-y-auto overflow-x-hidden">
                                         <div class="flex flex-col lg:flex-row gap-4">
                                             {{-- Songs Section (Left) --}}
-                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:w-1/3 overflow-hidden">
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:w-2/5 overflow-hidden">
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
                                                     <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
@@ -338,7 +338,12 @@
                                                 </template>
 
                                                 <template x-if="modalSongs.length === 0">
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Пісні ще не додані</p>
+                                                    <div class="text-center py-4 mb-3">
+                                                        <svg class="w-8 h-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                                        </svg>
+                                                        <p class="text-sm text-gray-400 dark:text-gray-500">Пісні ще не додані</p>
+                                                    </div>
                                                 </template>
 
                                                 {{-- Add song form --}}
