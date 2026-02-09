@@ -177,6 +177,7 @@
             <div style="font-size: 48px; margin-bottom: 16px;">🔗</div>
             <h2>Акаунт не прив'язано</h2>
             <p>Щоб користуватися додатком, прив'яжіть Telegram у профілі Ministrify або надішліть код боту.</p>
+            <pre style="margin-top: 16px; padding: 12px; background: var(--tg-secondary-bg); border-radius: 8px; font-size: 11px; text-align: left; overflow-x: auto; color: var(--tg-hint);" x-text="debugInfo"></pre>
         </div>
     </template>
 
@@ -441,6 +442,8 @@
             prayers: [],
             profile: null,
 
+            debugInfo: '',
+
             loading: {
                 events: false,
                 assignments: false,
@@ -477,7 +480,14 @@
                         this.loaded.profile = true;
                     }
                 } catch (e) {
-                    console.error('TMA init error:', e, 'initData length:', this.initData?.length);
+                    const errBody = e._body || e.message || String(e);
+                    this.debugInfo = JSON.stringify({
+                        error: errBody,
+                        initDataLen: this.initData?.length || 0,
+                        initDataPreview: this.initData?.substring(0, 100) || '(empty)',
+                        tgWebApp: !!window.Telegram?.WebApp,
+                        platform: window.Telegram?.WebApp?.platform,
+                    }, null, 2);
                     this.person = null;
                 }
 
@@ -615,7 +625,12 @@
                     },
                 };
                 const res = await fetch(url, opts);
-                if (!res.ok) throw new Error(`API ${res.status}`);
+                if (!res.ok) {
+                    const body = await res.text();
+                    const err = new Error(`API ${res.status}`);
+                    err._body = body;
+                    throw err;
+                }
                 return res.json();
             },
 
