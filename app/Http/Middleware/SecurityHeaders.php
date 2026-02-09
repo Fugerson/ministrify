@@ -40,7 +40,7 @@ class SecurityHeaders
             if ($request->is('telegram/app')) {
                 $response->headers->set('Content-Security-Policy',
                     "default-src 'self'; " .
-                    "script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net; " .
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://cdn.jsdelivr.net; " .
                     "style-src 'self' 'unsafe-inline'; " .
                     "connect-src 'self'; " .
                     "img-src 'self' data: blob:; " .
