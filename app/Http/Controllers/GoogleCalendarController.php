@@ -190,18 +190,26 @@ class GoogleCalendarController extends Controller
             $toGoogle = $result['to_google'];
             $fromGoogle = $result['from_google'];
 
-            $message = "Синхронізовано: ";
-            $message .= "→ Google: {$toGoogle['created']} створено, {$toGoogle['updated']} оновлено";
-            if (($toGoogle['deleted'] ?? 0) > 0) {
-                $message .= ", {$toGoogle['deleted']} видалено";
+            $toTotal = $toGoogle['created'] + $toGoogle['updated'] + ($toGoogle['deleted'] ?? 0);
+            $fromTotal = $fromGoogle['created'] + $fromGoogle['updated'];
+            $toSkipped = $toGoogle['skipped'] ?? 0;
+
+            if ($toTotal === 0 && $fromTotal === 0 && $toSkipped > 0) {
+                $message = "Всі події вже синхронізовані ({$toSkipped} подій)";
+            } else {
+                $parts = [];
+                if ($toGoogle['created'] > 0) $parts[] = "{$toGoogle['created']} → Google";
+                if ($toGoogle['updated'] > 0) $parts[] = "{$toGoogle['updated']} оновлено в Google";
+                if (($toGoogle['deleted'] ?? 0) > 0) $parts[] = "{$toGoogle['deleted']} видалено з Google";
+                if ($fromGoogle['created'] > 0) $parts[] = "{$fromGoogle['created']} ← Google";
+                if ($fromGoogle['updated'] > 0) $parts[] = "{$fromGoogle['updated']} оновлено з Google";
+                $message = $parts ? "Синхронізовано: " . implode(', ', $parts) : "Немає змін";
             }
             if (($toGoogle['failed'] ?? 0) > 0) {
-                $message .= ", {$toGoogle['failed']} помилок";
+                $message .= " | {$toGoogle['failed']} помилок";
             }
-            $skipped = $toGoogle['skipped'] ?? 0;
-            $message .= "; ← Google: {$fromGoogle['created']} імпортовано, {$fromGoogle['updated']} оновлено";
             if (!empty($result['errors'])) {
-                $message .= " | Помилки: " . implode('; ', array_slice($result['errors'], 0, 3));
+                $message .= " | " . implode('; ', array_slice($result['errors'], 0, 3));
             }
 
             if ($request->wantsJson()) {

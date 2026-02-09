@@ -657,7 +657,7 @@ class GoogleCalendarService
         }
 
         $results = [
-            'to_google' => ['created' => 0, 'updated' => 0, 'deleted' => 0, 'failed' => 0],
+            'to_google' => ['created' => 0, 'updated' => 0, 'deleted' => 0, 'skipped' => 0, 'failed' => 0],
             'from_google' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
             'errors' => [],
         ];
