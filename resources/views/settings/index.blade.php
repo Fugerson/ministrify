@@ -659,15 +659,17 @@
                         <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <p class="text-sm text-blue-700 dark:text-blue-300">
-                            При створенні або редагуванні подій в Ministrify вони автоматично з'являться у вашому Google Calendar.
-                        </p>
+                        <div class="text-sm text-blue-700 dark:text-blue-300">
+                            <p><strong>Автосинхронізація:</strong> коли ви створюєте, редагуєте або видаляєте подію в Ministrify — вона автоматично оновлюється в обраному нижче календарі Google.</p>
+                            <p class="mt-1">Кнопки нижче — для масового імпорту подій з Google або повної синхронізації в обидва боки.</p>
+                        </div>
                     </div>
 
                     <!-- Settings: Calendar & Ministry (BEFORE actions) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Календар</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Календар Google</label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Сюди потраплятимуть нові події з Ministrify</p>
                             <select x-model="calendarId"
                                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
                                 <option value="primary">Основний календар</option>
