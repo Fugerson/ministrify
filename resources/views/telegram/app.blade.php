@@ -224,14 +224,6 @@
             <div style="font-size: 48px; margin-bottom: 16px;">🔗</div>
             <h2>Акаунт не прив'язано</h2>
             <p>Щоб користуватися додатком, надішліть команду <strong>/app</strong> боту та натисніть кнопку "Відкрити додаток".</p>
-            <div style="margin-top: 20px; padding: 12px; background: var(--tg-secondary-bg); border-radius: 8px; text-align: left; font-size: 11px; color: var(--tg-hint); word-break: break-all;">
-                <div><b>DEBUG:</b></div>
-                <div>href: <span x-text="window.location.href"></span></div>
-                <div>search: <span x-text="window.location.search"></span></div>
-                <div>token: <span x-text="authToken || '(empty)'"></span></div>
-                <div>initData: <span x-text="initData ? initData.substring(0, 50) + '...' : '(empty)'"></span></div>
-                <div>error: <span x-text="debugError || '(none)'"></span></div>
-            </div>
         </div>
     </template>
 
@@ -587,7 +579,6 @@
             tab: 'events',
             person: null,
             loadingInit: true,
-            debugError: '',
 
             events: [],
             assignmentsList: [],
@@ -674,7 +665,6 @@
                     }
                 } catch (e) {
                     this.person = null;
-                    this.debugError = e.message + (e._body ? ' | ' + e._body : '');
                     // Clear stale token from localStorage on auth failure
                     try { localStorage.removeItem('tma_token'); } catch(ex) {}
                 }

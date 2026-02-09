@@ -388,7 +388,7 @@ class TelegramMiniAppController extends Controller
     public function profile(Request $request): JsonResponse
     {
         $person = $this->person($request);
-        $person->load(['ministries:id,name,color', 'groups:id,name,meeting_day,meeting_time,meeting_location']);
+        $person->load(['ministries:id,name,color', 'groups:id,name,meeting_day,meeting_time,location']);
 
         // Upcoming assignments count
         $upcomingAssignments = $person->assignments()
@@ -423,7 +423,7 @@ class TelegramMiniAppController extends Controller
                     'name' => $g->name,
                     'meeting_day' => $g->meeting_day,
                     'meeting_time' => $g->meeting_time?->format('H:i'),
-                    'meeting_location' => $g->meeting_location,
+                    'meeting_location' => $g->location,
                     'role' => $g->pivot->role ?? 'member',
                 ]),
                 'stats' => [
