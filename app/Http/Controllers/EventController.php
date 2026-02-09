@@ -268,6 +268,13 @@ class EventController extends Controller
         }
 
         $validated['church_id'] = $church->id;
+
+        // Set Google Calendar ID if provided
+        $googleCalendarId = $request->input('google_calendar_id');
+        if ($googleCalendarId) {
+            $validated['google_calendar_id'] = $googleCalendarId;
+        }
+
         $event = Event::create($validated);
 
         // Handle recurring events

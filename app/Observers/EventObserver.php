@@ -104,14 +104,17 @@ class EventObserver
                     });
                 }
             } else {
+                // Use event's calendar_id if set, otherwise fall back to global setting
+                $targetCalendarId = $event->google_calendar_id ?: $calendarId;
+
                 // Create new event in Google
-                $result = $service->createEvent($accessToken, $calendarId, $event);
+                $result = $service->createEvent($accessToken, $targetCalendarId, $event);
 
                 if ($result && isset($result['id'])) {
-                    Event::withoutEvents(function () use ($event, $result, $calendarId) {
+                    Event::withoutEvents(function () use ($event, $result, $targetCalendarId) {
                         $event->update([
                             'google_event_id' => $result['id'],
-                            'google_calendar_id' => $calendarId,
+                            'google_calendar_id' => $targetCalendarId,
                             'google_synced_at' => now(),
                             'google_sync_status' => 'synced',
                         ]);
