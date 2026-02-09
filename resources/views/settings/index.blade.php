@@ -704,8 +704,8 @@
                                 </svg>
                             </div>
                             <div class="text-left">
-                                <p class="font-medium text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">Завантажити події з Google</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Додати ваші Google-події сюди (в одну сторону)</p>
+                                <p class="font-medium text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">Завантажити з Google</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Google → Ministrify</p>
                             </div>
                             <svg class="w-5 h-5 text-gray-400 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -723,7 +723,7 @@
                             </div>
                             <div class="text-left">
                                 <p class="font-medium text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors">Синхронізувати все</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Оновити події в обидва боки: Google ↔ Ministrify</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Google ↔ Ministrify</p>
                             </div>
                             <svg class="w-5 h-5 text-gray-400 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
