@@ -27,7 +27,10 @@ Route::prefix('tma')->middleware(['throttle:60,1', 'tma.validate'])->group(funct
     Route::post('assignments/{id}/decline', [TelegramMiniAppController::class, 'declineAssignment']);
     Route::post('responsibilities/{id}/confirm', [TelegramMiniAppController::class, 'confirmResponsibility']);
     Route::post('responsibilities/{id}/decline', [TelegramMiniAppController::class, 'declineResponsibility']);
+    Route::post('plan-items/{id}/confirm', [TelegramMiniAppController::class, 'confirmPlanItem']);
+    Route::post('plan-items/{id}/decline', [TelegramMiniAppController::class, 'declinePlanItem']);
     Route::get('announcements', [TelegramMiniAppController::class, 'announcements']);
+    Route::get('birthdays', [TelegramMiniAppController::class, 'birthdays']);
     Route::get('prayers', [TelegramMiniAppController::class, 'prayers']);
     Route::post('prayers/{id}/pray', [TelegramMiniAppController::class, 'prayForRequest']);
     Route::get('profile', [TelegramMiniAppController::class, 'profile']);
