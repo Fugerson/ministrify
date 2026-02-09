@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\SecurityAlertService;
 use Closure;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Request;
@@ -10,10 +11,12 @@ use Symfony\Component\HttpFoundation\Response;
 class ThrottleLogin
 {
     protected RateLimiter $limiter;
+    protected SecurityAlertService $alertService;
 
-    public function __construct(RateLimiter $limiter)
+    public function __construct(RateLimiter $limiter, SecurityAlertService $alertService)
     {
         $this->limiter = $limiter;
+        $this->alertService = $alertService;
     }
 
     /**
@@ -28,6 +31,14 @@ class ThrottleLogin
 
         if ($this->limiter->tooManyAttempts($key, $maxAttempts)) {
             $seconds = $this->limiter->availableIn($key);
+
+            $maskedEmail = SecurityAlertService::maskEmail($request->input('email', '?'));
+
+            $this->alertService->alert('brute_force', 'Brute force login attempt', [
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'details' => "Email: {$maskedEmail}, попыток: {$maxAttempts}+, блок на {$seconds}с",
+            ]);
 
             if ($request->expectsJson()) {
                 return response()->json([

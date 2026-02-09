@@ -157,7 +157,6 @@ class PrivatbankService
             if (!$response->successful()) {
                 Log::warning('PrivatBank API error', [
                     'status' => $response->status(),
-                    'body' => $response->body(),
                 ]);
                 return null;
             }
@@ -236,7 +235,6 @@ class PrivatbankService
             if (!$response->successful()) {
                 Log::warning('PrivatBank balance API error', [
                     'status' => $response->status(),
-                    'body' => $response->body(),
                 ]);
                 return null;
             }

@@ -124,6 +124,7 @@ class Song extends Model
     {
         if (!$search) return $query;
 
+        $search = addcslashes($search, '%_');
         return $query->where(function ($q) use ($search) {
             $q->where('title', 'like', "%{$search}%")
                 ->orWhere('artist', 'like', "%{$search}%")

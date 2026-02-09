@@ -391,8 +391,8 @@
                                     @if($tx->comment)
                                         <div class="text-xs text-gray-500 truncate max-w-xs" title="{{ $tx->comment }}">{{ Str::limit($tx->comment, 50) }}</div>
                                     @endif
-                                    @if($tx->counterpart_iban)
-                                        <div class="text-xs text-gray-400">{{ Str::mask($tx->counterpart_iban, '*', 10, -4) }}</div>
+                                    @if($tx->masked_iban)
+                                        <div class="text-xs text-gray-400">{{ $tx->masked_iban }}</div>
                                     @endif
                                 </td>
                                 <td class="px-3 py-3">

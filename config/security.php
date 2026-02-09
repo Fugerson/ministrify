@@ -158,4 +158,18 @@ return [
     'debug_warning' => env('APP_ENV') === 'production' && env('APP_DEBUG', false)
         ? 'WARNING: Debug mode is enabled in production!'
         : null,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Security Alerts
+    |--------------------------------------------------------------------------
+    |
+    | Configure Telegram alerts for suspicious activity detection.
+    |
+    */
+    'alerts' => [
+        'enabled' => env('SECURITY_ALERTS_ENABLED', true),
+        'cooldown_seconds' => 60,
+        'max_404_per_minute' => 10,
+    ],
 ];

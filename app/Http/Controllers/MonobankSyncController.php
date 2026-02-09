@@ -74,7 +74,7 @@ class MonobankSyncController extends Controller
 
         // Search
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = addcslashes($request->search, '%_');
             $query->where(function ($q) use ($search) {
                 $q->where('counterpart_name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
@@ -552,7 +552,11 @@ class MonobankSyncController extends Controller
 
         $transactions = $query->orderByDesc('mono_time')->limit(100)->get();
 
-        return response()->json($transactions);
+        return response()->json($transactions->map(function ($tx) {
+            $data = $tx->toArray();
+            $data['masked_iban'] = $tx->masked_iban;
+            return $data;
+        }));
     }
 
     /**

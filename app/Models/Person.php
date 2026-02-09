@@ -357,6 +357,7 @@ class Person extends Model
 
     public function scopeSearch($query, string $search)
     {
+        $search = addcslashes($search, '%_');
         return $query->where(function ($q) use ($search) {
             $q->where('first_name', 'like', "%{$search}%")
               ->orWhere('last_name', 'like', "%{$search}%")

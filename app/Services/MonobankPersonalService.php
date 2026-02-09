@@ -70,7 +70,6 @@ class MonobankPersonalService
 
             Log::warning('Monobank API error', [
                 'status' => $response->status(),
-                'body' => $response->body(),
             ]);
 
             return null;
@@ -153,7 +152,6 @@ class MonobankPersonalService
 
             Log::warning('Monobank statements error', [
                 'status' => $response->status(),
-                'body' => $response->body(),
             ]);
 
             return null;
@@ -295,7 +293,6 @@ class MonobankPersonalService
 
             Log::warning('Monobank webhook setup failed', [
                 'status' => $response->status(),
-                'body' => $response->body(),
             ]);
 
             return false;

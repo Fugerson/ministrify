@@ -11,6 +11,15 @@ class OnlineDonation extends Model
 {
     use HasFactory, Auditable;
 
+    protected $hidden = [
+        'provider_response',
+        'error_message',
+        'donor_email',
+        'donor_phone',
+        'provider_payment_id',
+        'provider_order_id',
+    ];
+
     protected $fillable = [
         'church_id',
         'person_id',

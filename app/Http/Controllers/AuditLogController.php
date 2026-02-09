@@ -40,6 +40,7 @@ class AuditLogController extends Controller
 
         // Search
         if ($search = $request->get('search')) {
+            $search = addcslashes($search, '%_');
             $query->where(function ($q) use ($search) {
                 $q->where('model_name', 'like', "%{$search}%")
                   ->orWhere('user_name', 'like', "%{$search}%");

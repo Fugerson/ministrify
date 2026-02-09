@@ -171,8 +171,11 @@ class Church extends Model
         'telegram_bot_token',
         'calendar_token',
         'monobank_token',
+        'monobank_webhook_secret',
+        'monobank_account_id',
         'privatbank_merchant_id',
         'privatbank_password',
+        'privatbank_card_number',
     ];
 
     public function users(): HasMany

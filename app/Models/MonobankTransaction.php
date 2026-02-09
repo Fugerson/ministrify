@@ -10,6 +10,11 @@ class MonobankTransaction extends Model
 {
     use HasFactory;
 
+    protected $hidden = [
+        'counterpart_iban',
+        'balance',
+    ];
+
     protected $fillable = [
         'church_id',
         'mono_id',
@@ -78,6 +83,15 @@ class MonobankTransaction extends Model
             return $this->description;
         }
         return 'Невідомий відправник';
+    }
+
+    public function getMaskedIbanAttribute(): ?string
+    {
+        if (!$this->counterpart_iban) {
+            return null;
+        }
+
+        return \Illuminate\Support\Str::mask($this->counterpart_iban, '*', 10, -4);
     }
 
     public function church(): BelongsTo

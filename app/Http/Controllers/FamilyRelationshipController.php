@@ -152,7 +152,7 @@ class FamilyRelationshipController extends Controller
             abort(403);
         }
 
-        $search = $request->get('q', '');
+        $search = addcslashes($request->get('q', ''), '%_');
 
         $people = Person::where('church_id', $church->id)
             ->where('id', '!=', $person->id)

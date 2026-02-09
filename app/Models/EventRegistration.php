@@ -12,6 +12,10 @@ class EventRegistration extends Model
 {
     use HasFactory, Auditable;
 
+    protected $hidden = [
+        'confirmation_token',
+    ];
+
     protected $fillable = [
         'event_id',
         'church_id',

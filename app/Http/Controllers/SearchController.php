@@ -20,15 +20,16 @@ class SearchController extends Controller
             return response()->json(['results' => []]);
         }
 
+        $search = addcslashes($query, '%_');
         $results = [];
 
         // Search people
         $people = Person::where('church_id', $churchId)
-            ->where(function ($q) use ($query) {
-                $q->where('first_name', 'like', "%{$query}%")
-                  ->orWhere('last_name', 'like', "%{$query}%")
-                  ->orWhere('phone', 'like', "%{$query}%")
-                  ->orWhere('email', 'like', "%{$query}%");
+            ->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
             })
             ->limit(5)
             ->get();
@@ -38,14 +39,14 @@ class SearchController extends Controller
                 'type' => 'person',
                 'icon' => 'user',
                 'title' => $person->full_name,
-                'subtitle' => $person->phone ?? $person->email ?? '',
+                'subtitle' => $this->maskContact($person->phone, $person->email),
                 'url' => route('people.show', $person),
             ];
         }
 
         // Search ministries
         $ministries = Ministry::where('church_id', $churchId)
-            ->where('name', 'like', "%{$query}%")
+            ->where('name', 'like', "%{$search}%")
             ->withCount('members')
             ->limit(3)
             ->get();
@@ -63,7 +64,7 @@ class SearchController extends Controller
 
         // Search groups
         $groups = Group::where('church_id', $churchId)
-            ->where('name', 'like', "%{$query}%")
+            ->where('name', 'like', "%{$search}%")
             ->limit(3)
             ->get();
 
@@ -79,7 +80,7 @@ class SearchController extends Controller
 
         // Search events
         $events = Event::where('church_id', $churchId)
-            ->where('title', 'like', "%{$query}%")
+            ->where('title', 'like', "%{$search}%")
             ->where('date', '>=', now()->subDays(7))
             ->orderBy('date')
             ->limit(3)
@@ -98,7 +99,7 @@ class SearchController extends Controller
         // Search boards
         $boards = Board::where('church_id', $churchId)
             ->where('is_archived', false)
-            ->where('name', 'like', "%{$query}%")
+            ->where('name', 'like', "%{$search}%")
             ->withCount('cards')
             ->limit(3)
             ->get();
@@ -159,5 +160,23 @@ class SearchController extends Controller
         ];
 
         return response()->json(['actions' => $actions]);
+    }
+
+    protected function maskContact(?string $phone, ?string $email): string
+    {
+        if ($phone) {
+            // +380501234567 → +380***4567
+            $len = strlen($phone);
+            if ($len > 4) {
+                return substr($phone, 0, max(3, $len - 7)) . '***' . substr($phone, -4);
+            }
+            return '***';
+        }
+
+        if ($email) {
+            return \App\Services\SecurityAlertService::maskEmail($email);
+        }
+
+        return '';
     }
 }

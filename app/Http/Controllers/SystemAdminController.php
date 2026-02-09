@@ -77,9 +77,10 @@ class SystemAdminController extends Controller
         $query = Church::withCount(['users', 'people', 'events', 'ministries']);
 
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('city', 'like', "%{$request->search}%");
+            $s = addcslashes($request->search, '%_');
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                  ->orWhere('city', 'like', "%{$s}%");
             });
         }
 
@@ -126,9 +127,10 @@ class SystemAdminController extends Controller
         }
 
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%");
+            $s = addcslashes($request->search, '%_');
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                  ->orWhere('email', 'like', "%{$s}%");
             });
         }
 
@@ -295,9 +297,10 @@ class SystemAdminController extends Controller
         $query = AuditLog::with(['user', 'church']);
 
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('action', 'like', "%{$request->search}%")
-                  ->orWhere('model_type', 'like', "%{$request->search}%");
+            $s = addcslashes($request->search, '%_');
+            $query->where(function ($q) use ($s) {
+                $q->where('action', 'like', "%{$s}%")
+                  ->orWhere('model_type', 'like', "%{$s}%");
             });
         }
 
@@ -895,9 +898,10 @@ class SystemAdminController extends Controller
         }
 
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', "%{$request->search}%")
-                  ->orWhere('description', 'like', "%{$request->search}%");
+            $s = addcslashes($request->search, '%_');
+            $query->where(function ($q) use ($s) {
+                $q->where('title', 'like', "%{$s}%")
+                  ->orWhere('description', 'like', "%{$s}%");
             });
         }
 

@@ -72,7 +72,7 @@ class GoogleCalendarService
                 return $response->json();
             }
 
-            Log::error('Google OAuth error', ['response' => $response->body()]);
+            Log::error('Google OAuth error', ['status' => $response->status()]);
         } catch (\Exception $e) {
             Log::error('Google OAuth exception', ['error' => $e->getMessage()]);
         }
@@ -99,7 +99,6 @@ class GoogleCalendarService
 
             Log::error('Google token refresh failed', [
                 'status' => $response->status(),
-                'body' => $response->body(),
             ]);
         } catch (\Exception $e) {
             Log::error('Google token refresh exception', ['error' => $e->getMessage()]);
@@ -208,7 +207,7 @@ class GoogleCalendarService
                 return $response->json();
             }
 
-            Log::error('Failed to create Google event', ['response' => $response->body()]);
+            Log::error('Failed to create Google event', ['status' => $response->status()]);
         } catch (\Exception $e) {
             Log::error('Google event creation error', ['error' => $e->getMessage()]);
         }
@@ -452,7 +451,7 @@ class GoogleCalendarService
                 return $response->json()['items'] ?? [];
             }
 
-            Log::error('Failed to fetch Google events', ['response' => $response->body()]);
+            Log::error('Failed to fetch Google events', ['status' => $response->status()]);
         } catch (\Exception $e) {
             Log::error('Google events fetch error', ['error' => $e->getMessage()]);
         }
