@@ -36,6 +36,20 @@ class SecurityHeaders
         // Content Security Policy - prevent XSS and injection attacks
         // Note: unsafe-eval needed for Tailwind CDN on landing pages
         if (config('app.env') === 'production') {
+            // Telegram Mini App needs telegram.org scripts and to be framed by Telegram
+            if ($request->is('telegram/app')) {
+                $response->headers->set('Content-Security-Policy',
+                    "default-src 'self'; " .
+                    "script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net; " .
+                    "style-src 'self' 'unsafe-inline'; " .
+                    "connect-src 'self'; " .
+                    "img-src 'self' data: blob:; " .
+                    "frame-ancestors https://web.telegram.org https://desktop.telegram.org https://macos.telegram.org tg:; " .
+                    "base-uri 'self'; " .
+                    "object-src 'none';"
+                );
+                $response->headers->remove('X-Frame-Options');
+            } else {
             $response->headers->set('Content-Security-Policy',
                 "default-src 'self'; " .
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com; " .
@@ -50,6 +64,7 @@ class SecurityHeaders
                 "form-action 'self'; " .
                 "object-src 'none';"
             );
+            }
 
             // Force HTTPS in production - use config values
             $hstsMaxAge = $config['hsts_max_age'] ?? 31536000;
