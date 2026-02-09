@@ -985,6 +985,7 @@
                 this.loading = true;
                 try {
                     const resolutionsArray = Object.values(this.resolutions);
+                    console.log('Sending resolutions:', JSON.stringify(resolutionsArray));
                     const res = await fetch('{{ route("settings.google-calendar.import-with-resolution") }}', {
                         method: 'POST',
                         headers: {
