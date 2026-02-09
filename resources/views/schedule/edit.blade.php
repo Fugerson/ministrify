@@ -202,6 +202,39 @@
             </div>
         </div>
 
+        @php
+            $gcSettings = auth()->user()->settings['google_calendar'] ?? null;
+            $gcConnected = $gcSettings && !empty($gcSettings['access_token']);
+            $gcCalendarId = $gcSettings['calendar_id'] ?? 'primary';
+        @endphp
+        @if($gcConnected)
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6" x-data="googleCalendarPicker()">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 4H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z" stroke="#4285F4" stroke-width="1.5"/>
+                    <path d="M8 2v4M16 2v4M3 10h18" stroke="#4285F4" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span class="text-sm font-medium text-gray-900 dark:text-white">Google Calendar</span>
+                @if($event->google_event_id)
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
+                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></span>
+                        Синхронізовано
+                    </span>
+                @endif
+            </div>
+            <select name="google_calendar_id" x-model="calendarId"
+                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
+                <option value="">Не синхронізувати з Google</option>
+                <option value="primary">Основний календар</option>
+                <template x-for="cal in calendars" :key="cal.id">
+                    <option :value="cal.id" :disabled="!cal.can_sync"
+                            x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
+                </template>
+            </select>
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400" x-text="statusText"></p>
+        </div>
+        @endif
+
         <div class="flex items-center justify-between">
             <button type="button"
                     onclick="if(confirm('Видалити подію?')) { document.getElementById('delete-event-form').submit(); }"
@@ -229,6 +262,32 @@
 
 @push('scripts')
 <script>
+function googleCalendarPicker() {
+    return {
+        calendarId: '{{ $event->google_calendar_id ?? ($gcCalendarId ?? "primary") }}',
+        calendars: [],
+        get statusText() {
+            if (!this.calendarId) return 'Подія не буде синхронізуватись з Google Calendar';
+            @if($event->google_event_id)
+                const currentCal = this.calendars.find(c => c.id === this.calendarId);
+                const calName = this.calendarId === 'primary' ? 'Основний календар' : (currentCal?.summary || this.calendarId);
+                return 'Прив\u0027язано до: ' + calName;
+            @else
+                return 'Подія автоматично з\u0027явиться в обраному календарі';
+            @endif
+        },
+        async init() {
+            try {
+                const res = await fetch('{{ route("settings.google-calendar.calendars") }}');
+                if (res.ok) {
+                    const data = await res.json();
+                    this.calendars = data.calendars || [];
+                }
+            } catch (e) {}
+        }
+    }
+}
+
 function reminderSettings(initial = []) {
     return {
         reminders: initial.length ? initial : [],

@@ -403,6 +403,12 @@ class EventController extends Controller
             $validated['track_attendance'] = $request->boolean('track_attendance');
         }
 
+        // Handle Google Calendar binding
+        if ($request->has('google_calendar_id')) {
+            $googleCalendarId = $request->input('google_calendar_id');
+            $validated['google_calendar_id'] = $googleCalendarId ?: null;
+        }
+
         // Process reminder settings
         if ($request->has('reminders')) {
             if (!empty($validated['reminders'])) {
