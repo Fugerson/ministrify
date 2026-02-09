@@ -1413,9 +1413,7 @@
                     @foreach($transactionCategories->where('type', 'income') as $category)
                         <div x-data="{ editing: false }" class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <div x-show="!editing" class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm" style="background-color: {{ $category->color }}20">
-                                    {{ $category->icon_emoji }}
-                                </span>
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $category->color }}"></span>
                                 <span class="text-gray-900 dark:text-white">{{ $category->name }}</span>
                                 <span class="text-xs text-gray-500">{{ $category->transactions_count }} записів</span>
                             </div>
@@ -1444,8 +1442,6 @@
                                 @method('PUT')
                                 <input type="text" name="name" value="{{ $category->name }}" required
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                <input type="text" name="icon" value="{{ $category->icon_emoji }}" placeholder="Емодзі" maxlength="10"
-                                       class="w-16 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
                                        class="w-10 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer">
                                 <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm">Зберегти</button>
@@ -1471,9 +1467,7 @@
                     @foreach($transactionCategories->where('type', 'expense') as $category)
                         <div x-data="{ editing: false }" class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <div x-show="!editing" class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm" style="background-color: {{ $category->color }}20">
-                                    {{ $category->icon_emoji }}
-                                </span>
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $category->color }}"></span>
                                 <span class="text-gray-900 dark:text-white">{{ $category->name }}</span>
                                 <span class="text-xs text-gray-500">{{ $category->transactions_count }} записів</span>
                             </div>
@@ -1502,8 +1496,6 @@
                                 @method('PUT')
                                 <input type="text" name="name" value="{{ $category->name }}" required
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                <input type="text" name="icon" value="{{ $category->icon_emoji }}" placeholder="Емодзі" maxlength="10"
-                                       class="w-16 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
                                        class="w-10 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer">
                                 <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm">Зберегти</button>
