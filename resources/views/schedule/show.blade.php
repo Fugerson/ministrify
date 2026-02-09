@@ -230,7 +230,7 @@
                     </div>
                 </div>
 
-                <div style="min-height: 300px;">
+                <div class="overflow-x-auto" style="min-height: 300px;">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>

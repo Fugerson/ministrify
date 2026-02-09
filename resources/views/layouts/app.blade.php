@@ -135,8 +135,12 @@
 
         /* Prevent text overflow — wrap long words instead of breaking layout */
         body { overflow-wrap: break-word; word-break: break-word; }
-        td, th { overflow-wrap: break-word; }
         .break-anywhere { overflow-wrap: anywhere; }
+
+        /* Mobile table horizontal scroll */
+        .overflow-x-auto > table { min-width: 640px; }
+        td, th { white-space: nowrap; }
+        td.wrap-cell, th.wrap-cell { white-space: normal; overflow-wrap: break-word; }
 
         /* Mobile viewport fixes */
         @supports (height: 100dvh) {

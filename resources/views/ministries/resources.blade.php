@@ -140,6 +140,7 @@
             @endcan
         </div>
         @else
+        <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                 <tr>
@@ -217,6 +218,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         @endif
     </div>
 
