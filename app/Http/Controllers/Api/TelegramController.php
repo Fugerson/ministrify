@@ -277,7 +277,12 @@ class TelegramController extends Controller
                 break;
 
             case '/app':
-                $appUrl = route('telegram.app');
+                if ($person) {
+                    $token = \App\Http\Middleware\ValidateTelegramMiniApp::generateAuthToken($person);
+                    $appUrl = route('telegram.app') . '?token=' . $token;
+                } else {
+                    $appUrl = route('telegram.app');
+                }
                 \Illuminate\Support\Facades\Http::post(
                     "https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage",
                     [
@@ -289,7 +294,6 @@ class TelegramController extends Controller
                                 [['text' => "📱 Відкрити додаток", 'web_app' => ['url' => $appUrl]]],
                             ],
                             'resize_keyboard' => true,
-                            'one_time_keyboard' => true,
                         ]),
                     ]
                 );

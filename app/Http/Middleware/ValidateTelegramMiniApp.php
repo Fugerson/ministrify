@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Person;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 class ValidateTelegramMiniApp
@@ -12,10 +13,13 @@ class ValidateTelegramMiniApp
     public function handle(Request $request, Closure $next): Response
     {
         $initData = $request->header('X-Telegram-Init-Data', '');
+        $authToken = $request->header('X-TMA-Auth-Token', '');
 
         // In local/testing — skip validation, use fallback person
         if (app()->environment('local', 'testing')) {
-            $person = $this->parsePerson($initData) ?? Person::whereNotNull('telegram_chat_id')->first();
+            $person = $this->parsePerson($initData)
+                ?? $this->parseToken($authToken)
+                ?? Person::whereNotNull('telegram_chat_id')->first();
 
             if (!$person) {
                 return response()->json(['error' => 'No linked person found'], 401);
@@ -25,22 +29,38 @@ class ValidateTelegramMiniApp
             return $next($request);
         }
 
-        if (empty($initData)) {
-            logger()->warning('TMA: empty initData');
-            return response()->json(['error' => 'Missing initData'], 401);
+        // Strategy 1: Validate initData (Telegram HMAC-SHA-256)
+        if (!empty($initData)) {
+            $person = $this->validateInitData($initData);
+            if ($person) {
+                $request->attributes->set('tma_person', $person);
+                return $next($request);
+            }
         }
 
-        // Parse initData parameters
+        // Strategy 2: Validate auth token (fallback for clients that don't pass initData)
+        if (!empty($authToken)) {
+            $person = $this->parseToken($authToken);
+            if ($person) {
+                $request->attributes->set('tma_person', $person);
+                return $next($request);
+            }
+        }
+
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    private function validateInitData(string $initData): ?Person
+    {
         parse_str($initData, $params);
 
         if (empty($params['hash'])) {
-            logger()->warning('TMA: missing hash', ['params_keys' => array_keys($params)]);
-            return response()->json(['error' => 'Missing hash'], 401);
+            return null;
         }
 
         $hash = $params['hash'];
 
-        // Build data_check_string: all params except hash, sorted by key, joined with \n
+        // Build data_check_string
         $checkParams = $params;
         unset($checkParams['hash']);
         ksort($checkParams);
@@ -55,36 +75,32 @@ class ValidateTelegramMiniApp
         $calculatedHash = bin2hex(hash_hmac('sha256', $dataCheckString, $secretKey, true));
 
         if (!hash_equals($calculatedHash, $hash)) {
-            logger()->warning('TMA: invalid signature', [
-                'expected' => substr($calculatedHash, 0, 16) . '...',
-                'got' => substr($hash, 0, 16) . '...',
-            ]);
-            return response()->json(['error' => 'Invalid signature'], 401);
+            return null;
         }
 
         // Check auth_date freshness (1 hour)
         if (isset($params['auth_date'])) {
             $authDate = (int) $params['auth_date'];
             if (time() - $authDate > 3600) {
-                logger()->warning('TMA: expired', ['auth_date' => $authDate, 'now' => time()]);
-                return response()->json(['error' => 'Init data expired'], 401);
+                return null;
             }
         }
 
-        // Extract user from initData
-        $person = $this->parsePerson($initData);
+        return $this->parsePerson($initData);
+    }
 
-        if (!$person) {
-            $userData = json_decode($params['user'] ?? '{}', true);
-            logger()->warning('TMA: person not found', [
-                'telegram_user_id' => $userData['id'] ?? null,
-            ]);
-            return response()->json(['error' => 'Account not linked. Please link your Telegram in Ministrify profile.'], 403);
+    private function parseToken(string $token): ?Person
+    {
+        if (empty($token)) {
+            return null;
         }
 
-        $request->attributes->set('tma_person', $person);
+        $cached = Cache::get("tma_auth_{$token}");
+        if (!$cached || empty($cached['person_id'])) {
+            return null;
+        }
 
-        return $next($request);
+        return Person::find($cached['person_id']);
     }
 
     private function parsePerson(string $initData): ?Person
@@ -106,5 +122,19 @@ class ValidateTelegramMiniApp
         }
 
         return Person::where('telegram_chat_id', (string) $userData['id'])->first();
+    }
+
+    /**
+     * Generate an auth token for a person (used by TelegramController).
+     */
+    public static function generateAuthToken(Person $person): string
+    {
+        $token = \Illuminate\Support\Str::random(40);
+
+        Cache::put("tma_auth_{$token}", [
+            'person_id' => $person->id,
+        ], now()->addDays(30));
+
+        return $token;
     }
 }

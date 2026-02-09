@@ -176,8 +176,7 @@
         <div class="error-banner">
             <div style="font-size: 48px; margin-bottom: 16px;">🔗</div>
             <h2>Акаунт не прив'язано</h2>
-            <p>Щоб користуватися додатком, прив'яжіть Telegram у профілі Ministrify або надішліть код боту.</p>
-            <pre style="margin-top: 16px; padding: 12px; background: var(--tg-secondary-bg); border-radius: 8px; font-size: 11px; text-align: left; overflow-x: auto; color: var(--tg-hint);" x-text="debugInfo"></pre>
+            <p>Щоб користуватися додатком, надішліть команду <strong>/app</strong> боту та натисніть кнопку "Відкрити додаток".</p>
         </div>
     </template>
 
@@ -464,6 +463,10 @@
                 return window.Telegram?.WebApp?.initData || '';
             },
 
+            get authToken() {
+                return new URLSearchParams(window.location.search).get('token') || '';
+            },
+
             async init() {
                 const tg = window.Telegram?.WebApp;
                 if (tg) {
@@ -619,14 +622,17 @@
             },
 
             async api(method, url) {
-                const opts = {
-                    method,
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-Telegram-Init-Data': this.initData,
-                    },
+                const headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                 };
+                if (this.initData) {
+                    headers['X-Telegram-Init-Data'] = this.initData;
+                }
+                if (this.authToken) {
+                    headers['X-TMA-Auth-Token'] = this.authToken;
+                }
+                const opts = { method, headers };
                 const res = await fetch(url, opts);
                 if (!res.ok) {
                     const body = await res.text();
