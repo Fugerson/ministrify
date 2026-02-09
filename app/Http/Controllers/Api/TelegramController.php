@@ -277,13 +277,21 @@ class TelegramController extends Controller
                 break;
 
             case '/app':
-                $keyboard = [
-                    [['text' => "\xF0\x9F\x93\xB1 Відкрити додаток", 'web_app' => ['url' => route('telegram.app')]]],
-                ];
-                $this->telegram()->sendMessage(
-                    $chatId,
-                    "📱 <b>Ministrify App</b>\n\nНатисніть кнопку нижче, щоб відкрити додаток:",
-                    $keyboard
+                $appUrl = route('telegram.app');
+                \Illuminate\Support\Facades\Http::post(
+                    "https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage",
+                    [
+                        'chat_id' => $chatId,
+                        'text' => "📱 <b>Ministrify App</b>\n\nНатисніть кнопку нижче, щоб відкрити додаток:",
+                        'parse_mode' => 'HTML',
+                        'reply_markup' => json_encode([
+                            'keyboard' => [
+                                [['text' => "📱 Відкрити додаток", 'web_app' => ['url' => $appUrl]]],
+                            ],
+                            'resize_keyboard' => true,
+                            'one_time_keyboard' => true,
+                        ]),
+                    ]
                 );
                 break;
 
