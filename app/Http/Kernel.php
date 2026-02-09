@@ -26,6 +26,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\SanitizeInput::class,
             \App\Http\Middleware\HandleTabRequest::class,
             \App\Http\Middleware\NoCacheForAuth::class,
+            \App\Http\Middleware\LogPageVisit::class,
         ],
 
         'api' => [

@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
 use App\Models\AdminTask;
+use App\Models\PageVisit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -340,6 +341,44 @@ class SystemAdminController extends Controller
     public function settings()
     {
         return view('system-admin.settings');
+    }
+
+    /**
+     * Page visits log
+     */
+    public function pageVisits(Request $request)
+    {
+        $query = PageVisit::with(['user', 'church']);
+
+        if ($request->search) {
+            $s = addcslashes($request->search, '%_');
+            $query->where(function ($q) use ($s) {
+                $q->where('url', 'like', "%{$s}%")
+                  ->orWhere('user_name', 'like', "%{$s}%")
+                  ->orWhere('route_name', 'like', "%{$s}%");
+            });
+        }
+
+        if ($request->church_id) {
+            $query->where('church_id', $request->church_id);
+        }
+
+        if ($request->user_id) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->from) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+
+        if ($request->to) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
+        $visits = $query->latest('created_at')->paginate(50)->withQueryString();
+        $churches = Church::orderBy('name')->get();
+
+        return view('system-admin.page-visits', compact('visits', 'churches'));
     }
 
     /**

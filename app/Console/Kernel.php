@@ -48,6 +48,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:monitor')
             ->everySixHours()
             ->description('Check backup size and age, alert if issues');
+
+        // Clean old page visits
+        $schedule->command('page-visits:clean')
+            ->dailyAt('03:00')
+            ->description('Delete page visits older than 30 days');
     }
 
     protected function commands(): void

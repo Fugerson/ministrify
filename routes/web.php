@@ -216,6 +216,9 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     // Audit Logs
     Route::get('audit-logs', [SystemAdminController::class, 'auditLogs'])->name('audit-logs');
 
+    // Page Visits
+    Route::get('page-visits', [SystemAdminController::class, 'pageVisits'])->name('page-visits');
+
     // Support Tickets
     Route::get('support', [SystemAdminController::class, 'supportTickets'])->name('support.index');
     Route::post('support', [SystemAdminController::class, 'storeSupportTicket'])->name('support.store');
