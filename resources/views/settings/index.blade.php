@@ -666,7 +666,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-900 dark:text-white font-medium">Сповіщення про призначення</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Повідомлення при призначенні на позицію в розкладі</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">«Нове призначення! Служіння: Worship, Позиція: Вокал. Підтвердити / Не можу»</p>
                             </div>
                         </div>
                         <div class="relative inline-flex">
@@ -685,7 +685,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-900 dark:text-white font-medium">Сповіщення про відповідальності</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Повідомлення при призначенні відповідальності за подію</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">«Нова відповідальність! Звук. Ви можете взяти це на себе? Так / Не можу»</p>
                             </div>
                         </div>
                         <div class="relative inline-flex">
@@ -704,7 +704,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-900 dark:text-white font-medium">Сповіщення про план служіння</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Запит на участь у плані служіння</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">«Запит на участь. Прославлення, 10:00. Чи можете ви взяти участь? Так / Не можу»</p>
                             </div>
                         </div>
                         <div class="relative inline-flex">
@@ -723,7 +723,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-900 dark:text-white font-medium">Сповіщення лідеру при відхиленні</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Повідомлення лідеру, коли хтось відхиляє призначення</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">«Відмова від служіння. Іван відхилив участь: Worship, Вокал. Потрібно знайти заміну»</p>
                             </div>
                         </div>
                         <div class="relative inline-flex">
@@ -742,7 +742,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-900 dark:text-white font-medium">Привітання з днем народження</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Нагадування лідерам про дні народження членів церкви</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">«Дні народження. Сьогодні: Іван Петренко. Завтра: Марія Сидоренко. Не забудьте привітати!»</p>
                             </div>
                         </div>
                         <div class="relative inline-flex">
@@ -770,7 +770,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-900 dark:text-white font-medium">Нагадування за день</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Нагадування учасникам за день до події</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">«Нагадування на завтра! Завтра ти служиш: Worship, Вокал. Не забудь!»</p>
                             </div>
                         </div>
                         <div class="relative inline-flex">
@@ -789,7 +789,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-900 dark:text-white font-medium">Нагадування в день події</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Нагадування учасникам в день події</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">«Нагадування! Сьогодні ти служиш: Worship, Вокал. Не забудь!»</p>
                             </div>
                         </div>
                         <div class="relative inline-flex">
@@ -808,7 +808,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-900 dark:text-white font-medium">Нагадування про завдання</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Нагадування виконавцям про терміни завдань</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">«Нагадування про завдання. Сьогодні: Підготувати презентацію. Прострочено: Замовити обладнання»</p>
                             </div>
                         </div>
                         <div class="relative inline-flex">
