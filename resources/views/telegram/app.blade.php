@@ -487,6 +487,9 @@
                         initDataPreview: this.initData?.substring(0, 100) || '(empty)',
                         tgWebApp: !!window.Telegram?.WebApp,
                         platform: window.Telegram?.WebApp?.platform,
+                        version: window.Telegram?.WebApp?.version,
+                        hash: window.location.hash?.substring(0, 200) || '(empty)',
+                        href: window.location.href,
                     }, null, 2);
                     this.person = null;
                 }
