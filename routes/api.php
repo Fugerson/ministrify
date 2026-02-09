@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\TelegramController;
+use App\Http\Controllers\Api\TelegramMiniAppController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\PushSubscriptionController;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,20 @@ Route::middleware(['throttle:120,1', 'telegram.webhook'])->group(function () {
     Route::post('telegram/webhook', [TelegramController::class, 'webhook']);
 });
 Route::get('telegram/link/{code}', [TelegramController::class, 'link'])->name('telegram.link')->middleware('throttle:10,1');
+
+// Telegram Mini App API
+Route::prefix('tma')->middleware(['throttle:60,1', 'tma.validate'])->group(function () {
+    Route::get('events', [TelegramMiniAppController::class, 'events']);
+    Route::get('assignments', [TelegramMiniAppController::class, 'assignments']);
+    Route::post('assignments/{id}/confirm', [TelegramMiniAppController::class, 'confirmAssignment']);
+    Route::post('assignments/{id}/decline', [TelegramMiniAppController::class, 'declineAssignment']);
+    Route::post('responsibilities/{id}/confirm', [TelegramMiniAppController::class, 'confirmResponsibility']);
+    Route::post('responsibilities/{id}/decline', [TelegramMiniAppController::class, 'declineResponsibility']);
+    Route::get('announcements', [TelegramMiniAppController::class, 'announcements']);
+    Route::get('prayers', [TelegramMiniAppController::class, 'prayers']);
+    Route::post('prayers/{id}/pray', [TelegramMiniAppController::class, 'prayForRequest']);
+    Route::get('profile', [TelegramMiniAppController::class, 'profile']);
+});
 
 // Payment webhooks (for donations)
 Route::prefix('webhooks')->name('api.webhooks.')->middleware('throttle:60,1')->group(function () {

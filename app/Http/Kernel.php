@@ -54,5 +54,6 @@ class Kernel extends HttpKernel
         'onboarding' => \App\Http\Middleware\CheckOnboarding::class,
         'permission' => \App\Http\Middleware\CheckPermission::class,
         'telegram.webhook' => \App\Http\Middleware\ValidateTelegramWebhook::class,
+        'tma.validate' => \App\Http\Middleware\ValidateTelegramMiniApp::class,
     ];
 }

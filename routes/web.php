@@ -107,6 +107,9 @@ Route::match(['get', 'post'], 'webhook/uptime/{secret}', function ($secret, \Ill
     return response()->json(['ok' => true]);
 })->middleware('throttle:10,1')->withoutMiddleware(['web'])->name('uptime.webhook');
 
+// Telegram Mini App SPA (auth via initData in API calls)
+Route::get('telegram/app', fn() => view('telegram.app'))->name('telegram.app');
+
 // QR Check-in (public with optional auth)
 Route::get('checkin/{token}', [QrCheckinController::class, 'show'])->middleware('throttle:30,1')->name('checkin.show');
 
