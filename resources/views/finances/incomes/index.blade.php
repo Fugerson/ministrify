@@ -391,7 +391,7 @@ window.incomesManager = function() {
                     <option value="">Усі категорії</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                            {{ $category->icon ?? '💰' }} {{ $category->name }}
+                            {{ $category->icon_emoji }} {{ $category->name }}
                         </option>
                     @endforeach
                 </select>

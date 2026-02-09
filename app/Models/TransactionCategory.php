@@ -58,6 +58,29 @@ class TransactionCategory extends Model
         return $query->whereIn('type', [self::TYPE_EXPENSE, self::TYPE_BOTH]);
     }
 
+    public function getIconEmojiAttribute(): string
+    {
+        $map = [
+            'heart' => '❤️',
+            'gift' => '🎁',
+            'star' => '⭐',
+            'dots-horizontal' => '•••',
+            'home' => '🏠',
+            'lightning-bolt' => '⚡',
+            'desktop-computer' => '🖥️',
+            'users' => '👥',
+            'truck' => '🚛',
+        ];
+
+        $icon = $this->icon;
+
+        if (!$icon) {
+            return $this->type === self::TYPE_EXPENSE ? '📦' : '💰';
+        }
+
+        return $map[$icon] ?? $icon;
+    }
+
     public function getTotalThisMonthAttribute(): float
     {
         return $this->transactions()

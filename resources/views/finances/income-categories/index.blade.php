@@ -50,7 +50,7 @@
                         <div x-show="!editing" class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background-color: {{ $category->color }}20">
-                                    {{ $category->icon ?? '💰' }}
+                                    {{ $category->icon_emoji }}
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-900 dark:text-white">{{ $category->name }}</p>
@@ -88,7 +88,7 @@
                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                 </div>
                                 <div>
-                                    <input type="text" name="icon" value="{{ $category->icon }}" maxlength="10"
+                                    <input type="text" name="icon" value="{{ $category->icon_emoji }}" maxlength="10"
                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                 </div>
                                 <div>
