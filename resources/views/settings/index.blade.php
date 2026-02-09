@@ -667,7 +667,7 @@
                     <!-- Settings: Calendar & Ministry (BEFORE actions) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">З якого календаря імпортувати</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Календар</label>
                             <select x-model="calendarId"
                                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
                                 <option value="primary">Основний календар</option>
@@ -677,7 +677,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Прив'язати імпорт до команди</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Додати до команди</label>
                             <select x-model="ministryId"
                                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
                                 <option value="">Не прив'язувати</option>
@@ -704,8 +704,8 @@
                                 </svg>
                             </div>
                             <div class="text-left">
-                                <p class="font-medium text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">Імпорт з Google</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Перенести події з Google Calendar в Ministrify</p>
+                                <p class="font-medium text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">Завантажити події з Google</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Додати ваші Google-події сюди (в одну сторону)</p>
                             </div>
                             <svg class="w-5 h-5 text-gray-400 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -722,8 +722,8 @@
                                 </svg>
                             </div>
                             <div class="text-left">
-                                <p class="font-medium text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors">Повна синхронізація</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Обмін подіями в обидва боки: Google ↔ Ministrify</p>
+                                <p class="font-medium text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors">Синхронізувати все</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Оновити події в обидва боки: Google ↔ Ministrify</p>
                             </div>
                             <svg class="w-5 h-5 text-gray-400 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
