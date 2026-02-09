@@ -952,10 +952,13 @@
                             this.preview = data;
                             this.resolutions = {};
                             (data.preview?.conflicts || []).forEach(c => {
-                                this.resolutions[c.google_event.id] = { action: 'skip' };
+                                this.resolutions[c.google_event.id] = { google_event_id: c.google_event.id, action: 'skip' };
                             });
                             (data.preview?.new || []).forEach(n => {
-                                this.resolutions[n.google_event.id] = { action: 'import' };
+                                this.resolutions[n.google_event.id] = { google_event_id: n.google_event.id, action: 'import' };
+                            });
+                            (data.preview?.updates || []).forEach(u => {
+                                this.resolutions[u.google_event.id] = { google_event_id: u.google_event.id, action: 'import', local_event_id: u.local_event.id };
                             });
                             this.showConflictModal = true;
                         }
