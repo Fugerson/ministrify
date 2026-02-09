@@ -612,7 +612,12 @@
             },
 
             get authToken() {
-                return new URLSearchParams(window.location.search).get('token') || '';
+                const urlToken = new URLSearchParams(window.location.search).get('token');
+                if (urlToken) {
+                    try { localStorage.setItem('tma_token', urlToken); } catch(e) {}
+                    return urlToken;
+                }
+                try { return localStorage.getItem('tma_token') || ''; } catch(e) { return ''; }
             },
 
             get groupedEvents() {
