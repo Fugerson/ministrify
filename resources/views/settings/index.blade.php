@@ -944,17 +944,21 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        this.preview = data;
-                        this.resolutions = {};
-                        // Default all conflicts to 'skip'
-                        (data.preview?.conflicts || []).forEach(c => {
-                            this.resolutions[c.google_event.id] = { action: 'skip' };
-                        });
-                        // Default all new to 'import'
-                        (data.preview?.new || []).forEach(n => {
-                            this.resolutions[n.google_event.id] = { action: 'import' };
-                        });
-                        this.showConflictModal = true;
+                        const total = (data.counts?.new || 0) + (data.counts?.updates || 0) + (data.counts?.conflicts || 0);
+                        if (total === 0) {
+                            this.message = 'Немає нових подій для імпорту';
+                            this.success = true;
+                        } else {
+                            this.preview = data;
+                            this.resolutions = {};
+                            (data.preview?.conflicts || []).forEach(c => {
+                                this.resolutions[c.google_event.id] = { action: 'skip' };
+                            });
+                            (data.preview?.new || []).forEach(n => {
+                                this.resolutions[n.google_event.id] = { action: 'import' };
+                            });
+                            this.showConflictModal = true;
+                        }
                     } else {
                         this.message = data.error || 'Помилка завантаження';
                         this.success = false;
