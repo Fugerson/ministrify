@@ -26,6 +26,7 @@ class ValidateTelegramMiniApp
         }
 
         if (empty($initData)) {
+            logger()->warning('TMA: empty initData');
             return response()->json(['error' => 'Missing initData'], 401);
         }
 
@@ -33,6 +34,7 @@ class ValidateTelegramMiniApp
         parse_str($initData, $params);
 
         if (empty($params['hash'])) {
+            logger()->warning('TMA: missing hash', ['params_keys' => array_keys($params)]);
             return response()->json(['error' => 'Missing hash'], 401);
         }
 
@@ -53,6 +55,10 @@ class ValidateTelegramMiniApp
         $calculatedHash = bin2hex(hash_hmac('sha256', $dataCheckString, $secretKey, true));
 
         if (!hash_equals($calculatedHash, $hash)) {
+            logger()->warning('TMA: invalid signature', [
+                'expected' => substr($calculatedHash, 0, 16) . '...',
+                'got' => substr($hash, 0, 16) . '...',
+            ]);
             return response()->json(['error' => 'Invalid signature'], 401);
         }
 
@@ -60,6 +66,7 @@ class ValidateTelegramMiniApp
         if (isset($params['auth_date'])) {
             $authDate = (int) $params['auth_date'];
             if (time() - $authDate > 3600) {
+                logger()->warning('TMA: expired', ['auth_date' => $authDate, 'now' => time()]);
                 return response()->json(['error' => 'Init data expired'], 401);
             }
         }
@@ -68,6 +75,10 @@ class ValidateTelegramMiniApp
         $person = $this->parsePerson($initData);
 
         if (!$person) {
+            $userData = json_decode($params['user'] ?? '{}', true);
+            logger()->warning('TMA: person not found', [
+                'telegram_user_id' => $userData['id'] ?? null,
+            ]);
             return response()->json(['error' => 'Account not linked. Please link your Telegram in Ministrify profile.'], 403);
         }
 

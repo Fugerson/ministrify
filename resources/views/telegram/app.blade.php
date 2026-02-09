@@ -477,6 +477,7 @@
                         this.loaded.profile = true;
                     }
                 } catch (e) {
+                    console.error('TMA init error:', e, 'initData length:', this.initData?.length);
                     this.person = null;
                 }
 
