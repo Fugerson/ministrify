@@ -397,6 +397,11 @@ class Church extends Model
         return sprintf('#%02x%02x%02x', max(0, min(255, $r)), max(0, min(255, $g)), max(0, min(255, $b)));
     }
 
+    public function isNotificationEnabled(string $key): bool
+    {
+        return $this->settings['notifications'][$key] ?? true;
+    }
+
     public function getSetting(string $key, $default = null)
     {
         return data_get($this->settings, $key, $default);

@@ -612,6 +612,10 @@ class SchedulingService
         $person = $assignment->person;
         $church = $person->church;
 
+        if (!$church?->isNotificationEnabled('notify_on_assignment')) {
+            return false;
+        }
+
         if (!$person->telegram_chat_id || !config('services.telegram.bot_token')) {
             return false;
         }

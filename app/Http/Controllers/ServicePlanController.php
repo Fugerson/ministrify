@@ -587,6 +587,13 @@ class ServicePlanController extends Controller
         }
 
         $church = $event->church;
+        if (!$church?->isNotificationEnabled('notify_on_plan_request')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Сповіщення про план служіння вимкнено в налаштуваннях',
+            ], 422);
+        }
+
         if (!config('services.telegram.bot_token')) {
             return response()->json([
                 'success' => false,

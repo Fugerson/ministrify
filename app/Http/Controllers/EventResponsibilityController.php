@@ -195,6 +195,10 @@ class EventResponsibilityController extends Controller
             return;
         }
 
+        if (!$church->isNotificationEnabled('notify_on_responsibility')) {
+            return;
+        }
+
         if (!$person->telegram_chat_id || !config('services.telegram.bot_token')) {
             return;
         }

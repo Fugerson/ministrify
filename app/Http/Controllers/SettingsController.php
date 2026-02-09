@@ -183,10 +183,13 @@ class SettingsController extends Controller
         $currentNotifications = $settings['notifications'] ?? [];
 
         $settings['notifications'] = [
-            'reminder_day_before' => $request->has('reminder_day_before') ? $request->boolean('reminder_day_before') : ($currentNotifications['reminder_day_before'] ?? true),
-            'reminder_same_day' => $request->has('reminder_same_day') ? $request->boolean('reminder_same_day') : ($currentNotifications['reminder_same_day'] ?? true),
+            'notify_on_assignment' => $request->has('notify_on_assignment') ? $request->boolean('notify_on_assignment') : ($currentNotifications['notify_on_assignment'] ?? true),
+            'notify_on_responsibility' => $request->has('notify_on_responsibility') ? $request->boolean('notify_on_responsibility') : ($currentNotifications['notify_on_responsibility'] ?? true),
+            'notify_on_plan_request' => $request->has('notify_on_plan_request') ? $request->boolean('notify_on_plan_request') : ($currentNotifications['notify_on_plan_request'] ?? true),
             'notify_leader_on_decline' => $request->has('notify_leader_on_decline') ? $request->boolean('notify_leader_on_decline') : ($currentNotifications['notify_leader_on_decline'] ?? true),
             'birthday_reminders' => $request->has('birthday_reminders') ? $request->boolean('birthday_reminders') : ($currentNotifications['birthday_reminders'] ?? true),
+            'reminder_day_before' => $request->has('reminder_day_before') ? $request->boolean('reminder_day_before') : ($currentNotifications['reminder_day_before'] ?? true),
+            'reminder_same_day' => $request->has('reminder_same_day') ? $request->boolean('reminder_same_day') : ($currentNotifications['reminder_same_day'] ?? true),
             'task_reminders' => $request->has('task_reminders') ? $request->boolean('task_reminders') : ($currentNotifications['task_reminders'] ?? true),
         ];
 

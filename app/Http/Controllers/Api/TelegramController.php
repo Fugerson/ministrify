@@ -163,13 +163,15 @@ class TelegramController extends Controller
             $this->telegram()->sendMessage($chatId, "😔 Зрозуміло. Повідомлення надіслано лідеру.");
 
             // Notify ministry leader
-            $leader = $event->ministry->leader ?? $person->church?->people()
-                ->whereNotNull('telegram_chat_id')
-                ->whereHas('user', fn($q) => $q->where('role', 'admin'))
-                ->first();
+            if ($person->church?->isNotificationEnabled('notify_leader_on_decline')) {
+                $leader = $event->ministry->leader ?? $person->church?->people()
+                    ->whereNotNull('telegram_chat_id')
+                    ->whereHas('user', fn($q) => $q->where('role', 'admin'))
+                    ->first();
 
-            if ($leader) {
-                $this->telegram()->sendDeclineNotification($assignment, $leader);
+                if ($leader) {
+                    $this->telegram()->sendDeclineNotification($assignment, $leader);
+                }
             }
         }
     }
