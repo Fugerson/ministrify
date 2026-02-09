@@ -665,6 +665,8 @@
                     }
                 } catch (e) {
                     this.person = null;
+                    // Clear stale token from localStorage on auth failure
+                    try { localStorage.removeItem('tma_token'); } catch(ex) {}
                 }
 
                 this.loadingInit = false;

@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Models\Person;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 class ValidateTelegramMiniApp
@@ -95,12 +94,35 @@ class ValidateTelegramMiniApp
             return null;
         }
 
-        $cached = Cache::get("tma_auth_{$token}");
-        if (!$cached || empty($cached['person_id'])) {
+        try {
+            $decoded = base64_decode($token, true);
+            if (!$decoded) {
+                return null;
+            }
+
+            $parts = explode(':', $decoded, 3);
+            if (count($parts) !== 3) {
+                return null;
+            }
+
+            [$personId, $timestamp, $signature] = $parts;
+
+            // Verify HMAC signature
+            $data = $personId . ':' . $timestamp;
+            $expected = hash_hmac('sha256', $data, config('app.key'));
+            if (!hash_equals($expected, $signature)) {
+                return null;
+            }
+
+            // Check token age (30 days)
+            if (time() - (int) $timestamp > 30 * 86400) {
+                return null;
+            }
+
+            return Person::find((int) $personId);
+        } catch (\Exception $e) {
             return null;
         }
-
-        return Person::find($cached['person_id']);
     }
 
     private function parsePerson(string $initData): ?Person
@@ -125,16 +147,13 @@ class ValidateTelegramMiniApp
     }
 
     /**
-     * Generate an auth token for a person (used by TelegramController).
+     * Generate a signed auth token for a person (stateless, no cache needed).
      */
     public static function generateAuthToken(Person $person): string
     {
-        $token = \Illuminate\Support\Str::random(40);
+        $data = $person->id . ':' . time();
+        $signature = hash_hmac('sha256', $data, config('app.key'));
 
-        Cache::put("tma_auth_{$token}", [
-            'person_id' => $person->id,
-        ], now()->addDays(30));
-
-        return $token;
+        return base64_encode($data . ':' . $signature);
     }
 }
