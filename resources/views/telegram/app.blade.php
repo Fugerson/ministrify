@@ -215,7 +215,7 @@
                         </div>
                         <div class="card-meta" style="display: flex; gap: 12px; flex-wrap: wrap;">
                             <span>📅 <span x-text="event.date_formatted"></span></span>
-                            <span x-show="event.time">🕐 <span x-text="event.time"></span><template x-if="event.end_time"> — <span x-text="event.end_time"></span></template></span>
+                            <span x-show="event.time">🕐 <span x-text="event.time + (event.end_time ? ' — ' + event.end_time : '')"></span></span>
                             <span x-show="event.location">📍 <span x-text="event.location"></span></span>
                         </div>
                     </div>
