@@ -716,6 +716,15 @@
                         </button>
                     </div>
 
+                    <!-- Delete all events -->
+                    <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <button @click="deleteEvents('all')"
+                                :disabled="loading"
+                                class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors disabled:opacity-50">
+                            Очистити всі події
+                        </button>
+                    </div>
+
                     <!-- Status Message -->
                     <div x-show="message" x-transition
                          :class="success ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'"
