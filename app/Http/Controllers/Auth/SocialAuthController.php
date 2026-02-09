@@ -102,7 +102,7 @@ class SocialAuthController extends Controller
                     'model_type' => User::class,
                     'model_id' => $user->id,
                     'model_name' => $user->name,
-                    'description' => 'Вхід через Google',
+                    'notes' => 'Вхід через Google',
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
