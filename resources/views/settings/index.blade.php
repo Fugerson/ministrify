@@ -672,7 +672,7 @@
                                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
                                 <option value="primary">Основний календар</option>
                                 <template x-for="cal in calendars" :key="cal.id">
-                                    <option :value="cal.id" x-text="cal.summary"></option>
+                                    <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
                                 </template>
                             </select>
                         </div>

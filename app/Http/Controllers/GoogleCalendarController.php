@@ -100,7 +100,26 @@ class GoogleCalendarController extends Controller
             return response()->json(['error' => 'Not connected to Google Calendar'], 401);
         }
 
-        $calendars = $this->googleCalendar->listCalendars($accessToken);
+        $raw = $this->googleCalendar->listCalendars($accessToken);
+
+        $calendars = collect($raw)
+            ->filter(fn($c) => ($c['id'] ?? '') !== 'primary')
+            ->map(function ($c) {
+                $id = $c['id'] ?? '';
+                $role = $c['accessRole'] ?? 'reader';
+                $isImport = str_contains($id, '@import.calendar.google.com');
+                $isHoliday = str_contains($id, '#holiday@group.v.calendar.google.com');
+                $canSync = !$isImport && !$isHoliday && in_array($role, ['owner', 'writer']);
+
+                return [
+                    'id' => $id,
+                    'summary' => $c['summary'] ?? $id,
+                    'can_sync' => $canSync,
+                ];
+            })
+            ->sortByDesc('can_sync')
+            ->values()
+            ->toArray();
 
         return response()->json(['calendars' => $calendars]);
     }
