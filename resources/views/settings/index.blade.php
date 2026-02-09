@@ -604,7 +604,7 @@
         </div>
     </div>
 
-    <!-- Google Calendar OAuth Integration -->
+    <!-- Google Calendar Integration -->
     @php
         $googleCalendarSettings = auth()->user()->settings['google_calendar'] ?? null;
         $isGoogleConnected = $googleCalendarSettings && !empty($googleCalendarSettings['access_token']);
@@ -614,19 +614,22 @@
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                    <div class="w-10 h-10 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 4H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2z" stroke="#4285F4" stroke-width="1.5"/>
+                            <path d="M8 2v4M16 2v4M3 10h18" stroke="#4285F4" stroke-width="1.5" stroke-linecap="round"/>
+                            <rect x="7" y="13" width="3" height="3" rx="0.5" fill="#34A853"/>
+                            <rect x="14" y="13" width="3" height="3" rx="0.5" fill="#FBBC05"/>
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Google Calendar API</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Двостороння синхронізація з вашим Google Calendar</p>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Google Calendar</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Синхронізація подій між Ministrify та Google</p>
                     </div>
                 </div>
                 @if($isGoogleConnected)
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
-                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
                         Підключено
                     </span>
                 @endif
@@ -636,53 +639,37 @@
         <div class="p-6">
             @if($isGoogleConnected)
                 <!-- Connected State -->
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span class="text-sm text-green-700 dark:text-green-300">
-                                Підключено {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
-                            </span>
-                        </div>
-                        <form action="{{ route('settings.google-calendar.disconnect') }}" method="POST" class="inline">
+                <div class="space-y-5">
+                    <!-- Connection info -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            Підключено {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
+                        </span>
+                        <form action="{{ route('settings.google-calendar.disconnect') }}" method="POST" class="inline"
+                              onsubmit="return confirm('Відключити Google Calendar?')">
                             @csrf
-                            <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">
+                            <button type="submit" class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
                                 Відключити
                             </button>
                         </form>
                     </div>
 
-                    <!-- Sync Actions -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <button @click="previewImport()"
-                                :disabled="loading"
-                                class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-xl transition-colors">
-                            <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                            </svg>
-                            <svg x-show="loading" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                            </svg>
-                            <span x-text="loading ? 'Завантаження...' : 'Імпорт з Google'"></span>
-                        </button>
-                        <button @click="fullSync()"
-                                :disabled="loading"
-                                class="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 disabled:opacity-50 text-white font-medium rounded-xl transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                            </svg>
-                            Повна синхронізація
-                        </button>
+                    <!-- Auto-sync info -->
+                    <div class="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                        <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">
+                            При створенні або редагуванні подій в Ministrify вони автоматично з'являться у вашому Google Calendar.
+                        </p>
                     </div>
 
-                    <!-- Calendar & Ministry Selection -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <!-- Settings: Calendar & Ministry (BEFORE actions) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Календар Google</label>
-                            <select x-model="calendarId" @change="loadCalendars()"
-                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">З якого календаря імпортувати</label>
+                            <select x-model="calendarId"
+                                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
                                 <option value="primary">Основний календар</option>
                                 <template x-for="cal in calendars" :key="cal.id">
                                     <option :value="cal.id" x-text="cal.summary"></option>
@@ -690,15 +677,58 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Команда для імпорту</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Прив'язати імпорт до команди</label>
                             <select x-model="ministryId"
-                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-                                <option value="">Без команди</option>
+                                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
+                                <option value="">Не прив'язувати</option>
                                 @foreach($ministries as $ministry)
                                     <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                                 @endforeach
                             </select>
                         </div>
+                    </div>
+
+                    <!-- Sync Actions -->
+                    <div class="space-y-3">
+                        <!-- Import from Google -->
+                        <button @click="previewImport()"
+                                :disabled="loading"
+                                class="w-full flex items-center gap-4 p-4 bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group disabled:opacity-50">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
+                                <svg x-show="!loading" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                <svg x-show="loading" class="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-medium text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">Імпорт з Google</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Перенести події з Google Calendar в Ministrify</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+
+                        <!-- Full Sync -->
+                        <button @click="fullSync()"
+                                :disabled="loading"
+                                class="w-full flex items-center gap-4 p-4 bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-green-300 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-900/10 transition-all group disabled:opacity-50">
+                            <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-medium text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors">Повна синхронізація</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Обмін подіями в обидва боки: Google ↔ Ministrify</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
                     </div>
 
                     <!-- Status Message -->
@@ -707,39 +737,18 @@
                          class="p-4 rounded-xl border text-sm">
                         <span x-text="message"></span>
                     </div>
-
-                    <!-- Danger Zone: Delete Events -->
-                    <div class="border border-red-200 dark:border-red-800/50 rounded-xl p-4 mt-2">
-                        <h4 class="text-sm font-medium text-red-600 dark:text-red-400 mb-3">Видалення подій (тест)</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                            <button @click="deleteEvents('synced')"
-                                    :disabled="loading"
-                                    class="px-3 py-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 text-sm rounded-lg transition-colors disabled:opacity-50">
-                                Синхронізовані
-                            </button>
-                            <button @click="deleteEvents('imported')"
-                                    :disabled="loading"
-                                    class="px-3 py-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 text-sm rounded-lg transition-colors disabled:opacity-50">
-                                Імпортовані з Google
-                            </button>
-                            <button @click="deleteEvents('all')"
-                                    :disabled="loading"
-                                    class="px-3 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
-                                Всі події
-                            </button>
-                        </div>
-                    </div>
                 </div>
             @else
                 <!-- Not Connected State -->
-                <div class="text-center py-6">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-50 dark:bg-gray-700 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-300 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4">
-                        Підключіть Google Calendar для двосторонньої синхронізації подій
+                    <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">Підключіть Google Calendar</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-sm mx-auto">
+                        Події будуть автоматично синхронізуватися між Ministrify та вашим Google Calendar
                     </p>
                     <a href="{{ route('settings.google-calendar.redirect') }}"
                        class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 dark:bg-gray-700 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-medium rounded-xl transition-colors shadow-sm">
@@ -749,7 +758,7 @@
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                         </svg>
-                        Підключити Google Calendar
+                        Підключити
                     </a>
                 </div>
             @endif
