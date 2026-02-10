@@ -266,7 +266,7 @@ class Person extends Model
             ->where('present', true)
             ->with('attendance')
             ->get()
-            ->sortByDesc(fn($r) => $r->attendance->date)
+            ->sortByDesc(fn($r) => $r->attendance?->date)
             ->first()?->attendance?->date;
     }
 

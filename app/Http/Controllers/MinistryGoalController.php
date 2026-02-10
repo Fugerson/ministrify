@@ -6,6 +6,7 @@ use App\Models\Ministry;
 use App\Models\MinistryGoal;
 use App\Models\MinistryTask;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MinistryGoalController extends Controller
 {
@@ -76,8 +77,8 @@ class MinistryGoalController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'goal_id' => 'nullable|exists:ministry_goals,id',
-            'assigned_to' => 'nullable|exists:people,id',
+            'goal_id' => ['nullable', Rule::exists('ministry_goals', 'id')->where('ministry_id', $ministry->id)],
+            'assigned_to' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'due_date' => 'nullable|date',
             'priority' => 'nullable|in:low,medium,high',
         ]);
@@ -100,8 +101,8 @@ class MinistryGoalController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'goal_id' => 'nullable|exists:ministry_goals,id',
-            'assigned_to' => 'nullable|exists:people,id',
+            'goal_id' => ['nullable', Rule::exists('ministry_goals', 'id')->where('ministry_id', $ministry->id)],
+            'assigned_to' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'due_date' => 'nullable|date',
             'priority' => 'nullable|in:low,medium,high',
             'status' => 'nullable|in:todo,in_progress,done',

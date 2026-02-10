@@ -53,7 +53,7 @@ class MeetingController extends Controller
 
         // If copying from previous meeting
         if ($request->copy_from_id) {
-            $sourceMeeting = MinistryMeeting::findOrFail($request->copy_from_id);
+            $sourceMeeting = MinistryMeeting::where('ministry_id', $ministry->id)->findOrFail($request->copy_from_id);
             $meeting = $sourceMeeting->copyToNewMeeting($validated['date']);
             $meeting->update([
                 'title' => $validated['title'],
@@ -171,7 +171,7 @@ class MeetingController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'duration_minutes' => 'nullable|integer|min:1',
-            'responsible_id' => 'nullable|exists:people,id',
+            'responsible_id' => ['nullable', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $validated['meeting_id'] = $meeting->id;
@@ -184,11 +184,13 @@ class MeetingController extends Controller
 
     public function updateAgendaItem(Request $request, MeetingAgendaItem $item)
     {
+        $this->authorizeAgendaItem($item);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'duration_minutes' => 'nullable|integer|min:1',
-            'responsible_id' => 'nullable|exists:people,id',
+            'responsible_id' => ['nullable', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $item->update($validated);
@@ -198,6 +200,7 @@ class MeetingController extends Controller
 
     public function toggleAgendaItem(MeetingAgendaItem $item)
     {
+        $this->authorizeAgendaItem($item);
         $item->update(['is_completed' => !$item->is_completed]);
 
         return back();
@@ -205,6 +208,7 @@ class MeetingController extends Controller
 
     public function destroyAgendaItem(MeetingAgendaItem $item)
     {
+        $this->authorizeAgendaItem($item);
         $item->delete();
 
         return back()->with('success', 'Пункт видалено');
@@ -212,6 +216,9 @@ class MeetingController extends Controller
 
     public function reorderAgendaItems(Request $request, MinistryMeeting $meeting)
     {
+        abort_unless($meeting->ministry, 404);
+        $this->authorizeMinistry($meeting->ministry);
+
         $validated = $request->validate([
             'items' => 'required|array',
             'items.*' => 'exists:meeting_agenda_items,id',
@@ -246,6 +253,9 @@ class MeetingController extends Controller
 
     public function destroyMaterial(MeetingMaterial $material)
     {
+        $meeting = $material->meeting;
+        abort_unless($meeting?->ministry, 404);
+        $this->authorizeMinistry($meeting->ministry);
         $material->delete();
 
         return back()->with('success', 'Матеріал видалено');
@@ -257,7 +267,7 @@ class MeetingController extends Controller
         $this->authorizeMinistry($ministry);
 
         $validated = $request->validate([
-            'person_id' => 'required|exists:people,id',
+            'person_id' => ['required', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         MeetingAttendee::updateOrCreate(
@@ -273,6 +283,8 @@ class MeetingController extends Controller
 
     public function updateAttendee(Request $request, MeetingAttendee $attendee)
     {
+        $this->authorizeAttendee($attendee);
+
         $validated = $request->validate([
             'status' => 'required|in:invited,confirmed,attended,absent',
         ]);
@@ -284,6 +296,7 @@ class MeetingController extends Controller
 
     public function destroyAttendee(MeetingAttendee $attendee)
     {
+        $this->authorizeAttendee($attendee);
         $attendee->delete();
 
         return back()->with('success', 'Учасника видалено');
@@ -303,5 +316,19 @@ class MeetingController extends Controller
         if ($ministry->church_id !== $this->getCurrentChurch()->id) {
             abort(403);
         }
+    }
+
+    private function authorizeAgendaItem(MeetingAgendaItem $item): void
+    {
+        $meeting = $item->meeting;
+        abort_unless($meeting?->ministry, 404);
+        $this->authorizeMinistry($meeting->ministry);
+    }
+
+    private function authorizeAttendee(MeetingAttendee $attendee): void
+    {
+        $meeting = $attendee->meeting;
+        abort_unless($meeting?->ministry, 404);
+        $this->authorizeMinistry($meeting->ministry);
     }
 }

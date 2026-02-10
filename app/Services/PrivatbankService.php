@@ -307,7 +307,7 @@ class PrivatbankService
             $tranId = $statement['appcode'] ?: md5(json_encode($statement));
 
             // Check if already exists
-            $exists = PrivatbankTransaction::where('privat_id', $tranId)->exists();
+            $exists = PrivatbankTransaction::where('privat_id', $tranId)->where('church_id', $this->church->id)->exists();
 
             if ($exists) {
                 $skipped++;

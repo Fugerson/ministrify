@@ -148,6 +148,7 @@ class RotationController extends Controller
     public function volunteerStats(Request $request, Person $person)
     {
         $church = $this->getCurrentChurch();
+        abort_unless($person->church_id === $church->id, 404);
         $rotationService = new RotationService($church);
 
         $fromDate = $request->has('from')
@@ -202,6 +203,9 @@ class RotationController extends Controller
 
         // Get candidates for each position
         $ministry = $event->ministry;
+        if (!$ministry) {
+            return response()->json(['preview' => [], 'message' => 'Подія без служіння']);
+        }
         $positions = $ministry->positions()->get();
 
         $preview = [];

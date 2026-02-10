@@ -168,8 +168,16 @@ class Song extends Model
         }
 
         $notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        $fromIndex = array_search(str_replace('m', '', $fromKey), $notes);
-        $toIndex = array_search(str_replace('m', '', $toKey), $notes);
+        $flatToSharpKey = [
+            'Cb' => 'B', 'Db' => 'C#', 'Eb' => 'D#', 'Fb' => 'E',
+            'Gb' => 'F#', 'Ab' => 'G#', 'Bb' => 'A#',
+        ];
+        $fromNote = str_replace('m', '', $fromKey);
+        $toNote = str_replace('m', '', $toKey);
+        $fromNote = $flatToSharpKey[$fromNote] ?? $fromNote;
+        $toNote = $flatToSharpKey[$toNote] ?? $toNote;
+        $fromIndex = array_search($fromNote, $notes);
+        $toIndex = array_search($toNote, $notes);
 
         if ($fromIndex === false || $toIndex === false) {
             return $this->chords;
@@ -183,9 +191,12 @@ class Song extends Model
                 $note = $matches[1];
                 $suffix = $matches[2];
 
-                // Normalize flat to sharp
-                $note = str_replace('b', '#', $note);
-                if ($note === 'C#') $note = 'Db';
+                // Normalize flat to sharp (enharmonic equivalents)
+                $flatToSharp = [
+                    'Cb' => 'B', 'Db' => 'C#', 'Eb' => 'D#', 'Fb' => 'E',
+                    'Gb' => 'F#', 'Ab' => 'G#', 'Bb' => 'A#',
+                ];
+                $note = $flatToSharp[$note] ?? $note;
 
                 $noteIndex = array_search($note, $notes);
                 if ($noteIndex === false) {

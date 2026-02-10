@@ -601,7 +601,14 @@ class ServicePlanController extends Controller
             ], 500);
         }
 
-        $telegram = TelegramService::make();
+        try {
+            $telegram = TelegramService::make();
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Telegram бот не налаштований',
+            ], 500);
+        }
 
         $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : 'час уточнюється';
         $message = "📋 <b>Запит на участь</b>\n\n"

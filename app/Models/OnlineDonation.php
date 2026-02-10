@@ -162,6 +162,7 @@ class OnlineDonation extends Model
             'category_id' => $category->id,
             'person_id' => $this->is_anonymous ? null : $this->person_id,
             'is_anonymous' => $this->is_anonymous,
+            'currency' => $this->currency ?? 'UAH',
             'payment_method' => $this->provider,
             'description' => 'Онлайн пожертва через ' . $this->provider_label,
             'notes' => $this->description,

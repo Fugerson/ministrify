@@ -205,15 +205,13 @@ class RotationService
         }
 
         // Check last assignment date
-        // Note: orderByDesc must be on the main query, not inside whereHas
         $lastAssignment = Assignment::where('person_id', $person->id)
             ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
             ->with('event')
-            ->get()
-            ->sortByDesc(fn($a) => $a->event?->date)
+            ->latest('id')
             ->first();
 
-        if ($lastAssignment) {
+        if ($lastAssignment && $lastAssignment->event) {
             $daysSince = $lastAssignment->event->date->diffInDays($event->date);
             if ($daysSince < $this->config['min_rest_days']) {
                 return 0.2; // Too soon, but not impossible
@@ -377,7 +375,7 @@ class RotationService
             'last_served' => $assignments
                 ->whereIn('status', ['confirmed', 'completed'])
                 ->sortByDesc('event.date')
-                ->first()?->event->date,
+                ->first()?->event?->date,
         ];
     }
 
@@ -442,7 +440,7 @@ class RotationService
         $values = array_column($memberStats, 'assignments');
         $mean = array_sum($values) / count($values);
 
-        if ($mean === 0) {
+        if ($mean == 0) {
             return 100;
         }
 

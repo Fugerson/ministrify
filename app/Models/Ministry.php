@@ -248,6 +248,9 @@ class Ministry extends Model
 
     public function getPublicUrlAttribute(): string
     {
+        if (!$this->church) {
+            return '#';
+        }
         return route('public.ministry', [$this->church->slug, $this->slug]);
     }
 

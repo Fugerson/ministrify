@@ -65,7 +65,11 @@ class GalleryPhoto extends Model
     {
         if (!$this->width || !$this->height) return null;
 
-        $gcd = gmp_gcd($this->width, $this->height);
-        return ($this->width / gmp_intval($gcd)) . ':' . ($this->height / gmp_intval($gcd));
+        $a = $this->width;
+        $b = $this->height;
+        while ($b !== 0) {
+            [$a, $b] = [$b, $a % $b];
+        }
+        return ($this->width / $a) . ':' . ($this->height / $a);
     }
 }

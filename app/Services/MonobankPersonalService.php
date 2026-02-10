@@ -191,7 +191,7 @@ class MonobankPersonalService
 
         foreach ($statements as $statement) {
             // Check if already exists
-            $exists = MonobankTransaction::where('mono_id', $statement['id'])->exists();
+            $exists = MonobankTransaction::where('mono_id', $statement['id'])->where('church_id', $this->church->id)->exists();
 
             if ($exists) {
                 $skipped++;

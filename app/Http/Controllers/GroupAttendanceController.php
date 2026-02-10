@@ -7,6 +7,7 @@ use App\Models\AttendanceRecord;
 use App\Models\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class GroupAttendanceController extends Controller
 {
@@ -68,7 +69,7 @@ class GroupAttendanceController extends Controller
             'notes' => 'nullable|string',
             'guests_count' => 'nullable|integer|min:0',
             'present' => 'nullable|array',
-            'present.*' => 'exists:people,id',
+            'present.*' => [Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $presentIds = $validated['present'] ?? [];
@@ -147,7 +148,7 @@ class GroupAttendanceController extends Controller
             'notes' => 'nullable|string',
             'guests_count' => 'nullable|integer|min:0',
             'present' => 'nullable|array',
-            'present.*' => 'exists:people,id',
+            'present.*' => [Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $presentIds = $validated['present'] ?? [];

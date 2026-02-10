@@ -7,7 +7,7 @@
     $isAdmin = auth()->user()->isAdmin();
     $canEdit = $canEditProfile ?? $isAdmin;
     $personMinistries = $person->ministries->keyBy('id');
-    $familyMembersData = $person->family_members->map(function($m) {
+    $familyMembersData = $person->family_members->filter(fn($m) => $m->person)->map(function($m) {
         return [
             'relationship_id' => $m->relationship_id,
             'person_id' => $m->person->id,

@@ -91,7 +91,7 @@
                             @if($post->category)
                                 <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">{{ $post->category->name }}</span>
                             @endif
-                            <span>{{ $post->author->name ?? 'Автор' }}</span>
+                            <span>{{ $post->author?->name ?? 'Автор' }}</span>
                             <span>&middot;</span>
                             <span>{{ $post->updated_at->format('d.m.Y') }}</span>
                         </div>

@@ -141,7 +141,7 @@ class Assignment extends Model
         }
 
         // Additional validation based on event date
-        if ($newStatus === self::STATUS_CONFIRMED && $this->event->date->isPast()) {
+        if ($newStatus === self::STATUS_CONFIRMED && $this->event?->date?->isPast()) {
             return false; // Can't confirm past event
         }
 

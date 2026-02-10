@@ -136,7 +136,7 @@ $commTabs = [
                                 @if($log->failed_count > 0)
                                 <span class="text-red-600 dark:text-red-400">Помилок: {{ $log->failed_count }}</span>
                                 @endif
-                                <span class="text-gray-500 dark:text-gray-400">{{ $log->user->name }}</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ $log->user?->name ?? 'Видалений' }}</span>
                             </div>
                         </div>
                     </div>

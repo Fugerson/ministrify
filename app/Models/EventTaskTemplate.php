@@ -75,7 +75,7 @@ class EventTaskTemplate extends Model
                 'description' => $taskDef['description'] ?? null,
                 'priority' => $taskDef['priority'] ?? 'medium',
                 'due_date' => $dueDate,
-                'linked_event_id' => $event->id,
+                'event_id' => $event->id,
                 'position' => BoardCard::where('column_id', $column->id)->max('position') + 1,
             ]);
 

@@ -65,6 +65,16 @@ class MonobankSenderMapping extends Model
         int $categoryId,
         ?int $personId = null
     ): self {
+        if (!$iban && !$name) {
+            return self::create([
+                'church_id' => $churchId,
+                'sender_iban' => $iban,
+                'sender_name' => $name,
+                'category_id' => $categoryId,
+                'person_id' => $personId,
+            ]);
+        }
+
         $mapping = self::where('church_id', $churchId)
             ->where(function ($q) use ($iban, $name) {
                 if ($iban) $q->where('sender_iban', $iban);

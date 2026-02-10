@@ -760,7 +760,7 @@ class AuditLog extends Model
         }
 
         // Smart descriptions for common patterns
-        $modelClass = class_basename($this->auditable_type ?? '');
+        $modelClass = class_basename($this->model_type ?? '');
 
         // BoardCard: only position changed = card was reordered
         if ($modelClass === 'BoardCard' && count($rawChanges) === 1 && isset($rawChanges['position'])) {

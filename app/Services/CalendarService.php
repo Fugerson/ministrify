@@ -48,7 +48,7 @@ class CalendarService
         $ical .= "CALSCALE:GREGORIAN\r\n";
         $ical .= "METHOD:PUBLISH\r\n";
         $ical .= "X-WR-CALNAME:" . $this->escapeIcalText($church->name) . "\r\n";
-        $ical .= "X-WR-TIMEZONE:Europe/Kiev\r\n";
+        $ical .= "X-WR-TIMEZONE:Europe/Kyiv\r\n";
 
         // Add timezone definition
         $ical .= $this->getTimezoneComponent();
@@ -75,9 +75,14 @@ class CalendarService
             return $this->eventToVdayEvent($event, $church);
         }
 
-        // Assume 1 hour duration if not specified
-        $endTime = Carbon::parse($event->date->format('Y-m-d') . ' ' . $event->time->format('H:i'))
-            ->addHour();
+        // Use end_time if available, otherwise assume 1 hour duration
+        if ($event->end_time) {
+            $endDate = $event->end_date ?? $event->date;
+            $endTime = Carbon::parse($endDate->format('Y-m-d') . ' ' . $event->end_time->format('H:i'));
+        } else {
+            $endTime = Carbon::parse($event->date->format('Y-m-d') . ' ' . $event->time->format('H:i'))
+                ->addHour();
+        }
         $dtend = $this->formatIcalDateTime($endTime, $endTime);
 
         $description = '';
@@ -91,8 +96,8 @@ class CalendarService
         $vevent = "BEGIN:VEVENT\r\n";
         $vevent .= "UID:{$uid}\r\n";
         $vevent .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";
-        $vevent .= "DTSTART;TZID=Europe/Kiev:{$dtstart}\r\n";
-        $vevent .= "DTEND;TZID=Europe/Kiev:{$dtend}\r\n";
+        $vevent .= "DTSTART;TZID=Europe/Kyiv:{$dtstart}\r\n";
+        $vevent .= "DTEND;TZID=Europe/Kyiv:{$dtend}\r\n";
         $vevent .= "SUMMARY:" . $this->escapeIcalText($event->title) . "\r\n";
 
         if ($description) {
@@ -180,19 +185,13 @@ class CalendarService
     private function getTimezoneComponent(): string
     {
         return "BEGIN:VTIMEZONE\r\n" .
-               "TZID:Europe/Kiev\r\n" .
+               "TZID:Europe/Kyiv\r\n" .
                "BEGIN:STANDARD\r\n" .
-               "DTSTART:19700101T030000\r\n" .
-               "TZOFFSETFROM:+0300\r\n" .
+               "DTSTART:19700101T000000\r\n" .
+               "TZOFFSETFROM:+0200\r\n" .
                "TZOFFSETTO:+0200\r\n" .
                "TZNAME:EET\r\n" .
                "END:STANDARD\r\n" .
-               "BEGIN:DAYLIGHT\r\n" .
-               "DTSTART:19700101T020000\r\n" .
-               "TZOFFSETFROM:+0200\r\n" .
-               "TZOFFSETTO:+0300\r\n" .
-               "TZNAME:EEST\r\n" .
-               "END:DAYLIGHT\r\n" .
                "END:VTIMEZONE\r\n";
     }
 
@@ -304,7 +303,7 @@ class CalendarService
         if (preg_match('/DTSTART[^:]*:(\d{8}T?\d{0,6}Z?)/i', $content, $match)) {
             $dtstart = $this->parseIcalDate($match[1]);
             if ($dtstart) {
-                $data['date'] = $dtstart->startOfDay();
+                $data['date'] = $dtstart->copy()->startOfDay();
                 $data['time'] = $dtstart;
             }
         }

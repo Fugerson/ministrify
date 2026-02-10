@@ -34,7 +34,7 @@ class MonobankService
                 'X-Token' => $this->token,
                 'Content-Type' => 'application/json',
             ])->post($this->apiUrl, [
-                'amount' => (int) ($donation->amount * 100), // Amount in kopecks
+                'amount' => (int) round($donation->amount * 100), // Amount in kopecks
                 'ccy' => 980, // UAH
                 'merchantPaymInfo' => [
                     'reference' => $reference,

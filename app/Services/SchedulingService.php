@@ -402,12 +402,10 @@ class SchedulingService
         }
 
         // Check rest days since last assignment
-        // Note: orderByDesc must be on the main query, not inside whereHas
         $lastAssignment = Assignment::where('person_id', $person->id)
             ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
             ->with('event')
-            ->get()
-            ->sortByDesc(fn($a) => $a->event?->date)
+            ->latest('id')
             ->first();
 
         if ($lastAssignment && $lastAssignment->event) {
@@ -610,6 +608,9 @@ class SchedulingService
     public function notifyAssignment(Assignment $assignment): bool
     {
         $person = $assignment->person;
+        if (!$person) {
+            return false;
+        }
         $church = $person->church;
 
         if (!$church?->isNotificationEnabled('notify_on_assignment')) {
@@ -766,7 +767,7 @@ class SchedulingService
         $values = array_column($memberStats, 'assignments');
         $mean = array_sum($values) / count($values);
 
-        if ($mean === 0) {
+        if ($mean == 0) {
             return 100;
         }
 

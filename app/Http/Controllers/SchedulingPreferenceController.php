@@ -106,6 +106,12 @@ class SchedulingPreferenceController extends Controller
             return response()->json(['error' => 'Профіль не знайдено'], 404);
         }
 
+        // Verify position belongs to current church
+        $positionExists = \App\Models\Position::where('id', $positionId)
+            ->whereHas('ministry', fn($q) => $q->where('church_id', $this->getCurrentChurch()->id))
+            ->exists();
+        abort_unless($positionExists, 404);
+
         $validated = $request->validate([
             'max_times_per_month' => 'nullable|integer|min:1|max:30',
             'preferred_times_per_month' => 'nullable|integer|min:0|max:30',

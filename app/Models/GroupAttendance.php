@@ -56,7 +56,7 @@ class GroupAttendance extends Model
 
     public function getAttendanceRateAttribute(): float
     {
-        $totalMembers = $this->group->members()->count();
+        $totalMembers = $this->group?->members()->count() ?? 0;
         if ($totalMembers === 0) return 0;
 
         return round(($this->members_present / $totalMembers) * 100, 1);

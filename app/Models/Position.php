@@ -30,6 +30,9 @@ class Position extends Model
 
     public function getAvailablePeople(): \Illuminate\Database\Eloquent\Collection
     {
+        if (!$this->ministry) {
+            return new \Illuminate\Database\Eloquent\Collection();
+        }
         return $this->ministry->members()
             ->get()
             ->filter(fn($person) => $person->hasPositionInMinistry($this->ministry, $this));

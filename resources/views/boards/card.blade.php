@@ -183,12 +183,12 @@
                         <div class="flex gap-3 group">
                             <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
                                 <span class="text-primary-600 dark:text-primary-400 text-sm font-medium">
-                                    {{ substr($comment->user->name, 0, 1) }}
+                                    {{ substr($comment->user?->name ?? '?', 0, 1) }}
                                 </span>
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="font-medium text-gray-900 dark:text-white text-sm">{{ $comment->user->name }}</span>
+                                    <span class="font-medium text-gray-900 dark:text-white text-sm">{{ $comment->user?->name ?? 'Видалений' }}</span>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                                 </div>
                                 <p class="text-gray-600 dark:text-gray-300 text-sm mt-1">{{ $comment->content }}</p>

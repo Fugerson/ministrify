@@ -362,7 +362,7 @@ class Event extends Model
         $today = now()->startOfDay();
         $eventDay = $this->date->startOfDay();
 
-        return $today->diffInDays($eventDay, false) >= -1 && $today->diffInDays($eventDay, false) <= 0;
+        return $today->diffInDays($eventDay, false) >= 0 && $today->diffInDays($eventDay, false) <= 1;
     }
 
     /**

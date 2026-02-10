@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventChecklist;
 use App\Models\EventChecklistItem;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ChecklistController extends Controller
 {
@@ -196,7 +197,7 @@ class ChecklistController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'assigned_to' => 'nullable|exists:people,id',
+            'assigned_to' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $maxOrder = $checklist->items()->max('order') ?? -1;
@@ -251,7 +252,7 @@ class ChecklistController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'assigned_to' => 'nullable|exists:people,id',
+            'assigned_to' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $item->update($validated);
