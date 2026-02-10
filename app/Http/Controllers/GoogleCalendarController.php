@@ -308,6 +308,141 @@ class GoogleCalendarController extends Controller
     }
 
     /**
+     * Get calendar mappings from user settings (with backward compatibility)
+     */
+    protected function getCalendarMappings($user): array
+    {
+        $gc = $user->settings['google_calendar'] ?? [];
+        if (!empty($gc['calendars'])) {
+            return $gc['calendars'];
+        }
+        // Backward compatibility: old single-calendar format → array
+        if (!empty($gc['calendar_id'])) {
+            return [['calendar_id' => $gc['calendar_id'], 'ministry_id' => $gc['ministry_id'] ?? null]];
+        }
+        return [['calendar_id' => 'primary', 'ministry_id' => null]];
+    }
+
+    /**
+     * Save calendar mappings to user settings
+     */
+    public function saveCalendars(Request $request)
+    {
+        $validated = $request->validate([
+            'calendars' => 'required|array|min:1',
+            'calendars.*.calendar_id' => 'required|string',
+            'calendars.*.ministry_id' => 'nullable|integer|exists:ministries,id',
+        ]);
+
+        // Deduplicate by calendar_id
+        $seen = [];
+        $calendars = [];
+        foreach ($validated['calendars'] as $mapping) {
+            if (!in_array($mapping['calendar_id'], $seen)) {
+                $seen[] = $mapping['calendar_id'];
+                $calendars[] = [
+                    'calendar_id' => $mapping['calendar_id'],
+                    'ministry_id' => $mapping['ministry_id'] ?? null,
+                ];
+            }
+        }
+
+        $user = auth()->user();
+        $settings = $user->settings ?? [];
+
+        if (isset($settings['google_calendar'])) {
+            $settings['google_calendar']['calendars'] = $calendars;
+            // Remove old single-calendar fields
+            unset($settings['google_calendar']['calendar_id']);
+            unset($settings['google_calendar']['ministry_id']);
+            $user->update(['settings' => $settings]);
+        }
+
+        return response()->json(['success' => true, 'calendars' => $calendars]);
+    }
+
+    /**
+     * Full sync ALL calendar mappings
+     */
+    public function fullSyncAll(Request $request)
+    {
+        set_time_limit(120);
+
+        $user = auth()->user();
+        $church = $this->getCurrentChurch();
+        $mappings = $this->getCalendarMappings($user);
+
+        $aggregated = [
+            'to_google' => ['created' => 0, 'updated' => 0, 'deleted' => 0, 'skipped' => 0, 'failed' => 0],
+            'from_google' => ['created' => 0, 'updated' => 0],
+        ];
+        $errors = [];
+        $allSuccess = true;
+
+        foreach ($mappings as $mapping) {
+            $calendarId = $mapping['calendar_id'] ?? 'primary';
+            $ministryId = $mapping['ministry_id'] ?? null;
+
+            try {
+                $result = $this->googleCalendar->fullSync($user, $church, $calendarId, $ministryId);
+
+                if ($result['success']) {
+                    foreach (['created', 'updated', 'deleted', 'skipped', 'failed'] as $key) {
+                        $aggregated['to_google'][$key] += $result['to_google'][$key] ?? 0;
+                    }
+                    foreach (['created', 'updated'] as $key) {
+                        $aggregated['from_google'][$key] += $result['from_google'][$key] ?? 0;
+                    }
+                    if (!empty($result['errors'])) {
+                        $errors = array_merge($errors, $result['errors']);
+                    }
+                } else {
+                    $allSuccess = false;
+                    $errors[] = ($result['error'] ?? 'Unknown error') . " (calendar: {$calendarId})";
+                }
+            } catch (\Exception $e) {
+                \Log::error('fullSyncAll error', ['calendar_id' => $calendarId, 'error' => $e->getMessage()]);
+                $allSuccess = false;
+                $errors[] = $e->getMessage() . " (calendar: {$calendarId})";
+            }
+        }
+
+        // Save last_synced_at
+        $settings = $user->settings ?? [];
+        $settings['google_calendar']['last_synced_at'] = now()->toISOString();
+        $user->update(['settings' => $settings]);
+
+        $toGoogle = $aggregated['to_google'];
+        $fromGoogle = $aggregated['from_google'];
+        $toTotal = $toGoogle['created'] + $toGoogle['updated'] + $toGoogle['deleted'];
+        $fromTotal = $fromGoogle['created'] + $fromGoogle['updated'];
+
+        if ($toTotal === 0 && $fromTotal === 0 && $toGoogle['skipped'] > 0) {
+            $message = "Всі події вже синхронізовані ({$toGoogle['skipped']} подій)";
+        } else {
+            $parts = [];
+            if ($toGoogle['created'] > 0) $parts[] = "{$toGoogle['created']} → Google";
+            if ($toGoogle['updated'] > 0) $parts[] = "{$toGoogle['updated']} оновлено в Google";
+            if ($toGoogle['deleted'] > 0) $parts[] = "{$toGoogle['deleted']} видалено з Google";
+            if ($fromGoogle['created'] > 0) $parts[] = "{$fromGoogle['created']} ← Google";
+            if ($fromGoogle['updated'] > 0) $parts[] = "{$fromGoogle['updated']} оновлено з Google";
+            $message = $parts ? "Синхронізовано: " . implode(', ', $parts) : "Немає змін";
+        }
+        if ($toGoogle['failed'] > 0) {
+            $message .= " | {$toGoogle['failed']} помилок";
+        }
+        if (!empty($errors)) {
+            $message .= " | " . implode('; ', array_slice($errors, 0, 3));
+        }
+
+        return response()->json([
+            'success' => $allSuccess,
+            'message' => $message,
+            'details' => $aggregated,
+        ]);
+    }
+
+    /**
      * Save selected calendar ID and ministry ID to user settings for auto-sync
      */
     protected function saveSelectedCalendar($user, string $calendarId, ?int $ministryId = null): void

@@ -778,8 +778,14 @@
         $googleCalendarSettings = auth()->user()->settings['google_calendar'] ?? null;
         $isGoogleConnected = $googleCalendarSettings && !empty($googleCalendarSettings['access_token']);
     @endphp
+    @php
+        $savedMappings = $googleCalendarSettings['calendars']
+            ?? (!empty($googleCalendarSettings['calendar_id'])
+                ? [['calendar_id' => $googleCalendarSettings['calendar_id'], 'ministry_id' => $googleCalendarSettings['ministry_id'] ?? null]]
+                : [['calendar_id' => 'primary', 'ministry_id' => null]]);
+    @endphp
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-         x-data="googleCalendarSync({{ $isGoogleConnected ? 'true' : 'false' }}, '{{ $googleCalendarSettings['calendar_id'] ?? 'primary' }}', '{{ $googleCalendarSettings['ministry_id'] ?? '' }}')">
+         x-data="googleCalendarSync({{ $isGoogleConnected ? 'true' : 'false' }}, {{ json_encode($savedMappings) }})">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -843,29 +849,41 @@
                         </div>
                     </div>
 
-                    <!-- Settings: Calendar & Ministry -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Календар Google</label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Сюди потраплятимуть нові події з Ministrify</p>
-                            <select x-model="calendarId"
-                                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                                <option value="primary">Основний календар</option>
-                                <template x-for="cal in calendars" :key="cal.id">
-                                    <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
-                                </template>
-                            </select>
+                    <!-- Settings: Calendar Mappings -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Календарі для синхронізації</label>
+                            <button @click="addMapping()" type="button"
+                                    class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium">
+                                + Додати календар
+                            </button>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Додати до команди</label>
-                            <select x-model="ministryId"
-                                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                                <option value="">Не прив'язувати</option>
-                                @foreach($ministries as $ministry)
-                                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <template x-for="(mapping, index) in mappings" :key="index">
+                            <div class="flex items-center gap-2">
+                                <select x-model="mapping.calendar_id" @change="saveMappings()"
+                                        class="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
+                                    <option value="primary">Основний календар</option>
+                                    <template x-for="cal in calendars" :key="cal.id">
+                                        <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
+                                    </template>
+                                </select>
+                                <span class="text-gray-400 text-sm flex-shrink-0">→</span>
+                                <select x-model="mapping.ministry_id" @change="saveMappings()"
+                                        class="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
+                                    <option :value="null">Не прив'язувати</option>
+                                    @foreach($ministries as $ministry)
+                                        <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button @click="removeMapping(index)" type="button"
+                                        x-show="mappings.length > 1"
+                                        class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
                     </div>
 
                     <!-- Sync Now Button -->
@@ -917,15 +935,18 @@
     </div>
 
     <script>
-    function googleCalendarSync(isConnected = false, savedCalendarId = 'primary', savedMinistryId = '') {
+    function googleCalendarSync(isConnected = false, savedMappings = []) {
         return {
             isConnected: isConnected,
             loading: false,
+            saving: false,
             message: '',
             success: false,
-            calendarId: savedCalendarId,
-            ministryId: savedMinistryId,
             calendars: [],
+            mappings: savedMappings.length ? savedMappings.map(m => ({
+                calendar_id: m.calendar_id || 'primary',
+                ministry_id: m.ministry_id ? String(m.ministry_id) : null
+            })) : [{ calendar_id: 'primary', ministry_id: null }],
 
             async init() {
                 if (this.isConnected) {
@@ -945,11 +966,21 @@
                 }
             },
 
-            async fullSync() {
-                this.loading = true;
-                this.message = '';
+            addMapping() {
+                this.mappings.push({ calendar_id: 'primary', ministry_id: null });
+            },
+
+            removeMapping(index) {
+                if (this.mappings.length > 1) {
+                    this.mappings.splice(index, 1);
+                    this.saveMappings();
+                }
+            },
+
+            async saveMappings() {
+                this.saving = true;
                 try {
-                    const res = await fetch('{{ route("settings.google-calendar.full-sync") }}', {
+                    const res = await fetch('{{ route("settings.google-calendar.calendars.save") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -957,9 +988,34 @@
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify({
-                            calendar_id: this.calendarId,
-                            ministry_id: this.ministryId || null
+                            calendars: this.mappings.map(m => ({
+                                calendar_id: m.calendar_id,
+                                ministry_id: m.ministry_id || null
+                            }))
                         })
+                    });
+                    const data = await res.json();
+                    if (!data.success) {
+                        console.error('Failed to save mappings', data);
+                    }
+                } catch (e) {
+                    console.error('Failed to save mappings', e);
+                }
+                this.saving = false;
+            },
+
+            async fullSync() {
+                this.loading = true;
+                this.message = '';
+                try {
+                    const res = await fetch('{{ route("settings.google-calendar.full-sync-all") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({})
                     });
                     const data = await res.json();
                     this.message = data.message || (data.success ? 'Синхронізацію завершено' : 'Помилка синхронізації');

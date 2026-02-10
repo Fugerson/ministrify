@@ -30,40 +30,55 @@ class SyncGoogleCalendar extends Command
 
         foreach ($users as $user) {
             $settings = $user->settings['google_calendar'] ?? [];
-            $calendarId = $settings['calendar_id'] ?? 'primary';
-            $ministryId = $settings['ministry_id'] ?? null;
+
+            // Multi-calendar mappings with backward compatibility
+            $mappings = $settings['calendars']
+                ?? (!empty($settings['calendar_id'])
+                    ? [['calendar_id' => $settings['calendar_id'], 'ministry_id' => $settings['ministry_id'] ?? null]]
+                    : [['calendar_id' => 'primary', 'ministry_id' => null]]);
 
             $church = $user->church;
             if (!$church) {
                 continue;
             }
 
-            $this->line("- {$user->name} ({$church->name})...");
+            $this->line("- {$user->name} ({$church->name}), " . count($mappings) . " calendar(s)...");
 
-            try {
-                $result = $googleCalendar->fullSync($user, $church, $calendarId, $ministryId);
+            $userSynced = false;
 
-                if ($result['success']) {
-                    // Save last_synced_at
-                    $userSettings = $user->settings ?? [];
-                    $userSettings['google_calendar']['last_synced_at'] = now()->toISOString();
-                    $user->update(['settings' => $userSettings]);
+            foreach ($mappings as $mapping) {
+                $calendarId = $mapping['calendar_id'] ?? 'primary';
+                $ministryId = $mapping['ministry_id'] ?? null;
 
-                    $toGoogle = $result['to_google'];
-                    $fromGoogle = $result['from_google'];
-                    $this->info("  OK: →G {$toGoogle['created']}+{$toGoogle['updated']}, ←G {$fromGoogle['created']}+{$fromGoogle['updated']}");
-                    $synced++;
-                } else {
-                    $this->error("  Error: " . ($result['error'] ?? 'Unknown'));
+                try {
+                    $result = $googleCalendar->fullSync($user, $church, $calendarId, $ministryId);
+
+                    if ($result['success']) {
+                        $toGoogle = $result['to_google'];
+                        $fromGoogle = $result['from_google'];
+                        $this->info("  [{$calendarId}] OK: →G {$toGoogle['created']}+{$toGoogle['updated']}, ←G {$fromGoogle['created']}+{$fromGoogle['updated']}");
+                        $userSynced = true;
+                    } else {
+                        $this->error("  [{$calendarId}] Error: " . ($result['error'] ?? 'Unknown'));
+                        $errors++;
+                    }
+                } catch (\Exception $e) {
+                    Log::error('SyncGoogleCalendar command error', [
+                        'user_id' => $user->id,
+                        'calendar_id' => $calendarId,
+                        'error' => $e->getMessage(),
+                    ]);
+                    $this->error("  [{$calendarId}] Exception: {$e->getMessage()}");
                     $errors++;
                 }
-            } catch (\Exception $e) {
-                Log::error('SyncGoogleCalendar command error', [
-                    'user_id' => $user->id,
-                    'error' => $e->getMessage(),
-                ]);
-                $this->error("  Exception: {$e->getMessage()}");
-                $errors++;
+            }
+
+            if ($userSynced) {
+                // Save last_synced_at
+                $userSettings = $user->settings ?? [];
+                $userSettings['google_calendar']['last_synced_at'] = now()->toISOString();
+                $user->update(['settings' => $userSettings]);
+                $synced++;
             }
         }
 

@@ -181,13 +181,12 @@ class EventController extends Controller
         // Google Calendar OAuth status
         $googleSettings = auth()->user()->settings['google_calendar'] ?? null;
         $isGoogleConnected = !empty($googleSettings['access_token']);
-        $googleCalendarId = $googleSettings['calendar_id'] ?? 'primary';
         $lastSyncedAt = $googleSettings['last_synced_at'] ?? null;
 
         return view('schedule.calendar', compact(
             'events', 'year', 'month', 'startDate', 'endDate',
             'ministries', 'view', 'currentWeek', 'church', 'meetings', 'upcomingNextMonth', 'nextMonth', 'nextYear',
-            'isGoogleConnected', 'googleCalendarId', 'lastSyncedAt'
+            'isGoogleConnected', 'lastSyncedAt'
         ));
     }
 

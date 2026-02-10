@@ -112,10 +112,10 @@
                         <span class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline" x-text="syncStatus"></span>
                         <button @click="
                             syncing = true; message = ''; error = false;
-                            fetch('{{ route('settings.google-calendar.full-sync') }}', {
+                            fetch('{{ route('settings.google-calendar.full-sync-all') }}', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                                body: JSON.stringify({ calendar_id: '{{ $googleCalendarId }}' })
+                                body: JSON.stringify({})
                             })
                             .then(r => r.json())
                             .then(data => {
