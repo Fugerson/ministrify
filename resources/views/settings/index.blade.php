@@ -934,6 +934,100 @@
                          class="p-4 rounded-xl border text-sm">
                         <span x-text="message"></span>
                     </div>
+
+                    <!-- Sync Log -->
+                    @if(!empty($googleCalendarSettings['last_sync_result']))
+                        @php
+                            $syncResult = $googleCalendarSettings['last_sync_result'];
+                            $toG = $syncResult['to_google'] ?? [];
+                            $fromG = $syncResult['from_google'] ?? [];
+                            $syncAt = $syncResult['at'] ?? null;
+                            $calCount = $syncResult['calendars_count'] ?? 1;
+                        @endphp
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900/30 rounded-xl border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Остання синхронізація</h4>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                    @if($syncAt)
+                                        {{ \Carbon\Carbon::parse($syncAt)->diffForHumans() }}
+                                        ({{ $calCount }} {{ $calCount === 1 ? 'календар' : 'календарів' }})
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Ministrify → Google</p>
+                                    <div class="space-y-0.5 text-gray-700 dark:text-gray-300">
+                                        @if(($toG['created'] ?? 0) > 0)<p>+ {{ $toG['created'] }} створено</p>@endif
+                                        @if(($toG['updated'] ?? 0) > 0)<p>~ {{ $toG['updated'] }} оновлено</p>@endif
+                                        @if(($toG['deleted'] ?? 0) > 0)<p>- {{ $toG['deleted'] }} видалено</p>@endif
+                                        @if(($toG['created'] ?? 0) + ($toG['updated'] ?? 0) + ($toG['deleted'] ?? 0) === 0)
+                                            <p class="text-gray-400 dark:text-gray-500">Без змін</p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Google → Ministrify</p>
+                                    <div class="space-y-0.5 text-gray-700 dark:text-gray-300">
+                                        @if(($fromG['created'] ?? 0) > 0)<p>+ {{ $fromG['created'] }} імпортовано</p>@endif
+                                        @if(($fromG['updated'] ?? 0) > 0)<p>~ {{ $fromG['updated'] }} оновлено</p>@endif
+                                        @if(($fromG['created'] ?? 0) + ($fromG['updated'] ?? 0) === 0)
+                                            <p class="text-gray-400 dark:text-gray-500">Без змін</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Rollback Section -->
+                    <div x-data="{ showRollback: false }">
+                        <button @click="showRollback = !showRollback" type="button"
+                                class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                            <svg class="w-4 h-4 transition-transform" :class="showRollback && 'rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                            Керування подіями
+                        </button>
+                        <div x-show="showRollback" x-collapse class="mt-3 space-y-2">
+                            <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                                <p class="text-xs text-amber-700 dark:text-amber-300 mb-3">
+                                    Ці дії впливають на події, пов'язані з Google Calendar
+                                </p>
+                                <div class="space-y-2">
+                                    <!-- Unlink from Google -->
+                                    <button @click="if (confirm('Відв\'язати всі події від Google Calendar? Події залишаться в обох системах, але більше не будуть синхронізуватися.')) { unlinkEvents() }"
+                                            :disabled="rollbackLoading"
+                                            class="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50">
+                                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                        </svg>
+                                        <div>
+                                            <p class="font-medium text-gray-700 dark:text-gray-300">Відв'язати від Google</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Події залишаться, але зв'язок з Google буде видалено</p>
+                                        </div>
+                                    </button>
+                                    <!-- Delete imported -->
+                                    <button @click="if (confirm('Видалити всі імпортовані з Google події? Ця дія незворотна!')) { deleteImported() }"
+                                            :disabled="rollbackLoading"
+                                            class="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50">
+                                        <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        <div>
+                                            <p class="font-medium text-red-600 dark:text-red-400">Видалити імпортовані події</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Видалить з Ministrify всі події, які прийшли з Google</p>
+                                        </div>
+                                    </button>
+                                </div>
+                                <!-- Rollback status -->
+                                <div x-show="rollbackMessage" x-transition class="mt-3 text-sm"
+                                     :class="rollbackSuccess ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                    <span x-text="rollbackMessage"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @else
                 <!-- Not Connected State -->
@@ -972,6 +1066,9 @@
             savedTimeout: null,
             message: '',
             success: false,
+            rollbackLoading: false,
+            rollbackMessage: '',
+            rollbackSuccess: false,
             calendars: [],
             mappings: savedMappings.length ? savedMappings.map(m => ({
                 calendar_id: m.calendar_id || 'primary',
@@ -1061,6 +1158,43 @@
                     this.success = false;
                 }
                 this.loading = false;
+            },
+
+            async unlinkEvents() {
+                this.rollbackLoading = true;
+                this.rollbackMessage = '';
+                try {
+                    const res = await fetch('{{ route("settings.google-calendar.unlink-events") }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+                    });
+                    const data = await res.json();
+                    this.rollbackMessage = data.message || 'Готово';
+                    this.rollbackSuccess = data.success;
+                } catch (e) {
+                    this.rollbackMessage = 'Помилка з\'єднання';
+                    this.rollbackSuccess = false;
+                }
+                this.rollbackLoading = false;
+            },
+
+            async deleteImported() {
+                this.rollbackLoading = true;
+                this.rollbackMessage = '';
+                try {
+                    const res = await fetch('{{ route("settings.google-calendar.delete-events") }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                        body: JSON.stringify({ scope: 'synced' })
+                    });
+                    const data = await res.json();
+                    this.rollbackMessage = data.message || 'Готово';
+                    this.rollbackSuccess = data.success;
+                } catch (e) {
+                    this.rollbackMessage = 'Помилка з\'єднання';
+                    this.rollbackSuccess = false;
+                }
+                this.rollbackLoading = false;
             }
         }
     }

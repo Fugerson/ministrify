@@ -582,6 +582,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('google-calendar/full-sync', [\App\Http\Controllers\GoogleCalendarController::class, 'fullSync'])->name('google-calendar.full-sync');
         Route::post('google-calendar/full-sync-all', [\App\Http\Controllers\GoogleCalendarController::class, 'fullSyncAll'])->name('google-calendar.full-sync-all');
         Route::post('google-calendar/calendars/save', [\App\Http\Controllers\GoogleCalendarController::class, 'saveCalendars'])->name('google-calendar.calendars.save');
+        Route::post('google-calendar/unlink-events', [\App\Http\Controllers\GoogleCalendarController::class, 'unlinkGoogleEvents'])->name('google-calendar.unlink-events');
         Route::post('google-calendar/import', [\App\Http\Controllers\GoogleCalendarController::class, 'importFromGoogle'])->name('google-calendar.import');
         Route::post('google-calendar/preview-import', [\App\Http\Controllers\GoogleCalendarController::class, 'previewImport'])->name('google-calendar.preview-import');
         Route::post('google-calendar/import-with-resolution', [\App\Http\Controllers\GoogleCalendarController::class, 'importWithResolution'])->name('google-calendar.import-with-resolution');

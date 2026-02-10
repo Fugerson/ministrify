@@ -407,9 +407,15 @@ class GoogleCalendarController extends Controller
             }
         }
 
-        // Save last_synced_at
+        // Save last_synced_at + sync result log
         $settings = $user->settings ?? [];
         $settings['google_calendar']['last_synced_at'] = now()->toISOString();
+        $settings['google_calendar']['last_sync_result'] = [
+            'to_google' => $aggregated['to_google'],
+            'from_google' => $aggregated['from_google'],
+            'at' => now()->toISOString(),
+            'calendars_count' => count($mappings),
+        ];
         $user->update(['settings' => $settings]);
 
         $toGoogle = $aggregated['to_google'];
@@ -492,6 +498,29 @@ class GoogleCalendarController extends Controller
             'success' => false,
             'error' => $result['error'] ?? 'Import failed',
         ], 400);
+    }
+
+    /**
+     * Unlink all events from Google Calendar (keep events, clear google_* fields)
+     */
+    public function unlinkGoogleEvents()
+    {
+        $church = $this->getCurrentChurch();
+
+        $count = \App\Models\Event::where('church_id', $church->id)
+            ->whereNotNull('google_event_id')
+            ->update([
+                'google_event_id' => null,
+                'google_calendar_id' => null,
+                'google_synced_at' => null,
+                'google_sync_status' => null,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Відв'язано {$count} подій від Google Calendar",
+            'count' => $count,
+        ]);
     }
 
     /**
