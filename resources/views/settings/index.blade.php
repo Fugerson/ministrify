@@ -866,40 +866,60 @@
                         <!-- Mapping rows -->
                         <div class="space-y-2">
                             <template x-for="(mapping, index) in mappings" :key="index">
-                                <div class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-gray-200 dark:border-gray-700"
+                                <div class="p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-gray-200 dark:border-gray-700"
                                      :class="mapping._new && 'ring-2 ring-primary-300 dark:ring-primary-700'"
                                      x-init="if (mapping._new) { setTimeout(() => { mapping._new = false }, 1500) }">
-                                    <div class="flex-1 min-w-0">
-                                        <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Календар Google</label>
-                                        <select x-model="mapping.calendar_id" @change="saveMappings()"
-                                                class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                                            <option value="primary">Основний календар</option>
-                                            <template x-for="cal in calendars" :key="cal.id">
-                                                <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-                                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                    </svg>
-                                    <div class="flex-1 min-w-0">
-                                        <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Команда Ministrify</label>
-                                        <select x-model="mapping.ministry_id" @change="saveMappings()"
-                                                class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                                            <option :value="null">Не прив'язувати</option>
-                                            @foreach($ministries as $ministry)
-                                                <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <button @click="removeMapping(index)" type="button"
-                                            x-show="mappings.length > 1"
-                                            class="flex-shrink-0 w-8 h-8 mt-5 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                                            title="Видалити">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex-1 min-w-0">
+                                            <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Календар Google</label>
+                                            <select x-model="mapping.calendar_id" @change="saveMappings()"
+                                                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
+                                                <option value="primary">Основний календар</option>
+                                                <template x-for="cal in calendars" :key="cal.id">
+                                                    <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                         </svg>
-                                    </button>
+                                        <div class="flex-1 min-w-0">
+                                            <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Команда Ministrify</label>
+                                            <select x-model="mapping.ministry_id" @change="saveMappings()"
+                                                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
+                                                <option :value="null">Не прив'язувати</option>
+                                                @foreach($ministries as $ministry)
+                                                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <button @click="removeMapping(index)" type="button"
+                                                x-show="mappings.length > 1"
+                                                class="flex-shrink-0 w-8 h-8 mt-5 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                title="Видалити">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <!-- Per-calendar sync button + status -->
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <button @click="syncOne(index)"
+                                                :disabled="mapping._syncing"
+                                                class="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white text-xs font-medium rounded-lg transition-colors">
+                                            <svg x-show="!mapping._syncing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                            <svg x-show="mapping._syncing" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            <span x-text="mapping._syncing ? 'Синхронізація...' : 'Синхронізувати'"></span>
+                                        </button>
+                                        <span x-show="mapping._message" x-transition
+                                              :class="mapping._success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                                              class="text-xs truncate" x-text="mapping._message"></span>
+                                    </div>
                                 </div>
                             </template>
                         </div>
@@ -914,10 +934,11 @@
                         </button>
                     </div>
 
-                    <!-- Sync Now Button -->
-                    <button @click="fullSync()"
+                    <!-- Sync All Button (when multiple calendars) -->
+                    <button x-show="mappings.length > 1"
+                            @click="fullSync()"
                             :disabled="loading"
-                            class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors">
+                            class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors border border-gray-200 dark:border-gray-600">
                         <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
@@ -925,7 +946,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
-                        <span x-text="loading ? 'Синхронізація...' : 'Синхронізувати зараз'"></span>
+                        <span x-text="loading ? 'Синхронізація всіх...' : 'Синхронізувати всі календарі'"></span>
                     </button>
 
                     <!-- Status Message -->
@@ -1135,6 +1156,33 @@
                     console.error('Failed to save mappings', e);
                 }
                 this.saving = false;
+            },
+
+            async syncOne(index) {
+                const mapping = this.mappings[index];
+                mapping._syncing = true;
+                mapping._message = '';
+                try {
+                    const res = await fetch('{{ route("settings.google-calendar.full-sync") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            calendar_id: mapping.calendar_id,
+                            ministry_id: mapping.ministry_id || null
+                        })
+                    });
+                    const data = await res.json();
+                    mapping._message = data.message || (data.success ? 'Готово' : 'Помилка');
+                    mapping._success = data.success;
+                } catch (e) {
+                    mapping._message = 'Помилка з\'єднання';
+                    mapping._success = false;
+                }
+                mapping._syncing = false;
             },
 
             async fullSync() {
