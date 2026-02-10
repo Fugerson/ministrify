@@ -168,15 +168,17 @@ class GoogleCalendarController extends Controller
             'ministry_id' => 'nullable|integer|exists:ministries,id',
         ]);
 
-        // Save selected calendar_id for auto-sync
-        $this->saveSelectedCalendar($user, $validated['calendar_id']);
+        $ministryId = $validated['ministry_id'] ?? null;
+
+        // Save selected calendar_id and ministry_id for auto-sync
+        $this->saveSelectedCalendar($user, $validated['calendar_id'], $ministryId);
 
         try {
             $result = $this->googleCalendar->fullSync(
                 $user,
                 $church,
                 $validated['calendar_id'],
-                $validated['ministry_id'] ?? null
+                $ministryId
             );
         } catch (\Exception $e) {
             \Log::error('fullSync controller error', ['error' => $e->getMessage()]);
@@ -306,13 +308,14 @@ class GoogleCalendarController extends Controller
     }
 
     /**
-     * Save selected calendar ID to user settings for auto-sync
+     * Save selected calendar ID and ministry ID to user settings for auto-sync
      */
-    protected function saveSelectedCalendar($user, string $calendarId): void
+    protected function saveSelectedCalendar($user, string $calendarId, ?int $ministryId = null): void
     {
         $settings = $user->settings ?? [];
         if (isset($settings['google_calendar'])) {
             $settings['google_calendar']['calendar_id'] = $calendarId;
+            $settings['google_calendar']['ministry_id'] = $ministryId;
             $user->update(['settings' => $settings]);
         }
     }

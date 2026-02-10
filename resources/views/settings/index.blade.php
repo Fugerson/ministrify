@@ -779,7 +779,7 @@
         $isGoogleConnected = $googleCalendarSettings && !empty($googleCalendarSettings['access_token']);
     @endphp
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-         x-data="googleCalendarSync({{ $isGoogleConnected ? 'true' : 'false' }})">
+         x-data="googleCalendarSync({{ $isGoogleConnected ? 'true' : 'false' }}, '{{ $googleCalendarSettings['calendar_id'] ?? 'primary' }}', '{{ $googleCalendarSettings['ministry_id'] ?? '' }}')">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -917,14 +917,14 @@
     </div>
 
     <script>
-    function googleCalendarSync(isConnected = false) {
+    function googleCalendarSync(isConnected = false, savedCalendarId = 'primary', savedMinistryId = '') {
         return {
             isConnected: isConnected,
             loading: false,
             message: '',
             success: false,
-            calendarId: 'primary',
-            ministryId: '',
+            calendarId: savedCalendarId,
+            ministryId: savedMinistryId,
             calendars: [],
 
             async init() {
