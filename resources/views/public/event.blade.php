@@ -41,12 +41,21 @@
                     @endif
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{{ $event->title }}</h1>
                     <div class="flex flex-wrap gap-4 text-gray-600">
+                        @if($event->time)
                         <div class="flex items-center gap-2">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <span>{{ $event->time?->format('H:i') }}</span>
+                            <span>{{ $event->time->format('H:i') }}</span>
                         </div>
+                        @else
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <span>Весь день</span>
+                        </div>
+                        @endif
                         @if($event->location)
                             <div class="flex items-center gap-2">
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,13 +99,13 @@
                             </div>
 
                             <div x-show="showForm" x-cloak x-transition class="mt-6">
-                                <form action="{{ route('public.event.register', [$church->slug, $event]) }}" method="POST" class="space-y-4">
+                                <form action="{{ route('public.event.register', [$church->slug, $event]) }}" method="POST" class="space-y-4" x-data="{ submitting: false }" @submit="submitting = true">
                                     @csrf
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Ім'я *</label>
                                             <input type="text" name="first_name" required value="{{ old('first_name') }}"
-                                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                                   class="w-full px-4 py-2.5 border {{ $errors->has('first_name') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                             @error('first_name')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                             @enderror
@@ -104,7 +113,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Прізвище *</label>
                                             <input type="text" name="last_name" required value="{{ old('last_name') }}"
-                                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                                   class="w-full px-4 py-2.5 border {{ $errors->has('last_name') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                             @error('last_name')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                             @enderror
@@ -114,7 +123,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                                             <input type="email" name="email" required value="{{ old('email') }}"
-                                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                                   class="w-full px-4 py-2.5 border {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                             @error('email')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                             @enderror
@@ -138,9 +147,13 @@
                                         <textarea name="notes" rows="3"
                                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('notes') }}</textarea>
                                     </div>
-                                    <button type="submit"
-                                            class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                                        Підтвердити реєстрацію
+                                    <button type="submit" :disabled="submitting"
+                                            class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
+                                        <span x-show="!submitting">Підтвердити реєстрацію</span>
+                                        <span x-show="submitting" class="inline-flex items-center justify-center gap-2">
+                                            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                            Реєстрація...
+                                        </span>
                                     </button>
                                 </form>
                             </div>

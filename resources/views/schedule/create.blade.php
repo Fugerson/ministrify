@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto">
-    <form method="POST" action="{{ route('events.store') }}" class="space-y-6">
+    <form method="POST" action="{{ route('events.store') }}" class="space-y-6" x-data="{ submitting: false }" @submit="submitting = true">
         @csrf
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -20,22 +20,33 @@
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
                     <input type="text" name="title" id="title" value="{{ old('title') }}" required
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                           class="w-full px-3 py-2 border {{ $errors->has('title') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                            placeholder="Недільне богослужіння">
+                    @error('title') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                    <div>
-                        <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
-                        <input type="date" name="date" id="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
-                               class="w-full px-3 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div x-data="{ allDay: {{ old('all_day') ? 'true' : 'false' }} }">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
+                            <input type="date" name="date" id="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
+                                   class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('date') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            @error('date') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div x-show="!allDay" x-transition>
+                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Час *</label>
+                            <input type="time" name="time" id="time" value="{{ old('time', '10:00') }}" :required="!allDay"
+                                   class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('time') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            @error('time') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
                     </div>
 
-                    <div>
-                        <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Час *</label>
-                        <input type="time" name="time" id="time" value="{{ old('time', '10:00') }}" required
-                               class="w-full px-3 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    </div>
+                    <label class="flex items-center gap-2 mt-2 cursor-pointer">
+                        <input type="checkbox" name="all_day" value="1" x-model="allDay"
+                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Подія на весь день</span>
+                    </label>
                 </div>
 
                 <div x-data="recurrenceSettings()" x-init="init()">
@@ -271,8 +282,12 @@
             <a href="{{ route('schedule') }}" class="w-full sm:w-auto text-center px-4 py-2.5 md:py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 Скасувати
             </a>
-            <button type="submit" class="w-full sm:w-auto px-6 py-2.5 md:py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                Створити
+            <button type="submit" :disabled="submitting" class="w-full sm:w-auto px-6 py-2.5 md:py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+                <svg x-show="submitting" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span x-text="submitting ? 'Створення...' : 'Створити'"></span>
             </button>
         </div>
     </form>

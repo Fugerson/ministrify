@@ -223,7 +223,7 @@ class EventController extends Controller
             'ministry_id' => ['nullable', 'exists:ministries,id', new BelongsToChurch(Ministry::class)],
             'title' => 'required|string|max:255',
             'date' => 'required|date',
-            'time' => 'required|date_format:H:i',
+            'time' => 'nullable|date_format:H:i',
             'notes' => 'nullable|string',
             'recurrence_rule' => 'nullable|string',
             'recurrence_end_type' => 'nullable|string|in:count,date',
@@ -604,6 +604,8 @@ class EventController extends Controller
                 'is_service' => $parentEvent->is_service,
                 'has_music' => $parentEvent->has_music,
                 'track_attendance' => $parentEvent->track_attendance,
+                'reminder_settings' => $parentEvent->reminder_settings,
+                'google_calendar_id' => $parentEvent->google_calendar_id,
                 'parent_event_id' => $parentEvent->id,
             ]);
         }

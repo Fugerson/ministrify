@@ -100,25 +100,28 @@
                         </div>
 
                         <div x-show="showForm" x-cloak x-transition class="mt-6">
-                            <form action="{{ route('public.group.join', [$church->slug, $group->slug]) }}" method="POST" class="space-y-4">
+                            <form action="{{ route('public.group.join', [$church->slug, $group->slug]) }}" method="POST" class="space-y-4" x-data="{ submitting: false }" @submit="submitting = true">
                                 @csrf
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Ім'я *</label>
                                         <input type="text" name="first_name" required value="{{ old('first_name') }}"
-                                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                               class="w-full px-4 py-2.5 border {{ $errors->has('first_name') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        @error('first_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Прізвище *</label>
                                         <input type="text" name="last_name" required value="{{ old('last_name') }}"
-                                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                               class="w-full px-4 py-2.5 border {{ $errors->has('last_name') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        @error('last_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                                         <input type="email" name="email" required value="{{ old('email') }}"
-                                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                               class="w-full px-4 py-2.5 border {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        @error('email') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
@@ -131,9 +134,13 @@
                                     <textarea name="message" rows="3"
                                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Розкажіть трохи про себе...">{{ old('message') }}</textarea>
                                 </div>
-                                <button type="submit"
-                                        class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                                    Надіслати заявку
+                                <button type="submit" :disabled="submitting"
+                                        class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
+                                    <span x-show="!submitting">Надіслати заявку</span>
+                                    <span x-show="submitting" class="inline-flex items-center justify-center gap-2">
+                                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        Надсилання...
+                                    </span>
                                 </button>
                             </form>
                         </div>

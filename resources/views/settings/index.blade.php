@@ -720,7 +720,7 @@
 
                     <!-- Delete all events -->
                     <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <button @click="deleteEvents('all')"
+                        <button @click="if(confirm('Ви впевнені, що хочете видалити ВСІ події? Цю дію неможливо скасувати!') && prompt('Введіть ВИДАЛИТИ для підтвердження') === 'ВИДАЛИТИ') deleteEvents('all')"
                                 :disabled="loading"
                                 class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors disabled:opacity-50">
                             Очистити всі події

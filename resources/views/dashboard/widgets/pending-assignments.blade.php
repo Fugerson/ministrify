@@ -13,10 +13,10 @@
             <div class="mt-3 space-y-2">
                 @foreach($pendingAssignments->take(3) as $assignment)
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-3 flex items-center justify-between gap-3">
-                    <div class="min-w-0">
-                        <p class="font-medium text-gray-900 dark:text-white text-sm truncate">{{ $assignment->event->title }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event->date->format('d.m') }} &bull; {{ $assignment->position?->name }}</p>
-                    </div>
+                    <a href="{{ route('events.show', $assignment->event) }}" class="min-w-0 hover:opacity-80 transition-opacity">
+                        <p class="font-medium text-gray-900 dark:text-white text-sm truncate">{{ $assignment->event?->title }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event?->date?->format('d.m') }} &bull; {{ $assignment->position?->name }}</p>
+                    </a>
                     <div class="flex gap-2 flex-shrink-0">
                         <form method="POST" action="{{ route('assignments.confirm', $assignment) }}">
                             @csrf
@@ -38,6 +38,11 @@
                 </div>
                 @endforeach
             </div>
+            @if($pendingAssignments->count() > 3)
+                <a href="{{ route('my-schedule') }}" class="block mt-2 text-center text-xs text-primary-600 dark:text-primary-400 hover:underline">
+                    Всі призначення ({{ $pendingAssignments->count() }})
+                </a>
+            @endif
             @else
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Немає призначень для підтвердження</p>
             @endif

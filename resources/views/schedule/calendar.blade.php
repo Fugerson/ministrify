@@ -241,7 +241,7 @@
                                        class="block p-2 {{ $roundedClass }} text-xs transition-all hover:shadow-md {{ $isMultiDay && !$isFirstDay ? '-ml-2 pl-4' : '' }}"
                                        style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30; border-left: {{ $isFirstDay ? '3px' : '0' }} solid {{ $item->ministry_display_color ?? '#3b82f6' }};">
                                         @if($isFirstDay)
-                                            <p class="font-medium text-gray-900 dark:text-white truncate">{{ $item->time ? $item->time->format('H:i') : ($isMultiDay ? '' : '--:--') }}</p>
+                                            <p class="font-medium text-gray-900 dark:text-white truncate">{{ $item->time ? $item->time->format('H:i') : ($isMultiDay ? '' : 'Весь день') }}</p>
                                         @endif
                                         <p class="text-gray-700 dark:text-gray-300 truncate">{{ $item->title }}</p>
                                         @if($isFirstDay)

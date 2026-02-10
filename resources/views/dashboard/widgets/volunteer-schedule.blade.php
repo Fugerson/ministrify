@@ -45,9 +45,9 @@
 
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <div class="w-7 h-7 rounded-lg bg-primary-50 dark:bg-primary-900/50 flex items-center justify-center">
-                            <span class="text-xs font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($assignment->person->first_name, 0, 1) }}</span>
+                            <span class="text-xs font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($assignment->person?->first_name ?? '?', 0, 1) }}</span>
                         </div>
-                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">{{ $assignment->person->full_name }}</span>
+                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">{{ $assignment->person?->full_name }}</span>
                     </div>
 
                     {{-- Status badge --}}

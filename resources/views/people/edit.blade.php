@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto">
-    <form method="POST" action="{{ route('people.update', $person) }}" enctype="multipart/form-data" class="space-y-6">
+    <form method="POST" action="{{ route('people.update', $person) }}" enctype="multipart/form-data" class="space-y-6" x-data="{ submitting: false }" @submit="submitting = true">
         @csrf
         @method('PUT')
 
@@ -65,13 +65,15 @@
                 <div>
                     <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ім'я *</label>
                     <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $person->first_name) }}" required
-                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 {{ $errors->has('first_name') ? 'ring-2 ring-red-500' : '' }} border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                    @error('first_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
                     <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Прізвище *</label>
                     <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $person->last_name) }}" required
-                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 {{ $errors->has('last_name') ? 'ring-2 ring-red-500' : '' }} border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                    @error('last_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
             </div>
         </div>
@@ -250,9 +252,13 @@
                    class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                     Назад
                 </a>
-                <button type="submit"
-                        class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                    Зберегти
+                <button type="submit" :disabled="submitting"
+                        class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
+                    <span x-show="!submitting">Зберегти</span>
+                    <span x-show="submitting" class="inline-flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        Збереження...
+                    </span>
                 </button>
             </div>
         </div>

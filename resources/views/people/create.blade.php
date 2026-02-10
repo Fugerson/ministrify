@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto">
-    <form method="POST" action="{{ route('people.store') }}" enctype="multipart/form-data" class="space-y-6">
+    <form method="POST" action="{{ route('people.store') }}" enctype="multipart/form-data" class="space-y-6" x-data="{ submitting: false }" @submit="submitting = true">
         @csrf
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
@@ -14,13 +14,15 @@
                 <div>
                     <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ім'я *</label>
                     <input type="text" name="first_name" id="first_name" value="{{ old('first_name') }}" required
-                           class="w-full px-3 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                           class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('first_name') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    @error('first_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
                     <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Прізвище *</label>
                     <input type="text" name="last_name" id="last_name" value="{{ old('last_name') }}" required
-                           class="w-full px-3 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                           class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('last_name') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    @error('last_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="md:col-span-2">
@@ -180,8 +182,13 @@
             <a href="{{ route('people.index') }}" class="w-full sm:w-auto text-center px-4 py-2.5 md:py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 Скасувати
             </a>
-            <button type="submit" class="w-full sm:w-auto px-6 py-2.5 md:py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                Зберегти
+            <button type="submit" :disabled="submitting"
+                    class="w-full sm:w-auto px-6 py-2.5 md:py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                <span x-show="!submitting">Зберегти</span>
+                <span x-show="submitting" class="inline-flex items-center gap-2">
+                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    Збереження...
+                </span>
             </button>
         </div>
     </form>
