@@ -732,6 +732,36 @@ window.expenseModal = function() {
             this.errors = {};
             this.modalOpen = true;
         },
+        async deleteExpense() {
+            if (!confirm('Видалити цю витрату?')) return;
+            this.loading = true;
+            try {
+                const response = await fetch(`/finances/expenses/${this.editId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message || 'Витрату видалено');
+                    if (window.journalRemoveTransaction) {
+                        window.journalRemoveTransaction(this.editId);
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    showToast('error', data.message || 'Помилка видалення');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        },
         async submit() {
             this.loading = true;
             this.errors = {};
@@ -1035,16 +1065,25 @@ window.exchangeModal = function() {
                             </label>
                         </div>
                     </div>
-                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button type="button" @click="modalOpen = false"
-                                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">
-                            Скасувати
-                        </button>
-                        <button type="submit" :disabled="loading"
-                                class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl disabled:opacity-50">
-                            <span x-show="!loading" x-text="isEdit ? 'Зберегти' : 'Додати'"></span>
-                            <span x-show="loading">Збереження...</span>
-                        </button>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div>
+                            <button x-show="isEdit" type="button" @click="deleteExpense()"
+                                    :disabled="loading"
+                                    class="px-4 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-xl text-sm font-medium disabled:opacity-50">
+                                Видалити
+                            </button>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" @click="modalOpen = false"
+                                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">
+                                Скасувати
+                            </button>
+                            <button type="submit" :disabled="loading"
+                                    class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl disabled:opacity-50">
+                                <span x-show="!loading" x-text="isEdit ? 'Зберегти' : 'Додати'"></span>
+                                <span x-show="loading">Збереження...</span>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
