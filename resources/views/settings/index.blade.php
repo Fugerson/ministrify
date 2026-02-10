@@ -884,10 +884,10 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                         </svg>
                                         <div class="flex-1 min-w-0">
-                                            <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Команда Ministrify</label>
+                                            <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Команда</label>
                                             <select x-model="mapping.ministry_id" @change="saveMappings()"
                                                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                                                <option :value="null">Не прив'язувати</option>
+                                                <option value="">Без прив'язки до команди</option>
                                                 @foreach($ministries as $ministry)
                                                     <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                                                 @endforeach
@@ -1093,7 +1093,7 @@
             calendars: [],
             mappings: savedMappings.length ? savedMappings.map(m => ({
                 calendar_id: m.calendar_id || 'primary',
-                ministry_id: m.ministry_id ? String(m.ministry_id) : null
+                ministry_id: m.ministry_id ? String(m.ministry_id) : ''
             })) : [{ calendar_id: 'primary', ministry_id: null }],
 
             async init() {
@@ -1115,7 +1115,7 @@
             },
 
             addMapping() {
-                this.mappings.push({ calendar_id: 'primary', ministry_id: null, _new: true });
+                this.mappings.push({ calendar_id: 'primary', ministry_id: '', _new: true });
             },
 
             removeMapping(index) {
@@ -1144,7 +1144,7 @@
                         body: JSON.stringify({
                             calendars: this.mappings.map(m => ({
                                 calendar_id: m.calendar_id,
-                                ministry_id: m.ministry_id || null
+                                ministry_id: m.ministry_id ? parseInt(m.ministry_id) : null
                             }))
                         })
                     });
@@ -1172,7 +1172,7 @@
                         },
                         body: JSON.stringify({
                             calendar_id: mapping.calendar_id,
-                            ministry_id: mapping.ministry_id || null
+                            ministry_id: mapping.ministry_id ? parseInt(mapping.ministry_id) : null
                         })
                     });
                     const data = await res.json();
