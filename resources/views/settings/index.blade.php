@@ -604,6 +604,175 @@
         </div>
     </div>
 
+    <!-- Notification Settings -->
+    @php
+        $notifSettings = $church->settings['notifications'] ?? [];
+    @endphp
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="{
+            settings: {
+                notify_on_assignment: {{ ($notifSettings['notify_on_assignment'] ?? true) ? 'true' : 'false' }},
+                notify_on_responsibility: {{ ($notifSettings['notify_on_responsibility'] ?? true) ? 'true' : 'false' }},
+                notify_on_plan_request: {{ ($notifSettings['notify_on_plan_request'] ?? true) ? 'true' : 'false' }},
+                notify_leader_on_decline: {{ ($notifSettings['notify_leader_on_decline'] ?? true) ? 'true' : 'false' }},
+                birthday_reminders: {{ ($notifSettings['birthday_reminders'] ?? true) ? 'true' : 'false' }},
+                reminder_day_before: {{ ($notifSettings['reminder_day_before'] ?? true) ? 'true' : 'false' }},
+                reminder_same_day: {{ ($notifSettings['reminder_same_day'] ?? true) ? 'true' : 'false' }},
+                task_reminders: {{ ($notifSettings['task_reminders'] ?? true) ? 'true' : 'false' }},
+            },
+            saving: false,
+            saved: false,
+            toggle(key) {
+                this.settings[key] = !this.settings[key];
+                this.save();
+            },
+            save() {
+                this.saving = true;
+                this.saved = false;
+                const formData = new FormData();
+                formData.append('_token', document.querySelector('meta[name=csrf-token]').content);
+                formData.append('_method', 'PUT');
+                Object.entries(this.settings).forEach(([key, val]) => {
+                    formData.append(key, val ? '1' : '0');
+                });
+                fetch('{{ route('settings.notifications') }}', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' },
+                    body: formData
+                }).then(() => {
+                    this.saving = false;
+                    this.saved = true;
+                    setTimeout(() => this.saved = false, 2000);
+                }).catch(() => this.saving = false);
+            }
+         }">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Сповіщення</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Управління Telegram-сповіщеннями</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span x-show="saving" x-cloak class="text-xs text-gray-400">
+                        <svg class="animate-spin h-4 w-4 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
+                    <span x-show="saved" x-cloak x-transition.opacity class="text-xs text-green-600 dark:text-green-400">Збережено</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Automatic Notifications -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Автоматичні сповіщення</h3>
+                <div class="space-y-3">
+                    <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('notify_on_assignment')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Сповіщення про призначення</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Повідомлення при призначенні на позицію в служінні</p>
+                        </div>
+                        <div class="relative ml-4 flex-shrink-0">
+                            <div class="w-11 h-6 rounded-full transition-colors" :class="settings.notify_on_assignment ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="settings.notify_on_assignment ? 'translate-x-5' : ''"></div>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('notify_on_responsibility')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Сповіщення про відповідальності</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Повідомлення при призначенні відповідальності на подію</p>
+                        </div>
+                        <div class="relative ml-4 flex-shrink-0">
+                            <div class="w-11 h-6 rounded-full transition-colors" :class="settings.notify_on_responsibility ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="settings.notify_on_responsibility ? 'translate-x-5' : ''"></div>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('notify_on_plan_request')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Сповіщення про план служіння</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Повідомлення про участь у service plan</p>
+                        </div>
+                        <div class="relative ml-4 flex-shrink-0">
+                            <div class="w-11 h-6 rounded-full transition-colors" :class="settings.notify_on_plan_request ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="settings.notify_on_plan_request ? 'translate-x-5' : ''"></div>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('notify_leader_on_decline')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Сповіщення лідеру при відхиленні</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Повідомлення лідеру, коли хтось відхиляє призначення</p>
+                        </div>
+                        <div class="relative ml-4 flex-shrink-0">
+                            <div class="w-11 h-6 rounded-full transition-colors" :class="settings.notify_leader_on_decline ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="settings.notify_leader_on_decline ? 'translate-x-5' : ''"></div>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('birthday_reminders')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Привітання з днем народження</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Автоматичні привітання учасникам у день народження</p>
+                        </div>
+                        <div class="relative ml-4 flex-shrink-0">
+                            <div class="w-11 h-6 rounded-full transition-colors" :class="settings.birthday_reminders ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="settings.birthday_reminders ? 'translate-x-5' : ''"></div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Reminders -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Нагадування</h3>
+                <div class="space-y-3">
+                    <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('reminder_day_before')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Нагадування за день</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Нагадування за день до події учасникам служіння</p>
+                        </div>
+                        <div class="relative ml-4 flex-shrink-0">
+                            <div class="w-11 h-6 rounded-full transition-colors" :class="settings.reminder_day_before ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="settings.reminder_day_before ? 'translate-x-5' : ''"></div>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('reminder_same_day')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Нагадування в день події</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Нагадування в день події учасникам служіння</p>
+                        </div>
+                        <div class="relative ml-4 flex-shrink-0">
+                            <div class="w-11 h-6 rounded-full transition-colors" :class="settings.reminder_same_day ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="settings.reminder_same_day ? 'translate-x-5' : ''"></div>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('task_reminders')">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Нагадування про завдання</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Нагадування про невиконані завдання на дошках</p>
+                        </div>
+                        <div class="relative ml-4 flex-shrink-0">
+                            <div class="w-11 h-6 rounded-full transition-colors" :class="settings.task_reminders ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="settings.task_reminders ? 'translate-x-5' : ''"></div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Google Calendar Integration -->
     @php
         $googleCalendarSettings = auth()->user()->settings['google_calendar'] ?? null;
