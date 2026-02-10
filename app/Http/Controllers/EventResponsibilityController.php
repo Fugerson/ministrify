@@ -206,8 +206,9 @@ class EventResponsibilityController extends Controller
         try {
             $telegram = TelegramService::make();
 
+            $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
             $message = "🔔 <b>Нова відповідальність!</b>\n\n"
-                . "📅 {$event->date->format('d.m.Y')}, {$event->time->format('H:i')}\n"
+                . "📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
                 . "📍 {$event->title}\n"
                 . "🎯 <b>{$responsibility->name}</b>\n\n"
                 . "Ви можете взяти це на себе?";

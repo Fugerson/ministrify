@@ -124,7 +124,7 @@ class VolunteerSchedulingService
             'severity' => 'warning',
             'details' => "Вже призначений на «{$otherEvent->title}»" .
                         ($otherEvent->ministry ? " ({$otherEvent->ministry->name})" : '') .
-                        " о " . Carbon::parse($otherEvent->time)->format('H:i'),
+                        ($otherEvent->time ? " о " . Carbon::parse($otherEvent->time)->format('H:i') : ''),
             'other_event_id' => $otherEvent->id,
             'other_assignment_id' => $concurrentAssignment->id,
         ];

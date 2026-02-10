@@ -220,7 +220,7 @@ class WorshipTeamController extends Controller
                 'id' => $event->id,
                 'title' => $event->title,
                 'date' => $event->date->translatedFormat('l, j F Y'),
-                'time' => $event->time->format('H:i'),
+                'time' => $event->time?->format('H:i'),
             ],
             'songs' => $event->songs->map(function($s) use ($teamBySong) {
                 $songTeam = $teamBySong->get($s->pivot->id, collect());

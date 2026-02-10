@@ -104,7 +104,7 @@ class AssignmentService
         if ($existingAssignment) {
             return [
                 'type' => 'busy',
-                'reason' => "Служить в {$existingAssignment->event->ministry->name}",
+                'reason' => "Служить в " . ($existingAssignment->event->ministry?->name ?? 'іншому служінні'),
             ];
         }
 

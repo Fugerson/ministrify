@@ -70,6 +70,11 @@ class CalendarService
         $uid = $event->id . '@' . Str::slug($church->name) . '.ministrify';
         $dtstart = $this->formatIcalDateTime($event->date, $event->time);
 
+        // Handle all-day events
+        if (!$event->time) {
+            return $this->eventToVdayEvent($event, $church);
+        }
+
         // Assume 1 hour duration if not specified
         $endTime = Carbon::parse($event->date->format('Y-m-d') . ' ' . $event->time->format('H:i'))
             ->addHour();
@@ -104,6 +109,44 @@ class CalendarService
 
         $vevent .= "STATUS:CONFIRMED\r\n";
         $vevent .= "TRANSP:OPAQUE\r\n";
+        $vevent .= "END:VEVENT\r\n";
+
+        return $vevent;
+    }
+
+    /**
+     * Generate VEVENT for all-day event
+     */
+    private function eventToVdayEvent(Event $event, Church $church): string
+    {
+        $uid = $event->id . '@' . Str::slug($church->name) . '.ministrify';
+
+        $description = '';
+        if ($event->ministry) {
+            $description .= "Служіння: " . $event->ministry->name . "\\n";
+        }
+        if ($event->notes) {
+            $description .= $event->notes;
+        }
+
+        $vevent = "BEGIN:VEVENT\r\n";
+        $vevent .= "UID:{$uid}\r\n";
+        $vevent .= "DTSTART;VALUE=DATE:" . $event->date->format('Ymd') . "\r\n";
+        $vevent .= "DTEND;VALUE=DATE:" . $event->date->copy()->addDay()->format('Ymd') . "\r\n";
+        $vevent .= "SUMMARY:" . $this->escapeIcalText($event->title) . "\r\n";
+
+        if ($description) {
+            $vevent .= "DESCRIPTION:" . $this->escapeIcalText($description) . "\r\n";
+        }
+        if ($event->location) {
+            $vevent .= "LOCATION:" . $this->escapeIcalText($event->location) . "\r\n";
+        }
+        if ($event->ministry) {
+            $vevent .= "CATEGORIES:" . $this->escapeIcalText($event->ministry->name) . "\r\n";
+        }
+
+        $vevent .= "STATUS:CONFIRMED\r\n";
+        $vevent .= "TRANSP:TRANSPARENT\r\n";
         $vevent .= "END:VEVENT\r\n";
 
         return $vevent;
@@ -334,8 +377,13 @@ class CalendarService
      */
     public function getGoogleCalendarUrl(Event $event): string
     {
-        $startDate = Carbon::parse($event->date->format('Y-m-d') . ' ' . $event->time->format('H:i'));
-        $endDate = $startDate->copy()->addHour();
+        if (!$event->time) {
+            $startDate = Carbon::parse($event->date->format('Y-m-d'));
+            $endDate = $startDate->copy()->addDay();
+        } else {
+            $startDate = Carbon::parse($event->date->format('Y-m-d') . ' ' . $event->time->format('H:i'));
+            $endDate = $startDate->copy()->addHour();
+        }
 
         $params = [
             'action' => 'TEMPLATE',

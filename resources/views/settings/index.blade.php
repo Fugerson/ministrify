@@ -2052,10 +2052,12 @@
                         <div class="min-w-0 flex-1">
                             <div class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $u->name }}</div>
                             <div class="flex items-center gap-2 flex-wrap">
+                                @if($u->churchRole)
                                 <span class="inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full"
                                       style="background-color: {{ $u->churchRole->color }}30; color: {{ $u->churchRole->color }}">
                                     {{ $u->churchRole->name }}
                                 </span>
+                                @endif
                                 {{-- Override badges --}}
                                 @if(!empty($u->permission_overrides))
                                     @foreach($u->permission_overrides as $mod => $actions)
@@ -2069,7 +2071,7 @@
                             </div>
                         </div>
                     </div>
-                    <button @click="openUserModal({{ $u->id }}, @js($u->name), @js($u->churchRole->name))"
+                    <button @click="openUserModal({{ $u->id }}, @js($u->name), @js($u->churchRole?->name ?? 'Без ролі'))"
                             class="flex-shrink-0 px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
                         Налаштувати
                     </button>

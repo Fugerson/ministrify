@@ -24,8 +24,9 @@
                 <form action="{{ route('public.donate.process', $church->slug) }}" method="POST" x-data="{
                     amount: {{ (int) request('amount', 100) }},
                     customAmount: false,
-                    purpose: @json(request('campaign', ''))
-                }">
+                    purpose: @json(request('campaign', '')),
+                    submitting: false
+                }" @submit="submitting = true">
                     @csrf
 
                     <!-- Amount selection -->
@@ -155,9 +156,13 @@
 
                     <!-- Submit -->
                     @if(isset($paymentMethods) && ($paymentMethods['liqpay'] || $paymentMethods['monobank']))
-                    <button type="submit"
-                            class="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl">
-                        Пожертвувати <span x-text="amount"></span> грн
+                    <button type="submit" :disabled="submitting"
+                            class="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl disabled:opacity-50">
+                        <span x-show="!submitting">Пожертвувати <span x-text="amount"></span> грн</span>
+                        <span x-show="submitting" class="inline-flex items-center justify-center gap-2">
+                            <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            Обробка...
+                        </span>
                     </button>
                     @endif
 

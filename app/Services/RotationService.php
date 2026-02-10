@@ -341,9 +341,15 @@ class RotationService
         $duration2 = $event2->duration_minutes ?? 120;
 
         $start1 = $event1->time;
-        $end1 = $event1->time->copy()->addMinutes($duration1);
         $start2 = $event2->time;
-        $end2 = $event2->time->copy()->addMinutes($duration2);
+
+        // All-day events always overlap with same-day events
+        if (!$start1 || !$start2) {
+            return true;
+        }
+
+        $end1 = $start1->copy()->addMinutes($duration1);
+        $end2 = $start2->copy()->addMinutes($duration2);
 
         return $start1 < $end2 && $start2 < $end1;
     }

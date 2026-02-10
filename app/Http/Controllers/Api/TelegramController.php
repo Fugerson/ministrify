@@ -154,17 +154,21 @@ class TelegramController extends Controller
         if ($action === 'confirm') {
             $assignment->confirm();
 
-            $this->saveMessage($person, "✅ Підтверджено: {$event->ministry->name} - {$position->name} ({$event->date->format('d.m.Y')})");
+            $ministryName = $event->ministry?->name ?? 'Служіння';
+            $positionName = $position?->name ?? '';
+            $this->saveMessage($person, "✅ Підтверджено: {$ministryName} - {$positionName} ({$event->date->format('d.m.Y')})");
             $this->telegram()->sendMessage($chatId, "✅ Чудово! Ви підтвердили участь у служінні {$event->date->format('d.m.Y')}.");
         } else {
             $assignment->decline();
 
-            $this->saveMessage($person, "❌ Відхилено: {$event->ministry->name} - {$position->name} ({$event->date->format('d.m.Y')})");
+            $ministryName = $event->ministry?->name ?? 'Служіння';
+            $positionName = $position?->name ?? '';
+            $this->saveMessage($person, "❌ Відхилено: {$ministryName} - {$positionName} ({$event->date->format('d.m.Y')})");
             $this->telegram()->sendMessage($chatId, "😔 Зрозуміло. Повідомлення надіслано лідеру.");
 
             // Notify ministry leader
             if ($person->church?->isNotificationEnabled('notify_leader_on_decline')) {
-                $leader = $event->ministry->leader ?? $person->church?->people()
+                $leader = $event->ministry?->leader ?? $person->church?->people()
                     ->whereNotNull('telegram_chat_id')
                     ->whereHas('user', fn($q) => $q->where('role', 'admin'))
                     ->first();

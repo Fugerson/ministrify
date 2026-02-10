@@ -95,8 +95,9 @@ class TelegramService
             return false;
         }
 
+        $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
         $message = "🔔 <b>Нове призначення!</b>\n\n"
-            . "📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)}), {$event->time->format('H:i')}\n"
+            . "📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)}), {$timeStr}\n"
             . "⛪ Служіння: {$event->ministry->name}\n"
             . "🎯 Позиція: {$position->name}\n\n"
             . "Ви можете підтвердити або відхилити участь:";
@@ -123,10 +124,12 @@ class TelegramService
         $isToday = $event->date->isToday();
         $prefix = $isToday ? '⏰ <b>Нагадування!</b>' : '⏰ <b>Нагадування на завтра!</b>';
 
+        $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
+        $ministryName = $event->ministry?->name ?? 'Служіння';
         $message = "{$prefix}\n\n"
             . ($isToday ? "Сьогодні" : "Завтра") . " ти служиш:\n"
-            . "📅 {$event->date->format('d.m.Y')}, {$event->time->format('H:i')}\n"
-            . "⛪ {$event->ministry->name}\n"
+            . "📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
+            . "⛪ {$ministryName}\n"
             . "🎯 {$responsibility->name}\n\n"
             . "Не забудь! 🙏";
 
@@ -143,9 +146,10 @@ class TelegramService
             return false;
         }
 
+        $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
         $message = "⚠️ <b>Відмова від служіння</b>\n\n"
             . "{$person->full_name} відхилив(ла) участь:\n"
-            . "📅 {$event->date->format('d.m.Y')}, {$event->time->format('H:i')}\n"
+            . "📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
             . "⛪ {$event->ministry->name}\n"
             . "🎯 {$position->name}\n\n"
             . "Потрібно знайти заміну.";
@@ -181,7 +185,7 @@ class TelegramService
             };
 
             $message .= "{$event->date->format('d.m')} ({$this->getShortDayName($event->date)}) — "
-                . "{$event->ministry->name}, {$assignment->position->name} {$status}\n";
+                . ($event->ministry?->name ?? 'Служіння') . ", " . ($assignment->position?->name ?? '') . " {$status}\n";
         }
 
         $message .= "\n✅ — підтверджено\n⏳ — очікує підтвердження";
@@ -203,11 +207,12 @@ class TelegramService
 
         $event = $assignment->event;
 
+        $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
         return "📅 <b>Наступне служіння:</b>\n\n"
             . "📆 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
-            . "🕐 {$event->time->format('H:i')}\n"
-            . "⛪ {$event->ministry->name}\n"
-            . "🎯 {$assignment->position->name}";
+            . "🕐 {$timeStr}\n"
+            . "⛪ " . ($event->ministry?->name ?? 'Служіння') . "\n"
+            . "🎯 " . ($assignment->position?->name ?? '');
     }
 
     private function getDayName(\DateTime $date): string

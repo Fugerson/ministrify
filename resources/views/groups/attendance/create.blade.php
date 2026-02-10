@@ -23,7 +23,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Записати зустріч</h2>
 
-        <form method="POST" action="{{ route('groups.attendance.store', $group) }}" class="space-y-6">
+        <form method="POST" action="{{ route('groups.attendance.store', $group) }}" class="space-y-6" x-data="{ submitting: false }" @submit="submitting = true">
             @csrf
 
             <div class="grid grid-cols-2 gap-4">
@@ -82,8 +82,12 @@
                 <a href="{{ route('groups.show', $group) }}" class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 font-medium">
                     Скасувати
                 </a>
-                <button type="submit" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
-                    Зберегти
+                <button type="submit" :disabled="submitting" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
+                    <span x-show="!submitting">Зберегти</span>
+                    <span x-show="submitting" class="inline-flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        Збереження...
+                    </span>
                 </button>
             </div>
         </form>
