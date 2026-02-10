@@ -175,7 +175,6 @@ class MinistryController extends Controller
 
             $worshipEvents = Event::where('church_id', $church->id)
                 ->where('has_music', true)
-                ->where('date', '>=', now()->subDays(7))
                 ->withCount(['songs as songs_count', 'worshipTeam as team_count'])
                 ->orderBy('date')
                 ->orderBy('time')
