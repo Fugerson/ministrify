@@ -904,7 +904,7 @@
                                     </div>
                                     <!-- Per-calendar sync button + status -->
                                     <div class="mt-2 flex items-center gap-2">
-                                        <button @click="syncOne(index)"
+                                        <button type="button" @click="syncOne(index)"
                                                 :disabled="mapping._syncing"
                                                 class="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white text-xs font-medium rounded-lg transition-colors">
                                             <svg x-show="!mapping._syncing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1093,8 +1093,11 @@
             calendars: [],
             mappings: savedMappings.length ? savedMappings.map(m => ({
                 calendar_id: m.calendar_id || 'primary',
-                ministry_id: m.ministry_id ? String(m.ministry_id) : ''
-            })) : [{ calendar_id: 'primary', ministry_id: null }],
+                ministry_id: m.ministry_id ? String(m.ministry_id) : '',
+                _syncing: false,
+                _message: '',
+                _success: false
+            })) : [{ calendar_id: 'primary', ministry_id: '', _syncing: false, _message: '', _success: false }],
 
             async init() {
                 if (this.isConnected) {
@@ -1115,7 +1118,7 @@
             },
 
             addMapping() {
-                this.mappings.push({ calendar_id: 'primary', ministry_id: '', _new: true });
+                this.mappings.push({ calendar_id: 'primary', ministry_id: '', _new: true, _syncing: false, _message: '', _success: false });
             },
 
             removeMapping(index) {
