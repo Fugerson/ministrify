@@ -3,7 +3,7 @@
 @section('title', 'Розклад')
 
 @section('actions')
-@if(auth()->user()->canCreate('events'))
+@if(auth()->user()->can('create', \App\Models\Event::class))
 <a href="{{ route('events.create') }}"
    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,10 +91,25 @@
                     Сьогодні
                 </a>
 
-                <!-- Google Calendar Sync Button -->
+                <!-- Google Calendar Sync Status -->
                 @if(auth()->user()->canEdit('events'))
                 @if($isGoogleConnected)
-                    <div x-data="{ syncing: false, message: '', error: false }" class="inline-flex items-center gap-2">
+                    <div x-data="{
+                        syncing: false,
+                        message: '',
+                        error: false,
+                        lastSynced: '{{ $lastSyncedAt ?? '' }}',
+                        get syncStatus() {
+                            if (this.syncing) return 'Синхронізація...';
+                            if (!this.lastSynced) return 'Не синхронізовано';
+                            const diff = Math.floor((Date.now() - new Date(this.lastSynced).getTime()) / 60000);
+                            if (diff < 1) return 'Щойно';
+                            if (diff < 60) return diff + ' хв тому';
+                            if (diff < 1440) return Math.floor(diff / 60) + ' год тому';
+                            return Math.floor(diff / 1440) + ' дн тому';
+                        }
+                    }" class="inline-flex items-center gap-1.5">
+                        <span class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline" x-text="syncStatus"></span>
                         <button @click="
                             syncing = true; message = ''; error = false;
                             fetch('{{ route('settings.google-calendar.full-sync') }}', {
@@ -103,19 +118,24 @@
                                 body: JSON.stringify({ calendar_id: '{{ $googleCalendarId }}' })
                             })
                             .then(r => r.json())
-                            .then(data => { syncing = false; message = data.message || data.error || 'Готово'; error = !data.success; })
+                            .then(data => {
+                                syncing = false;
+                                message = data.message || data.error || 'Готово';
+                                error = !data.success;
+                                if (data.success) lastSynced = new Date().toISOString();
+                            })
                             .catch(e => { syncing = false; message = 'Помилка з\'єднання'; error = true; })
                         "
                                 :disabled="syncing"
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all shadow-sm hover:shadow disabled:opacity-50">
-                            <svg x-show="!syncing" class="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zM9.857 17.143H6.857v-3h3v3zm0-4.286H6.857V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3z"/>
+                                title="Синхронізувати з Google Calendar"
+                                class="w-9 h-9 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors disabled:opacity-50">
+                            <svg x-show="!syncing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
-                            <svg x-show="syncing" x-cloak class="w-4 h-4 mr-1.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <svg x-show="syncing" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
-                            <span x-text="syncing ? 'Синхронізація...' : 'Синхронізувати'">Синхронізувати</span>
                         </button>
                         <template x-if="message">
                             <span x-text="message" :class="error ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'" class="text-xs max-w-[200px] truncate" x-transition></span>
@@ -123,7 +143,8 @@
                     </div>
                 @else
                     <a href="{{ route('settings.index') }}#google-calendar"
-                       class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors">
+                       class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
+                       title="Підключити Google Calendar">
                         <svg class="w-4 h-4 mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zM9.857 17.143H6.857v-3h3v3zm0-4.286H6.857V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3z"/>
                         </svg>
@@ -159,7 +180,7 @@
                                 Експорт поточного періоду
                             </a>
                             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-                            @if(auth()->user()->canCreate('events'))
+                            @if(auth()->user()->can('create', \App\Models\Event::class))
                             <a href="{{ route('calendar.import') }}"
                                class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -503,7 +524,7 @@
                             </svg>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400">Немає подій у цьому місяці</p>
-                        @if(auth()->user()->canCreate('events'))
+                        @if(auth()->user()->can('create', \App\Models\Event::class))
                         <a href="{{ route('events.create') }}" class="mt-3 inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>

@@ -74,9 +74,9 @@ class TransactionPolicy
             return false;
         }
 
-        // Ministry leaders can update their ministry expenses
-        if ($transaction->ministry_id && $transaction->isExpense && $user->isLeader() && $user->person) {
-            if ($transaction->ministry->leader_id === $user->person->id) {
+        // Ministry leaders can update their ministry transactions
+        if ($transaction->ministry_id && $user->person) {
+            if ($transaction->ministry && $transaction->ministry->leader_id === $user->person->id) {
                 return true;
             }
         }

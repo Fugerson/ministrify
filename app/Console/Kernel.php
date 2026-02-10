@@ -53,6 +53,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('page-visits:clean')
             ->dailyAt('03:00')
             ->description('Delete page visits older than 30 days');
+
+        // Sync Google Calendar for all connected users
+        $schedule->command('app:sync-google-calendar')
+            ->everyFifteenMinutes()
+            ->description('Sync Google Calendar events for connected users');
     }
 
     protected function commands(): void

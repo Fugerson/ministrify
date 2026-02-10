@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Person;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AttendanceController extends Controller
 {
@@ -22,6 +23,7 @@ class AttendanceController extends Controller
     public function index(Request $request)
     {
         $this->checkAttendanceEnabled();
+        $this->authorize('viewAny', Attendance::class);
         $church = $this->getCurrentChurch();
 
         $year = $request->get('year', now()->year);
@@ -39,6 +41,7 @@ class AttendanceController extends Controller
     public function create(Request $request)
     {
         $this->checkAttendanceEnabled();
+        $this->authorize('create', Attendance::class);
         $church = $this->getCurrentChurch();
 
         $eventId = $request->get('event');
@@ -61,6 +64,7 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $this->checkAttendanceEnabled();
+        $this->authorize('create', Attendance::class);
         $validated = $request->validate([
             'date' => 'required|date',
             'event_id' => 'nullable|exists:events,id',
@@ -112,6 +116,7 @@ class AttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
+        $this->authorize('view', $attendance);
 
         $attendance->load(['event.ministry', 'records.person']);
 
@@ -122,6 +127,7 @@ class AttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
+        $this->authorize('update', $attendance);
 
         $church = $this->getCurrentChurch();
 
@@ -139,6 +145,7 @@ class AttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
+        $this->authorize('update', $attendance);
 
         $validated = $request->validate([
             'total_count' => 'required|integer|min:0',
@@ -179,6 +186,7 @@ class AttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
+        $this->authorize('delete', $attendance);
 
         $attendance->delete();
 
@@ -201,6 +209,7 @@ class AttendanceController extends Controller
     public function stats(Request $request)
     {
         $this->checkAttendanceEnabled();
+        $this->authorize('viewStats', Attendance::class);
         $church = $this->getCurrentChurch();
 
         $year = $request->get('year', now()->year);

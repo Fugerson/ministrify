@@ -288,16 +288,10 @@ class Ministry extends Model
             return false;
         }
 
-        // Leaders visibility - only admins and ministry leaders
+        // Leaders visibility - only admins and leaders of THIS ministry
         if ($visibility === self::VISIBILITY_LEADERS) {
-            // Check if user is a leader of ANY ministry (not just this one)
-            if ($user->person) {
-                $isAnyMinistryLeader = self::where('church_id', $this->church_id)
-                    ->where('leader_id', $user->person->id)
-                    ->exists();
-                if ($isAnyMinistryLeader) {
-                    return true;
-                }
+            if ($user->person && $this->leader_id === $user->person->id) {
+                return true;
             }
             return false;
         }

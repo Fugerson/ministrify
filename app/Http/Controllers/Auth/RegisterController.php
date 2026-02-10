@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Church;
+use App\Models\ChurchRole;
 use App\Models\ExpenseCategory;
 use App\Models\Person;
 use App\Models\Tag;
@@ -61,13 +62,18 @@ class RegisterController extends Controller
         // Check if a soft-deleted user with this email exists — restore instead of creating new
         $trashedUser = User::onlyTrashed()->where('email', $request->email)->first();
 
+        // Find default volunteer role for this church
+        $volunteerRole = ChurchRole::where('church_id', $church->id)
+            ->where('slug', 'volunteer')
+            ->first();
+
         if ($trashedUser) {
             $trashedUser->restore();
             $trashedUser->update([
                 'church_id' => $church->id,
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
-                'church_role_id' => null,
+                'church_role_id' => $volunteerRole?->id,
                 'onboarding_completed' => true,
             ]);
 
@@ -104,13 +110,13 @@ class RegisterController extends Controller
             $firstName = $nameParts[0];
             $lastName = $nameParts[1] ?? '';
 
-            // Create user without role (basic access)
+            // Create user with default volunteer role
             $user = User::create([
                 'church_id' => $church->id,
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'church_role_id' => null, // No role = basic access
+                'church_role_id' => $volunteerRole?->id,
                 'onboarding_completed' => true,
             ]);
 

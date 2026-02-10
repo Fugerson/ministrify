@@ -24,9 +24,8 @@ class AttendancePolicy
             return false;
         }
 
-        // Leaders can view attendance for their entities
-        if ($user->isLeader() && $user->person) {
-            // For groups
+        // Group/ministry leaders can view attendance for their entities
+        if ($user->person) {
             if ($attendance->attendable_type === \App\Models\Group::class) {
                 $group = $attendance->attendable;
                 if ($group && $group->leader_id === $user->person->id) {
@@ -34,7 +33,6 @@ class AttendancePolicy
                 }
             }
 
-            // For ministry events
             if ($attendance->attendable_type === \App\Models\Event::class) {
                 $event = $attendance->attendable;
                 if ($event && $event->ministry && $event->ministry->leader_id === $user->person->id) {
@@ -107,8 +105,8 @@ class AttendancePolicy
             return true;
         }
 
-        // Leaders can update their entities' attendance
-        if ($user->isLeader() && $user->person) {
+        // Group/ministry leaders can update their entities' attendance
+        if ($user->person) {
             if ($attendance->attendable_type === \App\Models\Group::class) {
                 $group = $attendance->attendable;
                 if ($group && $group->leader_id === $user->person->id) {

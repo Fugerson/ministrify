@@ -888,10 +888,10 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('create', [AnnouncementController::class, 'create'])->name('create')->middleware('permission:announcements,create');
         Route::post('/', [AnnouncementController::class, 'store'])->name('store')->middleware('permission:announcements,create');
         Route::get('{announcement}', [AnnouncementController::class, 'show'])->name('show');
-        Route::get('{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit')->middleware('permission:announcements,edit');
-        Route::put('{announcement}', [AnnouncementController::class, 'update'])->name('update')->middleware('permission:announcements,edit');
-        Route::delete('{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy')->middleware('permission:announcements,delete');
-        Route::post('{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('pin')->middleware('permission:announcements,edit');
+        Route::get('{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit');
+        Route::put('{announcement}', [AnnouncementController::class, 'update'])->name('update');
+        Route::delete('{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy');
+        Route::post('{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('pin');
     });
 
     // Donations

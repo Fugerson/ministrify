@@ -92,12 +92,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isLeader(): bool
     {
-        // Check if user has a role with 'leader' slug or name contains 'лідер'
         if (!$this->churchRole) {
             return false;
         }
-        return $this->churchRole->slug === 'leader'
-            || str_contains(mb_strtolower($this->churchRole->name), 'лідер');
+        return $this->churchRole->slug === 'leader';
     }
 
     public function isVolunteer(): bool

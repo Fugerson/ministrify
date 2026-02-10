@@ -19,7 +19,18 @@ class EventPolicy
 
     public function create(User $user): bool
     {
-        return $user->canCreate('events');
+        if ($user->canCreate('events')) {
+            return true;
+        }
+
+        // Ministry leaders can create events for their ministries
+        if ($user->person) {
+            return \App\Models\Ministry::where('church_id', $user->church_id)
+                ->where('leader_id', $user->person->id)
+                ->exists();
+        }
+
+        return false;
     }
 
     public function update(User $user, Event $event): bool
@@ -33,6 +44,11 @@ class EventPolicy
             return true;
         }
 
+        // Event creator can update their own event
+        if ($event->created_by && $event->created_by === $user->id) {
+            return true;
+        }
+
         // Ministry leader can update events in their ministry
         if ($user->person && $event->ministry && $event->ministry->leader_id === $user->person->id) {
             return true;
@@ -43,7 +59,25 @@ class EventPolicy
 
     public function delete(User $user, Event $event): bool
     {
-        return $user->church_id === $event->church_id && $user->canDelete('events');
+        if ($user->church_id !== $event->church_id) {
+            return false;
+        }
+
+        if ($user->canDelete('events')) {
+            return true;
+        }
+
+        // Event creator can delete their own event
+        if ($event->created_by && $event->created_by === $user->id) {
+            return true;
+        }
+
+        // Ministry leader can delete events in their ministry
+        if ($user->person && $event->ministry && $event->ministry->leader_id === $user->person->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

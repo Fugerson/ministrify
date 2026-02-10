@@ -1337,6 +1337,9 @@
                                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                             </svg>
                         </button>
+                        <a href="{{ route('my-schedule') }}" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl" title="Мій розклад">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </a>
                         <a href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center">
                             <x-user-avatar size="md" />
                         </a>
@@ -1435,7 +1438,7 @@
         </nav>
 
         <!-- FAB (Quick Actions) -->
-        @if(auth()->user()->canCreate('people') || auth()->user()->canCreate('events') || auth()->user()->canCreate('groups') || auth()->user()->canCreate('finances'))
+        @if(auth()->user()->canCreate('people') || auth()->user()->can('create', \App\Models\Event::class) || auth()->user()->canCreate('groups') || auth()->user()->canCreate('finances'))
         <div id="fab-button" class="fixed right-4 bottom-20 lg:bottom-6 z-50" x-data="{ open: false }">
             <div x-show="open" x-cloak
                  x-transition:enter="transition ease-out duration-200"
@@ -1451,12 +1454,12 @@
                     <span class="text-gray-700 dark:text-gray-200">Нова людина</span>
                 </a>
                 @endif
-                @if(auth()->user()->canCreate('events'))
+                @can('create', \App\Models\Event::class)
                 <a href="{{ route('events.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова подія</span>
                 </a>
-                @endif
+                @endcan
                 @if(auth()->user()->canCreate('groups'))
                 <a href="{{ route('groups.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>

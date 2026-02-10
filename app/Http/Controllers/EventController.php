@@ -26,7 +26,7 @@ class EventController extends Controller
         $church = $this->getCurrentChurch();
 
         $query = Event::where('church_id', $church->id)
-            ->with(['ministry', 'responsibilities.person']);
+            ->with(['ministry.positions', 'responsibilities.person', 'assignments']);
 
         if ($ministryId = $request->get('ministry')) {
             $query->where('ministry_id', $ministryId);
@@ -182,11 +182,12 @@ class EventController extends Controller
         $googleSettings = auth()->user()->settings['google_calendar'] ?? null;
         $isGoogleConnected = !empty($googleSettings['access_token']);
         $googleCalendarId = $googleSettings['calendar_id'] ?? 'primary';
+        $lastSyncedAt = $googleSettings['last_synced_at'] ?? null;
 
         return view('schedule.calendar', compact(
             'events', 'year', 'month', 'startDate', 'endDate',
             'ministries', 'view', 'currentWeek', 'church', 'meetings', 'upcomingNextMonth', 'nextMonth', 'nextYear',
-            'isGoogleConnected', 'googleCalendarId'
+            'isGoogleConnected', 'googleCalendarId', 'lastSyncedAt'
         ));
     }
 
@@ -204,7 +205,8 @@ class EventController extends Controller
 
         $query = Ministry::where('church_id', $church->id);
 
-        if ($user->isLeader() && $user->person) {
+        // Non-admins without global edit permission see only their own ministries
+        if (!$user->canEdit('events') && $user->person) {
             $query->where('leader_id', $user->person->id);
         }
 
@@ -268,6 +270,7 @@ class EventController extends Controller
         }
 
         $validated['church_id'] = $church->id;
+        $validated['created_by'] = auth()->id();
 
         // Set Google Calendar ID if provided
         $googleCalendarId = $request->input('google_calendar_id');
@@ -345,15 +348,22 @@ class EventController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        // Get ministries for inline editing
-        $ministries = Ministry::where('church_id', $church->id)->get();
+        // Get ministries for inline editing (same filter as create)
+        $ministryQuery = Ministry::where('church_id', $church->id);
+        $user = auth()->user();
+        if (!$user->canEdit('events') && $user->person) {
+            $ministryQuery->where('leader_id', $user->person->id);
+        }
+        $ministries = $ministryQuery->get();
 
         // Get songs for autocomplete in service plan
         $songsForAutocomplete = \App\Models\Song::where('church_id', $church->id)
             ->orderBy('title')
             ->get(['id', 'title', 'artist', 'key']);
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete'));
+        $canEdit = auth()->user()->can('update', $event);
+
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit'));
     }
 
     public function edit(Event $event)
@@ -362,7 +372,13 @@ class EventController extends Controller
         $this->authorize('update', $event);
 
         $church = $this->getCurrentChurch();
-        $ministries = Ministry::where('church_id', $church->id)->get();
+        $user = auth()->user();
+
+        $ministryQuery = Ministry::where('church_id', $church->id);
+        if (!$user->canEdit('events') && $user->person) {
+            $ministryQuery->where('leader_id', $user->person->id);
+        }
+        $ministries = $ministryQuery->get();
 
         return view('schedule.edit', compact('event', 'ministries'));
     }
@@ -577,11 +593,17 @@ class EventController extends Controller
 
         $responsibilities = $user->person->responsibilities()
             ->with(['event.ministry'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()))
+            ->whereHas('event', fn($q) => $q->where('date', '>=', now()->startOfDay()))
             ->get()
             ->sortBy(fn($r) => $r->event->date);
 
-        return view('schedule.my-schedule', compact('responsibilities'));
+        $assignments = $user->person->assignments()
+            ->with(['event.ministry', 'position'])
+            ->whereHas('event', fn($q) => $q->where('date', '>=', now()->startOfDay()))
+            ->get()
+            ->sortBy(fn($a) => $a->event->date);
+
+        return view('schedule.my-schedule', compact('responsibilities', 'assignments'));
     }
 
     private function generateRecurringEvents(

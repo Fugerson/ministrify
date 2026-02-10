@@ -807,6 +807,9 @@
 
         <div class="p-6">
             @if($isGoogleConnected)
+                @php
+                    $lastSyncedAt = $googleCalendarSettings['last_synced_at'] ?? null;
+                @endphp
                 <!-- Connected State -->
                 <div class="space-y-5">
                     <!-- Connection info -->
@@ -824,17 +827,23 @@
                     </div>
 
                     <!-- Auto-sync info -->
-                    <div class="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/50">
-                        <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <div class="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800/50">
+                        <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <div class="text-sm text-blue-700 dark:text-blue-300">
-                            <p><strong>Автосинхронізація:</strong> коли ви створюєте, редагуєте або видаляєте подію в Ministrify — вона автоматично оновлюється в обраному нижче календарі Google.</p>
-                            <p class="mt-1">Кнопки нижче — для масового імпорту подій з Google або повної синхронізації в обидва боки.</p>
+                        <div class="text-sm text-green-700 dark:text-green-300">
+                            <p><strong>Автоматична синхронізація</strong> кожні 15 хвилин.</p>
+                            <p class="mt-1 text-green-600 dark:text-green-400">
+                                @if($lastSyncedAt)
+                                    Остання синхронізація: {{ \Carbon\Carbon::parse($lastSyncedAt)->diffForHumans() }}
+                                @else
+                                    Ще не синхронізовано
+                                @endif
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Settings: Calendar & Ministry (BEFORE actions) -->
+                    <!-- Settings: Calendar & Ministry -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Календар Google</label>
@@ -859,42 +868,19 @@
                         </div>
                     </div>
 
-                    <!-- Sync Actions -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <button @click="previewImport()"
-                                :disabled="loading"
-                                class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 text-gray-900 dark:text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                            <svg x-show="!loading" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                            </svg>
-                            <svg x-show="loading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                            </svg>
-                            Google → Ministrify
-                        </button>
-                        <button @click="fullSync()"
-                                :disabled="loading"
-                                class="flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors">
-                            <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                            </svg>
-                            <svg x-show="loading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                            </svg>
-                            Google ↔ Ministrify
-                        </button>
-                    </div>
-
-                    <!-- Delete all events -->
-                    <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <button @click="if(confirm('Ви впевнені, що хочете видалити ВСІ події? Цю дію неможливо скасувати!') && prompt('Введіть ВИДАЛИТИ для підтвердження') === 'ВИДАЛИТИ') deleteEvents('all')"
-                                :disabled="loading"
-                                class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors disabled:opacity-50">
-                            Очистити всі події
-                        </button>
-                    </div>
+                    <!-- Sync Now Button -->
+                    <button @click="fullSync()"
+                            :disabled="loading"
+                            class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors">
+                        <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <svg x-show="loading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span x-text="loading ? 'Синхронізація...' : 'Синхронізувати зараз'"></span>
+                    </button>
 
                     <!-- Status Message -->
                     <div x-show="message" x-transition
@@ -913,7 +899,7 @@
                     </div>
                     <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">Підключіть Google Calendar</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-sm mx-auto">
-                        Події будуть автоматично синхронізуватися між Ministrify та вашим Google Calendar
+                        Події будуть автоматично синхронізуватися між Ministrify та вашим Google Calendar кожні 15 хвилин
                     </p>
                     <a href="{{ route('settings.google-calendar.redirect') }}"
                        class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 dark:bg-gray-700 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-medium rounded-xl transition-colors shadow-sm">
@@ -928,150 +914,6 @@
                 </div>
             @endif
         </div>
-
-        <!-- Conflict Resolution Modal -->
-        <div x-show="showConflictModal" x-cloak
-             class="fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
-            <div class="flex items-center justify-center min-h-screen p-4">
-                <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showConflictModal = false"></div>
-                <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Перегляд імпорту</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть як обробити конфлікти</p>
-                        </div>
-                        <button @click="showConflictModal = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="p-6 overflow-y-auto max-h-[60vh] space-y-6">
-                        <!-- Summary -->
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
-                                <p class="text-2xl font-bold text-green-600 dark:text-green-400" x-text="preview.counts?.new || 0"></p>
-                                <p class="text-sm text-green-700 dark:text-green-300">Нових</p>
-                            </div>
-                            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
-                                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" x-text="preview.counts?.updates || 0"></p>
-                                <p class="text-sm text-blue-700 dark:text-blue-300">Оновлень</p>
-                            </div>
-                            <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-center">
-                                <p class="text-2xl font-bold text-amber-600 dark:text-amber-400" x-text="preview.counts?.conflicts || 0"></p>
-                                <p class="text-sm text-amber-700 dark:text-amber-300">Конфліктів</p>
-                            </div>
-                        </div>
-
-                        <!-- Conflicts Section -->
-                        <template x-if="preview.preview?.conflicts?.length > 0">
-                            <div>
-                                <h4 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                    </svg>
-                                    Конфлікти (перекриття часу)
-                                </h4>
-                                <div class="space-y-3">
-                                    <template x-for="(conflict, idx) in preview.preview.conflicts" :key="idx">
-                                        <div class="p-4 border border-amber-200 dark:border-amber-800 rounded-xl bg-amber-50/50 dark:bg-amber-900/10">
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <!-- Google Event -->
-                                                <div class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Google Calendar</p>
-                                                    <p class="font-medium text-gray-900 dark:text-white" x-text="conflict.google_event.title"></p>
-                                                    <p class="text-sm text-gray-600 dark:text-gray-400" x-text="formatDate(conflict.google_event.date, conflict.google_event.end_date, conflict.google_event.time)"></p>
-                                                </div>
-                                                <!-- Local Events -->
-                                                <div class="space-y-2">
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Існуючі події:</p>
-                                                    <template x-for="local in conflict.conflicting_events" :key="local.id">
-                                                        <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm">
-                                                            <p class="font-medium text-gray-900 dark:text-white" x-text="local.title"></p>
-                                                            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDate(local.date, local.end_date, local.time)"></p>
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </div>
-                                            <!-- Action -->
-                                            <div class="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800">
-                                                <div class="flex flex-wrap gap-2">
-                                                    <label class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border cursor-pointer hover:border-primary-500"
-                                                           :class="resolutions[conflict.google_event.id]?.action === 'skip' ? 'border-primary-500 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600'">
-                                                        <input type="radio" :name="'conflict_' + idx" value="skip"
-                                                               @change="setResolution(conflict.google_event.id, 'skip')"
-                                                               :checked="resolutions[conflict.google_event.id]?.action === 'skip'"
-                                                               class="text-primary-600">
-                                                        <span class="text-sm text-gray-700 dark:text-gray-300">Пропустити</span>
-                                                    </label>
-                                                    <label class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border cursor-pointer hover:border-primary-500"
-                                                           :class="resolutions[conflict.google_event.id]?.action === 'import' ? 'border-primary-500 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600'">
-                                                        <input type="radio" :name="'conflict_' + idx" value="import"
-                                                               @change="setResolution(conflict.google_event.id, 'import')"
-                                                               :checked="resolutions[conflict.google_event.id]?.action === 'import'"
-                                                               class="text-primary-600">
-                                                        <span class="text-sm text-gray-700 dark:text-gray-300">Імпортувати як нову</span>
-                                                    </label>
-                                                    <template x-for="local in conflict.conflicting_events" :key="'replace_' + local.id">
-                                                        <label class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border cursor-pointer hover:border-primary-500"
-                                                               :class="resolutions[conflict.google_event.id]?.action === 'replace' && resolutions[conflict.google_event.id]?.local_event_id === local.id ? 'border-primary-500 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600'">
-                                                            <input type="radio" :name="'conflict_' + idx" value="replace"
-                                                                   @change="setResolution(conflict.google_event.id, 'replace', local.id)"
-                                                                   :checked="resolutions[conflict.google_event.id]?.action === 'replace' && resolutions[conflict.google_event.id]?.local_event_id === local.id"
-                                                                   class="text-primary-600">
-                                                            <span class="text-sm text-gray-700 dark:text-gray-300">Замінити "<span x-text="local.title"></span>"</span>
-                                                        </label>
-                                                    </template>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- New Events Section -->
-                        <template x-if="preview.preview?.new?.length > 0">
-                            <div>
-                                <h4 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    Нові події (<span x-text="preview.preview.new.length"></span>)
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <template x-for="event in preview.preview.new.slice(0, 6)" :key="event.google_event.id">
-                                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                                            <p class="font-medium text-gray-900 dark:text-white" x-text="event.google_event.title"></p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400" x-text="formatDate(event.google_event.date, event.google_event.end_date, event.google_event.time)"></p>
-                                        </div>
-                                    </template>
-                                </div>
-                                <p x-show="preview.preview.new.length > 6" class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                    + ще <span x-text="preview.preview.new.length - 6"></span> подій
-                                </p>
-                            </div>
-                        </template>
-                    </div>
-
-                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-700/50">
-                        <button @click="showConflictModal = false"
-                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl transition-colors">
-                            Скасувати
-                        </button>
-                        <button @click="applyImport()"
-                                :disabled="loading"
-                                class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors inline-flex items-center gap-2">
-                            <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                            </svg>
-                            <span x-text="loading ? 'Імпорт...' : 'Імпортувати'"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -1084,9 +926,6 @@
             calendarId: 'primary',
             ministryId: '',
             calendars: [],
-            showConflictModal: false,
-            preview: {},
-            resolutions: {},
 
             async init() {
                 if (this.isConnected) {
@@ -1104,89 +943,6 @@
                 } catch (e) {
                     console.error('Failed to load calendars', e);
                 }
-            },
-
-            async previewImport() {
-                this.loading = true;
-                this.message = '';
-                try {
-                    const res = await fetch('{{ route("settings.google-calendar.preview-import") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            calendar_id: this.calendarId,
-                            ministry_id: this.ministryId || null
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        const total = (data.counts?.new || 0) + (data.counts?.updates || 0) + (data.counts?.conflicts || 0);
-                        if (total === 0) {
-                            this.message = 'Немає нових подій для імпорту';
-                            this.success = true;
-                        } else {
-                            this.preview = data;
-                            this.resolutions = {};
-                            (data.preview?.conflicts || []).forEach(c => {
-                                this.resolutions[c.google_event.id] = { google_event_id: c.google_event.id, action: 'skip' };
-                            });
-                            (data.preview?.new || []).forEach(n => {
-                                this.resolutions[n.google_event.id] = { google_event_id: n.google_event.id, action: 'import' };
-                            });
-                            (data.preview?.updates || []).forEach(u => {
-                                this.resolutions[u.google_event.id] = { google_event_id: u.google_event.id, action: 'import', local_event_id: u.local_event.id };
-                            });
-                            this.showConflictModal = true;
-                        }
-                    } else {
-                        this.message = data.error || 'Помилка завантаження';
-                        this.success = false;
-                    }
-                } catch (e) {
-                    this.message = 'Помилка з\'єднання';
-                    this.success = false;
-                }
-                this.loading = false;
-            },
-
-            setResolution(googleEventId, action, localEventId = null) {
-                this.resolutions[googleEventId] = {
-                    google_event_id: googleEventId,
-                    action: action,
-                    local_event_id: localEventId
-                };
-            },
-
-            async applyImport() {
-                this.loading = true;
-                try {
-                    const resolutionsArray = Object.values(this.resolutions);
-                    const res = await fetch('{{ route("settings.google-calendar.import-with-resolution") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            calendar_id: this.calendarId,
-                            ministry_id: this.ministryId || null,
-                            resolutions: resolutionsArray
-                        })
-                    });
-                    const data = await res.json();
-                    this.showConflictModal = false;
-                    this.message = data.message || (data.success ? 'Імпорт завершено' : 'Помилка імпорту');
-                    this.success = data.success;
-                } catch (e) {
-                    this.message = 'Помилка з\'єднання';
-                    this.success = false;
-                }
-                this.loading = false;
             },
 
             async fullSync() {
@@ -1213,42 +969,6 @@
                     this.success = false;
                 }
                 this.loading = false;
-            },
-
-            async deleteEvents(scope) {
-                const labels = { synced: 'синхронізовані', imported: 'імпортовані з Google', all: 'ВСІ' };
-                if (!confirm(`Видалити ${labels[scope]} події? Цю дію не можна скасувати.`)) return;
-                this.loading = true;
-                this.message = '';
-                try {
-                    const res = await fetch('{{ route("settings.google-calendar.delete-events") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ scope })
-                    });
-                    const data = await res.json();
-                    this.message = data.message || (data.success ? 'Видалено' : 'Помилка');
-                    this.success = data.success;
-                } catch (e) {
-                    this.message = 'Помилка з\'єднання';
-                    this.success = false;
-                }
-                this.loading = false;
-            },
-
-            formatDate(date, endDate, time) {
-                let str = date;
-                if (endDate && endDate !== date) {
-                    str += ' - ' + endDate;
-                }
-                if (time) {
-                    str += ' о ' + time;
-                }
-                return str;
             }
         }
     }

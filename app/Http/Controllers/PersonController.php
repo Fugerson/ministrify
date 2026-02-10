@@ -521,6 +521,10 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
+        if (!auth()->user()->canDelete('people')) {
+            return redirect()->route('people.index')->with('error', 'У вас немає прав для відновлення записів.');
+        }
+
         $person->restore();
 
         return redirect()->route('people.show', $person)
@@ -529,6 +533,10 @@ class PersonController extends Controller
 
     public function export(Request $request)
     {
+        if (!auth()->user()->canView('people')) {
+            abort(403, 'Недостатньо прав для експорту.');
+        }
+
         $church = $this->getCurrentChurch();
         $ids = $request->has('ids') ? explode(',', $request->get('ids')) : null;
         $filename = 'people_' . now()->format('Y-m-d') . '.xlsx';
@@ -544,6 +552,10 @@ class PersonController extends Controller
 
     public function import(Request $request)
     {
+        if (!auth()->user()->canCreate('people')) {
+            abort(403, 'Недостатньо прав для імпорту.');
+        }
+
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:10240',
         ]);
@@ -996,7 +1008,13 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        if (!auth()->user()->isAdmin() && !auth()->user()->canEdit('people')) {
+        $currentUser = auth()->user();
+
+        // Allow: admins, users with edit permission, or shepherds assigning to themselves
+        $isShepherdSelfAssign = $currentUser->person?->is_shepherd
+            && $request->input('shepherd_id') == $currentUser->person->id;
+
+        if (!$currentUser->isAdmin() && !$currentUser->canEdit('people') && !$isShepherdSelfAssign) {
             return response()->json(['message' => 'Недостатньо прав'], 403);
         }
 

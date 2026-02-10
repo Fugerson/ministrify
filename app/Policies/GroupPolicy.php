@@ -43,6 +43,19 @@ class GroupPolicy
 
     public function delete(User $user, Group $group): bool
     {
-        return $user->church_id === $group->church_id && $user->canDelete('groups');
+        if ($user->church_id !== $group->church_id) {
+            return false;
+        }
+
+        if ($user->canDelete('groups')) {
+            return true;
+        }
+
+        // Group leader can delete their own group
+        if ($user->person && $group->leader_id === $user->person->id) {
+            return true;
+        }
+
+        return false;
     }
 }

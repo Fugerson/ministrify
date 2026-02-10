@@ -88,6 +88,7 @@ class AnnouncementController extends Controller
     public function edit(Announcement $announcement)
     {
         $this->authorizeChurch($announcement);
+        $this->authorizeAuthorOrPermission($announcement, 'edit');
 
         return view('announcements.edit', compact('announcement'));
     }
@@ -98,6 +99,7 @@ class AnnouncementController extends Controller
     public function update(Request $request, Announcement $announcement)
     {
         $this->authorizeChurch($announcement);
+        $this->authorizeAuthorOrPermission($announcement, 'edit');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -123,6 +125,7 @@ class AnnouncementController extends Controller
     public function destroy(Announcement $announcement)
     {
         $this->authorizeChurch($announcement);
+        $this->authorizeAuthorOrPermission($announcement, 'delete');
 
         $announcement->delete();
 
@@ -133,9 +136,34 @@ class AnnouncementController extends Controller
     /**
      * Toggle pin status
      */
+    /**
+     * Author can edit/delete own announcements, otherwise require permission
+     */
+    protected function authorizeAuthorOrPermission(Announcement $announcement, string $action): void
+    {
+        $user = auth()->user();
+
+        // Author can always manage their own
+        if ($announcement->author_id === $user->id) {
+            return;
+        }
+
+        // Otherwise require the specific permission
+        $hasPermission = match ($action) {
+            'edit' => $user->canEdit('announcements'),
+            'delete' => $user->canDelete('announcements'),
+            default => false,
+        };
+
+        if (!$hasPermission) {
+            abort(403, 'Тільки автор або користувач з відповідними правами може керувати цим оголошенням.');
+        }
+    }
+
     public function togglePin(Announcement $announcement)
     {
         $this->authorizeChurch($announcement);
+        $this->authorizeAuthorOrPermission($announcement, 'edit');
 
         $announcement->update(['is_pinned' => !$announcement->is_pinned]);
 

@@ -398,6 +398,12 @@ class ResourceController extends Controller
             abort(404);
         }
 
+        // Ministry documents require ministry management permission
+        if ($resource->ministry_id) {
+            $ministry = Ministry::findOrFail($resource->ministry_id);
+            Gate::authorize('manage-ministry', $ministry);
+        }
+
         if (!$resource->isDocument()) {
             abort(422, 'Це не документ');
         }

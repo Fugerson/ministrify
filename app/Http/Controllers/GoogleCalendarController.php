@@ -187,6 +187,11 @@ class GoogleCalendarController extends Controller
         }
 
         if ($result['success']) {
+            // Save last_synced_at
+            $settings = $user->settings ?? [];
+            $settings['google_calendar']['last_synced_at'] = now()->toISOString();
+            $user->update(['settings' => $settings]);
+
             $toGoogle = $result['to_google'];
             $fromGoogle = $result['from_google'];
 
