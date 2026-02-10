@@ -199,7 +199,7 @@ services:
     container_name: ministrify_phpmyadmin
     restart: always
     ports:
-      - "127.0.0.1:8888:80"  # Only accessible via SSH tunnel
+      - "8888:80"
     environment:
       PMA_HOST: mysql
       PMA_USER: ${DB_USERNAME}
