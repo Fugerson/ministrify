@@ -447,7 +447,7 @@
                                 'title' => $e->title,
                                 'date' => $e->date->format('Y-m-d'),
                                 'day' => $e->date->format('d'),
-                                'time' => $e->time->format('H:i'),
+                                'time' => $e->time?->format('H:i') ?? '',
                                 'fullDate' => $e->date->translatedFormat('l, j M'),
                                 'dataUrl' => route('ministries.worship-events.data', [$ministry, $e]),
                                 'songsCount' => $e->songs_count ?? 0,

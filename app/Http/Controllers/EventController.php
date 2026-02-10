@@ -406,7 +406,34 @@ class EventController extends Controller
         // Handle Google Calendar binding
         if ($request->has('google_calendar_id')) {
             $googleCalendarId = $request->input('google_calendar_id');
-            $validated['google_calendar_id'] = $googleCalendarId ?: null;
+            if ($googleCalendarId) {
+                $validated['google_calendar_id'] = $googleCalendarId;
+            } else {
+                // User chose "don't sync" — if event was synced, delete from Google first
+                if ($event->google_event_id && $event->google_calendar_id) {
+                    try {
+                        $gcService = app(\App\Services\GoogleCalendarService::class);
+                        $user = \App\Models\User::where('church_id', $event->church_id)
+                            ->whereNotNull('settings->google_calendar->access_token')
+                            ->first();
+                        if ($user) {
+                            $accessToken = $gcService->getValidToken($user);
+                            if ($accessToken) {
+                                $gcService->deleteEvent($accessToken, $event->google_calendar_id, $event->google_event_id);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to delete event from Google Calendar on unsync', [
+                            'event_id' => $event->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+                $validated['google_calendar_id'] = null;
+                $validated['google_event_id'] = null;
+                $validated['google_synced_at'] = null;
+                $validated['google_sync_status'] = null;
+            }
         }
 
         // Process reminder settings

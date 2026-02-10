@@ -221,7 +221,7 @@
                                 @if($item->type === 'meeting')
                                     <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
                                        class="block p-2 rounded-lg text-xs transition-all hover:shadow-md"
-                                       style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}30; border-left: 3px solid {{ $item->ministry->color ?? '#8b5cf6' }};">
+                                       style="background-color: {{ $item->ministry?->color ?? '#8b5cf6' }}30; border-left: 3px solid {{ $item->ministry?->color ?? '#8b5cf6' }};">
                                         <p class="font-medium text-gray-900 dark:text-white truncate">
                                             {{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '--:--' }}
                                         </p>
@@ -289,14 +289,14 @@
                                     <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
                                        class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}30;">
-                                                <svg class="w-5 h-5" style="color: {{ $item->ministry->color ?? '#8b5cf6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry?->color ?? '#8b5cf6' }}30;">
+                                                <svg class="w-5 h-5" style="color: {{ $item->ministry?->color ?? '#8b5cf6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                 </svg>
                                             </div>
                                             <div>
                                                 <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry->name ?? '' }} &bull; {{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '-' }}</p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry?->name ?? '' }} &bull; {{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '-' }}</p>
                                             </div>
                                         </div>
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -374,7 +374,7 @@
                                     @if($item->type === 'meeting')
                                         <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
                                            class="block px-1.5 py-0.5 rounded text-xs truncate transition-colors hover:opacity-80 {{ $isPast && !$isToday ? 'opacity-60' : '' }}"
-                                           style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}30; color: {{ $item->ministry->color ?? '#8b5cf6' }};">
+                                           style="background-color: {{ $item->ministry?->color ?? '#8b5cf6' }}30; color: {{ $item->ministry?->color ?? '#8b5cf6' }};">
                                             <span class="hidden lg:inline">{{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '' }}</span>
                                             📋 {{ Str::limit($item->title, 12) }}
                                         </a>
@@ -438,14 +438,14 @@
                                         <a href="{{ route('meetings.show', [$item->ministry_id, $item->id]) }}"
                                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry->color ?? '#8b5cf6' }}30;">
-                                                    <svg class="w-5 h-5" style="color: {{ $item->ministry->color ?? '#8b5cf6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry?->color ?? '#8b5cf6' }}30;">
+                                                    <svg class="w-5 h-5" style="color: {{ $item->ministry?->color ?? '#8b5cf6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                     </svg>
                                                 </div>
                                                 <div>
                                                     <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry->name ?? '' }} &bull; {{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '-' }}</p>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry?->name ?? '' }} &bull; {{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-2">

@@ -856,15 +856,15 @@
             @foreach($person->assignments->take(10) as $assignment)
                 <a href="{{ route('events.show', $assignment->event) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $assignment->event->ministry->color ?? '#3b82f6' }}30;">
-                            <svg class="w-5 h-5" style="color: {{ $assignment->event->ministry->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $assignment->event->ministry?->color ?? '#3b82f6' }}30;">
+                            <svg class="w-5 h-5" style="color: {{ $assignment->event->ministry?->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                         </div>
                         <div>
                             <p class="font-medium text-gray-900 dark:text-white">{{ $assignment->event->title }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ $assignment->event->date->format('d.m.Y') }} &bull; {{ $assignment->position->name }}
+                                {{ $assignment->event->date->format('d.m.Y') }} &bull; {{ $assignment->position?->name }}
                             </p>
                         </div>
                     </div>

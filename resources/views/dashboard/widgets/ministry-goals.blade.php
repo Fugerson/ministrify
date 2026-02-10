@@ -52,7 +52,7 @@
                 <div class="mb-2">
                     <div class="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                         <div class="h-full rounded-full transition-all duration-500"
-                             style="width: {{ min(100, $goal->progress) }}%; background-color: {{ $goal->ministry->color ?? '#6366f1' }};"></div>
+                             style="width: {{ min(100, $goal->progress) }}%; background-color: {{ $goal->ministry?->color ?? '#6366f1' }};"></div>
                     </div>
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">

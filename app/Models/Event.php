@@ -268,8 +268,16 @@ class Event extends Model
         return $this->unfilled_positions->isEmpty();
     }
 
-    public function getDateTimeAttribute(): \DateTime
+    public function getDateTimeAttribute(): ?\DateTime
     {
+        if (!$this->date) {
+            return null;
+        }
+
+        if (!$this->time) {
+            return \DateTime::createFromFormat('Y-m-d', $this->date->format('Y-m-d'));
+        }
+
         return \DateTime::createFromFormat(
             'Y-m-d H:i',
             $this->date->format('Y-m-d') . ' ' . $this->time->format('H:i')

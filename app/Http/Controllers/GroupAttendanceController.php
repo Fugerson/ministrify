@@ -89,7 +89,7 @@ class GroupAttendanceController extends Controller
             $attendance = $group->createAttendance([
                 'date' => $validated['date'],
                 'time' => $validated['time'] ?? null,
-                'location' => $validated['location'] ?? $group->meeting_location,
+                'location' => $validated['location'] ?? $group->location,
                 'notes' => $validated['notes'] ?? null,
                 'guests_count' => $validated['guests_count'] ?? 0,
                 'members_present' => count($presentIds),
@@ -212,7 +212,7 @@ class GroupAttendanceController extends Controller
             $attendance = $group->createAttendance([
                 'date' => today(),
                 'time' => now()->format('H:i'),
-                'location' => $group->meeting_location,
+                'location' => $group->location,
                 'recorded_by' => auth()->id(),
             ]);
 

@@ -41,7 +41,7 @@
 
             <div>
                 <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Місце</label>
-                <input type="text" name="location" id="location" value="{{ old('location', $group->meeting_location) }}"
+                <input type="text" name="location" id="location" value="{{ old('location', $group->location) }}"
                        placeholder="Адреса або назва місця"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
             </div>

@@ -291,7 +291,14 @@ class GoogleCalendarService
                 // Create new event
                 $result = $this->createEvent($accessToken, $calendarId, $event);
                 if ($result && isset($result['id'])) {
-                    $event->update(['google_event_id' => $result['id']]);
+                    Event::withoutEvents(function () use ($event, $result, $calendarId) {
+                        $event->update([
+                            'google_event_id' => $result['id'],
+                            'google_calendar_id' => $calendarId,
+                            'google_synced_at' => now(),
+                            'google_sync_status' => 'synced',
+                        ]);
+                    });
                     $results['created']++;
                 } else {
                     $results['failed']++;
@@ -322,14 +329,14 @@ class GoogleCalendarService
             // All-day event - use date format
             $googleEvent['start'] = [
                 'date' => $event->date->format('Y-m-d'),
-                'timeZone' => 'Europe/Kiev',
+                'timeZone' => 'Europe/Kyiv',
             ];
 
             // For all-day events, Google expects end date to be the day AFTER the last day
             $endDate = $event->end_date ?? $event->date;
             $googleEvent['end'] = [
                 'date' => Carbon::parse($endDate)->addDay()->format('Y-m-d'),
-                'timeZone' => 'Europe/Kiev',
+                'timeZone' => 'Europe/Kyiv',
             ];
         } else {
             // Timed event - use dateTime format
@@ -338,7 +345,7 @@ class GoogleCalendarService
 
             $googleEvent['start'] = [
                 'dateTime' => $startDateTime->toRfc3339String(),
-                'timeZone' => 'Europe/Kiev',
+                'timeZone' => 'Europe/Kyiv',
             ];
 
             // Calculate end time
@@ -359,7 +366,7 @@ class GoogleCalendarService
 
             $googleEvent['end'] = [
                 'dateTime' => $endDateTime->toRfc3339String(),
-                'timeZone' => 'Europe/Kiev',
+                'timeZone' => 'Europe/Kyiv',
             ];
         }
 
@@ -386,9 +393,9 @@ class GoogleCalendarService
             $lines[] = "Служіння: {$event->ministry->name}";
         }
 
-        if ($event->description) {
+        if ($event->notes) {
             $lines[] = "";
-            $lines[] = $event->description;
+            $lines[] = $event->notes;
         }
 
         $lines[] = "";

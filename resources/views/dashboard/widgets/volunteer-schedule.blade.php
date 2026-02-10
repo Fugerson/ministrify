@@ -37,9 +37,9 @@
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $assignment->event->title }}</p>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event->time->format('H:i') }}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event->time?->format('H:i') ?? 'Весь день' }}</span>
                             <span class="text-xs text-gray-300 dark:text-gray-600">&bull;</span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->position->name }}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->position?->name }}</span>
                         </div>
                     </div>
 

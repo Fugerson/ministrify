@@ -282,6 +282,13 @@ function googleCalendarPicker() {
                 if (res.ok) {
                     const data = await res.json();
                     this.calendars = data.calendars || [];
+                    // If current calendar ID is not in the list and not "primary", reset to default
+                    if (this.calendarId && this.calendarId !== 'primary') {
+                        const found = this.calendars.some(c => c.id === this.calendarId);
+                        if (!found) {
+                            this.calendarId = '{{ $gcCalendarId ?? "primary" }}';
+                        }
+                    }
                 }
             } catch (e) {}
         }

@@ -15,7 +15,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-3 flex items-center justify-between gap-3">
                     <div class="min-w-0">
                         <p class="font-medium text-gray-900 dark:text-white text-sm truncate">{{ $assignment->event->title }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event->date->format('d.m') }} &bull; {{ $assignment->position->name }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event->date->format('d.m') }} &bull; {{ $assignment->position?->name }}</p>
                     </div>
                     <div class="flex gap-2 flex-shrink-0">
                         <form method="POST" action="{{ route('assignments.confirm', $assignment) }}">

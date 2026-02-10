@@ -574,7 +574,7 @@
                     <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
                         <div>
                             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignment->event->date->format('d.m') }} - {{ $assignment->event->ministry?->name ?? $assignment->event->title }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->position->name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->position?->name }}</p>
                         </div>
                         <span class="text-lg">
                             @if($assignment->status === 'confirmed') ✅
