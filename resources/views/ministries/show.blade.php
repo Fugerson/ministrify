@@ -805,41 +805,179 @@
                         }
                     </script>
                 @else
-                    {{-- Regular ministry: show ministry events --}}
-                    @if($ministry->events->count() > 0)
-                        <div class="space-y-2">
-                            @foreach($ministry->events as $event)
-                                <a href="{{ route('events.show', $event) }}"
-                                   class="block p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
-                                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $event->title }}</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->date->format('d.m.Y') }} о {{ $event->time?->format('H:i') }}</p>
-                                        </div>
+                    {{-- Regular ministry: calendar view --}}
+                    @php
+                        $ministryEventsData = $ministry->events->map(function($e) {
+                            return [
+                                'id' => $e->id,
+                                'title' => $e->title,
+                                'date' => $e->date->format('Y-m-d'),
+                                'time' => $e->time?->format('H:i') ?? '',
+                                'url' => route('events.show', $e),
+                                'isPast' => $e->date->isPast(),
+                            ];
+                        })->values();
+                    @endphp
+                    <div x-data="ministryCalendar()">
+                        {{-- Header --}}
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <button @click="prevMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white min-w-[160px] text-center" x-text="monthYearLabel"></h3>
+                                <button @click="nextMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                                <button @click="goToToday()" class="ml-2 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Сьогодні</button>
+                            </div>
+                            @can('manage-ministry', $ministry)
+                            <a href="{{ route('events.create', ['ministry' => $ministry->id]) }}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Створити
+                            </a>
+                            @endcan
+                        </div>
+
+                        {{-- Day names --}}
+                        <div class="grid grid-cols-7 mb-1">
+                            <template x-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']" :key="day">
+                                <div class="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2" x-text="day"></div>
+                            </template>
+                        </div>
+
+                        {{-- Calendar grid --}}
+                        <div class="grid grid-cols-7 border-t border-l border-gray-200 dark:border-gray-700">
+                            <template x-for="(day, index) in calendarDays" :key="index">
+                                <div class="border-r border-b border-gray-200 dark:border-gray-700 min-h-[80px] sm:min-h-[100px] p-1"
+                                     :class="{ 'bg-gray-50 dark:bg-gray-800/50': !day.isCurrentMonth, 'bg-white dark:bg-gray-800': day.isCurrentMonth }">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-medium"
+                                              :class="{
+                                                  'text-gray-400 dark:text-gray-600': !day.isCurrentMonth,
+                                                  'text-gray-700 dark:text-gray-300': day.isCurrentMonth && !day.isToday,
+                                                  'bg-primary-600 text-white rounded-full w-6 h-6 flex items-center justify-center': day.isToday
+                                              }"
+                                              x-text="day.date"></span>
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <template x-for="event in day.events.slice(0, 2)" :key="event.id">
+                                            <a :href="event.url"
+                                               class="block w-full text-left px-1 py-0.5 text-xs rounded truncate transition-colors"
+                                               :class="event.isPast ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/60'">
+                                                <span x-text="event.time" class="font-medium"></span>
+                                                <span x-text="event.title" class="hidden sm:inline"></span>
+                                            </a>
+                                        </template>
+                                        <template x-if="day.events.length > 2">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 px-1" x-text="'+' + (day.events.length - 2) + ' ще'"></div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        {{-- Events list for current month --}}
+                        <div class="mt-4 space-y-1.5" x-show="currentMonthEvents.length > 0">
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" x-text="monthYearLabel + ' — події'"></h4>
+                            <template x-for="event in currentMonthEvents" :key="event.id">
+                                <a :href="event.url"
+                                   class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                         :class="event.isPast ? 'bg-gray-100 dark:bg-gray-700' : 'bg-blue-100 dark:bg-blue-900/30'">
+                                        <span class="text-xs font-bold"
+                                              :class="event.isPast ? 'text-gray-500 dark:text-gray-400' : 'text-blue-600 dark:text-blue-400'"
+                                              x-text="event.date.split('-')[2]"></span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="event.title"></p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400" x-text="event.time || 'Весь день'"></p>
                                     </div>
                                 </a>
-                            @endforeach
+                            </template>
                         </div>
-                    @else
-                        <p class="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">Немає запланованих подій</p>
-                    @endif
-
-                    @can('manage-ministry', $ministry)
-                    <div class="mt-4">
-                        <a href="{{ route('events.create', ['ministry' => $ministry->id]) }}"
-                           class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            Створити подію
-                        </a>
                     </div>
-                    @endcan
+
+                    <script>
+                        function ministryCalendar() {
+                            return {
+                                currentYear: new Date().getFullYear(),
+                                currentMonth: new Date().getMonth(),
+                                today: new Date(),
+                                allEvents: @json($ministryEventsData),
+                                monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
+
+                                get monthYearLabel() {
+                                    return this.monthNames[this.currentMonth] + ' ' + this.currentYear;
+                                },
+
+                                get calendarDays() {
+                                    const days = [];
+                                    const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                                    const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+
+                                    let startDay = firstDay.getDay();
+                                    startDay = startDay === 0 ? 6 : startDay - 1;
+
+                                    const prevLastDay = new Date(this.currentYear, this.currentMonth, 0).getDate();
+                                    for (let i = startDay - 1; i >= 0; i--) {
+                                        const d = prevLastDay - i;
+                                        const dateStr = this.formatDate(this.currentYear, this.currentMonth - 1, d);
+                                        days.push({ date: d, isCurrentMonth: false, isToday: false, events: this.getEventsForDate(dateStr) });
+                                    }
+
+                                    for (let d = 1; d <= lastDay.getDate(); d++) {
+                                        const dateStr = this.formatDate(this.currentYear, this.currentMonth, d);
+                                        const isToday = this.today.getFullYear() === this.currentYear && this.today.getMonth() === this.currentMonth && this.today.getDate() === d;
+                                        days.push({ date: d, isCurrentMonth: true, isToday, events: this.getEventsForDate(dateStr) });
+                                    }
+
+                                    const remaining = 42 - days.length;
+                                    for (let d = 1; d <= remaining; d++) {
+                                        const dateStr = this.formatDate(this.currentYear, this.currentMonth + 1, d);
+                                        days.push({ date: d, isCurrentMonth: false, isToday: false, events: this.getEventsForDate(dateStr) });
+                                    }
+
+                                    return days;
+                                },
+
+                                get currentMonthEvents() {
+                                    return this.allEvents.filter(e => {
+                                        const d = new Date(e.date);
+                                        return d.getFullYear() === this.currentYear && d.getMonth() === this.currentMonth;
+                                    }).sort((a, b) => new Date(a.date) - new Date(b.date));
+                                },
+
+                                formatDate(year, month, day) {
+                                    const y = month < 0 ? year - 1 : (month > 11 ? year + 1 : year);
+                                    const m = month < 0 ? 11 : (month > 11 ? 0 : month);
+                                    return `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                },
+
+                                getEventsForDate(dateStr) {
+                                    return this.allEvents.filter(e => e.date === dateStr);
+                                },
+
+                                prevMonth() {
+                                    if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
+                                    else { this.currentMonth--; }
+                                },
+
+                                nextMonth() {
+                                    if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; }
+                                    else { this.currentMonth++; }
+                                },
+
+                                goToToday() {
+                                    this.currentYear = this.today.getFullYear();
+                                    this.currentMonth = this.today.getMonth();
+                                }
+                            };
+                        }
+                    </script>
                 @endif
             </div>
 

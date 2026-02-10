@@ -100,7 +100,7 @@ class MinistryController extends Controller
             'leader',
             'positions',
             'members',
-            'events' => fn($q) => $q->upcoming()->with(['ministry.positions', 'assignments'])->limit(10),
+            'events' => fn($q) => $q->orderBy('date')->orderBy('time')->with(['ministry.positions', 'assignments']),
             'transactions' => fn($q) => $q->where('direction', 'out')->whereMonth('date', now()->month)->whereYear('date', now()->year)->with(['category', 'attachments'])->orderByDesc('date'),
             'goals' => fn($q) => $q->with(['tasks.assignee', 'creator'])->orderByDesc('created_at'),
         ]);
