@@ -16,7 +16,6 @@ class SyncGoogleCalendar extends Command
     public function handle(GoogleCalendarService $googleCalendar): int
     {
         $users = User::whereNotNull('settings->google_calendar->access_token')
-            ->whereNotNull('settings->google_calendar->calendar_id')
             ->get();
 
         if ($users->isEmpty()) {
@@ -31,12 +30,8 @@ class SyncGoogleCalendar extends Command
 
         foreach ($users as $user) {
             $settings = $user->settings['google_calendar'] ?? [];
-            $calendarId = $settings['calendar_id'] ?? null;
+            $calendarId = $settings['calendar_id'] ?? 'primary';
             $ministryId = $settings['ministry_id'] ?? null;
-
-            if (!$calendarId) {
-                continue;
-            }
 
             $church = $user->church;
             if (!$church) {
