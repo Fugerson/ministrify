@@ -163,9 +163,19 @@
 <script>
 function claudeChat() {
     return {
-        messages: [],
+        messages: JSON.parse(localStorage.getItem('claude_messages') || '[]'),
         input: '',
         loading: false,
+
+        init() {
+            this.$watch('messages', (val) => {
+                localStorage.setItem('claude_messages', JSON.stringify(val));
+            });
+            // Scroll to bottom on load if there are messages
+            if (this.messages.length) {
+                this.$nextTick(() => this.scrollToBottom());
+            }
+        },
 
         sendQuick(text) {
             this.input = text;
@@ -300,6 +310,7 @@ function claudeChat() {
                     },
                 });
                 this.messages = [];
+                localStorage.removeItem('claude_messages');
             } catch (error) {
                 // Ignore
             }
