@@ -385,80 +385,7 @@
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
                                     <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top whitespace-nowrap"
-                                        x-data="{
-                                            open: false,
-                                            search: '',
-                                            itemId: {{ $item->id }},
-                                            people: {{ json_encode($existingPeople) }},
-                                            allPeopleList: {{ $allPeopleJson }},
-
-                                            get filteredPeople() {
-                                                if (!this.search) return this.allPeopleList;
-                                                const s = this.search.toLowerCase();
-                                                return this.allPeopleList.filter(p => p.name.toLowerCase().includes(s));
-                                            },
-                                            addPerson(id, name, hasTg) {
-                                                if (this.people.find(p => p.name === name)) return;
-                                                this.people.push({ id, name, hasTelegram: hasTg, status: null });
-                                                this.save();
-                                                this.search = '';
-                                                this.open = false;
-                                            },
-                                            removePerson(index) {
-                                                this.people.splice(index, 1);
-                                                this.save();
-                                            },
-                                            async save() {
-                                                const names = this.people.map(p => p.name).join(', ');
-                                                const primaryId = this.people.length > 0 ? this.people[0].id : null;
-                                                try {
-                                                    const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${this.itemId}`, {
-                                                        method: 'PUT',
-                                                        headers: {
-                                                            'Content-Type': 'application/json',
-                                                            'Accept': 'application/json',
-                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                            'X-Requested-With': 'XMLHttpRequest'
-                                                        },
-                                                        body: JSON.stringify({ responsible_names: names, responsible_id: primaryId })
-                                                    });
-                                                    if (response.ok) {
-                                                        showGlobalToast('Збережено', 'success');
-                                                    } else {
-                                                        showGlobalToast('Помилка збереження', 'error');
-                                                    }
-                                                } catch (err) {
-                                                    console.error('Update error:', err);
-                                                    showGlobalToast('Помилка з\'єднання', 'error');
-                                                }
-                                            },
-                                            async askPerson(person, index) {
-                                                if (!person.id || !person.hasTelegram) return;
-                                                const result = await askInTelegram(this.itemId, person.name, person.id);
-                                                if (result) {
-                                                    this.people[index].status = 'pending';
-                                                }
-                                            },
-                                            async askAll() {
-                                                for (let i = 0; i < this.people.length; i++) {
-                                                    const p = this.people[i];
-                                                    if (p.hasTelegram && (!p.status || p.status === 'declined')) {
-                                                        await this.askPerson(p, i);
-                                                    }
-                                                }
-                                            },
-                                            getStats() {
-                                                const total = this.people.length;
-                                                const confirmed = this.people.filter(p => p.status === 'confirmed').length;
-                                                return { total, confirmed };
-                                            },
-                                            getTagClass(status) {
-                                                if (status === 'confirmed') return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
-                                                if (status === 'declined') return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
-                                                if (status === 'pending') return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
-                                                return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
-                                            }
-                                        }">
+                                        x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})">
                                         <div class="flex flex-col gap-1">
                                             {{-- Selected people as tags --}}
                                             <template x-for="(person, index) in people" :key="index">
@@ -1084,6 +1011,87 @@ document.addEventListener('alpine:init', () => {
 // Songs data for autocomplete
 const SONGS_DATA = @json($songsForAutocomplete ?? []);
 
+// Global data for responsible editor
+const ALL_PEOPLE = @json($allPeople->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'hasTelegram' => (bool)$p->telegram_chat_id])->values());
+const PLAN_URL = '{{ url("events/" . $event->id . "/plan") }}';
+const CSRF_TOKEN = '{{ csrf_token() }}';
+
+// Responsible person editor (shared between server-rendered and dynamic rows)
+function responsibleEditor(itemId, initialPeople) {
+    return {
+        open: false,
+        search: '',
+        itemId: itemId,
+        people: initialPeople || [],
+        allPeopleList: ALL_PEOPLE,
+
+        get filteredPeople() {
+            if (!this.search) return this.allPeopleList;
+            const s = this.search.toLowerCase();
+            return this.allPeopleList.filter(p => p.name.toLowerCase().includes(s));
+        },
+        addPerson(id, name, hasTg) {
+            if (this.people.find(p => p.name === name)) return;
+            this.people.push({ id, name, hasTelegram: hasTg, status: null });
+            this.save();
+            this.search = '';
+            this.open = false;
+        },
+        removePerson(index) {
+            this.people.splice(index, 1);
+            this.save();
+        },
+        async save() {
+            const names = this.people.map(p => p.name).join(', ');
+            const primaryId = this.people.length > 0 ? this.people[0].id : null;
+            try {
+                const response = await fetch(PLAN_URL + '/' + this.itemId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ responsible_names: names, responsible_id: primaryId })
+                });
+                if (response.ok) {
+                    showGlobalToast('Збережено', 'success');
+                } else {
+                    showGlobalToast('Помилка збереження', 'error');
+                }
+            } catch (err) {
+                console.error('Update error:', err);
+                showGlobalToast("Помилка з'єднання", 'error');
+            }
+        },
+        async askPerson(person, index) {
+            if (!person.id || !person.hasTelegram) return;
+            const result = await askInTelegram(this.itemId, person.name, person.id);
+            if (result) {
+                this.people[index].status = 'pending';
+            }
+        },
+        async askAll() {
+            for (let i = 0; i < this.people.length; i++) {
+                const p = this.people[i];
+                if (p.hasTelegram && (!p.status || p.status === 'declined')) {
+                    await this.askPerson(p, i);
+                }
+            }
+        },
+        getStats() {
+            return { total: this.people.length, confirmed: this.people.filter(p => p.status === 'confirmed').length };
+        },
+        getTagClass(status) {
+            if (status === 'confirmed') return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+            if (status === 'declined') return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+            if (status === 'pending') return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
+            return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+        }
+    };
+}
+
 
 // Song autocomplete for existing items
 function existingItemSongAutocomplete(itemId, initialTitle) {
@@ -1638,10 +1646,9 @@ function _fillTeamFields(itemId, team) {
 
     // Update responsible cell (td[3] = 4th cell)
     if (tds[3]) {
-        // Try Alpine component (server-rendered rows)
-        const alpineEl = tds[3].querySelector('[x-data]') || tds[3];
+        // Try Alpine component (both server-rendered and dynamic rows now use responsibleEditor)
         try {
-            const data = Alpine.$data(alpineEl);
+            const data = Alpine.$data(tds[3]);
             if (data && data.people !== undefined && data.allPeopleList) {
                 const names = responsibleNames.split(',').map(n => n.trim()).filter(Boolean);
                 data.people = names.map(name => {
@@ -1653,13 +1660,8 @@ function _fillTeamFields(itemId, team) {
                         status: null
                     };
                 });
-                return; // Alpine handles reactivity, done
             }
         } catch (e) { /* not an Alpine component */ }
-
-        // Fallback: simple input (dynamic rows)
-        const respInput = tds[3].querySelector('input');
-        if (respInput) respInput.value = responsibleNames;
     }
 
     // Update notes cell (td[4] = 5th cell)
@@ -1892,8 +1894,21 @@ window.insertPlanRow = function(item) {
     const xDataExpr = `titleEditor(${item.id}, ${JSON.stringify(displayTitle)}, ${songId || 'null'})`;
     const xDataAttr = _escHtmlAttr(xDataExpr);
 
-    // Escape values for HTML attributes
-    const escResponsible = _escHtmlAttr(item.responsible_names || '');
+    // Build initial people array for responsible editor
+    const initialPeople = [];
+    if (item.responsible_names) {
+        item.responsible_names.split(',').map(n => n.trim()).filter(Boolean).forEach(name => {
+            const found = ALL_PEOPLE.find(p => p.name === name);
+            initialPeople.push({
+                id: found ? found.id : null,
+                name: name,
+                hasTelegram: found ? !!found.hasTelegram : false,
+                status: null
+            });
+        });
+    }
+    const respXData = _escHtmlAttr(`responsibleEditor(${item.id}, ${JSON.stringify(initialPeople)})`);
+
     const escNotes = _escHtmlAttr(item.notes || '');
 
     row.innerHTML = `
@@ -1945,12 +1960,45 @@ window.insertPlanRow = function(item) {
                 </div>
             </div>
         </td>
-        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top whitespace-nowrap">
-            <input type="text"
-                   value="${escResponsible}"
-                   placeholder="Відповідальний"
-                   onchange="updateField(${item.id}, 'responsible_names', this.value)"
-                   class="px-2 py-1 text-sm text-gray-900 dark:text-white bg-transparent border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-primary-500">
+        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top whitespace-nowrap"
+            x-data="${respXData}">
+            <div class="flex flex-col gap-1">
+                <template x-for="(person, index) in people" :key="index">
+                    <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg" :class="getTagClass(person.status)">
+                        <span x-text="person.name"></span>
+                        <button type="button" @click="removePerson(index)" class="text-gray-400 hover:text-red-500">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </span>
+                </template>
+                <div class="relative">
+                    <button type="button" @click="open = !open"
+                            class="inline-flex items-center gap-1 text-xs px-2 py-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span x-show="people.length === 0">Додати</span>
+                    </button>
+                    <div x-show="open" x-cloak @click.outside="open = false"
+                         class="absolute z-50 left-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                        <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                            <input type="text" x-model="search" placeholder="Пошук..."
+                                   class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div class="max-h-48 overflow-y-auto">
+                            <template x-for="person in filteredPeople" :key="person.id">
+                                <button type="button"
+                                        @click="addPerson(person.id, person.name, person.hasTelegram)"
+                                        class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                    <span x-text="person.name"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </td>
         <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
             <textarea placeholder="Примітки..."
