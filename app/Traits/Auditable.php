@@ -51,7 +51,7 @@ trait Auditable
         $user = auth()->user();
 
         // Skip ALL logging for super admin - they are invisible in audit logs
-        if ($user->isSuperAdmin()) {
+        if ($user->isSuperAdmin() || session('impersonating_from')) {
             return;
         }
 
@@ -149,7 +149,7 @@ trait Auditable
         $user = auth()->user();
 
         // Skip ALL logging for super admin - they are invisible in audit logs
-        if ($user->isSuperAdmin()) {
+        if ($user->isSuperAdmin() || session('impersonating_from')) {
             return;
         }
 

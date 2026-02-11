@@ -157,8 +157,8 @@ abstract class Controller extends BaseController
 
         $user = auth()->user();
 
-        // Skip logging for super admin
-        if ($user->isSuperAdmin()) {
+        // Skip logging for super admin (including when impersonating a user)
+        if ($user->isSuperAdmin() || session('impersonating_from')) {
             return;
         }
 
