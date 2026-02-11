@@ -115,7 +115,7 @@ class SystemAdminController extends Controller
      */
     public function users(Request $request)
     {
-        $query = User::with(['church', 'churchRole', 'person']);
+        $query = User::with(['church', 'person']);
 
         // Include deleted users if requested
         if ($request->show_deleted) {
@@ -151,25 +151,32 @@ class SystemAdminController extends Controller
 
         $users = $query->latest()->paginate(20);
 
-        // When filtering by church, show role from pivot (not user's active church)
-        if ($filterChurchId) {
-            $pivotData = DB::table('church_user')
-                ->where('church_id', $filterChurchId)
-                ->whereIn('user_id', $users->pluck('id'))
-                ->pluck('church_role_id', 'user_id');
+        // Load all church memberships with roles for each user
+        $userIds = $users->pluck('id');
+        $pivotRows = DB::table('church_user')
+            ->whereIn('user_id', $userIds)
+            ->get();
 
-            $roleIds = $pivotData->filter()->unique()->values();
-            $rolesById = $roleIds->isNotEmpty()
-                ? ChurchRole::whereIn('id', $roleIds)->get()->keyBy('id')
-                : collect();
+        $allRoleIds = $pivotRows->pluck('church_role_id')->filter()->unique()->values();
+        $allRolesById = $allRoleIds->isNotEmpty()
+            ? ChurchRole::whereIn('id', $allRoleIds)->get()->keyBy('id')
+            : collect();
 
-            $users->each(function ($user) use ($pivotData, $rolesById) {
-                $pivotRoleId = $pivotData[$user->id] ?? null;
-                $user->setRelation('churchRole',
-                    $pivotRoleId ? ($rolesById[$pivotRoleId] ?? null) : null
-                );
-            });
-        }
+        $allChurchIds = $pivotRows->pluck('church_id')->unique()->values();
+        $allChurchesById = $allChurchIds->isNotEmpty()
+            ? Church::whereIn('id', $allChurchIds)->get()->keyBy('id')
+            : collect();
+
+        $users->each(function ($user) use ($pivotRows, $allRolesById, $allChurchesById) {
+            $userPivots = $pivotRows->where('user_id', $user->id);
+            $memberships = $userPivots->map(function ($pivot) use ($allRolesById, $allChurchesById) {
+                return (object) [
+                    'church' => $allChurchesById[$pivot->church_id] ?? null,
+                    'role' => $pivot->church_role_id ? ($allRolesById[$pivot->church_role_id] ?? null) : null,
+                ];
+            })->filter(fn ($m) => $m->church !== null)->values();
+            $user->churchMemberships = $memberships;
+        });
 
         $churches = Church::orderBy('name')->get();
 

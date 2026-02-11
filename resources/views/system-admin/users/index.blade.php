@@ -63,8 +63,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Користувач</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Церква</th>
-                        <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Роль</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Церква / Роль</th>
                         <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Створено</th>
                         <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
                     </tr>
@@ -91,24 +90,28 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            @if($user->church)
-                            <a href="{{ route('system.churches.show', $user->church) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
-                                {{ $user->church->name }}
-                            </a>
-                            @else
-                            <span class="text-gray-400 dark:text-gray-500">—</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 text-center">
                             @if($user->is_super_admin)
                             <span class="px-2 py-1 bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 text-xs rounded-full">Super Admin</span>
-                            @elseif($user->churchRole)
-                            <span class="px-2 py-1 text-xs rounded-full
-                                {{ $user->churchRole->is_admin_role ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' }}
-                            ">{{ $user->churchRole->name }}</span>
-                            @else
-                            <span class="px-2 py-1 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 text-xs rounded-full">Очікує</span>
                             @endif
+                            @forelse($user->churchMemberships ?? collect() as $membership)
+                            <div class="flex items-center gap-2 {{ !$loop->first ? 'mt-1' : '' }}">
+                                <a href="{{ route('system.churches.show', $membership->church) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm truncate">
+                                    {{ $membership->church->name }}
+                                </a>
+                                <span class="text-gray-300 dark:text-gray-600">—</span>
+                                @if($membership->role)
+                                <span class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap
+                                    {{ $membership->role->is_admin_role ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' }}
+                                ">{{ $membership->role->name }}</span>
+                                @else
+                                <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 text-xs rounded-full whitespace-nowrap">Очікує</span>
+                                @endif
+                            </div>
+                            @empty
+                                @if(!$user->is_super_admin)
+                                <span class="text-gray-400 dark:text-gray-500 text-sm">Без церкви</span>
+                                @endif
+                            @endforelse
                         </td>
                         <td class="px-6 py-4 text-center text-gray-600 dark:text-gray-300 text-sm">
                             {{ $user->created_at->format('d.m.Y') }}
@@ -254,24 +257,30 @@
                 </div>
             </div>
 
-            <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <div class="mt-3 text-xs space-y-1">
                 @if($user->is_super_admin)
                 <span class="px-2 py-1 bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 rounded-full">Super Admin</span>
-                @elseif($user->churchRole)
-                <span class="px-2 py-1 rounded-full
-                    {{ $user->churchRole->is_admin_role ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' }}
-                ">{{ $user->churchRole->name }}</span>
-                @else
-                <span class="px-2 py-1 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 rounded-full">Очікує</span>
                 @endif
-
-                @if($user->church)
-                <a href="{{ route('system.churches.show', $user->church) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 truncate max-w-[50%]">
-                    {{ $user->church->name }}
-                </a>
-                @endif
-
-                <span class="text-gray-400 dark:text-gray-500 ml-auto">{{ $user->created_at->format('d.m.Y') }}</span>
+                @forelse($user->churchMemberships ?? collect() as $membership)
+                <div class="flex items-center gap-1.5">
+                    <a href="{{ route('system.churches.show', $membership->church) }}" class="text-blue-600 dark:text-blue-400 truncate">
+                        {{ $membership->church->name }}
+                    </a>
+                    <span class="text-gray-300 dark:text-gray-600">—</span>
+                    @if($membership->role)
+                    <span class="px-2 py-0.5 rounded-full whitespace-nowrap
+                        {{ $membership->role->is_admin_role ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' }}
+                    ">{{ $membership->role->name }}</span>
+                    @else
+                    <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 rounded-full whitespace-nowrap">Очікує</span>
+                    @endif
+                </div>
+                @empty
+                    @if(!$user->is_super_admin)
+                    <span class="text-gray-400 dark:text-gray-500">Без церкви</span>
+                    @endif
+                @endforelse
+                <span class="text-gray-400 dark:text-gray-500">{{ $user->created_at->format('d.m.Y') }}</span>
             </div>
 
             @if($user->trashed())
