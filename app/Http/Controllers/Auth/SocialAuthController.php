@@ -53,6 +53,14 @@ class SocialAuthController extends Controller
                 'church_role_id' => null,
             ]);
 
+            // Also reset role in pivot for the active church
+            if ($user->church_id) {
+                DB::table('church_user')
+                    ->where('user_id', $user->id)
+                    ->where('church_id', $user->church_id)
+                    ->update(['church_role_id' => null, 'updated_at' => now()]);
+            }
+
             // Create Person record if not exists
             if ($user->church_id && !$user->person) {
                 $nameParts = explode(' ', $googleUser->getName(), 2);
@@ -157,16 +165,6 @@ class SocialAuthController extends Controller
         if ($existingUser) {
             if ($existingUser->trashed()) {
                 $existingUser->restore();
-                $existingUser->update([
-                    'church_role_id' => null,
-                    'church_id' => $church->id,
-                ]);
-
-                Log::channel('security')->info('Soft-deleted user restored via Google church join', [
-                    'user_id' => $existingUser->id,
-                    'email' => $googleUser->getEmail(),
-                    'church_id' => $church->id,
-                ]);
             }
             if (!$existingUser->google_id) {
                 $existingUser->update(['google_id' => $googleUser->getId()]);
@@ -175,31 +173,14 @@ class SocialAuthController extends Controller
                 $existingUser->markEmailAsVerified();
             }
 
-            // Create Person record if not exists for this church
-            $personForChurch = \App\Models\Person::where('user_id', $existingUser->id)
-                ->where('church_id', $church->id)
-                ->first();
-            if (!$personForChurch) {
-                $nameParts = explode(' ', $googleUser->getName(), 2);
-                $personForChurch = \App\Models\Person::create([
-                    'church_id' => $church->id,
-                    'user_id' => $existingUser->id,
-                    'first_name' => $nameParts[0],
-                    'last_name' => $nameParts[1] ?? '',
-                    'email' => $googleUser->getEmail(),
-                    'membership_status' => 'newcomer',
-                ]);
-            }
+            // Join church (creates pivot + Person, no role — pending)
+            $existingUser->joinChurch($church->id);
+            $existingUser->switchToChurch($church->id);
 
-            // Create pivot record if not exists
-            DB::table('church_user')->insertOrIgnore([
+            Log::channel('security')->info('User joined church via Google', [
                 'user_id' => $existingUser->id,
+                'email' => $googleUser->getEmail(),
                 'church_id' => $church->id,
-                'church_role_id' => null,
-                'person_id' => $personForChurch->id,
-                'joined_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             Auth::login($existingUser, true);
@@ -434,12 +415,9 @@ class SocialAuthController extends Controller
         if ($trashedUser) {
             $trashedUser->restore();
             $trashedUser->update([
-                'church_id' => $church->id,
                 'name' => $googleUser['name'],
                 'google_id' => $googleUser['id'],
                 'email_verified_at' => now(),
-                'role' => 'user',
-                'church_role_id' => null,
                 'onboarding_completed' => true,
             ]);
             $user = $trashedUser;
@@ -451,35 +429,13 @@ class SocialAuthController extends Controller
                 'google_id' => $googleUser['id'],
                 'password' => bcrypt(\Illuminate\Support\Str::random(32)),
                 'email_verified_at' => now(),
-                'role' => 'user',
                 'onboarding_completed' => true,
             ]);
         }
 
-        // Create Person record if not exists
-        $person = \App\Models\Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
-        if (!$person) {
-            $nameParts = explode(' ', $googleUser['name'], 2);
-            $person = \App\Models\Person::create([
-                'church_id' => $church->id,
-                'user_id' => $user->id,
-                'first_name' => $nameParts[0],
-                'last_name' => $nameParts[1] ?? '',
-                'email' => $googleUser['email'],
-                'membership_status' => 'newcomer',
-            ]);
-        }
-
-        // Create pivot record
-        DB::table('church_user')->insertOrIgnore([
-            'user_id' => $user->id,
-            'church_id' => $church->id,
-            'church_role_id' => null,
-            'person_id' => $person->id,
-            'joined_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Join church (creates pivot + Person, no role — pending)
+        $user->joinChurch($church->id);
+        $user->switchToChurch($church->id);
 
         // Clear session and login
         $request->session()->forget('google_user');

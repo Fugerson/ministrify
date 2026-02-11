@@ -221,6 +221,15 @@ class SystemAdminController extends Controller
             if ($churchRole) {
                 $user->church_id = $churchRole->church_id;
                 $user->role = $churchRole->is_admin_role ? 'admin' : ($churchRole->slug === 'leader' ? 'leader' : 'volunteer');
+
+                // Sync pivot for this church
+                DB::table('church_user')
+                    ->where('user_id', $user->id)
+                    ->where('church_id', $churchRole->church_id)
+                    ->update([
+                        'church_role_id' => $validated['church_role_id'],
+                        'updated_at' => now(),
+                    ]);
             }
         } else {
             $user->church_id = $validated['church_id'];
