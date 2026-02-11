@@ -135,8 +135,10 @@ class SystemAdminController extends Controller
             });
         }
 
-        if ($request->church_id) {
-            $query->where('church_id', $request->church_id);
+        $filterChurchId = $request->church_id;
+        if ($filterChurchId) {
+            // Find all users who belong to this church (via pivot), not just those with it as active
+            $query->whereHas('churches', fn ($q) => $q->where('churches.id', $filterChurchId));
         }
 
         if ($request->role) {
@@ -148,6 +150,27 @@ class SystemAdminController extends Controller
         }
 
         $users = $query->latest()->paginate(20);
+
+        // When filtering by church, show role from pivot (not user's active church)
+        if ($filterChurchId) {
+            $pivotData = DB::table('church_user')
+                ->where('church_id', $filterChurchId)
+                ->whereIn('user_id', $users->pluck('id'))
+                ->pluck('church_role_id', 'user_id');
+
+            $roleIds = $pivotData->filter()->unique()->values();
+            $rolesById = $roleIds->isNotEmpty()
+                ? ChurchRole::whereIn('id', $roleIds)->get()->keyBy('id')
+                : collect();
+
+            $users->each(function ($user) use ($pivotData, $rolesById) {
+                $pivotRoleId = $pivotData[$user->id] ?? null;
+                $user->setRelation('churchRole',
+                    $pivotRoleId ? ($rolesById[$pivotRoleId] ?? null) : null
+                );
+            });
+        }
+
         $churches = Church::orderBy('name')->get();
 
         // Count deleted users
@@ -676,8 +699,24 @@ class SystemAdminController extends Controller
             // 11. Audit logs
             AuditLog::where('church_id', $churchId)->delete();
 
-            // 12. Users (soft delete then force delete)
-            User::where('church_id', $churchId)->forceDelete();
+            // 12. Users — remove pivot, force-delete only if no other churches
+            $churchUserIds = DB::table('church_user')->where('church_id', $churchId)->pluck('user_id');
+            DB::table('church_user')->where('church_id', $churchId)->delete();
+
+            foreach ($churchUserIds as $userId) {
+                $hasOtherChurches = DB::table('church_user')->where('user_id', $userId)->exists();
+                if ($hasOtherChurches) {
+                    // Switch to another church
+                    $user = User::find($userId);
+                    if ($user && $user->church_id == $churchId) {
+                        $otherPivot = DB::table('church_user')->where('user_id', $userId)->first();
+                        $user->switchToChurch($otherPivot->church_id);
+                    }
+                } else {
+                    // No other churches — force delete
+                    User::where('id', $userId)->forceDelete();
+                }
+            }
 
             // 13. Finally, delete the church
             $church->forceDelete();
