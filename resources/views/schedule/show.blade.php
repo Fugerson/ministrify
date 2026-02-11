@@ -1197,20 +1197,7 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
 
             // Auto-fill responsible and notes from worship team
             if (song.team && song.team.length > 0) {
-                const responsibleNames = song.team.map(t => t.person_name).filter(Boolean).join(', ');
-                const byRole = {};
-                song.team.forEach(t => {
-                    if (t.role_name && t.person_name) {
-                        if (!byRole[t.role_name]) byRole[t.role_name] = [];
-                        byRole[t.role_name].push(t.person_name);
-                    }
-                });
-                const notes = Object.entries(byRole)
-                    .map(([role, names]) => `${role}: ${names.join(', ')}`)
-                    .join('; ');
-
-                updateField(this.itemId, 'responsible_names', responsibleNames);
-                updateField(this.itemId, 'notes', notes);
+                _fillTeamFields(this.itemId, song.team);
             }
 
             // Keep focus on input
@@ -1623,6 +1610,66 @@ async function updateField(itemId, field, value) {
         console.error('Update error:', err);
         showGlobalToast('Помилка з\'єднання', 'error');
         return false;
+    }
+}
+
+// Fill responsible + notes from worship team (works for both server-rendered and dynamic rows)
+function _fillTeamFields(itemId, team) {
+    const responsibleNames = team.map(t => t.person_name).filter(Boolean).join(', ');
+    const byRole = {};
+    team.forEach(t => {
+        if (t.role_name && t.person_name) {
+            if (!byRole[t.role_name]) byRole[t.role_name] = [];
+            byRole[t.role_name].push(t.person_name);
+        }
+    });
+    const notes = Object.entries(byRole)
+        .map(([role, names]) => `${role}: ${names.join(', ')}`)
+        .join('; ');
+
+    // Save to DB
+    updateField(itemId, 'responsible_names', responsibleNames);
+    updateField(itemId, 'notes', notes);
+
+    // Update DOM visually
+    const row = document.querySelector(`tr[data-id="${itemId}"]`);
+    if (!row) return;
+    const tds = row.querySelectorAll(':scope > td');
+
+    // Update responsible cell (td[3] = 4th cell)
+    if (tds[3]) {
+        // Try Alpine component (server-rendered rows)
+        const alpineEl = tds[3].querySelector('[x-data]') || tds[3];
+        try {
+            const data = Alpine.$data(alpineEl);
+            if (data && data.people !== undefined && data.allPeopleList) {
+                const names = responsibleNames.split(',').map(n => n.trim()).filter(Boolean);
+                data.people = names.map(name => {
+                    const found = data.allPeopleList.find(p => p.name === name);
+                    return {
+                        id: found ? found.id : null,
+                        name: name,
+                        hasTelegram: found ? !!found.hasTelegram : false,
+                        status: null
+                    };
+                });
+                return; // Alpine handles reactivity, done
+            }
+        } catch (e) { /* not an Alpine component */ }
+
+        // Fallback: simple input (dynamic rows)
+        const respInput = tds[3].querySelector('input');
+        if (respInput) respInput.value = responsibleNames;
+    }
+
+    // Update notes cell (td[4] = 5th cell)
+    if (tds[4]) {
+        const notesTextarea = tds[4].querySelector('textarea');
+        if (notesTextarea) {
+            notesTextarea.value = notes;
+            notesTextarea.style.height = 'auto';
+            notesTextarea.style.height = notesTextarea.scrollHeight + 'px';
+        }
     }
 }
 
