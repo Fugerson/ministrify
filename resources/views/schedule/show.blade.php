@@ -1818,6 +1818,11 @@ function planEditor() {
     };
 }
 
+// Helper: escape string for safe use inside HTML attribute
+function _escHtmlAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 // Global function to insert new plan row
 window.insertPlanRow = function(item) {
     const tbody = document.querySelector('table tbody');
@@ -1829,31 +1834,20 @@ window.insertPlanRow = function(item) {
     row.className = 'hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group';
     row.dataset.id = item.id;
 
-    // Build title cell - song link or textarea
-    let titleCell = '';
-    if (item.song && item.song.id) {
-        const keyBadge = item.song.key ? `<span class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${item.song.key}</span>` : '';
-        titleCell = `
-            <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
-                <div class="flex items-center gap-2">
-                    <span class="text-lg">🎵</span>
-                    <a href="/songs/${item.song.id}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">
-                        ${item.song.title}
-                    </a>
-                    ${keyBadge}
-                </div>
-            </td>`;
-    } else {
-        titleCell = `
-            <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
-                <textarea placeholder="Опис пункту..."
-                          onchange="updateField(${item.id}, 'title', this.value)"
-                          rows="1"
-                          class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
-                          style="word-wrap: break-word; overflow-wrap: break-word;"
-                          oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.title || ''}</textarea>
-            </td>`;
+    // Build display title with [song-ID] prefix if needed
+    let displayTitle = item.title || '';
+    const songId = item.song_id || (item.song ? item.song.id : null);
+    if (songId && !displayTitle.includes(`[song-${songId}]`)) {
+        displayTitle = `[song-${songId}] ${displayTitle}`.trim();
     }
+
+    // Build x-data attribute (HTML-escaped JS expression)
+    const xDataExpr = `titleEditor(${item.id}, ${JSON.stringify(displayTitle)}, ${songId || 'null'})`;
+    const xDataAttr = _escHtmlAttr(xDataExpr);
+
+    // Escape values for HTML attributes
+    const escResponsible = _escHtmlAttr(item.responsible_names || '');
+    const escNotes = _escHtmlAttr(item.notes || '');
 
     row.innerHTML = `
         <td class="px-1 py-3 cursor-grab active:cursor-grabbing drag-handle">
@@ -1870,10 +1864,43 @@ window.insertPlanRow = function(item) {
                    onchange="updateField(${item.id}, 'start_time', this.value)"
                    class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
         </td>
-        ${titleCell}
+        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
+            <div class="relative" x-data="${xDataAttr}">
+                <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.5rem] px-1 py-1 text-sm text-gray-900 dark:text-white break-words" x-html="renderWithSongLinks(title)"></div>
+                <div x-show="editing" class="relative">
+                    <textarea x-ref="input" x-model="title"
+                              @input="checkForSongTrigger($event.target.value); $el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'"
+                              @blur="setTimeout(() => { if(!showSongs) { saveTitle(); editing = false; } }, 150)"
+                              @keydown.escape="editing = false; showSongs = false"
+                              @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
+                              @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
+                              @keydown.enter.prevent="if(showSongs && filteredSongs().length) { insertSongLink(filteredSongs()[songIndex]); } else { saveTitle(); editing = false; }"
+                              placeholder="Текст... (введіть song- для пошуку пісні)"
+                              rows="1"
+                              class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-primary-300 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                              style="word-wrap: break-word; overflow-wrap: break-word;"></textarea>
+                    <div x-show="showSongs" x-transition
+                         class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                        <template x-if="SONGS_DATA.length === 0">
+                            <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
+                                Команда прославлення ще не обрала пісні.
+                            </div>
+                        </template>
+                        <template x-for="(song, index) in filteredSongs()" :key="song.id">
+                            <button type="button" @mousedown.prevent="insertSongLink(song)"
+                                    :class="{'bg-primary-50 dark:bg-primary-900/30': songIndex === index}"
+                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between">
+                                <span x-text="song.title"></span>
+                                <span x-show="song.key" class="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded font-mono" x-text="song.key"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </td>
         <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top whitespace-nowrap">
             <input type="text"
-                   value="${item.responsible_names || ''}"
+                   value="${escResponsible}"
                    placeholder="Відповідальний"
                    onchange="updateField(${item.id}, 'responsible_names', this.value)"
                    class="px-2 py-1 text-sm text-gray-900 dark:text-white bg-transparent border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-primary-500">
@@ -1884,7 +1911,7 @@ window.insertPlanRow = function(item) {
                       rows="1"
                       class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
                       style="word-wrap: break-word; overflow-wrap: break-word;"
-                      oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${item.notes || ''}</textarea>
+                      oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">${escNotes}</textarea>
         </td>
         <td class="px-3 py-3 text-center">
             <button type="button"
@@ -1898,6 +1925,10 @@ window.insertPlanRow = function(item) {
         </td>
     `;
     tbody.appendChild(row);
+
+    // Initialize Alpine.js on the new row for titleEditor to work
+    Alpine.initTree(row);
+
     row.querySelectorAll('textarea').forEach(ta => {
         ta.style.height = 'auto';
         ta.style.height = ta.scrollHeight + 'px';
