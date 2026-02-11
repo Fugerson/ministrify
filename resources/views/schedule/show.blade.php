@@ -1203,9 +1203,10 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
             });
             this.showSongs = false;
 
-            // Auto-fill responsible and notes from worship team
-            if (song.team && song.team.length > 0) {
-                _fillTeamFields(this.itemId, song.team);
+            // Auto-fill responsible and notes from ALL songs in title (merged)
+            const mergedTeam = _collectAllSongTeams(this.title);
+            if (mergedTeam.length > 0) {
+                _fillTeamFields(this.itemId, mergedTeam);
             }
 
             // Keep focus on input
@@ -1621,19 +1622,50 @@ async function updateField(itemId, field, value) {
     }
 }
 
-// Fill responsible + notes from worship team (works for both server-rendered and dynamic rows)
-function _fillTeamFields(itemId, team) {
-    const responsibleNames = team.map(t => t.person_name).filter(Boolean).join(', ');
+// Collect merged team from ALL [song-ID] references in title
+function _collectAllSongTeams(title) {
+    const songIds = [];
+    (title || '').replace(/\[song-(\d+)\]/g, (m, id) => { songIds.push(parseInt(id)); return m; });
+
+    const seen = new Set();
+    const merged = [];
+    songIds.forEach(id => {
+        const song = SONGS_DATA.find(s => s.id === id);
+        if (song && song.team) {
+            song.team.forEach(t => {
+                const key = (t.person_name || '') + '|' + (t.role_name || '');
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    merged.push(t);
+                }
+            });
+        }
+    });
+    return merged;
+}
+
+// Build responsible names + notes strings from team array
+function _buildTeamStrings(team) {
+    const responsibleNames = team.map(t => t.person_name).filter(Boolean);
+    const uniqueNames = [...new Set(responsibleNames)];
     const byRole = {};
     team.forEach(t => {
         if (t.role_name && t.person_name) {
             if (!byRole[t.role_name]) byRole[t.role_name] = [];
-            byRole[t.role_name].push(t.person_name);
+            if (!byRole[t.role_name].includes(t.person_name)) {
+                byRole[t.role_name].push(t.person_name);
+            }
         }
     });
     const notes = Object.entries(byRole)
         .map(([role, names]) => `${role}: ${names.join(', ')}`)
         .join('; ');
+    return { responsibleNames: uniqueNames.join(', '), notes };
+}
+
+// Fill responsible + notes from worship team (works for both server-rendered and dynamic rows)
+function _fillTeamFields(itemId, team) {
+    const { responsibleNames, notes } = _buildTeamStrings(team);
 
     // Save to DB
     updateField(itemId, 'responsible_names', responsibleNames);
@@ -1759,19 +1791,12 @@ function planEditor() {
             this.newItem.song_id = song.id;
             this.showSongs = false;
 
-            // Auto-fill responsible and notes from worship team
-            if (song.team && song.team.length > 0) {
-                this.newItem.responsible_names = song.team.map(t => t.person_name).filter(Boolean).join(', ');
-                const byRole = {};
-                song.team.forEach(t => {
-                    if (t.role_name && t.person_name) {
-                        if (!byRole[t.role_name]) byRole[t.role_name] = [];
-                        byRole[t.role_name].push(t.person_name);
-                    }
-                });
-                this.newItem.notes = Object.entries(byRole)
-                    .map(([role, names]) => `${role}: ${names.join(', ')}`)
-                    .join('; ');
+            // Auto-fill responsible and notes from ALL songs in title (merged)
+            const mergedTeam = _collectAllSongTeams(this.newItem.title);
+            if (mergedTeam.length > 0) {
+                const { responsibleNames, notes } = _buildTeamStrings(mergedTeam);
+                this.newItem.responsible_names = responsibleNames;
+                this.newItem.notes = notes;
             }
         },
 
