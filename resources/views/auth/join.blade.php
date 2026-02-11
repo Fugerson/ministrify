@@ -57,8 +57,8 @@
         @enderror
     </div>
 
-    <!-- Phone (optional) - hidden honeypot to prevent email autofill -->
-    <input type="text" name="email_trap" autocomplete="email" style="display:none" tabindex="-1">
+    <!-- Honeypot -->
+    <input type="text" name="email_trap" autocomplete="off" style="display:none" tabindex="-1" aria-hidden="true">
     <div>
         <label for="phone_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Телефон <span class="text-gray-400">(необов'язково)</span></label>
         <input type="tel" name="phone" id="phone_number" value="{{ old('phone') }}" autocomplete="off" data-lpignore="true" data-form-type="other"
