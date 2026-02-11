@@ -95,6 +95,11 @@
                             @endif
                             @forelse($user->churchMemberships ?? collect() as $membership)
                             <div class="flex items-center gap-2 {{ !$loop->first ? 'mt-1' : '' }}">
+                                @if($membership->church->id === $user->church_id)
+                                <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Активна"></span>
+                                @else
+                                <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 flex-shrink-0"></span>
+                                @endif
                                 <a href="{{ route('system.churches.show', $membership->church) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm truncate">
                                     {{ $membership->church->name }}
                                 </a>
@@ -263,6 +268,11 @@
                 @endif
                 @forelse($user->churchMemberships ?? collect() as $membership)
                 <div class="flex items-center gap-1.5">
+                    @if($membership->church->id === $user->church_id)
+                    <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Активна"></span>
+                    @else
+                    <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 flex-shrink-0"></span>
+                    @endif
                     <a href="{{ route('system.churches.show', $membership->church) }}" class="text-blue-600 dark:text-blue-400 truncate">
                         {{ $membership->church->name }}
                     </a>
