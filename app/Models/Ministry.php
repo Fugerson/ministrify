@@ -40,6 +40,7 @@ class Ministry extends Model
         'monthly_budget',
         'is_public',
         'is_worship_ministry',
+        'is_sunday_service_part',
         'slug',
         'public_description',
         'cover_image',
@@ -53,6 +54,7 @@ class Ministry extends Model
         'monthly_budget' => 'decimal:2',
         'is_public' => 'boolean',
         'is_worship_ministry' => 'boolean',
+        'is_sunday_service_part' => 'boolean',
         'allow_registrations' => 'boolean',
         'is_private' => 'boolean',
         'allowed_person_ids' => 'array',
@@ -88,6 +90,16 @@ class Ministry extends Model
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
+    }
+
+    public function ministryRoles(): HasMany
+    {
+        return $this->hasMany(MinistryRole::class)->orderBy('sort_order');
+    }
+
+    public function eventMinistryTeam(): HasMany
+    {
+        return $this->hasMany(EventMinistryTeam::class);
     }
 
     public function expenses(): HasMany

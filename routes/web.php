@@ -28,6 +28,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MigrationController;
 use App\Http\Controllers\TelegramBroadcastController;
+use App\Http\Controllers\ServiceTeamController;
 use App\Http\Controllers\WorshipTeamController;
 use App\Http\Controllers\TelegramChatController;
 use App\Http\Controllers\SupportController;
@@ -216,11 +217,9 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     Route::post('users/{id}/restore', [SystemAdminController::class, 'restoreUser'])->name('users.restore');
     Route::delete('users/{id}/force-delete', [SystemAdminController::class, 'forceDeleteUser'])->name('users.forceDelete');
 
-    // Audit Logs
-    Route::get('audit-logs', [SystemAdminController::class, 'auditLogs'])->name('audit-logs');
-
-    // Page Visits
-    Route::get('page-visits', [SystemAdminController::class, 'pageVisits'])->name('page-visits');
+    // Activity Log (combined page visits + audit logs)
+    Route::get('activity-log', [SystemAdminController::class, 'activityLog'])->name('activity-log');
+    Route::post('activity-log/delete', [SystemAdminController::class, 'deleteActivityRecords'])->name('activity-log.delete');
 
     // Support Tickets
     Route::get('support', [SystemAdminController::class, 'supportTickets'])->name('support.index');
@@ -295,6 +294,11 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::put('ministries/{ministry}/worship-roles/{role}', [MinistryController::class, 'updateWorshipRole'])->name('ministries.worship-roles.update');
     Route::delete('ministries/{ministry}/worship-roles/{role}', [MinistryController::class, 'destroyWorshipRole'])->name('ministries.worship-roles.destroy');
 
+    // Ministry Roles (for ministries with is_sunday_service_part)
+    Route::post('ministries/{ministry}/ministry-roles', [MinistryController::class, 'storeMinistryRole'])->name('ministries.ministry-roles.store');
+    Route::put('ministries/{ministry}/ministry-roles/{role}', [MinistryController::class, 'updateMinistryRole'])->name('ministries.ministry-roles.update');
+    Route::delete('ministries/{ministry}/ministry-roles/{role}', [MinistryController::class, 'destroyMinistryRole'])->name('ministries.ministry-roles.destroy');
+
     // Ministry Resources
     Route::get('ministries/{ministry}/resources', [ResourceController::class, 'ministryIndex'])->name('ministries.resources');
     Route::get('ministries/{ministry}/resources/folder/{folder}', [ResourceController::class, 'ministryIndex'])->name('ministries.resources.folder');
@@ -313,6 +317,12 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('events/{event}/songs/reorder', [WorshipTeamController::class, 'reorderSongs'])->name('events.songs.reorder');
     Route::post('events/{event}/worship-team', [WorshipTeamController::class, 'addTeamMember'])->name('events.worship-team.add');
     Route::delete('events/{event}/worship-team/{member}', [WorshipTeamController::class, 'removeTeamMember'])->name('events.worship-team.remove');
+
+    // Service Team (for ministries with is_sunday_service_part)
+    Route::get('ministries/{ministry}/service-events', [ServiceTeamController::class, 'events'])->name('ministries.service-events');
+    Route::get('ministries/{ministry}/service-events/{event}', [ServiceTeamController::class, 'eventShow'])->name('ministries.service-events.show');
+    Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add');
+    Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove');
 
     // Worship Roles Settings
     Route::get('settings/worship-roles', [WorshipTeamController::class, 'roles'])->name('settings.worship-roles');

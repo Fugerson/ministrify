@@ -291,48 +291,117 @@ class SystemAdminController extends Controller
     }
 
     /**
-     * System-wide audit logs
+     * Combined activity log (page visits + audit logs)
      */
-    public function auditLogs(Request $request)
+    public function activityLog(Request $request)
     {
-        $query = AuditLog::with(['user', 'church']);
-
-        if ($request->search) {
-            $s = addcslashes($request->search, '%_');
-            $query->where(function ($q) use ($s) {
-                $q->where('action', 'like', "%{$s}%")
-                  ->orWhere('model_type', 'like', "%{$s}%");
-            });
-        }
-
-        if ($request->church_id) {
-            $query->where('church_id', $request->church_id);
-        }
-
-        if ($request->user_id) {
-            $query->where('user_id', $request->user_id);
-        }
-
-        if ($request->action) {
-            $query->where('action', $request->action);
-        }
-
-        if ($request->model) {
-            $query->where('model_type', 'App\\Models\\' . $request->model);
-        }
-
-        if ($request->from) {
-            $query->whereDate('created_at', '>=', $request->from);
-        }
-
-        if ($request->to) {
-            $query->whereDate('created_at', '<=', $request->to);
-        }
-
-        $logs = $query->latest()->paginate(50)->withQueryString();
+        $tab = $request->get('tab', 'visits');
         $churches = Church::orderBy('name')->get();
 
-        return view('system-admin.audit-logs', compact('logs', 'churches'));
+        $visits = null;
+        $logs = null;
+
+        if ($tab === 'actions') {
+            $query = AuditLog::with(['user', 'church']);
+
+            if ($request->search) {
+                $s = addcslashes($request->search, '%_');
+                $query->where(function ($q) use ($s) {
+                    $q->where('model_name', 'like', "%{$s}%")
+                      ->orWhere('user_name', 'like', "%{$s}%");
+                });
+            }
+
+            if ($request->church_id) {
+                $query->where('church_id', $request->church_id);
+            }
+
+            if ($request->user_id) {
+                $query->where('user_id', $request->user_id);
+            }
+
+            if ($request->action) {
+                $query->where('action', $request->action);
+            }
+
+            if ($request->model) {
+                $query->where('model_type', 'App\\Models\\' . $request->model);
+            }
+
+            if ($request->from) {
+                $query->whereDate('created_at', '>=', $request->from);
+            }
+
+            if ($request->to) {
+                $query->whereDate('created_at', '<=', $request->to);
+            }
+
+            $logs = $query->latest()->paginate(50)->withQueryString();
+        } else {
+            $query = PageVisit::with(['user', 'church']);
+
+            if ($request->search) {
+                $s = addcslashes($request->search, '%_');
+                $query->where(function ($q) use ($s) {
+                    $q->where('url', 'like', "%{$s}%")
+                      ->orWhere('user_name', 'like', "%{$s}%")
+                      ->orWhere('route_name', 'like', "%{$s}%");
+                });
+            }
+
+            if ($request->church_id) {
+                $query->where('church_id', $request->church_id);
+            }
+
+            if ($request->user_id) {
+                $query->where('user_id', $request->user_id);
+            }
+
+            if ($request->from) {
+                $query->whereDate('created_at', '>=', $request->from);
+            }
+
+            if ($request->to) {
+                $query->whereDate('created_at', '<=', $request->to);
+            }
+
+            $visits = $query->latest('created_at')->paginate(50)->withQueryString();
+        }
+
+        return view('system-admin.activity-log', compact('tab', 'visits', 'logs', 'churches'));
+    }
+
+    /**
+     * Delete activity records (page visits or audit logs)
+     */
+    public function deleteActivityRecords(Request $request)
+    {
+        $type = $request->input('type', 'visits');
+        $action = $request->input('action');
+        $ids = json_decode($request->input('ids', '[]'), true);
+
+        $count = 0;
+
+        if ($type === 'visits') {
+            if ($action === 'all') {
+                $count = PageVisit::count();
+                PageVisit::query()->delete();
+            } elseif (!empty($ids)) {
+                $count = PageVisit::whereIn('id', $ids)->count();
+                PageVisit::whereIn('id', $ids)->delete();
+            }
+        } else {
+            if ($action === 'all') {
+                $count = AuditLog::count();
+                AuditLog::query()->delete();
+            } elseif (!empty($ids)) {
+                $count = AuditLog::whereIn('id', $ids)->count();
+                AuditLog::whereIn('id', $ids)->delete();
+            }
+        }
+
+        return redirect()->route('system.activity-log', ['tab' => $type])
+            ->with('success', "Видалено {$count} записів.");
     }
 
     /**
@@ -341,44 +410,6 @@ class SystemAdminController extends Controller
     public function settings()
     {
         return view('system-admin.settings');
-    }
-
-    /**
-     * Page visits log
-     */
-    public function pageVisits(Request $request)
-    {
-        $query = PageVisit::with(['user', 'church']);
-
-        if ($request->search) {
-            $s = addcslashes($request->search, '%_');
-            $query->where(function ($q) use ($s) {
-                $q->where('url', 'like', "%{$s}%")
-                  ->orWhere('user_name', 'like', "%{$s}%")
-                  ->orWhere('route_name', 'like', "%{$s}%");
-            });
-        }
-
-        if ($request->church_id) {
-            $query->where('church_id', $request->church_id);
-        }
-
-        if ($request->user_id) {
-            $query->where('user_id', $request->user_id);
-        }
-
-        if ($request->from) {
-            $query->whereDate('created_at', '>=', $request->from);
-        }
-
-        if ($request->to) {
-            $query->whereDate('created_at', '<=', $request->to);
-        }
-
-        $visits = $query->latest('created_at')->paginate(50)->withQueryString();
-        $churches = Church::orderBy('name')->get();
-
-        return view('system-admin.page-visits', compact('visits', 'churches'));
     }
 
     /**

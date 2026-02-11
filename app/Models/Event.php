@@ -166,6 +166,11 @@ class Event extends Model
         return $this->hasMany(EventWorshipTeam::class);
     }
 
+    public function ministryTeams(): HasMany
+    {
+        return $this->hasMany(EventMinistryTeam::class);
+    }
+
     public function hasServicePlan(): bool
     {
         return $this->is_service && $this->planItems()->exists();

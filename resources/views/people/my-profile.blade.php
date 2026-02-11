@@ -40,6 +40,21 @@
                     @csrf
                     @method('PUT')
 
+                    @if($errors->any())
+                        <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                            <div class="flex items-center gap-2 text-red-600 dark:text-red-400">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                </svg>
+                                <ul class="text-sm">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="flex items-center space-x-4 mb-6">
                         <!-- Editable avatar -->
                         <div class="relative flex-shrink-0">
@@ -56,7 +71,7 @@
                             </template>
                             <!-- Photo upload overlay -->
                             <label class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 rounded-full cursor-pointer transition-opacity">
-                                <input type="file" name="photo" accept="image/*" class="sr-only" x-ref="photoInput" @change="handleFileSelect($event)">
+                                <input type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/gif" class="sr-only" x-ref="photoInput" @change="handleFileSelect($event)">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -74,6 +89,25 @@
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $person->full_name }}</h2>
                             <p class="text-gray-500 dark:text-gray-400">{{ auth()->user()->role === 'admin' ? 'Адміністратор' : (auth()->user()->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
+                            <label class="inline-flex items-center gap-1.5 mt-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span x-text="preview ? 'Фото обрано' : 'Змінити фото'"></span>
+                                <input type="file" name="photo_btn" accept="image/jpeg,image/png,image/webp,image/gif" class="sr-only" @change="
+                                    const file = $event.target.files[0];
+                                    if (file) {
+                                        const dt = new DataTransfer();
+                                        dt.items.add(file);
+                                        $refs.photoInput.files = dt.files;
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => preview = e.target.result;
+                                        reader.readAsDataURL(file);
+                                        $refs.removePhotoInput.value = '0';
+                                    }
+                                ">
+                            </label>
                         </div>
                     </div>
 

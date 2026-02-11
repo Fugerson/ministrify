@@ -143,7 +143,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="font-semibold text-gray-900 dark:text-white">Останні дії в системі</h2>
-            <a href="{{ route('system.audit-logs') }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm">Всі →</a>
+            <a href="{{ route('system.activity-log', ['tab' => 'actions']) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm">Всі →</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">

@@ -52,6 +52,17 @@
                         <span class="block text-gray-500 dark:text-gray-400 text-xs">Показувати бібліотеку пісень та Music Stand</span>
                     </label>
                 </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <input type="hidden" name="is_sunday_service_part" value="0">
+                    <input type="checkbox" name="is_sunday_service_part" id="is_sunday_service_part" value="1"
+                           {{ old('is_sunday_service_part', $ministry->is_sunday_service_part) ? 'checked' : '' }}
+                           class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                    <label for="is_sunday_service_part" class="text-sm text-gray-700 dark:text-gray-300">
+                        <span class="font-medium">Частина воскресного служіння</span>
+                        <span class="block text-gray-500 dark:text-gray-400 text-xs">Команда бачить воскресні події та може призначати людей на ролі</span>
+                    </label>
+                </div>
             </div>
         </div>
 

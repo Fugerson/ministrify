@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Event;
 use App\Models\Ministry;
+use App\Models\MinistryRole;
 use App\Models\Person;
 use App\Models\Resource;
 use App\Models\Song;
@@ -185,7 +186,23 @@ class MinistryController extends Controller
                 ->get();
         }
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'worshipEvents', 'worshipRoles'));
+        // Load service events and ministry roles for sunday service part ministries
+        $serviceEvents = collect();
+        $ministryRoles = collect();
+        if ($ministry->is_sunday_service_part) {
+            $serviceEvents = Event::where('church_id', $church->id)
+                ->where('service_type', 'sunday_service')
+                ->withCount(['ministryTeams as ministry_team_count' => function ($q) use ($ministry) {
+                    $q->where('ministry_id', $ministry->id);
+                }])
+                ->orderBy('date')
+                ->orderBy('time')
+                ->get();
+
+            $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
+        }
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'worshipEvents', 'worshipRoles', 'serviceEvents', 'ministryRoles'));
     }
 
     public function edit(Ministry $ministry)
@@ -213,9 +230,11 @@ class MinistryController extends Controller
             'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'monthly_budget' => 'nullable|numeric|min:0',
             'is_worship_ministry' => 'boolean',
+            'is_sunday_service_part' => 'boolean',
         ]);
 
         $validated['is_worship_ministry'] = $request->boolean('is_worship_ministry');
+        $validated['is_sunday_service_part'] = $request->boolean('is_sunday_service_part');
 
         $ministry->update($validated);
 
@@ -437,6 +456,80 @@ class MinistryController extends Controller
         Gate::authorize('manage-ministry', $ministry);
 
         if (!$ministry->is_worship_ministry) {
+            abort(404);
+        }
+
+        $role->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Роль видалено');
+    }
+
+    public function storeMinistryRole(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('manage-ministry', $ministry);
+
+        if (!$ministry->is_sunday_service_part) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'icon' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:20',
+        ]);
+
+        $maxOrder = $ministry->ministryRoles()->max('sort_order') ?? 0;
+
+        $role = MinistryRole::create([
+            'ministry_id' => $ministry->id,
+            'name' => $validated['name'],
+            'icon' => $validated['icon'] ?? null,
+            'color' => $validated['color'] ?? null,
+            'sort_order' => $maxOrder + 1,
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'id' => $role->id]);
+        }
+
+        return back()->with('success', 'Роль додано');
+    }
+
+    public function updateMinistryRole(Request $request, Ministry $ministry, MinistryRole $role)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('manage-ministry', $ministry);
+
+        if (!$ministry->is_sunday_service_part || $role->ministry_id !== $ministry->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'icon' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:20',
+        ]);
+
+        $role->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Роль оновлено');
+    }
+
+    public function destroyMinistryRole(Request $request, Ministry $ministry, MinistryRole $role)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('manage-ministry', $ministry);
+
+        if (!$ministry->is_sunday_service_part || $role->ministry_id !== $ministry->id) {
             abort(404);
         }
 

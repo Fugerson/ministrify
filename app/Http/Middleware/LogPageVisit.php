@@ -32,6 +32,11 @@ class LogPageVisit
             return;
         }
 
+        // Skip when impersonating — admin actions should not appear in logs
+        if (session('impersonating_from')) {
+            return;
+        }
+
         // Skip AJAX/fetch requests
         if ($request->ajax() || $request->wantsJson()) {
             return;

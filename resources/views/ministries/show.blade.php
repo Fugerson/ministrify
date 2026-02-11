@@ -108,6 +108,16 @@
                     Бібліотека пісень
                 </button>
                 @endif
+                @if($ministry->is_sunday_service_part)
+                <button @click="setTab('service')" type="button"
+                   :class="activeTab === 'service' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Служіння
+                </button>
+                @endif
                 @can('manage-ministry', $ministry)
                 <button @click="setTab('settings')" type="button"
                    :class="activeTab === 'settings' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -2413,6 +2423,221 @@
             </div>
             @endif
 
+            {{-- Service Events Tab (for sunday service part ministries) --}}
+            @if($ministry->is_sunday_service_part)
+            <div x-show="activeTab === 'service'"{{ $tab !== 'service' ? ' style="display:none"' : '' }}>
+                @php
+                    $serviceEventsGrouped = $serviceEvents->groupBy(fn($e) => $e->date->format('Y-m-d'));
+                @endphp
+                <div x-data="serviceCalendar()" x-init="init()">
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <button @click="prevMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            </button>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white min-w-[160px] text-center" x-text="monthYearLabel"></h3>
+                            <button @click="nextMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <button @click="goToToday()" class="ml-2 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Сьогодні</button>
+                        </div>
+                    </div>
+
+                    {{-- Day names --}}
+                    <div class="grid grid-cols-7 mb-1">
+                        <template x-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']" :key="day">
+                            <div class="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2" x-text="day"></div>
+                        </template>
+                    </div>
+
+                    {{-- Calendar grid --}}
+                    <div class="grid grid-cols-7 border-t border-l border-gray-200 dark:border-gray-700">
+                        <template x-for="(day, index) in calendarDays" :key="index">
+                            <div class="border-r border-b border-gray-200 dark:border-gray-700 min-h-[80px] sm:min-h-[100px] p-1"
+                                 :class="{ 'bg-gray-50 dark:bg-gray-800/50': !day.isCurrentMonth, 'bg-white dark:bg-gray-800': day.isCurrentMonth }">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-medium"
+                                          :class="{
+                                              'text-gray-400 dark:text-gray-600': !day.isCurrentMonth,
+                                              'text-gray-700 dark:text-gray-300': day.isCurrentMonth && !day.isToday,
+                                              'bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center': day.isToday
+                                          }"
+                                          x-text="day.date"></span>
+                                </div>
+                                <div class="space-y-0.5">
+                                    <template x-for="event in day.events.slice(0, 2)" :key="event.id">
+                                        <a :href="event.detailUrl"
+                                           class="block w-full text-left px-1 py-0.5 text-xs rounded truncate transition-colors"
+                                           :class="event.isPast ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/60'">
+                                            <span x-text="event.time" class="font-medium"></span>
+                                            <span x-text="event.title" class="hidden sm:inline"></span>
+                                        </a>
+                                    </template>
+                                    <template x-if="day.events.length > 2">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 px-1" x-text="'+' + (day.events.length - 2) + ' ще'"></div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    {{-- Events list below calendar --}}
+                    <div class="mt-6" x-show="currentMonthEvents.length > 0">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Події цього місяця</h4>
+                        <div class="space-y-2">
+                            <template x-for="event in currentMonthEvents" :key="event.id">
+                                <a :href="event.detailUrl"
+                                   class="block p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                   :class="{ 'opacity-60': event.isPast }">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                                                <span class="text-xs font-bold" x-text="event.day"></span>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900 dark:text-white text-sm" x-text="event.title"></p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400" x-text="event.fullDate + (event.time ? ' о ' + event.time : '')"></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                            <template x-if="event.teamCount > 0">
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                                                    </svg>
+                                                    <span x-text="event.teamCount"></span>
+                                                </span>
+                                            </template>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+
+                    {{-- Empty state --}}
+                    <div x-show="allEvents.length === 0" class="text-center py-8">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Немає воскресних служінь</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Створіть подію з типом "Воскресне служіння"</p>
+                    </div>
+                </div>
+
+                @php
+                    $serviceCalendarData = $serviceEvents->map(function($e) use ($ministry) {
+                        return [
+                            'id' => $e->id,
+                            'title' => $e->title,
+                            'date' => $e->date->format('Y-m-d'),
+                            'day' => $e->date->format('d'),
+                            'time' => $e->time?->format('H:i') ?? '',
+                            'fullDate' => $e->date->translatedFormat('l, j M'),
+                            'detailUrl' => route('ministries.service-events.show', [$ministry, $e]),
+                            'teamCount' => $e->ministry_team_count ?? 0,
+                            'isPast' => $e->date->isPast(),
+                        ];
+                    })->values();
+                @endphp
+                <script>
+                    function serviceCalendar() {
+                        return {
+                            currentYear: new Date().getFullYear(),
+                            currentMonth: new Date().getMonth(),
+                            today: new Date(),
+                            allEvents: @json($serviceCalendarData),
+                            monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
+
+                            init() {},
+
+                            get monthYearLabel() {
+                                return this.monthNames[this.currentMonth] + ' ' + this.currentYear;
+                            },
+
+                            prevMonth() {
+                                if (this.currentMonth === 0) {
+                                    this.currentMonth = 11;
+                                    this.currentYear--;
+                                } else {
+                                    this.currentMonth--;
+                                }
+                            },
+
+                            nextMonth() {
+                                if (this.currentMonth === 11) {
+                                    this.currentMonth = 0;
+                                    this.currentYear++;
+                                } else {
+                                    this.currentMonth++;
+                                }
+                            },
+
+                            goToToday() {
+                                this.currentYear = new Date().getFullYear();
+                                this.currentMonth = new Date().getMonth();
+                            },
+
+                            get calendarDays() {
+                                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+
+                                let startDay = firstDay.getDay() - 1;
+                                if (startDay < 0) startDay = 6;
+
+                                const days = [];
+                                const prevMonthLastDay = new Date(this.currentYear, this.currentMonth, 0).getDate();
+
+                                for (let i = startDay - 1; i >= 0; i--) {
+                                    const d = prevMonthLastDay - i;
+                                    const m = this.currentMonth === 0 ? 11 : this.currentMonth - 1;
+                                    const y = this.currentMonth === 0 ? this.currentYear - 1 : this.currentYear;
+                                    days.push(this.makeDayObj(d, m, y, false));
+                                }
+
+                                for (let d = 1; d <= lastDay.getDate(); d++) {
+                                    days.push(this.makeDayObj(d, this.currentMonth, this.currentYear, true));
+                                }
+
+                                const remaining = 42 - days.length;
+                                for (let d = 1; d <= remaining; d++) {
+                                    const m = this.currentMonth === 11 ? 0 : this.currentMonth + 1;
+                                    const y = this.currentMonth === 11 ? this.currentYear + 1 : this.currentYear;
+                                    days.push(this.makeDayObj(d, m, y, false));
+                                }
+
+                                return days;
+                            },
+
+                            makeDayObj(date, month, year, isCurrentMonth) {
+                                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+                                const todayStr = `${this.today.getFullYear()}-${String(this.today.getMonth() + 1).padStart(2, '0')}-${String(this.today.getDate()).padStart(2, '0')}`;
+                                return {
+                                    date: date,
+                                    isCurrentMonth: isCurrentMonth,
+                                    isToday: dateStr === todayStr,
+                                    events: this.allEvents.filter(e => e.date === dateStr),
+                                };
+                            },
+
+                            get currentMonthEvents() {
+                                return this.allEvents.filter(e => {
+                                    const d = new Date(e.date);
+                                    return d.getFullYear() === this.currentYear && d.getMonth() === this.currentMonth;
+                                });
+                            },
+                        };
+                    }
+                </script>
+            </div>
+            @endif
+
             <!-- Settings Tab -->
             @can('manage-ministry', $ministry)
             <div x-show="activeTab === 'settings'"{{ $tab !== 'settings' ? ' style="display:none"' : '' }}
@@ -2457,6 +2682,17 @@
                                 <label for="is_worship_ministry" class="text-sm text-gray-700 dark:text-gray-300">
                                     <span class="font-medium">Музичне служіння</span>
                                     <span class="block text-gray-500 dark:text-gray-400 text-xs">Показувати бібліотеку пісень та Music Stand</span>
+                                </label>
+                            </div>
+
+                            <div class="flex items-center gap-3 pt-2">
+                                <input type="hidden" name="is_sunday_service_part" value="0">
+                                <input type="checkbox" name="is_sunday_service_part" id="is_sunday_service_part_settings" value="1"
+                                       {{ old('is_sunday_service_part', $ministry->is_sunday_service_part) ? 'checked' : '' }}
+                                       class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                                <label for="is_sunday_service_part_settings" class="text-sm text-gray-700 dark:text-gray-300">
+                                    <span class="font-medium">Частина воскресного служіння</span>
+                                    <span class="block text-gray-500 dark:text-gray-400 text-xs">Команда бачить воскресні події та може призначати людей на ролі</span>
                                 </label>
                             </div>
 
@@ -2714,6 +2950,129 @@
                                         Зберегти
                                         </button>
                                     </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @endif
+
+                    @if($ministry->is_sunday_service_part)
+                    <hr class="border-gray-200 dark:border-gray-700">
+
+                    <!-- Ministry Roles Settings (AJAX) -->
+                    <div x-data="ministryRolesManager()" x-init="init(@js($ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'icon' => $r->icon ?? '🔧', 'color' => $r->color ?? '#3b82f6'])->values()), '{{ route('ministries.ministry-roles.store', $ministry) }}', '{{ url('ministries/' . $ministry->id . '/ministry-roles') }}')">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ролі служіння</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Налаштуйте ролі для команди (напр. Камера, Звук, Стрім)</p>
+
+                        <!-- Roles List -->
+                        <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                            <template x-if="roles.length > 0">
+                                <div class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <template x-for="role in roles" :key="role.id">
+                                        <div class="p-3 flex items-center justify-between group">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base"
+                                                     :style="`background-color: ${role.color}20; color: ${role.color}`"
+                                                     x-text="role.icon"></div>
+                                                <span class="font-medium text-gray-900 dark:text-white text-sm" x-text="role.name"></span>
+                                            </div>
+                                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button type="button" @click="openEdit(role)"
+                                                        class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                    </svg>
+                                                </button>
+                                                <button type="button" @click="deleteRole(role.id)"
+                                                        class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="roles.length === 0">
+                                <div class="p-6 text-center">
+                                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Немає ролей. Додайте свою першу роль.</p>
+                                </div>
+                            </template>
+
+                            <!-- Add Role Form -->
+                            <div class="p-3 border-t border-gray-200 dark:border-gray-600">
+                                <div class="flex flex-wrap gap-2">
+                                    <input type="text" x-model="newName" placeholder="Назва ролі (напр. Камера, Звук)"
+                                           @keydown.enter.prevent="addRole(newName, newIcon, newColor)"
+                                           class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <input type="text" x-model="newIcon" placeholder="🔧" maxlength="5"
+                                           class="w-14 px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                    <input type="color" x-model="newColor"
+                                           class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <button type="button" @click="addRole(newName, newIcon, newColor)"
+                                            :disabled="!newName || loading"
+                                            class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                        <span x-show="!loading">Додати</span>
+                                        <span x-show="loading">...</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Suggested Defaults -->
+                        <template x-if="availableDefaults.length > 0">
+                            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Швидке додавання:</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <template x-for="def in availableDefaults" :key="def.name">
+                                        <button type="button" @click="addRole(def.name, def.icon, def.color)"
+                                                :disabled="loading"
+                                                class="px-2.5 py-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 transition-colors disabled:opacity-50">
+                                            <span x-text="def.icon + ' ' + def.name"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Edit Role Modal -->
+                        <div x-show="showEditModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showEditModal = false" @keydown.escape.window="showEditModal = false">
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md mx-4" @click.stop>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редагувати роль</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
+                                        <input type="text" x-model="editName" @keydown.enter.prevent="saveEdit()"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Іконка</label>
+                                            <input type="text" x-model="editIcon" maxlength="5"
+                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                                            <input type="color" x-model="editColor"
+                                                   class="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end gap-2 mt-6">
+                                    <button type="button" @click="showEditModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                        Скасувати
+                                    </button>
+                                    <button type="button" @click="saveEdit()" :disabled="!editName || loading"
+                                            class="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                        Зберегти
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3408,6 +3767,144 @@ function songsLibrary() {
                 console.error('Error:', error);
                 alert('Помилка видалення');
             }
+        }
+    }
+}
+
+/* === Ministry Roles Manager (for sunday service part) === */
+function ministryRolesManager() {
+    return {
+        roles: [],
+        defaultRoles: [
+            {icon: '📹', name: 'Камера 1', color: '#dc2626'},
+            {icon: '📹', name: 'Камера 2', color: '#f97316'},
+            {icon: '🎚', name: 'Звук', color: '#3b82f6'},
+            {icon: '💻', name: 'Стрім', color: '#8b5cf6'},
+            {icon: '📺', name: 'Презентація', color: '#22c55e'},
+            {icon: '☕', name: 'Бариста', color: '#92400e'},
+            {icon: '🙏', name: 'Привітання', color: '#ec4899'},
+            {icon: '🎤', name: 'Ведучий', color: '#14b8a6'},
+        ],
+        storeUrl: '',
+        baseUrl: '',
+        newName: '',
+        newIcon: '🔧',
+        newColor: '#3b82f6',
+        loading: false,
+        showEditModal: false,
+        editId: null,
+        editName: '',
+        editIcon: '',
+        editColor: '',
+
+        init(roles, storeUrl, baseUrl) {
+            this.roles = roles;
+            this.storeUrl = storeUrl;
+            this.baseUrl = baseUrl;
+        },
+
+        get availableDefaults() {
+            return this.defaultRoles.filter(d => !this.roles.some(r => r.name === d.name));
+        },
+
+        async addRole(name, icon, color) {
+            if (!name || this.loading) return;
+            this.loading = true;
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('icon', icon || '🔧');
+            formData.append('color', color || '#3b82f6');
+
+            try {
+                const res = await fetch(this.storeUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    this.roles.push({id: data.id, name, icon: icon || '🔧', color: color || '#3b82f6'});
+                    this.newName = '';
+                    this.newIcon = '🔧';
+                    this.newColor = '#3b82f6';
+                }
+            } catch (e) {
+                alert('Помилка додавання');
+            }
+
+            this.loading = false;
+        },
+
+        openEdit(role) {
+            this.editId = role.id;
+            this.editName = role.name;
+            this.editIcon = role.icon;
+            this.editColor = role.color;
+            this.showEditModal = true;
+        },
+
+        async saveEdit() {
+            if (!this.editName || this.loading) return;
+            this.loading = true;
+
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+            formData.append('name', this.editName);
+            formData.append('icon', this.editIcon || '🔧');
+            formData.append('color', this.editColor || '#3b82f6');
+
+            try {
+                const res = await fetch(this.baseUrl + '/' + this.editId, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const role = this.roles.find(r => r.id === this.editId);
+                    if (role) {
+                        role.name = this.editName;
+                        role.icon = this.editIcon || '🔧';
+                        role.color = this.editColor || '#3b82f6';
+                    }
+                    this.showEditModal = false;
+                }
+            } catch (e) {
+                alert('Помилка оновлення');
+            }
+
+            this.loading = false;
+        },
+
+        async deleteRole(id) {
+            if (!confirm('Видалити цю роль?')) return;
+            this.loading = true;
+
+            try {
+                const res = await fetch(this.baseUrl + '/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (res.ok) {
+                    this.roles = this.roles.filter(r => r.id !== id);
+                }
+            } catch (e) {
+                alert('Помилка видалення');
+            }
+
+            this.loading = false;
         }
     }
 }
