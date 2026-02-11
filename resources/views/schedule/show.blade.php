@@ -331,7 +331,12 @@
                                                 <div x-show="showSongs" x-transition
                                                      class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                                     <template x-if="SONGS_DATA.length === 0">
-                                                        <div class="px-3 py-3 text-center text-gray-500 text-sm">Пісень немає. <a href="/songs" class="text-primary-600 hover:underline">Додати</a></div>
+                                                        <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
+                                                            Команда прославлення ще не обрала пісні.
+                                                            @if($event->has_music && $event->ministry)
+                                                                <a href="{{ route('ministries.worship-events.show', [$event->ministry, $event]) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
+                                                            @endif
+                                                        </div>
                                                     </template>
                                                     <template x-for="(song, index) in filteredSongs()" :key="song.id">
                                                         <button type="button" @mousedown.prevent="insertSongLink(song)"
@@ -613,7 +618,10 @@
                                  class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                 <template x-if="SONGS_DATA.length === 0">
                                     <div class="px-3 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-                                        Пісень немає. <a href="{{ route('songs.index') }}" class="text-primary-600 hover:underline">Додати пісні</a>
+                                        Команда прославлення ще не обрала пісні.
+                                        @if($event->has_music && $event->ministry)
+                                            <a href="{{ route('ministries.worship-events.show', [$event->ministry, $event]) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
+                                        @endif
                                     </div>
                                 </template>
                                 <template x-if="SONGS_DATA.length > 0 && filteredSongsForNew().length === 0">
@@ -1186,6 +1194,25 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
                 return match;
             });
             this.showSongs = false;
+
+            // Auto-fill responsible and notes from worship team
+            if (song.team && song.team.length > 0) {
+                const responsibleNames = song.team.map(t => t.person_name).filter(Boolean).join(', ');
+                const byRole = {};
+                song.team.forEach(t => {
+                    if (t.role_name && t.person_name) {
+                        if (!byRole[t.role_name]) byRole[t.role_name] = [];
+                        byRole[t.role_name].push(t.person_name);
+                    }
+                });
+                const notes = Object.entries(byRole)
+                    .map(([role, names]) => `${role}: ${names.join(', ')}`)
+                    .join('; ');
+
+                updateField(this.itemId, 'responsible_names', responsibleNames);
+                updateField(this.itemId, 'notes', notes);
+            }
+
             // Keep focus on input
             this.$nextTick(() => {
                 if (this.$refs.input) {
@@ -1682,6 +1709,21 @@ function planEditor() {
             });
             this.newItem.song_id = song.id;
             this.showSongs = false;
+
+            // Auto-fill responsible and notes from worship team
+            if (song.team && song.team.length > 0) {
+                this.newItem.responsible_names = song.team.map(t => t.person_name).filter(Boolean).join(', ');
+                const byRole = {};
+                song.team.forEach(t => {
+                    if (t.role_name && t.person_name) {
+                        if (!byRole[t.role_name]) byRole[t.role_name] = [];
+                        byRole[t.role_name].push(t.person_name);
+                    }
+                });
+                this.newItem.notes = Object.entries(byRole)
+                    .map(([role, names]) => `${role}: ${names.join(', ')}`)
+                    .join('; ');
+            }
         },
 
         async addItem() {

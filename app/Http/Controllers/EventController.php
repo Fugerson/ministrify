@@ -301,6 +301,9 @@ class EventController extends Controller
 
         $event->load([
             'ministry',
+            'songs',
+            'worshipTeam.person',
+            'worshipTeam.worshipRole',
             'checklist.items.completedByUser',
             'planItems.responsible',
             'planItems.song',
@@ -355,10 +358,24 @@ class EventController extends Controller
         }
         $ministries = $ministryQuery->get();
 
-        // Get songs for autocomplete in service plan
-        $songsForAutocomplete = \App\Models\Song::where('church_id', $church->id)
-            ->orderBy('title')
-            ->get(['id', 'title', 'artist', 'key']);
+        // Get songs for autocomplete in service plan (only songs assigned to this event by worship team)
+        $songsForAutocomplete = $event->songs->map(function ($song) use ($event) {
+            $eventSongId = $song->pivot->id;
+            $songTeam = $event->worshipTeam->where('event_song_id', $eventSongId);
+            $eventLevelTeam = $event->worshipTeam->whereNull('event_song_id');
+            $allTeam = $songTeam->merge($eventLevelTeam)->unique('id');
+
+            return [
+                'id' => $song->id,
+                'title' => $song->title,
+                'artist' => $song->artist,
+                'key' => $song->pivot->key ?? $song->key,
+                'team' => $allTeam->map(fn ($t) => [
+                    'person_name' => $t->person?->full_name,
+                    'role_name' => $t->worshipRole?->name,
+                ])->values()->toArray(),
+            ];
+        });
 
         $canEdit = auth()->user()->can('update', $event);
 
