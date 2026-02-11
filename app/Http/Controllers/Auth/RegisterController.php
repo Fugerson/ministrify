@@ -82,8 +82,8 @@ class RegisterController extends Controller
                     ->with('info', 'Ви вже є членом цієї церкви.');
             }
 
-            // Join the new church
-            $existingUser->joinChurch($church->id, $volunteerRole?->id);
+            // Join the new church (no role — pending approval)
+            $existingUser->joinChurch($church->id);
             $existingUser->switchToChurch($church->id);
 
             Auth::login($existingUser);
