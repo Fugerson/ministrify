@@ -392,6 +392,29 @@ class OnboardingController extends Controller
                 'onboarding_completed' => true, // Skip onboarding for invited users
             ]);
 
+            // Create Person record
+            $nameParts = explode(' ', $userData['name'], 2);
+            $person = \App\Models\Person::create([
+                'church_id' => $church->id,
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'email' => $userData['email'],
+                'membership_status' => 'member',
+            ]);
+
+            // Create pivot record
+            \Illuminate\Support\Facades\DB::table('church_user')->updateOrInsert(
+                ['user_id' => $user->id, 'church_id' => $church->id],
+                [
+                    'church_role_id' => $churchRole?->id,
+                    'person_id' => $person->id,
+                    'joined_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+
             $created[] = $user->id;
         }
 

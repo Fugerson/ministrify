@@ -322,6 +322,11 @@ class SocialAuthController extends Controller
                 'church_role_id' => $adminRole?->id,
             ]);
             $user = $trashedUser;
+
+            // Reset roles in all old pivots (user was soft-deleted, old roles invalid)
+            DB::table('church_user')
+                ->where('user_id', $user->id)
+                ->update(['church_role_id' => null, 'updated_at' => now()]);
         } else {
             $user = User::create([
                 'church_id' => $church->id,

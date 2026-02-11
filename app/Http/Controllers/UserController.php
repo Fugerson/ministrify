@@ -189,16 +189,17 @@ class UserController extends Controller
             $personId = $newPerson->id;
         }
 
-        // Create pivot record
-        DB::table('church_user')->insertOrIgnore([
-            'user_id' => $user->id,
-            'church_id' => $church->id,
-            'church_role_id' => $validated['church_role_id'],
-            'person_id' => $personId,
-            'joined_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Create pivot record (updateOrInsert to handle stale pivots from soft-deleted users)
+        DB::table('church_user')->updateOrInsert(
+            ['user_id' => $user->id, 'church_id' => $church->id],
+            [
+                'church_role_id' => $validated['church_role_id'],
+                'person_id' => $personId,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
 
         // Try to send password reset link
         $message = 'Користувача створено.';

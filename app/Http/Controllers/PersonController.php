@@ -1477,6 +1477,18 @@ class PersonController extends Controller
                     // Link person to user
                     $person->update(['user_id' => $user->id]);
 
+                    // Create pivot record
+                    \Illuminate\Support\Facades\DB::table('church_user')->updateOrInsert(
+                        ['user_id' => $user->id, 'church_id' => $church->id],
+                        [
+                            'church_role_id' => $churchRoleId,
+                            'person_id' => $person->id,
+                            'joined_at' => now(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]
+                    );
+
                     // Send invitation email
                     $token = Password::createToken($user);
                     $user->sendPasswordResetNotification($token, isInvite: true);
