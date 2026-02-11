@@ -8,6 +8,7 @@ use App\Models\Person;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
@@ -22,14 +23,28 @@ class UserController extends Controller
     {
         $church = $this->getCurrentChurch();
 
-        $users = User::where('church_id', $church->id)
-            ->with(['person', 'churchRole'])
-            ->orderBy('name')
-            ->get();
-
         $churchRoles = ChurchRole::where('church_id', $church->id)
             ->orderBy('sort_order')
             ->get();
+
+        $churchRolesById = $churchRoles->keyBy('id');
+
+        $users = $church->members()
+            ->orderBy('name')
+            ->get()
+            ->each(function ($user) use ($church, $churchRolesById) {
+                // Load person for this specific church from pivot
+                $user->setRelation('person',
+                    Person::where('user_id', $user->id)
+                        ->where('church_id', $church->id)
+                        ->first()
+                );
+                // Load church role from pivot (not from user's active church)
+                $pivotRoleId = $user->pivot->church_role_id;
+                $user->setRelation('churchRole',
+                    $pivotRoleId ? ($churchRolesById[$pivotRoleId] ?? null) : null
+                );
+            });
 
         return view('settings.users.index', compact('users', 'churchRoles'));
     }
@@ -56,7 +71,7 @@ class UserController extends Controller
         // If person_id provided, name/email are optional (will be taken from Person)
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
-            'email' => ['nullable', 'email', Rule::unique('users')->whereNull('deleted_at')],
+            'email' => ['nullable', 'email'],
             'church_role_id' => ['required', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
             'person_id' => 'nullable|exists:people,id',
         ]);
@@ -76,16 +91,52 @@ class UserController extends Controller
             if (empty($email)) {
                 return back()->withInput()->withErrors(['person_id' => 'Ця людина не має email. Додайте email в профілі або створіть користувача без прив\'язки.']);
             }
-
-            // Check if email is already taken by another active user
-            if (User::where('email', $email)->exists()) {
-                return back()->withInput()->withErrors(['person_id' => 'Користувач з таким email вже існує.']);
-            }
         } else {
             // No person selected - require name and email
             if (empty($name) || empty($email)) {
                 return back()->withInput()->withErrors(['name' => 'Вкажіть ім\'я та email, або оберіть людину.']);
             }
+        }
+
+        // Check if user with this email already exists (active) → add to this church via pivot
+        $existingUser = User::where('email', $email)->first();
+
+        if ($existingUser) {
+            if ($existingUser->belongsToChurch($church->id)) {
+                return back()->withInput()->withErrors(['email' => 'Цей користувач вже є членом вашої церкви.']);
+            }
+
+            // Add to this church via pivot
+            $personId = !empty($validated['person_id']) ? $person->id : null;
+
+            // Create Person if needed
+            if (!$personId) {
+                $nameParts = explode(' ', $name, 2);
+                $newPerson = Person::create([
+                    'church_id' => $church->id,
+                    'user_id' => $existingUser->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $email,
+                    'membership_status' => 'member',
+                ]);
+                $personId = $newPerson->id;
+            } else {
+                $person->update(['user_id' => $existingUser->id]);
+            }
+
+            DB::table('church_user')->insert([
+                'user_id' => $existingUser->id,
+                'church_id' => $church->id,
+                'church_role_id' => $validated['church_role_id'],
+                'person_id' => $personId,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return redirect()->route('settings.users.index')
+                ->with('success', 'Користувача додано до церкви.');
         }
 
         // Generate secure random password (user will reset via email)
@@ -120,12 +171,14 @@ class UserController extends Controller
         }
 
         // Link to person if provided, otherwise create new Person (if not exists)
+        $personId = null;
         if (!empty($validated['person_id'])) {
             $person->update(['user_id' => $user->id]);
-        } elseif (!$user->person) {
-            // Create new Person for user only if doesn't already exist
+            $personId = $person->id;
+        } elseif (!Person::where('user_id', $user->id)->where('church_id', $church->id)->exists()) {
+            // Create new Person for user only if doesn't already exist for THIS church
             $nameParts = explode(' ', $name, 2);
-            Person::create([
+            $newPerson = Person::create([
                 'church_id' => $church->id,
                 'user_id' => $user->id,
                 'first_name' => $nameParts[0],
@@ -133,7 +186,19 @@ class UserController extends Controller
                 'email' => $email,
                 'membership_status' => 'member',
             ]);
+            $personId = $newPerson->id;
         }
+
+        // Create pivot record
+        DB::table('church_user')->insertOrIgnore([
+            'user_id' => $user->id,
+            'church_id' => $church->id,
+            'church_role_id' => $validated['church_role_id'],
+            'person_id' => $personId,
+            'joined_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // Try to send password reset link
         $message = 'Користувача створено.';
@@ -155,6 +220,16 @@ class UserController extends Controller
         $this->authorizeChurch($user);
 
         $church = $this->getCurrentChurch();
+
+        // Load church_role_id from pivot for this church (not from user's active church)
+        $pivotRecord = DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+        if ($pivotRecord) {
+            $user->church_role_id = $pivotRecord->church_role_id;
+        }
+
         $people = Person::where('church_id', $church->id)
             ->where(function ($q) use ($user) {
                 $q->whereDoesntHave('user')
@@ -189,7 +264,13 @@ class UserController extends Controller
         $name = $validated['name'] ?? null;
         $email = $validated['email'] ?? null;
         $churchRoleId = $validated['church_role_id'] ?: null; // Convert empty string to null
-        $hadNoRole = $user->church_role_id === null; // Track if user had no role before
+
+        // Check role from pivot for THIS church, not from user's active church
+        $pivotRecord = DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+        $hadNoRole = !$pivotRecord || $pivotRecord->church_role_id === null;
 
         if (!empty($validated['person_id'])) {
             $person = Person::where('id', $validated['person_id'])
@@ -214,11 +295,15 @@ class UserController extends Controller
             }
         }
 
-        $user->update([
+        $updateData = [
             'name' => $name,
             'email' => $email,
-            'church_role_id' => $churchRoleId,
-        ]);
+        ];
+        // Only update users.church_role_id if this is the user's active church
+        if ($user->church_id === $church->id) {
+            $updateData['church_role_id'] = $churchRoleId;
+        }
+        $user->update($updateData);
 
         if (!empty($validated['password'])) {
             $user->update(['password' => Hash::make($validated['password'])]);
@@ -226,12 +311,22 @@ class UserController extends Controller
 
         // Update person link
         // Remove old link
-        Person::where('user_id', $user->id)->update(['user_id' => null]);
+        Person::where('user_id', $user->id)->where('church_id', $church->id)->update(['user_id' => null]);
 
         // Add new link
         if (!empty($validated['person_id'])) {
             $person->update(['user_id' => $user->id]);
         }
+
+        // Sync pivot record
+        DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->update([
+                'church_role_id' => $churchRoleId,
+                'person_id' => $validated['person_id'] ?? null,
+                'updated_at' => now(),
+            ]);
 
         // Send notification if user was granted access (had no role before, now has one)
         if ($hadNoRole && $churchRoleId !== null) {
@@ -256,10 +351,30 @@ class UserController extends Controller
             return back()->with('error', 'Ви не можете видалити свій акаунт.');
         }
 
-        // Remove person link
-        Person::where('user_id', $user->id)->update(['user_id' => null]);
+        $church = $this->getCurrentChurch();
 
-        $user->delete();
+        // Remove from this church's pivot
+        DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->delete();
+
+        // Remove person link for this church
+        Person::where('user_id', $user->id)->where('church_id', $church->id)->update(['user_id' => null]);
+
+        // Check if user has other churches
+        $otherChurch = DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($otherChurch) {
+            // Switch user to another church
+            $user->switchToChurch($otherChurch->church_id);
+        } else {
+            // No more churches — soft-delete the user
+            $user->update(['church_id' => null, 'church_role_id' => null]);
+            $user->delete();
+        }
 
         return redirect()->route('settings.users.index')->with('success', 'Користувача видалено.');
     }
@@ -290,14 +405,27 @@ class UserController extends Controller
     {
         $this->authorizeChurch($user);
 
-        $rolePermissions = $user->churchRole ? $user->churchRole->getAllPermissions() : [];
-        $overrides = $user->getPermissionOverrides();
+        $church = $this->getCurrentChurch();
+
+        // Read role and overrides from pivot for THIS church
+        $pivotRecord = DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+
+        $churchRole = $pivotRecord?->church_role_id
+            ? ChurchRole::find($pivotRecord->church_role_id)
+            : null;
+
+        $overrides = $pivotRecord?->permission_overrides
+            ? json_decode($pivotRecord->permission_overrides, true)
+            : [];
 
         return response()->json([
-            'role_permissions' => $rolePermissions,
+            'role_permissions' => $churchRole ? $churchRole->getAllPermissions() : [],
             'overrides' => $overrides,
-            'role_name' => $user->churchRole?->name ?? 'Без ролі',
-            'is_admin_role' => $user->churchRole?->is_admin_role ?? false,
+            'role_name' => $churchRole?->name ?? 'Без ролі',
+            'is_admin_role' => $churchRole?->is_admin_role ?? false,
         ]);
     }
 
@@ -305,7 +433,19 @@ class UserController extends Controller
     {
         $this->authorizeChurch($user);
 
-        if ($user->churchRole?->is_admin_role) {
+        $church = $this->getCurrentChurch();
+
+        // Read role from pivot for THIS church
+        $pivotRecord = DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+
+        $churchRole = $pivotRecord?->church_role_id
+            ? ChurchRole::find($pivotRecord->church_role_id)
+            : null;
+
+        if ($churchRole?->is_admin_role) {
             return response()->json(['message' => 'Адмін-роль вже має повний доступ.'], 400);
         }
 
@@ -315,7 +455,7 @@ class UserController extends Controller
         }
 
         // Strip actions already granted by role
-        $rolePermissions = $user->churchRole ? $user->churchRole->getAllPermissions() : [];
+        $rolePermissions = $churchRole ? $churchRole->getAllPermissions() : [];
         $cleanOverrides = [];
 
         foreach ($overridesInput as $module => $actions) {
@@ -337,7 +477,19 @@ class UserController extends Controller
             }
         }
 
-        $user->setPermissionOverrides($cleanOverrides);
+        // Update user's overrides only if this is the active church
+        if ($user->church_id === $church->id) {
+            $user->setPermissionOverrides($cleanOverrides);
+        }
+
+        // Always sync to pivot
+        DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->update([
+                'permission_overrides' => $cleanOverrides ? json_encode($cleanOverrides) : null,
+                'updated_at' => now(),
+            ]);
 
         return response()->json([
             'message' => 'Додаткові права збережено.',
@@ -347,6 +499,13 @@ class UserController extends Controller
 
     protected function authorizeChurch($model): void
     {
+        if ($model instanceof User) {
+            if (!$model->belongsToChurch($this->getCurrentChurch()->id)) {
+                abort(404);
+            }
+            return;
+        }
+
         if ($model->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }

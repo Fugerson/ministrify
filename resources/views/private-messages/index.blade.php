@@ -322,8 +322,8 @@ if(auth()->user()->canCreate('announcements')) {
                                         ->orderBy('name')
                                         ->get();
                                 } else {
-                                    $availableUsers = \App\Models\User::where('church_id', auth()->user()->church_id)
-                                        ->where('id', '!=', auth()->id())
+                                    $availableUsers = $currentChurch->members()
+                                        ->where('users.id', '!=', auth()->id())
                                         ->orderBy('name')
                                         ->get();
                                 }

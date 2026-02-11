@@ -6,6 +6,7 @@ use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\PrivateMessage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PrivateMessageController extends Controller
 {
@@ -36,8 +37,8 @@ class PrivateMessageController extends Controller
         $currentUser = auth()->user();
         $church = $this->getChurchOrFail();
 
-        // Make sure target user is from same church
-        if ($user->church_id !== $church->id) {
+        // Make sure target user belongs to the same church (via pivot)
+        if (!$user->belongsToChurch($church->id)) {
             abort(404);
         }
 
@@ -53,9 +54,9 @@ class PrivateMessageController extends Controller
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        // Get all users for compose
-        $users = User::where('church_id', $church->id)
-            ->where('id', '!=', $currentUser->id)
+        // Get all users for compose (via pivot)
+        $users = $church->members()
+            ->where('users.id', '!=', $currentUser->id)
             ->orderBy('name')
             ->get();
 
@@ -70,8 +71,8 @@ class PrivateMessageController extends Controller
         $currentUser = auth()->user();
         $church = $this->getChurchOrFail();
 
-        $users = User::where('church_id', $church->id)
-            ->where('id', '!=', $currentUser->id)
+        $users = $church->members()
+            ->where('users.id', '!=', $currentUser->id)
             ->orderBy('name')
             ->get();
 
@@ -96,9 +97,9 @@ class PrivateMessageController extends Controller
                 'message' => 'required|string|max:5000',
             ]);
 
-            $recipients = User::where('church_id', $church->id)
-                ->where('id', '!=', $currentUser->id)
-                ->pluck('id');
+            $recipients = $church->members()
+                ->where('users.id', '!=', $currentUser->id)
+                ->pluck('users.id');
 
             foreach ($recipients as $recipientId) {
                 PrivateMessage::create([
@@ -122,9 +123,9 @@ class PrivateMessageController extends Controller
             'message' => 'required|string|max:5000',
         ]);
 
-        // Verify recipient is from same church
+        // Verify recipient belongs to the same church (via pivot)
         $recipient = User::findOrFail($validated['recipient_id']);
-        if ($recipient->church_id !== $church->id) {
+        if (!$recipient->belongsToChurch($church->id)) {
             abort(403);
         }
 

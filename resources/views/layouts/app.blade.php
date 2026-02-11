@@ -1096,6 +1096,8 @@
                 @endif
             </nav>
 
+            <x-church-switcher />
+
             @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
             <div class="flex-shrink-0 px-3 py-3 border-t border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30">
                 <div class="flex items-center gap-2 text-xs text-indigo-700 dark:text-indigo-300 mb-2">
@@ -1270,6 +1272,8 @@
                 </a>
                 @endif
             </nav>
+
+            <x-church-switcher />
 
             @if(session('impersonate_church_id') && auth()->user()->isSuperAdmin())
             <div class="flex-shrink-0 px-3 py-3 border-t border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30">

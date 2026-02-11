@@ -134,7 +134,7 @@ class EventObserver
      */
     protected function getSyncUser(Event $event): ?\App\Models\User
     {
-        return \App\Models\User::where('church_id', $event->church_id)
+        return \App\Models\User::whereHas('churches', fn ($q) => $q->where('churches.id', $event->church_id))
             ->whereNotNull('settings->google_calendar->access_token')
             ->first();
     }

@@ -8,6 +8,7 @@ use App\Models\Church;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -174,10 +175,13 @@ class SocialAuthController extends Controller
                 $existingUser->markEmailAsVerified();
             }
 
-            // Create Person record if not exists
-            if (!$existingUser->person) {
+            // Create Person record if not exists for this church
+            $personForChurch = \App\Models\Person::where('user_id', $existingUser->id)
+                ->where('church_id', $church->id)
+                ->first();
+            if (!$personForChurch) {
                 $nameParts = explode(' ', $googleUser->getName(), 2);
-                \App\Models\Person::create([
+                $personForChurch = \App\Models\Person::create([
                     'church_id' => $church->id,
                     'user_id' => $existingUser->id,
                     'first_name' => $nameParts[0],
@@ -186,6 +190,17 @@ class SocialAuthController extends Controller
                     'membership_status' => 'newcomer',
                 ]);
             }
+
+            // Create pivot record if not exists
+            DB::table('church_user')->insertOrIgnore([
+                'user_id' => $existingUser->id,
+                'church_id' => $church->id,
+                'church_role_id' => null,
+                'person_id' => $personForChurch->id,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
             Auth::login($existingUser, true);
             $request->session()->regenerate();
@@ -210,13 +225,24 @@ class SocialAuthController extends Controller
         ]);
 
         // Create linked Person record
-        \App\Models\Person::create([
+        $person = \App\Models\Person::create([
             'church_id' => $church->id,
             'user_id' => $user->id,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => $googleUser->getEmail(),
             'membership_status' => 'newcomer',
+        ]);
+
+        // Create pivot record
+        DB::table('church_user')->insertOrIgnore([
+            'user_id' => $user->id,
+            'church_id' => $church->id,
+            'church_role_id' => null,
+            'person_id' => $person->id,
+            'joined_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         // Login
@@ -332,9 +358,10 @@ class SocialAuthController extends Controller
         }
 
         // Create Person record for admin (if not already exists)
-        if (!$user->person) {
+        $person = \App\Models\Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
+        if (!$person) {
             $nameParts = explode(' ', $googleUser['name'], 2);
-            \App\Models\Person::create([
+            $person = \App\Models\Person::create([
                 'church_id' => $church->id,
                 'user_id' => $user->id,
                 'first_name' => $nameParts[0],
@@ -343,6 +370,17 @@ class SocialAuthController extends Controller
                 'membership_status' => 'member',
             ]);
         }
+
+        // Create pivot record
+        DB::table('church_user')->insertOrIgnore([
+            'user_id' => $user->id,
+            'church_id' => $church->id,
+            'church_role_id' => $adminRole?->id,
+            'person_id' => $person->id,
+            'joined_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // Create default tags
         $defaultTags = [
@@ -419,9 +457,10 @@ class SocialAuthController extends Controller
         }
 
         // Create Person record if not exists
-        if (!$user->person) {
+        $person = \App\Models\Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
+        if (!$person) {
             $nameParts = explode(' ', $googleUser['name'], 2);
-            \App\Models\Person::create([
+            $person = \App\Models\Person::create([
                 'church_id' => $church->id,
                 'user_id' => $user->id,
                 'first_name' => $nameParts[0],
@@ -430,6 +469,17 @@ class SocialAuthController extends Controller
                 'membership_status' => 'newcomer',
             ]);
         }
+
+        // Create pivot record
+        DB::table('church_user')->insertOrIgnore([
+            'user_id' => $user->id,
+            'church_id' => $church->id,
+            'church_role_id' => null,
+            'person_id' => $person->id,
+            'joined_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // Clear session and login
         $request->session()->forget('google_user');

@@ -64,7 +64,17 @@ abstract class Controller extends BaseController
             return;
         }
 
-        if ($model->church_id !== $this->getCurrentChurch()->id) {
+        $churchId = $this->getCurrentChurch()->id;
+
+        // For User models, check via pivot (user may belong to multiple churches)
+        if ($model instanceof \App\Models\User) {
+            if (!$model->belongsToChurch($churchId)) {
+                abort(404);
+            }
+            return;
+        }
+
+        if ($model->church_id !== $churchId) {
             abort(404);
         }
     }

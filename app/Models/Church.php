@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -181,6 +182,16 @@ class Church extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /**
+     * All users who belong to this church (via pivot).
+     */
+    public function members(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'church_user')
+            ->withPivot('church_role_id', 'person_id', 'permission_overrides', 'joined_at')
+            ->withTimestamps();
     }
 
     public function people(): HasMany

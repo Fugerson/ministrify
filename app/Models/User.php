@@ -7,6 +7,7 @@ use App\Notifications\VerifyEmail;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -77,6 +78,84 @@ class User extends Authenticatable implements MustVerifyEmail
     public function pushSubscriptions(): HasMany
     {
         return $this->hasMany(PushSubscription::class);
+    }
+
+    /**
+     * All churches this user belongs to (via pivot).
+     */
+    public function churches(): BelongsToMany
+    {
+        return $this->belongsToMany(Church::class, 'church_user')
+            ->withPivot('church_role_id', 'person_id', 'permission_overrides', 'joined_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if user belongs to a church (via pivot).
+     */
+    public function belongsToChurch(int $churchId): bool
+    {
+        return $this->churches()->where('churches.id', $churchId)->exists();
+    }
+
+    /**
+     * Switch active church: update church_id, church_role_id, permission_overrides from pivot.
+     */
+    public function switchToChurch(int $churchId): bool
+    {
+        $pivot = \Illuminate\Support\Facades\DB::table('church_user')
+            ->where('user_id', $this->id)
+            ->where('church_id', $churchId)
+            ->first();
+
+        if (!$pivot) {
+            return false;
+        }
+
+        $this->update([
+            'church_id' => $churchId,
+            'church_role_id' => $pivot->church_role_id,
+            'permission_overrides' => $pivot->permission_overrides ? json_decode($pivot->permission_overrides, true) : null,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Join a new church: create pivot record + Person for the new church.
+     */
+    public function joinChurch(int $churchId, ?int $roleId = null): void
+    {
+        // Create pivot if not exists
+        $exists = \Illuminate\Support\Facades\DB::table('church_user')
+            ->where('user_id', $this->id)
+            ->where('church_id', $churchId)
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        // Create Person for the new church
+        $nameParts = explode(' ', $this->name, 2);
+        $person = Person::create([
+            'church_id' => $churchId,
+            'user_id' => $this->id,
+            'first_name' => $nameParts[0],
+            'last_name' => $nameParts[1] ?? '',
+            'email' => $this->email,
+            'membership_status' => 'newcomer',
+        ]);
+
+        \Illuminate\Support\Facades\DB::table('church_user')->insert([
+            'user_id' => $this->id,
+            'church_id' => $churchId,
+            'church_role_id' => $roleId,
+            'person_id' => $person->id,
+            'joined_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     public function isSuperAdmin(): bool

@@ -170,6 +170,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 Route::post('stop-impersonating', [SystemAdminController::class, 'stopImpersonating'])->name('stop-impersonating')->middleware('auth');
+Route::post('church/switch', [\App\Http\Controllers\ChurchSwitchController::class, 'switch'])->name('church.switch')->middleware('auth');
 
 // Email Verification
 Route::middleware('auth')->group(function () {

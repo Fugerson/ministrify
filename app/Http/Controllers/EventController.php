@@ -445,7 +445,7 @@ class EventController extends Controller
                 if ($event->google_event_id && $event->google_calendar_id) {
                     try {
                         $gcService = app(\App\Services\GoogleCalendarService::class);
-                        $user = \App\Models\User::where('church_id', $event->church_id)
+                        $user = \App\Models\User::whereHas('churches', fn ($q) => $q->where('churches.id', $event->church_id))
                             ->whereNotNull('settings->google_calendar->access_token')
                             ->first();
                         if ($user) {

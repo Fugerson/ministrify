@@ -3,10 +3,12 @@
 namespace App\Http\Middleware;
 
 use App\Models\Church;
+use App\Models\Person;
 use App\Models\TelegramMessage;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureChurchContext
@@ -29,6 +31,20 @@ class EnsureChurchContext
             }
         } else {
             $church = $user->church;
+
+            // Auto-switch: if church_id is null but user has pivot records, switch to first church
+            if (!$church) {
+                $firstPivot = DB::table('church_user')
+                    ->where('user_id', $user->id)
+                    ->orderBy('joined_at')
+                    ->first();
+
+                if ($firstPivot) {
+                    $user->switchToChurch($firstPivot->church_id);
+                    $user->refresh();
+                    $church = $user->church;
+                }
+            }
         }
 
         if (!$church) {
@@ -43,8 +59,20 @@ class EnsureChurchContext
                 ->withErrors(['email' => 'Ваш акаунт не прив\'язаний до церкви.']);
         }
 
+        // Set correct Person for the active church
+        $person = Person::where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+        if ($person) {
+            $user->setRelation('person', $person);
+        }
+
         // Share church with all views
         view()->share('currentChurch', $church);
+
+        // Share user's churches for the switcher component
+        $userChurches = $user->churches()->select('churches.id', 'churches.name', 'churches.logo')->get();
+        view()->share('userChurches', $userChurches);
 
         // Share unread Telegram messages count for admins (cached for 120s)
         if ($user->isAdmin()) {

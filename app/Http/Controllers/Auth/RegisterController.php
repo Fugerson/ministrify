@@ -40,14 +40,15 @@ class RegisterController extends Controller
     }
 
     /**
-     * Handle join church registration
+     * Handle join church registration.
+     * Supports multi-church: if email already exists and password matches, join the new church.
      */
     public function join(Request $request)
     {
         $request->validate([
             'church_id' => ['required', 'exists:churches,id'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->whereNull('deleted_at')],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'confirmed', new SecurePassword],
         ]);
@@ -59,13 +60,47 @@ class RegisterController extends Controller
             return back()->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
-        // Check if a soft-deleted user with this email exists — restore instead of creating new
-        $trashedUser = User::onlyTrashed()->where('email', $request->email)->first();
-
         // Find default volunteer role for this church
         $volunteerRole = ChurchRole::where('church_id', $church->id)
             ->where('slug', 'volunteer')
             ->first();
+
+        // Check if an active user with this email already exists → multi-church join
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser) {
+            // Verify password
+            if (!Hash::check($request->password, $existingUser->password)) {
+                return back()->withInput()->withErrors(['password' => 'Невірний пароль для існуючого акаунту.']);
+            }
+
+            // Check if already a member
+            if ($existingUser->belongsToChurch($church->id)) {
+                Auth::login($existingUser);
+                $existingUser->switchToChurch($church->id);
+                return redirect()->route('dashboard')
+                    ->with('info', 'Ви вже є членом цієї церкви.');
+            }
+
+            // Join the new church
+            $existingUser->joinChurch($church->id, $volunteerRole?->id);
+            $existingUser->switchToChurch($church->id);
+
+            Auth::login($existingUser);
+
+            Log::channel('security')->info('Existing user joined new church', [
+                'user_id' => $existingUser->id,
+                'email' => $request->email,
+                'church_id' => $church->id,
+                'ip' => $request->ip(),
+            ]);
+
+            return redirect()->route('dashboard')
+                ->with('success', 'Ви приєднались до ' . $church->name . '!');
+        }
+
+        // Check if a soft-deleted user with this email exists — restore instead of creating new
+        $trashedUser = User::onlyTrashed()->where('email', $request->email)->first();
 
         if ($trashedUser) {
             $trashedUser->restore();
@@ -77,10 +112,14 @@ class RegisterController extends Controller
                 'onboarding_completed' => true,
             ]);
 
-            // Create Person record if not exists
-            if (!$trashedUser->person) {
+            // Create Person record if not exists for this church
+            $person = Person::where('user_id', $trashedUser->id)
+                ->where('church_id', $church->id)
+                ->first();
+
+            if (!$person) {
                 $nameParts = explode(' ', $request->name, 2);
-                Person::create([
+                $person = Person::create([
                     'church_id' => $church->id,
                     'user_id' => $trashedUser->id,
                     'first_name' => $nameParts[0],
@@ -90,6 +129,17 @@ class RegisterController extends Controller
                     'membership_status' => 'newcomer',
                 ]);
             }
+
+            // Create pivot record
+            DB::table('church_user')->insertOrIgnore([
+                'user_id' => $trashedUser->id,
+                'church_id' => $church->id,
+                'church_role_id' => $volunteerRole?->id,
+                'person_id' => $person->id,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
             Log::channel('security')->info('Soft-deleted user restored via join', [
                 'user_id' => $trashedUser->id,
@@ -104,7 +154,7 @@ class RegisterController extends Controller
                 ->with('success', 'Ласкаво просимо назад! Ваш акаунт відновлено.');
         }
 
-        DB::transaction(function () use ($request, $church) {
+        DB::transaction(function () use ($request, $church, $volunteerRole) {
             // Parse name into first_name and last_name
             $nameParts = explode(' ', $request->name, 2);
             $firstName = $nameParts[0];
@@ -129,6 +179,17 @@ class RegisterController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'membership_status' => 'newcomer',
+            ]);
+
+            // Create pivot record
+            DB::table('church_user')->insert([
+                'user_id' => $user->id,
+                'church_id' => $church->id,
+                'church_role_id' => $volunteerRole?->id,
+                'person_id' => $person->id,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             // Fire registered event to send verification email
@@ -209,10 +270,11 @@ class RegisterController extends Controller
                 ]);
             }
 
-            // Create Person record for admin (if not already exists)
-            if (!$user->person) {
+            // Create Person record for admin (if not already exists for THIS church)
+            $person = Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
+            if (!$person) {
                 $nameParts = explode(' ', $request->name, 2);
-                Person::create([
+                $person = Person::create([
                     'church_id' => $church->id,
                     'user_id' => $user->id,
                     'first_name' => $nameParts[0],
@@ -222,6 +284,17 @@ class RegisterController extends Controller
                     'membership_status' => 'member',
                 ]);
             }
+
+            // Create pivot record
+            DB::table('church_user')->insert([
+                'user_id' => $user->id,
+                'church_id' => $church->id,
+                'church_role_id' => $adminRole?->id,
+                'person_id' => $person->id,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
             // Create default tags
             $defaultTags = [
