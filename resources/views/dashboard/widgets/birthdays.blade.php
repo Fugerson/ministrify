@@ -31,19 +31,24 @@
         <svg class="w-6 h-6 animate-spin text-pink-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
     </div>
     <div x-show="!loading && people.length > 0" class="flex flex-wrap gap-2">
-        <template x-for="person in people" :key="person.id">
-            <a :href="person.url" class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-xl hover:shadow-md transition-shadow">
+        <template x-for="person in sortedPeople" :key="person.id">
+            <a :href="person.url" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:shadow-md transition-shadow"
+               :class="person.is_today ? 'bg-yellow-50 dark:bg-yellow-900/30 ring-2 ring-yellow-400 dark:ring-yellow-500' : 'bg-white dark:bg-gray-800'">
                 <template x-if="person.photo">
-                    <img :src="person.photo" class="w-8 h-8 rounded-full object-cover">
+                    <img :src="person.photo" class="w-8 h-8 rounded-full object-cover" :class="person.is_today && 'ring-2 ring-yellow-400'">
                 </template>
                 <template x-if="!person.photo">
-                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                        <span class="text-xs font-medium text-primary-600 dark:text-primary-400" x-text="person.initial"></span>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+                         :class="person.is_today ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-primary-100 dark:bg-primary-900'">
+                        <span class="text-xs font-medium" :class="person.is_today ? 'text-yellow-700 dark:text-yellow-300' : 'text-primary-600 dark:text-primary-400'" x-text="person.initial"></span>
                     </div>
                 </template>
                 <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="person.name"></p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="person.day + ' ' + person.month_short"></p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                        <span x-text="person.name"></span>
+                        <template x-if="person.is_today"><span class="ml-1">🎉</span></template>
+                    </p>
+                    <p class="text-xs" :class="person.is_today ? 'text-yellow-600 dark:text-yellow-400 font-medium' : 'text-gray-500 dark:text-gray-400'" x-text="person.is_today ? 'Сьогодні!' : person.day + ' ' + person.month_short"></p>
                 </div>
             </a>
         </template>
@@ -54,6 +59,8 @@
 </div>
 
 @php
+    $todayDay = now()->day;
+    $todayMonth = now()->month;
     $birthdayInitialData = $birthdaysThisMonth->sortBy(fn($p) => $p->birth_date->day)->values()->map(fn($p) => [
         'id' => $p->id,
         'name' => $p->full_name,
@@ -62,6 +69,7 @@
         'month_short' => $p->birth_date->translatedFormat('M'),
         'photo' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
         'url' => route('people.show', $p),
+        'is_today' => $p->birth_date->day === $todayDay && $p->birth_date->month === $todayMonth,
     ]);
 @endphp
 
@@ -76,6 +84,14 @@ function birthdayWidget() {
         people: initialData,
         count: initialData.length,
         loading: false,
+
+        get sortedPeople() {
+            return [...this.people].sort((a, b) => {
+                if (a.is_today && !b.is_today) return -1;
+                if (!a.is_today && b.is_today) return 1;
+                return 0;
+            });
+        },
 
         get monthName() {
             return monthNames[this.currentMonth - 1];

@@ -1141,6 +1141,7 @@ class DashboardController extends Controller
         $month = (int) $request->get('month', now()->month);
         $month = max(1, min(12, $month));
 
+        $today = now();
         $people = Person::where('church_id', $church->id)
             ->whereNotNull('birth_date')
             ->whereMonth('birth_date', $month)
@@ -1155,6 +1156,7 @@ class DashboardController extends Controller
                 'month_short' => $p->birth_date->translatedFormat('M'),
                 'photo' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
                 'url' => route('people.show', $p),
+                'is_today' => $p->birth_date->day === $today->day && $month === $today->month,
             ]);
 
         return response()->json([
