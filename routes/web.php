@@ -239,6 +239,14 @@ Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system
     Route::patch('tasks/{task}/status', [SystemAdminController::class, 'updateTaskStatus'])->name('tasks.update-status');
     Route::delete('tasks/{task}', [SystemAdminController::class, 'destroyTask'])->name('tasks.destroy');
 
+    // Claude Code Assistant
+    Route::get('claude', [\App\Http\Controllers\ClaudeController::class, 'index'])->name('claude.index');
+    Route::post('claude/chat', [\App\Http\Controllers\ClaudeController::class, 'chat'])->name('claude.chat');
+    Route::post('claude/apply/{editId}', [\App\Http\Controllers\ClaudeController::class, 'applyEdit'])->name('claude.apply');
+    Route::post('claude/apply-clear/{editId}', [\App\Http\Controllers\ClaudeController::class, 'applyClearEdit'])->name('claude.apply-clear');
+    Route::post('claude/cancel/{editId}', [\App\Http\Controllers\ClaudeController::class, 'cancelEdit'])->name('claude.cancel');
+    Route::post('claude/clear', [\App\Http\Controllers\ClaudeController::class, 'clearSession'])->name('claude.clear');
+
     // Exit church context
     Route::post('exit-church', [SystemAdminController::class, 'exitChurchContext'])->name('exit-church');
 });

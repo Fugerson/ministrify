@@ -42,7 +42,10 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - CLAUDE_ADMIN_CHAT_ID=${CLAUDE_ADMIN_CHAT_ID:-}
     volumes:
+      - .:/var/www/html
       - app_storage:/var/www/html/storage/app/public
       - ./docker/php/production.ini:/usr/local/etc/php/conf.d/production.ini
     networks:
@@ -138,7 +141,10 @@ services:
       - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
       - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@ministrify.app}
       - MAIL_FROM_NAME=Ministrify
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - CLAUDE_ADMIN_CHAT_ID=${CLAUDE_ADMIN_CHAT_ID:-}
     volumes:
+      - .:/var/www/html
       - app_storage:/var/www/html/storage/app/public
     networks:
       - ministrify

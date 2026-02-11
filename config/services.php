@@ -29,4 +29,11 @@ return [
         'redirect' => env('APP_URL') . '/auth/google/callback',  // For Socialite (Google Login)
         'redirect_uri' => env('GOOGLE_REDIRECT_URI', env('APP_URL') . '/settings/google-calendar/callback'),  // For Google Calendar
     ],
+
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-sonnet-4-5-20250929'),
+        'max_tokens' => (int) env('ANTHROPIC_MAX_TOKENS', 4096),
+        'admin_chat_id' => env('CLAUDE_ADMIN_CHAT_ID'),
+    ],
 ];

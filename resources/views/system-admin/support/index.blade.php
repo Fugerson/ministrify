@@ -84,9 +84,9 @@
             <div class="flex-1 p-2 space-y-2 min-h-[80px] kanban-cards overflow-y-auto max-h-[calc(100vh-350px)]"
                  data-status="open" id="column-open">
                 <template x-for="ticket in todoTickets" :key="ticket.id">
-                    <div class="kanban-card" :data-id="ticket.id" @click="openTicketPanel(ticket)">
+                    <a :href="ticket.show_url" class="kanban-card block" :data-id="ticket.id">
                         <div x-html="renderTicketCard(ticket)"></div>
-                    </div>
+                    </a>
                 </template>
                 <template x-if="todoTickets.length === 0">
                     <div class="text-center py-8 text-gray-400 dark:text-gray-500">
@@ -115,9 +115,9 @@
             <div class="flex-1 p-2 space-y-2 min-h-[80px] kanban-cards overflow-y-auto max-h-[calc(100vh-350px)]"
                  data-status="in_progress" id="column-in_progress">
                 <template x-for="ticket in inProgressTickets" :key="ticket.id">
-                    <div class="kanban-card" :data-id="ticket.id" @click="openTicketPanel(ticket)">
+                    <a :href="ticket.show_url" class="kanban-card block" :data-id="ticket.id">
                         <div x-html="renderTicketCard(ticket)"></div>
-                    </div>
+                    </a>
                 </template>
                 <template x-if="inProgressTickets.length === 0">
                     <div class="text-center py-8 text-gray-400 dark:text-gray-500">
@@ -146,9 +146,9 @@
             <div class="flex-1 p-2 space-y-2 min-h-[80px] kanban-cards overflow-y-auto max-h-[calc(100vh-350px)]"
                  data-status="resolved" id="column-resolved">
                 <template x-for="ticket in doneTickets" :key="ticket.id">
-                    <div class="kanban-card opacity-70" :data-id="ticket.id" @click="openTicketPanel(ticket)">
+                    <a :href="ticket.show_url" class="kanban-card block opacity-70" :data-id="ticket.id">
                         <div x-html="renderTicketCard(ticket, true)"></div>
-                    </div>
+                    </a>
                 </template>
                 <template x-if="doneTickets.length === 0">
                     <div class="text-center py-8 text-gray-400 dark:text-gray-500">
@@ -158,115 +158,6 @@
                         <p class="text-sm">Виконаних немає</p>
                     </div>
                 </template>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ticket Panel (Slide-over) -->
-    <div x-show="ticketPanel.open" x-cloak
-         class="fixed inset-0 z-50 overflow-hidden"
-         @keydown.escape.window="closePanel()">
-        <!-- Backdrop -->
-        <div x-show="ticketPanel.open"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="absolute inset-0 bg-black/30"
-             @click="closePanel()"></div>
-
-        <!-- Panel -->
-        <div x-show="ticketPanel.open"
-             x-transition:enter="transform transition ease-out duration-300"
-             x-transition:enter-start="translate-x-full"
-             x-transition:enter-end="translate-x-0"
-             x-transition:leave="transform transition ease-in duration-200"
-             x-transition:leave-start="translate-x-0"
-             x-transition:leave-end="translate-x-full"
-             class="absolute right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-gray-800 shadow-xl flex flex-col">
-
-            <!-- Panel Header -->
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 text-xs font-medium rounded-full"
-                          :class="getCategoryClass(ticketPanel.data?.category)"
-                          x-text="ticketPanel.data?.category_label"></span>
-                    <span class="text-xs text-gray-400">#<span x-text="ticketPanel.data?.id"></span></span>
-                </div>
-                <button @click="closePanel()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Panel Content -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-4">
-                <!-- Subject -->
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="ticketPanel.data?.subject"></h2>
-
-                <!-- Meta -->
-                <div class="flex flex-wrap gap-3 text-sm">
-                    <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                        <span x-text="ticketPanel.data?.user_name"></span>
-                    </div>
-                    <template x-if="ticketPanel.data?.church_name">
-                        <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                            <span x-text="ticketPanel.data?.church_name"></span>
-                        </div>
-                    </template>
-                    <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span x-text="ticketPanel.data?.time_ago"></span>
-                    </div>
-                </div>
-
-                <!-- Status Selector -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Статус</label>
-                    <select x-model="ticketPanel.data.status"
-                            @change="updateTicketStatus(ticketPanel.data.id, ticketPanel.data.status)"
-                            class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                        <option value="open">📋 До роботи</option>
-                        <option value="in_progress">🔄 В процесі</option>
-                        <option value="resolved">✅ Готово</option>
-                    </select>
-                </div>
-
-                <!-- Priority Selector -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Пріоритет</label>
-                    <select x-model="ticketPanel.data.priority"
-                            @change="updateTicketPriority(ticketPanel.data.id, ticketPanel.data.priority)"
-                            class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                        <option value="low">⚪ Низький</option>
-                        <option value="normal">🟡 Нормальний</option>
-                        <option value="high">🟠 Високий</option>
-                        <option value="urgent">🔴 Терміновий</option>
-                    </select>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <a :href="ticketPanel.data?.show_url"
-                       class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors text-center">
-                        Відкрити повністю
-                    </a>
-                    <button @click="deleteTicket(ticketPanel.data?.id)"
-                            class="px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-lg transition-colors">
-                        Видалити
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -421,10 +312,6 @@ function supportKanban() {
             category: '',
             priority: ''
         },
-        ticketPanel: {
-            open: false,
-            data: null
-        },
         updateUrl: '{{ route("system.support.update.status") }}',
         csrfToken: document.querySelector('meta[name="csrf-token"]').content,
 
@@ -565,15 +452,6 @@ function supportKanban() {
             });
         },
 
-        openTicketPanel(ticket) {
-            this.ticketPanel.data = { ...ticket };
-            this.ticketPanel.open = true;
-        },
-
-        closePanel() {
-            this.ticketPanel.open = false;
-        },
-
         async updateTicketStatus(ticketId, newStatus) {
             const ticket = this.allTickets.find(t => t.id == ticketId);
             if (ticket) {
@@ -595,51 +473,6 @@ function supportKanban() {
                 });
             } catch (error) {
                 console.error('Error updating status:', error);
-            }
-        },
-
-        async updateTicketPriority(ticketId, newPriority) {
-            const ticket = this.allTickets.find(t => t.id == ticketId);
-            if (ticket) {
-                ticket.priority = newPriority;
-            }
-
-            try {
-                await fetch(this.updateUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': this.csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        ticket_id: ticketId,
-                        priority: newPriority
-                    })
-                });
-            } catch (error) {
-                console.error('Error updating priority:', error);
-            }
-        },
-
-        async deleteTicket(ticketId) {
-            if (!confirm('Видалити тікет?')) return;
-
-            try {
-                const response = await fetch(`/system-admin/support/${ticketId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': this.csrfToken,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    this.allTickets = this.allTickets.filter(t => t.id !== ticketId);
-                    this.closePanel();
-                }
-            } catch (error) {
-                console.error('Error deleting ticket:', error);
             }
         },
 
