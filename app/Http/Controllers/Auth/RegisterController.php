@@ -130,16 +130,17 @@ class RegisterController extends Controller
                 ]);
             }
 
-            // Create pivot record
-            DB::table('church_user')->insertOrIgnore([
-                'user_id' => $trashedUser->id,
-                'church_id' => $church->id,
-                'church_role_id' => $volunteerRole?->id,
-                'person_id' => $person->id,
-                'joined_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Create or update pivot record
+            DB::table('church_user')->updateOrInsert(
+                ['user_id' => $trashedUser->id, 'church_id' => $church->id],
+                [
+                    'church_role_id' => $volunteerRole?->id,
+                    'person_id' => $person->id,
+                    'joined_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
 
             Log::channel('security')->info('Soft-deleted user restored via join', [
                 'user_id' => $trashedUser->id,

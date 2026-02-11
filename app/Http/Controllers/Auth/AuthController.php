@@ -38,6 +38,11 @@ class AuthController extends Controller
                     'church_role_id' => null,
                 ]);
 
+                // Reset roles in all pivots
+                \Illuminate\Support\Facades\DB::table('church_user')
+                    ->where('user_id', $user->id)
+                    ->update(['church_role_id' => null, 'updated_at' => now()]);
+
                 Log::channel('security')->info('Soft-deleted user restored via login', [
                     'user_id' => $user->id,
                     'email' => $credentials['email'],

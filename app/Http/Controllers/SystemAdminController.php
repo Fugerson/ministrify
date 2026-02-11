@@ -540,10 +540,14 @@ class SystemAdminController extends Controller
             ]);
         }
 
-        // Create Person record for admin (if not already exists)
-        if (!$user->person) {
+        // Create Person record for admin (if not already exists for this church)
+        $person = \App\Models\Person::where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+
+        if (!$person) {
             $nameParts = explode(' ', $validated['admin_name'], 2);
-            \App\Models\Person::create([
+            $person = \App\Models\Person::create([
                 'church_id' => $church->id,
                 'user_id' => $user->id,
                 'first_name' => $nameParts[0],
@@ -552,6 +556,18 @@ class SystemAdminController extends Controller
                 'membership_status' => 'member',
             ]);
         }
+
+        // Create pivot record
+        DB::table('church_user')->updateOrInsert(
+            ['user_id' => $user->id, 'church_id' => $church->id],
+            [
+                'church_role_id' => $adminRole?->id,
+                'person_id' => $person->id,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
 
         return redirect()->route('system.churches.index')
             ->with('success', "Церкву \"{$church->name}\" створено з адміністратором {$user->email}");

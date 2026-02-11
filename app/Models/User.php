@@ -136,16 +136,22 @@ class User extends Authenticatable implements MustVerifyEmail
             return;
         }
 
-        // Create Person for the new church
-        $nameParts = explode(' ', $this->name, 2);
-        $person = Person::create([
-            'church_id' => $churchId,
-            'user_id' => $this->id,
-            'first_name' => $nameParts[0],
-            'last_name' => $nameParts[1] ?? '',
-            'email' => $this->email,
-            'membership_status' => 'newcomer',
-        ]);
+        // Find or create Person for the new church
+        $person = Person::where('user_id', $this->id)
+            ->where('church_id', $churchId)
+            ->first();
+
+        if (!$person) {
+            $nameParts = explode(' ', $this->name, 2);
+            $person = Person::create([
+                'church_id' => $churchId,
+                'user_id' => $this->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'email' => $this->email,
+                'membership_status' => 'newcomer',
+            ]);
+        }
 
         \Illuminate\Support\Facades\DB::table('church_user')->insert([
             'user_id' => $this->id,

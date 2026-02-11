@@ -170,8 +170,12 @@ class LandingController extends Controller
         }
 
         // Create person record for admin (if not already exists)
-        if (!$user->person) {
-            \App\Models\Person::create([
+        $person = \App\Models\Person::where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+
+        if (!$person) {
+            $person = \App\Models\Person::create([
                 'church_id' => $church->id,
                 'user_id' => $user->id,
                 'first_name' => explode(' ', $validated['admin_name'])[0],
@@ -182,6 +186,18 @@ class LandingController extends Controller
                 'membership_status' => 'member',
             ]);
         }
+
+        // Create pivot record
+        \Illuminate\Support\Facades\DB::table('church_user')->updateOrInsert(
+            ['user_id' => $user->id, 'church_id' => $church->id],
+            [
+                'church_role_id' => $adminRole?->id,
+                'person_id' => $person->id,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
 
         auth()->login($user);
 

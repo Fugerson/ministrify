@@ -855,6 +855,15 @@ class PersonController extends Controller
         $oldRoleId = $person->user->church_role_id;
         $person->user->update(['church_role_id' => $newRoleId]);
 
+        // Sync pivot for this church
+        \Illuminate\Support\Facades\DB::table('church_user')
+            ->where('user_id', $person->user->id)
+            ->where('church_id', $church->id)
+            ->update([
+                'church_role_id' => $newRoleId,
+                'updated_at' => now(),
+            ]);
+
         // Log role change
         $oldRoleName = $oldRoleId ? \App\Models\ChurchRole::find($oldRoleId)?->name : 'Без ролі';
         $newRoleName = $newRoleId ? \App\Models\ChurchRole::find($newRoleId)?->name : 'Без ролі';
@@ -961,6 +970,18 @@ class PersonController extends Controller
 
         // Link person to user
         $person->update(['user_id' => $user->id]);
+
+        // Create pivot record
+        \Illuminate\Support\Facades\DB::table('church_user')->updateOrInsert(
+            ['user_id' => $user->id, 'church_id' => $church->id],
+            [
+                'church_role_id' => $validated['church_role_id'],
+                'person_id' => $person->id,
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
 
         // Send invitation email
         $token = Password::createToken($user);

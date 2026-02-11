@@ -53,13 +53,10 @@ class SocialAuthController extends Controller
                 'church_role_id' => null,
             ]);
 
-            // Also reset role in pivot for the active church
-            if ($user->church_id) {
-                DB::table('church_user')
-                    ->where('user_id', $user->id)
-                    ->where('church_id', $user->church_id)
-                    ->update(['church_role_id' => null, 'updated_at' => now()]);
-            }
+            // Reset roles in all pivots
+            DB::table('church_user')
+                ->where('user_id', $user->id)
+                ->update(['church_role_id' => null, 'updated_at' => now()]);
 
             // Create Person record if not exists
             if ($user->church_id && !$user->person) {
