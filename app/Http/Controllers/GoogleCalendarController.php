@@ -57,7 +57,7 @@ class GoogleCalendarController extends Controller
                 ->with('error', 'Failed to exchange authorization code.');
         }
 
-        // Save tokens to user settings
+        // Save tokens to user settings (store church_id for cross-church isolation)
         $user = auth()->user();
         $settings = $user->settings ?? [];
         $settings['google_calendar'] = [
@@ -65,6 +65,7 @@ class GoogleCalendarController extends Controller
             'refresh_token' => $tokens['refresh_token'] ?? null,
             'expires_at' => time() + ($tokens['expires_in'] ?? 3600),
             'connected_at' => now()->toISOString(),
+            'church_id' => $user->church_id,
         ];
         $user->update(['settings' => $settings]);
 
@@ -352,6 +353,7 @@ class GoogleCalendarController extends Controller
 
         if (isset($settings['google_calendar'])) {
             $settings['google_calendar']['calendars'] = $calendars;
+            $settings['google_calendar']['church_id'] = $user->church_id;
             // Remove old single-calendar fields
             unset($settings['google_calendar']['calendar_id']);
             unset($settings['google_calendar']['ministry_id']);
@@ -457,6 +459,7 @@ class GoogleCalendarController extends Controller
         if (isset($settings['google_calendar'])) {
             $settings['google_calendar']['calendar_id'] = $calendarId;
             $settings['google_calendar']['ministry_id'] = $ministryId;
+            $settings['google_calendar']['church_id'] = $user->church_id;
             $user->update(['settings' => $settings]);
         }
     }

@@ -168,9 +168,18 @@ class TelegramController extends Controller
 
             // Notify ministry leader
             if ($person->church?->isNotificationEnabled('notify_leader_on_decline')) {
+                $churchId = $person->church_id;
                 $leader = $event->ministry?->leader ?? $person->church?->people()
                     ->whereNotNull('telegram_chat_id')
-                    ->whereHas('user', fn($q) => $q->where('role', 'admin'))
+                    ->whereHas('user', function ($q) use ($churchId) {
+                        $q->whereIn('users.id', function ($sub) use ($churchId) {
+                            $sub->select('church_user.user_id')
+                                ->from('church_user')
+                                ->join('church_roles', 'church_user.church_role_id', '=', 'church_roles.id')
+                                ->where('church_user.church_id', $churchId)
+                                ->where('church_roles.is_admin_role', true);
+                        });
+                    })
                     ->first();
 
                 if ($leader) {
@@ -358,9 +367,18 @@ class TelegramController extends Controller
 
     private function notifyAdminsAboutLink(Person $person, string $username): void
     {
+        $churchId = $person->church_id;
         $admins = $person->church?->people()
             ->whereNotNull('telegram_chat_id')
-            ->whereHas('user', fn($q) => $q->where('role', 'admin'))
+            ->whereHas('user', function ($q) use ($churchId) {
+                $q->whereIn('users.id', function ($sub) use ($churchId) {
+                    $sub->select('church_user.user_id')
+                        ->from('church_user')
+                        ->join('church_roles', 'church_user.church_role_id', '=', 'church_roles.id')
+                        ->where('church_user.church_id', $churchId)
+                        ->where('church_roles.is_admin_role', true);
+                });
+            })
             ->get() ?? collect();
 
         $message = "🔗 <b>Автопідключення Telegram</b>\n\n"

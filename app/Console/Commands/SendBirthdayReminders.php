@@ -89,10 +89,19 @@ class SendBirthdayReminders extends Command
     private function getRecipients(Church $church)
     {
         // Get admins and leaders with telegram connected
+        // Use church-specific role via pivot instead of global User.role
         return Person::where('church_id', $church->id)
             ->whereNotNull('telegram_chat_id')
-            ->where(function ($query) {
-                $query->whereHas('user', fn($q) => $q->where('role', 'admin'))
+            ->where(function ($query) use ($church) {
+                $query->whereHas('user', function ($q) use ($church) {
+                        $q->whereIn('users.id', function ($sub) use ($church) {
+                            $sub->select('church_user.user_id')
+                                ->from('church_user')
+                                ->join('church_roles', 'church_user.church_role_id', '=', 'church_roles.id')
+                                ->where('church_user.church_id', $church->id)
+                                ->where('church_roles.is_admin_role', true);
+                        });
+                    })
                     ->orWhereHas('leadingMinistries')
                     ->orWhereHas('leadingGroups');
             })

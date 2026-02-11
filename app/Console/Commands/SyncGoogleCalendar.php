@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Church;
 use App\Models\User;
 use App\Services\GoogleCalendarService;
 use Illuminate\Console\Command;
@@ -37,7 +38,9 @@ class SyncGoogleCalendar extends Command
                     ? [['calendar_id' => $settings['calendar_id'], 'ministry_id' => $settings['ministry_id'] ?? null]]
                     : [['calendar_id' => 'primary', 'ministry_id' => null]]);
 
-            $church = $user->church;
+            // Use stored church_id for cross-church isolation (not active church)
+            $storedChurchId = $settings['church_id'] ?? null;
+            $church = $storedChurchId ? Church::find($storedChurchId) : $user->church;
             if (!$church) {
                 continue;
             }
