@@ -63,8 +63,8 @@ class WebPushService
         try {
             $pushSubscription = Subscription::create([
                 'endpoint' => $subscription->endpoint,
-                'publicKey' => $subscription->public_key,
-                'authToken' => $subscription->auth_token,
+                'publicKey' => $subscription->p256dh_key,
+                'authToken' => $subscription->auth_key,
             ]);
 
             $report = $webPush->sendOneNotification(
@@ -150,8 +150,8 @@ class WebPushService
             try {
                 $pushSubscription = Subscription::create([
                     'endpoint' => $subscription->endpoint,
-                    'publicKey' => $subscription->public_key,
-                    'authToken' => $subscription->auth_token,
+                    'publicKey' => $subscription->p256dh_key,
+                    'authToken' => $subscription->auth_key,
                 ]);
 
                 $webPush->queueNotification($pushSubscription, $payloadJson);

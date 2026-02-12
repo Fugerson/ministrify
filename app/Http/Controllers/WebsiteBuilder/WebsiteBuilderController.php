@@ -12,6 +12,10 @@ class WebsiteBuilderController extends Controller
 
     public function index()
     {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
         $church = $this->getChurchOrFail();
 
         $stats = [
@@ -34,6 +38,10 @@ class WebsiteBuilderController extends Controller
 
     public function preview()
     {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
         $church = $this->getChurchOrFail();
         return redirect()->route('public.church', $church->slug);
     }

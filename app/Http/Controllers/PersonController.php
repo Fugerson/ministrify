@@ -1088,6 +1088,10 @@ class PersonController extends Controller
      */
     public function quickEdit()
     {
+        if (!auth()->user()->canView('people')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+        }
+
         $church = $this->getCurrentChurch();
 
         $people = Person::where('church_id', $church->id)
@@ -1138,6 +1142,10 @@ class PersonController extends Controller
      */
     public function quickSave(Request $request)
     {
+        if (!auth()->user()->canManage('people')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
 
         $fieldRules = [
@@ -1151,7 +1159,7 @@ class PersonController extends Controller
             'marital_status' => 'nullable|in:single,married,widowed,divorced',
             'membership_status' => 'nullable|in:guest,newcomer,member,active',
             'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
-            'ministry_id' => 'nullable|exists:ministries,id',
+            'ministry_id' => ['nullable', \Illuminate\Validation\Rule::exists('ministries', 'id')->where('church_id', $church->id)],
             'address' => 'nullable|string|max:500',
             'first_visit_date' => 'nullable|date',
             'joined_date' => 'nullable|date',

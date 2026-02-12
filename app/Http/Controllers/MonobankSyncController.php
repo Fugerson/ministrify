@@ -353,10 +353,6 @@ class MonobankSyncController extends Controller
             abort(403);
         }
 
-        if ($monoTransaction->is_processed) {
-            return back()->with('error', 'Транзакція вже оброблена');
-        }
-
         $request->validate([
             'category_id' => 'required|exists:transaction_categories,id',
             'person_id' => 'nullable|exists:people,id',
@@ -364,27 +360,42 @@ class MonobankSyncController extends Controller
             'save_iban' => 'nullable|boolean',
         ]);
 
-        // Create transaction
-        $transaction = Transaction::create([
-            'church_id' => $church->id,
-            'direction' => Transaction::DIRECTION_IN,
-            'source_type' => Transaction::SOURCE_DONATION,
-            'amount' => $monoTransaction->amount_uah,
-            'currency' => 'UAH',
-            'category_id' => $request->category_id,
-            'person_id' => $request->person_id,
-            'description' => $request->description ?: $monoTransaction->counterpart_display,
-            'date' => $monoTransaction->mono_time->toDateString(),
-            'status' => Transaction::STATUS_COMPLETED,
-            'payment_method' => Transaction::PAYMENT_CARD,
-        ]);
+        // Use DB transaction with lock to prevent duplicate imports
+        $transaction = \Illuminate\Support\Facades\DB::transaction(function () use ($church, $monoTransaction, $request) {
+            $monoTransaction = MonobankTransaction::where('id', $monoTransaction->id)
+                ->lockForUpdate()
+                ->first();
 
-        // Mark as processed
-        $monoTransaction->update([
-            'is_processed' => true,
-            'transaction_id' => $transaction->id,
-            'person_id' => $request->person_id,
-        ]);
+            if ($monoTransaction->is_processed) {
+                return null;
+            }
+
+            $transaction = Transaction::create([
+                'church_id' => $church->id,
+                'direction' => Transaction::DIRECTION_IN,
+                'source_type' => Transaction::SOURCE_DONATION,
+                'amount' => $monoTransaction->amount_uah,
+                'currency' => 'UAH',
+                'category_id' => $request->category_id,
+                'person_id' => $request->person_id,
+                'description' => $request->description ?: $monoTransaction->counterpart_display,
+                'date' => $monoTransaction->mono_time->toDateString(),
+                'status' => Transaction::STATUS_COMPLETED,
+                'payment_method' => Transaction::PAYMENT_CARD,
+            ]);
+
+            $monoTransaction->update([
+                'is_processed' => true,
+                'transaction_id' => $transaction->id,
+                'person_id' => $request->person_id,
+            ]);
+
+            return $transaction;
+        });
+
+        if (!$transaction) {
+            return back()->with('error', 'Транзакція вже оброблена');
+        }
 
         // Update sender mapping for smart categorization
         MonobankSenderMapping::updateFromImport(
@@ -453,53 +464,56 @@ class MonobankSyncController extends Controller
         $imported = 0;
 
         foreach ($request->transaction_ids as $id) {
-            $monoTx = MonobankTransaction::where('id', $id)
-                ->where('church_id', $church->id)
-                ->where('is_processed', false)
-                ->where('is_income', true)
-                ->first();
-
-            if (!$monoTx) continue;
-
-            // Try to find person by IBAN
-            $personId = null;
-            if ($monoTx->counterpart_iban) {
-                $person = Person::where('church_id', $church->id)
-                    ->where('iban', $monoTx->counterpart_iban)
+            \Illuminate\Support\Facades\DB::transaction(function () use ($id, $church, $request, &$imported) {
+                $monoTx = MonobankTransaction::where('id', $id)
+                    ->where('church_id', $church->id)
+                    ->where('is_processed', false)
+                    ->where('is_income', true)
+                    ->lockForUpdate()
                     ->first();
-                $personId = $person?->id;
-            }
 
-            $transaction = Transaction::create([
-                'church_id' => $church->id,
-                'direction' => Transaction::DIRECTION_IN,
-                'source_type' => Transaction::SOURCE_DONATION,
-                'amount' => $monoTx->amount_uah,
-                'currency' => 'UAH',
-                'category_id' => $request->category_id,
-                'person_id' => $personId,
-                'description' => $monoTx->counterpart_display,
-                'date' => $monoTx->mono_time->toDateString(),
-                'status' => Transaction::STATUS_COMPLETED,
-                'payment_method' => Transaction::PAYMENT_CARD,
-            ]);
+                if (!$monoTx) return;
 
-            $monoTx->update([
-                'is_processed' => true,
-                'transaction_id' => $transaction->id,
-                'person_id' => $personId,
-            ]);
+                // Try to find person by IBAN
+                $personId = null;
+                if ($monoTx->counterpart_iban) {
+                    $person = Person::where('church_id', $church->id)
+                        ->where('iban', $monoTx->counterpart_iban)
+                        ->first();
+                    $personId = $person?->id;
+                }
 
-            // Update mapping
-            MonobankSenderMapping::updateFromImport(
-                $church->id,
-                $monoTx->counterpart_iban,
-                $monoTx->counterpart_name,
-                $request->category_id,
-                $personId
-            );
+                $transaction = Transaction::create([
+                    'church_id' => $church->id,
+                    'direction' => Transaction::DIRECTION_IN,
+                    'source_type' => Transaction::SOURCE_DONATION,
+                    'amount' => $monoTx->amount_uah,
+                    'currency' => 'UAH',
+                    'category_id' => $request->category_id,
+                    'person_id' => $personId,
+                    'description' => $monoTx->counterpart_display,
+                    'date' => $monoTx->mono_time->toDateString(),
+                    'status' => Transaction::STATUS_COMPLETED,
+                    'payment_method' => Transaction::PAYMENT_CARD,
+                ]);
 
-            $imported++;
+                $monoTx->update([
+                    'is_processed' => true,
+                    'transaction_id' => $transaction->id,
+                    'person_id' => $personId,
+                ]);
+
+                // Update mapping
+                MonobankSenderMapping::updateFromImport(
+                    $church->id,
+                    $monoTx->counterpart_iban,
+                    $monoTx->counterpart_name,
+                    $request->category_id,
+                    $personId
+                );
+
+                $imported++;
+            });
         }
 
         // Log bulk import

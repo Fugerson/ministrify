@@ -279,7 +279,7 @@ class BoardController extends Controller
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
-            'epic_id' => 'nullable|exists:board_epics,id',
+            'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->where('board_id', $column->board_id)],
             'event_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Event::class)],
             'ministry_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Ministry::class)],
             'group_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Group::class)],
@@ -587,7 +587,7 @@ class BoardController extends Controller
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
-            'epic_id' => 'nullable|exists:board_epics,id',
+            'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->where('board_id', $card->column->board_id)],
             'column_id' => 'nullable|exists:board_columns,id',
         ]);
 
@@ -999,11 +999,15 @@ class BoardController extends Controller
             return response()->json(['error' => 'Cannot relate card to itself'], 422);
         }
 
+        // Verify related card belongs to same board (church isolation)
+        $relatedCard = BoardCard::with('column')->findOrFail($validated['related_card_id']);
+        if ($relatedCard->column->board_id !== $card->column->board_id) {
+            abort(403, 'Картка належить іншій дошці.');
+        }
+
         // Check if already related
         $exists = $card->relatedCards()->where('related_card_id', $validated['related_card_id'])->exists()
             || $card->relatedFrom()->where('card_id', $validated['related_card_id'])->exists();
-
-        $relatedCard = BoardCard::with('column')->findOrFail($validated['related_card_id']);
 
         if (!$exists) {
             $card->relatedCards()->attach($validated['related_card_id'], ['relation_type' => 'related']);

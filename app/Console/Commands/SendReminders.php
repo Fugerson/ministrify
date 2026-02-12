@@ -19,14 +19,16 @@ class SendReminders extends Command
         $now = Carbon::now();
         $this->info("Checking reminders at {$now->format('Y-m-d H:i')}");
 
-        // Find all upcoming events with reminder settings
+        // Find all upcoming events with reminder settings (scoped to churches with Telegram configured)
         $events = Event::whereNotNull('reminder_settings')
+            ->whereNotNull('church_id')
+            ->whereHas('church')
             ->where('date', '>=', $now->copy()->startOfDay())
             ->where('date', '<=', $now->copy()->addDays(30)->endOfDay())
             ->with(['responsibilities' => function ($query) {
                 $query->whereNull('reminded_at')
                     ->with(['person.church']);
-            }, 'ministry'])
+            }, 'ministry', 'church'])
             ->get();
 
         $sent = 0;
@@ -102,6 +104,10 @@ class SendReminders extends Command
      */
     private function shouldSendReminder(Event $event, array $reminder, Carbon $now): bool
     {
+        if (!$event->time) {
+            return false;
+        }
+
         $eventDateTime = Carbon::parse($event->date->format('Y-m-d') . ' ' . $event->time->format('H:i'));
 
         if ($reminder['type'] === 'days') {

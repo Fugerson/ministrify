@@ -45,7 +45,14 @@ class PrivatbankService
             }
         }
 
-        $this->cardNumber = $church->privatbank_card_number;
+        if ($church->privatbank_card_number) {
+            try {
+                $this->cardNumber = Crypt::decryptString($church->privatbank_card_number);
+            } catch (\Exception $e) {
+                // Fallback for plain text (legacy data)
+                $this->cardNumber = $church->privatbank_card_number;
+            }
+        }
 
         return $this;
     }
@@ -355,7 +362,7 @@ class PrivatbankService
             $church->update([
                 'privatbank_merchant_id' => Crypt::encryptString($merchantId),
                 'privatbank_password' => Crypt::encryptString($password),
-                'privatbank_card_number' => $cardNumber,
+                'privatbank_card_number' => Crypt::encryptString($cardNumber),
             ]);
             return true;
         } catch (\Exception $e) {

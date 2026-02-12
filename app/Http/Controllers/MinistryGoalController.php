@@ -6,6 +6,7 @@ use App\Models\Ministry;
 use App\Models\MinistryGoal;
 use App\Models\MinistryTask;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class MinistryGoalController extends Controller
@@ -185,5 +186,7 @@ class MinistryGoalController extends Controller
         if ($ministry->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
+
+        Gate::authorize('manage-ministry', $ministry);
     }
 }

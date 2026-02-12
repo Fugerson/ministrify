@@ -22,9 +22,11 @@ class MyScheduleController extends Controller
             ], 200);
         }
 
+        $churchId = $user->church_id;
+
         $responsibilities = $user->person->responsibilities()
             ->with(['event.ministry:id,name,color'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()->startOfDay()))
+            ->whereHas('event', fn($q) => $q->where('church_id', $churchId)->where('date', '>=', now()->startOfDay()))
             ->get()
             ->sortBy(fn($r) => $r->event->date)
             ->values();
@@ -32,7 +34,7 @@ class MyScheduleController extends Controller
         // Also include events where user is assigned (ministry positions)
         $assignments = $user->person->assignments()
             ->with(['event.ministry:id,name,color', 'position'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()->startOfDay()))
+            ->whereHas('event', fn($q) => $q->where('church_id', $churchId)->where('date', '>=', now()->startOfDay()))
             ->get()
             ->sortBy(fn($a) => $a->event->date)
             ->values();

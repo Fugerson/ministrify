@@ -40,11 +40,16 @@ class SocialAuthController extends Controller
                 ->with('error', 'Не вдалося увійти через Google. Спробуйте ще раз.');
         }
 
-        // Find user by google_id or email (including soft-deleted)
+        // Find user by google_id first, then by email (prioritize google_id to avoid collision)
         $user = User::withTrashed()
             ->where('google_id', $googleUser->getId())
-            ->orWhere('email', $googleUser->getEmail())
             ->first();
+
+        if (!$user) {
+            $user = User::withTrashed()
+                ->where('email', $googleUser->getEmail())
+                ->first();
+        }
 
         // Restore if soft-deleted — reset role so admin must re-approve
         if ($user && $user->trashed()) {

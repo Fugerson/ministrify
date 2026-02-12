@@ -519,14 +519,16 @@ class EventController extends Controller
         $deleteSeries = $request->boolean('delete_series');
 
         if ($deleteSeries) {
-            // Delete all events in the series
+            // Delete all events in the series (scoped to church)
             $parentId = $event->parent_event_id ?? $event->id;
 
             // Delete child events
-            Event::where('parent_event_id', $parentId)->delete();
+            Event::where('church_id', $event->church_id)
+                ->where('parent_event_id', $parentId)->delete();
 
             // Delete parent event
-            Event::where('id', $parentId)->delete();
+            Event::where('church_id', $event->church_id)
+                ->where('id', $parentId)->delete();
 
             return redirect()->route('schedule')->with('success', 'Серію подій видалено.');
         }
@@ -551,42 +553,44 @@ class EventController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
-
-        // Get or create attendance record for this event
-        $attendance = Attendance::firstOrCreate(
-            [
-                'attendable_type' => Event::class,
-                'attendable_id' => $event->id,
-            ],
-            [
-                'church_id' => $church->id,
-                'type' => Attendance::TYPE_EVENT,
-                'date' => $event->date,
-                'time' => $event->time,
-                'recorded_by' => auth()->id(),
-            ]
-        );
-
-        // Update guests count
-        $attendance->update([
-            'guests_count' => $validated['guests_count'] ?? 0,
-        ]);
-
-        // Delete existing records and create new ones
-        $attendance->records()->delete();
-
         $presentIds = $validated['present'] ?? [];
-        foreach ($presentIds as $personId) {
-            AttendanceRecord::create([
-                'attendance_id' => $attendance->id,
-                'person_id' => $personId,
-                'present' => true,
-                'checked_in_at' => now()->format('H:i'),
-            ]);
-        }
 
-        // Recalculate counts
-        $attendance->recalculateCounts();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($event, $church, $validated, $presentIds) {
+            // Get or create attendance record with lock
+            $attendance = Attendance::lockForUpdate()->firstOrCreate(
+                [
+                    'attendable_type' => Event::class,
+                    'attendable_id' => $event->id,
+                ],
+                [
+                    'church_id' => $church->id,
+                    'type' => Attendance::TYPE_EVENT,
+                    'date' => $event->date,
+                    'time' => $event->time,
+                    'recorded_by' => auth()->id(),
+                ]
+            );
+
+            // Update guests count
+            $attendance->update([
+                'guests_count' => $validated['guests_count'] ?? 0,
+            ]);
+
+            // Delete existing records and create new ones
+            $attendance->records()->delete();
+
+            foreach ($presentIds as $personId) {
+                AttendanceRecord::create([
+                    'attendance_id' => $attendance->id,
+                    'person_id' => $personId,
+                    'present' => true,
+                    'checked_in_at' => now()->format('H:i'),
+                ]);
+            }
+
+            // Recalculate counts
+            $attendance->recalculateCounts();
+        });
 
         // Log attendance saved
         $this->logAuditAction('attendance_saved', 'Event', $event->id, $event->title, [

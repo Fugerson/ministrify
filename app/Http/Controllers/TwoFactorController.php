@@ -170,6 +170,7 @@ class TwoFactorController extends Controller
             session()->forget('2fa_user_id');
             auth()->login($user, session('2fa_remember', false));
             session()->forget('2fa_remember');
+            $request->session()->regenerate();
 
             // Create audit log entry for login via 2FA (skip for super admins without church)
             if ($user->church_id) {
@@ -196,6 +197,7 @@ class TwoFactorController extends Controller
             session()->forget('2fa_user_id');
             auth()->login($user, session('2fa_remember', false));
             session()->forget('2fa_remember');
+            $request->session()->regenerate();
 
             // Create audit log entry for login via recovery code (skip for super admins without church)
             if ($user->church_id) {

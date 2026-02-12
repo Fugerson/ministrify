@@ -30,7 +30,7 @@ class GenerateRecurringEvents extends Command
                 continue;
             }
 
-            $this->line("Processing: {$event->title} ({$event->ministry->name})");
+            $this->line("Processing: {$event->title} ({$event->ministry?->name})");
 
             $dates = $this->calculateDates($event, $weeks);
 
@@ -40,15 +40,17 @@ class GenerateRecurringEvents extends Command
                     ->exists();
 
                 if (!$exists) {
-                    Event::create([
-                        'church_id' => $event->church_id,
-                        'ministry_id' => $event->ministry_id,
-                        'title' => $event->title,
-                        'date' => $date,
-                        'time' => $event->time,
-                        'notes' => $event->notes,
-                        'parent_event_id' => $event->id,
-                    ]);
+                    Event::withoutEvents(function () use ($event, $date) {
+                        Event::create([
+                            'church_id' => $event->church_id,
+                            'ministry_id' => $event->ministry_id,
+                            'title' => $event->title,
+                            'date' => $date,
+                            'time' => $event->time,
+                            'notes' => $event->notes,
+                            'parent_event_id' => $event->id,
+                        ]);
+                    });
 
                     $created++;
                     $this->line("  Created event for {$date->format('d.m.Y')}");

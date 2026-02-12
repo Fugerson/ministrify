@@ -970,6 +970,7 @@ class DashboardController extends Controller
 
         $marriedCouples = FamilyRelationship::where('relationship_type', 'spouse')
             ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
+            ->whereHas('relatedPerson', fn($q) => $q->where('church_id', $church->id))
             ->count();
         // Divide by 2 since spouse relationship is bidirectional
         $marriedCouples = intdiv($marriedCouples, 2);

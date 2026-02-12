@@ -234,37 +234,48 @@ class PrivatbankSyncController extends Controller
             abort(403);
         }
 
-        if ($privatTransaction->is_processed) {
-            return back()->with('error', 'Транзакція вже оброблена');
-        }
-
         $request->validate([
             'category_id' => 'required|exists:transaction_categories,id',
             'person_id' => 'nullable|exists:people,id',
             'description' => 'nullable|string|max:500',
         ]);
 
-        // Create transaction
-        $transaction = Transaction::create([
-            'church_id' => $church->id,
-            'direction' => Transaction::DIRECTION_IN,
-            'source_type' => Transaction::SOURCE_DONATION,
-            'amount' => $privatTransaction->amount_uah,
-            'currency' => 'UAH',
-            'category_id' => $request->category_id,
-            'person_id' => $request->person_id,
-            'description' => $request->description ?: $privatTransaction->counterpart_display,
-            'date' => $privatTransaction->privat_time->toDateString(),
-            'status' => Transaction::STATUS_COMPLETED,
-            'payment_method' => Transaction::PAYMENT_CARD,
-        ]);
+        // Use DB transaction with lock to prevent duplicate imports
+        $transaction = \Illuminate\Support\Facades\DB::transaction(function () use ($church, $privatTransaction, $request) {
+            $privatTransaction = PrivatbankTransaction::where('id', $privatTransaction->id)
+                ->lockForUpdate()
+                ->first();
 
-        // Mark as processed
-        $privatTransaction->update([
-            'is_processed' => true,
-            'transaction_id' => $transaction->id,
-            'person_id' => $request->person_id,
-        ]);
+            if ($privatTransaction->is_processed) {
+                return null;
+            }
+
+            $transaction = Transaction::create([
+                'church_id' => $church->id,
+                'direction' => Transaction::DIRECTION_IN,
+                'source_type' => Transaction::SOURCE_DONATION,
+                'amount' => $privatTransaction->amount_uah,
+                'currency' => 'UAH',
+                'category_id' => $request->category_id,
+                'person_id' => $request->person_id,
+                'description' => $request->description ?: $privatTransaction->counterpart_display,
+                'date' => $privatTransaction->privat_time->toDateString(),
+                'status' => Transaction::STATUS_COMPLETED,
+                'payment_method' => Transaction::PAYMENT_CARD,
+            ]);
+
+            $privatTransaction->update([
+                'is_processed' => true,
+                'transaction_id' => $transaction->id,
+                'person_id' => $request->person_id,
+            ]);
+
+            return $transaction;
+        });
+
+        if (!$transaction) {
+            return back()->with('error', 'Транзакція вже оброблена');
+        }
 
         return back()->with('success', 'Транзакцію імпортовано');
     }
@@ -317,33 +328,36 @@ class PrivatbankSyncController extends Controller
         $imported = 0;
 
         foreach ($request->transaction_ids as $id) {
-            $privatTx = PrivatbankTransaction::where('id', $id)
-                ->where('church_id', $church->id)
-                ->where('is_processed', false)
-                ->where('is_income', true)
-                ->first();
+            \Illuminate\Support\Facades\DB::transaction(function () use ($id, $church, $request, &$imported) {
+                $privatTx = PrivatbankTransaction::where('id', $id)
+                    ->where('church_id', $church->id)
+                    ->where('is_processed', false)
+                    ->where('is_income', true)
+                    ->lockForUpdate()
+                    ->first();
 
-            if (!$privatTx) continue;
+                if (!$privatTx) return;
 
-            $transaction = Transaction::create([
-                'church_id' => $church->id,
-                'direction' => Transaction::DIRECTION_IN,
-                'source_type' => Transaction::SOURCE_DONATION,
-                'amount' => $privatTx->amount_uah,
-                'currency' => 'UAH',
-                'category_id' => $request->category_id,
-                'description' => $privatTx->counterpart_display,
-                'date' => $privatTx->privat_time->toDateString(),
-                'status' => Transaction::STATUS_COMPLETED,
-                'payment_method' => Transaction::PAYMENT_CARD,
-            ]);
+                $transaction = Transaction::create([
+                    'church_id' => $church->id,
+                    'direction' => Transaction::DIRECTION_IN,
+                    'source_type' => Transaction::SOURCE_DONATION,
+                    'amount' => $privatTx->amount_uah,
+                    'currency' => 'UAH',
+                    'category_id' => $request->category_id,
+                    'description' => $privatTx->counterpart_display,
+                    'date' => $privatTx->privat_time->toDateString(),
+                    'status' => Transaction::STATUS_COMPLETED,
+                    'payment_method' => Transaction::PAYMENT_CARD,
+                ]);
 
-            $privatTx->update([
-                'is_processed' => true,
-                'transaction_id' => $transaction->id,
-            ]);
+                $privatTx->update([
+                    'is_processed' => true,
+                    'transaction_id' => $transaction->id,
+                ]);
 
-            $imported++;
+                $imported++;
+            });
         }
 
         return back()->with('success', "Імпортовано {$imported} транзакцій");

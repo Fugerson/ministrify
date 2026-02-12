@@ -241,7 +241,7 @@ class GroupAttendanceController extends Controller
         $this->authorize('update', $group);
 
         $validated = $request->validate([
-            'person_id' => 'required|exists:people,id',
+            'person_id' => ['required', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
         ]);
 
         $record = $attendance->records()->where('person_id', $validated['person_id'])->first();
