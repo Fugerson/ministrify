@@ -224,7 +224,7 @@ function musicStand() {
             this.currentSong = {
                 title: item.title,
                 notes: item.notes,
-                chordsHtml: item.notes ? item.notes.replace(/\n/g, '<br>') : null,
+                chordsHtml: item.notes ? item.notes.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') : null,
             };
 
             this.loading = false;

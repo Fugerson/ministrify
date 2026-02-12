@@ -24,7 +24,7 @@
                   fromAmount: '',
                   toAmount: '',
                   rate: {{ $exchangeRates['USD'] ?? 41 }},
-                  nbuRates: {{ json_encode($exchangeRates) }},
+                  nbuRates: @json($exchangeRates),
                   init() {
                       this.updateDefaultRate();
                   },
