@@ -1529,6 +1529,10 @@ class PersonController extends Controller
                 ]);
 
             case 'delete':
+                if (!auth()->user()->canDelete('people')) {
+                    return response()->json(['success' => false, 'message' => 'Недостатньо прав для видалення']);
+                }
+
                 $deletedNames = $people->pluck('full_name')->toArray();
                 foreach ($people as $person) {
                     $person->delete(); // Soft delete
