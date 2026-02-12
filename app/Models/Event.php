@@ -62,6 +62,7 @@ class Event extends Model
         'qr_checkin_enabled' => 'boolean',
         'track_attendance' => 'boolean',
         'reminder_settings' => 'array',
+        'recurrence_rule' => 'array',
         'google_synced_at' => 'datetime',
         'google_sync_status' => 'string',
     ];

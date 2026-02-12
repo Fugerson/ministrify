@@ -207,12 +207,10 @@ class DetectSuspiciousActivity
         $cacheKey = "404_count:{$ip}";
         $max404 = config('security.alerts.max_404_per_minute', 10);
 
-        $count = Cache::increment($cacheKey);
-
-        // Set TTL on first hit
-        if ($count === 1) {
-            Cache::put($cacheKey, 1, 60);
+        if (!Cache::has($cacheKey)) {
+            Cache::put($cacheKey, 0, 60);
         }
+        $count = Cache::increment($cacheKey);
 
         if ($count === $max404) {
             $this->alertService->alert('mass_404', 'Mass 404 detected', [

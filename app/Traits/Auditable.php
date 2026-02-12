@@ -64,7 +64,7 @@ trait Auditable
         }
 
         // Filter out sensitive/technical fields
-        $sensitiveFields = ['password', 'remember_token', 'telegram_bot_token', 'calendar_token'];
+        $sensitiveFields = ['password', 'remember_token', 'telegram_bot_token', 'calendar_token', 'two_factor_secret', 'two_factor_recovery_codes', 'monobank_token', 'privatbank_password', 'privatbank_merchant_id'];
         $oldValues = $this->filterSensitive($oldValues, $sensitiveFields);
         $newValues = $this->filterSensitive($newValues, $sensitiveFields);
 

@@ -147,9 +147,9 @@ class RotationService
     {
         $ministry = $event->ministry;
 
-        // Get members who can serve in this position
+        // Get members who can serve in this position (position_ids is JSON in pivot)
         $members = $ministry->members()
-            ->whereHas('positions', fn($q) => $q->where('positions.id', $position->id))
+            ->whereJsonContains('ministry_person.position_ids', (string) $position->id)
             ->get();
 
         return $members->map(function ($person) use ($event, $position) {
@@ -228,25 +228,26 @@ class RotationService
      */
     protected function getSkillScore(Person $person, Position $position): float
     {
-        // Check if person has this position's skill
-        $hasPosition = $person->positions()
-            ->where('positions.id', $position->id)
-            ->exists();
-
-        if (!$hasPosition) {
+        // Check if person has this position via ministry_person pivot (position_ids is JSON)
+        $ministry = $position->ministry;
+        if (!$ministry) {
             return 0;
         }
 
-        // Get experience level
-        $pivot = $person->positions()
-            ->where('positions.id', $position->id)
-            ->first();
-
-        if (!$pivot) {
-            return 0.5;
+        $pivot = $person->ministries()->where('ministry_id', $ministry->id)->first()?->pivot;
+        if (!$pivot || !$pivot->position_ids) {
+            return 0;
         }
 
-        $level = $pivot->pivot->skill_level ?? 'intermediate';
+        $positionIds = is_array($pivot->position_ids)
+            ? $pivot->position_ids
+            : json_decode($pivot->position_ids, true);
+
+        if (!in_array($position->id, $positionIds ?? [])) {
+            return 0;
+        }
+
+        $level = 'intermediate';
 
         return match($level) {
             'expert' => 1.0,

@@ -232,7 +232,7 @@ class DashboardStatisticsService
 
         $data = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $startDate)
-            ->selectRaw('YEARWEEK(date, 1) as week_key, MIN(date) as week_start, SUM(total_count) as total')
+            ->selectRaw('CONCAT(YEAR(date), LPAD(WEEK(date, 1), 2, "0")) as week_key, MIN(date) as week_start, SUM(total_count) as total')
             ->groupBy('week_key')
             ->orderBy('week_key')
             ->get()
@@ -242,7 +242,7 @@ class DashboardStatisticsService
         $currentWeek = $startDate->copy();
 
         for ($i = 0; $i < $weeks; $i++) {
-            $weekKey = $currentWeek->format('oW');
+            $weekKey = $currentWeek->year . str_pad($currentWeek->weekOfYear, 2, '0', STR_PAD_LEFT);
             $chartData[] = [
                 'label' => $currentWeek->format('d.m'),
                 'value' => (int) ($data[$weekKey]->total ?? 0),

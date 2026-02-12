@@ -348,9 +348,9 @@ class CalendarService
             if (strlen($dateStr) >= 13) {
                 return Carbon::createFromFormat('Ymd\THi', $dateStr);
             }
-            // Date only: 20231225
+            // Date only: 20231225 (all-day event)
             if (strlen($dateStr) >= 8) {
-                return Carbon::createFromFormat('Ymd', substr($dateStr, 0, 8))->setTime(10, 0);
+                return Carbon::createFromFormat('Ymd', substr($dateStr, 0, 8))->startOfDay();
             }
         } catch (\Exception $e) {
             return null;

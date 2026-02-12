@@ -67,7 +67,7 @@ class SendTaskReminders extends Command
 
                 // Group tasks by assignee
                 $allTasks = $tasksDueToday->merge($tasksDueTomorrow)->merge($tasksOverdue);
-                $tasksByAssignee = $allTasks->groupBy('assignee_id');
+                $tasksByAssignee = $allTasks->groupBy('assigned_to');
 
                 foreach ($tasksByAssignee as $assigneeId => $tasks) {
                     if (!$assigneeId) {

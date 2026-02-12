@@ -349,7 +349,7 @@ class SongController extends Controller
     public function importPreview(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:10240',
+            'file' => 'required|file|mimes:csv,txt|max:10240',
         ]);
 
         $file = $request->file('file');
@@ -384,7 +384,7 @@ class SongController extends Controller
     public function importProcess(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:10240',
+            'file' => 'required|file|mimes:csv,txt|max:10240',
             'mappings' => 'required|array',
         ]);
 

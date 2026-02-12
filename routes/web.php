@@ -255,7 +255,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
 
     // People
     Route::resource('people', PersonController::class);
-    Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore');
+    Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore')->withTrashed();
     Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role');
     Route::post('people/{person}/update-email', [PersonController::class, 'updateEmail'])->name('people.update-email');
     Route::post('people/{person}/create-account', [PersonController::class, 'createAccount'])->name('people.create-account');

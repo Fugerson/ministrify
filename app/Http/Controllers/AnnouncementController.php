@@ -49,6 +49,10 @@ class AnnouncementController extends Controller
      */
     public function create()
     {
+        if (!auth()->user()->canCreate('announcements')) {
+            abort(403);
+        }
+
         return view('announcements.create');
     }
 
@@ -57,6 +61,10 @@ class AnnouncementController extends Controller
      */
     public function store(Request $request)
     {
+        if (!auth()->user()->canCreate('announcements')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string|max:10000',

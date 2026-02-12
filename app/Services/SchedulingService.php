@@ -426,15 +426,25 @@ class SchedulingService
      */
     protected function getSkillScore(Person $person, Position $position): float
     {
-        $pivot = $person->positions()
-            ->where('positions.id', $position->id)
-            ->first();
-
-        if (!$pivot) {
+        $ministry = $position->ministry;
+        if (!$ministry) {
             return 0;
         }
 
-        $level = $pivot->pivot->skill_level ?? 'intermediate';
+        $pivot = $person->ministries()->where('ministry_id', $ministry->id)->first()?->pivot;
+        if (!$pivot || !$pivot->position_ids) {
+            return 0;
+        }
+
+        $positionIds = is_array($pivot->position_ids)
+            ? $pivot->position_ids
+            : json_decode($pivot->position_ids, true);
+
+        if (!in_array($position->id, $positionIds ?? [])) {
+            return 0;
+        }
+
+        $level = 'intermediate';
 
         return match($level) {
             'expert' => 1.0,

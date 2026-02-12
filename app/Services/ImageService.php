@@ -26,13 +26,13 @@ class ImageService
         // Read and process image
         $image = Image::read($file);
 
+        // Auto-orient based on EXIF data (must be before resize)
+        $image->orient();
+
         // Resize if wider than max width (maintain aspect ratio)
         if ($image->width() > $maxWidth) {
             $image->scale(width: $maxWidth);
         }
-
-        // Auto-orient based on EXIF data
-        $image->orient();
 
         // Encode as WebP
         $encoded = $image->toWebp($quality);

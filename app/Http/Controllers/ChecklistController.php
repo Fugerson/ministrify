@@ -228,13 +228,15 @@ class ChecklistController extends Controller
     {
         $this->authorizeChecklistItem($item);
 
+        $newValue = !$item->is_completed;
         $item->update([
-            'is_completed' => !$item->is_completed,
-            'completed_by' => $item->is_completed ? null : auth()->id(),
-            'completed_at' => $item->is_completed ? null : now(),
+            'is_completed' => $newValue,
+            'completed_by' => $newValue ? auth()->id() : null,
+            'completed_at' => $newValue ? now() : null,
         ]);
 
         if (request()->wantsJson()) {
+            $item->refresh();
             return response()->json([
                 'success' => true,
                 'is_completed' => $item->is_completed,

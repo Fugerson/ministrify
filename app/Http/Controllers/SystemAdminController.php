@@ -618,18 +618,18 @@ class SystemAdminController extends Controller
             $church->sermonSeries()->delete();
             $church->staffMembers()->delete();
 
-            // Delete gallery images
+            // Delete gallery photos
             foreach ($church->galleries as $gallery) {
-                $gallery->images()->delete();
+                $gallery->photos()->delete();
             }
             $church->galleries()->delete();
 
             // 2. Events related
             foreach ($church->events as $event) {
-                $event->checklists()->delete();
+                $event->checklist()->delete();
                 $event->planItems()->delete();
-                $event->songs()->delete();
-                $event->volunteers()->delete();
+                $event->songs()->detach();
+                $event->assignments()->delete();
             }
             $church->events()->forceDelete();
             $church->eventRegistrations()->delete();
@@ -658,8 +658,10 @@ class SystemAdminController extends Controller
                 // Delete person relationships
                 if (Schema::hasTable('family_relationships')) {
                     DB::table('family_relationships')
-                        ->where('person_id', $person->id)
-                        ->orWhere('related_person_id', $person->id)
+                        ->where(function ($q) use ($person) {
+                            $q->where('person_id', $person->id)
+                              ->orWhere('related_person_id', $person->id);
+                        })
                         ->delete();
                 }
                 // Detach tags

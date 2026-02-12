@@ -176,7 +176,7 @@
     {{-- Permission Overrides Section (hidden for admin roles) --}}
     @if($user->church_role_id && !$user->churchRole?->is_admin_role)
     <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
-         x-data="permissionOverrides()"
+         x-data="permissionOverrides()">
 
         <div class="flex items-center justify-between mb-4">
             <div>

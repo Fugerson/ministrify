@@ -56,10 +56,11 @@ class ThrottleLogin
 
         $response = $next($request);
 
-        // If login failed (redirected back or 422 status), increment attempts
-        if ($response->getStatusCode() === 302 || $response->getStatusCode() === 422) {
+        // If login failed (422 or redirect back with errors), increment attempts
+        if ($response->getStatusCode() === 422 ||
+            ($response->getStatusCode() === 302 && session()->has('errors'))) {
             $this->limiter->hit($key, $decayMinutes * 60);
-        } else {
+        } elseif ($response->getStatusCode() === 200 || ($response->getStatusCode() === 302 && !session()->has('errors'))) {
             // Successful login - clear attempts
             $this->limiter->clear($key);
         }
