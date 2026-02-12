@@ -43,7 +43,6 @@ class MinistryGoalController extends Controller
     {
         $this->authorizeMinistry($ministry);
         abort_unless($goal->ministry_id === $ministry->id, 404);
-        abort_unless($goal->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
