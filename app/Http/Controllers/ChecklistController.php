@@ -99,7 +99,7 @@ class ChecklistController extends Controller
         // Update/create items
         foreach ($validated['items'] as $index => $itemData) {
             if (isset($itemData['id'])) {
-                ChecklistTemplateItem::find($itemData['id'])?->update([
+                $template->items()->where('id', $itemData['id'])->update([
                     'title' => $itemData['title'],
                     'description' => $itemData['description'] ?? null,
                     'order' => $index,

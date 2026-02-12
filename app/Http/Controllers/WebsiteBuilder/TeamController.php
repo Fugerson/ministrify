@@ -35,7 +35,7 @@ class TeamController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'role_category' => 'nullable|string|in:' . implode(',', array_keys(StaffMember::CATEGORIES)),
             'bio' => 'nullable|string|max:2000',
             'email' => 'nullable|email|max:255',
@@ -74,7 +74,7 @@ class TeamController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'role_category' => 'nullable|string|in:' . implode(',', array_keys(StaffMember::CATEGORIES)),
             'bio' => 'nullable|string|max:2000',
             'email' => 'nullable|email|max:255',

@@ -18,13 +18,13 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event?->date?->format('d.m') }} &bull; {{ $assignment->position?->name }}</p>
                     </a>
                     <div class="flex gap-2 flex-shrink-0" x-show="!responding">
-                        <button @click="responding = true; fetch('/api/my-schedule/{{ $assignment->id }}/confirm', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } }).then(() => $el.closest('[x-data]').remove())"
+                        <button @click="responding = true; fetch('/api/pwa/responsibilities/{{ $assignment->id }}/confirm', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } }).then(() => $el.closest('[x-data]').remove())"
                                 class="w-11 h-11 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400 rounded-xl flex items-center justify-center hover:bg-green-200 dark:hover:bg-green-800 active:bg-green-300 dark:active:bg-green-700 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                         </button>
-                        <button @click="responding = true; fetch('/api/my-schedule/{{ $assignment->id }}/decline', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } }).then(() => $el.closest('[x-data]').remove())"
+                        <button @click="responding = true; fetch('/api/pwa/responsibilities/{{ $assignment->id }}/decline', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } }).then(() => $el.closest('[x-data]').remove())"
                                 class="w-11 h-11 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-400 rounded-xl flex items-center justify-center hover:bg-red-200 dark:hover:bg-red-800 active:bg-red-300 dark:active:bg-red-700 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

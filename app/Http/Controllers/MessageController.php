@@ -57,14 +57,14 @@ class MessageController extends Controller
         $validated = $request->validate([
             'message' => 'required|string|max:4000',
             'recipient_type' => 'required|in:all,tag,ministry,group,custom,gender,birthday,membership,age,new_members,role',
-            'tag_id' => 'nullable|exists:tags,id',
-            'ministry_id' => 'nullable|exists:ministries,id',
-            'group_id' => 'nullable|exists:groups,id',
+            'tag_id' => ['nullable', \Illuminate\Validation\Rule::exists('tags', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'ministry_id' => ['nullable', \Illuminate\Validation\Rule::exists('ministries', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'group_id' => ['nullable', \Illuminate\Validation\Rule::exists('groups', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'person_ids' => 'nullable|array',
             'gender' => 'nullable|in:male,female',
             'membership_status' => 'nullable|string',
             'age_group' => 'nullable|in:youth,adults,seniors',
-            'church_role_id' => 'nullable|exists:church_roles,id',
+            'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $churchId = $this->getCurrentChurch()->id;

@@ -231,18 +231,26 @@ class AuthController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            // Auto-login and redirect
+            // Auto-login and redirect (skip if 2FA enabled)
             if (!Auth::check()) {
+                if ($user->two_factor_confirmed_at) {
+                    return redirect()->route('login')->with('success', 'Email вже підтверджено. Увійдіть у свій акаунт.');
+                }
                 Auth::login($user);
+                $request->session()->regenerate();
             }
             return redirect()->route('dashboard')->with('success', 'Email вже підтверджено.');
         }
 
         $user->markEmailAsVerified();
 
-        // Auto-login after verification
+        // Auto-login after verification (skip if 2FA enabled)
         if (!Auth::check()) {
+            if ($user->two_factor_confirmed_at) {
+                return redirect()->route('login')->with('success', 'Email підтверджено! Увійдіть у свій акаунт.');
+            }
             Auth::login($user);
+            $request->session()->regenerate();
         }
 
         return redirect()->route('dashboard')->with('success', 'Email успішно підтверджено!');

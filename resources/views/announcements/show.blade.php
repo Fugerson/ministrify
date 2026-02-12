@@ -33,9 +33,9 @@
                 <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <div class="flex items-center">
                         <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-2">
-                            <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($announcement->author->name, 0, 1) }}</span>
+                            <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($announcement->author?->name ?? '?', 0, 1) }}</span>
                         </div>
-                        <span>{{ $announcement->author->name }}</span>
+                        <span>{{ $announcement->author?->name ?? 'Видалений' }}</span>
                     </div>
                     <span>•</span>
                     <time datetime="{{ $announcement->created_at->toIso8601String() }}">

@@ -73,7 +73,7 @@
                     <h4 class="font-medium text-green-800 dark:text-green-300">{{ $testimony->title }}</h4>
                     <p class="mt-2 text-sm text-green-700 dark:text-green-400 line-clamp-3">{{ $testimony->answer_testimony }}</p>
                     <p class="mt-2 text-xs text-green-600 dark:text-green-500">
-                        {{ $testimony->author_name }} • {{ $testimony->answered_at->diffForHumans() }}
+                        {{ $testimony->author_name }} • {{ $testimony->answered_at?->diffForHumans() }}
                     </p>
                 </div>
             @empty

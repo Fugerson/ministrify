@@ -121,6 +121,7 @@ class ReportsController extends Controller
 
     public function finances(Request $request)
     {
+        abort_unless(auth()->user()->canView('finances'), 403);
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
 

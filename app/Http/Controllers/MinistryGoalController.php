@@ -42,6 +42,8 @@ class MinistryGoalController extends Controller
     public function updateGoal(Request $request, Ministry $ministry, MinistryGoal $goal)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($goal->ministry_id === $ministry->id, 404);
+        abort_unless($goal->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -65,6 +67,7 @@ class MinistryGoalController extends Controller
     public function destroyGoal(Ministry $ministry, MinistryGoal $goal)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($goal->ministry_id === $ministry->id, 404);
 
         $goal->delete();
 
@@ -98,6 +101,7 @@ class MinistryGoalController extends Controller
     public function updateTask(Request $request, Ministry $ministry, MinistryTask $task)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($task->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -123,6 +127,7 @@ class MinistryGoalController extends Controller
     public function toggleTask(Ministry $ministry, MinistryTask $task)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($task->ministry_id === $ministry->id, 404);
 
         $task->toggle();
 
@@ -132,6 +137,7 @@ class MinistryGoalController extends Controller
     public function updateTaskStatus(Request $request, Ministry $ministry, MinistryTask $task)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($task->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'status' => 'required|in:todo,in_progress,done',
@@ -156,6 +162,7 @@ class MinistryGoalController extends Controller
     public function destroyTask(Ministry $ministry, MinistryTask $task)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($task->ministry_id === $ministry->id, 404);
 
         $goal = $task->goal;
         $task->delete();

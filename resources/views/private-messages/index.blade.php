@@ -77,7 +77,7 @@ if(auth()->user()->canCreate('announcements')) {
                     <button type="button"
                         data-user-id="{{ $otherUser->id }}"
                         data-unread="{{ $isUnread ? 'true' : 'false' }}"
-                        @click="selectUser({{ $otherUser->id }}, '{{ addslashes($otherUser->name) }}', '{{ $otherUser->role }}', $el)"
+                        @click="selectUser({{ $otherUser->id }}, @js($otherUser->name), @js($otherUser->role), $el)"
                         class="conversation-btn w-full flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
                         :class="{
                             'bg-primary-50 dark:bg-primary-900/20': selectedUser?.id === {{ $otherUser->id }}
@@ -338,7 +338,7 @@ if(auth()->user()->canCreate('announcements')) {
                             @else
                                 @foreach($availableUsers as $user)
                                     <button type="button"
-                                            @click="composeMode = 'user'; composeRecipient = { id: {{ $user->id }}, name: '{{ addslashes($user->name) }}', role: '{{ $user->role }}' }; showUserDropdown = false; userSearch = ''"
+                                            @click="composeMode = 'user'; composeRecipient = { id: {{ $user->id }}, name: @js($user->name), role: @js($user->role) }; showUserDropdown = false; userSearch = ''"
                                             x-show="userSearch === '' || '{{ mb_strtolower($user->name) }}'.indexOf(userSearch.toLowerCase()) !== -1"
                                             class="w-full flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">

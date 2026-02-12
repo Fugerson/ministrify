@@ -165,6 +165,9 @@ class TwoFactorController extends Controller
         $code = str_replace('-', '', $request->code);
 
         // Try TOTP code first
+        if (!$user->two_factor_secret) {
+            return redirect()->route('login')->with('error', 'Двофакторну автентифікацію не налаштовано.');
+        }
         $secret = decrypt($user->two_factor_secret);
         if ($this->twoFactor->verify($secret, $code)) {
             session()->forget('2fa_user_id');

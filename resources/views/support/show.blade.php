@@ -106,16 +106,16 @@
                 </div>
 
                 <div class="flex items-center justify-between">
-                    <form action="{{ route('support.close', $ticket) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                            Закрити запит
-                        </button>
-                    </form>
+                    <button type="button" onclick="document.getElementById('close-ticket-form').submit()" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                        Закрити запит
+                    </button>
                     <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                         Надіслати
                     </button>
                 </div>
+            </form>
+            <form id="close-ticket-form" action="{{ route('support.close', $ticket) }}" method="POST" class="hidden">
+                @csrf
             </form>
         </div>
     @else

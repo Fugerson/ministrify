@@ -117,6 +117,7 @@ class GroupAttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorize('view', $group);
+        abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
         $attendance->load(['records.person', 'recorder']);
 
@@ -127,6 +128,7 @@ class GroupAttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
+        abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
         $group->load('members');
         $attendance->load('records');
@@ -140,6 +142,7 @@ class GroupAttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
+        abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
         $validated = $request->validate([
             'date' => 'required|date',
@@ -190,6 +193,7 @@ class GroupAttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
+        abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
         $attendance->delete();
 
@@ -239,6 +243,7 @@ class GroupAttendanceController extends Controller
     {
         $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
+        abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
         $validated = $request->validate([
             'person_id' => ['required', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],

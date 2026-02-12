@@ -745,7 +745,7 @@ class BoardController extends Controller
 
         $validated = $request->validate([
             'content' => 'required|string',
-            'files.*' => 'nullable|file|max:10240',
+            'files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip,csv',
         ]);
 
         // Handle file uploads
@@ -929,7 +929,7 @@ class BoardController extends Controller
         $this->authorizeBoard($card->column->board);
 
         $request->validate([
-            'file' => 'required|file|max:10240', // 10MB max
+            'file' => 'required|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip,csv', // 10MB max
         ]);
 
         $file = $request->file('file');

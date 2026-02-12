@@ -53,8 +53,8 @@
                          class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                         @foreach($users as $u)
                         <button type="button"
-                                x-show="'{{ mb_strtolower($u->name) }}'.includes(search.toLowerCase()) || search === ''"
-                                @click="selected = { id: {{ $u->id }}, name: '{{ $u->name }}' }; open = false"
+                                x-show="@js(mb_strtolower($u->name)).includes(search.toLowerCase()) || search === ''"
+                                @click="selected = { id: {{ $u->id }}, name: @js($u->name) }; open = false"
                                 class="w-full flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left">
                             <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
                                 <span class="text-lg font-medium text-primary-600 dark:text-primary-400">{{ mb_substr($u->name, 0, 1) }}</span>
