@@ -43,6 +43,7 @@ class ReportsController extends Controller
 
     public function attendance(Request $request)
     {
+        abort_unless(auth()->user()->canView('reports'), 403);
         $church = $this->getCurrentChurch();
 
         if (!$church->attendance_enabled) {
@@ -105,8 +106,8 @@ class ReportsController extends Controller
 
         // Top attendees
         $topAttendees = Person::where('church_id', $church->id)
+            ->whereHas('attendanceRecords', fn($q) => $q->whereYear('created_at', $year))
             ->withCount(['attendanceRecords' => fn($q) => $q->whereYear('created_at', $year)])
-            ->having('attendance_records_count', '>', 0)
             ->orderByDesc('attendance_records_count')
             ->take(10)
             ->get();
@@ -213,13 +214,14 @@ class ReportsController extends Controller
 
     public function volunteers(Request $request)
     {
+        abort_unless(auth()->user()->canView('reports'), 403);
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
 
         // Top volunteers by assignments
         $topVolunteers = Person::where('church_id', $church->id)
+            ->whereHas('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->whereYear('date', $year)))
             ->withCount(['assignments' => fn($q) => $q->whereHas('event', fn($e) => $e->whereYear('date', $year))])
-            ->having('assignments_count', '>', 0)
             ->orderByDesc('assignments_count')
             ->take(15)
             ->get();
@@ -272,6 +274,7 @@ class ReportsController extends Controller
 
     public function exportFinances(Request $request)
     {
+        abort_unless(auth()->user()->canView('reports'), 403);
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
         $filename = "finances-{$year}.xlsx";
@@ -281,6 +284,7 @@ class ReportsController extends Controller
 
     public function exportAttendance(Request $request)
     {
+        abort_unless(auth()->user()->canView('reports'), 403);
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
         $filename = "attendance-{$year}.xlsx";
@@ -290,6 +294,7 @@ class ReportsController extends Controller
 
     public function exportVolunteers(Request $request)
     {
+        abort_unless(auth()->user()->canView('reports'), 403);
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
         $filename = "volunteers-{$year}.xlsx";

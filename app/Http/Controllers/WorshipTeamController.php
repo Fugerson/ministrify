@@ -282,10 +282,11 @@ class WorshipTeamController extends Controller
             'key' => $validated['key'] ?? null,
         ]);
 
-        // Get the pivot ID (event_song_id)
+        // Get the pivot ID of the just-created record (latest by order)
         $eventSongId = \DB::table('event_songs')
             ->where('event_id', $event->id)
             ->where('song_id', $validated['song_id'])
+            ->orderByDesc('id')
             ->value('id');
 
         if ($request->wantsJson()) {

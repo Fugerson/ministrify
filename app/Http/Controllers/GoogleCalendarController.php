@@ -558,8 +558,7 @@ class GoogleCalendarController extends Controller
                 break;
         }
 
-        $count = $query->count();
-        $query->delete();
+        $count = $query->delete();
 
         return response()->json([
             'success' => true,
