@@ -26,7 +26,7 @@ services:
       - SESSION_LIFETIME=120
       - SESSION_SECURE_COOKIE=true
       - REDIS_HOST=redis
-      - REDIS_PASSWORD=null
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - REDIS_PORT=6379
       - MAIL_MAILER=${MAIL_MAILER:-smtp}
       - MAIL_HOST=${MAIL_HOST:-localhost}
@@ -128,7 +128,7 @@ services:
       - QUEUE_CONNECTION=redis
       - SESSION_DRIVER=redis
       - REDIS_HOST=redis
-      - REDIS_PASSWORD=null
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - REDIS_PORT=6379
       - MAIL_MAILER=${MAIL_MAILER:-smtp}
       - MAIL_HOST=${MAIL_HOST:-localhost}
@@ -154,7 +154,7 @@ services:
     container_name: ministrify_scheduler
     restart: always
     working_dir: /var/www/html
-    command: /bin/sh -c "while true; do php artisan schedule:run --verbose --no-interaction & sleep 60; done"
+    command: /bin/sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
     environment:
       - APP_NAME=Ministrify
       - APP_ENV=production
@@ -172,7 +172,7 @@ services:
       - QUEUE_CONNECTION=redis
       - SESSION_DRIVER=redis
       - REDIS_HOST=redis
-      - REDIS_PASSWORD=null
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - REDIS_PORT=6379
       - ALERT_TELEGRAM_BOT_TOKEN=${ALERT_TELEGRAM_BOT_TOKEN:-}
       - ALERT_TELEGRAM_CHAT_ID=${ALERT_TELEGRAM_CHAT_ID:-}
@@ -199,7 +199,7 @@ services:
     container_name: ministrify_phpmyadmin
     restart: always
     ports:
-      - "8888:80"
+      - "127.0.0.1:8888:80"
     environment:
       PMA_HOST: mysql
       UPLOAD_LIMIT: 100M
