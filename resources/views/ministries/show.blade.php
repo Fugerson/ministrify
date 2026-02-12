@@ -2345,7 +2345,7 @@
                                     <!-- Notes -->
                                     <div x-show="viewingSong.notes" class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                                         <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                                            <span class="font-medium">Коментарі:</span> <span x-html="(viewingSong.notes || '').replace(/(https?:\/\/[^\s<]+)/g, '<a href=&quot;$1&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;underline text-blue-600 dark:text-blue-400 hover:text-blue-800&quot;>$1</a>')"></span>
+                                            <span class="font-medium">Коментарі:</span> <span x-text="viewingSong.notes"></span>
                                         </p>
                                     </div>
 

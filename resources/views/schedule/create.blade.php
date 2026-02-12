@@ -3,9 +3,9 @@
 @section('title', 'Створити подію')
 
 @php
-    $ministriesJson = $ministries->map(function($m) {
+    $ministriesData = $ministries->map(function($m) {
         return ['id' => $m->id, 'name' => $m->name, 'color' => $m->color];
-    })->values()->toJson();
+    })->values();
 @endphp
 
 @section('content')
@@ -132,7 +132,7 @@
                 @if($ministries->count() > 0)
                 <div x-data="{
                     selectedId: '{{ $selectedMinistry ?? old('ministry_id', '') }}',
-                    ministries: {!! $ministriesJson !!},
+                    ministries: @json($ministriesData),
                     get selected() {
                         const self = this;
                         return this.ministries.find(function(m) { return m.id == self.selectedId; });

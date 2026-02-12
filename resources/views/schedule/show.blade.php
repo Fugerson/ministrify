@@ -6,18 +6,13 @@
 @endsection
 
 @php
-    $ministriesJson = $ministries->map(function($m) {
+    $ministriesData = $ministries->map(function($m) {
         return ['id' => $m->id, 'name' => $m->name, 'color' => $m->color];
-    })->values()->toJson();
+    })->values();
 
-    $availablePeopleJson = $event->responsibilities->map(function($r) {
+    $availablePeopleData = $event->responsibilities->map(function($r) {
         return ['id' => $r->person_id, 'name' => $r->person?->full_name ?? 'Невідомий'];
-    })->unique('id')->values()->toJson();
-
-    // All church members for plan item assignment (as JSON for Alpine.js)
-    $allPeopleJson = $allPeople->map(function($p) {
-        return ['id' => $p->id, 'name' => $p->full_name, 'hasTelegram' => (bool)$p->telegram_chat_id];
-    })->values()->toJson();
+    })->unique('id')->values();
 
     // Fallback for songs autocomplete
     if (!isset($songsForAutocomplete)) {
@@ -1428,7 +1423,7 @@ function eventEditor() {
         isSundayService: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
         hasMusic: {{ $event->has_music ? 'true' : 'false' }},
         trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }},
-        ministries: {!! $ministriesJson !!},
+        ministries: @json($ministriesData),
 
         // Store original values to detect changes
         _original: {
@@ -2399,7 +2394,7 @@ function reminderManager() {
             person_ids: r.person_ids || []
         })),
         saving: false,
-        availablePeople: {!! $availablePeopleJson !!},
+        availablePeople: @json($availablePeopleData),
 
         addReminder() {
             this.reminders.push({

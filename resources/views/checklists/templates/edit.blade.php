@@ -3,9 +3,9 @@
 @section('title', 'Редагувати шаблон')
 
 @php
-    $templateItemsJson = $template->items->map(function($i) {
+    $templateItemsData = $template->items->map(function($i) {
         return ['id' => $i->id, 'title' => $i->title, 'description' => $i->description];
-    })->toJson();
+    });
 @endphp
 
 @section('content')
@@ -110,7 +110,7 @@
 <script>
 function checklistForm() {
     return {
-        items: {!! $templateItemsJson !!},
+        items: @json($templateItemsData),
 
         addItem() {
             this.items.push({ id: null, title: '', description: '' });

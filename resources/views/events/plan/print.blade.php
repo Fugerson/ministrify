@@ -261,7 +261,7 @@
                             $songId = $matches[1];
                             $song = $songsById->get($songId);
                             if ($song) {
-                                $key = $song->key ? " ({$song->key})" : '';
+                                $key = $song->key ? " (" . e($song->key) . ")" : '';
                                 return '<strong>🎵 ' . e($song->title) . $key . '</strong>';
                             }
                             return $matches[0];
