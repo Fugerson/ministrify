@@ -990,7 +990,6 @@ class PersonController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Обліковий запис створено. Лист для встановлення пароля надіслано на email.',
-            'password' => $password,
             'email_sent' => true,
         ]);
     }
@@ -1020,7 +1019,7 @@ class PersonController extends Controller
 
         return response()->json([
             'success' => true,
-            'password' => $password,
+            'message' => 'Пароль скинуто. Лист надіслано на email.',
             'email_sent' => true,
         ]);
     }

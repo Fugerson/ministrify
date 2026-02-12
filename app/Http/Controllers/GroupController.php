@@ -131,6 +131,10 @@ class GroupController extends Controller
             'role' => 'nullable|string',
         ]);
 
+        if ($group->members()->where('people.id', $validated['person_id'])->exists()) {
+            return back()->with('error', 'Ця людина вже є учасником групи.');
+        }
+
         $group->members()->attach($validated['person_id'], [
             'role' => $validated['role'] ?? 'member',
             'joined_at' => now(),

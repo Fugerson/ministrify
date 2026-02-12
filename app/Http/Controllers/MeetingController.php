@@ -83,6 +83,7 @@ class MeetingController extends Controller
     public function show(Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $meeting->load(['agendaItems.responsible', 'materials', 'attendees.person', 'copiedFrom']);
 
@@ -97,6 +98,7 @@ class MeetingController extends Controller
     public function edit(Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $members = $ministry->members()->orderBy('first_name')->get();
 
@@ -106,6 +108,7 @@ class MeetingController extends Controller
     public function update(Request $request, Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -129,6 +132,7 @@ class MeetingController extends Controller
     public function destroy(Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $meeting->delete();
 
@@ -139,6 +143,7 @@ class MeetingController extends Controller
     public function copy(Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         return view('meetings.copy', compact('ministry', 'meeting'));
     }
@@ -305,6 +310,7 @@ class MeetingController extends Controller
     public function markAllAttended(Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $meeting->attendees()->where('status', '!=', 'absent')->update(['status' => 'attended']);
 

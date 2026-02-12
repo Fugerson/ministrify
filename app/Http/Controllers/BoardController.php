@@ -14,6 +14,7 @@ use App\Models\Group;
 use App\Models\Ministry;
 use App\Models\Person;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BoardController extends Controller
 {
@@ -659,20 +660,22 @@ class BoardController extends Controller
             abort(403, 'Колонка не належить цій дошці.');
         }
 
-        // Update positions in the old column
-        BoardCard::where('column_id', $card->column_id)
-            ->where('position', '>', $card->position)
-            ->decrement('position');
+        DB::transaction(function () use ($card, $validated) {
+            // Update positions in the old column
+            BoardCard::where('column_id', $card->column_id)
+                ->where('position', '>', $card->position)
+                ->decrement('position');
 
-        // Update positions in the new column
-        BoardCard::where('column_id', $validated['column_id'])
-            ->where('position', '>=', $validated['position'])
-            ->increment('position');
+            // Update positions in the new column
+            BoardCard::where('column_id', $validated['column_id'])
+                ->where('position', '>=', $validated['position'])
+                ->increment('position');
 
-        $card->update([
-            'column_id' => $validated['column_id'],
-            'position' => $validated['position'],
-        ]);
+            $card->update([
+                'column_id' => $validated['column_id'],
+                'position' => $validated['position'],
+            ]);
+        });
 
         return response()->json(['success' => true]);
     }

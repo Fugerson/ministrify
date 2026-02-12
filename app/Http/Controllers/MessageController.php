@@ -67,8 +67,8 @@ class MessageController extends Controller
             'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
-        $churchId = $this->getCurrentChurch()->id;
-        $church = auth()->user()->church;
+        $church = $this->getCurrentChurch();
+        $churchId = $church->id;
         $recipients = $this->getRecipients($request, $churchId);
 
         if ($recipients->isEmpty()) {
@@ -205,7 +205,7 @@ class MessageController extends Controller
                 break;
             case 'role':
                 if ($request->church_role_id) {
-                    $query->where('church_role_id', $request->church_role_id);
+                    $query->whereHas('user', fn($q) => $q->where('church_role_id', $request->church_role_id));
                 }
                 break;
         }
