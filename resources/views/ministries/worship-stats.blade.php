@@ -108,7 +108,7 @@
                                 {{ $index + 1 }}
                             </span>
                             <div class="flex-1 min-w-0">
-                                <p class="font-medium text-gray-900 dark:text-white truncate">{{ $participant->person->full_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white truncate">{{ $participant->person?->full_name ?? 'Видалено' }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
                                     @foreach($participant->roles as $role)
                                         <span class="inline-block">{{ $role->name }}{{ !$loop->last ? ',' : '' }}</span>

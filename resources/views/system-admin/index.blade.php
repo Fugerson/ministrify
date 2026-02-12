@@ -192,11 +192,11 @@ const textColor = isDark ? '#9ca3af' : '#6b7280';
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: {!! json_encode(array_column($monthlyGrowth, 'month')) !!},
+        labels: @json(array_column($monthlyGrowth, 'month')),
         datasets: [
             {
                 label: 'Церкви',
-                data: {!! json_encode(array_column($monthlyGrowth, 'churches')) !!},
+                data: @json(array_column($monthlyGrowth, 'churches')),
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 tension: 0.3,
@@ -204,7 +204,7 @@ new Chart(ctx, {
             },
             {
                 label: 'Користувачі',
-                data: {!! json_encode(array_column($monthlyGrowth, 'users')) !!},
+                data: @json(array_column($monthlyGrowth, 'users')),
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 tension: 0.3,
@@ -212,7 +212,7 @@ new Chart(ctx, {
             },
             {
                 label: 'Люди',
-                data: {!! json_encode(array_column($monthlyGrowth, 'people')) !!},
+                data: @json(array_column($monthlyGrowth, 'people')),
                 borderColor: '#8b5cf6',
                 backgroundColor: 'rgba(139, 92, 246, 0.1)',
                 tension: 0.3,

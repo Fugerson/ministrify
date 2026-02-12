@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\GoogleCalendarService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class GoogleCalendarController extends Controller
 {
@@ -166,7 +167,7 @@ class GoogleCalendarController extends Controller
 
         $validated = $request->validate([
             'calendar_id' => 'required|string',
-            'ministry_id' => 'nullable|integer|exists:ministries,id',
+            'ministry_id' => ['nullable', 'integer', Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
         ]);
 
         $ministryId = $validated['ministry_id'] ?? null;
@@ -251,7 +252,7 @@ class GoogleCalendarController extends Controller
 
         $validated = $request->validate([
             'calendar_id' => 'required|string',
-            'ministry_id' => 'nullable|integer|exists:ministries,id',
+            'ministry_id' => ['nullable', 'integer', Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
         ]);
 
         $result = $this->googleCalendar->importFromGoogle(
@@ -295,7 +296,7 @@ class GoogleCalendarController extends Controller
 
         $validated = $request->validate([
             'calendar_id' => 'required|string',
-            'ministry_id' => 'nullable|integer|exists:ministries,id',
+            'ministry_id' => ['nullable', 'integer', Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
         ]);
 
         $result = $this->googleCalendar->previewImport(
@@ -332,7 +333,7 @@ class GoogleCalendarController extends Controller
         $validated = $request->validate([
             'calendars' => 'required|array|min:1',
             'calendars.*.calendar_id' => 'required|string',
-            'calendars.*.ministry_id' => 'nullable|integer|exists:ministries,id',
+            'calendars.*.ministry_id' => ['nullable', 'integer', Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
         ]);
 
         // Deduplicate by calendar_id
@@ -474,7 +475,7 @@ class GoogleCalendarController extends Controller
 
         $validated = $request->validate([
             'calendar_id' => 'required|string',
-            'ministry_id' => 'nullable|integer|exists:ministries,id',
+            'ministry_id' => ['nullable', 'integer', Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
             'resolutions' => 'required|array',
             'resolutions.*.google_event_id' => 'required|string',
             'resolutions.*.action' => 'required|in:skip,import,replace',

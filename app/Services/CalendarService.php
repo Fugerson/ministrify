@@ -323,9 +323,9 @@ class CalendarService
             return null;
         }
 
-        // Default time to 10:00 if not specified
+        // All-day events: keep time as null
         if (!isset($data['time']) || !$data['time']) {
-            $data['time'] = Carbon::parse($data['date']->format('Y-m-d') . ' 10:00');
+            $data['time'] = null;
         }
 
         return $data;

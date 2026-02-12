@@ -854,6 +854,7 @@
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($person->assignments->take(10) as $assignment)
+                @if($assignment->event)
                 <a href="{{ route('events.show', $assignment->event) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $assignment->event->ministry?->color ?? '#3b82f6' }}30;">
@@ -874,6 +875,7 @@
                         {{ $assignment->status_label }}
                     </span>
                 </a>
+                @endif
             @endforeach
         </div>
     </div>
@@ -945,6 +947,7 @@
         @if($familyMembers->count() > 0)
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($familyMembers as $member)
+            @if($member->person)
             <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <a href="{{ route('people.show', $member->person) }}" class="flex items-center gap-3 flex-1 min-w-0">
                     @if($member->person->photo)
@@ -965,6 +968,7 @@
                     </div>
                 </a>
             </div>
+            @endif
             @endforeach
         </div>
         @else

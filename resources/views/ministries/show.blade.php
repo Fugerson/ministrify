@@ -3088,7 +3088,7 @@
                             Видалення команди є незворотнім. Всі дані команди (цілі, задачі, ресурси) будуть втрачені.
                         </p>
                         <button type="button"
-                                onclick="if(confirm('Видалити команду «{{ $ministry->name }}»? Ця дія незворотна і видалить всі дані команди.')) { document.getElementById('delete-ministry-form').submit(); }"
+                                onclick="if(confirm('Видалити команду «' + @js($ministry->name) + '»? Ця дія незворотна і видалить всі дані команди.')) { document.getElementById('delete-ministry-form').submit(); }"
                                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                             Видалити команду
                         </button>

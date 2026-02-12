@@ -10,7 +10,7 @@
         <span class="text-xs text-gray-500 dark:text-gray-400">Наступні 7 днів</span>
     </div>
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
-        @forelse($volunteerSchedule->groupBy(fn($a) => $a->event->date->format('Y-m-d')) as $date => $assignments)
+        @forelse($volunteerSchedule->filter(fn($a) => $a->event)->groupBy(fn($a) => $a->event->date->format('Y-m-d')) as $date => $assignments)
         <div class="p-4">
             {{-- Date header --}}
             <div class="flex items-center gap-2 mb-3">

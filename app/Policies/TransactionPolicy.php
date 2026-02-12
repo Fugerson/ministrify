@@ -26,7 +26,7 @@ class TransactionPolicy
 
         // Ministry leaders can view their ministry transactions
         if ($transaction->ministry_id && $user->isLeader() && $user->person) {
-            if ($transaction->ministry->leader_id === $user->person->id) {
+            if ($transaction->ministry && $transaction->ministry->leader_id === $user->person->id) {
                 return true;
             }
         }

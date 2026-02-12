@@ -605,6 +605,7 @@
                 @else
                 <div class="space-y-3">
                     @foreach($upcomingAssignments->take(5) as $assignment)
+                    @if($assignment->event)
                     <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
                         <div>
                             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignment->event->date->format('d.m') }} - {{ $assignment->event->ministry?->name ?? $assignment->event->title }}</p>
@@ -617,6 +618,7 @@
                             @endif
                         </span>
                     </div>
+                    @endif
                     @endforeach
                 </div>
                 @endif

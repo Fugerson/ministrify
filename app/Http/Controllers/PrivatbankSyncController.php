@@ -8,6 +8,7 @@ use App\Models\TransactionCategory;
 use App\Models\Person;
 use App\Services\PrivatbankService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
 class PrivatbankSyncController extends Controller
@@ -235,8 +236,8 @@ class PrivatbankSyncController extends Controller
         }
 
         $request->validate([
-            'category_id' => 'required|exists:transaction_categories,id',
-            'person_id' => 'nullable|exists:people,id',
+            'category_id' => ['required', Rule::exists('transaction_categories', 'id')->where('church_id', $church->id)],
+            'person_id' => ['nullable', Rule::exists('people', 'id')->where('church_id', $church->id)],
             'description' => 'nullable|string|max:500',
         ]);
 
@@ -322,7 +323,7 @@ class PrivatbankSyncController extends Controller
         $request->validate([
             'transaction_ids' => 'required|array|min:1',
             'transaction_ids.*' => 'integer',
-            'category_id' => 'required|exists:transaction_categories,id',
+            'category_id' => ['required', Rule::exists('transaction_categories', 'id')->where('church_id', $church->id)],
         ]);
 
         $imported = 0;

@@ -116,7 +116,7 @@
                                 <div class="space-y-1">
                                     @foreach($roleMembers as $member)
                                         <div class="flex items-center justify-between py-1">
-                                            <span class="text-sm text-gray-900 dark:text-white">{{ $member->person->full_name }}</span>
+                                            <span class="text-sm text-gray-900 dark:text-white">{{ $member->person?->full_name ?? 'Видалено' }}</span>
                                             <form action="{{ route('events.worship-team.remove', [$event, $member]) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')

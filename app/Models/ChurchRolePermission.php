@@ -88,6 +88,12 @@ class ChurchRolePermission extends Model
             'actions' => ['view', 'edit'],
             'description' => 'Публічний сайт церкви',
         ],
+        'attendance' => [
+            'label' => 'Відвідуваність',
+            'icon' => 'clipboard-check',
+            'actions' => ['view', 'create', 'edit', 'delete'],
+            'description' => 'Облік відвідуваності',
+        ],
         'settings' => [
             'label' => 'Налаштування',
             'icon' => 'cog',

@@ -9,6 +9,7 @@ use App\Models\BlogCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class BlogController extends Controller
 {
@@ -49,7 +50,7 @@ class BlogController extends Controller
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string',
             'featured_image' => 'nullable|image|max:2048',
-            'blog_category_id' => 'nullable|exists:blog_categories,id',
+            'blog_category_id' => ['nullable', Rule::exists('blog_categories', 'id')->where('church_id', $church->id)],
             'tags' => 'nullable|array',
             'status' => 'required|string|in:draft,published,scheduled,archived',
             'published_at' => 'nullable|date',
@@ -110,7 +111,7 @@ class BlogController extends Controller
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string',
             'featured_image' => 'nullable|image|max:2048',
-            'blog_category_id' => 'nullable|exists:blog_categories,id',
+            'blog_category_id' => ['nullable', Rule::exists('blog_categories', 'id')->where('church_id', $church->id)],
             'tags' => 'nullable|array',
             'status' => 'required|string|in:draft,published,scheduled,archived',
             'published_at' => 'nullable|date',

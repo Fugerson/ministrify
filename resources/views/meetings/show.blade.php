@@ -387,6 +387,7 @@
             @else
             <div class="grid gap-2">
                 @foreach($meeting->attendees as $attendee)
+                @if($attendee->person)
                 <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                     <div class="flex items-center gap-3">
                         @if($attendee->person->photo)
@@ -432,6 +433,7 @@
                         </form>
                     </div>
                 </div>
+                @endif
                 @endforeach
             </div>
             @endif

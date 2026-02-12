@@ -39,6 +39,7 @@
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($attendance->records->where('present', true) as $record)
+                @if($record->person)
                 <div class="px-6 py-3 flex items-center">
                     <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                         <span class="text-gray-600 dark:text-gray-400 text-sm">{{ substr($record->person->first_name, 0, 1) }}</span>
@@ -47,6 +48,7 @@
                         {{ $record->person->full_name }}
                     </a>
                 </div>
+                @endif
             @endforeach
         </div>
     </div>

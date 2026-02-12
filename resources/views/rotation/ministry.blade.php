@@ -101,12 +101,14 @@
                         <!-- Assignments Preview -->
                         <div class="flex -space-x-2">
                             @foreach($event->assignments->take(4) as $assignment)
+                            @if($assignment->person)
                             <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center border-2 border-white dark:border-gray-800"
                                  title="{{ $assignment->person->full_name }}">
                                 <span class="text-xs font-medium text-primary-600 dark:text-primary-400">
                                     {{ mb_substr($assignment->person->first_name, 0, 1) }}
                                 </span>
                             </div>
+                            @endif
                             @endforeach
                             @if($event->assignments->count() > 4)
                             <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center border-2 border-white dark:border-gray-800">
@@ -159,7 +161,7 @@
                             <div class="flex -space-x-1">
                                 @foreach($positionAssignments->take(3) as $assignment)
                                 <div class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-[10px] font-medium text-primary-600 dark:text-primary-400 border border-white dark:border-gray-700">
-                                    {{ mb_substr($assignment->person->first_name, 0, 1) }}
+                                    {{ mb_substr($assignment->person?->first_name ?? '?', 0, 1) }}
                                 </div>
                                 @endforeach
                             </div>

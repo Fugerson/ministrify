@@ -94,7 +94,7 @@
                     </a>
                     @if(isset($upcomingEvents[$ministry->id]) && $upcomingEvents[$ministry->id]->count() > 0)
                     <button type="button"
-                            onclick="autoAssignMinistry({{ $ministry->id }}, '{{ $ministry->name }}')"
+                            onclick="autoAssignMinistry({{ $ministry->id }}, @js($ministry->name))"
                             class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors text-center text-sm">
                         Авто-розподіл
                     </button>

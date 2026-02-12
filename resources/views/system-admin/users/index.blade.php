@@ -94,6 +94,7 @@
                             <span class="px-2 py-1 bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 text-xs rounded-full">Super Admin</span>
                             @endif
                             @forelse($user->churchMemberships ?? collect() as $membership)
+                            @if($membership->church)
                             <div class="flex items-center gap-2 {{ !$loop->first ? 'mt-1' : '' }}">
                                 @if($membership->church->id === $user->church_id)
                                 <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Активна"></span>
@@ -112,6 +113,7 @@
                                 <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 text-xs rounded-full whitespace-nowrap">Очікує</span>
                                 @endif
                             </div>
+                            @endif
                             @empty
                                 @if(!$user->is_super_admin)
                                 <span class="text-gray-400 dark:text-gray-500 text-sm">Без церкви</span>
@@ -133,7 +135,7 @@
                                         </button>
                                     </form>
                                     <form method="POST" action="{{ route('system.users.forceDelete', $user->id) }}"
-                                          onsubmit="return confirm('УВАГА! Видалити користувача {{ $user->name }} НАЗАВЖДИ? Цю дію неможливо скасувати!')" class="inline">
+                                          onsubmit="return confirm('УВАГА! Видалити користувача ' + @js($user->name) + ' НАЗАВЖДИ? Цю дію неможливо скасувати!')" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити назавжди">
@@ -161,7 +163,7 @@
                                     </a>
                                     @if($user->id !== auth()->id())
                                     <form method="POST" action="{{ route('system.users.destroy', $user) }}"
-                                          onsubmit="return confirm('Видалити користувача {{ $user->name }}? (можна буде відновити)')" class="inline">
+                                          onsubmit="return confirm('Видалити користувача ' + @js($user->name) + '? (можна буде відновити)')" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Видалити">
@@ -220,7 +222,7 @@
                             </button>
                         </form>
                         <form method="POST" action="{{ route('system.users.forceDelete', $user->id) }}"
-                              onsubmit="return confirm('УВАГА! Видалити користувача {{ $user->name }} НАЗАВЖДИ? Цю дію неможливо скасувати!')" class="inline">
+                              onsubmit="return confirm('УВАГА! Видалити користувача ' + @js($user->name) + ' НАЗАВЖДИ? Цю дію неможливо скасувати!')" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити назавжди">
@@ -248,7 +250,7 @@
                         </a>
                         @if($user->id !== auth()->id())
                         <form method="POST" action="{{ route('system.users.destroy', $user) }}"
-                              onsubmit="return confirm('Видалити користувача {{ $user->name }}? (можна буде відновити)')" class="inline">
+                              onsubmit="return confirm('Видалити користувача ' + @js($user->name) + '? (можна буде відновити)')" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg" title="Видалити">
@@ -267,6 +269,7 @@
                 <span class="px-2 py-1 bg-indigo-100 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 rounded-full">Super Admin</span>
                 @endif
                 @forelse($user->churchMemberships ?? collect() as $membership)
+                @if($membership->church)
                 <div class="flex items-center gap-1.5">
                     @if($membership->church->id === $user->church_id)
                     <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Активна"></span>
@@ -285,6 +288,7 @@
                     <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 rounded-full whitespace-nowrap">Очікує</span>
                     @endif
                 </div>
+                @endif
                 @empty
                     @if(!$user->is_super_admin)
                     <span class="text-gray-400 dark:text-gray-500">Без церкви</span>

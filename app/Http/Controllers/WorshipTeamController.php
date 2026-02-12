@@ -10,6 +10,7 @@ use App\Models\PersonWorshipSkill;
 use App\Models\Song;
 use App\Models\WorshipRole;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class WorshipTeamController extends Controller
 {
@@ -269,7 +270,7 @@ class WorshipTeamController extends Controller
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
-            'song_id' => 'required|exists:songs,id',
+            'song_id' => ['required', Rule::exists('songs', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'key' => 'nullable|string|max:10',
         ]);
 
@@ -348,8 +349,8 @@ class WorshipTeamController extends Controller
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
-            'person_id' => 'required|exists:people,id',
-            'worship_role_id' => 'required|exists:worship_roles,id',
+            'person_id' => ['required', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'worship_role_id' => ['required', Rule::exists('worship_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'event_song_id' => 'nullable|exists:event_songs,id',
             'notes' => 'nullable|string|max:255',
         ]);
@@ -482,8 +483,8 @@ class WorshipTeamController extends Controller
 
         $validated = $request->validate([
             'skills' => 'nullable|array',
-            'skills.*' => 'exists:worship_roles,id',
-            'primary_skill' => 'nullable|exists:worship_roles,id',
+            'skills.*' => [Rule::exists('worship_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'primary_skill' => ['nullable', Rule::exists('worship_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         // Remove all existing skills

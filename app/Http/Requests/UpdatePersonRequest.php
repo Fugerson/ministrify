@@ -45,7 +45,7 @@ class UpdatePersonRequest extends FormRequest
             'notes' => 'nullable|string|max:5000',
             'shepherd_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
+            'tags.*' => [Rule::exists('tags', 'id')->where('church_id', $this->user()->church_id)],
         ];
     }
 

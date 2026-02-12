@@ -26,7 +26,7 @@
                     <h4 class="font-medium text-sm text-gray-900 dark:text-white line-clamp-2 mb-2">{{ $task->title }}</h4>
                     <div class="flex items-center gap-1.5 mb-2">
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                            {{ $task->column->name }}
+                            {{ $task->column?->name }}
                         </span>
                         @if($task->priority === 'urgent')
                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400">

@@ -276,7 +276,7 @@
                                         @if(!$tx->is_processed && !$tx->is_ignored && $tx->is_income)
                                             <!-- Import Modal Trigger -->
                                             <button type="button"
-                                                    onclick="openImportModal({{ $tx->id }}, '{{ $tx->counterpart_display }}', {{ $tx->amount_uah }})"
+                                                    onclick="openImportModal({{ $tx->id }}, @js($tx->counterpart_display), {{ $tx->amount_uah }})"
                                                     class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 text-sm">
                                                 Імпорт
                                             </button>

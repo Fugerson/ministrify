@@ -6,6 +6,7 @@ use App\Models\BlockoutDate;
 use App\Models\Ministry;
 use App\Models\Person;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BlockoutDateController extends Controller
 {
@@ -69,7 +70,7 @@ class BlockoutDateController extends Controller
             'reason_note' => 'nullable|string|max:255',
             'applies_to_all' => 'boolean',
             'ministry_ids' => 'nullable|array',
-            'ministry_ids.*' => 'exists:ministries,id',
+            'ministry_ids.*' => [Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
             'recurrence' => 'required|in:none,weekly,biweekly,monthly,custom',
             'recurrence_end_date' => 'nullable|date|after:end_date',
         ]);
@@ -139,7 +140,7 @@ class BlockoutDateController extends Controller
             'reason_note' => 'nullable|string|max:255',
             'applies_to_all' => 'boolean',
             'ministry_ids' => 'nullable|array',
-            'ministry_ids.*' => 'exists:ministries,id',
+            'ministry_ids.*' => [Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
             'recurrence' => 'required|in:none,weekly,biweekly,monthly,custom',
             'recurrence_end_date' => 'nullable|date|after:end_date',
         ]);

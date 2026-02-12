@@ -94,6 +94,7 @@
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($attendance->records->sortByDesc('present') as $record)
+            @if($record->person)
             <div class="p-4 flex items-center justify-between {{ $record->present ? '' : 'opacity-50' }}">
                 <div class="flex items-center">
                     @if($record->person->photo)
@@ -133,6 +134,7 @@
                     @endif
                 </div>
             </div>
+            @endif
             @endforeach
         </div>
     </div>

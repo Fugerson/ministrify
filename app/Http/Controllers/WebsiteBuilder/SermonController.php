@@ -8,6 +8,7 @@ use App\Models\Sermon;
 use App\Models\SermonSeries;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class SermonController extends Controller
 {
@@ -38,8 +39,8 @@ class SermonController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:5000',
-            'sermon_series_id' => 'nullable|exists:sermon_series,id',
-            'speaker_id' => 'nullable|exists:staff_members,id',
+            'sermon_series_id' => ['nullable', Rule::exists('sermon_series', 'id')->where('church_id', $church->id)],
+            'speaker_id' => ['nullable', Rule::exists('staff_members', 'id')->where('church_id', $church->id)],
             'speaker_name' => 'nullable|string|max:255',
             'sermon_date' => 'required|date',
             'video_url' => 'nullable|url|max:500',
@@ -85,8 +86,8 @@ class SermonController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:5000',
-            'sermon_series_id' => 'nullable|exists:sermon_series,id',
-            'speaker_id' => 'nullable|exists:staff_members,id',
+            'sermon_series_id' => ['nullable', Rule::exists('sermon_series', 'id')->where('church_id', $church->id)],
+            'speaker_id' => ['nullable', Rule::exists('staff_members', 'id')->where('church_id', $church->id)],
             'speaker_name' => 'nullable|string|max:255',
             'sermon_date' => 'required|date',
             'video_url' => 'nullable|url|max:500',
