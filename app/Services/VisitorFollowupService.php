@@ -45,7 +45,7 @@ class VisitorFollowupService
             'priority' => 'high',
             'due_date' => now()->addDays(3),
             'position' => 0,
-            'labels' => json_encode(['follow-up', 'guest']),
+            'labels' => ['follow-up', 'guest'],
         ]);
 
         // Create welcome call task if phone exists
@@ -57,7 +57,7 @@ class VisitorFollowupService
                 'priority' => 'medium',
                 'due_date' => now()->addDays(1),
                 'position' => 1,
-                'labels' => json_encode(['follow-up', 'call']),
+                'labels' => ['follow-up', 'call'],
             ]);
         }
     }

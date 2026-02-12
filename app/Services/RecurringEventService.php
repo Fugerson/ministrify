@@ -148,7 +148,8 @@ class RecurringEventService
      */
     public function deleteFutureRecurringEvents(Event $parentEvent): int
     {
-        return Event::where('parent_event_id', $parentEvent->id)
+        return Event::where('church_id', $parentEvent->church_id)
+            ->where('parent_event_id', $parentEvent->id)
             ->where('date', '>', now())
             ->delete();
     }
@@ -161,7 +162,8 @@ class RecurringEventService
         $allowedFields = ['title', 'time', 'notes', 'is_service', 'track_attendance'];
         $updateData = array_intersect_key($data, array_flip($allowedFields));
 
-        return Event::where('parent_event_id', $parentEvent->id)
+        return Event::where('church_id', $parentEvent->church_id)
+            ->where('parent_event_id', $parentEvent->id)
             ->where('date', '>', now())
             ->update($updateData);
     }
@@ -173,10 +175,11 @@ class RecurringEventService
     {
         $parentId = $event->parent_event_id ?? $event->id;
 
-        return Event::where(function ($query) use ($parentId, $event) {
-            $query->where('id', $parentId)
-                ->orWhere('parent_event_id', $parentId);
-        })
+        return Event::where('church_id', $event->church_id)
+            ->where(function ($query) use ($parentId) {
+                $query->where('id', $parentId)
+                    ->orWhere('parent_event_id', $parentId);
+            })
             ->orderBy('date')
             ->get();
     }
