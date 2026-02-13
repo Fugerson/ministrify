@@ -334,7 +334,7 @@ class SystemAdminController extends Controller
      */
     public function activityLog(Request $request)
     {
-        $tab = $request->get('tab', 'visits');
+        $tab = $request->get('tab', 'actions');
         $churches = Church::orderBy('name')->get();
 
         $visits = null;

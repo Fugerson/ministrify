@@ -90,6 +90,8 @@ class AuditLog extends Model
             'restored' => 'Відновлено',
             'login' => 'Вхід',
             'logout' => 'Вихід',
+            'registered' => 'Реєстрація',
+            'joined_church' => 'Приєднався до церкви',
             'exported' => 'Експортовано',
             'imported' => 'Імпортовано',
             'sent' => 'Надіслано',
@@ -265,7 +267,7 @@ class AuditLog extends Model
     public function getActionColorAttribute(): string
     {
         return match($this->action) {
-            'created', 'account_created', 'member_added', 'telegram_linked' => 'green',
+            'created', 'account_created', 'member_added', 'telegram_linked', 'registered', 'joined_church' => 'green',
             'updated', 'settings_updated', 'positions_updated', 'visibility_updated', 'quick_edit_saved' => 'blue',
             'deleted', 'member_removed', 'telegram_unlinked', 'bulk_deleted', 'photo_deleted', 'receipt_deleted' => 'red',
             'restored' => 'purple',

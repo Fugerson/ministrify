@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Church;
 use App\Models\ChurchRole;
 use App\Models\ExpenseCategory;
@@ -95,6 +96,19 @@ class RegisterController extends Controller
                 'ip' => $request->ip(),
             ]);
 
+            AuditLog::create([
+                'church_id' => $church->id,
+                'user_id' => $existingUser->id,
+                'user_name' => $existingUser->name,
+                'action' => 'joined_church',
+                'model_type' => User::class,
+                'model_id' => $existingUser->id,
+                'model_name' => $existingUser->name,
+                'notes' => 'Приєднався до церкви (існуючий акаунт)',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             return redirect()->route('dashboard')
                 ->with('success', 'Ви приєднались до ' . $church->name . '!');
         }
@@ -161,6 +175,19 @@ class RegisterController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        AuditLog::create([
+            'church_id' => $user->church_id,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action' => 'registered',
+            'model_type' => User::class,
+            'model_id' => $user->id,
+            'model_name' => $user->name,
+            'notes' => 'Зареєструвався та приєднався до церкви',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return redirect()->route('dashboard')
             ->with('success', 'Ласкаво просимо! Ваш акаунт створено.');
@@ -288,6 +315,19 @@ class RegisterController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        AuditLog::create([
+            'church_id' => $user->church_id,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action' => 'registered',
+            'model_type' => User::class,
+            'model_id' => $user->id,
+            'model_name' => $user->name,
+            'notes' => 'Зареєструвався та створив нову церкву',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return redirect()->route('verification.notice');
     }

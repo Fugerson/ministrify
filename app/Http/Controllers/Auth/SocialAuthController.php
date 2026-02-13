@@ -111,6 +111,19 @@ class SocialAuthController extends Controller
                     Auth::login($user, true);
                     $request->session()->regenerate();
 
+                    AuditLog::create([
+                        'church_id' => $church->id,
+                        'user_id' => $user->id,
+                        'user_name' => $user->name,
+                        'action' => 'joined_church',
+                        'model_type' => User::class,
+                        'model_id' => $user->id,
+                        'model_name' => $user->name,
+                        'notes' => 'Приєднався до церкви через Google',
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ]);
+
                     return redirect()->route('dashboard')
                         ->with('success', 'Ви приєднались до ' . $church->name . '!');
                 }
@@ -208,6 +221,20 @@ class SocialAuthController extends Controller
 
             Auth::login($existingUser, true);
             $request->session()->regenerate();
+
+            AuditLog::create([
+                'church_id' => $church->id,
+                'user_id' => $existingUser->id,
+                'user_name' => $existingUser->name,
+                'action' => 'joined_church',
+                'model_type' => User::class,
+                'model_id' => $existingUser->id,
+                'model_name' => $existingUser->name,
+                'notes' => 'Приєднався до церкви через Google',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             return redirect()->route('dashboard');
         }
 
@@ -230,6 +257,19 @@ class SocialAuthController extends Controller
         // Login
         Auth::login($user, true);
         $request->session()->regenerate();
+
+        AuditLog::create([
+            'church_id' => $church->id,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action' => 'registered',
+            'model_type' => User::class,
+            'model_id' => $user->id,
+            'model_name' => $user->name,
+            'notes' => 'Зареєструвався через Google та приєднався до церкви',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return redirect()->route('dashboard')
             ->with('success', 'Ласкаво просимо! Ваш акаунт створено.');
@@ -381,6 +421,19 @@ class SocialAuthController extends Controller
         Auth::login($user, true);
         $request->session()->regenerate();
 
+        AuditLog::create([
+            'church_id' => $church->id,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action' => 'registered',
+            'model_type' => User::class,
+            'model_id' => $user->id,
+            'model_name' => $user->name,
+            'notes' => 'Зареєструвався через Google та створив нову церкву',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         return redirect()->route('dashboard')
             ->with('success', 'Ласкаво просимо до Ministrify!');
     }
@@ -418,6 +471,19 @@ class SocialAuthController extends Controller
         $request->session()->forget('google_user');
         Auth::login($user, true);
         $request->session()->regenerate();
+
+        AuditLog::create([
+            'church_id' => $church->id,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action' => 'registered',
+            'model_type' => User::class,
+            'model_id' => $user->id,
+            'model_name' => $user->name,
+            'notes' => 'Зареєструвався через Google та приєднався до церкви',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return redirect()->route('dashboard')
             ->with('success', 'Ласкаво просимо до ' . $church->name . '!');

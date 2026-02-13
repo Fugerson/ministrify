@@ -7,13 +7,13 @@
     <!-- Tabs + Delete All -->
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div class="flex gap-1 bg-white dark:bg-gray-800 rounded-xl p-1 border border-gray-200 dark:border-gray-700">
-            <a href="{{ route('system.activity-log', ['tab' => 'visits']) }}"
-               class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $tab === 'visits' ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                Навігація
-            </a>
             <a href="{{ route('system.activity-log', ['tab' => 'actions']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $tab === 'actions' ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 Журнал дій
+            </a>
+            <a href="{{ route('system.activity-log', ['tab' => 'visits']) }}"
+               class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $tab === 'visits' ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                Навігація
             </a>
         </div>
 
@@ -243,6 +243,8 @@
                     <option value="restored" {{ request('action') == 'restored' ? 'selected' : '' }}>Відновлено</option>
                     <option value="login" {{ request('action') == 'login' ? 'selected' : '' }}>Вхід</option>
                     <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>Вихід</option>
+                    <option value="registered" {{ request('action') == 'registered' ? 'selected' : '' }}>Реєстрація</option>
+                    <option value="joined_church" {{ request('action') == 'joined_church' ? 'selected' : '' }}>Приєднання до церкви</option>
                 </select>
 
                 @php
@@ -482,6 +484,20 @@
                                 @elseif($log->action === 'logout')
                                     <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                         Вихід з системи
+                                    </div>
+                                @elseif($log->action === 'registered')
+                                    <div class="mt-2 text-sm text-green-600 dark:text-green-400">
+                                        Новий користувач зареєструвався
+                                        @if($log->user_agent)
+                                            <span class="text-xs text-gray-400 dark:text-gray-500 ml-2">{{ Str::limit($log->user_agent, 60) }}</span>
+                                        @endif
+                                    </div>
+                                @elseif($log->action === 'joined_church')
+                                    <div class="mt-2 text-sm text-green-600 dark:text-green-400">
+                                        Користувач приєднався до церкви
+                                        @if($log->user_agent)
+                                            <span class="text-xs text-gray-400 dark:text-gray-500 ml-2">{{ Str::limit($log->user_agent, 60) }}</span>
+                                        @endif
                                     </div>
                                 @endif
 
