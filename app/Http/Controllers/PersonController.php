@@ -223,6 +223,19 @@ class PersonController extends Controller
         }
 
         $validated['church_id'] = $church->id;
+
+        // Check for duplicate by email in same church
+        if (!empty($validated['email'])) {
+            $existingPerson = Person::where('email', $validated['email'])
+                ->where('church_id', $church->id)
+                ->first();
+
+            if ($existingPerson) {
+                return redirect()->route('people.show', $existingPerson)
+                    ->with('warning', 'Людина з цим email вже існує. Перенаправляю на її профіль.');
+            }
+        }
+
         $person = Person::create($validated);
 
         // Attach tags (only tags belonging to this church)
@@ -1212,10 +1225,25 @@ class PersonController extends Controller
                 $data['membership_status'] = 'guest';
             }
 
+            // Check for duplicate by email in same church
+            $email = $data['email'] ?? null;
+            if ($email) {
+                $existing = Person::where('email', $email)
+                    ->where('church_id', $church->id)
+                    ->first();
+                if ($existing) {
+                    $person = $existing;
+                    $stats['updated']++;
+                    goto skip_create;
+                }
+            }
+
             $person = Person::create([
                 ...$data,
                 'church_id' => $church->id,
             ]);
+
+            skip_create:
 
             if ($ministryId) {
                 $person->ministries()->attach($ministryId);

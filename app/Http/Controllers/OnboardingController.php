@@ -392,16 +392,28 @@ class OnboardingController extends Controller
                 'onboarding_completed' => true, // Skip onboarding for invited users
             ]);
 
-            // Create Person record
+            // Create or merge Person record by email
             $nameParts = explode(' ', $userData['name'], 2);
-            $person = \App\Models\Person::create([
-                'church_id' => $church->id,
-                'user_id' => $user->id,
-                'first_name' => $nameParts[0],
-                'last_name' => $nameParts[1] ?? '',
-                'email' => $userData['email'],
-                'membership_status' => 'member',
-            ]);
+            $person = \App\Models\Person::where('email', $userData['email'])
+                ->where('church_id', $church->id)
+                ->first();
+
+            if (!$person) {
+                $person = \App\Models\Person::create([
+                    'church_id' => $church->id,
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $userData['email'],
+                    'membership_status' => 'member',
+                ]);
+            } else {
+                // Merge: update existing person with user link and latest data
+                $person->update([
+                    'user_id' => $user->id,
+                    'membership_status' => 'member',
+                ]);
+            }
 
             // Create pivot record
             \Illuminate\Support\Facades\DB::table('church_user')->updateOrInsert(
