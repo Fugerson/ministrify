@@ -434,7 +434,7 @@ class SocialAuthController extends Controller
         }
 
         DB::table('church_user')->where('user_id', $oldUser->id)->delete();
-        \App\Models\Person::where('user_id', $oldUser->id)->update(['user_id' => null]);
+        \App\Models\Person::where('user_id', $oldUser->id)->forceDelete();
         $oldUser->forceDelete();
     }
 }

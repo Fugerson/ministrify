@@ -103,7 +103,7 @@ class RegisterController extends Controller
         $oldUser = User::onlyTrashed()->where('email', $request->email)->first();
         if ($oldUser) {
             DB::table('church_user')->where('user_id', $oldUser->id)->delete();
-            Person::where('user_id', $oldUser->id)->update(['user_id' => null]);
+            Person::where('user_id', $oldUser->id)->forceDelete();
             $oldUser->forceDelete();
         }
 
@@ -181,7 +181,7 @@ class RegisterController extends Controller
         $oldUser = User::onlyTrashed()->where('email', $request->email)->first();
         if ($oldUser) {
             DB::table('church_user')->where('user_id', $oldUser->id)->delete();
-            Person::where('user_id', $oldUser->id)->update(['user_id' => null]);
+            Person::where('user_id', $oldUser->id)->forceDelete();
             $oldUser->forceDelete();
         }
 
