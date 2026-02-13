@@ -56,14 +56,13 @@ class SocialAuthController extends Controller
             $joinChurchId = $request->session()->get('google_join_church_id');
 
             if ($joinChurchId) {
-                // Joining a church — force-delete old record and proceed as new user
-                Log::channel('security')->info('Soft-deleted user re-registering via Google', [
-                    'old_user_id' => $user->id,
+                // Joining a church — restore and let them join
+                $user->restore();
+                Log::channel('security')->info('Soft-deleted user restored via Google join', [
+                    'user_id' => $user->id,
                     'email' => $googleUser->getEmail(),
                     'church_id' => $joinChurchId,
                 ]);
-                $user->forceDelete();
-                $user = null;
             } else {
                 // Pure login attempt — block
                 Log::channel('security')->info('Soft-deleted user attempted Google login', [
@@ -309,7 +308,7 @@ class SocialAuthController extends Controller
      */
     protected function createChurchWithGoogleUser(Request $request, array $googleUser, array $validated)
     {
-        // Force-delete old soft-deleted user if exists (allow re-registration)
+        // Remove old soft-deleted user if exists (allow re-registration)
         User::onlyTrashed()->where('email', $googleUser['email'])->forceDelete();
 
         $baseSlug = \Illuminate\Support\Str::slug($validated['church_name']);
@@ -419,7 +418,7 @@ class SocialAuthController extends Controller
             return back()->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
-        // Force-delete old soft-deleted user if exists (allow re-registration)
+        // Remove old soft-deleted user if exists (allow re-registration)
         User::onlyTrashed()->where('email', $googleUser['email'])->forceDelete();
 
         $user = User::create([

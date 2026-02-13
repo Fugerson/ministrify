@@ -99,7 +99,7 @@ class RegisterController extends Controller
                 ->with('success', 'Ви приєднались до ' . $church->name . '!');
         }
 
-        // Force-delete old soft-deleted user if exists (allow re-registration)
+        // Remove old soft-deleted user if exists (allow re-registration)
         User::onlyTrashed()->where('email', $request->email)->forceDelete();
 
         $user = DB::transaction(function () use ($request, $church, $volunteerRole) {
@@ -172,7 +172,7 @@ class RegisterController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
-        // Force-delete old soft-deleted user if exists (allow re-registration)
+        // Remove old soft-deleted user if exists (allow re-registration)
         User::onlyTrashed()->where('email', $request->email)->forceDelete();
 
         $user = DB::transaction(function () use ($request) {
