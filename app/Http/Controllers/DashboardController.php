@@ -209,6 +209,16 @@ class DashboardController extends Controller
 
         if (in_array('pending_assignments', $enabledWidgets)) {
             $data['pendingAssignments'] = $this->loadPendingAssignments($user);
+            if ($isAdmin) {
+                $data['pendingUsers'] = DB::table('church_user')
+                    ->join('users', 'users.id', '=', 'church_user.user_id')
+                    ->where('church_user.church_id', $church->id)
+                    ->whereNull('church_user.church_role_id')
+                    ->select('users.id', 'users.name', 'users.email', 'church_user.person_id', 'church_user.joined_at')
+                    ->orderByDesc('church_user.joined_at')
+                    ->limit(5)
+                    ->get();
+            }
         }
 
         if ($isAdmin && in_array('need_attention', $enabledWidgets)) {

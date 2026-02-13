@@ -8,8 +8,28 @@
         </div>
         <div class="flex-1">
             <h3 class="font-semibold text-gray-900 dark:text-white">Очікує підтвердження</h3>
+
+            {{-- Pending Users (admin only) --}}
+            @if(!empty($pendingUsers) && count($pendingUsers) > 0)
+            <p class="text-sm text-amber-700 dark:text-amber-400 font-medium mt-2">
+                <svg class="w-4 h-4 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                </svg>
+                {{ count($pendingUsers) }} {{ count($pendingUsers) === 1 ? 'користувач очікує' : 'користувачів очікують' }} на роль
+            </p>
+            <div class="mt-2 space-y-2">
+                @foreach($pendingUsers as $pendingUser)
+                <a href="{{ route('people.show', $pendingUser->person_id) }}" class="block bg-white dark:bg-gray-800 rounded-xl p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $pendingUser->name }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $pendingUser->email }} &bull; {{ \Carbon\Carbon::parse($pendingUser->joined_at)->diffForHumans() }}</p>
+                </a>
+                @endforeach
+            </div>
+            @endif
+
+            {{-- Pending Assignments --}}
             @if(count($pendingAssignments) > 0)
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">У вас {{ count($pendingAssignments) }} призначень</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">У вас {{ count($pendingAssignments) }} призначень</p>
             <div class="mt-3 space-y-2">
                 @foreach($pendingAssignments->take(3) as $assignment)
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-3 flex items-center justify-between gap-3" x-data="{ responding: false }">
@@ -42,7 +62,7 @@
                     Всі призначення ({{ $pendingAssignments->count() }})
                 </a>
             @endif
-            @else
+            @elseif(empty($pendingUsers) || count($pendingUsers) === 0)
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Немає призначень для підтвердження</p>
             @endif
         </div>
