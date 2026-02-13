@@ -1356,7 +1356,17 @@ function churchBoard() {
                     body: JSON.stringify(this.newEpic)
                 });
 
+                if (!response.ok) {
+                    console.error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorText = await response.text();
+                    console.error('Response body:', errorText);
+                    if (window.showGlobalToast) showGlobalToast('Помилка при створенні проєкту', 'error');
+                    return;
+                }
+
                 const result = await response.json();
+                console.log('createEpic response:', result);
+
                 if (result.success && result.epic) {
                     const newEpic = {
                         id: result.epic.id,
@@ -1374,9 +1384,12 @@ function churchBoard() {
                     this.newEpic = { name: '', color: '#6366f1', description: '' };
 
                     if (window.showGlobalToast) showGlobalToast('Проєкт створено', 'success');
+                } else {
+                    console.error('No success in response:', result);
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('createEpic error:', error);
+                if (window.showGlobalToast) showGlobalToast('Помилка: ' + error.message, 'error');
             } finally {
                 this.epicModalLoading = false;
             }
@@ -1397,7 +1410,14 @@ function churchBoard() {
                     body: JSON.stringify(this.newEpic)
                 });
 
+                if (!response.ok) {
+                    console.error(`HTTP ${response.status}: ${response.statusText}`);
+                    if (window.showGlobalToast) showGlobalToast('Помилка при оновленні проєкту', 'error');
+                    return;
+                }
+
                 const result = await response.json();
+                console.log('updateEpic response:', result);
                 if (result.success && result.epic) {
                     // Update in epics array
                     const idx = this.epics.findIndex(e => e.id === this.editingEpic);
@@ -1430,9 +1450,12 @@ function churchBoard() {
                     this.newEpic = { name: '', color: '#6366f1', description: '' };
 
                     if (window.showGlobalToast) showGlobalToast('Проєкт оновлено', 'success');
+                } else {
+                    console.error('No success in response:', result);
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('updateEpic error:', error);
+                if (window.showGlobalToast) showGlobalToast('Помилка: ' + error.message, 'error');
             } finally {
                 this.epicModalLoading = false;
             }
