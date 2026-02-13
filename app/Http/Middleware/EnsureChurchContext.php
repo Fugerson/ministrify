@@ -63,6 +63,39 @@ class EnsureChurchContext
         $person = Person::where('user_id', $user->id)
             ->where('church_id', $church->id)
             ->first();
+
+        // Fallback: resolve via pivot's person_id and auto-link
+        if (!$person) {
+            $pivot = DB::table('church_user')
+                ->where('user_id', $user->id)
+                ->where('church_id', $church->id)
+                ->first();
+
+            if ($pivot?->person_id) {
+                $person = Person::find($pivot->person_id);
+                if ($person && !$person->user_id) {
+                    $person->update(['user_id' => $user->id]);
+                }
+            }
+
+            // Still no person? Try by email and link
+            if (!$person) {
+                $person = Person::where('church_id', $church->id)
+                    ->where('email', $user->email)
+                    ->first();
+                if ($person && !$person->user_id) {
+                    $person->update(['user_id' => $user->id]);
+                }
+                // Update pivot to point to correct person
+                if ($person && $pivot && $pivot->person_id !== $person->id) {
+                    DB::table('church_user')
+                        ->where('user_id', $user->id)
+                        ->where('church_id', $church->id)
+                        ->update(['person_id' => $person->id]);
+                }
+            }
+        }
+
         if ($person) {
             $user->setRelation('person', $person);
         }

@@ -126,16 +126,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function joinChurch(int $churchId, ?int $roleId = null): void
     {
-        // Create pivot if not exists
-        $exists = \Illuminate\Support\Facades\DB::table('church_user')
-            ->where('user_id', $this->id)
-            ->where('church_id', $churchId)
-            ->exists();
-
-        if ($exists) {
-            return;
-        }
-
         // Find or create Person for the new church
         $person = Person::where('user_id', $this->id)
             ->where('church_id', $churchId)
@@ -161,6 +151,23 @@ class User extends Authenticatable implements MustVerifyEmail
                     'membership_status' => 'newcomer',
                 ]);
             }
+        }
+
+        // Create pivot if not exists, otherwise update person_id
+        $existingPivot = \Illuminate\Support\Facades\DB::table('church_user')
+            ->where('user_id', $this->id)
+            ->where('church_id', $churchId)
+            ->first();
+
+        if ($existingPivot) {
+            // Ensure pivot points to the correct person
+            if ($existingPivot->person_id !== $person->id) {
+                \Illuminate\Support\Facades\DB::table('church_user')
+                    ->where('user_id', $this->id)
+                    ->where('church_id', $churchId)
+                    ->update(['person_id' => $person->id, 'updated_at' => now()]);
+            }
+            return;
         }
 
         \Illuminate\Support\Facades\DB::table('church_user')->insert([
