@@ -72,7 +72,7 @@
 
                 <!-- Dropdown Panel -->
                 <div x-show="showFilters" x-transition
-                     class="absolute left-0 sm:left-auto sm:right-auto z-50 mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
+                     class="absolute left-0 sm:left-auto sm:right-auto z-[70] mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
                     <div class="p-3 space-y-3">
                         <!-- Quick Presets -->
                         <div class="flex items-center gap-2">
