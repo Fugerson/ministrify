@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -24,7 +25,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('event_worship_team', function (Blueprint $table) {
-            $table->dropForeign(['event_song_id']);
+            if (DB::connection()->getDriverName() !== 'sqlite') {
+                $table->dropForeign(['event_song_id']);
+            }
             $table->dropColumn('event_song_id');
         });
     }

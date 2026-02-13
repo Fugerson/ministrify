@@ -69,10 +69,11 @@ class UserTest extends TestCase
 
     public function test_is_leader_returns_true_for_ukrainian_name(): void
     {
-        $role = ChurchRole::factory()->forChurch($this->church)->create([
-            'slug' => 'custom-leader',
-            'name' => 'Старший лідер',
-        ]);
+        // Use the existing leader role created by ChurchRole::createDefaultsForChurch
+        // and update its name to a custom Ukrainian name
+        $role = ChurchRole::where('church_id', $this->church->id)->where('slug', 'leader')->first();
+        $role->update(['name' => 'Старший лідер']);
+
         $user = User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,

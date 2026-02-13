@@ -25,6 +25,7 @@ return new class extends Migration
         });
 
         // 2. Populate from existing users + people data
+        $now = DB::connection()->getDriverName() === 'sqlite' ? "datetime('now')" : 'NOW()';
         DB::statement("
             INSERT INTO church_user (user_id, church_id, church_role_id, person_id, permission_overrides, joined_at, created_at, updated_at)
             SELECT
@@ -34,34 +35,38 @@ return new class extends Migration
                 p.id,
                 u.permission_overrides,
                 u.created_at,
-                NOW(),
-                NOW()
+                {$now},
+                {$now}
             FROM users u
             LEFT JOIN people p ON p.user_id = u.id AND p.church_id = u.church_id
             WHERE u.church_id IS NOT NULL
               AND u.deleted_at IS NULL
         ");
 
-        // 3. Change FK on users.church_id: cascade → set null
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['church_id']);
-            $table->foreign('church_id')
-                ->references('id')
-                ->on('churches')
-                ->onDelete('set null');
-        });
+        // 3. Change FK on users.church_id: cascade → set null (skip on SQLite)
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropForeign(['church_id']);
+                $table->foreign('church_id')
+                    ->references('id')
+                    ->on('churches')
+                    ->onDelete('set null');
+            });
+        }
     }
 
     public function down(): void
     {
-        // Restore original FK
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['church_id']);
-            $table->foreign('church_id')
-                ->references('id')
-                ->on('churches')
-                ->onDelete('cascade');
-        });
+        // Restore original FK (skip on SQLite)
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropForeign(['church_id']);
+                $table->foreign('church_id')
+                    ->references('id')
+                    ->on('churches')
+                    ->onDelete('cascade');
+            });
+        }
 
         Schema::dropIfExists('church_user');
     }
