@@ -570,8 +570,37 @@
                                 </template>
                             </div>
                         </div>
-                        <input type="text" x-model="newItem.responsible_names" placeholder="Відповідальний"
-                               class="w-36 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <div class="relative w-44">
+                            <div class="flex flex-wrap items-center gap-1 min-h-[2.375rem] px-2 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer"
+                                 @click="newResponsible.open = !newResponsible.open">
+                                <template x-for="(person, index) in newResponsible.people" :key="index">
+                                    <span class="inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded">
+                                        <span x-text="person.name" class="truncate max-w-[5rem]"></span>
+                                        <button type="button" @click.stop="removeNewResponsible(index)" class="text-gray-400 hover:text-red-500">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </span>
+                                </template>
+                                <span x-show="newResponsible.people.length === 0" class="text-sm text-gray-400">Відповідальний</span>
+                            </div>
+                            <div x-show="newResponsible.open" x-cloak @click.outside="newResponsible.open = false"
+                                 class="absolute z-50 left-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                                <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                                    <input type="text" x-model="newResponsible.search" placeholder="Пошук..."
+                                           @click.stop
+                                           class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                </div>
+                                <div class="max-h-48 overflow-y-auto">
+                                    <template x-for="person in newFilteredPeople" :key="person.id">
+                                        <button type="button"
+                                                @click.stop="addNewResponsible(person.id, person.name)"
+                                                class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                            <span x-text="person.name"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
                         <input type="text" x-model="newItem.notes" placeholder="Коментар"
                                class="w-32 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium">
@@ -1754,6 +1783,28 @@ function planEditor() {
             notes: '',
             song_id: null
         },
+        // Responsible person selector for new items
+        newResponsible: {
+            open: false,
+            search: '',
+            people: [],
+        },
+        get newFilteredPeople() {
+            if (!this.newResponsible.search) return ALL_PEOPLE;
+            const s = this.newResponsible.search.toLowerCase();
+            return ALL_PEOPLE.filter(p => p.name.toLowerCase().includes(s));
+        },
+        addNewResponsible(id, name) {
+            if (this.newResponsible.people.find(p => p.name === name)) return;
+            this.newResponsible.people.push({ id, name });
+            this.newItem.responsible_names = this.newResponsible.people.map(p => p.name).join(', ');
+            this.newResponsible.search = '';
+            this.newResponsible.open = false;
+        },
+        removeNewResponsible(index) {
+            this.newResponsible.people.splice(index, 1);
+            this.newItem.responsible_names = this.newResponsible.people.map(p => p.name).join(', ');
+        },
         // Song autocomplete for new items
         showSongs: false,
         songSearch: '',
@@ -1801,6 +1852,11 @@ function planEditor() {
                 const { responsibleNames, notes } = _buildTeamStrings(mergedTeam);
                 this.newItem.responsible_names = responsibleNames;
                 this.newItem.notes = notes;
+                // Sync newResponsible.people from names
+                this.newResponsible.people = responsibleNames.split(',').map(n => n.trim()).filter(Boolean).map(name => {
+                    const found = ALL_PEOPLE.find(p => p.name === name);
+                    return { id: found ? found.id : null, name };
+                });
             }
         },
 
@@ -1831,6 +1887,7 @@ function planEditor() {
                         this.insertNewRow(data.item);
                         // Clear form
                         this.newItem = { start_time: '', title: '', responsible_names: '', notes: '', song_id: null };
+                        this.newResponsible = { open: false, search: '', people: [] };
                         showGlobalToast('Пункт додано', 'success');
                     }
                 } else {
