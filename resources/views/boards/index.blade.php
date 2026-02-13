@@ -57,7 +57,7 @@
             <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
 
             <!-- Filters Button + Dropdown -->
-            <div class="relative" x-data="{ showFilters: false }" @click.away="showFilters = false">
+            <div class="relative z-[70]" x-data="{ showFilters: false }" @click.away="showFilters = false">
                 <button @click="showFilters = !showFilters"
                         class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                         :class="activeFilterCount > 0 ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'">
