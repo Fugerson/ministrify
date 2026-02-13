@@ -700,10 +700,16 @@ class GoogleCalendarService
 
         foreach ($googleEvents as $googleEvent) {
             try {
-                // Skip events that originated from Ministrify (have our marker)
+                // Skip events that originated from Ministrify AND already exist in DB
                 $description = $googleEvent['description'] ?? '';
                 if (str_contains($description, 'Створено в Ministrify')) {
-                    continue;
+                    $alreadyExists = Event::where('church_id', $church->id)
+                        ->where('google_event_id', $googleEvent['id'])
+                        ->exists();
+                    if ($alreadyExists) {
+                        continue;
+                    }
+                    // New recurring instance — let importSingleEvent create it
                 }
 
                 $result = $this->importSingleEvent($church, $googleEvent, $calendarId, $ministryId);
