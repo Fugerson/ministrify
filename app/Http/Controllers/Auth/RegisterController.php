@@ -99,60 +99,9 @@ class RegisterController extends Controller
                 ->with('success', 'Ви приєднались до ' . $church->name . '!');
         }
 
-        // Check if a soft-deleted user with this email exists — restore instead of creating new
-        $trashedUser = User::onlyTrashed()->where('email', $request->email)->first();
-
-        if ($trashedUser) {
-            $trashedUser->restore();
-            $trashedUser->update([
-                'church_id' => $church->id,
-                'name' => $request->name,
-                'password' => Hash::make($request->password),
-                'church_role_id' => $volunteerRole?->id,
-                'onboarding_completed' => true,
-            ]);
-
-            // Create Person record if not exists for this church
-            $person = Person::where('user_id', $trashedUser->id)
-                ->where('church_id', $church->id)
-                ->first();
-
-            if (!$person) {
-                $nameParts = explode(' ', $request->name, 2);
-                $person = Person::create([
-                    'church_id' => $church->id,
-                    'user_id' => $trashedUser->id,
-                    'first_name' => $nameParts[0],
-                    'last_name' => $nameParts[1] ?? '',
-                    'email' => $request->email,
-                    'phone' => $request->phone,
-                    'membership_status' => 'newcomer',
-                ]);
-            }
-
-            // Create or update pivot record
-            DB::table('church_user')->updateOrInsert(
-                ['user_id' => $trashedUser->id, 'church_id' => $church->id],
-                [
-                    'church_role_id' => $volunteerRole?->id,
-                    'person_id' => $person->id,
-                    'joined_at' => now(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
-
-            Log::channel('security')->info('Soft-deleted user restored via join', [
-                'user_id' => $trashedUser->id,
-                'email' => $request->email,
-                'church_id' => $church->id,
-                'ip' => $request->ip(),
-            ]);
-
-            Auth::login($trashedUser);
-
-            return redirect()->route('dashboard')
-                ->with('success', 'Ласкаво просимо назад! Ваш акаунт відновлено.');
+        // Block soft-deleted users
+        if (User::onlyTrashed()->where('email', $request->email)->exists()) {
+            return back()->withInput()->withErrors(['email' => 'Цей акаунт було видалено. Зверніться до адміністратора.']);
         }
 
         $user = DB::transaction(function () use ($request, $church, $volunteerRole) {
@@ -225,6 +174,11 @@ class RegisterController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
+        // Block soft-deleted users
+        if (User::onlyTrashed()->where('email', $request->email)->exists()) {
+            return back()->withInput()->withErrors(['email' => 'Цей акаунт було видалено. Зверніться до адміністратора.']);
+        }
+
         $user = DB::transaction(function () use ($request) {
             // Create church with unique slug
             $baseSlug = Str::slug($request->church_name);
@@ -247,40 +201,20 @@ class RegisterController extends Controller
                 ],
             ]);
 
-            // Restore soft-deleted user or create new admin user
             // Query ChurchRole directly instead of via relationship - the relationship
             // would return empty due to Eloquent caching (roles were just created in booted())
             $adminRole = \App\Models\ChurchRole::where('church_id', $church->id)
                 ->where('is_admin_role', true)
                 ->first();
-            $trashedUser = User::onlyTrashed()->where('email', $request->email)->first();
 
-            if ($trashedUser) {
-                $trashedUser->restore();
-                $trashedUser->update([
-                    'church_id' => $church->id,
-                    'name' => $request->name,
-                    'password' => Hash::make($request->password),
-                    'role' => 'admin',
-                    'church_role_id' => $adminRole?->id,
-                ]);
-                $user = $trashedUser;
-
-                Log::channel('security')->info('Soft-deleted user restored via church registration', [
-                    'user_id' => $user->id,
-                    'email' => $request->email,
-                    'church_id' => $church->id,
-                ]);
-            } else {
-                $user = User::create([
-                    'church_id' => $church->id,
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'password' => Hash::make($request->password),
-                    'role' => 'admin',
-                    'church_role_id' => $adminRole?->id,
-                ]);
-            }
+            $user = User::create([
+                'church_id' => $church->id,
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'admin',
+                'church_role_id' => $adminRole?->id,
+            ]);
 
             // Create Person record for admin (if not already exists for THIS church)
             $person = Person::where('user_id', $user->id)->where('church_id', $church->id)->first();

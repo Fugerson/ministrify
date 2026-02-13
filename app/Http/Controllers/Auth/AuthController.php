@@ -31,23 +31,17 @@ class AuthController extends Controller
         $user = \App\Models\User::withTrashed()->where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
-            // Restore if soft-deleted — reset role so admin must re-approve
+            // Block soft-deleted users — admin deleted them for a reason
             if ($user->trashed()) {
-                $user->restore();
-                $user->update([
-                    'church_role_id' => null,
-                ]);
-
-                // Reset roles in all pivots
-                \Illuminate\Support\Facades\DB::table('church_user')
-                    ->where('user_id', $user->id)
-                    ->update(['church_role_id' => null, 'updated_at' => now()]);
-
-                Log::channel('security')->info('Soft-deleted user restored via login', [
+                Log::channel('security')->info('Soft-deleted user attempted login', [
                     'user_id' => $user->id,
                     'email' => $credentials['email'],
                     'ip' => $request->ip(),
                 ]);
+
+                return back()->withErrors([
+                    'email' => 'Ваш акаунт було видалено. Зверніться до адміністратора.',
+                ])->onlyInput('email');
             }
 
             // Check if 2FA is enabled

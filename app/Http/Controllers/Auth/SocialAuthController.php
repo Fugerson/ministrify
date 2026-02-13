@@ -51,35 +51,15 @@ class SocialAuthController extends Controller
                 ->first();
         }
 
-        // Restore if soft-deleted — reset role so admin must re-approve
+        // Block soft-deleted users — admin deleted them for a reason
         if ($user && $user->trashed()) {
-            $user->restore();
-            $user->update([
-                'church_role_id' => null,
-            ]);
-
-            // Reset roles in all pivots
-            DB::table('church_user')
-                ->where('user_id', $user->id)
-                ->update(['church_role_id' => null, 'updated_at' => now()]);
-
-            // Create Person record if not exists
-            if ($user->church_id && !$user->person) {
-                $nameParts = explode(' ', $googleUser->getName(), 2);
-                \App\Models\Person::create([
-                    'church_id' => $user->church_id,
-                    'user_id' => $user->id,
-                    'first_name' => $nameParts[0],
-                    'last_name' => $nameParts[1] ?? '',
-                    'email' => $googleUser->getEmail(),
-                    'membership_status' => 'newcomer',
-                ]);
-            }
-
-            Log::channel('security')->info('Soft-deleted user restored via Google login', [
+            Log::channel('security')->info('Soft-deleted user attempted Google login', [
                 'user_id' => $user->id,
                 'email' => $googleUser->getEmail(),
             ]);
+
+            return redirect()->route('login')
+                ->with('error', 'Ваш акаунт було видалено. Зверніться до адміністратора.');
         }
 
         if ($user) {
@@ -192,12 +172,15 @@ class SocialAuthController extends Controller
             return redirect()->route('join')->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
-        // Check if user with this email already exists (including soft-deleted)
+        // Check if user with this email already exists
         $existingUser = User::withTrashed()->where('email', $googleUser->getEmail())->first();
         if ($existingUser) {
+            // Block soft-deleted users
             if ($existingUser->trashed()) {
-                $existingUser->restore();
+                return redirect()->route('login')
+                    ->with('error', 'Ваш акаунт було видалено. Зверніться до адміністратора.');
             }
+
             if (!$existingUser->google_id) {
                 $existingUser->update(['google_id' => $googleUser->getId()]);
             }
@@ -318,6 +301,13 @@ class SocialAuthController extends Controller
      */
     protected function createChurchWithGoogleUser(Request $request, array $googleUser, array $validated)
     {
+        // Block soft-deleted users
+        if (User::onlyTrashed()->where('email', $googleUser['email'])->exists()) {
+            $request->session()->forget('google_user');
+            return redirect()->route('login')
+                ->with('error', 'Ваш акаунт було видалено. Зверніться до адміністратора.');
+        }
+
         $baseSlug = \Illuminate\Support\Str::slug($validated['church_name']);
         $slug = $baseSlug;
         $counter = 1;
@@ -343,37 +333,16 @@ class SocialAuthController extends Controller
             ->where('is_admin_role', true)
             ->first();
 
-        // Restore soft-deleted user or create new admin user
-        $trashedUser = User::onlyTrashed()->where('email', $googleUser['email'])->first();
-
-        if ($trashedUser) {
-            $trashedUser->restore();
-            $trashedUser->update([
-                'church_id' => $church->id,
-                'name' => $googleUser['name'],
-                'google_id' => $googleUser['id'],
-                'email_verified_at' => now(),
-                'role' => 'admin',
-                'church_role_id' => $adminRole?->id,
-            ]);
-            $user = $trashedUser;
-
-            // Reset roles in all old pivots (user was soft-deleted, old roles invalid)
-            DB::table('church_user')
-                ->where('user_id', $user->id)
-                ->update(['church_role_id' => null, 'updated_at' => now()]);
-        } else {
-            $user = User::create([
-                'church_id' => $church->id,
-                'name' => $googleUser['name'],
-                'email' => $googleUser['email'],
-                'google_id' => $googleUser['id'],
-                'password' => bcrypt(\Illuminate\Support\Str::random(32)),
-                'email_verified_at' => now(),
-                'role' => 'admin',
-                'church_role_id' => $adminRole?->id,
-            ]);
-        }
+        $user = User::create([
+            'church_id' => $church->id,
+            'name' => $googleUser['name'],
+            'email' => $googleUser['email'],
+            'google_id' => $googleUser['id'],
+            'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+            'email_verified_at' => now(),
+            'role' => 'admin',
+            'church_role_id' => $adminRole?->id,
+        ]);
 
         // Create Person record for admin (if not already exists)
         $person = \App\Models\Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
@@ -446,29 +415,22 @@ class SocialAuthController extends Controller
             return back()->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
-        // Restore soft-deleted user or create new user
-        $trashedUser = User::onlyTrashed()->where('email', $googleUser['email'])->first();
-
-        if ($trashedUser) {
-            $trashedUser->restore();
-            $trashedUser->update([
-                'name' => $googleUser['name'],
-                'google_id' => $googleUser['id'],
-                'email_verified_at' => now(),
-                'onboarding_completed' => true,
-            ]);
-            $user = $trashedUser;
-        } else {
-            $user = User::create([
-                'church_id' => $church->id,
-                'name' => $googleUser['name'],
-                'email' => $googleUser['email'],
-                'google_id' => $googleUser['id'],
-                'password' => bcrypt(\Illuminate\Support\Str::random(32)),
-                'email_verified_at' => now(),
-                'onboarding_completed' => true,
-            ]);
+        // Block soft-deleted users
+        if (User::onlyTrashed()->where('email', $googleUser['email'])->exists()) {
+            $request->session()->forget('google_user');
+            return redirect()->route('login')
+                ->with('error', 'Ваш акаунт було видалено. Зверніться до адміністратора.');
         }
+
+        $user = User::create([
+            'church_id' => $church->id,
+            'name' => $googleUser['name'],
+            'email' => $googleUser['email'],
+            'google_id' => $googleUser['id'],
+            'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+            'email_verified_at' => now(),
+            'onboarding_completed' => true,
+        ]);
 
         // Join church (creates pivot + Person, no role — pending)
         $user->joinChurch($church->id);
