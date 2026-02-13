@@ -170,23 +170,33 @@ class UserController extends Controller
             ]);
         }
 
-        // Link to person if provided, otherwise create new Person (if not exists)
+        // Link to person if provided, otherwise find by email or create new Person
         $personId = null;
         if (!empty($validated['person_id'])) {
             $person->update(['user_id' => $user->id]);
             $personId = $person->id;
-        } elseif (!Person::where('user_id', $user->id)->where('church_id', $church->id)->exists()) {
-            // Create new Person for user only if doesn't already exist for THIS church
-            $nameParts = explode(' ', $name, 2);
-            $newPerson = Person::create([
-                'church_id' => $church->id,
-                'user_id' => $user->id,
-                'first_name' => $nameParts[0],
-                'last_name' => $nameParts[1] ?? '',
-                'email' => $email,
-                'membership_status' => 'member',
-            ]);
-            $personId = $newPerson->id;
+        } else {
+            // Try to find existing Person by email (may have been added manually before)
+            $existingPerson = Person::where('church_id', $church->id)
+                ->where('email', $email)
+                ->whereNull('user_id')
+                ->first();
+
+            if ($existingPerson) {
+                $existingPerson->update(['user_id' => $user->id]);
+                $personId = $existingPerson->id;
+            } elseif (!Person::where('user_id', $user->id)->where('church_id', $church->id)->exists()) {
+                $nameParts = explode(' ', $name, 2);
+                $newPerson = Person::create([
+                    'church_id' => $church->id,
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $email,
+                    'membership_status' => 'member',
+                ]);
+                $personId = $newPerson->id;
+            }
         }
 
         // Create pivot record (updateOrInsert to handle stale pivots from soft-deleted users)

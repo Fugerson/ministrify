@@ -171,16 +171,25 @@ class RegisterController extends Controller
                 'onboarding_completed' => true,
             ]);
 
-            // Create linked Person record
-            $person = Person::create([
-                'church_id' => $church->id,
-                'user_id' => $user->id,
-                'first_name' => $firstName,
-                'last_name' => $lastName,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'membership_status' => 'newcomer',
-            ]);
+            // Find existing Person by email or create new
+            $person = Person::where('church_id', $church->id)
+                ->where('email', $request->email)
+                ->whereNull('user_id')
+                ->first();
+
+            if ($person) {
+                $person->update(['user_id' => $user->id]);
+            } else {
+                $person = Person::create([
+                    'church_id' => $church->id,
+                    'user_id' => $user->id,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'membership_status' => 'newcomer',
+                ]);
+            }
 
             // Create pivot record
             DB::table('church_user')->insert([
