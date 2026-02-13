@@ -2672,7 +2672,7 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Лідер</label>
-                                <x-person-select name="leader_id" :people="$availablePeople->merge($ministry->leader ? collect([$ministry->leader]) : collect())->unique('id')->sortBy('last_name')" :selected="old('leader_id', $ministry->leader_id)" placeholder="Пошук лідера..." />
+                                <x-person-select name="leader_id" :people="$availablePeople->merge($ministry->members)->merge($ministry->leader ? collect([$ministry->leader]) : collect())->unique('id')->sortBy('last_name')" :selected="old('leader_id', $ministry->leader_id)" placeholder="Пошук лідера..." />
                             </div>
 
                             <div>
