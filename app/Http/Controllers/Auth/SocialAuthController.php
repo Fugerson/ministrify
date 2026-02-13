@@ -211,11 +211,6 @@ class SocialAuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        // Parse name
-        $nameParts = explode(' ', $googleUser->getName(), 2);
-        $firstName = $nameParts[0];
-        $lastName = $nameParts[1] ?? '';
-
         // Create user
         $user = User::create([
             'church_id' => $church->id,
@@ -223,31 +218,14 @@ class SocialAuthController extends Controller
             'email' => $googleUser->getEmail(),
             'google_id' => $googleUser->getId(),
             'password' => bcrypt(\Illuminate\Support\Str::random(32)),
-            'church_role_id' => null, // Basic access
+            'church_role_id' => null,
             'onboarding_completed' => true,
         ]);
         $user->markEmailAsVerified();
 
-        // Create linked Person record
-        $person = \App\Models\Person::create([
-            'church_id' => $church->id,
-            'user_id' => $user->id,
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'email' => $googleUser->getEmail(),
-            'membership_status' => 'newcomer',
-        ]);
-
-        // Create pivot record
-        DB::table('church_user')->insertOrIgnore([
-            'user_id' => $user->id,
-            'church_id' => $church->id,
-            'church_role_id' => null,
-            'person_id' => $person->id,
-            'joined_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // joinChurch handles Person find/create + pivot (no duplicates)
+        $user->joinChurch($church->id);
+        $user->switchToChurch($church->id);
 
         // Login
         Auth::login($user, true);
