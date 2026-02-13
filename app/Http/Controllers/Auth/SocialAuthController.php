@@ -223,10 +223,10 @@ class SocialAuthController extends Controller
             'email' => $googleUser->getEmail(),
             'google_id' => $googleUser->getId(),
             'password' => bcrypt(\Illuminate\Support\Str::random(32)),
-            'email_verified_at' => now(),
             'church_role_id' => null, // Basic access
             'onboarding_completed' => true,
         ]);
+        $user->markEmailAsVerified();
 
         // Create linked Person record
         $person = \App\Models\Person::create([
@@ -343,10 +343,10 @@ class SocialAuthController extends Controller
             'email' => $googleUser['email'],
             'google_id' => $googleUser['id'],
             'password' => bcrypt(\Illuminate\Support\Str::random(32)),
-            'email_verified_at' => now(),
             'role' => 'admin',
             'church_role_id' => $adminRole?->id,
         ]);
+        $user->markEmailAsVerified();
 
         // Create Person record for admin (if not already exists)
         $person = \App\Models\Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
@@ -428,9 +428,9 @@ class SocialAuthController extends Controller
             'email' => $googleUser['email'],
             'google_id' => $googleUser['id'],
             'password' => bcrypt(\Illuminate\Support\Str::random(32)),
-            'email_verified_at' => now(),
             'onboarding_completed' => true,
         ]);
+        $user->markEmailAsVerified();
 
         // Join church (creates pivot + Person, no role — pending)
         $user->joinChurch($church->id);
