@@ -154,6 +154,7 @@ class GroupController extends Controller
     public function removeMember(Group $group, Person $person)
     {
         $this->authorize('update', $group);
+        abort_unless($person->church_id === auth()->user()->church_id, 404);
 
         $group->members()->detach($person->id);
 
@@ -169,6 +170,7 @@ class GroupController extends Controller
     public function updateMemberRole(Request $request, Group $group, Person $person)
     {
         $this->authorize('update', $group);
+        abort_unless($person->church_id === auth()->user()->church_id, 404);
 
         $validated = $request->validate([
             'role' => 'required|in:leader,assistant,member',

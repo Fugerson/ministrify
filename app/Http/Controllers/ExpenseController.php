@@ -84,7 +84,7 @@ class ExpenseController extends Controller
             'description' => 'required|string|max:255',
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'date' => 'required|date',
-            'receipt_photo' => 'nullable|image|max:5120',
+            'receipt_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'notes' => 'nullable|string',
         ]);
 
@@ -147,7 +147,7 @@ class ExpenseController extends Controller
             'description' => 'required|string|max:255',
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'date' => 'required|date',
-            'receipt_photo' => 'nullable|image|max:5120',
+            'receipt_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'notes' => 'nullable|string',
         ]);
 

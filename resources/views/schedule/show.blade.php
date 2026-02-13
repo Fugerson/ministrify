@@ -1029,6 +1029,12 @@
 
 @push('scripts')
 <script>
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+}
+
 // Alpine store for shared event state
 document.addEventListener('alpine:init', () => {
     Alpine.store('event', {
@@ -1336,14 +1342,14 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
 
     if (songId) {
         // Show song display with description field
-        const keyBadge = songKey ? `<span class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${songKey}</span>` : '';
+        const keyBadge = songKey ? `<span class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${escapeHtml(songKey)}</span>` : '';
         titleCell.innerHTML = `
             <div class="space-y-1">
                 <div class="flex items-center gap-2" x-data="{ editing: false }">
                     <template x-if="!editing">
                         <div class="flex items-center gap-2 cursor-pointer" @click="editing = true" title="Клікніть для зміни пісні">
                             <span class="text-lg">🎵</span>
-                            <a href="/songs/${songId}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>${title}</a>
+                            <a href="/songs/${songId}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>${escapeHtml(title)}</a>
                             ${keyBadge}
                             <button type="button" @click.stop="if(confirm('Видалити пісню з цього пункту?')) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title="Видалити пісню">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -1351,7 +1357,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                         </div>
                     </template>
                     <template x-if="editing">
-                        <div class="w-full relative" x-data="existingItemSongAutocomplete(${itemId}, '${title.replace(/'/g, "\\'")}')" x-init="$nextTick(() => $refs.input.focus())">
+                        <div class="w-full relative" x-data="existingItemSongAutocomplete(${itemId}, '${escapeHtml(title).replace(/'/g, "&#39;")}')" x-init="$nextTick(() => $refs.input.focus())">
                             <input type="text" x-ref="input" x-model="title"
                                    @input="checkForSongTrigger($event.target.value)"
                                    @blur="setTimeout(() => { if(!showSongs) editing = false; }, 200)"

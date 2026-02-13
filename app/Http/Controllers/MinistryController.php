@@ -291,6 +291,7 @@ class MinistryController extends Controller
     {
         $this->authorizeChurch($ministry);
         Gate::authorize('manage-ministry', $ministry);
+        abort_unless($person->church_id === auth()->user()->church_id, 404);
 
         $ministry->members()->detach($person->id);
 
@@ -307,6 +308,7 @@ class MinistryController extends Controller
     {
         $this->authorizeChurch($ministry);
         Gate::authorize('manage-ministry', $ministry);
+        abort_unless($person->church_id === auth()->user()->church_id, 404);
 
         $validated = $request->validate([
             'position_ids' => 'nullable|array',
