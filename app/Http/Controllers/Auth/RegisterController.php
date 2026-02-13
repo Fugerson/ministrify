@@ -155,7 +155,7 @@ class RegisterController extends Controller
                 ->with('success', 'Ласкаво просимо назад! Ваш акаунт відновлено.');
         }
 
-        DB::transaction(function () use ($request, $church, $volunteerRole) {
+        $user = DB::transaction(function () use ($request, $church, $volunteerRole) {
             // Parse name into first_name and last_name
             $nameParts = explode(' ', $request->name, 2);
             $firstName = $nameParts[0];
@@ -202,11 +202,13 @@ class RegisterController extends Controller
                 'updated_at' => now(),
             ]);
 
-            // Fire registered event to send verification email
-            event(new Registered($user));
-
-            Auth::login($user);
+            return $user;
         });
+
+        // Fire registered event AFTER transaction commits so queue worker can find the user
+        event(new Registered($user));
+
+        Auth::login($user);
 
         return redirect()->route('dashboard')
             ->with('success', 'Ласкаво просимо! Ваш акаунт створено.');
@@ -223,7 +225,7 @@ class RegisterController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
-        DB::transaction(function () use ($request) {
+        $user = DB::transaction(function () use ($request) {
             // Create church with unique slug
             $baseSlug = Str::slug($request->church_name);
             $slug = $baseSlug;
@@ -339,11 +341,13 @@ class RegisterController extends Controller
                 ]);
             }
 
-            // Fire registered event to send verification email
-            event(new Registered($user));
-
-            Auth::login($user);
+            return $user;
         });
+
+        // Fire registered event AFTER transaction commits so queue worker can find the user
+        event(new Registered($user));
+
+        Auth::login($user);
 
         return redirect()->route('verification.notice');
     }
