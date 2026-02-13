@@ -212,7 +212,7 @@
     </div>
 
     <!-- Kanban Columns Container -->
-    <div class="overflow-hidden">
+    <div class="overflow-x-hidden overflow-y-visible">
             <div class="kanban-container flex gap-4 pb-4 overflow-x-auto scrollbar-thin" id="kanban-columns">
                 @foreach($board->columns as $column)
                     @php
