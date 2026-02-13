@@ -817,7 +817,14 @@
                 @else
                     {{-- Regular ministry: calendar view --}}
                     @php
-                        $ministryEventsData = $ministry->events->map(function($e) {
+                        $allMinistryEvents = $ministry->events;
+                        if ($ministry->is_sunday_service_part && $serviceEvents->isNotEmpty()) {
+                            $existingIds = $allMinistryEvents->pluck('id')->toArray();
+                            $allMinistryEvents = $allMinistryEvents->merge(
+                                $serviceEvents->reject(fn($e) => in_array($e->id, $existingIds))
+                            );
+                        }
+                        $ministryEventsData = $allMinistryEvents->map(function($e) {
                             return [
                                 'id' => $e->id,
                                 'title' => $e->title,
