@@ -93,15 +93,22 @@ class SocialAuthController extends Controller
                 $user->markEmailAsVerified();
             }
 
-            // Check if user is trying to join a new church via Google
+            // Check if user is trying to join a specific church via Google
             $joinChurchId = $request->session()->pull('google_join_church_id');
-            if ($joinChurchId && !$user->belongsToChurch($joinChurchId)) {
+            if ($joinChurchId) {
                 $church = \App\Models\Church::find($joinChurchId);
-                if ($church && $church->getSetting('self_registration_enabled') !== false) {
-                    $user->joinChurch($church->id);
+                if ($church) {
+                    // Join if not already a member
+                    if (!$user->belongsToChurch($joinChurchId)) {
+                        if ($church->getSetting('self_registration_enabled') !== false) {
+                            $user->joinChurch($church->id);
+                        }
+                    }
+
+                    // Always switch to the requested church
                     $user->switchToChurch($church->id);
 
-                    Log::channel('security')->info('Existing user joined church via Google', [
+                    Log::channel('security')->info('User joined/switched to church via Google', [
                         'user_id' => $user->id,
                         'email' => $user->email,
                         'church_id' => $church->id,
