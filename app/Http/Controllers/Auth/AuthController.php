@@ -40,7 +40,7 @@ class AuthController extends Controller
                 ]);
 
                 return back()->withErrors([
-                    'email' => 'Ваш акаунт було видалено. Зверніться до адміністратора.',
+                    'email' => 'Акаунт не знайдено. Перевірте email або зареєструйтесь.',
                 ])->onlyInput('email');
             }
 

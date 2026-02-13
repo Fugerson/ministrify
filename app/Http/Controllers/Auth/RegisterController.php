@@ -101,7 +101,7 @@ class RegisterController extends Controller
 
         // Block soft-deleted users
         if (User::onlyTrashed()->where('email', $request->email)->exists()) {
-            return back()->withInput()->withErrors(['email' => 'Цей акаунт було видалено. Зверніться до адміністратора.']);
+            return back()->withInput()->withErrors(['email' => 'Акаунт не знайдено. Перевірте email або зареєструйтесь.']);
         }
 
         $user = DB::transaction(function () use ($request, $church, $volunteerRole) {
@@ -176,7 +176,7 @@ class RegisterController extends Controller
 
         // Block soft-deleted users
         if (User::onlyTrashed()->where('email', $request->email)->exists()) {
-            return back()->withInput()->withErrors(['email' => 'Цей акаунт було видалено. Зверніться до адміністратора.']);
+            return back()->withInput()->withErrors(['email' => 'Акаунт не знайдено. Перевірте email або зареєструйтесь.']);
         }
 
         $user = DB::transaction(function () use ($request) {

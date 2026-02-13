@@ -59,7 +59,7 @@ class SocialAuthController extends Controller
             ]);
 
             return redirect()->route('login')
-                ->with('error', 'Ваш акаунт було видалено. Зверніться до адміністратора.');
+                ->with('error', 'Акаунт не знайдено.');
         }
 
         if ($user) {
@@ -178,7 +178,7 @@ class SocialAuthController extends Controller
             // Block soft-deleted users
             if ($existingUser->trashed()) {
                 return redirect()->route('login')
-                    ->with('error', 'Ваш акаунт було видалено. Зверніться до адміністратора.');
+                    ->with('error', 'Акаунт не знайдено.');
             }
 
             if (!$existingUser->google_id) {
@@ -305,7 +305,7 @@ class SocialAuthController extends Controller
         if (User::onlyTrashed()->where('email', $googleUser['email'])->exists()) {
             $request->session()->forget('google_user');
             return redirect()->route('login')
-                ->with('error', 'Ваш акаунт було видалено. Зверніться до адміністратора.');
+                ->with('error', 'Акаунт не знайдено.');
         }
 
         $baseSlug = \Illuminate\Support\Str::slug($validated['church_name']);
@@ -419,7 +419,7 @@ class SocialAuthController extends Controller
         if (User::onlyTrashed()->where('email', $googleUser['email'])->exists()) {
             $request->session()->forget('google_user');
             return redirect()->route('login')
-                ->with('error', 'Ваш акаунт було видалено. Зверніться до адміністратора.');
+                ->with('error', 'Акаунт не знайдено.');
         }
 
         $user = User::create([
