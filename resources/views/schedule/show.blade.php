@@ -584,7 +584,7 @@
                                 <span x-show="newResponsible.people.length === 0" class="text-sm text-gray-400">Відповідальний</span>
                             </div>
                             <div x-show="newResponsible.open" x-cloak @click.outside="newResponsible.open = false"
-                                 class="absolute z-50 left-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                                 class="absolute z-50 left-0 bottom-full mb-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                                 <div class="p-2 border-b border-gray-200 dark:border-gray-700">
                                     <input type="text" x-model="newResponsible.search" placeholder="Пошук..."
                                            @click.stop
