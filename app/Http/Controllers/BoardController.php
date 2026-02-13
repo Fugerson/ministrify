@@ -102,11 +102,13 @@ class BoardController extends Controller
 
     public function create()
     {
+        abort_unless(auth()->user()->canCreate('boards'), 403);
         return view('boards.create');
     }
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->canCreate('boards'), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',

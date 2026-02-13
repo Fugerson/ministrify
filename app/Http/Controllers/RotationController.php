@@ -17,6 +17,8 @@ class RotationController extends Controller
      */
     public function index()
     {
+        abort_unless(auth()->user()->canView('ministries'), 403);
+
         $church = $this->getCurrentChurch();
 
         $ministries = $church->ministries()

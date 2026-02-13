@@ -113,6 +113,8 @@ class TeamController extends Controller
 
     public function reorder(Request $request)
     {
+        $church = $this->getChurchOrFail();
+
         $validated = $request->validate([
             'order' => 'required|array',
             'order.*' => 'integer|exists:staff_members,id',
@@ -120,7 +122,7 @@ class TeamController extends Controller
 
         foreach ($validated['order'] as $index => $id) {
             StaffMember::where('id', $id)
-                ->where('church_id', auth()->user()->church_id)
+                ->where('church_id', $church->id)
                 ->update(['sort_order' => $index]);
         }
 

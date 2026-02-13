@@ -342,7 +342,9 @@ class UserController extends Controller
         // Send notification if user was granted access (had no role before, now has one)
         if ($hadNoRole && $churchRoleId !== null) {
             $role = ChurchRole::find($churchRoleId);
-            $user->notify(new AccessGranted($role->name, $church->name));
+            if ($role) {
+                $user->notify(new AccessGranted($role->name, $church->name));
+            }
         }
 
         if ($request->expectsJson()) {

@@ -297,6 +297,7 @@ class EventController extends Controller
     public function show(Event $event)
     {
         $this->authorizeChurch($event);
+        $this->authorize('view', $event);
         $church = $this->getCurrentChurch();
 
         $event->load([
@@ -542,6 +543,10 @@ class EventController extends Controller
     {
         $this->authorizeChurch($event);
 
+        if (!auth()->user()->canEdit('attendance') && !auth()->user()->canEdit('events')) {
+            abort(403);
+        }
+
         if (!$event->track_attendance) {
             abort(404);
         }
@@ -756,6 +761,9 @@ class EventController extends Controller
      */
     public function importForm()
     {
+        if (!auth()->user()->canCreate('events')) {
+            abort(403);
+        }
         $church = $this->getCurrentChurch();
         $ministries = Ministry::where('church_id', $church->id)->get();
 

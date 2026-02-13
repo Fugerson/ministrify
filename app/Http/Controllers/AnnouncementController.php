@@ -37,6 +37,9 @@ class AnnouncementController extends Controller
     public function show(Announcement $announcement)
     {
         $this->authorizeChurch($announcement);
+        if (!auth()->user()->canView('announcements')) {
+            abort(403);
+        }
 
         // Mark as read
         $announcement->markAsReadBy(auth()->user());

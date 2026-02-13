@@ -26,7 +26,13 @@ class BlogCategory extends Model
     {
         static::creating(function ($category) {
             if (empty($category->slug)) {
-                $category->slug = Str::slug($category->name);
+                $baseSlug = Str::slug($category->name);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (self::where('slug', $slug)->where('church_id', $category->church_id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+                $category->slug = $slug;
             }
         });
     }

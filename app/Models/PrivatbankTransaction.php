@@ -133,7 +133,9 @@ class PrivatbankTransaction extends Model
         $rest = self::parseAmount($data['rest'] ?? '0');
 
         return self::updateOrCreate(
-            ['privat_id' => $data['tranId'] ?? $data['appcode'] ?? md5(json_encode($data))],
+            ['privat_id' => $data['tranId'] ?? $data['appcode'] ?? md5(
+                ($data['trandate'] ?? '') . ($data['trantime'] ?? '') . ($data['cardamount'] ?? $data['amount'] ?? '') . ($data['description'] ?? '')
+            )],
             [
                 'church_id' => $churchId,
                 'amount' => $amount,

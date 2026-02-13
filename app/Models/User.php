@@ -483,7 +483,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $completed = 0;
 
         foreach ($steps as $step) {
-            if ($step['completed'] || $step['skipped']) {
+            if (($step['completed'] ?? false) || ($step['skipped'] ?? false)) {
                 $completed++;
             }
         }

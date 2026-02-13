@@ -49,7 +49,13 @@ class Sermon extends Model
     {
         static::creating(function ($sermon) {
             if (empty($sermon->slug)) {
-                $sermon->slug = Str::slug($sermon->title);
+                $baseSlug = Str::slug($sermon->title);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (self::where('slug', $slug)->where('church_id', $sermon->church_id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+                $sermon->slug = $slug;
             }
         });
     }

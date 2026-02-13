@@ -36,7 +36,13 @@ class Gallery extends Model
     {
         static::creating(function ($gallery) {
             if (empty($gallery->slug)) {
-                $gallery->slug = Str::slug($gallery->title);
+                $baseSlug = Str::slug($gallery->title);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (self::where('slug', $slug)->where('church_id', $gallery->church_id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+                $gallery->slug = $slug;
             }
         });
     }

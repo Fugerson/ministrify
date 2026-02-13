@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Person;
 use App\Models\TelegramMessage;
 use App\Services\TelegramService;
@@ -10,14 +11,11 @@ use Illuminate\Support\Facades\Cache;
 
 class TelegramChatController extends Controller
 {
+    use RequiresChurch;
+
     public function index()
     {
-        $church = auth()->user()->church;
-
-        if (!$church) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Telegram чат доступний тільки для користувачів з церквою.');
-        }
+        $church = $this->getChurchOrFail();
 
         // Get people with Telegram linked, with their latest message
         $conversations = Person::where('church_id', $church->id)
@@ -44,12 +42,7 @@ class TelegramChatController extends Controller
 
     public function show(Person $person)
     {
-        $church = auth()->user()->church;
-
-        if (!$church) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Telegram чат доступний тільки для користувачів з церквою.');
-        }
+        $church = $this->getChurchOrFail();
 
         // Ensure person belongs to this church
         if ($person->church_id !== $church->id) {
@@ -84,12 +77,7 @@ class TelegramChatController extends Controller
             'message' => 'required|string|max:4000',
         ]);
 
-        $church = auth()->user()->church;
-
-        if (!$church) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Telegram чат доступний тільки для користувачів з церквою.');
-        }
+        $church = $this->getChurchOrFail();
 
         // Ensure person belongs to this church
         if ($person->church_id !== $church->id) {

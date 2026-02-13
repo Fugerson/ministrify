@@ -59,7 +59,13 @@ class BlogPost extends Model
     {
         static::creating(function ($post) {
             if (empty($post->slug)) {
-                $post->slug = Str::slug($post->title);
+                $baseSlug = Str::slug($post->title);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (self::where('slug', $slug)->where('church_id', $post->church_id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+                $post->slug = $slug;
             }
         });
     }

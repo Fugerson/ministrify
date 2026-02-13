@@ -211,7 +211,7 @@ class Event extends Model
     {
         return $this->registrations()
             ->whereIn('status', ['confirmed', 'attended'])
-            ->sum(\DB::raw('1 + guests'));
+            ->sum(\DB::raw('1 + COALESCE(guests, 0)'));
     }
 
     public function getRemainingSpacesAttribute(): ?int
@@ -373,7 +373,7 @@ class Event extends Model
 
         // Allow check-in on the event day or day before
         $today = now()->startOfDay();
-        $eventDay = $this->date->startOfDay();
+        $eventDay = $this->date->copy()->startOfDay();
 
         return $today->diffInDays($eventDay, false) >= 0 && $today->diffInDays($eventDay, false) <= 1;
     }

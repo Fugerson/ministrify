@@ -2615,7 +2615,7 @@ function userOverridesManager() {
     const usersData = {
         @foreach($users->filter(fn($u) => $u->church_role_id && !$u->churchRole?->is_admin_role) as $u)
         {{ $u->id }}: {
-            rolePerms: @json($u->churchRole->getAllPermissions()),
+            rolePerms: @json($u->churchRole?->getAllPermissions() ?? []),
             overrides: @json($u->permission_overrides ?? (object)[]),
         },
         @endforeach

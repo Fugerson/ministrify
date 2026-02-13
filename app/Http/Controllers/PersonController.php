@@ -225,15 +225,22 @@ class PersonController extends Controller
         $validated['church_id'] = $church->id;
         $person = Person::create($validated);
 
-        // Attach tags
+        // Attach tags (only tags belonging to this church)
         if ($request->has('tags')) {
-            $person->tags()->sync($request->tags);
+            $validTagIds = \App\Models\Tag::where('church_id', $church->id)
+                ->whereIn('id', $request->tags)
+                ->pluck('id')
+                ->toArray();
+            $person->tags()->sync($validTagIds);
         }
 
-        // Attach ministries with positions
+        // Attach ministries with positions (only ministries belonging to this church)
         if ($request->has('ministries')) {
+            $validMinistryIds = \App\Models\Ministry::where('church_id', $church->id)
+                ->pluck('id')
+                ->toArray();
             foreach ($request->ministries as $ministryId => $data) {
-                if (!empty($data['selected'])) {
+                if (!empty($data['selected']) && in_array((int) $ministryId, $validMinistryIds)) {
                     $person->ministries()->attach($ministryId, [
                         'position_ids' => json_encode($data['positions'] ?? []),
                     ]);
@@ -476,17 +483,26 @@ class PersonController extends Controller
 
         $person->update($validated);
 
-        // Sync tags (users with edit permission only)
+        // Sync tags (users with edit permission only, validated by church_id)
         if ($canEditPeople) {
-            $person->tags()->sync($request->tags ?? []);
+            $churchId = $this->getCurrentChurch()->id;
+            $validTagIds = \App\Models\Tag::where('church_id', $churchId)
+                ->whereIn('id', $request->tags ?? [])
+                ->pluck('id')
+                ->toArray();
+            $person->tags()->sync($validTagIds);
         }
 
-        // Sync ministries with positions (users with edit permission only)
+        // Sync ministries with positions (users with edit permission only, validated by church_id)
         if ($canEditPeople) {
+            $churchId = $churchId ?? $this->getCurrentChurch()->id;
+            $validMinistryIds = \App\Models\Ministry::where('church_id', $churchId)
+                ->pluck('id')
+                ->toArray();
             $person->ministries()->detach();
             if ($request->has('ministries')) {
                 foreach ($request->ministries as $ministryId => $data) {
-                    if (!empty($data['selected'])) {
+                    if (!empty($data['selected']) && in_array((int) $ministryId, $validMinistryIds)) {
                         $person->ministries()->attach($ministryId, [
                             'position_ids' => json_encode($data['positions'] ?? []),
                         ]);

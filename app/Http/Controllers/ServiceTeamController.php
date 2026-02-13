@@ -74,9 +74,17 @@ class ServiceTeamController extends Controller
             'notes' => 'nullable|string|max:255',
         ]);
 
+        $churchId = $this->getCurrentChurch()->id;
+
         // Verify ministry belongs to same church and has the flag
         $ministry = Ministry::find($validated['ministry_id']);
-        if (!$ministry || $ministry->church_id !== $this->getCurrentChurch()->id || !$ministry->is_sunday_service_part) {
+        if (!$ministry || $ministry->church_id !== $churchId || !$ministry->is_sunday_service_part) {
+            abort(404);
+        }
+
+        // Verify person belongs to same church
+        $person = \App\Models\Person::find($validated['person_id']);
+        if (!$person || $person->church_id !== $churchId) {
             abort(404);
         }
 

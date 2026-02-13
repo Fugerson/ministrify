@@ -57,6 +57,9 @@ class SongController extends Controller
 
     public function store(Request $request)
     {
+        if (!auth()->user()->canCreate('ministries')) {
+            abort(403);
+        }
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'artist' => 'nullable|string|max:255',
@@ -175,6 +178,9 @@ class SongController extends Controller
     public function update(Request $request, Song $song)
     {
         $this->authorizeChurch($song);
+        if (!auth()->user()->canEdit('ministries')) {
+            abort(403);
+        }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -256,6 +262,9 @@ class SongController extends Controller
     public function destroy(Request $request, Song $song)
     {
         $this->authorizeChurch($song);
+        if (!auth()->user()->canDelete('ministries')) {
+            abort(403);
+        }
 
         $song->delete();
 

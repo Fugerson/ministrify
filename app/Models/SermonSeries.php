@@ -40,7 +40,13 @@ class SermonSeries extends Model
     {
         static::creating(function ($series) {
             if (empty($series->slug)) {
-                $series->slug = Str::slug($series->title);
+                $baseSlug = Str::slug($series->title);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (self::where('slug', $slug)->where('church_id', $series->church_id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+                $series->slug = $slug;
             }
         });
     }

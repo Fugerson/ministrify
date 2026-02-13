@@ -66,10 +66,9 @@ class MonobankSenderMapping extends Model
         ?int $personId = null
     ): self {
         if (!$iban && !$name) {
-            return self::create([
+            // Cannot create mapping without identifier — skip
+            return new self([
                 'church_id' => $churchId,
-                'sender_iban' => $iban,
-                'sender_name' => $name,
                 'category_id' => $categoryId,
                 'person_id' => $personId,
             ]);

@@ -29,6 +29,7 @@ class MigrationController extends Controller
 
     public function planningCenter()
     {
+        abort_unless(auth()->user()->isAdmin(), 403);
         $church = $this->getCurrentChurch();
         $existingCount = Person::where('church_id', $church->id)->count();
 
@@ -40,6 +41,7 @@ class MigrationController extends Controller
 
     public function preview(Request $request)
     {
+        abort_unless(auth()->user()->isAdmin(), 403);
         $request->validate([
             'file' => 'required|file|mimes:csv,txt|max:10240',
         ]);
@@ -110,6 +112,7 @@ class MigrationController extends Controller
 
     public function import(Request $request)
     {
+        abort_unless(auth()->user()->isAdmin(), 403);
         $church = $this->getCurrentChurch();
         $clearExisting = $request->boolean('clear_existing');
 

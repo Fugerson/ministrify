@@ -126,7 +126,15 @@ class DesignController extends Controller
             'custom_css' => 'nullable|string|max:50000',
         ]);
 
-        $church->setPublicSiteSetting('custom_css', $validated['custom_css']);
+        $css = $validated['custom_css'];
+        if ($css) {
+            // Strip any </style> tags and <script> injections to prevent XSS
+            $css = preg_replace('/<\s*\/?\s*style\b[^>]*>/i', '', $css);
+            $css = preg_replace('/<\s*script\b[^>]*>.*?<\s*\/\s*script\s*>/is', '', $css);
+            $css = preg_replace('/<\s*script\b/i', '', $css);
+        }
+
+        $church->setPublicSiteSetting('custom_css', $css);
 
         return back()->with('success', 'Кастомний CSS збережено');
     }

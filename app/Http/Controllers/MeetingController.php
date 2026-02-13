@@ -230,7 +230,9 @@ class MeetingController extends Controller
         ]);
 
         foreach ($validated['items'] as $index => $itemId) {
-            MeetingAgendaItem::where('id', $itemId)->update(['sort_order' => $index]);
+            MeetingAgendaItem::where('id', $itemId)
+                ->where('ministry_meeting_id', $meeting->id)
+                ->update(['sort_order' => $index]);
         }
 
         return response()->json(['success' => true]);
@@ -320,6 +322,9 @@ class MeetingController extends Controller
     private function authorizeMinistry(Ministry $ministry): void
     {
         if ($ministry->church_id !== $this->getCurrentChurch()->id) {
+            abort(403);
+        }
+        if (!auth()->user()->canManageMinistry($ministry)) {
             abort(403);
         }
     }

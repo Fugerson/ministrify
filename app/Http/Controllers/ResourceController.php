@@ -58,6 +58,9 @@ class ResourceController extends Controller
      */
     public function createFolder(Request $request)
     {
+        if (!auth()->user()->canCreate('resources')) {
+            abort(403);
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:resources,id',
@@ -91,6 +94,9 @@ class ResourceController extends Controller
      */
     public function upload(Request $request)
     {
+        if (!auth()->user()->canCreate('resources')) {
+            abort(403);
+        }
         $churchId = $this->getCurrentChurch()->id;
 
         // Convert empty string to null for parent_id
@@ -174,6 +180,9 @@ class ResourceController extends Controller
         if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
+        if (!auth()->user()->canEdit('resources')) {
+            abort(403);
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -191,6 +200,9 @@ class ResourceController extends Controller
     {
         if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
+        }
+        if (!auth()->user()->canDelete('resources')) {
+            abort(403);
         }
 
         // If it's a file, delete from storage
@@ -215,6 +227,9 @@ class ResourceController extends Controller
     {
         if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
+        }
+        if (!auth()->user()->canEdit('resources')) {
+            abort(403);
         }
 
         $validated = $request->validate([

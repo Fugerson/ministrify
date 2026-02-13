@@ -135,7 +135,8 @@ class QrCheckinController extends Controller
 
         // Verify user has access to this church
         $user = auth()->user();
-        if ($event->church_id !== $user->church_id || $person->church_id !== $user->church_id) {
+        $churchId = $this->getCurrentChurch()->id;
+        if ($event->church_id !== $churchId || $person->church_id !== $churchId) {
             return response()->json([
                 'success' => false,
                 'message' => 'Доступ заборонено',
@@ -175,7 +176,7 @@ class QrCheckinController extends Controller
     {
         $user = auth()->user();
 
-        $events = Event::where('church_id', $user->church_id)
+        $events = Event::where('church_id', $this->getCurrentChurch()->id)
             ->whereDate('date', today())
             ->with('attendance.records')
             ->orderBy('time')

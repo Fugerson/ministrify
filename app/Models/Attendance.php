@@ -78,8 +78,7 @@ class Attendance extends Model
      */
     public function group(): BelongsTo
     {
-        return $this->belongsTo(Group::class, 'attendable_id')
-            ->where('attendable_type', Group::class);
+        return $this->belongsTo(Group::class, 'attendable_id');
     }
 
     public function records(): HasMany
@@ -212,7 +211,7 @@ class Attendance extends Model
     {
         $this->update([
             'members_present' => $this->records()->where('present', true)->count(),
-            'total_count' => $this->records()->where('present', true)->count() + $this->guests_count,
+            'total_count' => $this->records()->where('present', true)->count() + ($this->guests_count ?? 0),
         ]);
     }
 

@@ -150,7 +150,8 @@ class PrivateMessageController extends Controller
     public function unreadCount()
     {
         $user = auth()->user();
-        $count = PrivateMessage::unreadCount($user->church_id, $user->id);
+        $church = $this->getChurchOrFail();
+        $count = PrivateMessage::unreadCount($church->id, $user->id);
 
         return response()->json(['count' => $count]);
     }

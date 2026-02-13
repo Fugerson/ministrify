@@ -67,6 +67,8 @@ class FaqController extends Controller
 
     public function reorder(Request $request)
     {
+        $church = $this->getChurchOrFail();
+
         $validated = $request->validate([
             'order' => 'required|array',
             'order.*' => 'integer|exists:faqs,id',
@@ -74,7 +76,7 @@ class FaqController extends Controller
 
         foreach ($validated['order'] as $index => $id) {
             Faq::where('id', $id)
-                ->where('church_id', auth()->user()->church_id)
+                ->where('church_id', $church->id)
                 ->update(['sort_order' => $index]);
         }
 
