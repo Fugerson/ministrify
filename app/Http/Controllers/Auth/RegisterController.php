@@ -99,8 +99,13 @@ class RegisterController extends Controller
                 ->with('success', 'Ви приєднались до ' . $church->name . '!');
         }
 
-        // Remove old soft-deleted user if exists (allow re-registration)
-        User::onlyTrashed()->where('email', $request->email)->forceDelete();
+        // Wipe old soft-deleted user completely (allow re-registration from scratch)
+        $oldUser = User::onlyTrashed()->where('email', $request->email)->first();
+        if ($oldUser) {
+            DB::table('church_user')->where('user_id', $oldUser->id)->delete();
+            Person::where('user_id', $oldUser->id)->update(['user_id' => null]);
+            $oldUser->forceDelete();
+        }
 
         $user = DB::transaction(function () use ($request, $church, $volunteerRole) {
             // Parse name into first_name and last_name
@@ -172,8 +177,13 @@ class RegisterController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
-        // Remove old soft-deleted user if exists (allow re-registration)
-        User::onlyTrashed()->where('email', $request->email)->forceDelete();
+        // Wipe old soft-deleted user completely (allow re-registration from scratch)
+        $oldUser = User::onlyTrashed()->where('email', $request->email)->first();
+        if ($oldUser) {
+            DB::table('church_user')->where('user_id', $oldUser->id)->delete();
+            Person::where('user_id', $oldUser->id)->update(['user_id' => null]);
+            $oldUser->forceDelete();
+        }
 
         $user = DB::transaction(function () use ($request) {
             // Create church with unique slug

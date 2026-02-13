@@ -56,13 +56,14 @@ class SocialAuthController extends Controller
             $joinChurchId = $request->session()->get('google_join_church_id');
 
             if ($joinChurchId) {
-                // Joining a church — restore and let them join
-                $user->restore();
-                Log::channel('security')->info('Soft-deleted user restored via Google join', [
-                    'user_id' => $user->id,
+                // Joining a church — wipe old data completely, proceed as new user
+                Log::channel('security')->info('Soft-deleted user re-joining via Google', [
+                    'old_user_id' => $user->id,
                     'email' => $googleUser->getEmail(),
                     'church_id' => $joinChurchId,
                 ]);
+                $this->wipeTrashedUser($googleUser->getEmail());
+                $user = null;
             } else {
                 // Pure login attempt — block
                 Log::channel('security')->info('Soft-deleted user attempted Google login', [
@@ -308,8 +309,8 @@ class SocialAuthController extends Controller
      */
     protected function createChurchWithGoogleUser(Request $request, array $googleUser, array $validated)
     {
-        // Remove old soft-deleted user if exists (allow re-registration)
-        User::onlyTrashed()->where('email', $googleUser['email'])->forceDelete();
+        // Wipe old soft-deleted user completely (allow re-registration from scratch)
+        $this->wipeTrashedUser($googleUser['email']);
 
         $baseSlug = \Illuminate\Support\Str::slug($validated['church_name']);
         $slug = $baseSlug;
@@ -418,8 +419,8 @@ class SocialAuthController extends Controller
             return back()->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
-        // Remove old soft-deleted user if exists (allow re-registration)
-        User::onlyTrashed()->where('email', $googleUser['email'])->forceDelete();
+        // Wipe old soft-deleted user completely (allow re-registration from scratch)
+        $this->wipeTrashedUser($googleUser['email']);
 
         $user = User::create([
             'church_id' => $church->id,
@@ -442,5 +443,20 @@ class SocialAuthController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', 'Ласкаво просимо до ' . $church->name . '!');
+    }
+
+    /**
+     * Completely wipe a soft-deleted user and all their data.
+     */
+    private function wipeTrashedUser(string $email): void
+    {
+        $oldUser = User::onlyTrashed()->where('email', $email)->first();
+        if (!$oldUser) {
+            return;
+        }
+
+        DB::table('church_user')->where('user_id', $oldUser->id)->delete();
+        \App\Models\Person::where('user_id', $oldUser->id)->update(['user_id' => null]);
+        $oldUser->forceDelete();
     }
 }
