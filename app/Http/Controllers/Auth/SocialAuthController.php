@@ -51,15 +51,28 @@ class SocialAuthController extends Controller
                 ->first();
         }
 
-        // Block soft-deleted users — admin deleted them for a reason
+        // Soft-deleted user
         if ($user && $user->trashed()) {
-            Log::channel('security')->info('Soft-deleted user attempted Google login', [
-                'user_id' => $user->id,
-                'email' => $googleUser->getEmail(),
-            ]);
+            $joinChurchId = $request->session()->get('google_join_church_id');
 
-            return redirect()->route('login')
-                ->with('error', 'Акаунт не знайдено.');
+            if ($joinChurchId) {
+                // Joining a church — force-delete old record and proceed as new user
+                Log::channel('security')->info('Soft-deleted user re-registering via Google', [
+                    'old_user_id' => $user->id,
+                    'email' => $googleUser->getEmail(),
+                    'church_id' => $joinChurchId,
+                ]);
+                $user->forceDelete();
+                $user = null;
+            } else {
+                // Pure login attempt — block
+                Log::channel('security')->info('Soft-deleted user attempted Google login', [
+                    'user_id' => $user->id,
+                    'email' => $googleUser->getEmail(),
+                ]);
+                return redirect()->route('login')
+                    ->with('error', 'Акаунт не знайдено.');
+            }
         }
 
         if ($user) {
@@ -173,13 +186,8 @@ class SocialAuthController extends Controller
         }
 
         // Check if user with this email already exists
-        $existingUser = User::withTrashed()->where('email', $googleUser->getEmail())->first();
+        $existingUser = User::where('email', $googleUser->getEmail())->first();
         if ($existingUser) {
-            // Block soft-deleted users
-            if ($existingUser->trashed()) {
-                return redirect()->route('login')
-                    ->with('error', 'Акаунт не знайдено.');
-            }
 
             if (!$existingUser->google_id) {
                 $existingUser->update(['google_id' => $googleUser->getId()]);
@@ -301,12 +309,8 @@ class SocialAuthController extends Controller
      */
     protected function createChurchWithGoogleUser(Request $request, array $googleUser, array $validated)
     {
-        // Block soft-deleted users
-        if (User::onlyTrashed()->where('email', $googleUser['email'])->exists()) {
-            $request->session()->forget('google_user');
-            return redirect()->route('login')
-                ->with('error', 'Акаунт не знайдено.');
-        }
+        // Force-delete old soft-deleted user if exists (allow re-registration)
+        User::onlyTrashed()->where('email', $googleUser['email'])->forceDelete();
 
         $baseSlug = \Illuminate\Support\Str::slug($validated['church_name']);
         $slug = $baseSlug;
@@ -415,12 +419,8 @@ class SocialAuthController extends Controller
             return back()->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
-        // Block soft-deleted users
-        if (User::onlyTrashed()->where('email', $googleUser['email'])->exists()) {
-            $request->session()->forget('google_user');
-            return redirect()->route('login')
-                ->with('error', 'Акаунт не знайдено.');
-        }
+        // Force-delete old soft-deleted user if exists (allow re-registration)
+        User::onlyTrashed()->where('email', $googleUser['email'])->forceDelete();
 
         $user = User::create([
             'church_id' => $church->id,

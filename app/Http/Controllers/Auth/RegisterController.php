@@ -99,10 +99,8 @@ class RegisterController extends Controller
                 ->with('success', 'Ви приєднались до ' . $church->name . '!');
         }
 
-        // Block soft-deleted users
-        if (User::onlyTrashed()->where('email', $request->email)->exists()) {
-            return back()->withInput()->withErrors(['email' => 'Акаунт не знайдено. Перевірте email або зареєструйтесь.']);
-        }
+        // Force-delete old soft-deleted user if exists (allow re-registration)
+        User::onlyTrashed()->where('email', $request->email)->forceDelete();
 
         $user = DB::transaction(function () use ($request, $church, $volunteerRole) {
             // Parse name into first_name and last_name
@@ -174,10 +172,8 @@ class RegisterController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
-        // Block soft-deleted users
-        if (User::onlyTrashed()->where('email', $request->email)->exists()) {
-            return back()->withInput()->withErrors(['email' => 'Акаунт не знайдено. Перевірте email або зареєструйтесь.']);
-        }
+        // Force-delete old soft-deleted user if exists (allow re-registration)
+        User::onlyTrashed()->where('email', $request->email)->forceDelete();
 
         $user = DB::transaction(function () use ($request) {
             // Create church with unique slug
