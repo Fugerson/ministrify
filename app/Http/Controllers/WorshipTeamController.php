@@ -23,7 +23,7 @@ class WorshipTeamController extends Controller
     {
         $this->authorizeChurch($ministry);
 
-        if (!$ministry->is_worship_ministry) {
+        if (!$ministry->is_worship_ministry && !$ministry->is_sunday_service_part) {
             abort(404);
         }
 
@@ -47,7 +47,7 @@ class WorshipTeamController extends Controller
     {
         $this->authorizeChurch($ministry);
 
-        if (!$ministry->is_worship_ministry) {
+        if (!$ministry->is_worship_ministry && !$ministry->is_sunday_service_part) {
             abort(404);
         }
 
@@ -155,7 +155,7 @@ class WorshipTeamController extends Controller
         $this->authorizeChurch($ministry);
         $this->authorizeChurch($event);
 
-        if (!$ministry->is_worship_ministry) {
+        if (!$ministry->is_worship_ministry && !$ministry->is_sunday_service_part) {
             abort(404);
         }
 
