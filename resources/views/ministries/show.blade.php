@@ -242,11 +242,14 @@
                                                                         </button>
                                                                     </span>
                                                                 </template>
-                                                                {{-- Add button --}}
-                                                                <button @click="openGridDropdown($event, event.id, role.id)"
-                                                                    class="inline-flex items-center justify-center w-6 h-6 rounded border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-purple-400 hover:text-purple-500 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-colors text-xs">
-                                                                    +
-                                                                </button>
+                                                                {{-- Add select --}}
+                                                                <select @change="if($event.target.value) { gridAssign(event.id, role.id, parseInt($event.target.value)); $event.target.value = ''; }"
+                                                                    class="w-24 text-xs border border-dashed border-gray-300 dark:border-gray-600 rounded px-1 py-0.5 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none">
+                                                                    <option value="">+</option>
+                                                                    <template x-for="member in gridData.members" :key="'sel-'+member.id">
+                                                                        <option :value="member.id" x-text="member.name"></option>
+                                                                    </template>
+                                                                </select>
                                                             </div>
                                                         </td>
                                                     </template>
@@ -257,20 +260,6 @@
                                 </template>
                             </div>
 
-                            {{-- Shared dropdown for grid (outside overflow container) --}}
-                            <div x-show="gridDropdown.open" @click.outside="gridDropdown.open = false" @scroll.window="gridDropdown.open = false" x-cloak
-                                :style="gridDropdown.style"
-                                class="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl py-1 w-48 max-h-48 overflow-y-auto">
-                                <template x-for="member in gridData.members" :key="'dd-' + member.id">
-                                    <button @click="gridAssign(gridDropdown.eventId, gridDropdown.roleId, member.id); gridDropdown.open = false"
-                                        class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
-                                        x-text="member.name">
-                                    </button>
-                                </template>
-                                <div x-show="gridData.members.length === 0" class="px-3 py-2 text-xs text-gray-400">
-                                    Немає учасників
-                                </div>
-                            </div>
                         </div>
 
                         {{-- Calendar view --}}
