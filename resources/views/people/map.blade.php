@@ -21,6 +21,9 @@
                         <template x-if="error">
                             <span class="text-red-500" x-text="error"></span>
                         </template>
+                        <template x-if="tileStatus">
+                            <span class="text-amber-500" x-text="tileStatus"></span>
+                        </template>
                     </p>
                 </div>
             </div>
@@ -50,9 +53,9 @@
 </div>
 
 @push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
     .leaflet-popup-content-wrapper { border-radius: 12px; }
     .dark .leaflet-tile { filter: brightness(0.8) contrast(1.1) saturate(0.8); }
@@ -65,8 +68,8 @@
 @endpush
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
 function membersMap() {
     return {
@@ -74,13 +77,11 @@ function membersMap() {
         markerGroup: null,
         markers: [],
         error: '',
+        tileStatus: '',
         filters: { ministry_id: '', group_id: '' },
 
         init() {
-            // Load data first regardless of map
             this.loadData();
-
-            // Initialize map with retry
             this.$nextTick(() => this.initMap());
         },
 
@@ -96,14 +97,32 @@ function membersMap() {
                 if (!el) return;
 
                 this.map = L.map('members-map').setView([48.45, 35.05], 6);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+                const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; OpenStreetMap',
                     maxZoom: 18,
-                }).addTo(this.map);
+                });
+
+                let loadedCount = 0;
+                const self = this;
+                tiles.on('tileerror', (e) => {
+                    console.error('Tile error:', e.tile?.src, e.error);
+                    self.tileStatus = '(тайли не завантажуються)';
+                });
+                tiles.on('tileload', () => {
+                    loadedCount++;
+                    if (loadedCount === 1) self.tileStatus = '';
+                });
+
+                tiles.addTo(this.map);
                 this.markerGroup = L.markerClusterGroup();
                 this.map.addLayer(this.markerGroup);
 
-                // If data already loaded, render markers
+                // Force recalculate map size after render
+                setTimeout(() => {
+                    if (this.map) this.map.invalidateSize();
+                }, 200);
+
                 if (this.markers.length) {
                     this.renderMarkers();
                 }
