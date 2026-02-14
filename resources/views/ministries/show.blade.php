@@ -225,14 +225,31 @@
                                                                     </span>
                                                                 </template>
                                                                 {{-- Add button --}}
-                                                                <div class="relative" x-data="{ open: false }">
-                                                                    <button @click="open = !open; editingCell = { roleId: role.id, eventId: event.id }"
+                                                                <div x-data="{ open: false, dropStyle: {} }" class="relative">
+                                                                    <button @click="
+                                                                        if (open) { open = false; return; }
+                                                                        const rect = $el.getBoundingClientRect();
+                                                                        const spaceBelow = window.innerHeight - rect.bottom;
+                                                                        const spaceRight = window.innerWidth - rect.left;
+                                                                        const dh = Math.min(192, gridData.members.length * 30 + 8);
+                                                                        const openUp = spaceBelow < dh + 8 && rect.top > dh;
+                                                                        dropStyle = {
+                                                                            position: 'fixed',
+                                                                            left: (spaceRight < 200 ? rect.right - 192 : rect.left) + 'px',
+                                                                            width: '192px',
+                                                                            ...(openUp
+                                                                                ? { bottom: (window.innerHeight - rect.top + 4) + 'px' }
+                                                                                : { top: (rect.bottom + 4) + 'px' })
+                                                                        };
+                                                                        open = true;
+                                                                    "
                                                                         class="inline-flex items-center justify-center w-6 h-6 rounded border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-purple-400 hover:text-purple-500 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-colors text-xs">
                                                                         +
                                                                     </button>
-                                                                    {{-- Dropdown --}}
-                                                                    <div x-show="open" @click.outside="open = false" x-cloak
-                                                                        class="absolute z-20 mt-1 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 w-48 max-h-48 overflow-y-auto">
+                                                                    {{-- Dropdown (fixed position to escape overflow) --}}
+                                                                    <div x-show="open" @click.outside="open = false" @scroll.window="open = false" x-cloak
+                                                                        :style="dropStyle"
+                                                                        class="fixed z-[60] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 max-h-48 overflow-y-auto">
                                                                         <template x-for="member in gridData.members" :key="member.id">
                                                                             <button @click="gridAssign(event.id, role.id, member.id); open = false"
                                                                                 class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
