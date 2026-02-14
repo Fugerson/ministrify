@@ -141,12 +141,12 @@
                             <div class="flex items-center gap-2">
                                 {{-- View switcher --}}
                                 <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
-                                    <button @click="gridView = false"
+                                    <button @click="gridView = false; let u = new URL(window.location); u.searchParams.delete('view'); history.replaceState({}, '', u)"
                                         :class="!gridView ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
                                         class="px-3 py-1 text-xs font-medium rounded-md transition-colors">
                                         Календар
                                     </button>
-                                    <button @click="gridView = true; loadGrid()"
+                                    <button @click="gridView = true; loadGrid(); let u = new URL(window.location); u.searchParams.set('view', 'grid'); history.replaceState({}, '', u)"
                                         :class="gridView ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
                                         class="px-3 py-1 text-xs font-medium rounded-md transition-colors">
                                         Сітка
@@ -644,7 +644,7 @@
                                 monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
 
                                 // Grid state
-                                gridView: false,
+                                gridView: new URL(window.location).searchParams.get('view') === 'grid',
                                 gridData: { events: [], roles: [], grid: {}, members: [] },
                                 gridLoading: false,
                                 editingCell: null,
@@ -669,7 +669,7 @@
                                 selectedSongForTeam: null, // Currently selected song for team editing
 
                                 init() {
-                                    // Start from current month
+                                    if (this.gridView) this.loadGrid();
                                 },
 
                                 async openEventModal(event) {
