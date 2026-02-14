@@ -9,13 +9,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. Add event_song_id to event_ministry_team
-        Schema::table('event_ministry_team', function (Blueprint $table) {
-            $table->unsignedBigInteger('event_song_id')->nullable()->after('ministry_role_id');
-            $table->foreign('event_song_id')->references('id')->on('event_songs')->onDelete('cascade');
-        });
+        // 1. Add event_song_id to event_ministry_team (skip if already exists from partial run)
+        if (!Schema::hasColumn('event_ministry_team', 'event_song_id')) {
+            Schema::table('event_ministry_team', function (Blueprint $table) {
+                $table->unsignedBigInteger('event_song_id')->nullable()->after('ministry_role_id');
+                $table->foreign('event_song_id')->references('id')->on('event_songs')->onDelete('cascade');
+            });
+        }
 
         // 2. Drop unique constraint from event_ministry_team (needed for song-level duplicates)
+        // First create a regular index so MySQL FK can use it instead of the unique one
+        Schema::table('event_ministry_team', function (Blueprint $table) {
+            $table->index('event_id', 'event_ministry_team_event_id_index');
+        });
         Schema::table('event_ministry_team', function (Blueprint $table) {
             $table->dropUnique('event_ministry_team_unique');
         });
@@ -116,9 +122,10 @@ return new class extends Migration
             ->whereIn('name', $worshipRoleNames)
             ->delete();
 
-        // Re-add unique constraint
+        // Re-add unique constraint and drop helper index
         Schema::table('event_ministry_team', function (Blueprint $table) {
             $table->unique(['event_id', 'ministry_id', 'person_id', 'ministry_role_id'], 'event_ministry_team_unique');
+            $table->dropIndex('event_ministry_team_event_id_index');
         });
 
         // Remove event_song_id column
