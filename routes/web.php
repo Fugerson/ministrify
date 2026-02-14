@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GroupController;
@@ -146,6 +147,7 @@ Route::prefix('c/{slug}')->name('public.')->middleware('throttle:60,1')->group(f
     Route::post('/donate', [PublicSiteController::class, 'processDonation'])->name('donate.process')->middleware('throttle:5,1');
     Route::get('/donate/success', [PublicSiteController::class, 'donateSuccess'])->name('donate.success');
     Route::get('/contact', [PublicSiteController::class, 'contact'])->name('contact');
+    Route::post('/feedback', [PublicSiteController::class, 'submitFeedback'])->name('feedback.store')->middleware('throttle:5,1');
 });
 
 // Authentication routes with rate limiting
@@ -254,6 +256,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('dashboard/calendar-events', [DashboardController::class, 'calendarEventsApi'])->name('dashboard.calendar-events');
 
     // People
+    Route::get('people/map', [PersonController::class, 'map'])->name('people.map');
+    Route::get('people/map-data', [PersonController::class, 'mapData'])->name('people.map-data');
     Route::resource('people', PersonController::class);
     Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore')->withTrashed();
     Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role');
@@ -412,6 +416,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
 
     // Service Plan
     Route::prefix('events/{event}/plan')->name('events.plan.')->group(function () {
+        Route::get('/', [ServicePlanController::class, 'index'])->name('index');
         Route::post('/', [ServicePlanController::class, 'store'])->name('store');
         Route::get('/print', [ServicePlanController::class, 'print'])->name('print');
         Route::post('/reorder', [ServicePlanController::class, 'reorder'])->name('reorder');
@@ -913,6 +918,14 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('campaigns', [\App\Http\Controllers\DonationController::class, 'storeCampaign'])->name('campaigns.store');
         Route::post('campaigns/{campaign}/toggle', [\App\Http\Controllers\DonationController::class, 'toggleCampaign'])->name('campaigns.toggle');
         Route::delete('campaigns/{campaign}', [\App\Http\Controllers\DonationController::class, 'destroyCampaign'])->name('campaigns.destroy');
+    });
+
+    // Feedback (admin)
+    Route::prefix('feedback')->name('feedback.')->group(function () {
+        Route::get('/', [FeedbackController::class, 'index'])->name('index');
+        Route::post('{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('status');
+        Route::post('{feedback}/notes', [FeedbackController::class, 'updateNotes'])->name('notes');
+        Route::delete('{feedback}', [FeedbackController::class, 'destroy'])->name('destroy');
     });
 
     // Songs Library

@@ -1597,6 +1597,57 @@ class PersonController extends Controller
         return response()->json(['success' => false, 'message' => 'Невідома дія']);
     }
 
+    /**
+     * Map view of church members
+     */
+    public function map(Request $request)
+    {
+        if (!auth()->user()->canView('people')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу.');
+        }
+
+        $church = $this->getCurrentChurch();
+        $ministries = \App\Models\Ministry::where('church_id', $church->id)->orderBy('name')->get(['id', 'name']);
+        $groups = \App\Models\Group::where('church_id', $church->id)->orderBy('name')->get(['id', 'name']);
+
+        return view('people.map', compact('ministries', 'groups'));
+    }
+
+    /**
+     * Map data (JSON endpoint)
+     */
+    public function mapData(Request $request)
+    {
+        if (!auth()->user()->canView('people')) {
+            abort(403);
+        }
+
+        $church = $this->getCurrentChurch();
+
+        $query = Person::where('church_id', $church->id)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude');
+
+        if ($request->filled('ministry_id')) {
+            $query->whereHas('ministries', fn($q) => $q->where('ministries.id', $request->ministry_id));
+        }
+        if ($request->filled('group_id')) {
+            $query->whereHas('groups', fn($q) => $q->where('groups.id', $request->group_id));
+        }
+
+        $people = $query->get(['id', 'first_name', 'last_name', 'phone', 'photo', 'latitude', 'longitude', 'address']);
+
+        return response()->json($people->map(fn($p) => [
+            'id' => $p->id,
+            'name' => $p->full_name,
+            'phone' => $p->phone,
+            'photo' => $p->photo ? '/storage/' . $p->photo : null,
+            'lat' => (float) $p->latitude,
+            'lng' => (float) $p->longitude,
+            'address' => $p->address,
+        ]));
+    }
+
     protected function authorizeChurch($model): void
     {
         if ($model->church_id !== $this->getCurrentChurch()->id) {
