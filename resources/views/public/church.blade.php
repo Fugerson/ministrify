@@ -299,7 +299,7 @@
                                 @if($group->meeting_schedule)
                                     {{ $group->meeting_schedule }}
                                 @else
-                                    {{ $group->meeting_day_name }}@if($group->meeting_time), {{ $group->meeting_time->format('H:i') }}@endif
+                                    {{ $group->meeting_day_name }}@if($group->meeting_time), {{ $group->meeting_time?->format('H:i') }}@endif
                                 @endif
                             </p>
                         @endif

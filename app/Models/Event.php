@@ -74,7 +74,7 @@ class Event extends Model
     public static function serviceTypeLabels(): array
     {
         return [
-            self::SERVICE_SUNDAY => 'Воскресне служіння',
+            self::SERVICE_SUNDAY => 'Недільне служіння',
             self::SERVICE_YOUTH => 'Молодіжна зустріч',
             self::SERVICE_PRAYER => 'Молитовна зустріч',
             self::SERVICE_SPECIAL => 'Особливе служіння',

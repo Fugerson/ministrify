@@ -293,7 +293,7 @@ class EventTest extends TestCase
             'date' => now()->addWeek(),
         ]);
 
-        $this->assertEquals('Воскресне служіння', $event->service_type_label);
+        $this->assertEquals('Недільне служіння', $event->service_type_label);
     }
 
     public function test_service_type_label_null_when_not_service(): void

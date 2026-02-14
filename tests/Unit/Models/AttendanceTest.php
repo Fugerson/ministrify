@@ -125,7 +125,7 @@ class AttendanceTest extends TestCase
     {
         $ministry = Ministry::factory()->forChurch($this->church)->create();
         $event = Event::factory()->forMinistry($ministry)->create([
-            'title' => 'Воскресне служіння',
+            'title' => 'Недільне служіння',
             'date' => now(),
         ]);
 
@@ -135,7 +135,7 @@ class AttendanceTest extends TestCase
             'type' => Attendance::TYPE_EVENT,
         ]);
 
-        $this->assertEquals('Воскресне служіння', $attendance->entity_name);
+        $this->assertEquals('Недільне служіння', $attendance->entity_name);
     }
 
     // ==================

@@ -302,8 +302,8 @@ class EventController extends Controller
         $event->load([
             'ministry',
             'songs',
-            'worshipTeam.person',
-            'worshipTeam.worshipRole',
+            'ministryTeams.person',
+            'ministryTeams.ministryRole',
             'checklist.items.completedByUser',
             'planItems.responsible',
             'planItems.song',
@@ -361,8 +361,8 @@ class EventController extends Controller
         // Get songs for autocomplete in service plan (only songs assigned to this event by worship team)
         $songsForAutocomplete = $event->songs->map(function ($song) use ($event) {
             $eventSongId = $song->pivot->id;
-            $songTeam = $event->worshipTeam->where('event_song_id', $eventSongId);
-            $eventLevelTeam = $event->worshipTeam->whereNull('event_song_id');
+            $songTeam = $event->ministryTeams->where('event_song_id', $eventSongId);
+            $eventLevelTeam = $event->ministryTeams->whereNull('event_song_id');
             $allTeam = $songTeam->merge($eventLevelTeam)->unique('id');
 
             return [
@@ -372,7 +372,7 @@ class EventController extends Controller
                 'key' => $song->pivot->key ?? $song->key,
                 'team' => $allTeam->map(fn ($t) => [
                     'person_name' => $t->person?->full_name,
-                    'role_name' => $t->worshipRole?->name,
+                    'role_name' => $t->ministryRole?->name,
                 ])->values()->toArray(),
             ];
         });
