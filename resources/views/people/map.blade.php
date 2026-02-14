@@ -18,6 +18,9 @@
                     <h1 class="text-lg font-bold text-gray-900 dark:text-white">Карта членів</h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         <span x-text="markers.length"></span> на карті
+                        <template x-if="error">
+                            <span class="text-red-500" x-text="error"></span>
+                        </template>
                     </p>
                 </div>
             </div>
@@ -70,10 +73,28 @@ function membersMap() {
         map: null,
         markerGroup: null,
         markers: [],
+        error: '',
         filters: { ministry_id: '', group_id: '' },
 
         init() {
-            this.$nextTick(() => {
+            // Load data first regardless of map
+            this.loadData();
+
+            // Initialize map with retry
+            this.$nextTick(() => this.initMap());
+        },
+
+        initMap() {
+            try {
+                if (typeof L === 'undefined') {
+                    this.error = '(Leaflet не завантажився)';
+                    console.error('Leaflet not loaded');
+                    return;
+                }
+
+                const el = document.getElementById('members-map');
+                if (!el) return;
+
                 this.map = L.map('members-map').setView([48.45, 35.05], 6);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; OpenStreetMap',
@@ -81,8 +102,15 @@ function membersMap() {
                 }).addTo(this.map);
                 this.markerGroup = L.markerClusterGroup();
                 this.map.addLayer(this.markerGroup);
-                this.loadData();
-            });
+
+                // If data already loaded, render markers
+                if (this.markers.length) {
+                    this.renderMarkers();
+                }
+            } catch (e) {
+                this.error = '(помилка ініціалізації карти)';
+                console.error('Map init error:', e);
+            }
         },
 
         async loadData() {
@@ -94,14 +122,23 @@ function membersMap() {
                 const res = await fetch(`{{ route('people.map-data') }}?${params}`, {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 });
+
+                if (!res.ok) {
+                    this.error = `(помилка ${res.status})`;
+                    console.error('Map data response:', res.status, res.statusText);
+                    return;
+                }
+
                 this.markers = await res.json();
                 this.renderMarkers();
             } catch (e) {
+                this.error = '(помилка завантаження)';
                 console.error('Map data error:', e);
             }
         },
 
         renderMarkers() {
+            if (!this.markerGroup) return;
             this.markerGroup.clearLayers();
             if (!this.markers.length) return;
 
@@ -123,7 +160,7 @@ function membersMap() {
                 bounds.push([p.lat, p.lng]);
             });
 
-            if (bounds.length) {
+            if (bounds.length && this.map) {
                 this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
             }
         }
