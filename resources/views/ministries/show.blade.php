@@ -3437,7 +3437,7 @@ function songsLibrary() {
 function ministryRolesManager() {
     return {
         roles: [],
-        defaultRoles: {{ $ministry->is_worship_ministry ? "
+        defaultRoles: {!! $ministry->is_worship_ministry ? "
             [
                 {icon: '🎤', name: 'Ведучий вокал', color: '#dc2626'},
                 {icon: '🎤', name: 'Бек-вокал', color: '#f97316'},
@@ -3459,7 +3459,7 @@ function ministryRolesManager() {
                 {icon: '🙏', name: 'Привітання', color: '#ec4899'},
                 {icon: '🎤', name: 'Ведучий', color: '#14b8a6'},
             ]"
-        }},
+        !!},
         storeUrl: '',
         baseUrl: '',
         newName: '',
