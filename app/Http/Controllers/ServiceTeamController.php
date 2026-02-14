@@ -6,6 +6,8 @@ use App\Models\Event;
 use App\Models\EventMinistryTeam;
 use App\Models\Ministry;
 use App\Models\MinistryRole;
+use App\Models\Person;
+use App\Services\TelegramService;
 use Illuminate\Http\Request;
 
 class ServiceTeamController extends Controller
@@ -91,6 +93,61 @@ class ServiceTeamController extends Controller
         }
 
         return back()->with('success', 'Учасника видалено');
+    }
+
+    public function sendNotification(Request $request, Event $event, EventMinistryTeam $member)
+    {
+        $this->authorizeChurch($event);
+
+        if ($member->event_id !== $event->id) {
+            abort(404);
+        }
+
+        $person = $member->person;
+        if (!$person) {
+            return response()->json(['success' => false, 'message' => 'Людину не знайдено'], 422);
+        }
+
+        if (!$person->telegram_chat_id) {
+            return response()->json(['success' => false, 'message' => 'У цієї людини не підключений Telegram'], 422);
+        }
+
+        if (!config('services.telegram.bot_token')) {
+            return response()->json(['success' => false, 'message' => 'Telegram бот не налаштований'], 500);
+        }
+
+        try {
+            $telegram = TelegramService::make();
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Telegram бот не налаштований'], 500);
+        }
+
+        $roleName = $member->ministryRole?->name ?? 'Служіння';
+        $days = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота'];
+        $dayName = $days[$event->date->format('w')];
+        $timeStr = $event->time ? $event->time->format('H:i') : 'час уточнюється';
+
+        $message = "📋 <b>Запит на участь</b>\n\n"
+            . "📅 {$event->date->format('d.m.Y')} ({$dayName})\n"
+            . "⏰ {$timeStr}\n"
+            . "🎯 {$roleName}\n\n"
+            . "Чи можете ви взяти участь?";
+
+        $keyboard = [
+            [
+                ['text' => '✅ Так, зможу', 'callback_data' => "mteam_confirm_{$member->id}"],
+                ['text' => '❌ Не можу', 'callback_data' => "mteam_decline_{$member->id}"],
+            ],
+        ];
+
+        $sent = $telegram->sendMessage($person->telegram_chat_id, $message, $keyboard);
+
+        if ($sent) {
+            $member->update(['status' => 'pending']);
+            return response()->json(['success' => true, 'message' => 'Запит надіслано в Telegram']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Не вдалося надіслати повідомлення'], 500);
     }
 
     protected function authorizeChurch($model): void

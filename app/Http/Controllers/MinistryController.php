@@ -262,6 +262,8 @@ class MinistryController extends Controller
                 'id' => $entry->id,
                 'person_id' => $entry->person_id,
                 'person_name' => $personName,
+                'status' => $entry->status,
+                'has_telegram' => (bool) $person?->telegram_chat_id,
             ];
         }
 
@@ -269,6 +271,7 @@ class MinistryController extends Controller
             ->map(fn($m) => [
                 'id' => $m->id,
                 'name' => $m->full_name,
+                'has_telegram' => (bool) $m->telegram_chat_id,
             ]);
 
         return response()->json(compact('events', 'roles', 'grid', 'members'));

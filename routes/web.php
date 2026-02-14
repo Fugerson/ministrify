@@ -325,6 +325,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     // Service Team (for ministries with is_sunday_service_part or is_worship_ministry)
     Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add');
     Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove');
+    Route::post('events/{event}/ministry-team/{member}/notify', [ServiceTeamController::class, 'sendNotification'])->name('events.ministry-team.notify');
 
 
     // Person worship skills

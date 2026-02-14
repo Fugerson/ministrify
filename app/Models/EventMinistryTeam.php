@@ -19,6 +19,7 @@ class EventMinistryTeam extends Model
         'ministry_role_id',
         'event_song_id',
         'notes',
+        'status',
     ];
 
     public function event(): BelongsTo

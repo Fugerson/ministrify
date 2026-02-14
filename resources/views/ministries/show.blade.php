@@ -216,10 +216,28 @@
                                                             <div class="flex flex-wrap gap-1 justify-center min-h-[28px] items-start">
                                                                 {{-- Assigned people --}}
                                                                 <template x-for="member in getGridCell(role.id, event.id)" :key="member.id">
-                                                                    <span class="group relative inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs max-w-[90px] truncate">
-                                                                        <span x-text="member.person_name" class="truncate"></span>
+                                                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs"
+                                                                        :class="{
+                                                                            'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300': member.status === 'confirmed',
+                                                                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300': member.status === 'declined',
+                                                                            'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300': member.status === 'pending',
+                                                                            'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300': !member.status
+                                                                        }">
+                                                                        {{-- Status icon --}}
+                                                                        <span x-show="member.status === 'confirmed'" class="flex-shrink-0">✅</span>
+                                                                        <span x-show="member.status === 'declined'" class="flex-shrink-0">❌</span>
+                                                                        <span x-show="member.status === 'pending'" class="flex-shrink-0">⏳</span>
+                                                                        <span x-text="member.person_name" class="truncate max-w-[70px]"></span>
+                                                                        {{-- TG send button --}}
+                                                                        <button x-show="member.has_telegram && member.status !== 'confirmed'"
+                                                                            @click.stop="gridNotify(event.id, member.id, role.id)"
+                                                                            class="inline-flex items-center justify-center w-3.5 h-3.5 flex-shrink-0 text-blue-500 hover:text-blue-700 transition-colors"
+                                                                            :title="member.status === 'pending' ? 'Нагадати' : 'Запитати в Telegram'">
+                                                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                                                                        </button>
+                                                                        {{-- Remove button --}}
                                                                         <button @click.stop="gridRemove(event.id, member.id, role.id)"
-                                                                            class="hidden group-hover:inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-red-500 text-white text-[8px] leading-none flex-shrink-0 hover:bg-red-600">
+                                                                            class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full text-current opacity-40 hover:opacity-100 hover:bg-red-500 hover:text-white text-[10px] leading-none flex-shrink-0 transition-all">
                                                                             &times;
                                                                         </button>
                                                                     </span>
@@ -1095,7 +1113,9 @@
                                             this.gridData.grid[rId][eId].push({
                                                 id: result.id,
                                                 person_id: personId,
-                                                person_name: shortName
+                                                person_name: shortName,
+                                                status: null,
+                                                has_telegram: member ? member.has_telegram : false
                                             });
 
                                             // Force reactivity
@@ -1131,6 +1151,34 @@
                                         }
                                     } catch (error) {
                                         console.error('Error removing:', error);
+                                    }
+                                },
+
+                                async gridNotify(eventId, memberId, roleId) {
+                                    try {
+                                        const response = await fetch('/events/' + eventId + '/ministry-team/' + memberId + '/notify', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json'
+                                            }
+                                        });
+
+                                        const result = await response.json();
+                                        if (response.ok && result.success) {
+                                            // Update status to pending
+                                            const rId = String(roleId);
+                                            const eId = String(eventId);
+                                            if (this.gridData.grid[rId]?.[eId]) {
+                                                const m = this.gridData.grid[rId][eId].find(m => m.id === memberId);
+                                                if (m) m.status = 'pending';
+                                                this.gridData = { ...this.gridData, grid: { ...this.gridData.grid } };
+                                            }
+                                        } else {
+                                            alert(result.message || 'Помилка');
+                                        }
+                                    } catch (error) {
+                                        console.error('Error sending notification:', error);
                                     }
                                 }
                             };

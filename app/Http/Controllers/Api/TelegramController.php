@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\EventMinistryTeam;
 use App\Models\EventResponsibility;
 use App\Models\Person;
 use App\Models\ServicePlanItem;
@@ -71,6 +72,11 @@ class TelegramController extends Controller
             $this->handlePlanItemCallback($matches[1], (int) $matches[2], $targetPersonId, $person, $chatId);
         }
 
+        // Handle MinistryTeam callbacks (mteam_confirm_{memberId}, mteam_decline_{memberId})
+        if (preg_match('/^mteam_(confirm|decline)_(\d+)$/', $data, $matches)) {
+            $this->handleMinistryTeamCallback($matches[1], (int) $matches[2], $person, $chatId);
+        }
+
         return response()->json(['ok' => true]);
     }
 
@@ -131,6 +137,37 @@ class TelegramController extends Controller
         $responseMessage = $isConfirm
             ? "✅ Чудово! Ви підтвердили участь у: {$item->title}"
             : "😔 Зрозуміло, пошукаємо когось іншого для: {$item->title}";
+
+        $this->telegram()->sendMessage($chatId, $responseMessage);
+    }
+
+    private function handleMinistryTeamCallback(string $action, int $memberId, Person $person, string $chatId): void
+    {
+        $member = EventMinistryTeam::with(['event', 'ministryRole'])->find($memberId);
+
+        if (!$member || $member->person_id !== $person->id || !$member->event) {
+            return;
+        }
+
+        if ($member->event->church_id !== $person->church_id) {
+            return;
+        }
+
+        $isConfirm = $action === 'confirm';
+        $member->update(['status' => $isConfirm ? 'confirmed' : 'declined']);
+
+        $roleName = $member->ministryRole?->name ?? 'Служіння';
+        $dateStr = $member->event->date->format('d.m.Y');
+
+        $logMessage = $isConfirm
+            ? "✅ Підтверджено: {$roleName} ({$dateStr})"
+            : "❌ Відхилено: {$roleName} ({$dateStr})";
+
+        $this->saveMessage($person, $logMessage);
+
+        $responseMessage = $isConfirm
+            ? "✅ Чудово! Ви підтвердили участь: {$roleName} ({$dateStr})"
+            : "😔 Зрозуміло, пошукаємо когось іншого.";
 
         $this->telegram()->sendMessage($chatId, $responseMessage);
     }
