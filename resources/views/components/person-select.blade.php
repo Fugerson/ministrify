@@ -21,7 +21,7 @@
     <div class="relative">
         <input type="text"
                x-model="searchQuery"
-               @focus="isOpen = true"
+               @focus="updatePosition(); isOpen = true"
                @click.away="isOpen = false"
                @keydown.escape="isOpen = false"
                @keydown.arrow-down.prevent="highlightNext()"
@@ -53,12 +53,13 @@
     <!-- Dropdown -->
     <div x-show="isOpen && (filteredPeople.length > 0 || searchQuery.length === 0)"
          x-transition:enter="transition ease-out duration-100"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-75"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-60 overflow-auto">
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         :style="dropdownStyle"
+         class="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-60 overflow-auto">
 
         @if($nullable)
         <!-- Null option -->
@@ -105,7 +106,8 @@
 
     <!-- No results -->
     <div x-show="isOpen && searchQuery.length > 0 && filteredPeople.length === 0"
-         class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg p-4 text-center text-gray-500 dark:text-gray-400">
+         :style="dropdownStyle"
+         class="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg p-4 text-center text-gray-500 dark:text-gray-400">
         <svg class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
@@ -154,6 +156,22 @@ function personSelectComponent_{{ str_replace('-', '_', $uniqueId) }}() {
         isOpen: false,
         highlightedIndex: {{ $nullable ? '-1' : '0' }},
         people: people,
+        dropdownStyle: {},
+
+        updatePosition() {
+            const el = this.$el.querySelector('input[type="text"]');
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const openAbove = spaceBelow < 260 && rect.top > 260;
+            this.dropdownStyle = {
+                left: rect.left + 'px',
+                width: rect.width + 'px',
+                ...(openAbove
+                    ? { bottom: (window.innerHeight - rect.top + 4) + 'px', top: 'auto' }
+                    : { top: (rect.bottom + 4) + 'px', bottom: 'auto' })
+            };
+        },
 
         get filteredPeople() {
             if (!this.searchQuery || this.searchQuery === (this.getSelectedName())) {

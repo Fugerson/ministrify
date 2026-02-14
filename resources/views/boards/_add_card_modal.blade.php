@@ -158,7 +158,22 @@
                         <div x-data="{
                             open: false,
                             search: '',
+                            dropdownStyle: {},
                             people: @js($people->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null])),
+                            updatePosition() {
+                                const btn = this.$el.querySelector('button');
+                                if (!btn) return;
+                                const rect = btn.getBoundingClientRect();
+                                const spaceBelow = window.innerHeight - rect.bottom;
+                                const openAbove = spaceBelow < 220 && rect.top > 220;
+                                this.dropdownStyle = {
+                                    left: rect.left + 'px',
+                                    width: rect.width + 'px',
+                                    ...(openAbove
+                                        ? { bottom: (window.innerHeight - rect.top + 4) + 'px', top: 'auto' }
+                                        : { top: (rect.bottom + 4) + 'px', bottom: 'auto' })
+                                };
+                            },
                             get filtered() {
                                 if (!this.search) return this.people;
                                 return this.people.filter(p => p.name.toLowerCase().includes(this.search.toLowerCase()));
@@ -174,7 +189,7 @@
                         }">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Виконавець</label>
                             <div class="relative">
-                                <button type="button" @click="open = !open; $nextTick(() => open && $refs.searchInput.focus())"
+                                <button type="button" @click="updatePosition(); open = !open; $nextTick(() => open && $refs.searchInput.focus())"
                                         class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-left flex items-center justify-between dark:text-white">
                                     <span x-show="!selectedPerson" class="text-gray-500">Оберіть виконавця...</span>
                                     <template x-if="selectedPerson">
@@ -194,7 +209,8 @@
                                 </button>
 
                                 <div x-show="open" @click.away="open = false" x-transition
-                                     class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
+                                     :style="dropdownStyle"
+                                     class="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
                                     <div class="p-2 border-b border-gray-200 dark:border-gray-700">
                                         <input type="text" x-model="search" x-ref="searchInput"
                                                placeholder="Пошук..."
