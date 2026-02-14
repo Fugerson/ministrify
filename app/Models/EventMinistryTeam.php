@@ -17,6 +17,7 @@ class EventMinistryTeam extends Model
         'ministry_id',
         'person_id',
         'ministry_role_id',
+        'event_song_id',
         'notes',
     ];
 
@@ -38,5 +39,10 @@ class EventMinistryTeam extends Model
     public function ministryRole(): BelongsTo
     {
         return $this->belongsTo(MinistryRole::class);
+    }
+
+    public function eventSong(): BelongsTo
+    {
+        return $this->belongsTo(EventSong::class);
     }
 }

@@ -319,17 +319,10 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('events/{event}/worship-team', [WorshipTeamController::class, 'addTeamMember'])->name('events.worship-team.add');
     Route::delete('events/{event}/worship-team/{member}', [WorshipTeamController::class, 'removeTeamMember'])->name('events.worship-team.remove');
 
-    // Service Team (for ministries with is_sunday_service_part)
-    Route::get('ministries/{ministry}/service-events', [ServiceTeamController::class, 'events'])->name('ministries.service-events');
-    Route::get('ministries/{ministry}/service-events/{event}', [ServiceTeamController::class, 'eventShow'])->name('ministries.service-events.show');
+    // Service Team (for ministries with is_sunday_service_part or is_worship_ministry)
     Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add');
     Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove');
 
-    // Worship Roles Settings
-    Route::get('settings/worship-roles', [WorshipTeamController::class, 'roles'])->name('settings.worship-roles');
-    Route::post('settings/worship-roles', [WorshipTeamController::class, 'storeRole'])->name('settings.worship-roles.store');
-    Route::put('settings/worship-roles/{role}', [WorshipTeamController::class, 'updateRole'])->name('settings.worship-roles.update');
-    Route::delete('settings/worship-roles/{role}', [WorshipTeamController::class, 'destroyRole'])->name('settings.worship-roles.destroy');
 
     // Person worship skills
     Route::put('people/{person}/worship-skills', [WorshipTeamController::class, 'updateSkills'])->name('people.worship-skills.update');

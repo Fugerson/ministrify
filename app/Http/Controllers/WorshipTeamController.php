@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\EventMinistryTeam;
 use App\Models\EventWorshipTeam;
 use App\Models\Ministry;
+use App\Models\MinistryRole;
 use App\Models\Person;
 use App\Models\PersonWorshipSkill;
 use App\Models\Song;
@@ -25,20 +27,17 @@ class WorshipTeamController extends Controller
             abort(404);
         }
 
-        // Get all church events with music
         $events = Event::where('church_id', $this->getCurrentChurch()->id)
-            ->where('has_music', true)
+            ->where('service_type', 'sunday_service')
             ->where('date', '>=', now()->subDays(7))
-            ->with(['songs', 'worshipTeam.person', 'worshipTeam.worshipRole'])
+            ->with(['songs', 'ministryTeams' => fn($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')])
             ->orderBy('date')
             ->orderBy('time')
             ->get();
 
-        $worshipRoles = WorshipRole::where('church_id', $this->getCurrentChurch()->id)
-            ->orderBy('sort_order')
-            ->get();
+        $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
 
-        return view('ministries.worship-events', compact('ministry', 'events', 'worshipRoles'));
+        return view('ministries.worship-events', compact('ministry', 'events', 'ministryRoles'));
     }
 
     /**
@@ -66,7 +65,7 @@ class WorshipTeamController extends Controller
 
         // Base query for events
         $eventsQuery = Event::where('church_id', $churchId)
-            ->where('has_music', true);
+            ->where('service_type', 'sunday_service');
 
         if ($startDate) {
             $eventsQuery->where('date', '>=', $startDate);
@@ -77,7 +76,8 @@ class WorshipTeamController extends Controller
         // Summary stats
         $stats = [
             'total_events' => $eventIds->count(),
-            'total_participants' => EventWorshipTeam::whereIn('event_id', $eventIds)
+            'total_participants' => EventMinistryTeam::whereIn('event_id', $eventIds)
+                ->where('ministry_id', $ministry->id)
                 ->distinct('person_id')
                 ->count('person_id'),
             'total_songs' => \DB::table('event_songs')
@@ -90,7 +90,8 @@ class WorshipTeamController extends Controller
         ];
 
         // Top participants
-        $topParticipants = EventWorshipTeam::whereIn('event_id', $eventIds)
+        $topParticipants = EventMinistryTeam::whereIn('event_id', $eventIds)
+            ->where('ministry_id', $ministry->id)
             ->select('person_id', \DB::raw('COUNT(*) as count'))
             ->groupBy('person_id')
             ->orderByDesc('count')
@@ -100,10 +101,11 @@ class WorshipTeamController extends Controller
         // Load person and roles for each participant
         foreach ($topParticipants as $participant) {
             $participant->person = Person::find($participant->person_id);
-            $participant->roles = WorshipRole::whereIn('id', function($q) use ($participant, $eventIds) {
-                $q->select('worship_role_id')
-                    ->from('event_worship_team')
+            $participant->roles = MinistryRole::whereIn('id', function($q) use ($participant, $eventIds, $ministry) {
+                $q->select('ministry_role_id')
+                    ->from('event_ministry_team')
                     ->where('person_id', $participant->person_id)
+                    ->where('ministry_id', $ministry->id)
                     ->whereIn('event_id', $eventIds)
                     ->distinct();
             })->get();
@@ -122,7 +124,7 @@ class WorshipTeamController extends Controller
             ->get();
 
         // Role distribution
-        $roleStats = WorshipRole::where('church_id', $churchId)
+        $roleStats = MinistryRole::where('ministry_id', $ministry->id)
             ->withCount(['eventTeamMembers as count' => function($q) use ($eventIds) {
                 $q->whereIn('event_id', $eventIds);
             }])
@@ -131,9 +133,11 @@ class WorshipTeamController extends Controller
 
         // Recent events
         $recentEvents = Event::where('church_id', $churchId)
-            ->where('has_music', true)
+            ->where('service_type', 'sunday_service')
             ->where('date', '<=', now())
-            ->withCount(['songs as songs_count', 'worshipTeam as team_count'])
+            ->withCount(['songs as songs_count', 'ministryTeams as team_count' => function($q) use ($ministry) {
+                $q->where('ministry_id', $ministry->id);
+            }])
             ->orderByDesc('date')
             ->limit(5)
             ->get();
@@ -151,15 +155,13 @@ class WorshipTeamController extends Controller
         $this->authorizeChurch($ministry);
         $this->authorizeChurch($event);
 
-        if (!$ministry->is_worship_ministry || !$event->has_music) {
+        if (!$ministry->is_worship_ministry) {
             abort(404);
         }
 
-        $event->load(['songs', 'worshipTeam.person', 'worshipTeam.worshipRole']);
+        $event->load(['songs', 'ministryTeams' => fn($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')]);
 
-        $worshipRoles = WorshipRole::where('church_id', $this->getCurrentChurch()->id)
-            ->orderBy('sort_order')
-            ->get();
+        $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
 
         // Get ministry members with their worship skills
         $members = $ministry->members()
@@ -180,27 +182,25 @@ class WorshipTeamController extends Controller
             ->get();
 
         return view('ministries.worship-event-detail', compact(
-            'ministry', 'event', 'worshipRoles', 'members', 'availableSongs'
+            'ministry', 'event', 'ministryRoles', 'members', 'availableSongs'
         ));
     }
 
     /**
-     * Get worship event data as JSON for modal
+     * Get event data as JSON for modal
      */
     public function eventData(Ministry $ministry, Event $event)
     {
         $this->authorizeChurch($ministry);
         $this->authorizeChurch($event);
 
-        if (!$ministry->is_worship_ministry || !$event->has_music) {
+        if (!$ministry->is_worship_ministry && !$ministry->is_sunday_service_part) {
             abort(404);
         }
 
-        $event->load(['songs', 'worshipTeam.person', 'worshipTeam.worshipRole']);
+        $event->load(['songs', 'ministryTeams' => fn($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')]);
 
-        $worshipRoles = WorshipRole::where('church_id', $this->getCurrentChurch()->id)
-            ->orderBy('sort_order')
-            ->get();
+        $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
 
         // Get ministry members
         $members = $ministry->members()->get();
@@ -208,13 +208,19 @@ class WorshipTeamController extends Controller
             $members->prepend($ministry->leader);
         }
 
-        // Get all church songs
-        $availableSongs = Song::where('church_id', $this->getCurrentChurch()->id)
-            ->orderBy('title')
-            ->get();
+        // Get all church songs (only for worship ministries)
+        $availableSongs = collect();
+        if ($ministry->is_worship_ministry) {
+            $availableSongs = Song::where('church_id', $this->getCurrentChurch()->id)
+                ->orderBy('title')
+                ->get();
+        }
 
         // Group team by event_song_id
-        $teamBySong = $event->worshipTeam->groupBy('event_song_id');
+        $teamBySong = $event->ministryTeams->groupBy('event_song_id');
+
+        // General team (no song assigned)
+        $generalTeam = $teamBySong->get('', collect())->merge($teamBySong->get(null, collect()));
 
         return response()->json([
             'event' => [
@@ -223,7 +229,7 @@ class WorshipTeamController extends Controller
                 'date' => $event->date->translatedFormat('l, j F Y'),
                 'time' => $event->time?->format('H:i'),
             ],
-            'songs' => $event->songs->map(function($s) use ($teamBySong) {
+            'songs' => $ministry->is_worship_ministry ? $event->songs->map(function($s) use ($teamBySong) {
                 $songTeam = $teamBySong->get($s->pivot->id, collect());
                 return [
                     'id' => $s->id,
@@ -235,12 +241,19 @@ class WorshipTeamController extends Controller
                         'id' => $t->id,
                         'person_id' => $t->person_id,
                         'person_name' => $t->person->full_name,
-                        'role_id' => $t->worship_role_id,
-                        'role_name' => $t->worshipRole->name,
+                        'role_id' => $t->ministry_role_id,
+                        'role_name' => $t->ministryRole?->name ?? '',
                     ])->values(),
                 ];
-            }),
-            'worshipRoles' => $worshipRoles->map(fn($r) => [
+            }) : [],
+            'generalTeam' => $generalTeam->map(fn($t) => [
+                'id' => $t->id,
+                'person_id' => $t->person_id,
+                'person_name' => $t->person->full_name,
+                'role_id' => $t->ministry_role_id,
+                'role_name' => $t->ministryRole?->name ?? '',
+            ])->values(),
+            'ministryRoles' => $ministryRoles->map(fn($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
             ]),
@@ -254,6 +267,7 @@ class WorshipTeamController extends Controller
                 'key' => $s->key,
                 'inEvent' => $event->songs->contains('id', $s->id),
             ]),
+            'isWorshipMinistry' => $ministry->is_worship_ministry,
             'routes' => [
                 'addSong' => route('events.songs.add', $event),
                 'addTeam' => route('events.worship-team.add', $event),
@@ -309,8 +323,9 @@ class WorshipTeamController extends Controller
             ->where('song_id', $song->id)
             ->value('id');
 
-        // Remove team members assigned to this song
+        // Remove team members assigned to this song (from both tables for backwards compat)
         if ($eventSongId) {
+            EventMinistryTeam::where('event_song_id', $eventSongId)->delete();
             EventWorshipTeam::where('event_song_id', $eventSongId)->delete();
         }
 
@@ -343,7 +358,7 @@ class WorshipTeamController extends Controller
     }
 
     /**
-     * Add a team member to an event
+     * Add a team member to an event (using MinistryRole + EventMinistryTeam)
      */
     public function addTeamMember(Request $request, Event $event)
     {
@@ -351,15 +366,29 @@ class WorshipTeamController extends Controller
 
         $validated = $request->validate([
             'person_id' => ['required', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
-            'worship_role_id' => ['required', Rule::exists('worship_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'ministry_role_id' => ['required', 'exists:ministry_roles,id'],
+            'ministry_id' => ['required', 'exists:ministries,id'],
             'event_song_id' => 'nullable|exists:event_songs,id',
             'notes' => 'nullable|string|max:255',
         ]);
 
+        // Verify ministry belongs to same church
+        $ministry = Ministry::find($validated['ministry_id']);
+        if (!$ministry || $ministry->church_id !== $this->getCurrentChurch()->id) {
+            abort(404);
+        }
+
+        // Verify role belongs to the ministry
+        $role = MinistryRole::find($validated['ministry_role_id']);
+        if (!$role || $role->ministry_id !== $ministry->id) {
+            abort(404);
+        }
+
         // Check if already exists for this song
-        $query = EventWorshipTeam::where('event_id', $event->id)
+        $query = EventMinistryTeam::where('event_id', $event->id)
+            ->where('ministry_id', $validated['ministry_id'])
             ->where('person_id', $validated['person_id'])
-            ->where('worship_role_id', $validated['worship_role_id']);
+            ->where('ministry_role_id', $validated['ministry_role_id']);
 
         if (!empty($validated['event_song_id'])) {
             $query->where('event_song_id', $validated['event_song_id']);
@@ -374,11 +403,12 @@ class WorshipTeamController extends Controller
             return back()->with('error', 'Ця людина вже призначена на цю роль для цієї пісні');
         }
 
-        $member = EventWorshipTeam::create([
+        $member = EventMinistryTeam::create([
             'event_id' => $event->id,
+            'ministry_id' => $validated['ministry_id'],
             'event_song_id' => $validated['event_song_id'] ?? null,
             'person_id' => $validated['person_id'],
-            'worship_role_id' => $validated['worship_role_id'],
+            'ministry_role_id' => $validated['ministry_role_id'],
             'notes' => $validated['notes'] ?? null,
         ]);
 
@@ -392,7 +422,7 @@ class WorshipTeamController extends Controller
     /**
      * Remove a team member from an event
      */
-    public function removeTeamMember(Request $request, Event $event, EventWorshipTeam $member)
+    public function removeTeamMember(Request $request, Event $event, EventMinistryTeam $member)
     {
         $this->authorizeChurch($event);
 
@@ -407,72 +437,6 @@ class WorshipTeamController extends Controller
         }
 
         return back()->with('success', 'Учасника видалено');
-    }
-
-    /**
-     * Manage worship roles for the church
-     */
-    public function roles()
-    {
-        $roles = WorshipRole::where('church_id', $this->getCurrentChurch()->id)
-            ->orderBy('sort_order')
-            ->get();
-
-        return view('settings.worship-roles', compact('roles'));
-    }
-
-    /**
-     * Store a new worship role
-     */
-    public function storeRole(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'icon' => 'nullable|string|max:50',
-            'color' => 'nullable|string|max:20',
-        ]);
-
-        $maxOrder = WorshipRole::where('church_id', $this->getCurrentChurch()->id)->max('sort_order') ?? 0;
-
-        WorshipRole::create([
-            'church_id' => $this->getCurrentChurch()->id,
-            'name' => $validated['name'],
-            'icon' => $validated['icon'] ?? null,
-            'color' => $validated['color'] ?? null,
-            'sort_order' => $maxOrder + 1,
-        ]);
-
-        return back()->with('success', 'Роль додано');
-    }
-
-    /**
-     * Update a worship role
-     */
-    public function updateRole(Request $request, WorshipRole $role)
-    {
-        $this->authorizeChurch($role);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'icon' => 'nullable|string|max:50',
-            'color' => 'nullable|string|max:20',
-        ]);
-
-        $role->update($validated);
-
-        return back()->with('success', 'Роль оновлено');
-    }
-
-    /**
-     * Delete a worship role
-     */
-    public function destroyRole(WorshipRole $role)
-    {
-        $this->authorizeChurch($role);
-
-        $role->delete();
-
-        return back()->with('success', 'Роль видалено');
     }
 
     /**

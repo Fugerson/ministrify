@@ -102,11 +102,11 @@
                 </h2>
             </div>
 
-            @if($worshipRoles->count() > 0)
+            @if($ministryRoles->count() > 0)
                 <div class="space-y-4 mb-4">
-                    @foreach($worshipRoles as $role)
+                    @foreach($ministryRoles as $role)
                         @php
-                            $roleMembers = $event->worshipTeam->where('worship_role_id', $role->id);
+                            $roleMembers = $event->ministryTeams->where('ministry_role_id', $role->id);
                         @endphp
                         <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div class="flex items-center justify-between mb-2">
@@ -139,6 +139,7 @@
                 <!-- Add Team Member Form -->
                 <form action="{{ route('events.worship-team.add', $event) }}" method="POST" class="border-t border-gray-200 dark:border-gray-700 pt-4">
                     @csrf
+                    <input type="hidden" name="ministry_id" value="{{ $ministry->id }}">
                     <div class="grid grid-cols-2 gap-2 mb-2">
                         <select name="person_id" required class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="">Оберіть учасника...</option>
@@ -146,9 +147,9 @@
                                 <option value="{{ $member->id }}">{{ $member->full_name }}</option>
                             @endforeach
                         </select>
-                        <select name="worship_role_id" required class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <select name="ministry_role_id" required class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="">Роль...</option>
-                            @foreach($worshipRoles as $role)
+                            @foreach($ministryRoles as $role)
                                 <option value="{{ $role->id }}">{{ $role->name }}</option>
                             @endforeach
                         </select>
@@ -160,7 +161,7 @@
             @else
                 <div class="text-center py-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Спочатку налаштуйте ролі</p>
-                    <a href="{{ route('settings.worship-roles') }}" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                    <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'settings']) }}" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
                         Налаштувати ролі
                     </a>
                 </div>

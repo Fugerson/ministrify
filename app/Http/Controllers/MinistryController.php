@@ -165,44 +165,38 @@ class MinistryController extends Controller
             'overdue_tasks' => $ministry->tasks()->overdue()->count(),
         ];
 
-        // Load songs, worship events, and worship roles for worship ministries
+        // Load songs for worship ministries
         $songs = [];
-        $worshipEvents = collect();
-        $worshipRoles = collect();
         if ($ministry->is_worship_ministry) {
             $songs = Song::where('church_id', $church->id)
                 ->orderBy('title')
                 ->get();
-
-            $worshipEvents = Event::where('church_id', $church->id)
-                ->where('has_music', true)
-                ->withCount(['songs as songs_count', 'worshipTeam as team_count'])
-                ->orderBy('date')
-                ->orderBy('time')
-                ->get();
-
-            $worshipRoles = WorshipRole::where('church_id', $church->id)
-                ->orderBy('sort_order')
-                ->get();
         }
 
-        // Load service events and ministry roles for sunday service part ministries
-        $serviceEvents = collect();
+        // Load schedule events and ministry roles for worship or sunday service part ministries
+        $scheduleEvents = collect();
         $ministryRoles = collect();
-        if ($ministry->is_sunday_service_part) {
-            $serviceEvents = Event::where('church_id', $church->id)
+        if ($ministry->is_worship_ministry || $ministry->is_sunday_service_part) {
+            $scheduleEventsQuery = Event::where('church_id', $church->id)
                 ->where('service_type', 'sunday_service')
-                ->withCount(['ministryTeams as ministry_team_count' => function ($q) use ($ministry) {
-                    $q->where('ministry_id', $ministry->id);
-                }])
                 ->orderBy('date')
-                ->orderBy('time')
-                ->get();
+                ->orderBy('time');
 
+            if ($ministry->is_worship_ministry) {
+                $scheduleEventsQuery->withCount(['songs as songs_count', 'ministryTeams as team_count' => function ($q) use ($ministry) {
+                    $q->where('ministry_id', $ministry->id);
+                }]);
+            } else {
+                $scheduleEventsQuery->withCount(['ministryTeams as team_count' => function ($q) use ($ministry) {
+                    $q->where('ministry_id', $ministry->id);
+                }]);
+            }
+
+            $scheduleEvents = $scheduleEventsQuery->get();
             $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
         }
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'worshipEvents', 'worshipRoles', 'serviceEvents', 'ministryRoles'));
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles'));
     }
 
     public function edit(Ministry $ministry)
@@ -475,7 +469,7 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('manage-ministry', $ministry);
 
-        if (!$ministry->is_sunday_service_part) {
+        if (!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) {
             abort(404);
         }
 
@@ -507,7 +501,7 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('manage-ministry', $ministry);
 
-        if (!$ministry->is_sunday_service_part || $role->ministry_id !== $ministry->id) {
+        if ((!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) || $role->ministry_id !== $ministry->id) {
             abort(404);
         }
 
@@ -531,7 +525,7 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('manage-ministry', $ministry);
 
-        if (!$ministry->is_sunday_service_part || $role->ministry_id !== $ministry->id) {
+        if ((!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) || $role->ministry_id !== $ministry->id) {
             abort(404);
         }
 
