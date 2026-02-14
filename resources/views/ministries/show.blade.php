@@ -243,42 +243,10 @@
                                                                     </span>
                                                                 </template>
                                                                 {{-- Add button --}}
-                                                                <div x-data="{ open: false, dropStyle: {} }" class="relative">
-                                                                    <button @click="
-                                                                        if (open) { open = false; return; }
-                                                                        const rect = $el.getBoundingClientRect();
-                                                                        const spaceBelow = window.innerHeight - rect.bottom;
-                                                                        const spaceRight = window.innerWidth - rect.left;
-                                                                        const dh = Math.min(192, gridData.members.length * 30 + 8);
-                                                                        const openUp = spaceBelow < dh + 8 && rect.top > dh;
-                                                                        dropStyle = {
-                                                                            position: 'fixed',
-                                                                            left: (spaceRight < 200 ? rect.right - 192 : rect.left) + 'px',
-                                                                            width: '192px',
-                                                                            ...(openUp
-                                                                                ? { bottom: (window.innerHeight - rect.top + 4) + 'px' }
-                                                                                : { top: (rect.bottom + 4) + 'px' })
-                                                                        };
-                                                                        open = true;
-                                                                    "
-                                                                        class="inline-flex items-center justify-center w-6 h-6 rounded border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-purple-400 hover:text-purple-500 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-colors text-xs">
-                                                                        +
-                                                                    </button>
-                                                                    {{-- Dropdown (fixed position to escape overflow) --}}
-                                                                    <div x-show="open" @click.outside="open = false" @scroll.window="open = false" x-cloak
-                                                                        :style="dropStyle"
-                                                                        class="fixed z-[60] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 max-h-48 overflow-y-auto">
-                                                                        <template x-for="member in gridData.members" :key="member.id">
-                                                                            <button @click="gridAssign(event.id, role.id, member.id); open = false"
-                                                                                class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
-                                                                                x-text="member.name">
-                                                                            </button>
-                                                                        </template>
-                                                                        <div x-show="gridData.members.length === 0" class="px-3 py-2 text-xs text-gray-400">
-                                                                            Немає учасників
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
+                                                                <button @click="openGridDropdown($event, event.id, role.id)"
+                                                                    class="inline-flex items-center justify-center w-6 h-6 rounded border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-purple-400 hover:text-purple-500 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-colors text-xs">
+                                                                    +
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     </template>
@@ -287,6 +255,21 @@
                                         </tbody>
                                     </table>
                                 </template>
+                            </div>
+
+                            {{-- Shared dropdown for grid (outside overflow container) --}}
+                            <div x-show="gridDropdown.open" @click.outside="gridDropdown.open = false" @scroll.window="gridDropdown.open = false" x-cloak
+                                :style="gridDropdown.style"
+                                class="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl py-1 w-48 max-h-48 overflow-y-auto">
+                                <template x-for="member in gridData.members" :key="'dd-' + member.id">
+                                    <button @click="gridAssign(gridDropdown.eventId, gridDropdown.roleId, member.id); gridDropdown.open = false"
+                                        class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+                                        x-text="member.name">
+                                    </button>
+                                </template>
+                                <div x-show="gridData.members.length === 0" class="px-3 py-2 text-xs text-gray-400">
+                                    Немає учасників
+                                </div>
                             </div>
                         </div>
 
@@ -676,6 +659,7 @@
                                 gridData: { events: [], roles: [], grid: {}, members: [] },
                                 gridLoading: false,
                                 editingCell: null,
+                                gridDropdown: { open: false, eventId: null, roleId: null, style: {} },
 
                                 // Modal state
                                 showModal: false,
@@ -1063,7 +1047,31 @@
                                 },
 
                                 // Grid methods
+                                openGridDropdown(e, eventId, roleId) {
+                                    if (this.gridDropdown.open && this.gridDropdown.eventId === eventId && this.gridDropdown.roleId === roleId) {
+                                        this.gridDropdown.open = false;
+                                        return;
+                                    }
+                                    const rect = e.target.getBoundingClientRect();
+                                    const spaceBelow = window.innerHeight - rect.bottom;
+                                    const spaceRight = window.innerWidth - rect.left;
+                                    const dh = Math.min(192, this.gridData.members.length * 30 + 8);
+                                    const openUp = spaceBelow < dh + 8 && rect.top > dh;
+                                    this.gridDropdown = {
+                                        open: true,
+                                        eventId,
+                                        roleId,
+                                        style: {
+                                            left: (spaceRight < 200 ? rect.right - 192 : rect.left) + 'px',
+                                            ...(openUp
+                                                ? { bottom: (window.innerHeight - rect.top + 4) + 'px', top: 'auto' }
+                                                : { top: (rect.bottom + 4) + 'px', bottom: 'auto' })
+                                        }
+                                    };
+                                },
+
                                 async loadGrid() {
+                                    this.gridDropdown.open = false;
                                     this.gridLoading = true;
                                     try {
                                         const url = this.gridUrl + '?year=' + this.currentYear + '&month=' + (this.currentMonth + 1);
@@ -1127,7 +1135,7 @@
                                     } catch (error) {
                                         console.error('Error assigning:', error);
                                     }
-                                    this.editingCell = null;
+                                    this.gridDropdown.open = false;
                                 },
 
                                 async gridRemove(eventId, memberId, roleId) {
