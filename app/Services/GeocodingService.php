@@ -14,10 +14,10 @@ class GeocodingService
             return null;
         }
 
-        // Append city for better accuracy if address doesn't already contain it
+        // Append city + country for better accuracy
         $query = $address;
         if ($city && stripos($address, $city) === false) {
-            $query = $address . ', ' . $city;
+            $query = $address . ', ' . $city . ', Україна';
         }
 
         $cacheKey = 'geocode:' . md5($query);
