@@ -100,8 +100,6 @@ class Person extends Model
         'telegram_chat_id',
         'photo',
         'address',
-        'latitude',
-        'longitude',
         'birth_date',
         'anniversary',
         'first_visit_date',

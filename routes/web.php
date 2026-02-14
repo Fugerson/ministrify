@@ -256,8 +256,6 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('dashboard/calendar-events', [DashboardController::class, 'calendarEventsApi'])->name('dashboard.calendar-events');
 
     // People
-    Route::get('people/map', [PersonController::class, 'map'])->name('people.map');
-    Route::get('people/map-data', [PersonController::class, 'mapData'])->name('people.map-data');
     Route::resource('people', PersonController::class);
     Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore')->withTrashed();
     Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role');
