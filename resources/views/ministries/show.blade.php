@@ -127,7 +127,7 @@
                     @endphp
                     <div x-data="worshipCalendar()" x-init="init()">
                         {{-- Header --}}
-                        <div class="flex items-center justify-between mb-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                             <div class="flex items-center gap-2">
                                 <button @click="prevMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -138,15 +138,125 @@
                                 </button>
                                 <button @click="goToToday()" class="ml-2 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Сьогодні</button>
                             </div>
-                            @if($ministry->is_worship_ministry)
-                            <a href="{{ route('ministries.worship-stats', $ministry) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                </svg>
-                                Статистика
-                            </a>
-                            @endif
+                            <div class="flex items-center gap-2">
+                                {{-- View switcher --}}
+                                <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                                    <button @click="gridView = false"
+                                        :class="!gridView ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                                        class="px-3 py-1 text-xs font-medium rounded-md transition-colors">
+                                        Календар
+                                    </button>
+                                    <button @click="gridView = true; loadGrid()"
+                                        :class="gridView ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                                        class="px-3 py-1 text-xs font-medium rounded-md transition-colors">
+                                        Сітка
+                                    </button>
+                                </div>
+                                @if($ministry->is_worship_ministry)
+                                <a href="{{ route('ministries.worship-stats', $ministry) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Статистика
+                                </a>
+                                @endif
+                            </div>
                         </div>
+
+                        {{-- Schedule Grid View --}}
+                        <div x-show="gridView" x-cloak>
+                            {{-- Loading --}}
+                            <div x-show="gridLoading" class="flex items-center justify-center py-12">
+                                <svg class="animate-spin h-8 w-8 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+
+                            {{-- Grid table --}}
+                            <div x-show="!gridLoading" class="overflow-x-auto">
+                                {{-- Empty state --}}
+                                <template x-if="gridData.roles.length === 0 || gridData.events.length === 0">
+                                    <div class="text-center py-8">
+                                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400" x-text="gridData.roles.length === 0 ? 'Створіть ролі для цього служіння' : 'Немає подій у цьому місяці'"></p>
+                                    </div>
+                                </template>
+
+                                <template x-if="gridData.roles.length > 0 && gridData.events.length > 0">
+                                    <table class="w-full border-collapse text-sm">
+                                        <thead>
+                                            <tr>
+                                                <th class="sticky left-0 z-10 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase border-b border-r border-gray-200 dark:border-gray-600 min-w-[140px]">
+                                                    Роль
+                                                </th>
+                                                <template x-for="event in gridData.events" :key="event.id">
+                                                    <th class="px-2 py-2 text-center border-b border-gray-200 dark:border-gray-600 min-w-[100px]">
+                                                        <div class="text-xs font-semibold text-gray-900 dark:text-white" x-text="event.dateLabel"></div>
+                                                        <div class="text-[10px] text-gray-400 dark:text-gray-500" x-text="event.dayOfWeek"></div>
+                                                    </th>
+                                                </template>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="role in gridData.roles" :key="role.id">
+                                                <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-750/50">
+                                                    <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 px-3 py-2 border-r border-gray-200 dark:border-gray-600">
+                                                        <div class="flex items-center gap-1.5">
+                                                            <span x-show="role.icon" x-text="role.icon" class="text-sm"></span>
+                                                            <span class="font-medium text-gray-700 dark:text-gray-300 text-xs" x-text="role.name"></span>
+                                                        </div>
+                                                    </td>
+                                                    <template x-for="event in gridData.events" :key="event.id">
+                                                        <td class="px-1 py-1.5 text-center border-r border-gray-100 dark:border-gray-700 align-top">
+                                                            <div class="flex flex-wrap gap-1 justify-center min-h-[28px] items-start">
+                                                                {{-- Assigned people --}}
+                                                                <template x-for="member in getGridCell(role.id, event.id)" :key="member.id">
+                                                                    <span class="group relative inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs max-w-[90px] truncate">
+                                                                        <span x-text="member.person_name" class="truncate"></span>
+                                                                        <button @click.stop="gridRemove(event.id, member.id, role.id)"
+                                                                            class="hidden group-hover:inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-red-500 text-white text-[8px] leading-none flex-shrink-0 hover:bg-red-600">
+                                                                            &times;
+                                                                        </button>
+                                                                    </span>
+                                                                </template>
+                                                                {{-- Add button --}}
+                                                                <div class="relative" x-data="{ open: false }">
+                                                                    <button @click="open = !open; editingCell = { roleId: role.id, eventId: event.id }"
+                                                                        class="inline-flex items-center justify-center w-6 h-6 rounded border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-purple-400 hover:text-purple-500 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-colors text-xs">
+                                                                        +
+                                                                    </button>
+                                                                    {{-- Dropdown --}}
+                                                                    <div x-show="open" @click.outside="open = false" x-cloak
+                                                                        class="absolute z-20 mt-1 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 w-48 max-h-48 overflow-y-auto">
+                                                                        <template x-for="member in gridData.members" :key="member.id">
+                                                                            <button @click="gridAssign(event.id, role.id, member.id); open = false"
+                                                                                class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+                                                                                x-text="member.name">
+                                                                            </button>
+                                                                        </template>
+                                                                        <div x-show="gridData.members.length === 0" class="px-3 py-2 text-xs text-gray-400">
+                                                                            Немає учасників
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </template>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </template>
+                            </div>
+                        </div>
+
+                        {{-- Calendar view --}}
+                        <div x-show="!gridView">
 
                         {{-- Day names --}}
                         <div class="grid grid-cols-7 mb-1">
@@ -232,7 +342,7 @@
                         </div>
 
                         {{-- Empty state --}}
-                        <div x-show="allEvents.length === 0" class="text-center py-8">
+                        <div x-show="allEvents.length === 0 && !gridView" class="text-center py-8">
                             <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
@@ -241,6 +351,8 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">Немає запланованих подій</p>
                             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Створіть подію з типом "Недільне служіння"</p>
                         </div>
+
+                        </div>{{-- end calendar view wrapper --}}
 
                         {{-- Event Detail Modal --}}
                         <div x-show="showModal" x-cloak
@@ -521,7 +633,14 @@
                                 allEvents: @json($calendarEventsData),
                                 isWorshipMinistry: {{ $ministry->is_worship_ministry ? 'true' : 'false' }},
                                 ministryId: {{ $ministry->id }},
+                                gridUrl: '{{ route('ministries.schedule-grid', $ministry) }}',
                                 monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
+
+                                // Grid state
+                                gridView: false,
+                                gridData: { events: [], roles: [], grid: {}, members: [] },
+                                gridLoading: false,
+                                editingCell: null,
 
                                 // Modal state
                                 showModal: false,
@@ -889,6 +1008,7 @@
                                     } else {
                                         this.currentMonth--;
                                     }
+                                    if (this.gridView) this.loadGrid();
                                 },
 
                                 nextMonth() {
@@ -898,11 +1018,103 @@
                                     } else {
                                         this.currentMonth++;
                                     }
+                                    if (this.gridView) this.loadGrid();
                                 },
 
                                 goToToday() {
                                     this.currentYear = this.today.getFullYear();
                                     this.currentMonth = this.today.getMonth();
+                                    if (this.gridView) this.loadGrid();
+                                },
+
+                                // Grid methods
+                                async loadGrid() {
+                                    this.gridLoading = true;
+                                    try {
+                                        const url = this.gridUrl + '?year=' + this.currentYear + '&month=' + (this.currentMonth + 1);
+                                        const res = await fetch(url, {
+                                            headers: { 'Accept': 'application/json' }
+                                        });
+                                        this.gridData = await res.json();
+                                    } catch (error) {
+                                        console.error('Error loading grid:', error);
+                                    }
+                                    this.gridLoading = false;
+                                },
+
+                                getGridCell(roleId, eventId) {
+                                    return this.gridData.grid?.[roleId]?.[eventId] || [];
+                                },
+
+                                async gridAssign(eventId, roleId, personId) {
+                                    const formData = new FormData();
+                                    formData.append('person_id', personId);
+                                    formData.append('ministry_role_id', roleId);
+                                    formData.append('ministry_id', this.ministryId);
+
+                                    try {
+                                        const response = await fetch('/events/' + eventId + '/ministry-team', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json'
+                                            },
+                                            body: formData
+                                        });
+
+                                        if (response.ok) {
+                                            const result = await response.json();
+                                            const member = this.gridData.members.find(m => m.id == personId);
+                                            const rId = String(roleId);
+                                            const eId = String(eventId);
+
+                                            if (!this.gridData.grid[rId]) this.gridData.grid[rId] = {};
+                                            if (!this.gridData.grid[rId][eId]) this.gridData.grid[rId][eId] = [];
+
+                                            const firstName = member ? member.name.split(' ')[0] : '?';
+                                            const lastName = member ? member.name.split(' ').slice(1).join(' ') : '';
+                                            const shortName = firstName + (lastName ? ' ' + lastName.charAt(0) + '.' : '');
+
+                                            this.gridData.grid[rId][eId].push({
+                                                id: result.id,
+                                                person_id: personId,
+                                                person_name: shortName
+                                            });
+
+                                            // Force reactivity
+                                            this.gridData = { ...this.gridData, grid: { ...this.gridData.grid } };
+                                        } else {
+                                            const err = await response.json();
+                                            if (err.error) alert(err.error);
+                                        }
+                                    } catch (error) {
+                                        console.error('Error assigning:', error);
+                                    }
+                                    this.editingCell = null;
+                                },
+
+                                async gridRemove(eventId, memberId, roleId) {
+                                    try {
+                                        const response = await fetch('/events/' + eventId + '/ministry-team/' + memberId, {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json'
+                                            }
+                                        });
+
+                                        if (response.ok) {
+                                            const rId = String(roleId);
+                                            const eId = String(eventId);
+                                            if (this.gridData.grid[rId] && this.gridData.grid[rId][eId]) {
+                                                this.gridData.grid[rId][eId] = this.gridData.grid[rId][eId].filter(m => m.id !== memberId);
+                                                // Force reactivity
+                                                this.gridData = { ...this.gridData, grid: { ...this.gridData.grid } };
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error('Error removing:', error);
+                                    }
                                 }
                             };
                         }

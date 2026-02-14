@@ -295,6 +295,9 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::put('ministries/{ministry}/worship-roles/{role}', [MinistryController::class, 'updateWorshipRole'])->name('ministries.worship-roles.update');
     Route::delete('ministries/{ministry}/worship-roles/{role}', [MinistryController::class, 'destroyWorshipRole'])->name('ministries.worship-roles.destroy');
 
+    // Schedule Grid
+    Route::get('ministries/{ministry}/schedule-grid', [MinistryController::class, 'scheduleGridData'])->name('ministries.schedule-grid');
+
     // Ministry Roles (for ministries with is_sunday_service_part)
     Route::post('ministries/{ministry}/ministry-roles', [MinistryController::class, 'storeMinistryRole'])->name('ministries.ministry-roles.store');
     Route::put('ministries/{ministry}/ministry-roles/{role}', [MinistryController::class, 'updateMinistryRole'])->name('ministries.ministry-roles.update');

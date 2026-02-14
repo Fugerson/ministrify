@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Board;
 use App\Models\Event;
+use App\Models\EventMinistryTeam;
 use App\Models\Ministry;
 use App\Models\MinistryRole;
 use App\Models\Person;
@@ -197,6 +198,80 @@ class MinistryController extends Controller
         }
 
         return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles'));
+    }
+
+    public function scheduleGridData(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('view-ministry', $ministry);
+
+        $church = $this->getCurrentChurch();
+
+        $year = $request->integer('year', now()->year);
+        $month = $request->integer('month', now()->month);
+
+        $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
+
+        $events = Event::where('church_id', $church->id)
+            ->where('service_type', 'sunday_service')
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->orderBy('date')
+            ->orderBy('time')
+            ->get()
+            ->map(fn($e) => [
+                'id' => $e->id,
+                'title' => $e->title,
+                'date' => $e->date->format('Y-m-d'),
+                'dateLabel' => $e->date->format('j') . ' ' . $monthNames[$e->date->month],
+                'dayOfWeek' => mb_substr($e->date->translatedFormat('D'), 0, 2),
+            ]);
+
+        $roles = $ministry->ministryRoles()->orderBy('sort_order')->get()
+            ->map(fn($r) => [
+                'id' => $r->id,
+                'name' => $r->name,
+                'icon' => $r->icon,
+            ]);
+
+        $eventIds = $events->pluck('id')->toArray();
+
+        $teamEntries = EventMinistryTeam::whereIn('event_id', $eventIds)
+            ->where('ministry_id', $ministry->id)
+            ->with('person')
+            ->get();
+
+        $grid = [];
+        foreach ($teamEntries as $entry) {
+            $roleId = (string) $entry->ministry_role_id;
+            $eventId = (string) $entry->event_id;
+
+            if (!isset($grid[$roleId])) {
+                $grid[$roleId] = [];
+            }
+            if (!isset($grid[$roleId][$eventId])) {
+                $grid[$roleId][$eventId] = [];
+            }
+
+            $person = $entry->person;
+            $personName = $person
+                ? $person->first_name . ' ' . mb_substr($person->last_name, 0, 1) . '.'
+                : '?';
+
+            $grid[$roleId][$eventId][] = [
+                'id' => $entry->id,
+                'person_id' => $entry->person_id,
+                'person_name' => $personName,
+            ];
+        }
+
+        $members = $ministry->members()->orderBy('last_name')->get()
+            ->map(fn($m) => [
+                'id' => $m->id,
+                'name' => $m->full_name,
+            ]);
+
+        return response()->json(compact('events', 'roles', 'grid', 'members'));
     }
 
     public function edit(Ministry $ministry)
