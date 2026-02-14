@@ -486,6 +486,36 @@ class GoogleCalendarService
     }
 
     /**
+     * Check if a Google event was definitively deleted (404/410) vs API error
+     * Returns: 'deleted', 'cancelled', 'exists', or 'error'
+     */
+    public function checkGoogleEventStatus(string $accessToken, string $calendarId, string $eventId): string
+    {
+        try {
+            $response = Http::withToken($accessToken)
+                ->get(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events/{$eventId}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return ($data['status'] ?? '') === 'cancelled' ? 'cancelled' : 'exists';
+            }
+
+            if ($response->status() === 404 || $response->status() === 410) {
+                return 'deleted';
+            }
+
+            Log::warning('checkGoogleEventStatus: unexpected status', [
+                'event_id' => $eventId,
+                'status' => $response->status(),
+            ]);
+            return 'error';
+        } catch (\Exception $e) {
+            Log::error('checkGoogleEventStatus: exception', ['event_id' => $eventId, 'error' => $e->getMessage()]);
+            return 'error';
+        }
+    }
+
+    /**
      * Import events from Google Calendar to Ministrify
      */
     public function importFromGoogle(User $user, Church $church, string $calendarId, ?int $ministryId = null): array
@@ -560,15 +590,14 @@ class GoogleCalendarService
             return 'updated';
         }
 
-        // Check for duplicate by title and date
+        // Check for duplicate by title and date (regardless of google_event_id)
         $duplicate = Event::where('church_id', $church->id)
             ->where('title', $eventData['title'])
             ->whereDate('date', $eventData['date'])
-            ->whereNull('google_event_id')
             ->first();
 
         if ($duplicate) {
-            // Link existing event to Google
+            // Link existing event to Google (keep existing plan items, attendance, etc.)
             Event::withoutEvents(function () use ($duplicate, $googleEvent, $calendarId) {
                 $duplicate->update([
                     'google_event_id' => $googleEvent['id'],
@@ -785,19 +814,26 @@ class GoogleCalendarService
             ->get();
 
         foreach ($syncedEvents as $event) {
-            $googleEvent = $this->getGoogleEvent($accessToken, $calendarId, $event->google_event_id);
+            $status = $this->checkGoogleEventStatus($accessToken, $calendarId, $event->google_event_id);
 
-            if (!$googleEvent || ($googleEvent['status'] ?? '') === 'cancelled') {
-                // Event was deleted in Google - delete from Ministrify too
+            if ($status === 'deleted' || $status === 'cancelled') {
+                // Event was definitively deleted/cancelled in Google - delete from Ministrify
                 Log::info('handleDeletedGoogleEvents: deleting event', [
                     'event_id' => $event->id,
                     'title' => $event->title,
                     'google_event_id' => $event->google_event_id,
+                    'status' => $status,
                 ]);
                 Event::withoutEvents(function () use ($event) {
                     $event->delete();
                 });
                 $results['to_google']['deleted']++;
+            } elseif ($status === 'error') {
+                // API error - skip, don't delete (might be rate limit or network issue)
+                Log::warning('handleDeletedGoogleEvents: skipping due to API error', [
+                    'event_id' => $event->id,
+                    'google_event_id' => $event->google_event_id,
+                ]);
             }
 
             usleep(50000); // 50ms
