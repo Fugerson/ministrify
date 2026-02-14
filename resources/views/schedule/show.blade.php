@@ -328,7 +328,9 @@
                                                         <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
                                                             Команда прославлення ще не обрала пісні.
                                                             @if($event->service_type === 'sunday_service')
-                                                                @php($worshipMinistry = \App\Models\Ministry::where('church_id', $event->church_id)->where('is_worship_ministry', true)->first())
+                                                                @php
+                                                                    $worshipMinistry = \App\Models\Ministry::where('church_id', $event->church_id)->where('is_worship_ministry', true)->first();
+                                                                @endphp
                                                                 @if($worshipMinistry)
                                                                     <a href="{{ route('ministries.show', ['ministry' => $worshipMinistry, 'tab' => 'schedule']) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
                                                                 @endif
@@ -544,7 +546,9 @@
                                     <div class="px-3 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
                                         Команда прославлення ще не обрала пісні.
                                         @if($event->service_type === 'sunday_service')
-                                            @php($wm = \App\Models\Ministry::where('church_id', $event->church_id)->where('is_worship_ministry', true)->first())
+                                            @php
+                                                $wm = \App\Models\Ministry::where('church_id', $event->church_id)->where('is_worship_ministry', true)->first();
+                                            @endphp
                                             @if($wm)
                                                 <a href="{{ route('ministries.show', ['ministry' => $wm, 'tab' => 'schedule']) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
                                             @endif
