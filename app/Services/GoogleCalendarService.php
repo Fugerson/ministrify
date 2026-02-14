@@ -788,14 +788,14 @@ class GoogleCalendarService
             $googleEvent = $this->getGoogleEvent($accessToken, $calendarId, $event->google_event_id);
 
             if (!$googleEvent || ($googleEvent['status'] ?? '') === 'cancelled') {
-                // Event was deleted in Google - mark as unsynced
+                // Event was deleted in Google - delete from Ministrify too
+                Log::info('handleDeletedGoogleEvents: deleting event', [
+                    'event_id' => $event->id,
+                    'title' => $event->title,
+                    'google_event_id' => $event->google_event_id,
+                ]);
                 Event::withoutEvents(function () use ($event) {
-                    $event->update([
-                        'google_event_id' => null,
-                        'google_calendar_id' => null,
-                        'google_synced_at' => null,
-                        'google_sync_status' => null,
-                    ]);
+                    $event->delete();
                 });
                 $results['to_google']['deleted']++;
             }

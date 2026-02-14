@@ -11,6 +11,7 @@ use App\Models\Ministry;
 use App\Models\MinistryMeeting;
 use App\Rules\BelongsToChurch;
 use App\Services\CalendarService;
+use App\Services\GoogleCalendarService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -517,21 +518,31 @@ class EventController extends Controller
         $this->authorizeChurch($event);
         $this->authorize('delete', $event);
 
+        $googleCalendar = app(GoogleCalendarService::class);
+        $user = auth()->user();
+
         $deleteSeries = $request->boolean('delete_series');
 
         if ($deleteSeries) {
             // Delete all events in the series (scoped to church)
             $parentId = $event->parent_event_id ?? $event->id;
 
-            // Delete child events
-            Event::where('church_id', $event->church_id)
-                ->where('parent_event_id', $parentId)->delete();
+            $seriesEvents = Event::where('church_id', $event->church_id)
+                ->where(fn($q) => $q->where('parent_event_id', $parentId)->orWhere('id', $parentId))
+                ->get();
 
-            // Delete parent event
-            Event::where('church_id', $event->church_id)
-                ->where('id', $parentId)->delete();
+            foreach ($seriesEvents as $seriesEvent) {
+                if ($seriesEvent->google_event_id) {
+                    $googleCalendar->deleteAndUnlink($user, $seriesEvent);
+                }
+                $seriesEvent->delete();
+            }
 
             return redirect()->route('schedule')->with('success', 'Серію подій видалено.');
+        }
+
+        if ($event->google_event_id) {
+            $googleCalendar->deleteAndUnlink($user, $event);
         }
 
         $event->delete();
