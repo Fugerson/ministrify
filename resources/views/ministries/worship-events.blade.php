@@ -30,7 +30,7 @@
         @if($events->count() > 0)
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($events as $event)
-                    <a href="{{ route('ministries.worship-events.show', [$ministry, $event]) }}"
+                    <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'schedule']) }}"
                        class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $event->date->isPast() ? 'opacity-60' : '' }}">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">

@@ -328,7 +328,7 @@
                                                         <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
                                                             Команда прославлення ще не обрала пісні.
                                                             @if($event->service_type === 'sunday_service' && $event->ministry)
-                                                                <a href="{{ route('ministries.worship-events.show', [$event->ministry, $event]) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
+                                                                <a href="{{ route('ministries.show', ['ministry' => $event->ministry, 'tab' => 'schedule']) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
                                                             @endif
                                                         </div>
                                                     </template>
@@ -541,7 +541,7 @@
                                     <div class="px-3 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
                                         Команда прославлення ще не обрала пісні.
                                         @if($event->service_type === 'sunday_service' && $event->ministry)
-                                            <a href="{{ route('ministries.worship-events.show', [$event->ministry, $event]) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
+                                            <a href="{{ route('ministries.show', ['ministry' => $event->ministry, 'tab' => 'schedule']) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
                                         @endif
                                     </div>
                                 </template>

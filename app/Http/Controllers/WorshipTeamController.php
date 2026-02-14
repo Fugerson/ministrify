@@ -152,38 +152,8 @@ class WorshipTeamController extends Controller
      */
     public function eventShow(Ministry $ministry, Event $event)
     {
-        $this->authorizeChurch($ministry);
-        $this->authorizeChurch($event);
-
-        if (!$ministry->is_worship_ministry && !$ministry->is_sunday_service_part) {
-            abort(404);
-        }
-
-        $event->load(['songs', 'ministryTeams' => fn($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')]);
-
-        $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
-
-        // Get ministry members with their worship skills
-        $members = $ministry->members()
-            ->with('worshipSkills.worshipRole')
-            ->get();
-
-        // Also include the leader
-        if ($ministry->leader) {
-            $ministry->leader->load('worshipSkills.worshipRole');
-            if (!$members->contains('id', $ministry->leader->id)) {
-                $members->prepend($ministry->leader);
-            }
-        }
-
-        // Get all church songs for adding
-        $availableSongs = Song::where('church_id', $this->getCurrentChurch()->id)
-            ->orderBy('title')
-            ->get();
-
-        return view('ministries.worship-event-detail', compact(
-            'ministry', 'event', 'ministryRoles', 'members', 'availableSongs'
-        ));
+        // Redirect to ministry page with schedule tab — detail is now a modal
+        return redirect()->route('ministries.show', ['ministry' => $ministry, 'tab' => 'schedule']);
     }
 
     /**

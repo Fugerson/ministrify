@@ -198,7 +198,7 @@
             @if(count($recentEvents) > 0)
                 <div class="space-y-3">
                     @foreach($recentEvents as $event)
-                        <a href="{{ route('ministries.worship-events.show', [$ministry, $event]) }}" class="block p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <a href="{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'schedule']) }}" class="block p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $event->title }}</p>
