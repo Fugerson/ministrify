@@ -2,20 +2,24 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Church;
 use App\Models\Person;
 use App\Services\GeocodingService;
 use Illuminate\Console\Command;
 
 class GeocodeExistingPeople extends Command
 {
-    protected $signature = 'people:geocode {--limit=50 : Maximum people to geocode} {--church= : Limit to specific church ID}';
+    protected $signature = 'people:geocode {--limit=50 : Maximum people to geocode} {--church= : Limit to specific church ID} {--force : Re-geocode even if coordinates exist}';
     protected $description = 'Geocode addresses for existing people who have address but no coordinates';
 
     public function handle(GeocodingService $geocoding): int
     {
         $query = Person::whereNotNull('address')
-            ->where('address', '!=', '')
-            ->whereNull('latitude');
+            ->where('address', '!=', '');
+
+        if (!$this->option('force')) {
+            $query->whereNull('latitude');
+        }
 
         if ($churchId = $this->option('church')) {
             $query->where('church_id', $churchId);
@@ -28,12 +32,18 @@ class GeocodeExistingPeople extends Command
             return 0;
         }
 
+        // Pre-load church cities for context
+        $churchCities = Church::whereIn('id', $people->pluck('church_id')->unique())
+            ->pluck('city', 'id')
+            ->toArray();
+
         $this->info("Geocoding {$people->count()} people...");
         $bar = $this->output->createProgressBar($people->count());
         $successCount = 0;
 
         foreach ($people as $person) {
-            $result = $geocoding->geocode($person->address);
+            $city = $churchCities[$person->church_id] ?? null;
+            $result = $geocoding->geocode($person->address, $city);
             if ($result) {
                 $person->update([
                     'latitude' => $result['lat'],

@@ -8,13 +8,19 @@ use Illuminate\Support\Facades\Log;
 
 class GeocodingService
 {
-    public function geocode(string $address): ?array
+    public function geocode(string $address, ?string $city = null): ?array
     {
         if (empty(trim($address))) {
             return null;
         }
 
-        $cacheKey = 'geocode:' . md5($address);
+        // Append city for better accuracy if address doesn't already contain it
+        $query = $address;
+        if ($city && stripos($address, $city) === false) {
+            $query = $address . ', ' . $city;
+        }
+
+        $cacheKey = 'geocode:' . md5($query);
 
         $cached = Cache::get($cacheKey);
         if ($cached !== null) {
@@ -33,7 +39,7 @@ class GeocodingService
             $response = Http::withHeaders([
                 'User-Agent' => 'ChurchHub/1.0',
             ])->timeout(10)->get('https://nominatim.openstreetmap.org/search', [
-                'q' => $address,
+                'q' => $query,
                 'format' => 'json',
                 'limit' => 1,
             ]);
@@ -54,7 +60,7 @@ class GeocodingService
 
             return null;
         } catch (\Exception $e) {
-            Log::warning('Geocoding failed for address: ' . $address, ['error' => $e->getMessage()]);
+            Log::warning('Geocoding failed for address: ' . $query, ['error' => $e->getMessage()]);
             return null;
         }
     }
