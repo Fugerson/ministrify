@@ -1405,7 +1405,7 @@
                             $memberPositions = collect($memberPositionIds)->map(fn($id) => $positions[$id]->name ?? null)->filter();
                             $positionText = $member->pivot->position;
                         @endphp
-                        <div class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-md transition-shadow group"
+                        <div class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-md transition-shadow group"
                              x-data="{
                                  role: '{{ $isLeader ? 'leader' : $pivotRole }}',
                                  open: false,
@@ -1433,7 +1433,7 @@
                                  }
                              }">
                             {{-- Top accent --}}
-                            <div class="h-1 transition-all" :class="accentClass"></div>
+                            <div class="h-1 rounded-t-xl transition-all" :class="accentClass"></div>
 
                             <div class="p-4">
                                 <div class="flex items-start gap-3">
