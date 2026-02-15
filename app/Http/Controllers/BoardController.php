@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class BoardController extends Controller
 {
-    // Board listing page
+    // Task Tracker - Single board for all church tasks
     public function index(Request $request)
     {
         if (!auth()->user()->canView('boards')) {
@@ -26,50 +26,17 @@ class BoardController extends Controller
         }
 
         $church = $this->getCurrentChurch();
-        $user = auth()->user();
 
-        // Ensure the church-wide board exists
-        $churchBoard = Board::firstOrCreate(
-            ['church_id' => $church->id, 'ministry_id' => null],
+        // Get or create the main church task tracker
+        $board = Board::firstOrCreate(
+            ['church_id' => $church->id, 'name' => 'Трекер завдань'],
             [
-                'name' => 'Загальна дошка',
-                'description' => 'Загальні завдання церкви',
+                'description' => 'Єдиний трекер для всіх завдань церкви',
                 'color' => $church->primary_color ?? '#3b82f6',
                 'is_archived' => false,
             ]
         );
-        $this->ensureDefaultColumns($churchBoard);
 
-        // Auto-create boards for user's ministries
-        $this->autoCreateMinistryBoards($church, $user);
-
-        // Load accessible boards with stats
-        $boards = Board::accessibleBy($user)
-            ->with('ministry')
-            ->withCount(['cards', 'cards as completed_cards_count' => function ($q) {
-                $q->where('is_completed', true);
-            }])
-            ->orderByRaw('ministry_id IS NOT NULL, ministry_id')
-            ->get();
-
-        $churchWideBoard = $boards->firstWhere('ministry_id', null);
-        $ministryBoards = $boards->where('ministry_id', '!=', null)->values();
-
-        return view('boards.listing', compact('churchWideBoard', 'ministryBoards'));
-    }
-
-    // Kanban board view
-    public function show(Board $board)
-    {
-        if (!auth()->user()->canView('boards')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
-        }
-
-        $this->authorizeBoard($board);
-
-        $church = $this->getCurrentChurch();
-
-        // Ensure default columns
         $this->ensureDefaultColumns($board);
 
         // Load board with cards and epics
@@ -80,20 +47,70 @@ class BoardController extends Controller
             'columns.cards.checklistItems',
             'columns.cards.comments',
             'epics',
-            'ministry',
         ]);
 
         // Get filter data
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
-
-        // For ministry boards, only show that ministry; for church-wide, show all
-        if ($board->ministry_id) {
-            $ministries = collect([$board->ministry]);
-        } else {
-            $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
-        }
+        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
 
         // Get epic stats via single GROUP BY query
+        $columnIds = $board->columns->pluck('id')->toArray();
+        $epicStatsRaw = BoardCard::whereIn('column_id', $columnIds)
+            ->whereNotNull('epic_id')
+            ->selectRaw('epic_id, COUNT(*) as total, SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed')
+            ->groupBy('epic_id')
+            ->get()
+            ->keyBy('epic_id');
+
+        $epics = $board->epics->map(function ($epic) use ($epicStatsRaw) {
+            $stat = $epicStatsRaw[$epic->id] ?? null;
+            $total = $stat ? (int) $stat->total : 0;
+            $completed = $stat ? (int) $stat->completed : 0;
+            return [
+                'id' => $epic->id,
+                'name' => $epic->name,
+                'color' => $epic->color,
+                'description' => $epic->description,
+                'total' => $total,
+                'completed' => $completed,
+                'progress' => $total > 0 ? round(($completed / $total) * 100) : 0,
+            ];
+        });
+
+        return view('boards.index', compact('board', 'people', 'ministries', 'epics'));
+    }
+
+    // Kanban board for a specific ministry
+    public function show(Board $board)
+    {
+        if (!auth()->user()->canView('boards')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+        }
+
+        // Church-wide board — redirect to index
+        if (!$board->ministry_id) {
+            return redirect()->route('boards.index');
+        }
+
+        $this->authorizeBoard($board);
+
+        $church = $this->getCurrentChurch();
+
+        $this->ensureDefaultColumns($board);
+
+        $board->load([
+            'columns.cards.assignee',
+            'columns.cards.ministry',
+            'columns.cards.epic',
+            'columns.cards.checklistItems',
+            'columns.cards.comments',
+            'epics',
+            'ministry',
+        ]);
+
+        $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
+        $ministries = collect([$board->ministry]);
+
         $columnIds = $board->columns->pluck('id')->toArray();
         $epicStatsRaw = BoardCard::whereIn('column_id', $columnIds)
             ->whereNotNull('epic_id')
@@ -1174,39 +1191,6 @@ class BoardController extends Controller
             foreach ($defaultColumns as $column) {
                 $board->columns()->create($column);
             }
-        }
-    }
-
-    private function autoCreateMinistryBoards($church, $user): void
-    {
-        // Admin sees all ministries; regular users only their own
-        if ($user->isAdmin()) {
-            $ministries = Ministry::where('church_id', $church->id)->get();
-        } else {
-            $personId = $user->person?->id;
-            if (!$personId) {
-                return;
-            }
-
-            $ministries = Ministry::where('church_id', $church->id)
-                ->where(function ($q) use ($personId) {
-                    $q->where('leader_id', $personId)
-                      ->orWhereHas('members', fn($pq) => $pq->where('person_id', $personId));
-                })
-                ->get();
-        }
-
-        foreach ($ministries as $ministry) {
-            $board = Board::firstOrCreate(
-                ['church_id' => $church->id, 'ministry_id' => $ministry->id],
-                [
-                    'name' => $ministry->name,
-                    'color' => $ministry->color ?? '#3b82f6',
-                    'is_archived' => false,
-                ]
-            );
-
-            $this->ensureDefaultColumns($board);
         }
     }
 

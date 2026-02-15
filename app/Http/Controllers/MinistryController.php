@@ -197,7 +197,17 @@ class MinistryController extends Controller
             $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
         }
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles'));
+        // Get or create ministry board
+        $ministryBoard = Board::firstOrCreate(
+            ['church_id' => $church->id, 'ministry_id' => $ministry->id],
+            [
+                'name' => $ministry->name,
+                'color' => $ministry->color ?? '#3b82f6',
+                'is_archived' => false,
+            ]
+        );
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard'));
     }
 
     public function scheduleGridData(Request $request, Ministry $ministry)
