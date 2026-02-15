@@ -333,7 +333,7 @@
                                         <!-- Comments list -->
                                         <div class="space-y-4">
                                             <template x-for="comment in cardPanel.data.comments" :key="comment.id">
-                                                <div class="flex gap-3 group" x-data="{ editing: false, editContent: comment.content }">
+                                                <div class="flex gap-3 group" x-data="{ editing: false, editContent: comment.content, editFileNames: [] }">
                                                     <div class="w-7 h-7 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
                                                         <span class="text-primary-600 dark:text-primary-400 text-xs font-medium" x-text="comment.user_initial"></span>
                                                     </div>
@@ -352,9 +352,27 @@
                                                             <div class="mt-1">
                                                                 <textarea x-model="editContent" rows="2"
                                                                           class="w-full px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm dark:text-white resize-none"></textarea>
-                                                                <div class="flex gap-2 mt-1">
+                                                                <!-- Edit file names preview -->
+                                                                <template x-if="editFileNames.length > 0">
+                                                                    <div class="flex flex-wrap gap-1 mt-1">
+                                                                        <template x-for="(fname, fi) in editFileNames" :key="fi">
+                                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded-full">
+                                                                                <span x-text="fname" class="truncate max-w-[120px]"></span>
+                                                                                <button type="button" @click="removeEditFile(fi)" class="hover:text-red-500">&times;</button>
+                                                                            </span>
+                                                                        </template>
+                                                                    </div>
+                                                                </template>
+                                                                <div class="flex items-center gap-2 mt-1">
                                                                     <button @click="updateComment(comment, editContent); editing=false" class="px-2 py-1 bg-primary-600 text-white text-xs rounded">Зберегти</button>
-                                                                    <button @click="editing=false; editContent=comment.content" class="px-2 py-1 text-gray-500 text-xs">Скасувати</button>
+                                                                    <button @click="editing=false; editContent=comment.content; editFileNames=[]; _editCommentFiles=[]" class="px-2 py-1 text-gray-500 text-xs">Скасувати</button>
+                                                                    <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
+                                                                           x-ref="editFileInput"
+                                                                           @change="onEditFilesChange($event)"
+                                                                           class="hidden">
+                                                                    <button type="button" @click="$refs.editFileInput.click()" class="p-1 text-gray-400 hover:text-primary-600 ml-auto" title="Прикріпити файл">
+                                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </template>

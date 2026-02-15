@@ -433,6 +433,7 @@ $epicsData = $epics->toArray();
 <script>
 // File objects stored outside Alpine to avoid Proxy wrapping
 let _pendingCommentFiles = [];
+let _editCommentFiles = [];
 
 function churchBoard() {
     return {
@@ -481,6 +482,7 @@ function churchBoard() {
         selectedCardIndex: -1,
         commentText: '',
         commentFileNames: [],
+        editFileNames: [],
         lightboxUrl: null,
 
         get hasActiveFilters() {
@@ -1084,23 +1086,66 @@ function churchBoard() {
             } catch (e) { console.error('Delete comment error:', e); }
         },
 
+        onEditFilesChange(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            _editCommentFiles = [..._editCommentFiles, ...files];
+            this.editFileNames = [...(this.editFileNames || []), ...files.map(f => f.name)];
+            e.target.value = '';
+        },
+
+        removeEditFile(idx) {
+            _editCommentFiles = _editCommentFiles.filter((_, i) => i !== idx);
+            this.editFileNames = this.editFileNames.filter((_, i) => i !== idx);
+        },
+
         async updateComment(comment, newContent) {
-            if (!newContent.trim()) return;
+            const content = (newContent || '').trim();
+            const files = [..._editCommentFiles];
 
-            const response = await fetch(`/boards/comments/${comment.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ content: newContent })
-            });
+            if (!content && files.length === 0) return;
 
-            const result = await response.json();
-            if (result.success) {
-                comment.content = newContent;
-                comment.is_edited = true;
+            _editCommentFiles = [];
+            this.editFileNames = [];
+
+            try {
+                let response;
+                if (files.length > 0) {
+                    const formData = new FormData();
+                    formData.append('_method', 'PUT');
+                    if (content) formData.append('content', content);
+                    files.forEach((file, idx) => { formData.append(`files[${idx}]`, file); });
+
+                    response = await fetch(`/boards/comments/${comment.id}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                } else {
+                    response = await fetch(`/boards/comments/${comment.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ content: content })
+                    });
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    comment.content = content;
+                    comment.is_edited = true;
+                    if (result.attachments !== undefined) {
+                        comment.attachments = result.attachments;
+                    }
+                }
+            } catch (e) {
+                console.error('Update comment error:', e);
             }
         },
 

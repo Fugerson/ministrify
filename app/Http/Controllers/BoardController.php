@@ -907,14 +907,34 @@ class BoardController extends Controller
         }
 
         $validated = $request->validate([
-            'content' => 'required|string',
+            'content' => 'nullable|string',
+            'files.*' => 'file|max:10240',
         ]);
 
         $oldContent = $comment->content;
-        $comment->update($validated);
+        $newContent = $validated['content'] ?? $comment->content;
 
-        // Log activity with diff
-        BoardCardActivity::log($comment->card, 'comment_edited', null, $oldContent, $validated['content'], [
+        // Handle file uploads
+        $attachments = $comment->attachments ?? [];
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('board-comments', 'public');
+                $attachments[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                ];
+            }
+        }
+
+        $comment->update([
+            'content' => $newContent,
+            'attachments' => !empty($attachments) ? $attachments : null,
+        ]);
+
+        // Log activity
+        BoardCardActivity::log($comment->card, 'comment_edited', null, $oldContent, $newContent, [
             'comment_id' => $comment->id,
         ]);
 
@@ -927,6 +947,14 @@ class BoardController extends Controller
                     'updated_at' => $comment->updated_at->diffForHumans(),
                     'is_edited' => true,
                 ],
+                'attachments' => collect($comment->attachments ?? [])->map(function ($att) {
+                    return [
+                        'name' => $att['name'],
+                        'url' => \Storage::url($att['path']),
+                        'size' => isset($att['size']) ? number_format($att['size'] / 1024, 1) . ' KB' : '',
+                        'is_image' => str_starts_with($att['mime'] ?? '', 'image/'),
+                    ];
+                })->toArray(),
             ]);
         }
 
