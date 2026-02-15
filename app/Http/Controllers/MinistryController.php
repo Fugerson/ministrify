@@ -227,6 +227,26 @@ class MinistryController extends Controller
                 }
             }
 
+            // Migrate cards from main board to ministry board (one-time)
+            if ($ministryBoard->cards()->count() === 0) {
+                $mainBoard = Board::where('church_id', $church->id)
+                    ->where('name', 'Трекер завдань')
+                    ->first();
+
+                if ($mainBoard) {
+                    $mainColumns = $mainBoard->columns()->orderBy('position')->pluck('id')->toArray();
+                    $ministryColumns = $ministryBoard->columns()->orderBy('position')->pluck('id')->toArray();
+
+                    foreach ($mainColumns as $idx => $mainColId) {
+                        $targetColId = $ministryColumns[$idx] ?? end($ministryColumns);
+
+                        BoardCard::where('column_id', $mainColId)
+                            ->where('ministry_id', $ministry->id)
+                            ->update(['column_id' => $targetColId]);
+                    }
+                }
+            }
+
             $ministryBoard->load([
                 'columns.cards.assignee',
                 'columns.cards.ministry',
