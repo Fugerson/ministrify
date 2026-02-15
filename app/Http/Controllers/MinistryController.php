@@ -111,6 +111,15 @@ class MinistryController extends Controller
         $defaultTab = Gate::allows('manage-ministry', $ministry) ? 'goals' : 'schedule';
         $tab = request('tab', $defaultTab);
 
+        // Redirect board tab to separate board page
+        if ($tab === 'board') {
+            $board = Board::firstOrCreate(
+                ['church_id' => $church->id, 'ministry_id' => $ministry->id],
+                ['name' => $ministry->name, 'color' => $ministry->color ?? '#3b82f6', 'is_archived' => false]
+            );
+            return redirect()->route('boards.show', $board);
+        }
+
         // Get boards for task creation
         $boards = Board::where('church_id', $church->id)
             ->where('is_archived', false)
