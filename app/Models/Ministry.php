@@ -83,7 +83,7 @@ class Ministry extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(Person::class, 'ministry_person')
-            ->withPivot('position_ids')
+            ->withPivot('position_ids', 'role', 'position', 'experience_level', 'joined_at', 'notes')
             ->withTimestamps();
     }
 

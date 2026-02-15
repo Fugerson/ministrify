@@ -1368,10 +1368,20 @@
             </div>
 
             <div x-show="activeTab === 'members'"{{ $tab !== 'members' ? ' style="display:none"' : '' }}>
+                @php
+                    $leader = $ministry->leader;
+                    $sortedMembers = $ministry->members->sortBy(function ($m) use ($ministry) {
+                        if ($m->id === $ministry->leader_id) return 0;
+                        if ($m->pivot->role === 'co-leader') return 1;
+                        return 2;
+                    });
+                    $positions = $ministry->positions->keyBy('id');
+                @endphp
+
                 <!-- Add member form -->
                 @can('manage-ministry', $ministry)
                 @if($availablePeople->count() > 0)
-                <form method="POST" action="{{ route('ministries.members.add', $ministry) }}" class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <form method="POST" action="{{ route('ministries.members.add', $ministry) }}" class="mb-5 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     @csrf
                     <div class="flex gap-2">
                         <div class="flex-1">
@@ -1385,40 +1395,105 @@
                 @endif
                 @endcan
 
-                @if($ministry->members->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    @foreach($ministry->members as $member)
-                        <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <a href="{{ route('people.show', $member) }}" class="flex items-center hover:opacity-80">
-                                @if($member->photo)
-                                <div x-data="{ hover: false, r: {} }" @mouseenter="hover = true; r = $el.getBoundingClientRect()" @mouseleave="hover = false">
-                                    <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
-                                    <div class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
-                                        <img src="{{ Storage::url($member->photo) }}" :class="hover ? 'opacity-100 scale-100' : 'opacity-0 scale-75'" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800 transition-all duration-200 ease-out origin-bottom">
+                @if($sortedMembers->count() > 0)
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    @foreach($sortedMembers as $member)
+                        @php
+                            $isLeader = $member->id === $ministry->leader_id;
+                            $pivotRole = $member->pivot->role ?? 'member';
+                            $memberPositionIds = json_decode($member->pivot->position_ids ?? '[]', true) ?: [];
+                            $memberPositions = collect($memberPositionIds)->map(fn($id) => $positions[$id]->name ?? null)->filter();
+                            $positionText = $member->pivot->position;
+                        @endphp
+                        <div class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-md transition-shadow group">
+                            {{-- Top accent for leader --}}
+                            @if($isLeader)
+                            <div class="h-1 bg-gradient-to-r from-amber-400 to-amber-500"></div>
+                            @elseif($pivotRole === 'co-leader')
+                            <div class="h-1 bg-gradient-to-r from-primary-400 to-primary-500"></div>
+                            @endif
+
+                            <div class="p-4">
+                                <div class="flex items-start gap-3">
+                                    {{-- Avatar --}}
+                                    <a href="{{ route('people.show', $member) }}" class="shrink-0">
+                                        @if($member->photo)
+                                        <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700" loading="lazy">
+                                        @else
+                                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center ring-2 ring-gray-100 dark:ring-gray-700">
+                                            <span class="text-white text-sm font-semibold">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>
+                                        </div>
+                                        @endif
+                                    </a>
+
+                                    {{-- Info --}}
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <a href="{{ route('people.show', $member) }}" class="font-semibold text-gray-900 dark:text-white text-sm hover:text-primary-600 dark:hover:text-primary-400 truncate">
+                                                {{ $member->full_name }}
+                                            </a>
+                                            @if($isLeader)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                                                Лідер
+                                            </span>
+                                            @elseif($pivotRole === 'co-leader')
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400">
+                                                Со-лідер
+                                            </span>
+                                            @endif
+                                        </div>
+
+                                        {{-- Positions --}}
+                                        @if($memberPositions->isNotEmpty() || $positionText)
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                            {{ $memberPositions->isNotEmpty() ? $memberPositions->implode(', ') : $positionText }}
+                                        </p>
+                                        @endif
+
+                                        {{-- Contact --}}
+                                        <div class="flex items-center gap-3 mt-2">
+                                            @if($member->phone)
+                                            <a href="tel:{{ $member->phone }}" class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400" title="{{ $member->phone }}">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                <span class="hidden sm:inline">{{ $member->phone }}</span>
+                                            </a>
+                                            @endif
+                                            @if($member->telegram_username)
+                                            <a href="https://t.me/{{ ltrim($member->telegram_username, '@') }}" target="_blank" class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-500" title="Telegram">
+                                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                                            </a>
+                                            @endif
+                                            @if($member->email)
+                                            <a href="mailto:{{ $member->email }}" class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400" title="{{ $member->email }}">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                            </a>
+                                            @endif
+                                        </div>
                                     </div>
+
+                                    {{-- Remove button --}}
+                                    @can('manage-ministry', $ministry)
+                                    @if(!$isLeader)
+                                    <form method="POST" action="{{ route('ministries.members.remove', [$ministry, $member]) }}"
+                                          onsubmit="return confirm('Видалити учасника з команди?')" class="shrink-0">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </form>
+                                    @endif
+                                    @endcan
                                 </div>
-                                @else
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                                    <span class="text-white text-sm font-medium">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>
-                                </div>
-                                @endif
-                                <span class="ml-3 font-medium text-gray-900 dark:text-white text-sm">{{ $member->full_name }}</span>
-                            </a>
-                            @can('manage-ministry', $ministry)
-                            <form method="POST" action="{{ route('ministries.members.remove', [$ministry, $member]) }}"
-                                  onsubmit="return confirm('Видалити учасника?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-gray-400 hover:text-red-600 dark:hover:text-red-400">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
-                            </form>
-                            @endcan
+                            </div>
                         </div>
                     @endforeach
                 </div>
                 @else
-                <p class="text-center text-gray-500 dark:text-gray-400 py-6 text-sm">Немає учасників</p>
+                <div class="text-center py-10">
+                    <svg class="mx-auto w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Немає учасників</p>
+                </div>
                 @endif
             </div>
 
