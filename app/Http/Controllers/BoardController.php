@@ -649,7 +649,7 @@ class BoardController extends Controller
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
-            'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->where('board_id', $card->column->board_id)],
+            'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->whereIn('board_id', Board::where('church_id', $this->getCurrentChurch()->id)->pluck('id'))],
             'column_id' => 'nullable|exists:board_columns,id',
             'show_in_general' => 'nullable|boolean',
         ]);
