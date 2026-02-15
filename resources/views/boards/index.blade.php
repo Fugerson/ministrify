@@ -539,11 +539,10 @@ function churchBoard() {
                     this.showShortcuts = !this.showShortcuts;
                     break;
                 case 'Escape':
-                    this.closePanel();
-                    this.showShortcuts = false;
-                    this.addCardModal.open = false;
-                    this.showEpicModal = false;
-                    this.editingEpic = null;
+                    if (this.showShortcuts) { this.showShortcuts = false; }
+                    else if (this.showEpicModal) { this.showEpicModal = false; this.editingEpic = null; }
+                    else if (this.addCardModal.open) { this.addCardModal.open = false; }
+                    else if (this.cardPanel.open) { this.closePanel(); }
                     break;
                 case 'n':
                 case 'N':
@@ -563,7 +562,8 @@ function churchBoard() {
                 case 'M':
                     if (this.cardPanel.open) {
                         e.preventDefault();
-                        // Focus column select
+                        const statusSelect = document.querySelector('[x-model="cardPanel.data.card.column_id"]');
+                        if (statusSelect) statusSelect.focus();
                     }
                     break;
             }
@@ -571,7 +571,8 @@ function churchBoard() {
 
         initSortable() {
             document.querySelectorAll('.kanban-cards').forEach(container => {
-                new Sortable(container, {
+                if (container._sortable) container._sortable.destroy();
+                container._sortable = new Sortable(container, {
                     group: 'cards',
                     animation: 200,
                     ghostClass: 'opacity-40',
@@ -653,9 +654,7 @@ function churchBoard() {
 
             document.querySelectorAll('.column-count').forEach(el => {
                 const columnId = el.dataset.columnId;
-                if (counts[columnId] !== undefined) {
-                    el.textContent = counts[columnId];
-                }
+                el.textContent = counts[columnId] || 0;
             });
         },
 
@@ -890,9 +889,20 @@ function churchBoard() {
             if (!this.cardPanel.data) return;
 
             const cardId = this.cardPanel.data.card.id;
-            const data = { ...this.cardPanel.data.card, [field]: value };
+            const card = this.cardPanel.data.card;
+            const data = {
+                title: card.title,
+                description: card.description,
+                priority: card.priority,
+                due_date: card.due_date,
+                assigned_to: card.assigned_to,
+                epic_id: card.epic_id || null,
+                column_id: card.column_id,
+                [field]: value === '' ? null : value
+            };
 
-            await fetch(`/boards/cards/${cardId}`, {
+            try {
+            const resp = await fetch(`/boards/cards/${cardId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -901,6 +911,7 @@ function churchBoard() {
                 },
                 body: JSON.stringify(data)
             });
+            if (!resp.ok) { console.error('Save failed:', resp.status); return; }
 
             // Update DOM
             const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
@@ -993,6 +1004,7 @@ function churchBoard() {
                     this.allCards[cardIndex].epicColor = epic?.color;
                 }
             }
+            } catch (e) { console.error('Save field error:', e); }
         },
 
         updateColumnCount(columnId) {
@@ -1004,6 +1016,7 @@ function churchBoard() {
         },
 
         async toggleComplete(cardId) {
+            try {
             const response = await fetch(`/boards/cards/${cardId}/toggle`, {
                 method: 'POST',
                 headers: {
@@ -1012,6 +1025,7 @@ function churchBoard() {
                 }
             });
 
+            if (!response.ok) return;
             const result = await response.json();
 
             const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
@@ -1039,6 +1053,7 @@ function churchBoard() {
             if (this.cardPanel.data && this.cardPanel.data.card.id === cardId) {
                 this.cardPanel.data.card.is_completed = result.is_completed;
             }
+            } catch (e) { console.error('Toggle error:', e); }
         },
 
         async toggleCardComplete() {
@@ -1050,34 +1065,39 @@ function churchBoard() {
             if (!content.trim() || !this.cardPanel.data) return;
 
             const cardId = this.cardPanel.data.card.id;
-            const response = await fetch(`/boards/cards/${cardId}/comments`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ content })
-            });
+            try {
+                const response = await fetch(`/boards/cards/${cardId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ content })
+                });
 
-            const result = await response.json();
-            if (result.success) {
-                this.cardPanel.data.comments.unshift(result.comment);
-                this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
-            }
+                if (!response.ok) return;
+                const result = await response.json();
+                if (result.success) {
+                    this.cardPanel.data.comments.unshift(result.comment);
+                    this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
+                }
+            } catch (e) { console.error('Comment error:', e); }
         },
 
         async deleteComment(comment) {
             if (!confirm('Видалити коментар?')) return;
 
             const cardId = this.cardPanel.data.card.id;
-            await fetch(`/boards/comments/${comment.id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
-            });
+            try {
+                await fetch(`/boards/comments/${comment.id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
+                });
 
-            this.cardPanel.data.comments = this.cardPanel.data.comments.filter(c => c.id !== comment.id);
-            this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
+                this.cardPanel.data.comments = this.cardPanel.data.comments.filter(c => c.id !== comment.id);
+                this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
+            } catch (e) { console.error('Delete comment error:', e); }
         },
 
         async updateComment(comment, newContent) {
@@ -1104,43 +1124,48 @@ function churchBoard() {
             if (!title.trim() || !this.cardPanel.data) return;
 
             const cardId = this.cardPanel.data.card.id;
-            const response = await fetch(`/boards/cards/${cardId}/checklist`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ title })
-            });
+            try {
+                const response = await fetch(`/boards/cards/${cardId}/checklist`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ title })
+                });
 
-            const result = await response.json();
-            if (result.success) {
-                this.cardPanel.data.checklist.push(result.item);
-                this.updateCardChecklistCount(cardId);
-            }
+                if (!response.ok) return;
+                const result = await response.json();
+                if (result.success) {
+                    this.cardPanel.data.checklist.push(result.item);
+                    this.updateCardChecklistCount(cardId);
+                }
+            } catch (e) { console.error('Checklist error:', e); }
         },
 
         async toggleChecklistItem(item) {
             const cardId = this.cardPanel.data.card.id;
-            await fetch(`/boards/cards/checklist/${item.id}/toggle`, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
-            });
-
-            item.is_completed = !item.is_completed;
-            this.updateCardChecklistCount(cardId);
+            try {
+                await fetch(`/boards/cards/checklist/${item.id}/toggle`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
+                });
+                item.is_completed = !item.is_completed;
+                this.updateCardChecklistCount(cardId);
+            } catch (e) { console.error('Toggle checklist error:', e); }
         },
 
         async deleteChecklistItem(item) {
             const cardId = this.cardPanel.data.card.id;
-            await fetch(`/boards/cards/checklist/${item.id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
-            });
-
-            this.cardPanel.data.checklist = this.cardPanel.data.checklist.filter(i => i.id !== item.id);
-            this.updateCardChecklistCount(cardId);
+            try {
+                await fetch(`/boards/cards/checklist/${item.id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
+                });
+                this.cardPanel.data.checklist = this.cardPanel.data.checklist.filter(i => i.id !== item.id);
+                this.updateCardChecklistCount(cardId);
+            } catch (e) { console.error('Delete checklist error:', e); }
         },
 
         updateCardChecklistCount(cardId) {
@@ -1188,18 +1213,28 @@ function churchBoard() {
             formData.append('file', file);
 
             const cardId = this.cardPanel.data.card.id;
-            const response = await fetch(`/boards/cards/${cardId}/attachments`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': this.csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: formData
-            });
+            try {
+                const response = await fetch(`/boards/cards/${cardId}/attachments`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
 
-            const result = await response.json();
-            if (result.success) {
-                this.cardPanel.data.attachments.push(result.attachment);
+                if (!response.ok) {
+                    if (window.showGlobalToast) showGlobalToast('Помилка завантаження файлу', 'error');
+                    return;
+                }
+                const result = await response.json();
+                if (result.success) {
+                    this.cardPanel.data.attachments.push(result.attachment);
+                    if (window.showGlobalToast) showGlobalToast('Файл завантажено', 'success');
+                }
+            } catch (e) {
+                console.error('Upload error:', e);
+                if (window.showGlobalToast) showGlobalToast('Помилка завантаження', 'error');
             }
 
             event.target.value = '';
@@ -1208,43 +1243,48 @@ function churchBoard() {
         async deleteAttachment(file) {
             if (!confirm('Видалити файл?')) return;
 
-            await fetch(`/boards/attachments/${file.id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
-            });
-
-            this.cardPanel.data.attachments = this.cardPanel.data.attachments.filter(a => a.id !== file.id);
+            try {
+                await fetch(`/boards/attachments/${file.id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
+                });
+                this.cardPanel.data.attachments = this.cardPanel.data.attachments.filter(a => a.id !== file.id);
+            } catch (e) { console.error('Delete attachment error:', e); }
         },
 
         async addRelatedCard(relatedCardId) {
             if (!relatedCardId || !this.cardPanel.data) return;
 
             const cardId = this.cardPanel.data.card.id;
-            const response = await fetch(`/boards/cards/${cardId}/related`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ related_card_id: relatedCardId })
-            });
+            try {
+                const response = await fetch(`/boards/cards/${cardId}/related`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ related_card_id: relatedCardId })
+                });
 
-            const result = await response.json();
-            if (result.success) {
-                this.cardPanel.data.related_cards.push(result.related_card);
-                this.cardPanel.data.available_cards = this.cardPanel.data.available_cards.filter(c => c.id != relatedCardId);
-            }
+                if (!response.ok) return;
+                const result = await response.json();
+                if (result.success) {
+                    this.cardPanel.data.related_cards.push(result.related_card);
+                    this.cardPanel.data.available_cards = this.cardPanel.data.available_cards.filter(c => c.id != relatedCardId);
+                }
+            } catch (e) { console.error('Add related error:', e); }
         },
 
         async removeRelatedCard(related) {
             const cardId = this.cardPanel.data.card.id;
-            await fetch(`/boards/cards/${cardId}/related/${related.id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
-            });
-
-            this.cardPanel.data.related_cards = this.cardPanel.data.related_cards.filter(r => r.id !== related.id);
+            try {
+                await fetch(`/boards/cards/${cardId}/related/${related.id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json' }
+                });
+                this.cardPanel.data.related_cards = this.cardPanel.data.related_cards.filter(r => r.id !== related.id);
+            } catch (e) { console.error('Remove related error:', e); }
         },
 
         async duplicateCard() {
@@ -1304,20 +1344,23 @@ function churchBoard() {
                 });
             }
 
-            const response = await fetch(`/boards/cards/${cardId}/comments`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': this.csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: formData
-            });
+            try {
+                const response = await fetch(`/boards/cards/${cardId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
 
-            const result = await response.json();
-            if (result.success) {
-                this.cardPanel.data.comments.unshift(result.comment);
-                this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
-            }
+                if (!response.ok) return;
+                const result = await response.json();
+                if (result.success) {
+                    this.cardPanel.data.comments.unshift(result.comment);
+                    this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
+                }
+            } catch (e) { console.error('Comment with files error:', e); }
         },
 
         async deleteCard(cardId) {
@@ -1384,7 +1427,6 @@ function churchBoard() {
                 }
 
                 const result = await response.json();
-                console.log('createEpic response:', result);
 
                 if (result.success && result.epic) {
                     const newEpic = {
@@ -1436,7 +1478,7 @@ function churchBoard() {
                 }
 
                 const result = await response.json();
-                console.log('updateEpic response:', result);
+
                 if (result.success && result.epic) {
                     // Update in epics array
                     const idx = this.epics.findIndex(e => e.id === this.editingEpic);

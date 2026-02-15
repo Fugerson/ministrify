@@ -81,9 +81,9 @@
                                 <select x-model="addCardModal.epicId"
                                         class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
                                     <option value="">Без проєкту</option>
-                                    @foreach($epics as $epic)
-                                        <option value="{{ $epic['id'] }}">{{ $epic['name'] }}</option>
-                                    @endforeach
+                                    <template x-for="epic in epics" :key="epic.id">
+                                        <option :value="epic.id" x-text="epic.name"></option>
+                                    </template>
                                 </select>
                             </div>
                         </div>

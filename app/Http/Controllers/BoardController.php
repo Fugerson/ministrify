@@ -50,12 +50,13 @@ class BoardController extends Controller
             }
         }
 
-        // Load board with cards and epics (comments, creator, attachments loaded via AJAX on card open)
+        // Load board with cards and epics
         $board->load([
             'columns.cards.assignee',
             'columns.cards.ministry',
             'columns.cards.epic',
             'columns.cards.checklistItems',
+            'columns.cards.comments',
             'epics',
         ]);
 
@@ -63,18 +64,8 @@ class BoardController extends Controller
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
 
-        // Get stats via SQL
-        $columnIds = $board->columns->pluck('id');
-        $stats = [
-            'total' => BoardCard::whereIn('column_id', $columnIds)->count(),
-            'completed' => BoardCard::whereIn('column_id', $columnIds)->where('is_completed', true)->count(),
-            'overdue' => BoardCard::whereIn('column_id', $columnIds)->where('is_completed', false)
-                ->whereNotNull('due_date')->where('due_date', '<', now())->count(),
-            'my_tasks' => BoardCard::whereIn('column_id', $columnIds)
-                ->where('assigned_to', auth()->user()->person?->id)->count(),
-        ];
-
         // Get epic stats via single GROUP BY query
+        $columnIds = $board->columns->pluck('id')->toArray();
         $epicStatsRaw = BoardCard::whereIn('column_id', $columnIds)
             ->whereNotNull('epic_id')
             ->selectRaw('epic_id, COUNT(*) as total, SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed')
@@ -97,7 +88,7 @@ class BoardController extends Controller
             ];
         });
 
-        return view('boards.index', compact('board', 'people', 'ministries', 'stats', 'epics'));
+        return view('boards.index', compact('board', 'people', 'ministries', 'epics'));
     }
 
     public function create()
@@ -662,6 +653,9 @@ class BoardController extends Controller
             abort(403, 'Колонка не належить цій дошці.');
         }
 
+        $oldColumnId = $card->column_id;
+        $oldColumnName = $card->column->name;
+
         DB::transaction(function () use ($card, $validated) {
             // Update positions in the old column
             BoardCard::where('column_id', $card->column_id)
@@ -678,6 +672,11 @@ class BoardController extends Controller
                 'position' => $validated['position'],
             ]);
         });
+
+        // Log activity if column changed
+        if ($oldColumnId != $validated['column_id']) {
+            BoardCardActivity::log($card, 'moved', 'column_id', $oldColumnName, $targetColumn->name);
+        }
 
         return response()->json(['success' => true]);
     }

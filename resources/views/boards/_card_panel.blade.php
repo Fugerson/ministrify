@@ -182,6 +182,100 @@
                                         </div>
                                     </div>
 
+                                    <!-- Attachments -->
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                Файли
+                                                <template x-if="cardPanel.data.attachments && cardPanel.data.attachments.length > 0">
+                                                    <span class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs" x-text="cardPanel.data.attachments.length"></span>
+                                                </template>
+                                            </label>
+                                            <label class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 cursor-pointer flex items-center gap-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                Додати
+                                                <input type="file" class="hidden" @change="uploadAttachment($event)">
+                                            </label>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <template x-for="file in cardPanel.data.attachments" :key="file.id">
+                                                <div class="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg group">
+                                                    <template x-if="file.is_image">
+                                                        <a :href="file.url" target="_blank" class="w-10 h-10 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                                                            <img :src="file.url" class="w-full h-full object-cover">
+                                                        </a>
+                                                    </template>
+                                                    <template x-if="!file.is_image">
+                                                        <div class="w-10 h-10 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                        </div>
+                                                    </template>
+                                                    <div class="flex-1 min-w-0">
+                                                        <a :href="file.url" target="_blank" class="text-sm text-gray-700 dark:text-gray-300 hover:text-primary-600 truncate block" x-text="file.name"></a>
+                                                        <span class="text-xs text-gray-400" x-text="file.size"></span>
+                                                    </div>
+                                                    <button @click="deleteAttachment(file)" class="p-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 flex-shrink-0">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <template x-if="!cardPanel.data.attachments || cardPanel.data.attachments.length === 0">
+                                                <p class="text-center text-gray-400 text-xs py-2">Немає файлів</p>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Related Cards -->
+                                    <div x-data="{ showLinkSearch: false, linkSearch: '' }">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                                Пов'язані
+                                                <template x-if="cardPanel.data.related_cards && cardPanel.data.related_cards.length > 0">
+                                                    <span class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs" x-text="cardPanel.data.related_cards.length"></span>
+                                                </template>
+                                            </label>
+                                            <button @click="showLinkSearch = !showLinkSearch" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                Зв'язати
+                                            </button>
+                                        </div>
+
+                                        <template x-if="showLinkSearch">
+                                            <div class="mb-3">
+                                                <input type="text" x-model="linkSearch" placeholder="Пошук завдання..."
+                                                       class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white mb-2">
+                                                <div class="max-h-32 overflow-y-auto space-y-1">
+                                                    <template x-for="card in (cardPanel.data.available_cards || []).filter(c => !linkSearch || c.title.toLowerCase().includes(linkSearch.toLowerCase())).slice(0, 10)" :key="card.id">
+                                                        <button @click="addRelatedCard(card.id); showLinkSearch = false; linkSearch = ''"
+                                                                class="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-2 dark:text-white">
+                                                            <span class="text-gray-400 text-xs" x-text="'#' + card.id"></span>
+                                                            <span class="truncate" x-text="card.title"></span>
+                                                            <span class="ml-auto text-xs text-gray-400 flex-shrink-0" x-text="card.column_name"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <div class="space-y-1">
+                                            <template x-for="related in cardPanel.data.related_cards || []" :key="related.id">
+                                                <div class="flex items-center gap-2 group py-1">
+                                                    <button @click="closePanel(); $nextTick(() => openCard(related.id))" class="flex-1 text-left flex items-center gap-2 text-sm hover:text-primary-600 dark:text-gray-300 min-w-0">
+                                                        <span class="text-gray-400 text-xs flex-shrink-0" x-text="'#' + related.id"></span>
+                                                        <span class="truncate" :class="related.is_completed ? 'line-through text-gray-400' : ''" x-text="related.title"></span>
+                                                        <span class="ml-auto text-xs text-gray-400 flex-shrink-0" x-text="related.column_name"></span>
+                                                    </button>
+                                                    <button @click="removeRelatedCard(related)" class="p-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 flex-shrink-0">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
                                     <!-- Comments -->
                                     <div>
                                         <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">
@@ -198,6 +292,21 @@
                                                       @keydown.cmd.enter="addCommentWithFiles(newComment, commentFiles); newComment=''; commentFiles=[]; fileNames=[]"
                                                       @keydown.ctrl.enter="addCommentWithFiles(newComment, commentFiles); newComment=''; commentFiles=[]; fileNames=[]"
                                                       class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white resize-none"></textarea>
+
+                                            <!-- Selected files preview -->
+                                            <template x-if="fileNames.length > 0">
+                                                <div class="flex flex-wrap gap-1 mt-1">
+                                                    <template x-for="(name, idx) in fileNames" :key="idx">
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                            <span x-text="name" class="truncate max-w-[120px]"></span>
+                                                            <button @click="commentFiles.splice(idx, 1); fileNames.splice(idx, 1)" class="hover:text-red-500">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                            </template>
 
                                             <div class="flex items-center gap-2 mt-2">
                                                 <button @click="addCommentWithFiles(newComment, commentFiles); newComment=''; commentFiles=[]; fileNames=[]" :disabled="!newComment.trim()"
@@ -247,6 +356,24 @@
                                                                 </div>
                                                             </div>
                                                         </template>
+                                                        <!-- Comment attachments -->
+                                                        <template x-if="comment.attachments && comment.attachments.length > 0">
+                                                            <div class="flex flex-wrap gap-2 mt-2">
+                                                                <template x-for="att in comment.attachments" :key="att.name">
+                                                                    <a :href="att.url" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400 hover:text-primary-600">
+                                                                        <template x-if="att.is_image">
+                                                                            <img :src="att.url" class="w-16 h-12 object-cover rounded">
+                                                                        </template>
+                                                                        <template x-if="!att.is_image">
+                                                                            <span class="flex items-center gap-1">
+                                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                                                <span x-text="att.name" class="truncate max-w-[100px]"></span>
+                                                                            </span>
+                                                                        </template>
+                                                                    </a>
+                                                                </template>
+                                                            </div>
+                                                        </template>
                                                     </div>
                                                     <template x-if="comment.is_mine && !editing">
                                                         <div class="flex gap-1 opacity-0 group-hover:opacity-100">
@@ -266,6 +393,42 @@
                                             </template>
                                             <template x-if="cardPanel.data.comments.length === 0">
                                                 <p class="text-center text-gray-400 text-sm py-4">Немає коментарів</p>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Activity History -->
+                                    <div x-data="{ showAll: false }">
+                                        <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            Історія
+                                        </label>
+                                        <div class="space-y-2">
+                                            <template x-for="(activity, idx) in (showAll ? cardPanel.data.activities : (cardPanel.data.activities || []).slice(0, 5))" :key="activity.id">
+                                                <div class="flex gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                                    <span class="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-[10px]" x-text="activity.user_initial"></span>
+                                                    <div class="flex-1 min-w-0">
+                                                        <span class="font-medium text-gray-700 dark:text-gray-300" x-text="activity.user_name"></span>
+                                                        <span x-text="activity.description || ({'updated': 'оновив', 'moved': 'перемістив', 'assigned': 'призначив', 'created': 'створив', 'completed': 'завершив'}[activity.action] || activity.action)"></span>
+                                                        <template x-if="activity.field && !activity.description">
+                                                            <span>
+                                                                <span class="text-gray-400" x-text="({'title': 'назву', 'description': 'опис', 'priority': 'пріоритет', 'due_date': 'дедлайн', 'column_id': 'статус', 'epic_id': 'проєкт', 'assigned_to': 'виконавця'}[activity.field] || activity.field)"></span>
+                                                                <template x-if="activity.old_value">
+                                                                    <span>: <span class="line-through" x-text="activity.old_value"></span> &rarr; <span x-text="activity.new_value || '—'"></span></span>
+                                                                </template>
+                                                            </span>
+                                                        </template>
+                                                        <span class="block text-gray-400 mt-0.5" x-text="activity.created_at" :title="activity.created_at_full"></span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template x-if="(cardPanel.data.activities || []).length > 5 && !showAll">
+                                                <button @click="showAll = true" class="text-xs text-primary-600 hover:text-primary-700">
+                                                    Показати все (<span x-text="cardPanel.data.activities.length"></span>)
+                                                </button>
+                                            </template>
+                                            <template x-if="!cardPanel.data.activities || cardPanel.data.activities.length === 0">
+                                                <p class="text-center text-gray-400 text-xs py-2">Немає активності</p>
                                             </template>
                                         </div>
                                     </div>
@@ -417,7 +580,7 @@
                                             <input type="date" x-model="cardPanel.data.card.due_date" @change="saveCardField('due_date', cardPanel.data.card.due_date)"
                                                    class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-lg text-sm dark:text-white"
                                                    :class="{
-                                                       'border-red-300 dark:border-red-600': cardPanel.data.card.due_date && new Date(cardPanel.data.card.due_date) < new Date() && !cardPanel.data.card.is_completed,
+                                                       'border-red-300 dark:border-red-600': cardPanel.data.card.due_date && new Date(cardPanel.data.card.due_date + 'T23:59:59') < new Date() && !cardPanel.data.card.is_completed,
                                                        'border-gray-200 dark:border-gray-700': !cardPanel.data.card.due_date || cardPanel.data.card.is_completed
                                                    }">
                                         </div>
