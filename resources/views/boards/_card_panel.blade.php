@@ -292,49 +292,23 @@
                                             </template>
                                         </label>
 
-                                        <!-- Add comment -->
-                                        <div class="mb-4" x-data="{
-                                            newComment: '',
-                                            commentFiles: [],
-                                            fileNames: [],
-                                            pickFiles() {
-                                                this.$refs.commentFileInput.click();
-                                            },
-                                            onFilesSelected(e) {
-                                                const files = Array.from(e.target.files);
-                                                this.commentFiles = [...this.commentFiles, ...files];
-                                                this.fileNames = [...this.fileNames, ...files.map(f => f.name)];
-                                                e.target.value = '';
-                                            },
-                                            removeFile(idx) {
-                                                this.commentFiles = this.commentFiles.filter((_, i) => i !== idx);
-                                                this.fileNames = this.fileNames.filter((_, i) => i !== idx);
-                                            },
-                                            submit() {
-                                                addCommentWithFiles(this.newComment, this.commentFiles);
-                                                this.newComment = '';
-                                                this.commentFiles = [];
-                                                this.fileNames = [];
-                                            },
-                                            get canSubmit() {
-                                                return this.newComment.trim() || this.commentFiles.length > 0;
-                                            }
-                                        }">
-                                            <textarea x-model="newComment" rows="2" placeholder="Написати коментар..."
-                                                      @keydown.cmd.enter="if (canSubmit) submit()"
-                                                      @keydown.ctrl.enter="if (canSubmit) submit()"
+                                        <!-- Add comment (uses parent churchBoard scope — no nested x-data) -->
+                                        <div class="mb-4">
+                                            <textarea x-model="commentText" rows="2" placeholder="Написати коментар..."
+                                                      @keydown.cmd.enter="submitComment()"
+                                                      @keydown.ctrl.enter="submitComment()"
                                                       class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white resize-none"></textarea>
 
-                                            <input type="file" multiple x-ref="commentFileInput" class="hidden" @change="onFilesSelected($event)">
+                                            <input type="file" multiple x-ref="commentFileInput" class="hidden" @change="onCommentFilesChange($event)">
 
                                             <!-- Selected files preview -->
-                                            <template x-if="fileNames.length > 0">
+                                            <template x-if="commentFileNames.length > 0">
                                                 <div class="flex flex-wrap gap-1 mt-1">
-                                                    <template x-for="(name, idx) in fileNames" :key="idx">
+                                                    <template x-for="(name, idx) in commentFileNames" :key="idx">
                                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded text-xs text-primary-700 dark:text-primary-300">
                                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                                                             <span x-text="name" class="truncate max-w-[120px]"></span>
-                                                            <button type="button" @click="removeFile(idx)" class="hover:text-red-500 ml-0.5">
+                                                            <button type="button" @click="removeCommentFile(idx)" class="hover:text-red-500 ml-0.5">
                                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                             </button>
                                                         </span>
@@ -343,11 +317,11 @@
                                             </template>
 
                                             <div class="flex items-center gap-2 mt-2">
-                                                <button type="button" @click="submit()" :disabled="!canSubmit"
+                                                <button type="button" @click="submitComment()" :disabled="!commentText.trim() && commentFileNames.length === 0"
                                                         class="px-3 py-1.5 bg-primary-600 text-white text-sm rounded-lg disabled:opacity-50">
                                                     Коментувати
                                                 </button>
-                                                <button type="button" @click="pickFiles()"
+                                                <button type="button" @click="$refs.commentFileInput.click()"
                                                         class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>

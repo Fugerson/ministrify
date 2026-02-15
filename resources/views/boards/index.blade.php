@@ -431,6 +431,9 @@ $epicsData = $epics->toArray();
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
+// File objects stored outside Alpine to avoid Proxy wrapping
+let _pendingCommentFiles = [];
+
 function churchBoard() {
     return {
         filters: {
@@ -476,6 +479,8 @@ function churchBoard() {
         boardId: {{ $board->id }},
         csrfToken: document.querySelector('meta[name="csrf-token"]').content,
         selectedCardIndex: -1,
+        commentText: '',
+        commentFileNames: [],
 
         get hasActiveFilters() {
             return this.filters.priority || this.filters.assignee || this.filters.ministry || this.filters.epic || this.searchQuery;
@@ -847,6 +852,7 @@ function churchBoard() {
             this.cardPanel.open = true;
             this.cardPanel.loading = true;
             this.cardPanel.cardId = cardId;
+            this.resetCommentForm();
 
             try {
                 const response = await fetch(`/boards/cards/${cardId}`, {
@@ -883,6 +889,7 @@ function churchBoard() {
             this.cardPanel.open = false;
             this.cardPanel.data = null;
             this.cardPanel.cardId = null;
+            this.resetCommentForm();
         },
 
         async saveCardField(field, value) {
@@ -1059,30 +1066,6 @@ function churchBoard() {
         async toggleCardComplete() {
             if (!this.cardPanel.data) return;
             await this.toggleComplete(this.cardPanel.data.card.id);
-        },
-
-        async addComment(content) {
-            if (!content.trim() || !this.cardPanel.data) return;
-
-            const cardId = this.cardPanel.data.card.id;
-            try {
-                const response = await fetch(`/boards/cards/${cardId}/comments`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': this.csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ content })
-                });
-
-                if (!response.ok) return;
-                const result = await response.json();
-                if (result.success) {
-                    this.cardPanel.data.comments.unshift(result.comment);
-                    this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
-                }
-            } catch (e) { console.error('Comment error:', e); }
         },
 
         async deleteComment(comment) {
@@ -1366,18 +1349,46 @@ function churchBoard() {
             }
         },
 
-        async addCommentWithFiles(content, files) {
-            if ((!content.trim() && (!files || files.length === 0)) || !this.cardPanel.data) return;
+        // --- Comment with files (file objects stored in _pendingCommentFiles outside Alpine) ---
+
+        onCommentFilesChange(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            _pendingCommentFiles = [..._pendingCommentFiles, ...files];
+            this.commentFileNames = [...this.commentFileNames, ...files.map(f => f.name)];
+            e.target.value = '';
+        },
+
+        removeCommentFile(idx) {
+            _pendingCommentFiles = _pendingCommentFiles.filter((_, i) => i !== idx);
+            this.commentFileNames = this.commentFileNames.filter((_, i) => i !== idx);
+        },
+
+        resetCommentForm() {
+            this.commentText = '';
+            this.commentFileNames = [];
+            _pendingCommentFiles = [];
+        },
+
+        async submitComment() {
+            const content = (this.commentText || '').trim();
+            const files = [..._pendingCommentFiles]; // copy before clearing
+
+            if (!content && files.length === 0) return;
+            if (!this.cardPanel.data) return;
 
             const cardId = this.cardPanel.data.card.id;
-            const formData = new FormData();
-            formData.append('content', content);
 
-            if (files && files.length > 0) {
-                files.forEach((file, idx) => {
-                    formData.append(`files[${idx}]`, file);
-                });
+            // Clear form immediately
+            this.resetCommentForm();
+
+            const formData = new FormData();
+            if (content) {
+                formData.append('content', content);
             }
+            files.forEach((file, idx) => {
+                formData.append(`files[${idx}]`, file);
+            });
 
             try {
                 const response = await fetch(`/boards/cards/${cardId}/comments`, {
@@ -1389,13 +1400,22 @@ function churchBoard() {
                     body: formData
                 });
 
-                if (!response.ok) return;
+                if (!response.ok) {
+                    const errText = await response.text();
+                    console.error('Comment error:', response.status, errText);
+                    if (window.showGlobalToast) showGlobalToast('Помилка при додаванні коментаря', 'error');
+                    return;
+                }
+
                 const result = await response.json();
                 if (result.success) {
                     this.cardPanel.data.comments.unshift(result.comment);
                     this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
                 }
-            } catch (e) { console.error('Comment with files error:', e); }
+            } catch (e) {
+                console.error('Comment error:', e);
+                if (window.showGlobalToast) showGlobalToast('Помилка: ' + e.message, 'error');
+            }
         },
 
         async deleteCard(cardId) {

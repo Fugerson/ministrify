@@ -753,7 +753,8 @@ class BoardController extends Controller
         ]);
 
         // Must have either content or files
-        if (empty($validated['content']) && !$request->hasFile('files')) {
+        $content = $validated['content'] ?? null;
+        if (empty($content) && !$request->hasFile('files')) {
             return response()->json(['error' => 'Потрібен текст або файл'], 422);
         }
 
