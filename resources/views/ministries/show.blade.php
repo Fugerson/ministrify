@@ -1438,9 +1438,12 @@
                             <div class="p-4">
                                 <div class="flex items-start gap-3">
                                     {{-- Avatar --}}
-                                    <a href="{{ route('people.show', $member) }}" class="shrink-0">
+                                    <a href="{{ route('people.show', $member) }}" class="shrink-0" x-data="{ imgErr: false }">
                                         @if($member->photo)
-                                        <img src="{{ Storage::url($member->photo) }}" alt="{{ $member->full_name }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700" loading="lazy">
+                                        <img x-show="!imgErr" @error="imgErr = true" src="{{ Storage::url($member->photo) }}" alt="" class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700" loading="lazy">
+                                        <div x-show="imgErr" x-cloak class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center ring-2 ring-gray-100 dark:ring-gray-700">
+                                            <span class="text-white text-sm font-semibold">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>
+                                        </div>
                                         @else
                                         <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center ring-2 ring-gray-100 dark:ring-gray-700">
                                             <span class="text-white text-sm font-semibold">{{ mb_substr($member->first_name, 0, 1) }}{{ mb_substr($member->last_name, 0, 1) }}</span>
