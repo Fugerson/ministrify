@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class BoardController extends Controller
 {
-    // Task Tracker - Single board for all church tasks
+    // Board listing page
     public function index(Request $request)
     {
         if (!auth()->user()->canView('boards')) {
@@ -26,29 +26,51 @@ class BoardController extends Controller
         }
 
         $church = $this->getCurrentChurch();
+        $user = auth()->user();
 
-        // Get or create the main church task tracker
-        $board = Board::firstOrCreate(
-            ['church_id' => $church->id, 'name' => 'Трекер завдань'],
+        // Ensure the church-wide board exists
+        $churchBoard = Board::firstOrCreate(
+            ['church_id' => $church->id, 'ministry_id' => null],
             [
-                'description' => 'Єдиний трекер для всіх завдань церкви',
+                'name' => 'Загальна дошка',
+                'description' => 'Загальні завдання церкви',
                 'color' => $church->primary_color ?? '#3b82f6',
                 'is_archived' => false,
             ]
         );
+        $this->ensureDefaultColumns($churchBoard);
 
-        // Create default columns if they don't exist
-        if ($board->columns()->count() === 0) {
-            $defaultColumns = [
-                ['name' => 'Нові', 'color' => 'gray', 'position' => 0],
-                ['name' => 'До виконання', 'color' => 'blue', 'position' => 1],
-                ['name' => 'В процесі', 'color' => 'yellow', 'position' => 2],
-                ['name' => 'Завершено', 'color' => 'green', 'position' => 3],
-            ];
-            foreach ($defaultColumns as $column) {
-                $board->columns()->create($column);
-            }
+        // Auto-create boards for user's ministries
+        $this->autoCreateMinistryBoards($church, $user);
+
+        // Load accessible boards with stats
+        $boards = Board::accessibleBy($user)
+            ->with('ministry')
+            ->withCount(['cards', 'cards as completed_cards_count' => function ($q) {
+                $q->where('is_completed', true);
+            }])
+            ->orderByRaw('ministry_id IS NOT NULL, ministry_id')
+            ->get();
+
+        $churchWideBoard = $boards->firstWhere('ministry_id', null);
+        $ministryBoards = $boards->where('ministry_id', '!=', null)->values();
+
+        return view('boards.listing', compact('churchWideBoard', 'ministryBoards'));
+    }
+
+    // Kanban board view
+    public function show(Board $board)
+    {
+        if (!auth()->user()->canView('boards')) {
+            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
         }
+
+        $this->authorizeBoard($board);
+
+        $church = $this->getCurrentChurch();
+
+        // Ensure default columns
+        $this->ensureDefaultColumns($board);
 
         // Load board with cards and epics
         $board->load([
@@ -58,11 +80,18 @@ class BoardController extends Controller
             'columns.cards.checklistItems',
             'columns.cards.comments',
             'epics',
+            'ministry',
         ]);
 
         // Get filter data
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
-        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+
+        // For ministry boards, only show that ministry; for church-wide, show all
+        if ($board->ministry_id) {
+            $ministries = collect([$board->ministry]);
+        } else {
+            $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+        }
 
         // Get epic stats via single GROUP BY query
         $columnIds = $board->columns->pluck('id')->toArray();
@@ -284,6 +313,11 @@ class BoardController extends Controller
         $maxPosition = $column->cards()->max('position') ?? -1;
         $validated['position'] = $maxPosition + 1;
         $validated['created_by'] = auth()->id();
+
+        // Auto-set ministry for ministry boards
+        if ($column->board->ministry_id && empty($validated['ministry_id'])) {
+            $validated['ministry_id'] = $column->board->ministry_id;
+        }
 
         $card = $column->cards()->create($validated);
         $card->load('epic');
@@ -1127,6 +1161,58 @@ class BoardController extends Controller
     {
         if ($board->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
+        }
+
+        if (!$board->canAccess(auth()->user())) {
+            abort(403);
+        }
+    }
+
+    private function ensureDefaultColumns(Board $board): void
+    {
+        if ($board->columns()->count() === 0) {
+            $defaultColumns = [
+                ['name' => 'Нові', 'color' => 'gray', 'position' => 0],
+                ['name' => 'До виконання', 'color' => 'blue', 'position' => 1],
+                ['name' => 'В процесі', 'color' => 'yellow', 'position' => 2],
+                ['name' => 'Завершено', 'color' => 'green', 'position' => 3],
+            ];
+            foreach ($defaultColumns as $column) {
+                $board->columns()->create($column);
+            }
+        }
+    }
+
+    private function autoCreateMinistryBoards($church, $user): void
+    {
+        // Admin sees all ministries; regular users only their own
+        if ($user->isAdmin()) {
+            $ministries = Ministry::where('church_id', $church->id)->get();
+        } else {
+            $personId = $user->person?->id;
+            if (!$personId) {
+                return;
+            }
+
+            $ministries = Ministry::where('church_id', $church->id)
+                ->where(function ($q) use ($personId) {
+                    $q->where('leader_id', $personId)
+                      ->orWhereHas('members', fn($pq) => $pq->where('person_id', $personId));
+                })
+                ->get();
+        }
+
+        foreach ($ministries as $ministry) {
+            $board = Board::firstOrCreate(
+                ['church_id' => $church->id, 'ministry_id' => $ministry->id],
+                [
+                    'name' => $ministry->name,
+                    'color' => $ministry->color ?? '#3b82f6',
+                    'is_archived' => false,
+                ]
+            );
+
+            $this->ensureDefaultColumns($board);
         }
     }
 

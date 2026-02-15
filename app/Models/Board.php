@@ -13,6 +13,7 @@ class Board extends Model
     use Auditable;
     protected $fillable = [
         'church_id',
+        'ministry_id',
         'name',
         'description',
         'color',
@@ -26,6 +27,72 @@ class Board extends Model
     public function church(): BelongsTo
     {
         return $this->belongsTo(Church::class);
+    }
+
+    public function ministry(): BelongsTo
+    {
+        return $this->belongsTo(Ministry::class);
+    }
+
+    public function isChurchWide(): bool
+    {
+        return $this->ministry_id === null;
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->ministry?->name ?? $this->name;
+    }
+
+    public function getDisplayColorAttribute(): string
+    {
+        return $this->ministry?->color ?? $this->color ?? '#3b82f6';
+    }
+
+    public function canAccess(User $user): bool
+    {
+        if ($user->is_super_admin) {
+            return true;
+        }
+
+        if ($this->church_id !== $user->church_id) {
+            return false;
+        }
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($this->isChurchWide()) {
+            return true;
+        }
+
+        return $this->ministry && $this->ministry->isMember($user);
+    }
+
+    public function scopeAccessibleBy($query, User $user)
+    {
+        $query->where('church_id', $user->church_id)
+              ->where('is_archived', false);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $personId = $user->person?->id;
+
+        return $query->where(function ($q) use ($user, $personId) {
+            // Church-wide boards
+            $q->whereNull('ministry_id');
+
+            if ($personId) {
+                // Ministry boards where user is member
+                $q->orWhereHas('ministry', function ($mq) use ($personId) {
+                    $mq->where('leader_id', $personId)
+                        ->orWhereHas('members', fn($pq) => $pq->where('person_id', $personId));
+                });
+            }
+        });
     }
 
     public function columns(): HasMany

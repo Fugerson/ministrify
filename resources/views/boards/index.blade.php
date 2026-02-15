@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Трекер завдань')
+@section('title', $board->display_name)
 
 @section('content')
 <div class="h-full -mt-2" x-data="churchBoard()" x-init="init()" @keydown.window="handleKeydown($event)">
@@ -8,9 +8,30 @@
     <div class="mb-4 space-y-3">
         <!-- Title & Stats Row -->
         <div class="flex items-center justify-between flex-wrap gap-4">
-            <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">Трекер завдань</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Всі завдання команд в одному місці</p>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('boards.index') }}"
+                   class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                   title="До всіх дошок">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                @if($board->ministry)
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base"
+                         style="background-color: {{ $board->display_color }}20">
+                        @if($board->ministry->icon)
+                            {{ $board->ministry->icon }}
+                        @else
+                            <span class="w-3 h-3 rounded-full" style="background-color: {{ $board->display_color }}"></span>
+                        @endif
+                    </div>
+                @endif
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $board->display_name }}</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $board->ministry_id ? 'Дошка команди' : 'Загальна дошка' }}
+                    </p>
+                </div>
             </div>
 
         </div>
@@ -478,6 +499,7 @@ function churchBoard() {
         showShortcuts: false,
         myPersonId: {{ auth()->user()->person?->id ?? 'null' }},
         boardId: {{ $board->id }},
+        boardMinistryId: {{ $board->ministry_id ?? 'null' }},
         csrfToken: document.querySelector('meta[name="csrf-token"]').content,
         selectedCardIndex: -1,
         commentText: '',
@@ -691,7 +713,7 @@ function churchBoard() {
                 title: '',
                 description: '',
                 priority: 'medium',
-                ministryId: '',
+                ministryId: this.boardMinistryId ? String(this.boardMinistryId) : '',
                 epicId: '',
                 assignedTo: '',
                 dueDate: ''
