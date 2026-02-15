@@ -156,12 +156,6 @@ class BoardController extends Controller
             ->with('success', 'Дошку створено.');
     }
 
-    public function show(Board $board)
-    {
-        // Redirect to single task tracker
-        return redirect()->route('boards.index');
-    }
-
     public function edit(Board $board)
     {
         $this->authorizeBoard($board);
