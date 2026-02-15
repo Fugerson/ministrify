@@ -89,25 +89,14 @@
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $person->full_name }}</h2>
                             <p class="text-gray-500 dark:text-gray-400">{{ auth()->user()->role === 'admin' ? 'Адміністратор' : (auth()->user()->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
-                            <label class="inline-flex items-center gap-1.5 mt-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 cursor-pointer">
+                            <button type="button" @click="$refs.photoInput.click()"
+                                    class="inline-flex items-center gap-1.5 mt-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
                                 <span x-text="preview ? 'Фото обрано' : 'Змінити фото'"></span>
-                                <input type="file" name="photo_btn" accept="image/jpeg,image/png,image/webp,image/gif" class="sr-only" @change="
-                                    const file = $event.target.files[0];
-                                    if (file) {
-                                        const dt = new DataTransfer();
-                                        dt.items.add(file);
-                                        $refs.photoInput.files = dt.files;
-                                        const reader = new FileReader();
-                                        reader.onload = (e) => preview = e.target.result;
-                                        reader.readAsDataURL(file);
-                                        $refs.removePhotoInput.value = '0';
-                                    }
-                                ">
-                            </label>
+                            </button>
                         </div>
                     </div>
 
