@@ -546,86 +546,6 @@
 </section>
 @endif
 
-<!-- Feedback Section -->
-<section class="py-16 bg-gray-50" x-data="feedbackForm()">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900">Залишити відгук</h2>
-            <p class="text-gray-600 mt-2">Ваша думка важлива для нас. Відгук може бути анонімним.</p>
-        </div>
-
-        @if(session('feedback_success'))
-        <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-center">
-            {{ session('feedback_success') }}
-        </div>
-        @endif
-
-        <form method="POST" action="{{ route('public.feedback.store', $church->slug) }}" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
-            @csrf
-            <!-- Star Rating -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Оцінка</label>
-                <div class="flex gap-1">
-                    <template x-for="star in 5" :key="star">
-                        <button type="button" @click="rating = star"
-                                class="text-3xl transition-colors focus:outline-none"
-                                :class="star <= rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'">
-                            <span x-text="star <= rating ? '\u2605' : '\u2606'"></span>
-                        </button>
-                    </template>
-                </div>
-                <input type="hidden" name="rating" :value="rating || ''">
-            </div>
-
-            <!-- Category -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Категорія</label>
-                <select name="category" required
-                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                    <option value="general">Загальне</option>
-                    <option value="sermon">Проповідь</option>
-                    <option value="worship">Прославлення</option>
-                    <option value="suggestion">Пропозиція</option>
-                    <option value="complaint">Скарга</option>
-                </select>
-            </div>
-
-            <!-- Message -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Ваш відгук</label>
-                <textarea name="message" required rows="4" maxlength="2000" placeholder="Поділіться вашими думками..."
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"></textarea>
-            </div>
-
-            <!-- Optional name & email -->
-            <div x-data="{ showContact: false }">
-                <button type="button" @click="showContact = !showContact"
-                        class="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                    <svg class="w-4 h-4 transition-transform" :class="showContact && 'rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                    Вказати ім'я та email (необов'язково)
-                </button>
-                <div x-show="showContact" x-cloak class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input type="text" name="name" placeholder="Ваше ім'я"
-                           class="border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                    <input type="email" name="email" placeholder="Email"
-                           class="border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                </div>
-            </div>
-
-            @error('message')
-                <p class="text-sm text-red-600">{{ $message }}</p>
-            @enderror
-
-            <button type="submit"
-                    class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors">
-                Надіслати відгук
-            </button>
-        </form>
-    </div>
-</section>
-
 <!-- CTA Section -->
 <section class="py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -650,12 +570,6 @@
         </div>
     </div>
 </section>
-
-<script>
-function feedbackForm() {
-    return { rating: 0 };
-}
-</script>
 
 <style>
 .line-clamp-2 {

@@ -388,26 +388,4 @@ class PublicSiteController extends Controller
         return view('public.contact', compact('church'));
     }
 
-    // Submit anonymous feedback
-    public function submitFeedback(Request $request, string $slug)
-    {
-        $church = Church::where('slug', $slug)
-            ->where('public_site_enabled', true)
-            ->firstOrFail();
-
-        $validated = $request->validate([
-            'category' => 'required|in:general,sermon,worship,suggestion,complaint',
-            'message' => 'required|string|max:2000',
-            'rating' => 'nullable|integer|min:1|max:5',
-            'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-        ]);
-
-        $validated['church_id'] = $church->id;
-        $validated['is_anonymous'] = empty($validated['name']);
-
-        \App\Models\Feedback::create($validated);
-
-        return back()->with('feedback_success', 'Дякуємо за ваш відгук!');
-    }
 }

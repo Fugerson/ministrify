@@ -12,34 +12,6 @@ use Illuminate\Http\Request;
 class ServicePlanController extends Controller
 {
     /**
-     * Display the service plan for an event
-     */
-    public function index(Event $event)
-    {
-        $this->authorize('managePlan', $event);
-
-        $event->load(['planItems.responsible', 'ministry', 'church']);
-
-        // Get previous services for duplication
-        $previousServices = Event::where('church_id', $event->church_id)
-            ->where('is_service', true)
-            ->where('id', '!=', $event->id)
-            ->where('date', '<', $event->date)
-            ->whereHas('planItems')
-            ->orderByDesc('date')
-            ->limit(10)
-            ->get();
-
-        // Get available people for assignment
-        $availablePeople = Person::where('church_id', $event->church_id)
-            ->orderBy('last_name')
-            ->orderBy('first_name')
-            ->get();
-
-        return view('events.plan.index', compact('event', 'previousServices', 'availablePeople'));
-    }
-
-    /**
      * Store a new plan item
      */
     public function store(Request $request, Event $event)

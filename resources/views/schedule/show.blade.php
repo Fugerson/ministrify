@@ -218,10 +218,6 @@
                                 💾 Зберегти
                             </button>
 
-                            <a href="{{ route('events.plan.index', $event) }}"
-                               class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Відкрити редактор">
-                                📋 Редактор
-                            </a>
                             <a href="{{ route('events.plan.print', $event) }}" target="_blank"
                                class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Друк">
                                 🖨️ Друк
