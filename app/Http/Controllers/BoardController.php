@@ -657,8 +657,25 @@ class BoardController extends Controller
         // Verify column belongs to the same board if provided
         if (!empty($validated['column_id'])) {
             $targetColumn = BoardColumn::find($validated['column_id']);
-            if (!$targetColumn || $targetColumn->board_id !== $card->column->board_id) {
-                abort(403, 'Колонка не належить цій дошці.');
+            if (!$targetColumn) {
+                abort(404);
+            }
+            // Cross-board: card from ministry board shown on main board via show_in_general
+            if ($targetColumn->board_id !== $card->column->board_id) {
+                $isGeneral = $card->show_in_general || ($card->epic && $card->epic->show_in_general);
+                if (!$isGeneral) {
+                    abort(403, 'Колонка не належить цій дошці.');
+                }
+                $matchingColumn = BoardColumn::where('board_id', $card->column->board_id)
+                    ->where('position', $targetColumn->position)
+                    ->first();
+                if (!$matchingColumn) {
+                    $matchingColumn = BoardColumn::where('board_id', $card->column->board_id)
+                        ->orderBy('position')
+                        ->skip($targetColumn->position)
+                        ->first() ?? $card->column;
+                }
+                $validated['column_id'] = $matchingColumn->id;
             }
         }
 
