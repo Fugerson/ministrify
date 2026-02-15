@@ -86,15 +86,14 @@
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
                     Витрати
                 </button>
-                <a href="{{ route('ministries.show', $ministry) }}?tab=board"
-                   @click="activeTab = 'board'"
+                <button @click="setTab('board')" type="button"
                    :class="activeTab === 'board' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
                     </svg>
                     Завдання
-                </a>
+                </button>
                 <button @click="setTab('resources')" type="button"
                    :class="activeTab === 'resources' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
@@ -2017,8 +2016,7 @@
             </div>
 
             <!-- Board Tab -->
-            @if($tab === 'board')
-            <div x-show="activeTab === 'board'">
+            <div x-show="activeTab === 'board'"{{ $tab !== 'board' ? ' style="display:none"' : '' }}>
                 @include('boards._kanban', [
                     'board' => $ministryBoard,
                     'people' => $boardPeople,
@@ -2027,7 +2025,6 @@
                     'embedded' => true,
                 ])
             </div>
-            @endif
 
             <!-- Goals Tab -->
             <div x-show="activeTab === 'goals'"{{ $tab !== 'goals' ? ' style="display:none"' : '' }}
@@ -2333,7 +2330,7 @@
 
                 <!-- Linked Tasks (Boards) -->
                 <div class="mt-6">
-                    <x-linked-cards entityType="ministry" :entityId="$ministry->id" :boards="$boards" :createUrl="route('ministries.show', $ministry) . '?tab=board'" />
+                    <x-linked-cards entityType="ministry" :entityId="$ministry->id" :boards="$boards" createAction="board" />
                 </div>
                 @endcan
 

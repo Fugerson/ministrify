@@ -208,81 +208,74 @@ class MinistryController extends Controller
             ]
         );
 
-        // Load full board data when board tab is active
-        $boardPeople = collect();
-        $boardMinistries = collect();
-        $boardEpics = collect();
-
-        if ($tab === 'board') {
-            // Ensure default columns exist
-            if ($ministryBoard->columns()->count() === 0) {
-                $defaultColumns = [
-                    ['name' => 'До виконання', 'color' => 'gray', 'position' => 0],
-                    ['name' => 'В процесі', 'color' => 'blue', 'position' => 1],
-                    ['name' => 'На перевірці', 'color' => 'yellow', 'position' => 2],
-                    ['name' => 'Завершено', 'color' => 'green', 'position' => 3],
-                ];
-                foreach ($defaultColumns as $column) {
-                    $ministryBoard->columns()->create($column);
-                }
+        // Ensure default columns exist
+        if ($ministryBoard->columns()->count() === 0) {
+            $defaultColumns = [
+                ['name' => 'До виконання', 'color' => 'gray', 'position' => 0],
+                ['name' => 'В процесі', 'color' => 'blue', 'position' => 1],
+                ['name' => 'На перевірці', 'color' => 'yellow', 'position' => 2],
+                ['name' => 'Завершено', 'color' => 'green', 'position' => 3],
+            ];
+            foreach ($defaultColumns as $column) {
+                $ministryBoard->columns()->create($column);
             }
-
-            // Migrate cards from main board to ministry board (one-time)
-            if ($ministryBoard->cards()->count() === 0) {
-                $mainBoard = Board::where('church_id', $church->id)
-                    ->where('name', 'Трекер завдань')
-                    ->first();
-
-                if ($mainBoard) {
-                    $mainColumns = $mainBoard->columns()->orderBy('position')->pluck('id')->toArray();
-                    $ministryColumns = $ministryBoard->columns()->orderBy('position')->pluck('id')->toArray();
-
-                    foreach ($mainColumns as $idx => $mainColId) {
-                        $targetColId = $ministryColumns[$idx] ?? end($ministryColumns);
-
-                        BoardCard::where('column_id', $mainColId)
-                            ->where('ministry_id', $ministry->id)
-                            ->update(['column_id' => $targetColId]);
-                    }
-                }
-            }
-
-            $ministryBoard->load([
-                'columns.cards.assignee',
-                'columns.cards.ministry',
-                'columns.cards.epic',
-                'columns.cards.checklistItems',
-                'columns.cards.comments',
-                'epics',
-                'ministry',
-            ]);
-
-            $boardPeople = Person::where('church_id', $church->id)->orderBy('first_name')->get();
-            $boardMinistries = collect([$ministry]);
-
-            $columnIds = $ministryBoard->columns->pluck('id')->toArray();
-            $epicStatsRaw = BoardCard::whereIn('column_id', $columnIds)
-                ->whereNotNull('epic_id')
-                ->selectRaw('epic_id, COUNT(*) as total, SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed')
-                ->groupBy('epic_id')
-                ->get()
-                ->keyBy('epic_id');
-
-            $boardEpics = $ministryBoard->epics->map(function ($epic) use ($epicStatsRaw) {
-                $stat = $epicStatsRaw[$epic->id] ?? null;
-                $total = $stat ? (int) $stat->total : 0;
-                $completed = $stat ? (int) $stat->completed : 0;
-                return [
-                    'id' => $epic->id,
-                    'name' => $epic->name,
-                    'color' => $epic->color,
-                    'description' => $epic->description,
-                    'total' => $total,
-                    'completed' => $completed,
-                    'progress' => $total > 0 ? round(($completed / $total) * 100) : 0,
-                ];
-            });
         }
+
+        // Migrate cards from main board to ministry board (one-time)
+        if ($ministryBoard->cards()->count() === 0) {
+            $mainBoard = Board::where('church_id', $church->id)
+                ->where('name', 'Трекер завдань')
+                ->first();
+
+            if ($mainBoard) {
+                $mainColumns = $mainBoard->columns()->orderBy('position')->pluck('id')->toArray();
+                $ministryColumns = $ministryBoard->columns()->orderBy('position')->pluck('id')->toArray();
+
+                foreach ($mainColumns as $idx => $mainColId) {
+                    $targetColId = $ministryColumns[$idx] ?? end($ministryColumns);
+
+                    BoardCard::where('column_id', $mainColId)
+                        ->where('ministry_id', $ministry->id)
+                        ->update(['column_id' => $targetColId]);
+                }
+            }
+        }
+
+        $ministryBoard->load([
+            'columns.cards.assignee',
+            'columns.cards.ministry',
+            'columns.cards.epic',
+            'columns.cards.checklistItems',
+            'columns.cards.comments',
+            'epics',
+            'ministry',
+        ]);
+
+        $boardPeople = Person::where('church_id', $church->id)->orderBy('first_name')->get();
+        $boardMinistries = collect([$ministry]);
+
+        $columnIds = $ministryBoard->columns->pluck('id')->toArray();
+        $epicStatsRaw = BoardCard::whereIn('column_id', $columnIds)
+            ->whereNotNull('epic_id')
+            ->selectRaw('epic_id, COUNT(*) as total, SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed')
+            ->groupBy('epic_id')
+            ->get()
+            ->keyBy('epic_id');
+
+        $boardEpics = $ministryBoard->epics->map(function ($epic) use ($epicStatsRaw) {
+            $stat = $epicStatsRaw[$epic->id] ?? null;
+            $total = $stat ? (int) $stat->total : 0;
+            $completed = $stat ? (int) $stat->completed : 0;
+            return [
+                'id' => $epic->id,
+                'name' => $epic->name,
+                'color' => $epic->color,
+                'description' => $epic->description,
+                'total' => $total,
+                'completed' => $completed,
+                'progress' => $total > 0 ? round(($completed / $total) * 100) : 0,
+            ];
+        });
 
         return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics'));
     }
