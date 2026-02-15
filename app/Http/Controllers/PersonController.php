@@ -706,6 +706,31 @@ class PersonController extends Controller
         return view('people.my-giving', compact('person', 'transactions', 'stats', 'years', 'year', 'monthlyData'));
     }
 
+    public function updateMyPhoto(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user->person) {
+            abort(404);
+        }
+
+        $person = $user->person;
+
+        if ($request->input('remove') === '1') {
+            $this->imageService->delete($person->photo);
+            $person->update(['photo' => null]);
+            return response()->json(['photo_url' => null]);
+        }
+
+        $request->validate(['photo' => 'required|image|max:5120']);
+
+        $this->imageService->delete($person->photo);
+        $path = $this->imageService->storeProfilePhoto($request->file('photo'), 'people');
+        $person->update(['photo' => $path]);
+
+        return response()->json(['photo_url' => Storage::url($path)]);
+    }
+
     public function updateMyProfile(Request $request)
     {
         $user = auth()->user();
@@ -719,28 +744,9 @@ class PersonController extends Controller
             'email' => 'nullable|email|max:255',
             'telegram_username' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:500',
-            'photo' => 'nullable|image|max:5120',
         ]);
 
         $person = $user->person;
-
-        // Handle photo upload
-        if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            $this->imageService->delete($person->photo);
-            $validated['photo'] = $this->imageService->storeProfilePhoto(
-                $request->file('photo'),
-                'people'
-            );
-        } elseif ($request->input('remove_photo') === '1') {
-            // Remove photo if requested
-            $this->imageService->delete($person->photo);
-            $validated['photo'] = null;
-        } else {
-            // Don't update photo field if not provided
-            unset($validated['photo']);
-        }
-
         $person->update($validated);
 
         return back()->with('success', 'Профіль оновлено.');

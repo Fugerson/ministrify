@@ -17,28 +17,44 @@
         <!-- Profile info -->
         <div class="lg:col-span-2 space-y-6">
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <form action="{{ route('my-profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-4"
+                <form action="{{ route('my-profile.update') }}" method="POST" class="space-y-4"
                       x-data="{
-                          preview: null,
-                          existingPhoto: {{ $person->photo ? 'true' : 'false' }},
-                          handleFileSelect(event) {
+                          photoUrl: {{ $person->photo ? "'" . Storage::url($person->photo) . "'" : 'null' }},
+                          uploading: false,
+                          async uploadPhoto(event) {
                               const file = event.target.files[0];
-                              if (file) {
-                                  const reader = new FileReader();
-                                  reader.onload = (e) => this.preview = e.target.result;
-                                  reader.readAsDataURL(file);
-                                  this.$refs.removePhotoInput.value = '0';
-                              }
+                              if (!file) return;
+                              this.uploading = true;
+                              const formData = new FormData();
+                              formData.append('photo', file);
+                              try {
+                                  const res = await fetch('{{ route('my-profile.photo') }}', {
+                                      method: 'POST',
+                                      headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                                      body: formData
+                                  });
+                                  const data = await res.json();
+                                  if (res.ok) this.photoUrl = data.photo_url;
+                              } catch (e) { console.error(e); }
+                              this.uploading = false;
+                              event.target.value = '';
                           },
-                          removePhoto() {
-                              this.preview = null;
-                              this.existingPhoto = false;
-                              this.$refs.removePhotoInput.value = '1';
-                              this.$refs.photoInput.value = '';
+                          async removePhoto() {
+                              this.uploading = true;
+                              try {
+                                  const res = await fetch('{{ route('my-profile.photo') }}', {
+                                      method: 'POST',
+                                      headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ remove: '1' })
+                                  });
+                                  if (res.ok) this.photoUrl = null;
+                              } catch (e) { console.error(e); }
+                              this.uploading = false;
                           }
                       }">
                     @csrf
                     @method('PUT')
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" x-ref="photoInput" @change="uploadPhoto($event)">
 
                     @if($errors->any())
                         <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -57,34 +73,38 @@
 
                     <div class="flex items-center space-x-4 mb-6">
                         <!-- Editable avatar -->
-                        <div class="relative flex-shrink-0">
-                            <template x-if="preview">
-                                <img :src="preview" class="w-20 h-20 rounded-full object-cover">
+                        <div class="relative flex-shrink-0 cursor-pointer" @click="$refs.photoInput.click()">
+                            <template x-if="photoUrl">
+                                <img :src="photoUrl" class="w-20 h-20 rounded-full object-cover">
                             </template>
-                            <template x-if="!preview && existingPhoto">
-                                <img src="{{ $person->photo ? Storage::url($person->photo) : '' }}" class="w-20 h-20 rounded-full object-cover">
-                            </template>
-                            <template x-if="!preview && !existingPhoto">
+                            <template x-if="!photoUrl">
                                 <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                     <span class="text-2xl text-gray-500 dark:text-gray-400">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
                                 </div>
                             </template>
-                            <!-- Photo upload overlay -->
-                            <label class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 rounded-full cursor-pointer transition-opacity">
-                                <input type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/gif" class="sr-only" x-ref="photoInput" @change="handleFileSelect($event)">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <!-- Upload overlay -->
+                            <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 rounded-full transition-opacity">
+                                <template x-if="!uploading">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </template>
+                            </div>
+                            <!-- Loading spinner -->
+                            <div x-show="uploading" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                                <svg class="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                            </label>
+                            </div>
                             <!-- Remove photo button -->
-                            <button type="button" x-show="preview || existingPhoto" @click="removePhoto()"
+                            <button type="button" x-show="photoUrl && !uploading" @click.stop="removePhoto()"
                                     class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors z-10">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
-                            <input type="hidden" name="remove_photo" x-ref="removePhotoInput" value="0">
                         </div>
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $person->full_name }}</h2>
@@ -95,7 +115,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
-                                <span x-text="preview ? 'Фото обрано' : 'Змінити фото'"></span>
+                                Змінити фото
                             </button>
                         </div>
                     </div>

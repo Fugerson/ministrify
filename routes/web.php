@@ -731,6 +731,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('my-profile', [PersonController::class, 'myProfile'])->name('my-profile');
     Route::get('my-giving', [PersonController::class, 'myGiving'])->name('my-giving');
     Route::put('my-profile', [PersonController::class, 'updateMyProfile'])->name('my-profile.update');
+    Route::post('my-profile/photo', [PersonController::class, 'updateMyPhoto'])->name('my-profile.photo');
     Route::post('my-profile/unavailable', [PersonController::class, 'addUnavailableDate'])->name('my-profile.unavailable.add');
     Route::delete('my-profile/unavailable/{unavailableDate}', [PersonController::class, 'removeUnavailableDate'])->name('my-profile.unavailable.remove');
     Route::post('my-profile/telegram/generate-code', [PersonController::class, 'generateTelegramCode'])->name('my-profile.telegram.generate');
