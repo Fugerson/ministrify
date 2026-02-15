@@ -853,11 +853,30 @@ function churchBoard() {
                 const response = await fetch(`/boards/cards/${cardId}`, {
                     headers: { 'Accept': 'application/json' }
                 });
-                this.cardPanel.data = await response.json();
+                const data = await response.json();
+
+                // Fix due_date: ISO timestamp → YYYY-MM-DD for <input type="date">
+                if (data.card.due_date) {
+                    data.card.due_date = data.card.due_date.substring(0, 10);
+                }
+
+                // Normalize null epic_id to empty string for <select> matching
+                if (data.card.epic_id == null) {
+                    data.card.epic_id = '';
+                }
+
+                this.cardPanel.data = data;
             } catch (e) {
                 console.error('Error loading card:', e);
             } finally {
                 this.cardPanel.loading = false;
+
+                // Re-trigger reactivity after x-for renders <option> elements
+                this.$nextTick(() => {
+                    if (this.cardPanel.data) {
+                        this.cardPanel.data = {...this.cardPanel.data};
+                    }
+                });
             }
         },
 
