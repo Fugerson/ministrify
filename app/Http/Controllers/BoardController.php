@@ -933,6 +933,42 @@ class BoardController extends Controller
         return back()->with('success', 'Коментар оновлено.');
     }
 
+    // Delete a single attachment from a comment
+    public function deleteCommentAttachment(Request $request, BoardCardComment $comment, int $index)
+    {
+        $this->authorizeBoard($comment->card->column->board);
+
+        if ($comment->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $attachments = $comment->attachments ?? [];
+
+        if (!isset($attachments[$index])) {
+            return response()->json(['error' => 'Вкладення не знайдено'], 404);
+        }
+
+        // Delete file from storage
+        $attachment = $attachments[$index];
+        if (!empty($attachment['path'])) {
+            \Storage::disk('public')->delete($attachment['path']);
+        }
+
+        // Remove from array
+        array_splice($attachments, $index, 1);
+        $comment->update(['attachments' => !empty($attachments) ? $attachments : null]);
+
+        return response()->json([
+            'success' => true,
+            'attachments' => collect($attachments)->map(fn($a) => [
+                'name' => $a['name'],
+                'url' => \Storage::url($a['path']),
+                'mime_type' => $a['mime_type'],
+                'is_image' => str_starts_with($a['mime_type'], 'image/'),
+            ])->toArray(),
+        ]);
+    }
+
     // Attachments
     public function storeAttachment(Request $request, BoardCard $card)
     {

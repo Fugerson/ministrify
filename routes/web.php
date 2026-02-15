@@ -860,6 +860,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('cards/{card}/comments', [BoardController::class, 'storeComment'])->name('cards.comments.store');
         Route::put('comments/{comment}', [BoardController::class, 'updateComment'])->name('comments.update');
         Route::delete('comments/{comment}', [BoardController::class, 'destroyComment'])->name('comments.destroy');
+        Route::delete('comments/{comment}/attachments/{index}', [BoardController::class, 'deleteCommentAttachment'])->name('comments.attachments.destroy');
 
         // Card Checklist
         Route::post('cards/{card}/checklist', [BoardController::class, 'storeChecklistItem'])->name('cards.checklist.store');

@@ -360,19 +360,28 @@
                                                         </template>
                                                         <!-- Comment attachments -->
                                                         <template x-if="comment.attachments && comment.attachments.length > 0">
-                                                            <div class="flex flex-wrap gap-2 mt-2">
-                                                                <template x-for="att in comment.attachments" :key="att.name">
-                                                                    <a :href="att.url" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400 hover:text-primary-600">
+                                                            <div class="mt-2 space-y-2">
+                                                                <template x-for="(att, attIdx) in comment.attachments" :key="att.name + '-' + attIdx">
+                                                                    <div class="relative inline-block mr-2 group/att">
                                                                         <template x-if="att.is_image">
-                                                                            <img :src="att.url" class="w-16 h-12 object-cover rounded">
+                                                                            <a :href="att.url" target="_blank" class="block">
+                                                                                <img :src="att.url" class="max-w-[280px] max-h-[200px] rounded-lg object-cover border border-gray-200 dark:border-gray-600 hover:opacity-90 transition-opacity">
+                                                                            </a>
                                                                         </template>
                                                                         <template x-if="!att.is_image">
-                                                                            <span class="flex items-center gap-1">
-                                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                                                                <span x-text="att.name" class="truncate max-w-[100px]"></span>
-                                                                            </span>
+                                                                            <a :href="att.url" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600">
+                                                                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                                                <span x-text="att.name" class="truncate max-w-[150px]"></span>
+                                                                            </a>
                                                                         </template>
-                                                                    </a>
+                                                                        <template x-if="comment.is_mine">
+                                                                            <button @click.prevent.stop="deleteCommentAttachment(comment, attIdx)"
+                                                                                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/att:opacity-100 transition-opacity shadow hover:bg-red-600"
+                                                                                    title="Видалити вкладення">
+                                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                            </button>
+                                                                        </template>
+                                                                    </div>
                                                                 </template>
                                                             </div>
                                                         </template>

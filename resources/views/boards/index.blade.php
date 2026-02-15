@@ -1103,6 +1103,30 @@ function churchBoard() {
             }
         },
 
+        async deleteCommentAttachment(comment, attIndex) {
+            try {
+                const response = await fetch(`/boards/comments/${comment.id}/attachments/${attIndex}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (window.showGlobalToast) showGlobalToast('Помилка при видаленні', 'error');
+                    return;
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    comment.attachments = result.attachments;
+                }
+            } catch (e) {
+                console.error('Delete comment attachment error:', e);
+            }
+        },
+
         async addChecklistItem(title) {
             if (!title.trim() || !this.cardPanel.data) return;
 
