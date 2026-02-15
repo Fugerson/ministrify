@@ -32,8 +32,13 @@ class BoardCardActivity extends Model
     }
 
     // Helper to create activity
-    public static function log(BoardCard $card, string $action, ?string $field = null, $oldValue = null, $newValue = null, ?array $metadata = null): self
+    public static function log(BoardCard $card, string $action, ?string $field = null, $oldValue = null, $newValue = null, ?array $metadata = null): ?self
     {
+        // Super admin is invisible in activity logs
+        if (auth()->check() && auth()->user()->isSuperAdmin()) {
+            return null;
+        }
+
         return static::create([
             'card_id' => $card->id,
             'user_id' => auth()->id(),
