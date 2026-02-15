@@ -748,9 +748,14 @@ class BoardController extends Controller
         $this->authorizeBoard($card->column->board);
 
         $validated = $request->validate([
-            'content' => 'required|string',
+            'content' => 'nullable|string',
             'files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip,csv',
         ]);
+
+        // Must have either content or files
+        if (empty($validated['content']) && !$request->hasFile('files')) {
+            return response()->json(['error' => 'Потрібен текст або файл'], 422);
+        }
 
         // Handle file uploads
         $attachments = [];
@@ -768,14 +773,14 @@ class BoardController extends Controller
 
         $comment = $card->comments()->create([
             'user_id' => auth()->id(),
-            'content' => $validated['content'],
+            'content' => $validated['content'] ?? '',
             'attachments' => !empty($attachments) ? $attachments : null,
         ]);
 
         // Log activity
         BoardCardActivity::log($card, 'comment_added', null, null, null, [
             'comment_id' => $comment->id,
-            'preview' => \Str::limit($validated['content'], 50),
+            'preview' => \Str::limit($validated['content'] ?? '', 50),
         ]);
 
         if ($request->ajax() || $request->wantsJson()) {

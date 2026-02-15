@@ -1367,7 +1367,7 @@ function churchBoard() {
         },
 
         async addCommentWithFiles(content, files) {
-            if (!content.trim() || !this.cardPanel.data) return;
+            if ((!content.trim() && (!files || files.length === 0)) || !this.cardPanel.data) return;
 
             const cardId = this.cardPanel.data.card.id;
             const formData = new FormData();
