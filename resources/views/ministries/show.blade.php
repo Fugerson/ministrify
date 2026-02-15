@@ -86,14 +86,13 @@
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
                     Витрати
                 </button>
-                <button @click="setTab('board')" type="button"
-                   :class="activeTab === 'board' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
+                <a href="{{ route('boards.show', $ministryBoard) }}"
+                   class="px-3 sm:px-6 py-3 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
                     </svg>
                     Завдання
-                </button>
+                </a>
                 <button @click="setTab('resources')" type="button"
                    :class="activeTab === 'resources' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
@@ -2016,32 +2015,6 @@
             </div>
 
             <!-- Board Tab -->
-            <div x-show="activeTab === 'board'"{{ $tab !== 'board' ? ' style="display:none"' : '' }}>
-                <div class="text-center py-8">
-                    <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4"
-                         style="background-color: {{ $ministry->color ?? '#3b82f6' }}15">
-                        <svg class="w-8 h-8" style="color: {{ $ministry->color ?? '#3b82f6' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Трекер завдань</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                        Канбан-дошка для відстеження завдань команди «{{ $ministry->name }}»
-                    </p>
-                    <a href="{{ route('boards.show', $ministryBoard) }}"
-                       class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium transition-colors shadow-sm hover:shadow-md"
-                       style="background-color: {{ $ministry->color ?? '#3b82f6' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
-                        </svg>
-                        Відкрити дошку
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
             <!-- Goals Tab -->
             <div x-show="activeTab === 'goals'"{{ $tab !== 'goals' ? ' style="display:none"' : '' }}
                  x-data="goalsManager()">
