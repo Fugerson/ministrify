@@ -1240,6 +1240,41 @@ function churchBoard() {
             event.target.value = '';
         },
 
+        async uploadAttachments(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0 || !this.cardPanel.data) return;
+
+            const cardId = this.cardPanel.data.card.id;
+            let uploaded = 0;
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                    const response = await fetch(`/boards/cards/${cardId}/attachments`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            this.cardPanel.data.attachments.push(result.attachment);
+                            uploaded++;
+                        }
+                    }
+                } catch (e) { console.error('Upload error:', e); }
+            }
+
+            if (uploaded > 0 && window.showGlobalToast) {
+                showGlobalToast(`Завантажено ${uploaded} файл(ів)`, 'success');
+            }
+            event.target.value = '';
+        },
+
         async deleteAttachment(file) {
             if (!confirm('Видалити файл?')) return;
 

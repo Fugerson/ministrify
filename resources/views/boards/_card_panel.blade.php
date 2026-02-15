@@ -83,6 +83,10 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
+                                    <label class="p-2 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer transition-colors" title="Прикріпити файл">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                        <input type="file" multiple class="hidden" @change="uploadAttachments($event)">
+                                    </label>
                                     <button @click="toggleCardComplete()"
                                             class="p-2 rounded-lg transition-colors"
                                             :class="cardPanel.data.card.is_completed ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'"
@@ -195,7 +199,7 @@
                                             <label class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 cursor-pointer flex items-center gap-1">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                                 Додати
-                                                <input type="file" class="hidden" @change="uploadAttachment($event)">
+                                                <input type="file" multiple class="hidden" @change="uploadAttachments($event)">
                                             </label>
                                         </div>
 
