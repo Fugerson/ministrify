@@ -481,6 +481,7 @@ function churchBoard() {
         selectedCardIndex: -1,
         commentText: '',
         commentFileNames: [],
+        lightboxUrl: null,
 
         get hasActiveFilters() {
             return this.filters.priority || this.filters.assignee || this.filters.ministry || this.filters.epic || this.searchQuery;

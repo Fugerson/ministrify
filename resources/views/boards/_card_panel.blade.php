@@ -209,9 +209,9 @@
                                             <template x-for="file in cardPanel.data.attachments" :key="file.id">
                                                 <div class="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg group">
                                                     <template x-if="file.is_image">
-                                                        <a :href="file.url" target="_blank" class="w-10 h-10 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                                                        <div @click="lightboxUrl = file.url" class="w-10 h-10 rounded bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-primary-400 transition-all">
                                                             <img :src="file.url" class="w-full h-full object-cover">
-                                                        </a>
+                                                        </div>
                                                     </template>
                                                     <template x-if="!file.is_image">
                                                         <div class="w-10 h-10 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
@@ -219,7 +219,7 @@
                                                         </div>
                                                     </template>
                                                     <div class="flex-1 min-w-0">
-                                                        <a :href="file.url" target="_blank" class="text-sm text-gray-700 dark:text-gray-300 hover:text-primary-600 truncate block" x-text="file.name"></a>
+                                                        <button @click="file.is_image ? (lightboxUrl = file.url) : window.open(file.url, '_blank')" class="text-sm text-gray-700 dark:text-gray-300 hover:text-primary-600 truncate block text-left" x-text="file.name"></button>
                                                         <span class="text-xs text-gray-400" x-text="file.size"></span>
                                                     </div>
                                                     <button @click="deleteAttachment(file)" class="p-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 flex-shrink-0">
@@ -364,9 +364,7 @@
                                                                 <template x-for="(att, attIdx) in comment.attachments" :key="att.name + '-' + attIdx">
                                                                     <div class="relative inline-block mr-2 group/att">
                                                                         <template x-if="att.is_image">
-                                                                            <a :href="att.url" target="_blank" class="block">
-                                                                                <img :src="att.url" class="max-w-[280px] max-h-[200px] rounded-lg object-cover border border-gray-200 dark:border-gray-600 hover:opacity-90 transition-opacity">
-                                                                            </a>
+                                                                            <img :src="att.url" @click="lightboxUrl = att.url" class="max-w-[280px] max-h-[200px] rounded-lg object-cover border border-gray-200 dark:border-gray-600 hover:opacity-90 transition-opacity cursor-pointer">
                                                                         </template>
                                                                         <template x-if="!att.is_image">
                                                                             <a :href="att.url" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600">
@@ -620,4 +618,25 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Image Lightbox -->
+<div x-show="lightboxUrl" x-cloak
+     class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+     @click="lightboxUrl = null"
+     @keydown.escape.window="lightboxUrl = null"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+    <img :src="lightboxUrl" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl" @click.stop>
+    <button @click="lightboxUrl = null" class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <a :href="lightboxUrl" target="_blank" @click.stop class="absolute bottom-4 right-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg flex items-center gap-2 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        Відкрити
+    </a>
 </div>
