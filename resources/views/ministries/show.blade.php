@@ -2333,7 +2333,7 @@
 
                 <!-- Linked Tasks (Boards) -->
                 <div class="mt-6">
-                    <x-linked-cards entityType="ministry" :entityId="$ministry->id" :boards="$boards" />
+                    <x-linked-cards entityType="ministry" :entityId="$ministry->id" :boards="$boards" :defaultBoard="$ministryBoard" />
                 </div>
                 @endcan
 

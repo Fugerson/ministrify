@@ -1,4 +1,4 @@
-@props(['entityType', 'entityId', 'boards' => []])
+@props(['entityType', 'entityId', 'boards' => [], 'defaultBoard' => null])
 
 <div x-data="linkedCards()" x-init="loadCards()" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
     <div class="flex items-center justify-between mb-4">
@@ -8,7 +8,20 @@
             </svg>
             Пов'язані завдання
         </h3>
-        @if(count($boards) > 0)
+        @if($defaultBoard)
+        <form action="{{ route('boards.create-from-entity') }}" method="POST" class="inline">
+            @csrf
+            <input type="hidden" name="entity_type" value="{{ $entityType }}">
+            <input type="hidden" name="entity_id" value="{{ $entityId }}">
+            <input type="hidden" name="board_id" value="{{ $defaultBoard->id }}">
+            <button type="submit" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Створити завдання
+            </button>
+        </form>
+        @elseif(count($boards) > 0)
         <div class="relative" x-data="{ open: false }">
             <button @click="open = !open" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
