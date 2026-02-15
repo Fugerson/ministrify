@@ -213,7 +213,7 @@
         </div>
     </a>
 
-    <form method="POST" action="{{ route('settings.public-site') }}" enctype="multipart/form-data" class="space-y-6">
+    <form method="POST" action="{{ route('settings.public-site') }}" enctype="multipart/form-data" class="space-y-6" autocomplete="off">
         @csrf
         @method('PUT')
 
@@ -245,6 +245,7 @@
                             {{ url('/c/') }}/
                         </span>
                         <input type="text" name="slug" value="{{ old('slug', $church->slug ?? Str::slug($church->name)) }}" required
+                               autocomplete="off"
                                class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-r-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                placeholder="my-church">
                     </div>
@@ -297,6 +298,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Розклад богослужінь</label>
                     <input type="text" name="service_times" value="{{ old('service_times', $church->service_times) }}"
+                           autocomplete="off"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                            >
                 </div>
@@ -314,12 +316,14 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Публічний Email</label>
                         <input type="email" name="public_email" value="{{ old('public_email', $church->public_email) }}"
+                               autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                >
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Публічний телефон</label>
                         <input type="text" name="public_phone" value="{{ old('public_phone', $church->public_phone) }}"
+                               autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                >
                     </div>
@@ -354,6 +358,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ім'я пастора</label>
                         <input type="text" name="pastor_name" value="{{ old('pastor_name', $church->pastor_name) }}"
+                               autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     </div>
                     <div>
@@ -399,7 +404,7 @@
         $paymentSettings = $church->payment_settings ?? [];
     @endphp
 
-    <form method="POST" action="{{ route('settings.payments') }}" class="space-y-6">
+    <form method="POST" action="{{ route('settings.payments') }}" class="space-y-6" autocomplete="off">
         @csrf
         @method('PUT')
 
@@ -438,6 +443,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Public Key</label>
                     <input type="text" name="liqpay_public_key"
                            value="{{ old('liqpay_public_key', $paymentSettings['liqpay_public_key'] ?? '') }}"
+                           autocomplete="off"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
                            placeholder="sandbox_XXXXXXXXXXXX">
                 </div>
@@ -446,6 +452,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Private Key</label>
                     <input type="password" name="liqpay_private_key"
                            value="{{ old('liqpay_private_key', $paymentSettings['liqpay_private_key'] ?? '') }}"
+                           autocomplete="new-password"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
                            placeholder="sandbox_XXXXXXXXXXXX">
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Зберігається в зашифрованому вигляді</p>
@@ -484,6 +491,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID банки або посилання</label>
                     <input type="text" name="monobank_jar_id"
                            value="{{ old('monobank_jar_id', $paymentSettings['monobank_jar_id'] ?? '') }}"
+                           autocomplete="off"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                            placeholder="https://send.monobank.ua/jar/XXXXXXXXX або jar/XXXXXXXXX">
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Наприклад: https://send.monobank.ua/jar/ABC123def або просто ABC123def</p>
