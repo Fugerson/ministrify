@@ -486,6 +486,35 @@ class MinistryController extends Controller
         return back()->with('success', 'Позиції оновлено.');
     }
 
+    public function updateMemberRole(Request $request, Ministry $ministry, Person $person)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('manage-ministry', $ministry);
+        abort_unless($person->church_id === auth()->user()->church_id, 404);
+
+        $validated = $request->validate([
+            'role' => 'required|in:member,co-leader,leader',
+        ]);
+
+        $newRole = $validated['role'];
+
+        // If setting as leader, update ministry's leader_id
+        if ($newRole === 'leader') {
+            // Demote current leader in pivot if exists
+            if ($ministry->leader_id && $ministry->leader_id !== $person->id) {
+                $ministry->members()->updateExistingPivot($ministry->leader_id, ['role' => 'member']);
+            }
+            $ministry->update(['leader_id' => $person->id]);
+        } elseif ($ministry->leader_id === $person->id) {
+            // Removing leader role — clear leader_id
+            $ministry->update(['leader_id' => null]);
+        }
+
+        $ministry->members()->updateExistingPivot($person->id, ['role' => $newRole]);
+
+        return response()->json(['success' => true, 'role' => $newRole]);
+    }
+
     public function togglePrivacy(Ministry $ministry)
     {
         $this->authorizeChurch($ministry);

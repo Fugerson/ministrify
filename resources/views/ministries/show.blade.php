@@ -1405,13 +1405,35 @@
                             $memberPositions = collect($memberPositionIds)->map(fn($id) => $positions[$id]->name ?? null)->filter();
                             $positionText = $member->pivot->position;
                         @endphp
-                        <div class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-md transition-shadow group">
-                            {{-- Top accent for leader --}}
-                            @if($isLeader)
-                            <div class="h-1 bg-gradient-to-r from-amber-400 to-amber-500"></div>
-                            @elseif($pivotRole === 'co-leader')
-                            <div class="h-1 bg-gradient-to-r from-primary-400 to-primary-500"></div>
-                            @endif
+                        <div class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-md transition-shadow group"
+                             x-data="{
+                                 role: '{{ $isLeader ? 'leader' : $pivotRole }}',
+                                 open: false,
+                                 saving: false,
+                                 async setRole(newRole) {
+                                     this.saving = true;
+                                     try {
+                                         const res = await fetch('{{ route('ministries.members.role', [$ministry, $member]) }}', {
+                                             method: 'PATCH',
+                                             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                                             body: JSON.stringify({ role: newRole })
+                                         });
+                                         if (res.ok) {
+                                             this.role = newRole;
+                                             if (newRole === 'leader') setTimeout(() => location.reload(), 300);
+                                         }
+                                     } catch (e) { console.error(e); }
+                                     this.saving = false;
+                                     this.open = false;
+                                 },
+                                 get accentClass() {
+                                     if (this.role === 'leader') return 'bg-gradient-to-r from-amber-400 to-amber-500';
+                                     if (this.role === 'co-leader') return 'bg-gradient-to-r from-primary-400 to-primary-500';
+                                     return '';
+                                 }
+                             }">
+                            {{-- Top accent --}}
+                            <div class="h-1 transition-all" :class="accentClass"></div>
 
                             <div class="p-4">
                                 <div class="flex items-start gap-3">
@@ -1432,15 +1454,46 @@
                                             <a href="{{ route('people.show', $member) }}" class="font-semibold text-gray-900 dark:text-white text-sm hover:text-primary-600 dark:hover:text-primary-400 truncate">
                                                 {{ $member->full_name }}
                                             </a>
-                                            @if($isLeader)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                                                Лідер
-                                            </span>
-                                            @elseif($pivotRole === 'co-leader')
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400">
-                                                Со-лідер
-                                            </span>
-                                            @endif
+                                            {{-- Role badge --}}
+                                            @can('manage-ministry', $ministry)
+                                            <div class="relative">
+                                                <button type="button" @click="open = !open"
+                                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-colors"
+                                                        :class="{
+                                                            'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50': role === 'leader',
+                                                            'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-900/50': role === 'co-leader',
+                                                            'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600': role === 'member'
+                                                        }">
+                                                    <span x-text="role === 'leader' ? 'Лідер' : (role === 'co-leader' ? 'Со-лідер' : 'Учасник')"></span>
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                                </button>
+                                                <div x-show="open" @click.away="open = false" x-transition
+                                                     class="absolute left-0 mt-1 w-36 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-20 border border-gray-200 dark:border-gray-600 py-1">
+                                                    <button type="button" @click="setRole('leader')" :disabled="saving"
+                                                            class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2"
+                                                            :class="role === 'leader' ? 'text-amber-700 dark:text-amber-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
+                                                        <span class="w-2 h-2 rounded-full bg-amber-400"></span> Лідер
+                                                    </button>
+                                                    <button type="button" @click="setRole('co-leader')" :disabled="saving"
+                                                            class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2"
+                                                            :class="role === 'co-leader' ? 'text-primary-700 dark:text-primary-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
+                                                        <span class="w-2 h-2 rounded-full bg-primary-400"></span> Со-лідер
+                                                    </button>
+                                                    <button type="button" @click="setRole('member')" :disabled="saving"
+                                                            class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2"
+                                                            :class="role === 'member' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-700 dark:text-gray-300'">
+                                                        <span class="w-2 h-2 rounded-full bg-gray-400"></span> Учасник
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            @else
+                                            <template x-if="role === 'leader'">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">Лідер</span>
+                                            </template>
+                                            <template x-if="role === 'co-leader'">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400">Со-лідер</span>
+                                            </template>
+                                            @endcan
                                         </div>
 
                                         {{-- Positions --}}
@@ -1473,7 +1526,6 @@
 
                                     {{-- Remove button --}}
                                     @can('manage-ministry', $ministry)
-                                    @if(!$isLeader)
                                     <form method="POST" action="{{ route('ministries.members.remove', [$ministry, $member]) }}"
                                           onsubmit="return confirm('Видалити учасника з команди?')" class="shrink-0">
                                         @csrf
@@ -1482,7 +1534,6 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </form>
-                                    @endif
                                     @endcan
                                 </div>
                             </div>
