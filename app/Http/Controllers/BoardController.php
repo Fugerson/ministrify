@@ -49,6 +49,23 @@ class BoardController extends Controller
             'epics',
         ]);
 
+        // Inject ministry board cards with show_in_general into main board columns
+        $mainColumnsByPosition = $board->columns->keyBy('position');
+        $generalCards = BoardCard::where('show_in_general', true)
+            ->whereHas('column.board', function ($q) use ($church) {
+                $q->where('church_id', $church->id)->whereNotNull('ministry_id');
+            })
+            ->with(['assignee', 'ministry', 'epic', 'checklistItems', 'comments', 'column'])
+            ->get();
+
+        foreach ($generalCards as $card) {
+            $cardPosition = $card->column->position;
+            $targetColumn = $mainColumnsByPosition[$cardPosition] ?? $mainColumnsByPosition->first();
+            if ($targetColumn) {
+                $targetColumn->cards->push($card);
+            }
+        }
+
         // Get filter data
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
@@ -628,6 +645,7 @@ class BoardController extends Controller
             'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
             'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->where('board_id', $card->column->board_id)],
             'column_id' => 'nullable|exists:board_columns,id',
+            'show_in_general' => 'nullable|boolean',
         ]);
 
         // Verify column belongs to the same board if provided

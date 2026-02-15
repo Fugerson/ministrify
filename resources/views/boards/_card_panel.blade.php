@@ -613,6 +613,22 @@
                                         </div>
                                     </div>
 
+                                    <!-- Show in general board toggle -->
+                                    <template x-if="cardPanel.data.card.ministry_id">
+                                        <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                            <label class="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                                <input type="checkbox"
+                                                       :checked="cardPanel.data.card.show_in_general"
+                                                       @change="cardPanel.data.card.show_in_general = $event.target.checked; saveCardField('show_in_general', $event.target.checked ? 1 : 0)"
+                                                       class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700">
+                                                <div>
+                                                    <span class="text-sm text-gray-700 dark:text-gray-300">Показувати в загальних</span>
+                                                    <p class="text-xs text-gray-400 dark:text-gray-500">Завдання з'явиться на загальній дошці</p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </template>
+
                                     <!-- Actions -->
                                     <div class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-1">
                                         <button @click="duplicateCard()" class="w-full px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2">

@@ -29,12 +29,14 @@ class BoardCard extends Model
         'entity_type',
         'is_completed',
         'completed_at',
+        'show_in_general',
     ];
 
     protected $casts = [
         'due_date' => 'date',
         'completed_at' => 'datetime',
         'is_completed' => 'boolean',
+        'show_in_general' => 'boolean',
         'labels' => 'array',
     ];
 
