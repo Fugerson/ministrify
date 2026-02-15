@@ -76,16 +76,37 @@ class BoardController extends Controller
         $people = Person::where('church_id', $church->id)->orderBy('first_name')->get();
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
 
-        // Get epic stats via single GROUP BY query
-        $columnIds = $board->columns->pluck('id')->toArray();
-        $epicStatsRaw = BoardCard::whereIn('column_id', $columnIds)
-            ->whereNotNull('epic_id')
-            ->selectRaw('epic_id, COUNT(*) as total, SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed')
-            ->groupBy('epic_id')
-            ->get()
-            ->keyBy('epic_id');
+        // Collect all visible epics: board's own + ministry epics visible in general
+        $allEpics = $board->epics->collect();
 
-        $epics = $board->epics->map(function ($epic) use ($epicStatsRaw) {
+        // Add ministry epics with show_in_general or having cards with show_in_general
+        $generalEpicIds = $generalCards->pluck('epic_id')->filter()->unique();
+        $ministryEpics = BoardEpic::where('show_in_general', true)
+            ->whereHas('board', function ($q) use ($church) {
+                $q->where('church_id', $church->id)->whereNotNull('ministry_id');
+            })
+            ->get();
+        // Also add epics referenced by general cards (even without epic-level flag)
+        if ($generalEpicIds->isNotEmpty()) {
+            $cardEpics = BoardEpic::whereIn('id', $generalEpicIds)
+                ->whereNotIn('id', $ministryEpics->pluck('id'))
+                ->whereNotIn('id', $allEpics->pluck('id'))
+                ->get();
+            $ministryEpics = $ministryEpics->merge($cardEpics);
+        }
+        $allEpics = $allEpics->merge($ministryEpics)->unique('id');
+
+        // Get epic stats — count from all visible cards (board + injected general)
+        $allVisibleCards = $board->columns->flatMap->cards;
+        $epicStatsRaw = $allVisibleCards
+            ->filter(fn ($c) => $c->epic_id)
+            ->groupBy('epic_id')
+            ->map(fn ($cards) => (object) [
+                'total' => $cards->count(),
+                'completed' => $cards->where('is_completed', true)->count(),
+            ]);
+
+        $epics = $allEpics->map(function ($epic) use ($epicStatsRaw) {
             $stat = $epicStatsRaw[$epic->id] ?? null;
             $total = $stat ? (int) $stat->total : 0;
             $completed = $stat ? (int) $stat->completed : 0;
@@ -94,11 +115,12 @@ class BoardController extends Controller
                 'name' => $epic->name,
                 'color' => $epic->color,
                 'description' => $epic->description,
+                'show_in_general' => $epic->show_in_general,
                 'total' => $total,
                 'completed' => $completed,
                 'progress' => $total > 0 ? round(($completed / $total) * 100) : 0,
             ];
-        });
+        })->values();
 
         return view('boards.index', compact('board', 'people', 'ministries', 'epics'));
     }
