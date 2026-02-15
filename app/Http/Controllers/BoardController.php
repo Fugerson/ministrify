@@ -50,8 +50,14 @@ class BoardController extends Controller
         ]);
 
         // Inject ministry board cards with show_in_general into main board columns
+        // Include cards with show_in_general=true OR cards belonging to epics with show_in_general=true
         $mainColumnsByPosition = $board->columns->keyBy('position');
-        $generalCards = BoardCard::where('show_in_general', true)
+        $generalCards = BoardCard::where(function ($q) {
+                $q->where('show_in_general', true)
+                  ->orWhereHas('epic', function ($eq) {
+                      $eq->where('show_in_general', true);
+                  });
+            })
             ->whereHas('column.board', function ($q) use ($church) {
                 $q->where('church_id', $church->id)->whereNotNull('ministry_id');
             })
@@ -1221,6 +1227,7 @@ class BoardController extends Controller
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|max:7',
             'description' => 'nullable|string',
+            'show_in_general' => 'nullable|boolean',
         ]);
 
         $maxPosition = $board->epics()->max('position') ?? -1;
@@ -1246,6 +1253,7 @@ class BoardController extends Controller
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|max:7',
             'description' => 'nullable|string',
+            'show_in_general' => 'nullable|boolean',
         ]);
 
         $epic->update($validated);

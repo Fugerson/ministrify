@@ -223,7 +223,7 @@
                 <kbd class="hidden sm:inline px-1.5 py-0.5 text-[10px] font-mono bg-primary-500 rounded">N</kbd>
             </button>
 
-            <button @click="editingEpic = null; newEpic = { name: '', color: '#6366f1', description: '' }; showEpicModal = true"
+            <button @click="editingEpic = null; newEpic = { name: '', color: '#6366f1', description: '', showInGeneral: false }; showEpicModal = true"
                     class="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors border border-gray-200 dark:border-gray-700">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
@@ -489,7 +489,7 @@ function churchBoard() {
         showEpicModal: false,
         editingEpic: null,
         epicModalLoading: false,
-        newEpic: { name: '', color: '#6366f1', description: '' },
+        newEpic: { name: '', color: '#6366f1', description: '', showInGeneral: false },
         cards: @json($board->columns->flatMap->cards->keyBy('id')),
         allCards: @json($allCardsData),
         epics: @json($epicsData),
@@ -1551,7 +1551,7 @@ function churchBoard() {
 
         openEditEpic(epic) {
             this.editingEpic = epic.id;
-            this.newEpic = { name: epic.name, color: epic.color, description: epic.description || '' };
+            this.newEpic = { name: epic.name, color: epic.color, description: epic.description || '', showInGeneral: epic.show_in_general || false };
             this.showEpicModal = true;
         },
 
@@ -1567,7 +1567,12 @@ function churchBoard() {
                         'X-CSRF-TOKEN': this.csrfToken,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(this.newEpic)
+                    body: JSON.stringify({
+                        name: this.newEpic.name,
+                        color: this.newEpic.color,
+                        description: this.newEpic.description,
+                        show_in_general: this.newEpic.showInGeneral ? 1 : 0,
+                    })
                 });
 
                 if (!response.ok) {
@@ -1586,6 +1591,7 @@ function churchBoard() {
                         name: result.epic.name,
                         color: result.epic.color,
                         description: result.epic.description,
+                        show_in_general: result.epic.show_in_general,
                         total: 0,
                         completed: 0,
                         progress: 0
@@ -1594,7 +1600,7 @@ function churchBoard() {
 
                     this.showEpicModal = false;
                     this.editingEpic = null;
-                    this.newEpic = { name: '', color: '#6366f1', description: '' };
+                    this.newEpic = { name: '', color: '#6366f1', description: '', showInGeneral: false };
 
                     if (window.showGlobalToast) showGlobalToast('Проєкт створено', 'success');
                 } else {
@@ -1620,7 +1626,12 @@ function churchBoard() {
                         'X-CSRF-TOKEN': this.csrfToken,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(this.newEpic)
+                    body: JSON.stringify({
+                        name: this.newEpic.name,
+                        color: this.newEpic.color,
+                        description: this.newEpic.description,
+                        show_in_general: this.newEpic.showInGeneral ? 1 : 0,
+                    })
                 });
 
                 if (!response.ok) {
@@ -1638,6 +1649,7 @@ function churchBoard() {
                         this.epics[idx].name = result.epic.name;
                         this.epics[idx].color = result.epic.color;
                         this.epics[idx].description = result.epic.description;
+                        this.epics[idx].show_in_general = result.epic.show_in_general;
                     }
 
                     // Update epic badges on cards in DOM
@@ -1660,7 +1672,7 @@ function churchBoard() {
 
                     this.showEpicModal = false;
                     this.editingEpic = null;
-                    this.newEpic = { name: '', color: '#6366f1', description: '' };
+                    this.newEpic = { name: '', color: '#6366f1', description: '', showInGeneral: false };
 
                     if (window.showGlobalToast) showGlobalToast('Проєкт оновлено', 'success');
                 } else {

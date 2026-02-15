@@ -17,6 +17,11 @@ class BoardEpic extends Model
         'color',
         'description',
         'position',
+        'show_in_general',
+    ];
+
+    protected $casts = [
+        'show_in_general' => 'boolean',
     ];
 
     public function board(): BelongsTo

@@ -60,6 +60,18 @@
                                   placeholder="Короткий опис цілей проєкту..."
                                   class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white resize-none"></textarea>
                     </div>
+
+                    <!-- Show in general -->
+                    <template x-if="boardMinistryId">
+                        <label class="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <input type="checkbox" x-model="newEpic.showInGeneral"
+                                   class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700">
+                            <div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Показувати в загальних</span>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">Всі завдання цього проєкту з'являться на загальній дошці</p>
+                            </div>
+                        </label>
+                    </template>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
