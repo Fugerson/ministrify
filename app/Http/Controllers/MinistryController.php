@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Board;
+use App\Models\BoardCard;
 use App\Models\Event;
 use App\Models\EventMinistryTeam;
 use App\Models\Ministry;
@@ -111,15 +112,6 @@ class MinistryController extends Controller
         $defaultTab = Gate::allows('manage-ministry', $ministry) ? 'goals' : 'schedule';
         $tab = request('tab', $defaultTab);
 
-        // Redirect board tab to separate board page
-        if ($tab === 'board') {
-            $board = Board::firstOrCreate(
-                ['church_id' => $church->id, 'ministry_id' => $ministry->id],
-                ['name' => $ministry->name, 'color' => $ministry->color ?? '#3b82f6', 'is_archived' => false]
-            );
-            return redirect()->route('boards.show', $board);
-        }
-
         // Get boards for task creation
         $boards = Board::where('church_id', $church->id)
             ->where('is_archived', false)
@@ -216,7 +208,63 @@ class MinistryController extends Controller
             ]
         );
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard'));
+        // Load full board data when board tab is active
+        $boardPeople = collect();
+        $boardMinistries = collect();
+        $boardEpics = collect();
+
+        if ($tab === 'board') {
+            // Ensure default columns exist
+            if ($ministryBoard->columns()->count() === 0) {
+                $defaultColumns = [
+                    ['name' => 'До виконання', 'color' => 'gray', 'position' => 0],
+                    ['name' => 'В процесі', 'color' => 'blue', 'position' => 1],
+                    ['name' => 'На перевірці', 'color' => 'yellow', 'position' => 2],
+                    ['name' => 'Завершено', 'color' => 'green', 'position' => 3],
+                ];
+                foreach ($defaultColumns as $column) {
+                    $ministryBoard->columns()->create($column);
+                }
+            }
+
+            $ministryBoard->load([
+                'columns.cards.assignee',
+                'columns.cards.ministry',
+                'columns.cards.epic',
+                'columns.cards.checklistItems',
+                'columns.cards.comments',
+                'epics',
+                'ministry',
+            ]);
+
+            $boardPeople = Person::where('church_id', $church->id)->orderBy('first_name')->get();
+            $boardMinistries = collect([$ministry]);
+
+            $columnIds = $ministryBoard->columns->pluck('id')->toArray();
+            $epicStatsRaw = BoardCard::whereIn('column_id', $columnIds)
+                ->whereNotNull('epic_id')
+                ->selectRaw('epic_id, COUNT(*) as total, SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed')
+                ->groupBy('epic_id')
+                ->get()
+                ->keyBy('epic_id');
+
+            $boardEpics = $ministryBoard->epics->map(function ($epic) use ($epicStatsRaw) {
+                $stat = $epicStatsRaw[$epic->id] ?? null;
+                $total = $stat ? (int) $stat->total : 0;
+                $completed = $stat ? (int) $stat->completed : 0;
+                return [
+                    'id' => $epic->id,
+                    'name' => $epic->name,
+                    'color' => $epic->color,
+                    'description' => $epic->description,
+                    'total' => $total,
+                    'completed' => $completed,
+                    'progress' => $total > 0 ? round(($completed / $total) * 100) : 0,
+                ];
+            });
+        }
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics'));
     }
 
     public function scheduleGridData(Request $request, Ministry $ministry)
