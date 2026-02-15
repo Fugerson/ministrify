@@ -129,29 +129,24 @@
 
                         <!-- Two columns -->
                         <div class="grid grid-cols-2 gap-4">
+                            @if(!$board->ministry_id)
                             <!-- Ministry -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Команда</label>
-                                @if($board->ministry_id)
-                                    <div class="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-300">
-                                        <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $board->display_color }}"></span>
-                                        <span>{{ $board->ministry?->name ?? $board->name }}</span>
-                                    </div>
-                                @else
-                                    <x-searchable-select
-                                        name="ministry_id_temp"
-                                        :items="$ministries"
-                                        :selected="null"
-                                        labelKey="name"
-                                        valueKey="id"
-                                        colorKey="color"
-                                        placeholder="Пошук команди..."
-                                        nullText="Без команди"
-                                        nullable
-                                        x-on:select-changed="addCardModal.ministryId = $event.detail.value || ''"
-                                    />
-                                @endif
+                                <x-searchable-select
+                                    name="ministry_id_temp"
+                                    :items="$ministries"
+                                    :selected="null"
+                                    labelKey="name"
+                                    valueKey="id"
+                                    colorKey="color"
+                                    placeholder="Пошук команди..."
+                                    nullText="Без команди"
+                                    nullable
+                                    x-on:select-changed="addCardModal.ministryId = $event.detail.value || ''"
+                                />
                             </div>
+                            @endif
 
                             <!-- Due Date -->
                             <div>
