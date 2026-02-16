@@ -191,10 +191,10 @@ class GoogleCalendarController extends Controller
         }
 
         if ($result['success']) {
-            // Save last_synced_at
+            // Save last_synced_at (quietly to avoid audit log)
             $settings = $user->settings ?? [];
             $settings['google_calendar']['last_synced_at'] = now()->toISOString();
-            $user->update(['settings' => $settings]);
+            $user->updateQuietly(['settings' => $settings]);
 
             $toGoogle = $result['to_google'];
             $fromGoogle = $result['from_google'];
@@ -410,7 +410,7 @@ class GoogleCalendarController extends Controller
             }
         }
 
-        // Save last_synced_at + sync result log
+        // Save last_synced_at + sync result log (quietly to avoid audit log)
         $settings = $user->settings ?? [];
         $settings['google_calendar']['last_synced_at'] = now()->toISOString();
         $settings['google_calendar']['last_sync_result'] = [
@@ -419,7 +419,7 @@ class GoogleCalendarController extends Controller
             'at' => now()->toISOString(),
             'calendars_count' => count($mappings),
         ];
-        $user->update(['settings' => $settings]);
+        $user->updateQuietly(['settings' => $settings]);
 
         $toGoogle = $aggregated['to_google'];
         $fromGoogle = $aggregated['from_google'];

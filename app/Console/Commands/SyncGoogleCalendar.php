@@ -77,10 +77,10 @@ class SyncGoogleCalendar extends Command
             }
 
             if ($userSynced) {
-                // Save last_synced_at
+                // Save last_synced_at (quietly to avoid audit log)
                 $userSettings = $user->settings ?? [];
                 $userSettings['google_calendar']['last_synced_at'] = now()->toISOString();
-                $user->update(['settings' => $userSettings]);
+                $user->updateQuietly(['settings' => $userSettings]);
                 $synced++;
             }
         }

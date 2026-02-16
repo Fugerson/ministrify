@@ -149,12 +149,12 @@ class GoogleCalendarService
                         return null;
                     }
 
-                    // Update user settings with new token
+                    // Update user settings with new token (quietly to avoid audit log)
                     $settings['google_calendar'] = array_merge($googleCalendar, [
                         'access_token' => $newToken['access_token'],
                         'expires_at' => time() + ($newToken['expires_in'] ?? 3600),
                     ]);
-                    $user->update(['settings' => $settings]);
+                    $user->updateQuietly(['settings' => $settings]);
 
                     return $newToken['access_token'];
                 } else {
