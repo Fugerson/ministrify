@@ -170,6 +170,9 @@
     {{-- Alpine.js --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    {{-- reCAPTCHA v3 --}}
+    <x-recaptcha-script />
+
     @yield('head')
 </head>
 <body class="font-sans antialiased text-gray-900 bg-white dark:bg-gray-950 dark:text-gray-100" x-data="{ mobileMenu: false, darkMode: localStorage.getItem('theme') !== 'light' }" :class="{ 'dark': darkMode }">

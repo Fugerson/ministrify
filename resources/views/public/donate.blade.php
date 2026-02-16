@@ -26,8 +26,19 @@
                     customAmount: false,
                     purpose: @json(request('campaign', '')),
                     submitting: false
-                }" @submit="submitting = true">
+                }" x-on:submit.prevent="
+                    submitting = true;
+                    if (typeof grecaptcha !== 'undefined') {
+                        grecaptcha.ready(function() {
+                            grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'donate'}).then(function(token) {
+                                $refs.recaptchaToken.value = token;
+                                $el.submit();
+                            });
+                        });
+                    } else { $el.submit(); }
+                ">
                     @csrf
+                    <x-spam-protection action="donate" />
 
                     <!-- Amount selection -->
                     <div class="mb-8">

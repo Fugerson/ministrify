@@ -11,6 +11,8 @@ use App\Models\Group;
 use App\Models\GroupJoinRequest;
 use App\Models\Ministry;
 use App\Models\MinistryJoinRequest;
+use App\Rules\Honeypot;
+use App\Rules\Recaptcha;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
 
@@ -111,6 +113,11 @@ class PublicSiteController extends Controller
             abort(404);
         }
 
+        $request->validate([
+            'website' => [new Honeypot],
+            'recaptcha_token' => [new Recaptcha('event_register')],
+        ]);
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -184,6 +191,11 @@ class PublicSiteController extends Controller
             ->where('allow_registrations', true)
             ->firstOrFail();
 
+        $request->validate([
+            'website' => [new Honeypot],
+            'recaptcha_token' => [new Recaptcha('join_ministry')],
+        ]);
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -229,6 +241,11 @@ class PublicSiteController extends Controller
             ->where('is_public', true)
             ->where('allow_join_requests', true)
             ->firstOrFail();
+
+        $request->validate([
+            'website' => [new Honeypot],
+            'recaptcha_token' => [new Recaptcha('join_group')],
+        ]);
 
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -276,6 +293,11 @@ class PublicSiteController extends Controller
         $church = Church::where('slug', $slug)
             ->where('public_site_enabled', true)
             ->firstOrFail();
+
+        $request->validate([
+            'website' => [new Honeypot],
+            'recaptcha_token' => [new Recaptcha('donate')],
+        ]);
 
         $validated = $request->validate([
             'amount' => 'required|numeric|min:1|max:100000',

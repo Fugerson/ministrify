@@ -109,8 +109,21 @@
                         </div>
 
                         <div x-show="showForm" x-cloak x-transition class="mt-6">
-                            <form action="{{ route('public.ministry.join', [$church->slug, $ministry->slug]) }}" method="POST" class="space-y-4">
+                            <form action="{{ route('public.ministry.join', [$church->slug, $ministry->slug]) }}" method="POST" class="space-y-4"
+                                  x-data="{ submitting: false }"
+                                  x-on:submit.prevent="
+                                      submitting = true;
+                                      if (typeof grecaptcha !== 'undefined') {
+                                          grecaptcha.ready(function() {
+                                              grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'join_ministry'}).then(function(token) {
+                                                  $refs.recaptchaToken.value = token;
+                                                  $el.submit();
+                                              });
+                                          });
+                                      } else { $el.submit(); }
+                                  ">
                                 @csrf
+                                <x-spam-protection action="join_ministry" />
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Ім'я *</label>
@@ -145,9 +158,13 @@
                                     <textarea name="message" rows="3"
                                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('message') }}</textarea>
                                 </div>
-                                <button type="submit"
-                                        class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                                    Надіслати заявку
+                                <button type="submit" :disabled="submitting"
+                                        class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
+                                    <span x-show="!submitting">Надіслати заявку</span>
+                                    <span x-show="submitting" class="inline-flex items-center justify-center gap-2">
+                                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        Надсилання...
+                                    </span>
                                 </button>
                             </form>
                         </div>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Church;
+use App\Rules\Honeypot;
+use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -44,6 +46,11 @@ class LandingController extends Controller
      */
     public function sendContact(Request $request)
     {
+        $request->validate([
+            'website' => [new Honeypot],
+            'recaptcha_token' => [new Recaptcha('contact')],
+        ]);
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|email|max:100',
@@ -116,6 +123,11 @@ class LandingController extends Controller
      */
     public function processRegistration(Request $request)
     {
+        $request->validate([
+            'website' => [new Honeypot],
+            'recaptcha_token' => [new Recaptcha('register')],
+        ]);
+
         $validated = $request->validate([
             'church_name' => 'required|string|max:255',
             'city' => 'required|string|max:100',

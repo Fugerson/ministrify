@@ -52,11 +52,12 @@ class SecurityHeaders
             } else {
             $response->headers->set('Content-Security-Policy',
                 "default-src 'self'; " .
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; " .
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com; " .
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
                 "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:; " .
                 "img-src 'self' data: blob:; " .
                 "connect-src 'self' https://cdn.jsdelivr.net wss:; " .
+                "frame-src https://www.google.com; " .
                 "manifest-src 'self'; " .
                 "worker-src 'self' blob:; " .
                 "frame-ancestors 'self'; " .

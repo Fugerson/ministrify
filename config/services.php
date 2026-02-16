@@ -23,6 +23,12 @@ return [
         'sandbox' => env('LIQPAY_SANDBOX', false),
     ],
 
+    'recaptcha' => [
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+        'threshold' => env('RECAPTCHA_THRESHOLD', 0.5),
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

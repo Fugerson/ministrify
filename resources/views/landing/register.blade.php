@@ -67,8 +67,21 @@
                 </div>
             @endif
 
-            <form action="{{ route('landing.register.process') }}" method="POST" class="space-y-5">
+            <form action="{{ route('landing.register.process') }}" method="POST" class="space-y-5"
+                  x-data="{ submitting: false }"
+                  x-on:submit.prevent="
+                      submitting = true;
+                      if (typeof grecaptcha !== 'undefined') {
+                          grecaptcha.ready(function() {
+                              grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'register'}).then(function(token) {
+                                  $refs.recaptchaToken.value = token;
+                                  $el.submit();
+                              });
+                          });
+                      } else { $el.submit(); }
+                  ">
                 @csrf
+                <x-spam-protection action="register" />
 
                 <!-- Church Info Section -->
                 <div class="space-y-4">
@@ -175,9 +188,10 @@
                 </div>
 
                 <!-- Submit -->
-                <button type="submit"
-                        class="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                    Зареєструвати церкву
+                <button type="submit" :disabled="submitting"
+                        class="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50">
+                    <span x-show="!submitting">Зареєструвати церкву</span>
+                    <span x-show="submitting" x-cloak>Реєстрація...</span>
                 </button>
             </form>
 

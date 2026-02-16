@@ -62,8 +62,21 @@
                     </div>
                 @endif
 
-                <form action="{{ route('landing.contact.send') }}" method="POST" class="space-y-6">
+                <form action="{{ route('landing.contact.send') }}" method="POST" class="space-y-6"
+                      x-data="{ submitting: false }"
+                      x-on:submit.prevent="
+                          submitting = true;
+                          if (typeof grecaptcha !== 'undefined') {
+                              grecaptcha.ready(function() {
+                                  grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'contact'}).then(function(token) {
+                                      $refs.recaptchaToken.value = token;
+                                      $el.submit();
+                                  });
+                              });
+                          } else { $el.submit(); }
+                      ">
                     @csrf
+                    <x-spam-protection action="contact" />
 
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -113,9 +126,10 @@
                         @enderror
                     </div>
 
-                    <button type="submit"
-                            class="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                        Надіслати повідомлення
+                    <button type="submit" :disabled="submitting"
+                            class="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50">
+                        <span x-show="!submitting">Надіслати повідомлення</span>
+                        <span x-show="submitting" x-cloak>Надсилання...</span>
                     </button>
                 </form>
             </div>

@@ -99,8 +99,21 @@
                             </div>
 
                             <div x-show="showForm" x-cloak x-transition class="mt-6">
-                                <form action="{{ route('public.event.register', [$church->slug, $event]) }}" method="POST" class="space-y-4" x-data="{ submitting: false }" @submit="submitting = true">
+                                <form action="{{ route('public.event.register', [$church->slug, $event]) }}" method="POST" class="space-y-4"
+                                      x-data="{ submitting: false }"
+                                      x-on:submit.prevent="
+                                          submitting = true;
+                                          if (typeof grecaptcha !== 'undefined') {
+                                              grecaptcha.ready(function() {
+                                                  grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'event_register'}).then(function(token) {
+                                                      $refs.recaptchaToken.value = token;
+                                                      $el.submit();
+                                                  });
+                                              });
+                                          } else { $el.submit(); }
+                                      ">
                                     @csrf
+                                    <x-spam-protection action="event_register" />
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Ім'я *</label>
