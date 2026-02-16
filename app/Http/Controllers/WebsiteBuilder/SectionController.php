@@ -74,4 +74,20 @@ class SectionController extends Controller
 
         return back()->with('success', 'Статус секції оновлено');
     }
+
+    public function updateSettings(Request $request)
+    {
+        $church = $this->getChurchOrFail();
+
+        $validated = $request->validate([
+            'section_id' => 'required|string',
+            'settings' => 'required|array',
+        ]);
+
+        $allSettings = $church->getPublicSiteSetting('section_settings', []);
+        $allSettings[$validated['section_id']] = $validated['settings'];
+        $church->setPublicSiteSetting('section_settings', $allSettings);
+
+        return response()->json(['success' => true, 'message' => 'Налаштування секції оновлено']);
+    }
 }

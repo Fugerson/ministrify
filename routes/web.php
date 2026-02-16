@@ -661,6 +661,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::middleware('permission:website')->prefix('website-builder')->name('website-builder.')->group(function () {
         // Dashboard
         Route::get('/', [\App\Http\Controllers\WebsiteBuilder\WebsiteBuilderController::class, 'index'])->name('index');
+        Route::get('editor', [\App\Http\Controllers\WebsiteBuilder\WebsiteBuilderController::class, 'editor'])->name('editor');
         Route::get('preview', [\App\Http\Controllers\WebsiteBuilder\WebsiteBuilderController::class, 'preview'])->name('preview');
 
         // Templates
@@ -671,6 +672,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('sections', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'index'])->name('sections.index');
         Route::post('sections', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'update'])->name('sections.update');
         Route::post('sections/{section}/toggle', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'toggle'])->name('sections.toggle');
+        Route::post('sections/settings', [\App\Http\Controllers\WebsiteBuilder\SectionController::class, 'updateSettings'])->name('sections.settings');
 
         // Design (colors, fonts, hero, navigation)
         Route::get('design', [\App\Http\Controllers\WebsiteBuilder\DesignController::class, 'index'])->name('design.index');

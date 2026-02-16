@@ -690,6 +690,11 @@ class Church extends Model
         ]);
     }
 
+    public function getSectionSettings(string $sectionId): array
+    {
+        return $this->getPublicSiteSetting("section_settings.{$sectionId}", []);
+    }
+
     public function getCustomCssAttribute(): ?string
     {
         $css = $this->getPublicSiteSetting('custom_css');

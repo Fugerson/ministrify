@@ -17,11 +17,20 @@ use Illuminate\Http\Request;
 class PublicSiteController extends Controller
 {
     // Church main page
-    public function church(string $slug)
+    public function church(Request $request, string $slug)
     {
-        $church = Church::where('slug', $slug)
-            ->where('public_site_enabled', true)
-            ->firstOrFail();
+        $church = Church::where('slug', $slug)->firstOrFail();
+
+        // Preview mode: allow viewing even if site is disabled
+        $isPreview = $request->boolean('preview');
+        if ($isPreview) {
+            $user = auth()->user();
+            if (!$user || !$user->church_id === $church->id) {
+                abort(404);
+            }
+        } elseif (!$church->public_site_enabled) {
+            abort(404);
+        }
 
         $upcomingEvents = Event::where('church_id', $church->id)
             ->where('is_public', true)
