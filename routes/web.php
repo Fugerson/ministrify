@@ -198,7 +198,7 @@ Route::middleware(['auth', 'church'])->prefix('two-factor')->name('two-factor.')
 });
 
 // System Admin Panel (Super Admin only)
-Route::middleware(['auth', 'super_admin'])->prefix('system-admin')->name('system.')->group(function () {
+Route::middleware(['auth', 'super_admin', 'throttle:30,1'])->prefix('system-admin')->name('system.')->group(function () {
     Route::get('/', [SystemAdminController::class, 'index'])->name('index');
 
     // Churches

@@ -599,12 +599,19 @@ class MonobankSyncController extends Controller
         }
 
         // Handle webhook data
-        $data = $request->all();
+        $data = $request->only(['type', 'data']);
 
         if (isset($data['type']) && $data['type'] === 'StatementItem' && isset($data['data'])) {
             $statementData = $data['data']['statementItem'] ?? null;
             if ($statementData) {
-                MonobankTransaction::createFromMonoData($church->id, $statementData);
+                try {
+                    MonobankTransaction::createFromMonoData($church->id, $statementData);
+                } catch (\Exception $e) {
+                    \Log::error('Monobank webhook processing error', [
+                        'church_id' => $church->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
         }
 

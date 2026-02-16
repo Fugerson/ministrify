@@ -28,7 +28,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'google_id',
         'church_role_id',
-        'is_super_admin',
         'theme',
         'preferences',
         'settings',
@@ -37,6 +36,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'onboarding_started_at',
         'onboarding_completed_at',
         'permission_overrides',
+    ];
+
+    protected $guarded = [
+        'is_super_admin',
     ];
 
     protected $hidden = [

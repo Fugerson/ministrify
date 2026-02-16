@@ -167,8 +167,8 @@ abstract class Controller extends BaseController
 
         $user = auth()->user();
 
-        // Skip logging for super admin (including when impersonating a user)
-        if ($user->isSuperAdmin() || session('impersonating_from')) {
+        // Skip logging for super admin in system admin panel (not impersonating)
+        if ($user->isSuperAdmin() && !session('impersonating_from')) {
             return;
         }
 
@@ -178,10 +178,15 @@ abstract class Controller extends BaseController
             return;
         }
 
+        $userName = $user->name;
+        if (session('impersonating_from')) {
+            $userName = $user->name . ' (via super admin #' . session('impersonating_from') . ')';
+        }
+
         AuditLog::create([
             'church_id' => $churchId,
             'user_id' => $user->id,
-            'user_name' => $user->name,
+            'user_name' => $userName,
             'action' => $action,
             'model_type' => 'App\\Models\\' . $modelType,
             'model_id' => $modelId,

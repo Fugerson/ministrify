@@ -850,27 +850,28 @@ class DashboardController extends Controller
 
     private function loadShepherdOverview($church): array
     {
-        // Count sheep per shepherd
+        // Count sheep per shepherd in a single query
+        $sheepCounts = DB::table('people')
+            ->where('church_id', $church->id)
+            ->whereNull('deleted_at')
+            ->whereNotNull('shepherd_id')
+            ->selectRaw('shepherd_id, COUNT(*) as sheep_count')
+            ->groupBy('shepherd_id')
+            ->pluck('sheep_count', 'shepherd_id');
+
         $shepherdList = Person::where('church_id', $church->id)
             ->where('is_shepherd', true)
             ->get()
-            ->map(function ($shepherd) use ($church) {
-                $sheepCount = Person::where('church_id', $church->id)
-                    ->where('shepherd_id', $shepherd->id)
-                    ->count();
-                return [
-                    'id' => $shepherd->id,
-                    'full_name' => $shepherd->full_name,
-                    'first_name' => $shepherd->first_name,
-                    'sheep_count' => $sheepCount,
-                ];
-            })
+            ->map(fn($shepherd) => [
+                'id' => $shepherd->id,
+                'full_name' => $shepherd->full_name,
+                'first_name' => $shepherd->first_name,
+                'sheep_count' => $sheepCounts[$shepherd->id] ?? 0,
+            ])
             ->sortByDesc('sheep_count')
             ->values();
 
-        $totalSheep = Person::where('church_id', $church->id)
-            ->whereNotNull('shepherd_id')
-            ->count();
+        $totalSheep = $sheepCounts->sum();
 
         $unassigned = Person::where('church_id', $church->id)
             ->whereNull('shepherd_id')
@@ -1062,23 +1063,36 @@ class DashboardController extends Controller
 
     private function loadGroupAttendanceCompare($church)
     {
-        return Group::where('church_id', $church->id)
+        $groups = Group::where('church_id', $church->id)
             ->where('status', 'active')
             ->withCount('members')
-            ->get()
-            ->map(function ($group) {
-                $attendances = Attendance::where('attendable_type', Group::class)
-                    ->where('attendable_id', $group->id)
-                    ->where('date', '>=', now()->subWeeks(4))
-                    ->orderBy('date')
-                    ->get();
+            ->get();
 
-                $avgAttendance = $attendances->avg('total_count') ?? 0;
+        if ($groups->isEmpty()) {
+            return collect();
+        }
+
+        $groupIds = $groups->pluck('id');
+        $fourWeeksAgo = now()->subWeeks(4);
+
+        // Batch query: get all attendance data for all groups at once
+        $attendanceData = Attendance::where('attendable_type', Group::class)
+            ->whereIn('attendable_id', $groupIds)
+            ->where('date', '>=', $fourWeeksAgo)
+            ->select('attendable_id', 'date', 'total_count')
+            ->orderBy('date')
+            ->get()
+            ->groupBy('attendable_id');
+
+        return $groups->map(function ($group) use ($attendanceData) {
+                $groupAttendance = $attendanceData->get($group->id, collect());
+
+                $avgAttendance = $groupAttendance->avg('total_count') ?? 0;
                 $attendanceRate = $group->members_count > 0
                     ? round($avgAttendance / $group->members_count * 100)
                     : 0;
 
-                $last4 = $attendances->take(-4)->pluck('total_count')->toArray();
+                $last4 = $groupAttendance->sortBy('date')->take(-4)->pluck('total_count')->toArray();
                 while (count($last4) < 4) {
                     array_unshift($last4, 0);
                 }
