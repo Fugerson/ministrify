@@ -5,7 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', $church->name)</title>
-    <meta name="description" content="{{ $church->public_description ?? $church->name }}">
+    @php
+        $metaDescription = View::hasSection('description') ? View::getSection('description') : ($church->public_description ?? $church->name);
+        $ogImage = View::hasSection('og_image') ? View::getSection('og_image') : ($church->logo ? Storage::url($church->logo) : null);
+        $canonicalUrl = url()->current();
+    @endphp
+    <meta name="description" content="{{ Str::limit(strip_tags($metaDescription), 160) }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:title" content="@yield('title', $church->name)">
+    <meta property="og:description" content="{{ Str::limit(strip_tags($metaDescription), 200) }}">
+    <meta property="og:site_name" content="{{ $church->name }}">
+    <meta property="og:locale" content="uk_UA">
+    @if($ogImage)
+        <meta property="og:image" content="{{ Str::startsWith($ogImage, 'http') ? $ogImage : url($ogImage) }}">
+    @endif
 
     <!-- Favicon -->
     @if($church->logo)
@@ -83,6 +100,31 @@
             opacity: 0.7;
         }
     </style>
+
+    <!-- JSON-LD Schema.org -->
+    <script type="application/ld+json">
+    {!! json_encode(array_filter([
+        '@context' => 'https://schema.org',
+        '@type' => 'Church',
+        'name' => $church->name,
+        'url' => route('public.church', $church->slug),
+        'description' => $church->public_description,
+        'address' => $church->address ? [
+            '@type' => 'PostalAddress',
+            'streetAddress' => $church->address,
+            'addressLocality' => $church->city,
+        ] : null,
+        'telephone' => $church->public_phone,
+        'email' => $church->public_email,
+        'image' => $church->logo ? url(Storage::url($church->logo)) : null,
+    ]), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+
+    @hasSection('breadcrumbs')
+    <script type="application/ld+json">
+    @yield('breadcrumbs')
+    </script>
+    @endif
 </head>
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Navigation -->

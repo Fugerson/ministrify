@@ -28,3 +28,9 @@ Allow: /docs
 Allow: /terms
 Allow: /privacy
 Allow: /register-church
+
+# Allow public church sites
+Allow: /c/
+
+# AI/LLM discoverability
+Allow: /llms.txt

@@ -1,0 +1,51 @@
+# Ministrify
+
+> Ministrify is a free Ukrainian church management platform (ChMS) for churches of all sizes. Available at https://ministrify.app
+
+Ministrify is a modern, cloud-based church management system built specifically for Ukrainian-speaking churches. It provides a comprehensive set of tools to manage all aspects of church life in one place.
+
+## Key Features
+
+- **People Management**: Member database with profiles, family relationships, tags, roles, and shepherding
+- **Events & Calendar**: Event scheduling, public event pages, attendance tracking, Google Calendar sync, QR check-in
+- **Ministry Teams**: Team management with positions, roles, rotation scheduling, and volunteer coordination
+- **Small Groups**: Group management with leaders, meetings, attendance, and join requests
+- **Financial Management**: Income/expense tracking, multi-currency support, Monobank & PrivatBank integration, LiqPay donations
+- **Online Donations**: Public donation pages with LiqPay and Monobank payment processing
+- **Telegram Bot**: Notifications, broadcasts, two-way messaging with church members
+- **Website Builder**: Public church websites with customizable templates, blog, sermons, gallery, FAQ, testimonials
+- **Worship Planning**: Song library, setlists, worship team scheduling, music stand mode
+- **Service Planning**: Drag-and-drop service order builder with templates and team assignments
+- **Kanban Boards**: Task and project management for church teams
+- **Reports & Analytics**: Attendance trends, financial reports, volunteer statistics
+- **Permissions System**: Role-based access control with customizable permissions per role
+
+## Technical Details
+
+- Built with Laravel, Blade, Alpine.js, Tailwind CSS
+- Multi-tenant architecture (church_id based)
+- Ukrainian and Russian language interface
+- Available for all churches
+- Hosted at https://ministrify.app
+
+## Target Audience
+
+- Ukrainian churches and religious communities
+- Church pastors, administrators, and ministry leaders
+- Churches looking for a free, Ukrainian-language church management solution
+
+## Comparisons
+
+Ministrify is comparable to Planning Center, ChurchTools, Breeze, and Elvanto, but is:
+- Available for all churches, no restrictions on team size
+- Built for Ukrainian churches with native Ukrainian/Russian language support
+- Integrated with Ukrainian payment systems (LiqPay, Monobank, PrivatBank)
+- Includes Telegram bot integration (widely used in Ukraine)
+
+## Links
+
+- Website: https://ministrify.app
+- Registration: https://ministrify.app/register-church
+- Features: https://ministrify.app/features
+- Documentation: https://ministrify.app/docs
+- Contact: https://ministrify.app/contact

@@ -27,6 +27,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MigrationController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TelegramBroadcastController;
 use App\Http\Controllers\ServiceTeamController;
 use App\Http\Controllers\WorshipTeamController;
@@ -119,6 +120,9 @@ Route::match(['get', 'post'], 'monobank/webhook/{secret}', [MonobankSyncControll
     ->middleware('throttle:60,1')
     ->name('monobank.webhook')
     ->withoutMiddleware(['web']);
+
+// Dynamic sitemap
+Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Landing pages (public)
 Route::get('/', [LandingController::class, 'home'])->name('landing.home');

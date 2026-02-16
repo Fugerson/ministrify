@@ -123,10 +123,8 @@
         },
         "offers": {
             "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "UAH",
             "availability": "https://schema.org/InStock",
-            "description": "Безкоштовно для всіх церков"
+            "description": "Доступний для всіх церков"
         },
         "aggregateRating": {
             "@type": "AggregateRating",

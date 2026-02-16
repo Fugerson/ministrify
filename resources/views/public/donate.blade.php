@@ -1,6 +1,17 @@
 @extends('public.layout')
 
 @section('title', 'Пожертвування - ' . $church->name)
+@section('description', 'Підтримайте ' . $church->name . ' — онлайн пожертва для підтримки церкви та її програм')
+@section('breadcrumbs')
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => [
+        ['@type' => 'ListItem', 'position' => 1, 'name' => $church->name, 'item' => route('public.church', $church->slug)],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Пожертвування'],
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+@endsection
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
