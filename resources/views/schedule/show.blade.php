@@ -77,13 +77,27 @@
             </div>
             <div class="text-right shrink-0">
                 @if($canEdit)
+                <div class="flex items-center gap-2 justify-end mb-2" x-data="{ allDay: {{ !$event->time ? 'true' : 'false' }} }">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" x-model="allDay" @change="
+                            if (allDay) {
+                                time = '';
+                                saveField('all_day', true);
+                            } else {
+                                saveField('all_day', false);
+                            }
+                        "
+                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
+                        <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('Весь день') }}</span>
+                    </label>
+                </div>
                 <input type="date" x-model="date" @change="saveField('date', date)"
                        class="text-xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 p-0 pb-1 text-right cursor-pointer">
-                <input type="time" x-model="time" @change="saveField('time', time)"
+                <input type="time" x-model="time" @change="saveField('time', time)" x-show="!allDay"
                        class="text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 p-0 pb-1 text-right block ml-auto cursor-pointer">
                 @else
                 <span class="text-xl font-bold text-gray-900 dark:text-white" x-text="date"></span>
-                <span class="text-gray-500 dark:text-gray-400 block text-right" x-text="time || ''"></span>
+                <span class="text-gray-500 dark:text-gray-400 block text-right" x-text="time || '(весь день)'"></span>
                 @endif
                 @if($event->google_event_id)
                     <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">

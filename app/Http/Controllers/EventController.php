@@ -243,6 +243,12 @@ class EventController extends Controller
             'reminders.*.person_ids' => 'nullable|array',
         ]);
 
+        // Handle all-day events - clear time if all_day is true
+        if ($request->boolean('all_day')) {
+            $validated['time'] = null;
+            $validated['end_time'] = null;
+        }
+
         $validated['is_service'] = $request->boolean('is_service');
         $validated['track_attendance'] = $request->boolean('track_attendance');
 
@@ -425,6 +431,14 @@ class EventController extends Controller
         ];
 
         $validated = $request->validate($rules);
+
+        // Handle all-day events
+        if ($request->has('all_day')) {
+            if ($request->boolean('all_day')) {
+                $validated['time'] = null;
+                $validated['end_time'] = null;
+            }
+        }
 
         if ($request->has('is_service')) {
             $validated['is_service'] = $request->boolean('is_service');
