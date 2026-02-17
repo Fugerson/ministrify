@@ -314,6 +314,10 @@ return [
     'privacy_section_10' => '10. Контакти',
     'privacy_contacts_text' => 'Щодо питань приватності зв\'язуйтеся з нами через форму зворотного зв\'язку.',
 
+    // Dashboard & Account
+    'profile' => 'Профіль',
+    'logout' => 'Вийти',
+
     // Terms page
     'terms_title' => 'Умови використання — Ministrify',
     'terms_meta' => 'Умови використання сервісу Ministrify.',

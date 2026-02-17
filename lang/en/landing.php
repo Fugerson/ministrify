@@ -313,6 +313,10 @@ return [
     'privacy_section_10' => '10. Contacts',
     'privacy_contacts_text' => 'For privacy questions, contact us through the feedback form.',
 
+    // Dashboard & Account
+    'profile' => 'Profile',
+    'logout' => 'Logout',
+
     // Terms page
     'terms_title' => 'Terms of Use — Ministrify',
     'terms_meta' => 'Terms of use of the Ministrify service.',
