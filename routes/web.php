@@ -37,6 +37,7 @@ use App\Http\Controllers\QrCheckinController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\MonobankSyncController;
 use App\Http\Controllers\PrivatbankSyncController;
+use App\Http\Controllers\LocaleSwitchController;
 use Illuminate\Support\Facades\Route;
 
 // Health check endpoint (for monitoring)
@@ -125,27 +126,7 @@ Route::match(['get', 'post'], 'monobank/webhook/{secret}', [MonobankSyncControll
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Locale switcher (must be in web middleware group for CSRF)
-Route::post('locale/{locale}', function (string $locale) {
-    $available = config('app.available_locales', ['uk', 'en']);
-    if (!in_array($locale, $available)) {
-        abort(400);
-    }
-
-    // Save to user preferences if authenticated
-    if (auth()->check()) {
-        $prefs = auth()->user()->preferences ?? [];
-        $prefs['locale'] = $locale;
-        auth()->user()->update(['preferences' => $prefs]);
-    }
-
-    // Set locale immediately for this response
-    app()->setLocale($locale);
-
-    // Return with cookie (will be sent to browser)
-    return redirect()->back()
-        ->cookie('locale', $locale, 525600) // 1 year
-        ->with('locale_changed', true);
-})->middleware('web')->name('locale.switch');
+Route::post('locale/{locale}', [LocaleSwitchController::class, 'switch'])->middleware('web')->name('locale.switch');
 
 // Landing pages (public)
 Route::get('/', [LandingController::class, 'home'])->name('landing.home');

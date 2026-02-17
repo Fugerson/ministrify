@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
         // Force HTTPS in production (for queue workers that don't have request context)
         if ($this->app->isProduction()) {
             URL::forceScheme('https');
+        } else {
+            // Allow non-secure cookies in development (HTTP)
+            config(['session.secure' => false]);
         }
 
         // Prevent lazy loading in development
