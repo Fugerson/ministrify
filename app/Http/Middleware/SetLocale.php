@@ -22,28 +22,27 @@ class SetLocale
     {
         $available = config('app.available_locales', ['uk', 'en']);
 
-        // 1. Cookie (highest priority — explicit user choice)
+        // 1. Session (highest priority — explicit user choice in current session)
+        $sessionLocale = session('app.locale');
+        if ($sessionLocale && in_array($sessionLocale, $available)) {
+            return $sessionLocale;
+        }
+
+        // 2. Cookie (explicit user choice, persistent)
         $cookie = $request->cookie('locale');
-        \Log::debug('SetLocale: Checking cookie', [
-            'cookie_value' => $cookie,
-            'all_cookies' => $request->cookies->all(),
-        ]);
         if ($cookie && in_array($cookie, $available)) {
-            \Log::debug('SetLocale: Using cookie', ['locale' => $cookie]);
             return $cookie;
         }
 
-        // 2. Authenticated user preference
+        // 3. Authenticated user preference (from database)
         if ($request->user()) {
             $userLocale = $request->user()->preferences['locale'] ?? null;
             if ($userLocale && in_array($userLocale, $available)) {
-                \Log::debug('SetLocale: Using user preference', ['locale' => $userLocale]);
                 return $userLocale;
             }
         }
 
-        // 3. Default
-        \Log::debug('SetLocale: Using default locale');
+        // 4. Default
         return config('app.locale', 'uk');
     }
 }
