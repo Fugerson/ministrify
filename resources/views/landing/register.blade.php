@@ -1,16 +1,16 @@
 @extends('layouts.landing')
 
-@section('title', 'Зареєструвати церкву - Ministrify')
-@section('description', 'Зареєструйте вашу церкву в Ministrify за 2 хвилини. Безкоштовний старт, без кредитної картки. Управління громадою стало простіше!')
-@section('keywords', 'реєстрація церкви, Ministrify реєстрація, управління церквою безкоштовно')
+@section('title', __('landing.register_church_title'))
+@section('description', __('landing.register_church_meta'))
+@section('keywords', __('landing.register_church_keywords'))
 
 @section('schema')
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "Реєстрація церкви в Ministrify",
-    "description": "Швидка реєстрація церкви для доступу до всіх функцій управління громадою",
+    "name": "{{ __('landing.register_church_page') }}",
+    "description": "{{ __('landing.register_quick_access') }}",
     "potentialAction": {
         "@type": "RegisterAction",
         "target": {
@@ -50,10 +50,10 @@
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8">
             <div class="text-center mb-8">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    Зареєструйте вашу церкву
+                    {{ __('landing.register_your_church') }}
                 </h1>
                 <p class="text-gray-600 dark:text-gray-400">
-                    Безкоштовний старт за 2 хвилини
+                    {{ __('landing.free_start_2min') }}
                 </p>
             </div>
 
@@ -86,12 +86,12 @@
                 <!-- Church Info Section -->
                 <div class="space-y-4">
                     <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Інформація про церкву
+                        {{ __('landing.church_info') }}
                     </h3>
 
                     <div>
                         <label for="church_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Назва церкви *
+                            {{ __('landing.church_name_required') }}
                         </label>
                         <input type="text" id="church_name" name="church_name" required
                                value="{{ old('church_name') }}"
@@ -101,7 +101,7 @@
 
                     <div>
                         <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Місто *
+                            {{ __('landing.city_required') }}
                         </label>
                         <input type="text" id="city" name="city" required
                                value="{{ old('city') }}"
@@ -113,7 +113,7 @@
                 <!-- Admin Info Section -->
                 <div class="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Адміністратор церкви
+                        {{ __('landing.church_administrator') }}
                     </h3>
 
                     <div>
@@ -148,7 +148,7 @@
 
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Пароль *
+                            {{ __('landing.password_required') }}
                         </label>
                         <div class="relative">
                             <input :type="showPassword ? 'text' : 'password'" id="password" name="password" required minlength="8"
@@ -169,7 +169,7 @@
 
                     <div>
                         <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Підтвердження пароля *
+                            {{ __('landing.password_confirmation') }}
                         </label>
                         <input :type="showPassword ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" required
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
@@ -182,24 +182,23 @@
                     <input type="checkbox" id="terms" name="terms" required
                            class="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                     <label for="terms" class="text-sm text-gray-600 dark:text-gray-400">
-                        Я погоджуюсь з <a href="{{ route('landing.terms') }}" target="_blank" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">умовами використання</a>
-                        та <a href="{{ route('landing.privacy') }}" target="_blank" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">політикою конфіденційності</a>
+                        {{ __('landing.agree_terms') }}
                     </label>
                 </div>
 
                 <!-- Submit -->
                 <button type="submit" :disabled="submitting"
                         class="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50">
-                    <span x-show="!submitting">Зареєструвати церкву</span>
-                    <span x-show="submitting" x-cloak>Реєстрація...</span>
+                    <span x-show="!submitting">{{ __('landing.register_church_button') }}</span>
+                    <span x-show="submitting" x-cloak>{{ __('landing.registering') }}</span>
                 </button>
             </form>
 
             <!-- Login Link -->
             <p class="mt-6 text-center text-gray-600 dark:text-gray-400">
-                Вже маєте акаунт?
+                {{ __('landing.already_account') }}
                 <a href="{{ route('login') }}" class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-medium">
-                    Увійти
+                    {{ __('landing.log_in') }}
                 </a>
             </p>
         </div>
@@ -210,19 +209,19 @@
                 <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span>Безкоштовно</span>
+                <span>{{ __('landing.free_label') }}</span>
             </div>
             <div class="flex flex-col items-center">
                 <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
-                <span>Безпечно</span>
+                <span>{{ __('landing.secure_label') }}</span>
             </div>
             <div class="flex flex-col items-center">
                 <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                 </svg>
-                <span>2 хвилини</span>
+                <span>{{ __('landing.two_minutes') }}</span>
             </div>
         </div>
     </div>
