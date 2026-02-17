@@ -13,21 +13,21 @@
             <div class="text-center lg:text-left">
                 <div class="inline-flex items-center px-3 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium mb-6">
                     <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                    {{ __('Система управління церквою') }}
+                    {{ __('landing.system_church_management') }}
                 </div>
 
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
-                    {{ __('Керуйте церквою') }}
-                    <span class="gradient-text">{{ __('просто та ефективно') }}</span>
+                    {{ __('landing.manage_church') }}
+                    <span class="gradient-text">{{ __('landing.simple_effective') }}</span>
                 </h1>
 
                 <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
-                    {{ __('Сучасна українська платформа для управління церквою: члени, події, пожертви, групи, команди — все в одному місці.') }}
+                    {{ __('landing.modern_platform') }}
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                     <a href="{{ url('/register-church') }}" class="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary-600/25 hover:shadow-primary-600/40 hover:scale-105">
-                        <span>{{ __('Почати безкоштовно') }}</span>
+                        <span>{{ __('landing.start_free') }}</span>
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                         </svg>
@@ -37,7 +37,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        {{ __('Дивитись демо') }}
+                        {{ __('landing.watch_demo') }}
                     </a>
                 </div>
 
@@ -47,17 +47,17 @@
                         <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
-                        {{ __('SSL захист') }}
+                        {{ __('landing.ssl_protection') }}
                     </div>
                     <div class="flex items-center">
                         <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
                         </svg>
-                        {{ __('Хмарне рішення') }}
+                        {{ __('landing.cloud_solution') }}
                     </div>
                     <div class="flex items-center">
                         <span class="text-xl mr-2">🇺🇦</span>
-                        {{ __('Українська мова') }}
+                        {{ __('landing.ukrainian_language') }}
                     </div>
                 </div>
             </div>
@@ -96,7 +96,7 @@
 {{-- Logos / Trust Section --}}
 <section class="py-12 bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-8">{{ __('Інтегровано з популярними сервісами') }}</p>
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-8">{{ __('landing.integrated_services') }}</p>
         <div class="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
             <div class="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
                 <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
@@ -124,12 +124,12 @@
 <section id="features" class="py-20 bg-white dark:bg-gray-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <span class="inline-block px-4 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium mb-4">{{ __('Можливості') }}</span>
+            <span class="inline-block px-4 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium mb-4">{{ __('landing.features') }}</span>
             <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                {{ __('Все для ефективного управління церквою') }}
+                {{ __('landing.effective_management') }}
             </h2>
             <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                {{ __('Від обліку членів до онлайн-пожертв — один інструмент для всіх потреб вашої церкви.') }}
+                {{ __('landing.features_description') }}
             </p>
         </div>
 
@@ -141,9 +141,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Управління членами') }}</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.manage_members') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400">
-                    {{ __('Повна база членів церкви з профілями, контактами, сім\'ями та історією участі. Швидкий пошук та фільтрація.') }}
+                    {{ __('landing.manage_members_desc') }}
                 </p>
             </div>
 
@@ -154,9 +154,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Онлайн-пожертви') }}</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.online_donations') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400">
-                    {{ __('Приймайте пожертви через LiqPay та Monobank. Автоматичний облік, звіти та подяки донорам.') }}
+                    {{ __('landing.online_donations_desc') }}
                 </p>
             </div>
 
@@ -167,9 +167,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Події та календар') }}</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.events_calendar') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400">
-                    {{ __('Плануйте богослужіння, зустрічі груп та заходи. Синхронізація з Google Calendar та нагадування.') }}
+                    {{ __('landing.events_calendar_desc') }}
                 </p>
             </div>
 
@@ -180,9 +180,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Команди та групи') }}</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.teams_groups') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400">
-                    {{ __('Організуйте команди та домашні групи. Відстежуйте участь та координуйте служителів.') }}
+                    {{ __('landing.teams_groups_desc') }}
                 </p>
             </div>
 
@@ -193,9 +193,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Бібліотека пісень') }}</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.songs_library') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400">
-                    {{ __('Зберігайте тексти пісень з акордами. Створюйте плейлисти для богослужінь та презентації.') }}
+                    {{ __('landing.songs_library_desc') }}
                 </p>
             </div>
 
@@ -206,16 +206,16 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Трекер завдань') }}</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.task_tracker') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400">
-                    {{ __('Kanban-дошка для управління завданнями церкви. Призначайте відповідальних, встановлюйте дедлайни.') }}
+                    {{ __('landing.task_tracker_desc') }}
                 </p>
             </div>
         </div>
 
         <div class="text-center mt-12">
             <a href="{{ url('/features') }}" class="inline-flex items-center text-primary-600 dark:text-primary-400 font-semibold hover:text-primary-700 dark:hover:text-primary-300">
-                {{ __('Всі можливості') }}
+                {{ __('landing.all_features') }}
                 <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
@@ -228,12 +228,12 @@
 <section id="demo" class="py-20 bg-gray-50 dark:bg-gray-900 overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <span class="inline-block px-4 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium mb-4">{{ __('Демо') }}</span>
+            <span class="inline-block px-4 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium mb-4">{{ __('landing.demo') }}</span>
             <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                {{ __('Подивіться як це працює') }}
+                {{ __('landing.see_how_it_works') }}
             </h2>
             <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                {{ __('Інтуїтивний інтерфейс, який ваша команда полюбить з першого погляду') }}
+                {{ __('landing.intuitive_interface') }}
             </p>
         </div>
 
@@ -243,13 +243,13 @@
             slides: 7,
             fullscreen: false,
             images: [
-                { src: '/icons/demo/Screenshot_7.jpg', label: '{{ __('Головна') }}' },
-                { src: '/icons/demo/Screenshot_2.jpg', label: '{{ __('Люди') }}' },
-                { src: '/icons/demo/Screenshot_5.jpg', label: '{{ __('Команди') }}' },
-                { src: '/icons/demo/Screenshot_4.jpg', label: '{{ __('Розклад') }}' },
-                { src: '/icons/demo/Screenshot_3.jpg', label: '{{ __('Фінанси') }}' },
-                { src: '/icons/demo/Screenshot_6.jpg', label: '{{ __('Завдання') }}' },
-                { src: '/icons/demo/Screenshot_8.jpg', label: '{{ __('Налаштування') }}' }
+                { src: '/icons/demo/Screenshot_7.jpg', label: '{{ __('landing.home') }}' },
+                { src: '/icons/demo/Screenshot_2.jpg', label: '{{ __('landing.people') }}' },
+                { src: '/icons/demo/Screenshot_5.jpg', label: '{{ __('landing.teams') }}' },
+                { src: '/icons/demo/Screenshot_4.jpg', label: '{{ __('landing.schedule') }}' },
+                { src: '/icons/demo/Screenshot_3.jpg', label: '{{ __('landing.finances') }}' },
+                { src: '/icons/demo/Screenshot_6.jpg', label: '{{ __('landing.tasks') }}' },
+                { src: '/icons/demo/Screenshot_8.jpg', label: '{{ __('landing.settings') }}' }
             ],
             openFullscreen(index) {
                 this.activeSlide = index;
@@ -397,8 +397,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('Мобільна версія') }}</h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ __('Працює на будь-якому пристрої — телефон, планшет, комп\'ютер') }}</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('landing.mobile_version') }}</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ __('landing.mobile_version_desc') }}</p>
             </div>
             <div class="text-center">
                 <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -406,8 +406,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('Блискавично швидкий') }}</h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ __('Оптимізований для максимальної продуктивності') }}</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('landing.lightning_fast') }}</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ __('landing.lightning_fast_desc') }}</p>
             </div>
             <div class="text-center">
                 <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -415,8 +415,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('Темна тема') }}</h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ __('Зручно працювати вдень і вночі') }}</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('landing.dark_theme') }}</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ __('landing.dark_theme_desc') }}</p>
             </div>
         </div>
     </div>
@@ -428,19 +428,19 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
                 <div class="text-4xl md:text-5xl font-bold text-white mb-2">{{ $stats['churches'] ?? '10' }}+</div>
-                <div class="text-primary-100">{{ __('Церков') }}</div>
+                <div class="text-primary-100">{{ __('landing.churches') }}</div>
             </div>
             <div>
                 <div class="text-4xl md:text-5xl font-bold text-white mb-2">{{ number_format($stats['members'] ?? 500) }}+</div>
-                <div class="text-primary-100">{{ __('Членів') }}</div>
+                <div class="text-primary-100">{{ __('landing.members') }}</div>
             </div>
             <div>
                 <div class="text-4xl md:text-5xl font-bold text-white mb-2">{{ $stats['events'] ?? '100' }}+</div>
-                <div class="text-primary-100">{{ __('Подій') }}</div>
+                <div class="text-primary-100">{{ __('landing.events') }}</div>
             </div>
             <div>
                 <div class="text-4xl md:text-5xl font-bold text-white mb-2">99.9%</div>
-                <div class="text-primary-100">{{ __('Доступність') }}</div>
+                <div class="text-primary-100">{{ __('landing.uptime') }}</div>
             </div>
         </div>
     </div>
@@ -569,20 +569,20 @@
 <section class="py-20 bg-white dark:bg-gray-950">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-            {{ __('Готові спростити управління церквою?') }}
+            {{ __('landing.ready_simplify') }}
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
-            {{ __('Приєднуйтесь до церков, які вже використовують Ministrify.') }}
+            {{ __('landing.join_churches') }}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ url('/register-church') }}" class="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary-600/25 hover:shadow-primary-600/40">
-                {{ __('Почати безкоштовно') }}
+                {{ __('landing.start_free') }}
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
             </a>
             <a href="{{ url('/contact') }}" class="inline-flex items-center justify-center px-8 py-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
-                {{ __('Зв\'язатися з нами') }}
+                {{ __('landing.contacts') }}
             </a>
         </div>
     </div>
