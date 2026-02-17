@@ -13,6 +13,12 @@ class LocaleSwitchController extends Controller
             abort(400);
         }
 
+        \Log::info('Switching locale', [
+            'from' => app()->getLocale(),
+            'to' => $locale,
+            'user_id' => auth()->id(),
+        ]);
+
         // Save to user preferences if authenticated
         if (auth()->check()) {
             $prefs = auth()->user()->preferences ?? [];
@@ -24,7 +30,7 @@ class LocaleSwitchController extends Controller
         app()->setLocale($locale);
 
         // Return with unencrypted cookie (locale cookie is excluded from encryption in EncryptCookies middleware)
-        return redirect()->back()
+        $response = redirect()->back()
             ->cookie(
                 'locale',           // name
                 $locale,            // value - simple string, not encrypted
@@ -37,5 +43,13 @@ class LocaleSwitchController extends Controller
                 'none'              // sameSite (allow cross-site cookies)
             )
             ->with('locale_changed', true);
+
+        \Log::info('Locale cookie set', [
+            'cookie_name' => 'locale',
+            'cookie_value' => $locale,
+            'response_headers' => $response->headers->all(),
+        ]);
+
+        return $response;
     }
 }
