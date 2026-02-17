@@ -15,8 +15,8 @@
                 </svg>
             </div>
             <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Ознайомтесь з системою</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Пройдіть інтерактивний тур, щоб дізнатися про всі можливості</p>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('Ознайомтесь з системою') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Пройдіть інтерактивний тур, щоб дізнатися про всі можливості') }}</p>
             </div>
         </div>
         <button @click="dismissed = true"
@@ -32,7 +32,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        <span>Розпочати тур</span>
+        <span>{{ __('Розпочати тур') }}</span>
     </button>
 </div>
 @endif

@@ -1,14 +1,14 @@
 @extends('public.layout')
 
-@section('title', 'Пожертвування - ' . $church->name)
-@section('description', 'Підтримайте ' . $church->name . ' — онлайн пожертва для підтримки церкви та її програм')
+@section('title', __('Пожертвування') . ' - ' . $church->name)
+@section('description', __('Підтримайте :church — онлайн пожертва для підтримки церкви та її програм', ['church' => $church->name]))
 @section('breadcrumbs')
 {!! json_encode([
     '@context' => 'https://schema.org',
     '@type' => 'BreadcrumbList',
     'itemListElement' => [
         ['@type' => 'ListItem', 'position' => 1, 'name' => $church->name, 'item' => route('public.church', $church->slug)],
-        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Пожертвування'],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => __('Пожертвування')],
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
 @endsection
@@ -22,9 +22,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
             </svg>
         </div>
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">Підтримати церкву</h1>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ __('Підтримати церкву') }}</h1>
         <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            Ваша пожертва допомагає нам продовжувати працю та підтримувати громаду
+            {{ __('Ваша пожертва допомагає нам продовжувати працю та підтримувати громаду') }}
         </p>
     </div>
 
@@ -53,7 +53,7 @@
 
                     <!-- Amount selection -->
                     <div class="mb-8">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Сума пожертви</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">{{ __('Сума пожертви') }}</label>
                         <div class="grid grid-cols-3 gap-3 mb-3">
                             @foreach([50, 100, 200, 500, 1000, 2000] as $preset)
                                 <button type="button"
@@ -68,7 +68,7 @@
                             <input type="number" name="amount" x-model="amount" @focus="customAmount = true"
                                    :class="{ 'ring-2 ring-primary-500 border-primary-500': customAmount }"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg"
-                                   placeholder="Інша сума" min="1">
+                                   placeholder="{{ __('Інша сума') }}" min="1">
                             <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">грн</span>
                         </div>
                         @error('amount')
@@ -79,10 +79,10 @@
                     <!-- Campaign selection -->
                     @if($campaigns->count() > 0)
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Цільовий збір (необов'язково)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">{{ __("Цільовий збір (необов'язково)") }}</label>
                         <select name="campaign_id"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            <option value="">Загальний фонд</option>
+                            <option value="">{{ __('Загальний фонд') }}</option>
                             @foreach($campaigns as $campaign)
                                 <option value="{{ $campaign->id }}">{{ $campaign->name }}</option>
                             @endforeach
@@ -92,12 +92,12 @@
 
                     <!-- Donor info -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Ваші дані (необов'язково)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">{{ __("Ваші дані (необов'язково)") }}</label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <input type="text" name="donor_name" value="{{ old('donor_name') }}"
                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                       placeholder="Ваше ім'я">
+                                       placeholder="{{ __("Ваше ім'я") }}">
                             </div>
                             <div>
                                 <input type="email" name="donor_email" value="{{ old('donor_email') }}"
@@ -107,7 +107,7 @@
                             <div>
                                 <input type="tel" name="donor_phone" value="{{ old('donor_phone') }}"
                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                       placeholder="Телефон">
+                                       placeholder="{{ __('Телефон') }}">
                             </div>
                         </div>
                     </div>
@@ -116,7 +116,7 @@
                     <div class="mb-6">
                         <textarea name="message" rows="2"
                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                  placeholder="Коментар до пожертви (необов'язково)">{{ old('message') }}</textarea>
+                                  placeholder="{{ __("Коментар до пожертви (необов'язково)") }}">{{ old('message') }}</textarea>
                     </div>
 
                     <!-- Anonymous option -->

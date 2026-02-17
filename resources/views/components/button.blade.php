@@ -55,6 +55,6 @@
             </span>
         </template>
         <span x-show="!loading">{{ $slot }}</span>
-        <span x-show="loading" x-cloak>Завантаження<span class="loading-dots"></span></span>
+        <span x-show="loading" x-cloak>{{ __('Завантаження') }}<span class="loading-dots"></span></span>
     </button>
 @endif

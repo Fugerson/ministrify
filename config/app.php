@@ -12,6 +12,7 @@ return [
     'timezone' => 'Europe/Kyiv',
     'locale' => 'uk',
     'fallback_locale' => 'en',
+    'available_locales' => ['uk', 'en'],
     'faker_locale' => 'uk_UA',
     'key' => env('APP_KEY'),
     'cipher' => 'AES-256-CBC',

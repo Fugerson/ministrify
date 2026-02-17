@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Архівовані дошки')
+@section('title', __('Архівовані дошки'))
 
 @section('actions')
 <a href="{{ route('boards.index') }}"
@@ -8,7 +8,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
     </svg>
-    Назад до дошок
+    {{ __('Назад до дошок') }}
 </a>
 @endsection
 
@@ -21,7 +21,7 @@
         </svg>
         <div>
             <p class="text-sm text-yellow-700 dark:text-yellow-300">
-                Архівовані дошки не відображаються в основному списку. Ви можете відновити їх у будь-який час.
+                {{ __('Архівовані дошки не відображаються в основному списку. Ви можете відновити їх у будь-який час.') }}
             </p>
         </div>
     </div>
@@ -49,16 +49,16 @@
                             @csrf
                             <button type="submit"
                                     class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                Відновити
+                                {{ __('Відновити') }}
                             </button>
                         </form>
                         <form method="POST" action="{{ route('boards.destroy', $board) }}"
-                              onsubmit="return confirm('Видалити назавжди?')">
+                              onsubmit="return confirm('{{ __('Видалити назавжди?') }}')">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
                                     class="px-3 py-1.5 text-red-600 hover:text-red-700 text-sm font-medium">
-                                Видалити
+                                {{ __('Видалити') }}
                             </button>
                         </form>
                     </div>
@@ -71,8 +71,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                     </svg>
                 </div>
-                <h3 class="font-medium text-gray-900 dark:text-white mb-2">Немає архівованих дошок</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Архівовані дошки з'являться тут</p>
+                <h3 class="font-medium text-gray-900 dark:text-white mb-2">{{ __('Немає архівованих дошок') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('Архівовані дошки з\'являться тут') }}</p>
             </div>
         @endforelse
     </div>

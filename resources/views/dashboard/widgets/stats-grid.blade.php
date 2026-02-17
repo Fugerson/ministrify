@@ -20,39 +20,39 @@
                     {{ $stats['people_trend'] }}
                 </span>
                 @endif
-                <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 px-2 py-1 rounded-lg">Люди</span>
+                <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 px-2 py-1 rounded-lg">{{ __('Люди') }}</span>
             </div>
         </div>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['total_people'] }}</p>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">за 3 місяці</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">{{ __('за 3 місяці') }}</p>
         <div class="mt-2 space-y-1.5">
             @if($stats['age_stats']['children'] > 0)
             <div class="flex items-center justify-between text-xs">
-                <span class="text-amber-600 dark:text-amber-400">Діти (0-12)</span>
+                <span class="text-amber-600 dark:text-amber-400">{{ __('Діти (0-12)') }}</span>
                 <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['children'] }}</span>
             </div>
             @endif
             @if($stats['age_stats']['teens'] > 0)
             <div class="flex items-center justify-between text-xs">
-                <span class="text-purple-600 dark:text-purple-400">Підлітки (13-17)</span>
+                <span class="text-purple-600 dark:text-purple-400">{{ __('Підлітки (13-17)') }}</span>
                 <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['teens'] }}</span>
             </div>
             @endif
             @if($stats['age_stats']['youth'] > 0)
             <div class="flex items-center justify-between text-xs">
-                <span class="text-blue-600 dark:text-blue-400">Молодь (18-35)</span>
+                <span class="text-blue-600 dark:text-blue-400">{{ __('Молодь (18-35)') }}</span>
                 <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['youth'] }}</span>
             </div>
             @endif
             @if($stats['age_stats']['adults'] > 0)
             <div class="flex items-center justify-between text-xs">
-                <span class="text-green-600 dark:text-green-400">Дорослі (36-59)</span>
+                <span class="text-green-600 dark:text-green-400">{{ __('Дорослі (36-59)') }}</span>
                 <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['adults'] }}</span>
             </div>
             @endif
             @if($stats['age_stats']['seniors'] > 0)
             <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-600 dark:text-gray-400">Старші (60+)</span>
+                <span class="text-gray-600 dark:text-gray-400">{{ __('Старші (60+)') }}</span>
                 <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $stats['age_stats']['seniors'] }}</span>
             </div>
             @endif
@@ -79,11 +79,11 @@
                     {{ $stats['volunteers_trend'] }}
                 </span>
                 @endif
-                <span class="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50 px-2 py-1 rounded-lg">Служіння</span>
+                <span class="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50 px-2 py-1 rounded-lg">{{ __('Служіння') }}</span>
             </div>
         </div>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['volunteers_count'] }}</p>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">служителів</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">{{ __('служителів') }}</p>
         <div class="mt-2 space-y-1.5 max-h-32 overflow-y-auto">
             @foreach($stats['ministries_list'] as $ministry)
             <div class="flex items-center justify-between text-xs">

@@ -1,9 +1,9 @@
 @props([
     'action',
-    'title' => 'Видалити',
-    'message' => 'Ви впевнені, що хочете видалити цей запис? Цю дію неможливо скасувати.',
+    'title' => __('Видалити'),
+    'message' => __('Ви впевнені, що хочете видалити цей запис? Цю дію неможливо скасувати.'),
     'buttonClass' => 'text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300',
-    'buttonText' => 'Видалити',
+    'buttonText' => __('Видалити'),
     'icon' => true,
     'method' => 'DELETE',
     'ajax' => false,
@@ -28,7 +28,7 @@
             if (response.ok && data.success) {
                 this.open = false;
                 if (typeof showToast === 'function') {
-                    showToast('success', data.message || 'Видалено!');
+                    showToast('success', data.message || '{{ __('Видалено!') }}');
                 }
                 @if($redirect)
                     setTimeout(() => window.location.href = '{{ $redirect }}', 500);
@@ -37,12 +37,12 @@
                 @endif
             } else {
                 if (typeof showToast === 'function') {
-                    showToast('error', data.message || 'Помилка видалення');
+                    showToast('error', data.message || '{{ __('Помилка видалення') }}');
                 }
             }
         } catch (e) {
             if (typeof showToast === 'function') {
-                showToast('error', 'Помилка з\'єднання');
+                showToast('error', '{{ __('Помилка з\\\'єднання') }}');
             }
         } finally {
             this.loading = false;
@@ -116,13 +116,13 @@
                     <div class="mt-6 flex justify-center space-x-3">
                         <button type="button" @click="open = false"
                                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                            Скасувати
+                            {{ __('Скасувати') }}
                         </button>
                         @if($ajax)
                             <button type="button" @click="submitDelete()" :disabled="loading"
                                     class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50">
                                 <span x-show="!loading">{{ $buttonText }}</span>
-                                <span x-show="loading">Видалення...</span>
+                                <span x-show="loading">{{ __('Видалення...') }}</span>
                             </button>
                         @else
                             <form method="POST" action="{{ $action }}" class="inline">

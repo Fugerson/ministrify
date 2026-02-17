@@ -124,6 +124,21 @@ Route::match(['get', 'post'], 'monobank/webhook/{secret}', [MonobankSyncControll
 // Dynamic sitemap
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
+// Locale switcher
+Route::post('locale/{locale}', function (string $locale) {
+    if (!in_array($locale, config('app.available_locales', ['uk', 'en']))) {
+        abort(400);
+    }
+
+    if (auth()->check()) {
+        $prefs = auth()->user()->preferences ?? [];
+        $prefs['locale'] = $locale;
+        auth()->user()->update(['preferences' => $prefs]);
+    }
+
+    return redirect()->back()->withCookie(cookie('locale', $locale, 525600)); // 1 year
+})->name('locale.switch');
+
 // Landing pages (public)
 Route::get('/', [LandingController::class, 'home'])->name('landing.home');
 Route::get('features', [LandingController::class, 'features'])->name('landing.features');

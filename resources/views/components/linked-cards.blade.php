@@ -6,7 +6,7 @@
             <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
-            Пов'язані завдання
+            {{ __('Пов\'язані завдання') }}
         </h3>
         @if($createAction)
         <button type="button" @click="setTab('{{ $createAction }}')"
@@ -14,7 +14,7 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Створити завдання
+            {{ __('Створити завдання') }}
         </button>
         @elseif(count($boards) > 0)
         <div class="relative" x-data="{ open: false }">
@@ -22,7 +22,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Створити завдання
+                {{ __('Створити завдання') }}
             </button>
             <div x-show="open" @click.away="open = false" x-transition
                  class="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-600">
@@ -53,7 +53,7 @@
     </div>
 
     <div x-show="!loading && cards.length === 0" class="text-center py-4">
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає пов'язаних завдань</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('Немає пов\'язаних завдань') }}</p>
     </div>
 
     <div x-show="!loading && cards.length > 0" class="space-y-2">
@@ -74,7 +74,7 @@
                     </div>
                     <div class="flex items-center space-x-2">
                         <span x-show="card.is_completed" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-                            Виконано
+                            {{ __('Виконано') }}
                         </span>
                         <span class="text-xs text-gray-500 dark:text-gray-400" x-text="card.column?.board?.name"></span>
                     </div>

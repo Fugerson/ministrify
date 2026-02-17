@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Головна')
+@section('title', __('Головна'))
 
 @section('content')
 <!-- Onboarding Reminder for new admins -->
@@ -9,7 +9,7 @@
 <div class="space-y-4 lg:space-y-6 page-transition">
     <!-- Mobile Welcome -->
     <div class="lg:hidden">
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Привіт, {{ explode(' ', auth()->user()->name)[0] }}!</h1>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('Привіт, :name!', ['name' => explode(' ', auth()->user()->name)[0]]) }}</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">{{ now()->locale('uk')->translatedFormat('l, d F') }}</p>
     </div>
 
@@ -30,7 +30,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
-                <span x-text="editMode ? 'Редагування...' : 'Редагувати дашборд'"></span>
+                <span x-text="editMode ? '{{ __('Редагування...') }}' : '{{ __('Редагувати дашборд') }}'"></span>
             </button>
         </div>
         @endadmin
@@ -39,7 +39,7 @@
         <div x-show="editMode" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-primary-200 dark:border-primary-800 p-4 mt-2">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div class="text-sm text-gray-600 dark:text-gray-400">
-                    Перетягуйте віджети для зміни порядку. Змінюйте ширину або видаляйте непотрібні.
+                    {{ __('Перетягуйте віджети для зміни порядку. Змінюйте ширину або видаляйте непотрібні.') }}
                 </div>
                 <div class="flex items-center gap-2 flex-shrink-0">
                     {{-- Add Widget --}}
@@ -49,7 +49,7 @@
                             class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            Додати віджет
+                            {{ __('Додати віджет') }}
                         </button>
                         <div
                             x-show="addOpen"
@@ -73,7 +73,7 @@
                                     </button>
                                 </template>
                                 <div x-show="getDisabledWidgets().length === 0" class="text-center py-4 text-sm text-gray-400">
-                                    Всі віджети вже додано
+                                    {{ __('Всі віджети вже додано') }}
                                 </div>
                             </div>
                         </div>
@@ -87,7 +87,7 @@
                     >
                         <svg x-show="!saving" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <svg x-show="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                        Зберегти
+                        {{ __('Зберегти') }}
                     </button>
 
                     {{-- Cancel --}}
@@ -95,7 +95,7 @@
                         @click="cancelEdit()"
                         class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                     >
-                        Скасувати
+                        {{ __('Скасувати') }}
                     </button>
                 </div>
             </div>
@@ -144,12 +144,12 @@
                                     <span class="text-[10px]">2/3</span>
                                 </button>
                                 @endif
-                                <button @click="changeWidth('{{ $widget['id'] }}', 12)" class="w-7 h-7 rounded-md text-xs font-bold transition-colors" :class="getWidgetCols('{{ $widget['id'] }}') === 12 ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700 hover:bg-gray-50'" title="Повна ширина">
+                                <button @click="changeWidth('{{ $widget['id'] }}', 12)" class="w-7 h-7 rounded-md text-xs font-bold transition-colors" :class="getWidgetCols('{{ $widget['id'] }}') === 12 ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700 hover:bg-gray-50'" title="{{ __('Повна ширина') }}">
                                     <span class="text-[10px]">Full</span>
                                 </button>
 
                                 {{-- Remove Button --}}
-                                <button @click="removeWidget('{{ $widget['id'] }}')" class="w-7 h-7 rounded-md bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 flex items-center justify-center transition-colors ml-1" title="Видалити">
+                                <button @click="removeWidget('{{ $widget['id'] }}')" class="w-7 h-7 rounded-md bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 flex items-center justify-center transition-colors ml-1" title="{{ __('Видалити') }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                             </div>
@@ -173,16 +173,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Очікування підтвердження</h2>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ __('Очікування підтвердження') }}</h2>
             <p class="text-gray-600 dark:text-gray-400 max-w-md mb-6">
-                Ваш акаунт створено, але адміністратор ще не надав вам доступ до системи.
-                Зверніться до адміністратора вашої церкви для отримання доступу.
+                {{ __('Ваш акаунт створено, але адміністратор ще не надав вам доступ до системи.') }}
+                {{ __('Зверніться до адміністратора вашої церкви для отримання доступу.') }}
             </p>
             <a href="{{ route('my-profile') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
-                Мій профіль
+                {{ __('Мій профіль') }}
             </a>
         </div>
     </div>
@@ -337,11 +337,11 @@ function dashboardBuilder() {
                     window.location.reload();
                 } else {
                     const err = await response.json();
-                    alert('Помилка збереження: ' + (err.message || 'Невідома помилка'));
+                    alert('{{ __('Помилка збереження:') }} ' + (err.message || '{{ __('Невідома помилка') }}'));
                 }
             } catch (e) {
                 console.error('Save failed:', e);
-                alert('Помилка мережі при збереженні');
+                alert('{{ __('Помилка мережі при збереженні') }}');
             } finally {
                 this.saving = false;
             }

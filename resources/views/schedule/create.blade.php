@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Створити подію')
+@section('title', __('Створити подію'))
 
 @php
     $ministriesData = $ministries->map(function($m) {
@@ -14,28 +14,28 @@
         @csrf
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова подія</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Нова подія') }}</h2>
 
             <div class="space-y-4">
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Назва') }} *</label>
                     <input type="text" name="title" id="title" value="{{ old('title') }}" required
                            class="w-full px-3 py-2 border {{ $errors->has('title') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                           placeholder="Недільне богослужіння">
+                           placeholder="{{ __('Недільне богослужіння') }}">
                     @error('title') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
 
                 <div x-data="{ allDay: {{ old('all_day') ? 'true' : 'false' }} }">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
-                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
+                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>
                             <input type="date" name="date" id="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
                                    class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('date') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             @error('date') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                         </div>
 
                         <div x-show="!allDay" x-transition>
-                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Час *</label>
+                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Час') }} *</label>
                             <input type="time" name="time" id="time" value="{{ old('time', '10:00') }}" :required="!allDay"
                                    class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('time') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             @error('time') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
@@ -45,7 +45,7 @@
                     <label class="flex items-center gap-2 mt-2 cursor-pointer">
                         <input type="checkbox" name="all_day" value="1" x-model="allDay"
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Подія на весь день</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на весь день') }}</span>
                     </label>
                 </div>
 
@@ -58,7 +58,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Повторення
+                        {{ __('Повторення') }}
                         <span x-show="recurrenceType" x-cloak class="text-xs text-primary-600 dark:text-primary-400 font-medium"
                               x-text="recurrenceType ? '(' + ({'daily':'щодня','weekly':'щотижня','biweekly':'що 2 тижні','monthly':'щомісяця','yearly':'щороку','weekdays':'пн-пт','custom':'свій'}[recurrenceType] || '') + ')' : ''"></span>
                     </button>
@@ -66,46 +66,46 @@
                     <div x-show="showRecurrence" x-collapse class="mt-3 space-y-3">
                         <select x-model="recurrenceType" @change="updateRecurrence()"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <option value="">Не повторювати</option>
-                            <option value="daily">Щодня</option>
-                            <option value="weekly">Щотижня</option>
-                            <option value="biweekly">Що 2 тижні</option>
-                            <option value="monthly">Щомісяця</option>
-                            <option value="yearly">Щороку</option>
-                            <option value="weekdays">Кожен робочий день (пн-пт)</option>
-                            <option value="custom">Користувацьке...</option>
+                            <option value="">{{ __('Не повторювати') }}</option>
+                            <option value="daily">{{ __('Щодня') }}</option>
+                            <option value="weekly">{{ __('Щотижня') }}</option>
+                            <option value="biweekly">{{ __('Що 2 тижні') }}</option>
+                            <option value="monthly">{{ __('Щомісяця') }}</option>
+                            <option value="yearly">{{ __('Щороку') }}</option>
+                            <option value="weekdays">{{ __('Кожен робочий день (пн-пт)') }}</option>
+                            <option value="custom">{{ __('Користувацьке...') }}</option>
                         </select>
 
                         <!-- Custom recurrence settings -->
                         <div x-show="recurrenceType === 'custom'" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-gray-600 dark:text-gray-400">Кожні</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Кожні') }}</span>
                                 <input type="number" x-model="customInterval" @input="updatePreview()" min="1" max="99"
                                        class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
                                 <select x-model="customFrequency" @change="updatePreview()"
                                         class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <option value="day">днів</option>
-                                    <option value="week">тижнів</option>
-                                    <option value="month">місяців</option>
-                                    <option value="year">років</option>
+                                    <option value="day">{{ __('днів') }}</option>
+                                    <option value="week">{{ __('тижнів') }}</option>
+                                    <option value="month">{{ __('місяців') }}</option>
+                                    <option value="year">{{ __('років') }}</option>
                                 </select>
                             </div>
                         </div>
 
                         <!-- Recurrence end settings -->
                         <div x-show="recurrenceType && recurrenceType !== ''" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
-                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Закінчується</label>
+                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('Закінчується') }}</label>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" x-model="endType" value="count" @change="updatePreview()" class="text-primary-600 focus:ring-primary-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">Після</span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('Після') }}</span>
                                     <input type="number" x-model="endCount" @input="updatePreview()" min="2" max="365" :disabled="endType !== 'count'"
                                            class="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center disabled:opacity-50">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">повторень</span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('повторень') }}</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" x-model="endType" value="date" @change="updatePreview()" class="text-primary-600 focus:ring-primary-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">До дати</span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('До дати') }}</span>
                                     <input type="date" x-model="endDate" @change="updatePreview()" :disabled="endType !== 'date'"
                                            class="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
                                 </label>
@@ -122,10 +122,10 @@
                 </div>
 
                 <div>
-                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Нотатки') }}</label>
                     <textarea name="notes" id="notes" rows="2"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              placeholder="Додаткова інформація...">{{ old('notes') }}</textarea>
+                              placeholder="{{ __('Додаткова інформація...') }}">{{ old('notes') }}</textarea>
                 </div>
 
                 <!-- Ministry/Team Selection -->
@@ -138,7 +138,7 @@
                         return this.ministries.find(function(m) { return m.id == self.selectedId; });
                     }
                 }">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
                     <x-searchable-select
                         name="ministry_id"
                         :items="$ministries"
@@ -146,8 +146,8 @@
                         labelKey="name"
                         valueKey="id"
                         colorKey="color"
-                        placeholder="Пошук команди..."
-                        nullText="Без команди"
+                        placeholder="{{ __('Пошук команди...') }}"
+                        nullText="{{ __('Без команди') }}"
                         nullable
                         x-on:select-changed="selectedId = $event.detail.value || ''"
                     />
@@ -169,11 +169,11 @@
                                {{ old('is_service') ? 'checked' : '' }}
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
                         <label for="is_service" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Це подія з планом
+                            {{ __('Це подія з планом') }}
                         </label>
                     </div>
                     <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        Увімкніть, щоб створити план події з таймлайном (прославлення, проповідь, оголошення тощо)
+                        {{ __('Увімкніть, щоб створити план події з таймлайном (прославлення, проповідь, оголошення тощо)') }}
                     </p>
                 </div>
 
@@ -185,11 +185,11 @@
                                {{ old('track_attendance') ? 'checked' : '' }}
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
                         <label for="track_attendance" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Відстежувати відвідуваність
+                            {{ __('Відстежувати відвідуваність') }}
                         </label>
                     </div>
                     <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        Увімкніть, щоб відмічати хто був на цій події
+                        {{ __('Увімкніть, щоб відмічати хто був на цій події') }}
                     </p>
                 </div>
                 @endif
@@ -205,7 +205,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
-                        Нагадування в Telegram
+                        {{ __('Нагадування в Telegram') }}
                         <span x-show="reminders.length > 0" x-cloak class="inline-flex items-center justify-center w-5 h-5 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full" x-text="reminders.length"></span>
                     </button>
 
@@ -214,8 +214,8 @@
                             <div class="flex items-center gap-2">
                                 <select x-model="reminder.type" @change="updateReminder(index)"
                                         class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <option value="days">За днів до</option>
-                                    <option value="hours">За годин до</option>
+                                    <option value="days">{{ __('За днів до') }}</option>
+                                    <option value="hours">{{ __('За годин до') }}</option>
                                 </select>
                                 <input type="number" x-model="reminder.value" min="1" max="30"
                                        class="w-20 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
@@ -237,11 +237,11 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            Додати нагадування
+                            {{ __('Додати нагадування') }}
                         </button>
 
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            Нагадування надсилатимуться призначеним служителям
+                            {{ __('Нагадування надсилатимуться призначеним служителям') }}
                         </p>
                     </div>
 
@@ -274,27 +274,27 @@
             </div>
             <select name="google_calendar_id" x-model="calendarId"
                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                <option value="">Не додавати в Google</option>
-                <option value="primary">Основний календар</option>
+                <option value="">{{ __('Не додавати в Google') }}</option>
+                <option value="primary">{{ __('Основний календар') }}</option>
                 <template x-for="cal in calendars" :key="cal.id">
                     <option :value="cal.id" :disabled="!cal.can_sync" :selected="cal.id === defaultCalendarId"
                             x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
                 </template>
             </select>
-            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Подія автоматично з'явиться в обраному календарі</p>
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ __('Подія автоматично з\'явиться в обраному календарі') }}</p>
         </div>
         @endif
 
         <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:space-x-4">
             <a href="{{ route('schedule') }}" class="w-full sm:w-auto text-center px-4 py-2.5 md:py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                Скасувати
+                {{ __('Скасувати') }}
             </a>
             <button type="submit" :disabled="submitting" class="w-full sm:w-auto px-6 py-2.5 md:py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
                 <svg x-show="submitting" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
-                <span x-text="submitting ? 'Створення...' : 'Створити'"></span>
+                <span x-text="submitting ? '{{ __('Створення...') }}' : '{{ __('Створити') }}'"></span>
             </button>
         </div>
     </form>

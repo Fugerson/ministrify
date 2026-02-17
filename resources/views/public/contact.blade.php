@@ -1,14 +1,14 @@
 @extends('public.layout')
 
-@section('title', 'Контакти - ' . $church->name)
+@section('title', __('Контакти') . ' - ' . $church->name)
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- Header -->
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">Зв'яжіться з нами</h1>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ __("Зв'яжіться з нами") }}</h1>
         <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            Ми завжди раді вашим питанням та відгукам. Не соромтеся звертатися!
+            {{ __('Ми завжди раді вашим питанням та відгукам. Не соромтеся звертатися!') }}
         </p>
     </div>
 
@@ -16,7 +16,7 @@
         <!-- Contact Info -->
         <div>
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">Контактна інформація</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('Контактна інформація') }}</h2>
 
                 <div class="space-y-6">
                     @if($church->address)
@@ -28,7 +28,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-900">Адреса</h3>
+                                <h3 class="font-semibold text-gray-900">{{ __('Адреса') }}</h3>
                                 <p class="text-gray-600 mt-1">{{ $church->address }}@if($church->city), {{ $church->city }}@endif</p>
                             </div>
                         </div>
@@ -42,7 +42,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-900">Телефон</h3>
+                                <h3 class="font-semibold text-gray-900">{{ __('Телефон') }}</h3>
                                 <a href="tel:{{ $church->public_phone }}" class="text-primary-600 hover:text-primary-700 mt-1 block">{{ $church->public_phone }}</a>
                             </div>
                         </div>
@@ -56,7 +56,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-900">Email</h3>
+                                <h3 class="font-semibold text-gray-900">{{ __('Email') }}</h3>
                                 <a href="mailto:{{ $church->public_email }}" class="text-primary-600 hover:text-primary-700 mt-1 block">{{ $church->public_email }}</a>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-900">Богослужіння</h3>
+                                <h3 class="font-semibold text-gray-900">{{ __('Богослужіння') }}</h3>
                                 <p class="text-gray-600 mt-1">{{ $church->service_times }}</p>
                             </div>
                         </div>
@@ -81,7 +81,7 @@
             <!-- Social Links -->
             @if($church->facebook_url || $church->instagram_url || $church->youtube_url || $church->website_url)
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                    <h2 class="text-xl font-bold text-gray-900 mb-6">Слідкуйте за нами</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('Слідкуйте за нами') }}</h2>
                     <div class="flex flex-wrap gap-4">
                         @if($church->facebook_url)
                             <a href="{{ $church->facebook_url }}" target="_blank"
@@ -110,7 +110,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
                                 </svg>
-                                Веб-сайт
+                                {{ __('Веб-сайт') }}
                             </a>
                         @endif
                     </div>
@@ -138,7 +138,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                                 </svg>
-                                Відкрити в Google Maps
+                                {{ __('Відкрити в Google Maps') }}
                             </a>
                         </div>
                     </div>
@@ -146,7 +146,7 @@
                     <div class="w-full h-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
                         <div class="text-center text-white p-8">
                             <h3 class="text-2xl font-bold mb-2">{{ $church->name }}</h3>
-                            <p class="text-white/80">Ласкаво просимо!</p>
+                            <p class="text-white/80">{{ __('Ласкаво просимо!') }}</p>
                         </div>
                     </div>
                 @endif

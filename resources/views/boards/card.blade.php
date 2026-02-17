@@ -46,14 +46,14 @@
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
                         </svg>
-                        <h3 class="font-medium text-gray-900 dark:text-white">Опис</h3>
+                        <h3 class="font-medium text-gray-900 dark:text-white">{{ __('Опис') }}</h3>
                     </div>
 
                     <div x-show="!editing" @click="editing = true" class="cursor-pointer">
                         @if($card->description)
                             <p class="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{{ $card->description }}</p>
                         @else
-                            <p class="text-gray-400 dark:text-gray-500 italic">Натисніть, щоб додати опис...</p>
+                            <p class="text-gray-400 dark:text-gray-500 italic">{{ __('Натисніть, щоб додати опис...') }}</p>
                         @endif
                     </div>
 
@@ -63,11 +63,11 @@
                         <div class="flex items-center gap-2 mt-2">
                             <button type="submit"
                                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                Зберегти
+                                {{ __('Зберегти') }}
                             </button>
                             <button type="button" @click="editing = false"
                                     class="px-4 py-2 text-gray-600 dark:text-gray-400 text-sm font-medium">
-                                Скасувати
+                                {{ __('Скасувати') }}
                             </button>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
-                        <h3 class="font-medium text-gray-900 dark:text-white">Чеклист</h3>
+                        <h3 class="font-medium text-gray-900 dark:text-white">{{ __('Чеклист') }}</h3>
                     </div>
 
                     @if($card->checklistItems->count() > 0)
@@ -138,15 +138,15 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            Додати пункт
+                            {{ __('Додати пункт') }}
                         </button>
                     </template>
                     <template x-if="adding">
                         <div class="flex items-center gap-2">
-                            <input type="text" name="title" required autofocus placeholder="Назва пункту..."
+                            <input type="text" name="title" required autofocus placeholder="{{ __('Назва пункту...') }}"
                                    class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm">
                             <button type="submit" class="px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg">
-                                Додати
+                                {{ __('Додати') }}
                             </button>
                             <button type="button" @click="adding = false" class="p-2 text-gray-400 hover:text-gray-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,16 +164,16 @@
                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
-                    <h3 class="font-medium text-gray-900 dark:text-white">Коментарі</h3>
+                    <h3 class="font-medium text-gray-900 dark:text-white">{{ __('Коментарі') }}</h3>
                 </div>
 
                 <!-- Add comment -->
                 <form method="POST" action="{{ route('boards.cards.comments.store', $card) }}" class="mb-4">
                     @csrf
-                    <textarea name="content" rows="2" required placeholder="Написати коментар..."
+                    <textarea name="content" rows="2" required placeholder="{{ __('Написати коментар...') }}"
                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"></textarea>
                     <button type="submit" class="mt-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                        Коментувати
+                        {{ __('Коментувати') }}
                     </button>
                 </form>
 
@@ -188,7 +188,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="font-medium text-gray-900 dark:text-white text-sm">{{ $comment->user?->name ?? 'Видалений' }}</span>
+                                    <span class="font-medium text-gray-900 dark:text-white text-sm">{{ $comment->user?->name ?? __('Видалений') }}</span>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                                 </div>
                                 <p class="text-gray-600 dark:text-gray-300 text-sm mt-1">{{ $comment->content }}</p>
@@ -207,7 +207,7 @@
                             @endif
                         </div>
                     @empty
-                        <p class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">Немає коментарів</p>
+                        <p class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">{{ __('Немає коментарів') }}</p>
                     @endforelse
                 </div>
             </div>
@@ -217,7 +217,7 @@
         <div class="space-y-6">
             <!-- Card Details -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Деталі</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Деталі') }}</h3>
 
                 <form method="POST" action="{{ route('boards.cards.update', $card) }}" class="space-y-4">
                     @csrf
@@ -227,7 +227,7 @@
 
                     <!-- Column -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колонка</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Колонка') }}</label>
                         <select name="column_id"
                                 class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"
                                 onchange="this.form.submit()">
@@ -241,24 +241,24 @@
 
                     <!-- Priority -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пріоритет</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Пріоритет') }}</label>
                         <select name="priority"
                                 class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"
                                 onchange="this.form.submit()">
-                            <option value="low" {{ $card->priority === 'low' ? 'selected' : '' }}>Низький</option>
-                            <option value="medium" {{ $card->priority === 'medium' ? 'selected' : '' }}>Середній</option>
-                            <option value="high" {{ $card->priority === 'high' ? 'selected' : '' }}>Високий</option>
-                            <option value="urgent" {{ $card->priority === 'urgent' ? 'selected' : '' }}>Терміновий</option>
+                            <option value="low" {{ $card->priority === 'low' ? 'selected' : '' }}>{{ __('Низький') }}</option>
+                            <option value="medium" {{ $card->priority === 'medium' ? 'selected' : '' }}>{{ __('Середній') }}</option>
+                            <option value="high" {{ $card->priority === 'high' ? 'selected' : '' }}>{{ __('Високий') }}</option>
+                            <option value="urgent" {{ $card->priority === 'urgent' ? 'selected' : '' }}>{{ __('Терміновий') }}</option>
                         </select>
                     </div>
 
                     <!-- Assignee -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Відповідальний</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Відповідальний') }}</label>
                         <select name="assigned_to"
                                 class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"
                                 onchange="this.form.submit()">
-                            <option value="">Не призначено</option>
+                            <option value="">{{ __('Не призначено') }}</option>
                             @foreach($people as $person)
                                 <option value="{{ $person->id }}" {{ $card->assigned_to === $person->id ? 'selected' : '' }}>
                                     {{ $person->full_name }}
@@ -269,7 +269,7 @@
 
                     <!-- Due Date -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дедлайн</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дедлайн') }}</label>
                         <input type="date" name="due_date"
                                value="{{ $card->due_date?->format('Y-m-d') }}"
                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"
@@ -282,18 +282,18 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
                 <div class="space-y-3 text-sm">
                     <div class="flex items-center justify-between text-gray-500 dark:text-gray-400">
-                        <span>Створено</span>
+                        <span>{{ __('Створено') }}</span>
                         <span>{{ $card->created_at->format('d.m.Y H:i') }}</span>
                     </div>
                     @if($card->creator)
                         <div class="flex items-center justify-between text-gray-500 dark:text-gray-400">
-                            <span>Автор</span>
+                            <span>{{ __('Автор') }}</span>
                             <span>{{ $card->creator->name }}</span>
                         </div>
                     @endif
                     @if($card->is_completed)
                         <div class="flex items-center justify-between text-green-600 dark:text-green-400">
-                            <span>Завершено</span>
+                            <span>{{ __('Завершено') }}</span>
                             <span>{{ $card->completed_at?->format('d.m.Y H:i') }}</span>
                         </div>
                     @endif
@@ -302,18 +302,18 @@
 
             <!-- Actions -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Дії</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Дії') }}</h3>
                 <div class="space-y-2">
                     <a href="{{ $card->column->board->ministry_id ? route('boards.show', $card->column->board) : route('boards.index') }}"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
-                        <span>Назад до дошки</span>
+                        <span>{{ __('Назад до дошки') }}</span>
                     </a>
 
                     <form method="POST" action="{{ route('boards.cards.destroy', $card) }}"
-                          onsubmit="return confirm('Видалити картку?')">
+                          onsubmit="return confirm('{{ __('Видалити картку?') }}')">
                         @csrf
                         @method('DELETE')
                         <button type="submit"
@@ -321,7 +321,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
-                            <span>Видалити картку</span>
+                            <span>{{ __('Видалити картку') }}</span>
                         </button>
                     </form>
                 </div>

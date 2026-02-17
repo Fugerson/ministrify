@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Підтвердження Email')
+@section('title', __('Підтвердження Email'))
 
 @section('content')
 <div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -12,21 +12,21 @@
                 </svg>
             </div>
             <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">
-                Підтвердіть ваш Email
+                {{ __('Підтвердіть ваш Email') }}
             </h2>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Ми надіслали лист на <strong>{{ auth()->user()->email }}</strong>
+                {{ __('Ми надіслали лист на') }} <strong>{{ auth()->user()->email }}</strong>
             </p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
             <div class="text-center space-y-4">
                 <p class="text-gray-600 dark:text-gray-300">
-                    Перейдіть за посиланням у листі, щоб підтвердити вашу email адресу.
+                    {{ __('Перейдіть за посиланням у листі, щоб підтвердити вашу email адресу.') }}
                 </p>
 
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Не отримали лист? Перевірте папку "Спам" або натисніть кнопку нижче.
+                    {{ __('Не отримали лист? Перевірте папку "Спам" або натисніть кнопку нижче.') }}
                 </p>
 
                 @if (session('status'))
@@ -45,7 +45,7 @@
                     @csrf
                     <button type="submit"
                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                        Надіслати лист ще раз
+                        {{ __('Надіслати лист ще раз') }}
                     </button>
                 </form>
 
@@ -53,7 +53,7 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                            Вийти з акаунту
+                            {{ __('Вийти з акаунту') }}
                         </button>
                     </form>
                 </div>

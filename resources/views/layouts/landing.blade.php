@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk" class="scroll-smooth">
+<html lang="{{ app()->getLocale() }}" class="scroll-smooth">
 <head>
     <script>
         // Dark mode by default - prevent FOUC
@@ -12,10 +12,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     {{-- Primary Meta Tags --}}
-    <title>@yield('title', 'Ministrify — Система управління церквою')</title>
-    <meta name="title" content="@yield('title', 'Ministrify — Система управління церквою')">
-    <meta name="description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди. Українська мова, LiqPay та Monobank.')">
-    <meta name="keywords" content="@yield('keywords', 'церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви')">
+    <title>@yield('title', __('Ministrify — Система управління церквою'))</title>
+    <meta name="title" content="@yield('title', __('Ministrify — Система управління церквою'))">
+    <meta name="description" content="@yield('description', __('Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди. Українська мова, LiqPay та Monobank.'))">
+    <meta name="keywords" content="@yield('keywords', __('церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви'))">
     <meta name="author" content="Ministrify">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url()->current() }}">
@@ -23,17 +23,17 @@
     {{-- Open Graph / Facebook --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="@yield('title', 'Ministrify — Система управління церквою')">
-    <meta property="og:description" content="@yield('description', 'Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди.')">
+    <meta property="og:title" content="@yield('title', __('Ministrify — Система управління церквою'))">
+    <meta property="og:description" content="@yield('description', __('Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди.'))">
     <meta property="og:image" content="@yield('og_image', asset('icon-512x512.png'))">
-    <meta property="og:locale" content="uk_UA">
+    <meta property="og:locale" content="{{ app()->getLocale() === 'en' ? 'en_US' : 'uk_UA' }}">
     <meta property="og:site_name" content="Ministrify">
 
     {{-- Twitter --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ url()->current() }}">
-    <meta name="twitter:title" content="@yield('title', 'Ministrify — Система управління церквою')">
-    <meta name="twitter:description" content="@yield('description', 'Сучасна платформа для управління церквою.')">
+    <meta name="twitter:title" content="@yield('title', __('Ministrify — Система управління церквою'))">
+    <meta name="twitter:description" content="@yield('description', __('Сучасна платформа для управління церквою.'))">
     <meta name="twitter:image" content="@yield('og_image', asset('icon-512x512.png'))">
 
     {{-- Favicon --}}
@@ -112,9 +112,9 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Church Management Software",
         "operatingSystem": "Web, iOS, Android",
-        "description": "Сучасна українська платформа для управління церквою: члени, події, пожертви, групи, команди, Telegram-бот.",
+        "description": "{{ __('Сучасна українська платформа для управління церквою: члени, події, пожертви, групи, команди, Telegram-бот.') }}",
         "url": "{{ url('/') }}",
-        "inLanguage": "uk",
+        "inLanguage": "{{ app()->getLocale() }}",
         "author": {
             "@type": "Organization",
             "name": "Ministrify",
@@ -124,7 +124,7 @@
         "offers": {
             "@type": "Offer",
             "availability": "https://schema.org/InStock",
-            "description": "Доступний для всіх церков"
+            "description": "{{ __('Доступний для всіх церков') }}"
         },
         "aggregateRating": {
             "@type": "AggregateRating",
@@ -133,7 +133,7 @@
             "bestRating": "5",
             "worstRating": "1"
         },
-        "featureList": "База членів церкви, Планування подій, Фінансовий облік, Telegram-бот, Домашні групи, Команди служіння"
+        "featureList": "{{ __('База членів церкви, Планування подій, Фінансовий облік, Telegram-бот, Домашні групи, Команди служіння') }}"
     }
     </script>
     <script type="application/ld+json">
@@ -143,7 +143,7 @@
         "name": "Ministrify",
         "url": "{{ url('/') }}",
         "logo": "{{ asset('icon-512x512.png') }}",
-        "description": "Сучасна українська платформа для управління церквою",
+        "description": "{{ __('Сучасна українська платформа для управління церквою') }}",
         "foundingDate": "2024",
         "foundingLocation": "Ukraine",
         "areaServed": {
@@ -191,11 +191,11 @@
 
                 {{-- Desktop Menu --}}
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Огляд функцій</a>
+                    <a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('Огляд функцій') }}</a>
                     {{-- TODO: Розкоментувати після бета-тестування
-                    <a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Ціни</a>
+                    <a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('Ціни') }}</a>
                     --}}
-                    <a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">Контакти</a>
+                    <a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('Контакти') }}</a>
                 </div>
 
                 {{-- CTA Buttons --}}
@@ -217,9 +217,10 @@
                             </svg>
                         </button>
                     </div>
-                    <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Увійти</a>
+                    <x-locale-switcher />
+                    <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">{{ __('Увійти') }}</a>
                     <a href="{{ url('/register-church') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-primary-600/25 hover:shadow-primary-600/40">
-                        Почати безкоштовно
+                        {{ __('Почати безкоштовно') }}
                     </a>
                 </div>
 
@@ -238,15 +239,15 @@
         {{-- Mobile Menu --}}
         <div x-show="mobileMenu" x-cloak x-transition class="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
             <div class="px-4 py-4 space-y-3">
-                <a href="{{ url('/features') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Огляд функцій</a>
+                <a href="{{ url('/features') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('Огляд функцій') }}</a>
                 {{-- TODO: Розкоментувати після бета-тестування
-                <a href="{{ url('/pricing') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Ціни</a>
+                <a href="{{ url('/pricing') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('Ціни') }}</a>
                 --}}
-                <a href="{{ url('/contact') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Контакти</a>
+                <a href="{{ url('/contact') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('Контакти') }}</a>
                 <hr class="border-gray-200 dark:border-gray-800">
                 {{-- Theme Toggle --}}
                 <div class="flex items-center justify-between px-3 py-2">
-                    <span class="text-gray-600 dark:text-gray-300 font-medium">Тема</span>
+                    <span class="text-gray-600 dark:text-gray-300 font-medium">{{ __('Тема') }}</span>
                     <div class="flex items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
                         <button @click="darkMode = false; localStorage.setItem('theme', 'light')"
                                 :class="!darkMode ? 'bg-white dark:bg-gray-600 shadow' : ''"
@@ -265,8 +266,9 @@
                     </div>
                 </div>
                 <hr class="border-gray-200 dark:border-gray-800">
-                <a href="{{ route('login') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">Увійти</a>
-                <a href="{{ url('/register-church') }}" class="block px-3 py-2 bg-primary-600 text-white text-center rounded-lg font-semibold">Почати безкоштовно</a>
+                <x-locale-switcher />
+                <a href="{{ route('login') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('Увійти') }}</a>
+                <a href="{{ url('/register-church') }}" class="block px-3 py-2 bg-primary-600 text-white text-center rounded-lg font-semibold">{{ __('Почати безкоштовно') }}</a>
             </div>
         </div>
     </nav>
@@ -291,45 +293,45 @@
                         <span class="text-lg font-bold text-gray-900 dark:text-white">Ministrify</span>
                     </a>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        Сучасна платформа для управління церквою. Зроблено в Україні 🇺🇦
+                        {{ __('Сучасна платформа для управління церквою. Зроблено в Україні 🇺🇦') }}
                     </p>
                 </div>
 
                 {{-- Product --}}
                 <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Продукт</h4>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Продукт') }}</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Огляд функцій</a></li>
+                        <li><a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Огляд функцій') }}</a></li>
                         {{-- TODO: Розкоментувати після бета-тестування
-                        <li><a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Ціни</a></li>
+                        <li><a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Ціни') }}</a></li>
                         --}}
-                        <li><a href="{{ url('/register-church') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Реєстрація</a></li>
+                        <li><a href="{{ url('/register-church') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Реєстрація') }}</a></li>
                     </ul>
                 </div>
 
                 {{-- Support --}}
                 <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Підтримка</h4>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Підтримка') }}</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Контакти</a></li>
-                        <li><a href="{{ url('/docs') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Документація</a></li>
+                        <li><a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Контакти') }}</a></li>
+                        <li><a href="{{ url('/docs') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Документація') }}</a></li>
                         <li><a href="{{ url('/faq') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">FAQ</a></li>
                     </ul>
                 </div>
 
                 {{-- Legal --}}
                 <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Правова інформація</h4>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Правова інформація') }}</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url('/terms') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Умови використання</a></li>
-                        <li><a href="{{ url('/privacy') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Політика приватності</a></li>
+                        <li><a href="{{ url('/terms') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Умови використання') }}</a></li>
+                        <li><a href="{{ url('/privacy') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Політика приватності') }}</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between">
                 <p class="text-gray-500 dark:text-gray-400 text-sm">
-                    © {{ date('Y') }} Ministrify. Всі права захищені.
+                    © {{ date('Y') }} Ministrify. {{ __('Всі права захищені.') }}
                 </p>
 {{-- Приховано: соціальні мережі
                 <div class="flex items-center space-x-4 mt-4 md:mt-0">

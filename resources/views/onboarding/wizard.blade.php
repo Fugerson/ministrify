@@ -13,7 +13,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Ministrify - Налаштування</title>
+    <title>Ministrify - {{ __('Налаштування') }}</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -260,13 +260,13 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ministrify</h1>
-                        <p class="text-sm font-medium theme-primary">Налаштування</p>
+                        <p class="text-sm font-medium theme-primary">{{ __('Налаштування') }}</p>
                     </div>
                 </div>
 
                 <!-- Steps Navigation -->
                 <nav class="space-y-1 mb-8">
-                    <p class="text-[10px] font-bold uppercase tracking-wider mb-3 px-4 text-gray-400 dark:text-gray-500">КРОКИ НАЛАШТУВАННЯ</p>
+                    <p class="text-[10px] font-bold uppercase tracking-wider mb-3 px-4 text-gray-400 dark:text-gray-500">{{ __('КРОКИ НАЛАШТУВАННЯ') }}</p>
                     @foreach($steps as $stepKey => $stepConfig)
                         <button
                             @click="goToStep('{{ $stepKey }}')"
@@ -305,7 +305,7 @@
                                        'text-gray-900 dark:text-white': currentStep !== '{{ $stepKey }}'
                                    }">{{ $stepConfig['title'] }}</p>
                                 @if(!$stepConfig['required'])
-                                    <p class="text-xs text-gray-400 dark:text-gray-500">опційно</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">{{ __('опційно') }}</p>
                                 @endif
                             </div>
                             <svg x-show="currentStep === '{{ $stepKey }}'" class="w-5 h-5 theme-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,7 +319,7 @@
                 <div class="rounded-2xl p-5 shadow-sm border bg-white dark:bg-slate-700/50 border-gray-100 dark:border-slate-600/50">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">ПРОГРЕС</p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ __('ПРОГРЕС') }}</p>
                             <p class="text-2xl font-bold mt-1 text-gray-900 dark:text-white" x-text="progress.percentage + '%'"></p>
                         </div>
                         <div class="w-14 h-14 rounded-2xl flex items-center justify-center theme-bg-50 dark:bg-opacity-30">
@@ -332,7 +332,7 @@
                         <div class="h-full progress-bar" :style="'width: ' + progress.percentage + '%'"></div>
                     </div>
                     <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                        <span class="font-semibold theme-primary" x-text="progress.completed"></span> з <span x-text="progress.total"></span> кроків завершено
+                        <span class="font-semibold theme-primary" x-text="progress.completed"></span> {{ __('з') }} <span x-text="progress.total"></span> {{ __('кроків завершено') }}
                     </p>
                 </div>
 
@@ -349,7 +349,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                     </template>
-                    <span x-text="darkMode ? 'Світла тема' : 'Темна тема'"></span>
+                    <span x-text="darkMode ? '{{ __('Світла тема') }}' : '{{ __('Темна тема') }}'"></span>
                 </button>
             </aside>
 
@@ -364,7 +364,7 @@
                 <div x-show="loading" class="flex flex-col items-center justify-center py-20">
                     <div class="w-16 h-16 rounded-full border-4 border-t-4 animate-spin"
                          :style="'border-color: var(--theme-100); border-top-color: var(--theme-500);'"></div>
-                    <p class="mt-4 text-gray-500 dark:text-gray-400">Завантаження...</p>
+                    <p class="mt-4 text-gray-500 dark:text-gray-400">{{ __('Завантаження...') }}</p>
                 </div>
 
                 <!-- Navigation -->
@@ -375,7 +375,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
-                        Назад
+                        {{ __('Назад') }}
                     </button>
                     <div x-show="!canGoPrevious()"></div>
 
@@ -384,19 +384,19 @@
                                 @click="skipStep()"
                                 :disabled="saving"
                                 class="px-5 py-2.5 rounded-xl transition-all font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">
-                            Пропустити
+                            {{ __('Пропустити') }}
                         </button>
 
                         <button @click="saveAndNext()"
                                 :disabled="saving"
                                 class="btn-primary flex items-center gap-2 px-8 py-3 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                            <span x-show="!saving" x-text="isLastStep() ? 'Завершити' : 'Продовжити'"></span>
+                            <span x-show="!saving" x-text="isLastStep() ? '{{ __('Завершити') }}' : '{{ __('Продовжити') }}'"></span>
                             <span x-show="saving" class="flex items-center gap-2">
                                 <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Збереження...
+                                {{ __('Збереження...') }}
                             </span>
                             <svg x-show="!saving" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -574,8 +574,8 @@
                         if (!response.ok) {
                             const errorData = await response.json().catch(() => ({}));
                             this.serverError = {
-                                title: 'Помилка валідації',
-                                message: errorData.message || 'Перевірте правильність даних',
+                                title: '{{ __('Помилка валідації') }}',
+                                message: errorData.message || '{{ __('Перевірте правильність даних') }}',
                                 errors: errorData.errors ? Object.values(errorData.errors).flat() : null
                             };
                             setTimeout(() => this.serverError = null, 8000);
@@ -594,13 +594,13 @@
                             this.progress = data.progress || this.progress;
 
                             if (data.completed) {
-                                this.successMessage = 'Налаштування завершено!';
+                                this.successMessage = '{{ __('Налаштування завершено!') }}';
                                 this.celebrate();
                                 setTimeout(() => {
                                     window.location.href = data.redirect;
                                 }, 2500);
                             } else if (data.nextStep) {
-                                this.successMessage = 'Збережено';
+                                this.successMessage = '{{ __('Збережено') }}';
                                 setTimeout(() => this.successMessage = null, 1500);
                                 this.currentStep = data.nextStep;
                                 await this.loadStepContent();
@@ -608,8 +608,8 @@
                         }
                     } catch (error) {
                         this.serverError = {
-                            title: 'Помилка з\'єднання',
-                            message: 'Перевірте інтернет-з\'єднання'
+                            title: '{{ __('Помилка з\'єднання') }}',
+                            message: '{{ __('Перевірте інтернет-з\'єднання') }}'
                         };
                         setTimeout(() => this.serverError = null, 5000);
                     }

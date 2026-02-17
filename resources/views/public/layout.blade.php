@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,7 +19,7 @@
     <meta property="og:title" content="@yield('title', $church->name)">
     <meta property="og:description" content="{{ Str::limit(strip_tags($metaDescription), 200) }}">
     <meta property="og:site_name" content="{{ $church->name }}">
-    <meta property="og:locale" content="uk_UA">
+    <meta property="og:locale" content="{{ app()->getLocale() === 'en' ? 'en_US' : 'uk_UA' }}">
     @if($ogImage)
         <meta property="og:image" content="{{ Str::startsWith($ogImage, 'http') ? $ogImage : url($ogImage) }}">
     @endif
@@ -148,18 +148,19 @@
                 <div class="hidden md:flex items-center gap-1">
                     <a href="{{ route('public.church', $church->slug) }}"
                        class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                        Головна
+                        {{ __('Головна') }}
                     </a>
                     <a href="{{ route('public.events', $church->slug) }}"
                        class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                        Події
+                        {{ __('Події') }}
                     </a>
                     {{-- TODO: Розкоментувати після бета-тестування
                     <a href="{{ route('public.donate', $church->slug) }}"
                        class="ml-2 px-5 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shadow-sm">
-                        Пожертвувати
+                        {{ __('Пожертвувати') }}
                     </a>
                     --}}
+                    <x-locale-switcher />
                 </div>
 
                 <!-- Mobile menu button -->
@@ -177,11 +178,14 @@
         <!-- Mobile menu -->
         <div x-show="mobileOpen" x-cloak class="md:hidden border-t border-gray-100">
             <div class="px-4 py-3 space-y-1">
-                <a href="{{ route('public.church', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Головна</a>
-                <a href="{{ route('public.events', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Події</a>
+                <a href="{{ route('public.church', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">{{ __('Головна') }}</a>
+                <a href="{{ route('public.events', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">{{ __('Події') }}</a>
                 {{-- TODO: Розкоментувати після бета-тестування
-                <a href="{{ route('public.donate', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg text-center mt-3">Пожертвувати</a>
+                <a href="{{ route('public.donate', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg text-center mt-3">{{ __('Пожертвувати') }}</a>
                 --}}
+                <div class="px-4 py-2">
+                    <x-locale-switcher />
+                </div>
             </div>
         </div>
     </nav>
@@ -231,7 +235,7 @@
                 </div>
 
                 <div>
-                    <h4 class="font-semibold mb-4">Контакти</h4>
+                    <h4 class="font-semibold mb-4">{{ __('Контакти') }}</h4>
                     <ul class="space-y-2 text-sm text-gray-400">
                         @if($church->address)
                             <li class="flex items-start gap-2">

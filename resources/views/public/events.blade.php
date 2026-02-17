@@ -1,14 +1,14 @@
 @extends('public.layout')
 
-@section('title', 'Події - ' . $church->name)
+@section('title', __('Події') . ' - ' . $church->name)
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- Header -->
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">Наші події</h1>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ __('Наші події') }}</h1>
         <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-            Приєднуйтесь до нас на богослужіннях, семінарах та інших заходах нашої громади
+            {{ __('Приєднуйтесь до нас на богослужіннях, семінарах та інших заходах нашої громади') }}
         </p>
     </div>
 
@@ -48,11 +48,11 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                     </svg>
-                                    Реєстрація відкрита
+                                    {{ __('Реєстрація відкрита') }}
                                 </span>
                                 @if($event->registration_limit)
                                     <span class="text-xs text-gray-400">
-                                        {{ $event->remaining_spaces ?? 0 }} місць
+                                        {{ __(':count місць', ['count' => $event->remaining_spaces ?? 0]) }}
                                     </span>
                                 @endif
                             </div>
@@ -72,8 +72,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Немає запланованих подій</h3>
-            <p class="text-gray-500">Слідкуйте за оновленнями - нові події з'являться незабаром</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ __('Немає запланованих подій') }}</h3>
+            <p class="text-gray-500">{{ __('Слідкуйте за оновленнями - нові події з\'являться незабаром') }}</p>
         </div>
     @endif
 </div>

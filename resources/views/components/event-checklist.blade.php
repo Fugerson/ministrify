@@ -7,7 +7,7 @@
             <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
-            <h3 class="font-semibold text-gray-900 dark:text-white">Чеклист</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('Чеклист') }}</h3>
         </div>
 
         <template x-if="hasChecklist">
@@ -69,17 +69,17 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            Додати пункт
+                            {{ __('Додати пункт') }}
                         </button>
                     </template>
 
                     <template x-if="adding">
                         <form @submit.prevent="addItem()" class="flex items-center gap-2">
                             <input type="text" x-model="newTitle" required x-ref="newItemInput"
-                                   placeholder="Назва пункту..."
+                                   placeholder="{{ __('Назва пункту...') }}"
                                    class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm">
                             <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                Додати
+                                {{ __('Додати') }}
                             </button>
                             <button type="button" @click="adding = false; newTitle = ''" class="p-2 text-gray-500 hover:text-gray-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +102,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Додайте чеклист для відстеження підготовки</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('Додайте чеклист для відстеження підготовки') }}</p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <button type="button" @click="createChecklist()"
@@ -110,7 +110,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Порожній чеклист
+                        {{ __('Порожній чеклист') }}
                     </button>
 
                     @if($templates->isNotEmpty())
@@ -120,7 +120,7 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
-                                З шаблону
+                                {{ __('З шаблону') }}
                             </button>
 
                             <div x-show="showTemplates" x-cloak @click.away="showTemplates = false"
@@ -129,7 +129,7 @@
                                     <button type="button" @click="createChecklist({{ $template->id }})"
                                             class="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                         <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $template->name }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $template->items->count() }} пунктів</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __(':count пунктів', ['count' => $template->items->count()]) }}</p>
                                     </button>
                                 @endforeach
                             </div>
@@ -196,17 +196,17 @@ function checklistManager(eventId, hasChecklistInitial) {
                         this.hasChecklist = true;
                         this.showTemplates = false;
                         this.updateProgress();
-                        if (window.showGlobalToast) showGlobalToast('Чеклист створено', 'success');
+                        if (window.showGlobalToast) showGlobalToast('{{ __('Чеклист створено') }}', 'success');
                     }
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('Помилка створення', 'error');
+                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка створення') }}', 'error');
             }
         },
 
         async deleteChecklist() {
-            if (!confirm('Видалити чеклист?')) return;
+            if (!confirm('{{ __('Видалити чеклист?') }}')) return;
 
             try {
                 const response = await fetch(`/checklists/${this.checklistId}`, {
@@ -223,11 +223,11 @@ function checklistManager(eventId, hasChecklistInitial) {
                     this.checklistId = null;
                     this.items = [];
                     this.progress = 0;
-                    if (window.showGlobalToast) showGlobalToast('Чеклист видалено', 'success');
+                    if (window.showGlobalToast) showGlobalToast('{{ __('Чеклист видалено') }}', 'success');
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('Помилка видалення', 'error');
+                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка видалення') }}', 'error');
             }
         },
 
@@ -257,7 +257,7 @@ function checklistManager(eventId, hasChecklistInitial) {
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('Помилка', 'error');
+                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка') }}', 'error');
             }
         },
 
@@ -290,12 +290,12 @@ function checklistManager(eventId, hasChecklistInitial) {
                         this.newTitle = '';
                         this.adding = false;
                         this.updateProgress();
-                        if (window.showGlobalToast) showGlobalToast('Пункт додано', 'success');
+                        if (window.showGlobalToast) showGlobalToast('{{ __('Пункт додано') }}', 'success');
                     }
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('Помилка додавання', 'error');
+                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка додавання') }}', 'error');
             }
         },
 
@@ -313,11 +313,11 @@ function checklistManager(eventId, hasChecklistInitial) {
                 if (response.ok) {
                     this.items = this.items.filter(i => i.id !== item.id);
                     this.updateProgress();
-                    if (window.showGlobalToast) showGlobalToast('Пункт видалено', 'success');
+                    if (window.showGlobalToast) showGlobalToast('{{ __('Пункт видалено') }}', 'success');
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('Помилка видалення', 'error');
+                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка видалення') }}', 'error');
             }
         }
     };

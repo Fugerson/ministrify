@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати подію')
+@section('title', __('Редагувати подію'))
 
 @php
     $ministriesData = $ministries->map(function($m) {
@@ -15,7 +15,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
-            Назад до події
+            {{ __('Назад до події') }}
         </a>
     </div>
 
@@ -24,11 +24,11 @@
         @method('PUT')
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Редагувати подію</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Редагувати подію') }}</h2>
 
             <div class="space-y-4">
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Назва') }} *</label>
                     <input type="text" name="title" id="title" value="{{ old('title', $event->title) }}" required
                            class="w-full px-3 py-2 border {{ $errors->has('title') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     @error('title') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
@@ -37,14 +37,14 @@
                 <div x-data="{ allDay: {{ old('all_day', !$event->time) ? 'true' : 'false' }} }">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
-                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
+                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>
                             <input type="date" name="date" id="date" value="{{ old('date', $event->date->format('Y-m-d')) }}" required
                                    class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('date') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             @error('date') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                         </div>
 
                         <div x-show="!allDay" x-transition>
-                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Час</label>
+                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Час') }}</label>
                             <input type="time" name="time" id="time" value="{{ old('time', $event->time?->format('H:i')) }}" :required="!allDay"
                                    class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('time') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             @error('time') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
@@ -54,12 +54,12 @@
                     <label class="flex items-center gap-2 mt-2 cursor-pointer">
                         <input type="checkbox" name="all_day" value="1" x-model="allDay"
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Подія на весь день</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на весь день') }}</span>
                     </label>
                 </div>
 
                 <div>
-                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Нотатки') }}</label>
                     <textarea name="notes" id="notes" rows="3"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">{{ old('notes', $event->notes) }}</textarea>
                 </div>
@@ -74,7 +74,7 @@
                         return this.ministries.find(function(m) { return m.id == self.selectedId; });
                     }
                 }">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
                     <x-searchable-select
                         name="ministry_id"
                         :items="$ministries"
@@ -82,8 +82,8 @@
                         labelKey="name"
                         valueKey="id"
                         colorKey="color"
-                        placeholder="Пошук команди..."
-                        nullText="Без команди"
+                        placeholder="{{ __('Пошук команди...') }}"
+                        nullText="{{ __('Без команди') }}"
                         nullable
                         x-on:select-changed="selectedId = $event.detail.value || ''"
                     />
@@ -105,11 +105,11 @@
                                {{ old('is_service', $event->is_service) ? 'checked' : '' }}
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
                         <label for="is_service" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Це подія з планом
+                            {{ __('Це подія з планом') }}
                         </label>
                     </div>
                     <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        Увімкніть, щоб створити план події з таймлайном
+                        {{ __('Увімкніть, щоб створити план події з таймлайном') }}
                     </p>
 
                     @if($event->is_service)
@@ -119,7 +119,7 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                 </svg>
-                                Переглянути план події
+                                {{ __('Переглянути план події') }}
                             </a>
                         </div>
                     @endif
@@ -133,11 +133,11 @@
                                {{ old('track_attendance', $event->track_attendance) ? 'checked' : '' }}
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
                         <label for="track_attendance" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Відстежувати відвідуваність
+                            {{ __('Відстежувати відвідуваність') }}
                         </label>
                     </div>
                     <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        Увімкніть, щоб відмічати хто був на цій події
+                        {{ __('Увімкніть, щоб відмічати хто був на цій події') }}
                     </p>
                 </div>
                 @endif
@@ -146,7 +146,7 @@
                 @if($currentChurch->telegram_bot_token)
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-600" x-data="reminderSettings({{ json_encode($event->reminder_settings ?? []) }})">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Нагадування в Telegram
+                        {{ __('Нагадування в Telegram') }}
                     </label>
 
                     <div class="space-y-2">

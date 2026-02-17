@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Приєднатися до церкви')
+@section('title', __('Приєднатися до церкви'))
 
 @section('content')
 <div class="text-center mb-6">
@@ -9,8 +9,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
         </svg>
     </div>
-    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Приєднатися до церкви</h2>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Оберіть вашу церкву та створіть акаунт</p>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('Приєднатися до церкви') }}</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Оберіть вашу церкву та створіть акаунт') }}</p>
 </div>
 
 <form method="POST" action="{{ route('join.store') }}" class="space-y-5" x-data="{ showPassword: false }">
@@ -18,10 +18,10 @@
 
     <!-- Church Select -->
     <div>
-        <label for="church_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ваша церква</label>
+        <label for="church_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Ваша церква') }}</label>
         <select name="church_id" id="church_id" required
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
-            <option value="">Оберіть церкву...</option>
+            <option value="">{{ __('Оберіть церкву...') }}</option>
             @foreach($churches as $church)
                 <option value="{{ $church->id }}" {{ old('church_id') == $church->id ? 'selected' : '' }}>
                     {{ $church->name }} ({{ $church->city }})
@@ -37,10 +37,10 @@
 
     <!-- Name -->
     <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ваше ім'я</label>
+        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Ваше ім\'я') }}</label>
         <input type="text" name="name" id="name" value="{{ old('name') }}" required autocomplete="name"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all"
-               placeholder="Іван Петренко">
+               placeholder="{{ __('Іван Петренко') }}">
         @error('name')
             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
         @enderror
@@ -48,7 +48,7 @@
 
     <!-- Email -->
     <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Email') }}</label>
         <input type="email" name="email" id="email" value="{{ old('email') }}" required autocomplete="email"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all"
                placeholder="ivan@example.com">
@@ -60,7 +60,7 @@
     <!-- Honeypot -->
     <input type="text" name="email_trap" autocomplete="off" style="display:none" tabindex="-1" aria-hidden="true">
     <div>
-        <label for="phone_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Телефон <span class="text-gray-400">(необов'язково)</span></label>
+        <label for="phone_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Телефон') }} <span class="text-gray-400">({{ __('необов\'язково') }})</span></label>
         <input type="tel" name="phone" id="phone_number" value="{{ old('phone') }}" autocomplete="off" data-lpignore="true" data-form-type="other"
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all"
                placeholder="+380 XX XXX XX XX">
@@ -68,7 +68,7 @@
 
     <!-- Password -->
     <div>
-        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Пароль</label>
+        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Пароль') }}</label>
         <div class="relative">
             <input :type="showPassword ? 'text' : 'password'" name="password" id="password" required autocomplete="new-password"
                    class="w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
@@ -90,7 +90,7 @@
 
     <!-- Password Confirmation -->
     <div>
-        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Підтвердження пароля</label>
+        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Підтвердження пароля') }}</label>
         <div class="relative">
             <input :type="showPassword ? 'text' : 'password'" name="password_confirmation" id="password_confirmation" required autocomplete="new-password"
                    class="w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
@@ -115,7 +115,7 @@
 
     <button type="submit"
             class="w-full py-3.5 px-4 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold rounded-xl shadow-lg shadow-primary-500/30 transition-all duration-200 transform hover:scale-[1.02]">
-        Приєднатися
+        {{ __('Приєднатися') }}
     </button>
 
     @if(config('services.google.client_id'))
@@ -124,11 +124,11 @@
             <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
         </div>
         <div class="relative flex justify-center text-sm">
-            <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">або</span>
+            <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">{{ __('або') }}</span>
         </div>
     </div>
 
-    <a href="#" @click.prevent="if(!document.getElementById('church_id').value) { alert('Спочатку оберіть церкву'); return; } window.location.href='{{ route('auth.google') }}?church_id=' + document.getElementById('church_id').value"
+    <a href="#" @click.prevent="if(!document.getElementById('church_id').value) { alert('{{ __('Спочатку оберіть церкву') }}'); return; } window.location.href='{{ route('auth.google') }}?church_id=' + document.getElementById('church_id').value"
        class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200">
         <svg class="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -136,19 +136,19 @@
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
-        <span class="font-medium text-gray-700 dark:text-gray-200">Приєднатися з Google</span>
+        <span class="font-medium text-gray-700 dark:text-gray-200">{{ __('Приєднатися з Google') }}</span>
     </a>
     @endif
 </form>
 
 <div class="mt-6 text-center space-y-2">
     <p class="text-sm text-gray-500 dark:text-gray-400">
-        Вже маєте акаунт?
-        <a href="{{ route('login') }}" class="text-primary-600 hover:text-primary-700 font-medium">Увійти</a>
+        {{ __('Вже маєте акаунт?') }}
+        <a href="{{ route('login') }}" class="text-primary-600 hover:text-primary-700 font-medium">{{ __('Увійти') }}</a>
     </p>
     <p class="text-sm text-gray-500 dark:text-gray-400">
-        Хочете зареєструвати нову церкву?
-        <a href="{{ route('register') }}" class="text-primary-600 hover:text-primary-700 font-medium">Реєстрація церкви</a>
+        {{ __('Хочете зареєструвати нову церкву?') }}
+        <a href="{{ route('register') }}" class="text-primary-600 hover:text-primary-700 font-medium">{{ __('Реєстрація церкви') }}</a>
     </p>
 </div>
 @endsection

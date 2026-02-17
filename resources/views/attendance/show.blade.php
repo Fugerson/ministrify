@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Відвідуваність: ' . $attendance->date->format('d.m.Y'))
+@section('title', __('Відвідуваність') . ': ' . $attendance->date->format('d.m.Y'))
 
 @section('actions')
 <a href="{{ route('attendance.edit', $attendance) }}"
    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
-    Редагувати
+    {{ __('Редагувати') }}
 </a>
 @endsection
 
@@ -21,7 +21,7 @@
             </div>
             <div class="text-right">
                 <p class="text-3xl sm:text-4xl font-bold text-primary-600">{{ $attendance->total_count }}</p>
-                <p class="text-gray-500 dark:text-gray-400">загальна кількість</p>
+                <p class="text-gray-500 dark:text-gray-400">{{ __('загальна кількість') }}</p>
             </div>
         </div>
 
@@ -35,7 +35,7 @@
     @if($attendance->records->count() > 0)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Присутні з бази ({{ $attendance->present_count }})</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Присутні з бази') }} ({{ $attendance->present_count }})</h2>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($attendance->records->where('present', true) as $record)
@@ -56,14 +56,14 @@
 
     <div class="flex items-center justify-between">
         <a href="{{ route('attendance.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-            &larr; Назад
+            &larr; {{ __('Назад') }}
         </a>
         <form method="POST" action="{{ route('attendance.destroy', $attendance) }}"
-              onsubmit="return confirm('Видалити цей запис?')">
+              onsubmit="return confirm('{{ __('Видалити цей запис?') }}')">
             @csrf
             @method('DELETE')
             <button type="submit" class="text-red-600 hover:text-red-800">
-                Видалити
+                {{ __('Видалити') }}
             </button>
         </form>
     </div>

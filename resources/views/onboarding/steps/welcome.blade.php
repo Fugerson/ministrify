@@ -10,11 +10,11 @@
     </div>
 
     <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
-        Вітаємо в <span class="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">Ministrify</span>!
+        {{ __('Вітаємо в') }} <span class="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">Ministrify</span>!
     </h1>
 
     <p class="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-lg mx-auto leading-relaxed">
-        Налаштуйте систему управління вашою церквою за кілька простих кроків
+        {{ __('Налаштуйте систему управління вашою церквою за кілька простих кроків') }}
     </p>
 
     <!-- Features Grid -->
@@ -25,8 +25,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
-            <h3 class="font-bold text-gray-900 dark:text-white mb-2">Управління людьми</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400">База контактів, групи та відвідуваність</p>
+            <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ __('Управління людьми') }}</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('База контактів, групи та відвідуваність') }}</p>
         </div>
 
         <div class="group p-6 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 rounded-2xl border border-green-100 dark:border-green-800/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
@@ -35,8 +35,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <h3 class="font-bold text-gray-900 dark:text-white mb-2">Календар подій</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Планування та розклад подій</p>
+            <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ __('Календар подій') }}</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Планування та розклад подій') }}</p>
         </div>
 
         <div class="group p-6 bg-gradient-to-br from-amber-50 to-orange-100/50 dark:from-amber-900/20 dark:to-orange-800/10 rounded-2xl border border-amber-100 dark:border-amber-800/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
@@ -45,8 +45,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <h3 class="font-bold text-gray-900 dark:text-white mb-2">Фінанси</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Доходи, витрати та звіти</p>
+            <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ __('Фінанси') }}</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Доходи, витрати та звіти') }}</p>
         </div>
     </div>
 

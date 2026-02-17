@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Відвідуваність')
+@section('title', __('Відвідуваність'))
 
 @section('actions')
 <div class="flex items-center space-x-2">
     <a href="{{ route('attendance.stats') }}"
        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
-        Статистика
+        {{ __('Статистика') }}
     </a>
     <a href="{{ route('attendance.create') }}"
        class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
@@ -20,7 +20,7 @@
 
 @section('content')
 @php
-    $months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+    $months = [__('Січень'), __('Лютий'), __('Березень'), __('Квітень'), __('Травень'), __('Червень'), __('Липень'), __('Серпень'), __('Вересень'), __('Жовтень'), __('Листопад'), __('Грудень')];
 @endphp
 
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
@@ -58,23 +58,23 @@
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             @if($attendance->event)
-                                {{ $attendance->event->ministry?->name ?? 'Без команди' }}
+                                {{ $attendance->event->ministry?->name ?? __('Без команди') }}
                             @else
-                                Загальний check-in
+                                {{ __('Загальний check-in') }}
                             @endif
                         </p>
                     </div>
                     <div class="text-right">
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendance->total_count }}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">осіб</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('осіб') }}</p>
                     </div>
                 </div>
             </a>
         @empty
             <div class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                <p>Немає записів за цей місяць</p>
+                <p>{{ __('Немає записів за цей місяць') }}</p>
                 <a href="{{ route('attendance.create') }}" class="mt-2 inline-block text-primary-600 hover:text-primary-500">
-                    Створити check-in
+                    {{ __('Створити check-in') }}
                 </a>
             </div>
         @endforelse

@@ -21,7 +21,7 @@
     <!-- Breadcrumb -->
     <nav class="mb-8">
         <ol class="flex items-center gap-2 text-sm">
-            <li><a href="{{ route('public.church', $church->slug) }}" class="text-gray-500 hover:text-primary-600">Головна</a></li>
+            <li><a href="{{ route('public.church', $church->slug) }}" class="text-gray-500 hover:text-primary-600">{{ __('Головна') }}</a></li>
             <li class="text-gray-400">/</li>
             <li class="text-gray-900 font-medium">{{ $group->name }}</li>
         </ol>
@@ -71,7 +71,7 @@
                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
-                    <span>{{ $group->members_count }} учасників</span>
+                    <span>{{ __(':count учасників', ['count' => $group->members_count]) }}</span>
                 </div>
             </div>
 
@@ -85,7 +85,7 @@
                         @endif
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500">Лідер групи</p>
+                        <p class="text-sm text-gray-500">{{ __('Лідер групи') }}</p>
                         <p class="font-semibold text-gray-900">{{ $group->leader->full_name }}</p>
                     </div>
                 </div>
@@ -103,13 +103,13 @@
                     <div class="bg-primary-50 rounded-2xl p-6">
                         <div class="flex items-center justify-between mb-4">
                             <div>
-                                <h3 class="font-semibold text-gray-900">Приєднатися до групи</h3>
-                                <p class="text-sm text-gray-600">Заповніть форму і лідер групи зв'яжеться з вами</p>
+                                <h3 class="font-semibold text-gray-900">{{ __('Приєднатися до групи') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __("Заповніть форму і лідер групи зв'яжеться з вами") }}</p>
                             </div>
                             <button @click="showForm = !showForm"
                                     class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                                <span x-show="!showForm">Подати заявку</span>
-                                <span x-show="showForm">Приховати форму</span>
+                                <span x-show="!showForm">{{ __('Подати заявку') }}</span>
+                                <span x-show="showForm">{{ __('Приховати форму') }}</span>
                             </button>
                         </div>
 
@@ -131,13 +131,13 @@
                                 <x-spam-protection action="join_group" />
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Ім'я *</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __("Ім'я") }} *</label>
                                         <input type="text" name="first_name" required value="{{ old('first_name') }}"
                                                class="w-full px-4 py-2.5 border {{ $errors->has('first_name') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                         @error('first_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Прізвище *</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Прізвище') }} *</label>
                                         <input type="text" name="last_name" required value="{{ old('last_name') }}"
                                                class="w-full px-4 py-2.5 border {{ $errors->has('last_name') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                         @error('last_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
@@ -145,28 +145,28 @@
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email') }} *</label>
                                         <input type="email" name="email" required value="{{ old('email') }}"
                                                class="w-full px-4 py-2.5 border {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                         @error('email') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Телефон') }}</label>
                                         <input type="tel" name="phone" value="{{ old('phone') }}"
                                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Повідомлення</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Повідомлення') }}</label>
                                     <textarea name="message" rows="3"
-                                              class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Розкажіть трохи про себе...">{{ old('message') }}</textarea>
+                                              class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="{{ __('Розкажіть трохи про себе...') }}">{{ old('message') }}</textarea>
                                 </div>
                                 <button type="submit" :disabled="submitting"
                                         class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                                    <span x-show="!submitting">Надіслати заявку</span>
+                                    <span x-show="!submitting">{{ __('Надіслати заявку') }}</span>
                                     <span x-show="submitting" class="inline-flex items-center justify-center gap-2">
                                         <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                                        Надсилання...
+                                        {{ __('Надсилання...') }}
                                     </span>
                                 </button>
                             </form>
@@ -183,7 +183,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Повернутись на головну
+            {{ __('Повернутись на головну') }}
         </a>
     </div>
 </div>
