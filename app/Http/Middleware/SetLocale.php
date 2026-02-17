@@ -22,19 +22,13 @@ class SetLocale
     {
         $available = config('app.available_locales', ['uk', 'en']);
 
-        // 1. Session (highest priority — explicit user choice in current session)
-        $sessionLocale = session('app.locale');
-        if ($sessionLocale && in_array($sessionLocale, $available)) {
-            return $sessionLocale;
-        }
-
-        // 2. Cookie (explicit user choice, persistent)
+        // 1. Cookie (set by JavaScript when user clicks language button)
         $cookie = $request->cookie('locale');
         if ($cookie && in_array($cookie, $available)) {
             return $cookie;
         }
 
-        // 3. Authenticated user preference (from database)
+        // 2. Authenticated user preference (from database, for logged-in users)
         if ($request->user()) {
             $userLocale = $request->user()->preferences['locale'] ?? null;
             if ($userLocale && in_array($userLocale, $available)) {
@@ -42,7 +36,7 @@ class SetLocale
             }
         }
 
-        // 4. Default
+        // 3. Default
         return config('app.locale', 'uk');
     }
 }

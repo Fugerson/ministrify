@@ -13,27 +13,14 @@ class LocaleSwitchController extends Controller
             abort(400);
         }
 
-        // Save to user preferences if authenticated
+        // Save to user preferences if authenticated (for future sessions)
         if (auth()->check()) {
             $prefs = auth()->user()->preferences ?? [];
             $prefs['locale'] = $locale;
             auth()->user()->update(['preferences' => $prefs]);
         }
 
-        // Store in session for this browser session
-        session(['app.locale' => $locale]);
-
-        // Also set persistent cookie as fallback
-        return redirect()->back()
-            ->cookie(
-                'locale',
-                $locale,
-                60 * 24 * 365,      // 1 year
-                '/',
-                null,
-                config('app.env') === 'production',
-                false
-            )
-            ->with('locale_changed', true);
+        // Cookie is already set by JavaScript, just acknowledge the request
+        return response()->json(['status' => 'ok', 'locale' => $locale]);
     }
 }
