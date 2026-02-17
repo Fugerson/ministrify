@@ -18,6 +18,7 @@
     <meta name="keywords" content="@yield('keywords', __('церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви'))">
     <meta name="author" content="Ministrify">
     <meta name="robots" content="index, follow">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Open Graph / Facebook --}}

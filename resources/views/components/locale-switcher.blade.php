@@ -24,22 +24,38 @@
 
 <script>
 function switchLocale(locale) {
+    console.log('🌐 Switching locale to:', locale);
+
     // Set HTTP cookie immediately (1 year expiry)
-    document.cookie = 'locale=' + locale + '; path=/; max-age=' + (365*24*60*60) + '; SameSite=Lax';
+    const maxAge = 365 * 24 * 60 * 60;
+    document.cookie = 'locale=' + locale + '; path=/; max-age=' + maxAge + '; SameSite=Lax';
+    console.log('🍪 Cookie set:', document.cookie);
+
+    // Get CSRF token from meta tag or form
+    let csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                    document.querySelector('input[name="_token"]')?.value || '';
+    console.log('🔐 CSRF token found:', csrfToken ? 'yes (' + csrfToken.substring(0,10) + '...)' : 'NO');
 
     // Send to server to save user preference
+    const formData = new FormData();
+    formData.append('_token', csrfToken);
+
     fetch('/locale/' + locale, {
         method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-        }
-    }).catch(err => console.error('Locale switch error:', err));
+        body: formData
+    })
+    .then(r => {
+        console.log('✅ Server response:', r.status);
+        return r.json();
+    })
+    .then(data => console.log('📦 Server data:', data))
+    .catch(err => console.error('❌ Fetch error:', err));
 
-    // Dispatch event so all locale switchers update immediately
+    // Dispatch event
     window.dispatchEvent(new CustomEvent('locale-changed', { detail: locale }));
 
-    // Reload page after brief delay to apply translations
-    setTimeout(() => location.reload(), 150);
+    // Reload immediately
+    console.log('🔄 Reloading page...');
+    location.reload();
 }
 </script>
