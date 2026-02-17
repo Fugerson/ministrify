@@ -124,20 +124,28 @@ Route::match(['get', 'post'], 'monobank/webhook/{secret}', [MonobankSyncControll
 // Dynamic sitemap
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
-// Locale switcher
+// Locale switcher (must be in web middleware group for CSRF)
 Route::post('locale/{locale}', function (string $locale) {
-    if (!in_array($locale, config('app.available_locales', ['uk', 'en']))) {
+    $available = config('app.available_locales', ['uk', 'en']);
+    if (!in_array($locale, $available)) {
         abort(400);
     }
 
+    // Save to user preferences if authenticated
     if (auth()->check()) {
         $prefs = auth()->user()->preferences ?? [];
         $prefs['locale'] = $locale;
         auth()->user()->update(['preferences' => $prefs]);
     }
 
-    return redirect()->back()->withCookie(cookie('locale', $locale, 525600)); // 1 year
-})->name('locale.switch');
+    // Set locale immediately for this response
+    app()->setLocale($locale);
+
+    // Return with cookie (will be sent to browser)
+    return redirect()->back()
+        ->cookie('locale', $locale, 525600) // 1 year
+        ->with('locale_changed', true);
+})->middleware('web')->name('locale.switch');
 
 // Landing pages (public)
 Route::get('/', [LandingController::class, 'home'])->name('landing.home');
