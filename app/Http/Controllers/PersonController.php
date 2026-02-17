@@ -982,15 +982,18 @@ class PersonController extends Controller
                 'church_id' => $church->id,
                 'name' => $person->full_name,
                 'password' => Hash::make($password),
-                'church_role_id' => $validated['church_role_id'],
+                // Don't assign church_role_id yet - set to pending approval instead
+                'requested_church_role_id' => $validated['church_role_id'],
+                'servant_approval_status' => 'pending',
                 'onboarding_completed' => true,
             ]);
             $user = $trashedUser;
 
-            Log::channel('security')->info('Soft-deleted user restored via createAccount', [
+            Log::channel('security')->info('Soft-deleted user restored via createAccount (pending approval)', [
                 'user_id' => $user->id,
                 'email' => $validated['email'],
                 'church_id' => $church->id,
+                'requested_role_id' => $validated['church_role_id'],
             ]);
         } else {
             $user = User::create([
@@ -998,7 +1001,9 @@ class PersonController extends Controller
                 'name' => $person->full_name,
                 'email' => $validated['email'],
                 'password' => Hash::make($password),
-                'church_role_id' => $validated['church_role_id'],
+                // Don't assign church_role_id yet - set to pending approval instead
+                'requested_church_role_id' => $validated['church_role_id'],
+                'servant_approval_status' => 'pending',
                 'onboarding_completed' => true,
             ]);
         }
@@ -1520,14 +1525,16 @@ class PersonController extends Controller
                         continue;
                     }
 
-                    // Create user
+                    // Create user with pending approval
                     $password = Str::random(10);
                     $user = User::create([
                         'church_id' => $church->id,
                         'name' => $person->full_name,
                         'email' => $person->email,
                         'password' => Hash::make($password),
-                        'church_role_id' => $churchRoleId,
+                        // Don't assign role yet - set to pending approval
+                        'requested_church_role_id' => $churchRoleId,
+                        'servant_approval_status' => 'pending',
                         'onboarding_completed' => true,
                     ]);
 

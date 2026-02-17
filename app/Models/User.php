@@ -28,6 +28,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'google_id',
         'church_role_id',
+        'requested_church_role_id',
+        'servant_approval_status',
+        'servant_approved_at',
         'theme',
         'preferences',
         'settings',
@@ -53,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'password_set_at' => 'datetime',
+        'servant_approved_at' => 'datetime',
         'preferences' => 'array',
         'settings' => 'array',
         'onboarding_completed' => 'boolean',
@@ -76,6 +80,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function churchRole(): BelongsTo
     {
         return $this->belongsTo(ChurchRole::class);
+    }
+
+    public function requestedChurchRole(): BelongsTo
+    {
+        return $this->belongsTo(ChurchRole::class, 'requested_church_role_id');
     }
 
     public function pushSubscriptions(): HasMany

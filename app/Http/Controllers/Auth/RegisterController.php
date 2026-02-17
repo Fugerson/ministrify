@@ -61,7 +61,7 @@ class RegisterController extends Controller
             return back()->with('error', 'Ця церква не приймає нові реєстрації.');
         }
 
-        // Find default volunteer role for this church
+        // Find default volunteer role for this church (for approval pending status)
         $volunteerRole = ChurchRole::where('church_id', $church->id)
             ->where('slug', 'volunteer')
             ->first();
@@ -127,13 +127,15 @@ class RegisterController extends Controller
             $firstName = $nameParts[0];
             $lastName = $nameParts[1] ?? '';
 
-            // Create user with default volunteer role
+            // Create user with PENDING volunteer role approval
+            // Don't assign church_role_id yet - set to pending approval instead
             $user = User::create([
                 'church_id' => $church->id,
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'church_role_id' => $volunteerRole?->id,
+                'requested_church_role_id' => $volunteerRole?->id,
+                'servant_approval_status' => 'pending',
                 'onboarding_completed' => true,
             ]);
 
@@ -157,11 +159,12 @@ class RegisterController extends Controller
                 ]);
             }
 
-            // Create pivot record
+            // Create pivot record (without church_role_id - pending approval)
             DB::table('church_user')->insert([
                 'user_id' => $user->id,
                 'church_id' => $church->id,
-                'church_role_id' => $volunteerRole?->id,
+                'church_role_id' => null,  // No role until approved
+                'role_approval_status' => 'pending',  // Mark as pending
                 'person_id' => $person->id,
                 'joined_at' => now(),
                 'created_at' => now(),
@@ -176,6 +179,14 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
+        Log::channel('security')->info('User self-registered and joined church (pending approval)', [
+            'user_id' => $user->id,
+            'email' => $request->email,
+            'church_id' => $church->id,
+            'requested_role' => 'volunteer',
+            'ip' => $request->ip(),
+        ]);
+
         AuditLog::create([
             'church_id' => $user->church_id,
             'user_id' => $user->id,
@@ -184,13 +195,13 @@ class RegisterController extends Controller
             'model_type' => User::class,
             'model_id' => $user->id,
             'model_name' => $user->name,
-            'notes' => 'Зареєструвався та приєднався до церкви',
+            'notes' => 'Зареєструвався та приєднався до церкви (очікує одобрення)',
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Ласкаво просимо! Ваш акаунт створено.');
+            ->with('success', 'Ласкаво просимо! Ваш акаунт створено. Адміністратор церкви повинен одобрити вашу реєстрацію.');
     }
 
     public function register(Request $request)

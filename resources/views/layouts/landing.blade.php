@@ -201,9 +201,9 @@
         .then(data => console.log('📦 Response:', data))
         .catch(err => console.error('❌ Error:', err));
 
-        // Reload immediately
-        console.log('🔄 Reloading page...');
-        location.reload();
+        // Reload after 2 seconds so you can see the logs
+        console.log('🔄 Reloading page in 2 seconds...');
+        setTimeout(() => location.reload(), 2000);
     };
     </script>
 
