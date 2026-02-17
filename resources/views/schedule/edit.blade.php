@@ -34,7 +34,7 @@
                     @error('title') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
 
-                <div x-data="{ allDay: {{ old('all_day', !$event->time) ? 'true' : 'false' }} }">
+                <div x-data="{ allDay: {{ old('all_day', !$event->time) ? 'true' : 'false' }}, multiDay: {{ old('multi_day', $event->end_date && $event->end_date->format('Y-m-d') !== $event->date->format('Y-m-d')) ? 'true' : 'false' }} }">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
                             <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>
@@ -56,6 +56,21 @@
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
                         <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на весь день') }}</span>
                     </label>
+
+                    <!-- Multi-day event toggle -->
+                    <label class="flex items-center gap-2 mt-3 cursor-pointer">
+                        <input type="checkbox" name="multi_day" value="1" x-model="multiDay"
+                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на кілька днів') }}</span>
+                    </label>
+
+                    <!-- End date for multi-day events -->
+                    <div x-show="multiDay" x-collapse class="mt-3">
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата закінчення') }} *</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ old('end_date', $event->end_date?->format('Y-m-d')) }}"
+                               class="w-full px-3 py-2.5 md:py-2 border {{ $errors->has('end_date') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' }} rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        @error('end_date') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
                 </div>
 
                 <div>
