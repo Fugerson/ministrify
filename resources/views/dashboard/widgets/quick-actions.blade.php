@@ -6,6 +6,7 @@
     <div class="p-4">
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
             {{-- Додати людину --}}
+            @if(auth()->user()->canCreate('people'))
             <a href="{{ route('people.create') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:shadow-md transition-all group">
                 <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,8 +15,10 @@
                 </div>
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Додати людину</span>
             </a>
+            @endif
 
             {{-- Створити подію --}}
+            @if(auth()->user()->canCreate('events'))
             <a href="{{ route('events.create') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:shadow-md transition-all group">
                 <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,6 +28,7 @@
                 </div>
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Створити подію</span>
             </a>
+            @endif
 
             {{-- Нова транзакція --}}
             @if(auth()->user()->canCreate('finances'))
@@ -51,6 +55,7 @@
             @endif
 
             {{-- Створити групу --}}
+            @if(auth()->user()->canCreate('groups'))
             <a href="{{ route('groups.create') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:shadow-md transition-all group">
                 <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,6 +64,7 @@
                 </div>
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Створити групу</span>
             </a>
+            @endif
 
             {{-- Переглянути звіти --}}
             @if(auth()->user()->canView('reports'))
