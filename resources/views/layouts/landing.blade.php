@@ -179,8 +179,10 @@
 
         // Set HTTP cookie immediately (1 year expiry)
         const maxAge = 365 * 24 * 60 * 60;
-        document.cookie = 'locale=' + locale + '; path=/; max-age=' + maxAge + '; SameSite=Lax';
-        console.log('🍪 Cookie set');
+        document.cookie = 'locale=' + locale + '; path=/; max-age=' + maxAge + '; SameSite=Lax; Secure';
+
+        // Verify cookie was set
+        console.log('🍪 Cookie set, checking document.cookie:', document.cookie);
 
         // Get CSRF token from meta tag
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -192,6 +194,7 @@
 
         fetch('/locale/' + locale, {
             method: 'POST',
+            credentials: 'include',
             body: formData
         })
         .then(r => {
