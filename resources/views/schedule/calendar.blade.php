@@ -31,65 +31,50 @@
     $nextWeekYear = $currentWeek == 52 ? $year + 1 : $year;
 @endphp
 
-<div class="space-y-4">
+<div class="space-y-4" x-data="calendarNavigator({{ json_encode(['view' => $view, 'year' => $year, 'month' => $month, 'week' => $currentWeek ?? null]) }})">
     <!-- View Toggle & Navigation -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <!-- View Toggle -->
             <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
-                <a href="{{ route('schedule', ['view' => 'week', 'year' => $year, 'week' => now()->weekOfYear]) }}"
-                   class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {{ $view === 'week' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white' }}">
+                <button @click="switchView('week')" type="button"
+                   :class="currentView === 'week' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                   class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
                     Тиждень
-                </a>
-                <a href="{{ route('schedule', ['view' => 'month', 'year' => $year, 'month' => $month]) }}"
-                   class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {{ $view === 'month' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white' }}">
+                </button>
+                <button @click="switchView('month')" type="button"
+                   :class="currentView === 'month' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                   class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
                     Місяць
-                </a>
+                </button>
             </div>
 
             <!-- Date Navigation -->
             <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
-                @if($view === 'week')
-                    <a href="{{ route('schedule', ['view' => 'week', 'year' => $prevWeekYear, 'week' => $prevWeek]) }}"
-                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
-                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </a>
-                    <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center">
-                        {{ $startDate->format('d.m') }} - {{ $endDate->format('d.m.Y') }}
-                    </h2>
-                    <a href="{{ route('schedule', ['view' => 'week', 'year' => $nextWeekYear, 'week' => $nextWeek]) }}"
-                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
-                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
-                @else
-                    <a href="{{ route('schedule', ['view' => 'month', 'year' => $prevYear, 'month' => $prevMonth]) }}"
-                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
-                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </a>
-                    <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[120px] sm:min-w-[180px] text-center">
-                        {{ $months[$month - 1] }} {{ $year }}
-                    </h2>
-                    <a href="{{ route('schedule', ['view' => 'month', 'year' => $nextYear, 'month' => $nextMonth]) }}"
-                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
-                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
-                @endif
+                <button @click="prevPeriod()" type="button"
+                   class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
+                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center">
+                    <span x-show="currentView === 'week'" x-text="weekDisplay"></span>
+                    <span x-show="currentView === 'month'" x-text="monthDisplay"></span>
+                </h2>
+                <button @click="nextPeriod()" type="button"
+                   class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
+                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
             </div>
 
             <!-- Actions -->
             <div class="flex items-center gap-2">
-                <a href="{{ route('schedule', ['view' => $view]) }}"
+                <button @click="goToday()" type="button"
                    class="px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
                     Сьогодні
-                </a>
+                </button>
 
                 <!-- Google Calendar Sync Status -->
                 @if(auth()->user()->canEdit('events'))
@@ -709,5 +694,123 @@ document.addEventListener('keydown', function(e) {
         hideSubscriptionModal();
     }
 });
+
+// Calendar Navigator - AJAX switching between week/month views
+function calendarNavigator(initialState) {
+    const months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+
+    return {
+        currentView: initialState.view,
+        currentYear: initialState.year,
+        currentMonth: initialState.month,
+        currentWeek: initialState.week,
+        loading: false,
+
+        get monthDisplay() {
+            return `${months[this.currentMonth - 1]} ${this.currentYear}`;
+        },
+
+        get weekDisplay() {
+            // Calculate week dates (simplified)
+            const d = new Date(this.currentYear, 0, 1);
+            const weekStart = new Date(d.setDate(d.getDate() + (this.currentWeek - 1) * 7));
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            return `${String(weekStart.getDate()).padStart(2, '0')}.${String(weekStart.getMonth() + 1).padStart(2, '0')} - ${String(weekEnd.getDate()).padStart(2, '0')}.${String(weekEnd.getMonth() + 1).padStart(2, '0')}.${weekEnd.getFullYear()}`;
+        },
+
+        switchView(view) {
+            this.currentView = view;
+            if (view === 'week') {
+                this.currentWeek = new Date().getWeek();
+            }
+            this.loadCalendar();
+        },
+
+        prevPeriod() {
+            if (this.currentView === 'week') {
+                this.currentWeek = this.currentWeek === 1 ? 52 : this.currentWeek - 1;
+                if (this.currentWeek === 52) this.currentYear--;
+            } else {
+                this.currentMonth = this.currentMonth === 1 ? 12 : this.currentMonth - 1;
+                if (this.currentMonth === 12) this.currentYear--;
+            }
+            this.loadCalendar();
+        },
+
+        nextPeriod() {
+            if (this.currentView === 'week') {
+                this.currentWeek = this.currentWeek === 52 ? 1 : this.currentWeek + 1;
+                if (this.currentWeek === 1) this.currentYear++;
+            } else {
+                this.currentMonth = this.currentMonth === 12 ? 1 : this.currentMonth + 1;
+                if (this.currentMonth === 1) this.currentYear++;
+            }
+            this.loadCalendar();
+        },
+
+        goToday() {
+            const today = new Date();
+            this.currentYear = today.getFullYear();
+            this.currentMonth = today.getMonth() + 1;
+            this.currentWeek = today.getWeek();
+            this.currentView = 'month';
+            this.loadCalendar();
+        },
+
+        loadCalendar() {
+            this.loading = true;
+            const params = new URLSearchParams({
+                view: this.currentView,
+                year: this.currentYear,
+                ...(this.currentView === 'week' ? { week: this.currentWeek } : { month: this.currentMonth })
+            });
+
+            fetch(`{{ route('schedule') }}?${params}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Extract calendar content from response (after navigation bar)
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.querySelector('.space-y-4');
+
+                if (newContent) {
+                    // Replace only the content after navigation
+                    const currentContent = document.querySelector('.space-y-4');
+                    if (currentContent) {
+                        currentContent.innerHTML = newContent.innerHTML;
+                        // Re-initialize Alpine.js for new elements
+                        this.$dispatch('contentUpdated');
+                    }
+                }
+
+                // Update browser history without reload
+                const newUrl = `{{ route('schedule') }}?view=${this.currentView}&year=${this.currentYear}${this.currentView === 'week' ? '&week=' + this.currentWeek : '&month=' + this.currentMonth}`;
+                window.history.pushState({ view: this.currentView, year: this.currentYear, month: this.currentMonth, week: this.currentWeek }, '', newUrl);
+            })
+            .catch(error => {
+                console.error('Error loading calendar:', error);
+                alert('Помилка при завантаженні календаря');
+            })
+            .finally(() => {
+                this.loading = false;
+            });
+        }
+    };
+}
+
+// Helper function to get week number
+Date.prototype.getWeek = function() {
+    const d = new Date(Date.UTC(this.getFullYear(), this.getMonth(), this.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+};
 </script>
 @endsection
