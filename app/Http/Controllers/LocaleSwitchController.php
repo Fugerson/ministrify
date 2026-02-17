@@ -23,9 +23,17 @@ class LocaleSwitchController extends Controller
         // Set locale immediately for this response
         app()->setLocale($locale);
 
-        // Return with cookie
+        // Return with unencrypted cookie (locale cookie is excluded from encryption in EncryptCookies middleware)
         return redirect()->back()
-            ->cookie('locale', $locale, 60*24*365, '/', null, false, false) // 1 year, non-secure, non-httpOnly
+            ->cookie(
+                'locale',           // name
+                $locale,            // value - simple string, not encrypted
+                60 * 24 * 365,      // minutes (1 year)
+                '/',                // path
+                null,               // domain
+                false,              // secure (allow HTTP in development)
+                false               // httpOnly (allow JS access if needed)
+            )
             ->with('locale_changed', true);
     }
 }
