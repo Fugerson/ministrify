@@ -30,9 +30,11 @@ class LocaleSwitchController extends Controller
                 $locale,            // value - simple string, not encrypted
                 60 * 24 * 365,      // minutes (1 year)
                 '/',                // path
-                null,               // domain
-                false,              // secure (allow HTTP in development)
-                false               // httpOnly (allow JS access if needed)
+                null,               // domain (null = current domain)
+                config('app.env') === 'production', // secure (HTTPS only in production)
+                false,              // httpOnly (allow JS access if needed)
+                false,              // raw
+                'none'              // sameSite (allow cross-site cookies)
             )
             ->with('locale_changed', true);
     }
