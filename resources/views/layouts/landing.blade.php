@@ -172,6 +172,41 @@
     {{-- reCAPTCHA v3 --}}
     <x-recaptcha-script />
 
+    {{-- Locale Switcher Function --}}
+    <script>
+    window.switchLocale = function(locale) {
+        console.log('🌐 Switching locale to:', locale);
+
+        // Set HTTP cookie immediately (1 year expiry)
+        const maxAge = 365 * 24 * 60 * 60;
+        document.cookie = 'locale=' + locale + '; path=/; max-age=' + maxAge + '; SameSite=Lax';
+        console.log('🍪 Cookie set');
+
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        console.log('🔐 CSRF token:', csrfToken ? 'found' : 'NOT FOUND!');
+
+        // Send to server to save user preference
+        const formData = new FormData();
+        formData.append('_token', csrfToken);
+
+        fetch('/locale/' + locale, {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => {
+            console.log('✅ Server response:', r.status);
+            return r.json();
+        })
+        .then(data => console.log('📦 Response:', data))
+        .catch(err => console.error('❌ Error:', err));
+
+        // Reload immediately
+        console.log('🔄 Reloading page...');
+        location.reload();
+    };
+    </script>
+
     @yield('head')
 </head>
 <body class="font-sans antialiased text-gray-900 bg-white dark:bg-gray-950 dark:text-gray-100" x-data="{ mobileMenu: false, darkMode: localStorage.getItem('theme') !== 'light' }" :class="{ 'dark': darkMode }">
