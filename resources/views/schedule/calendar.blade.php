@@ -49,7 +49,7 @@
                 </button>
             </div>
 
-            <!-- Date Navigation -->
+            <!-- Date Navigation with Month Picker -->
             <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
                 <button @click="prevPeriod()" type="button"
                    class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
@@ -57,10 +57,90 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-                <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center">
-                    <span x-show="currentView === 'week'" x-text="weekDisplay"></span>
-                    <span x-show="currentView === 'month'" x-text="monthDisplay"></span>
-                </h2>
+
+                <!-- Month/Week Picker Button -->
+                <div x-data="{ showPicker: false }" class="relative">
+                    <button @click="showPicker = !showPicker" type="button"
+                       class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer">
+                        <span x-show="currentView === 'week'" x-text="weekDisplay"></span>
+                        <span x-show="currentView === 'month'" x-text="monthDisplay"></span>
+                        <svg class="w-4 h-4 inline-block ml-2 transition-transform" :class="showPicker ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                        </svg>
+                    </button>
+
+                    <!-- Calendar Picker Dropdown -->
+                    <div x-show="showPicker" x-transition @click.outside="showPicker = false"
+                         class="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+                        <div x-show="currentView === 'month'" class="space-y-3">
+                            <!-- Year Navigation -->
+                            <div class="flex items-center justify-between mb-3">
+                                <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                    </svg>
+                                </button>
+                                <span class="font-semibold" x-text="currentYear"></span>
+                                <button @click="currentYear++; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Month Grid -->
+                            <div class="grid grid-cols-3 gap-2">
+                                <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
+                                    <button @click="currentMonth = index + 1; showPicker = false; loadCalendar()" type="button"
+                                       :class="currentMonth === index + 1 ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                       class="p-2 rounded-lg font-medium text-sm transition-colors">
+                                        <span x-text="month"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div x-show="currentView === 'week'" class="space-y-3">
+                            <!-- Week Navigation -->
+                            <div class="flex items-center justify-between mb-3">
+                                <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                    </svg>
+                                </button>
+                                <span class="font-semibold" x-text="currentYear"></span>
+                                <button @click="currentYear++; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Month selector for weeks -->
+                            <div class="grid grid-cols-3 gap-2 mb-3">
+                                <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
+                                    <button @click="currentMonth = index + 1" type="button"
+                                       :class="currentMonth === index + 1 ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                       class="p-2 rounded-lg font-medium text-xs transition-colors">
+                                        <span x-text="month"></span>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <!-- Week Grid (1-52) -->
+                            <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+                                <template x-for="week in Array.from({length: 52}, (_, i) => i + 1)" :key="week">
+                                    <button @click="currentWeek = week; showPicker = false; loadCalendar()" type="button"
+                                       :class="currentWeek === week ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                       class="p-2 rounded-lg font-medium text-xs transition-colors">
+                                        <span x-text="'W' + week"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button @click="nextPeriod()" type="button"
                    class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
