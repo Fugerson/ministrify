@@ -15,6 +15,7 @@ class SearchController extends Controller
     {
         $query = $request->get('q', '');
         $churchId = $this->getCurrentChurch()->id;
+        $user = auth()->user();
 
         if (strlen($query) < 2) {
             return response()->json(['results' => []]);
@@ -24,94 +25,104 @@ class SearchController extends Controller
         $results = [];
 
         // Search people
-        $people = Person::where('church_id', $churchId)
-            ->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            })
-            ->limit(5)
-            ->get();
+        if ($user->canView('people')) {
+            $people = Person::where('church_id', $churchId)
+                ->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                })
+                ->limit(5)
+                ->get();
 
-        foreach ($people as $person) {
-            $results[] = [
-                'type' => 'person',
-                'icon' => 'user',
-                'title' => $person->full_name,
-                'subtitle' => $this->maskContact($person->phone, $person->email),
-                'url' => route('people.show', $person),
-            ];
+            foreach ($people as $person) {
+                $results[] = [
+                    'type' => 'person',
+                    'icon' => 'user',
+                    'title' => $person->full_name,
+                    'subtitle' => $this->maskContact($person->phone, $person->email),
+                    'url' => route('people.show', $person),
+                ];
+            }
         }
 
         // Search ministries
-        $ministries = Ministry::where('church_id', $churchId)
-            ->where('name', 'like', "%{$search}%")
-            ->withCount('members')
-            ->limit(3)
-            ->get();
+        if ($user->canView('ministries')) {
+            $ministries = Ministry::where('church_id', $churchId)
+                ->where('name', 'like', "%{$search}%")
+                ->withCount('members')
+                ->limit(3)
+                ->get();
 
-        foreach ($ministries as $ministry) {
-            $results[] = [
-                'type' => 'ministry',
-                'icon' => 'church',
-                'title' => $ministry->name,
-                'subtitle' => $ministry->members_count . ' учасників',
-                'url' => route('ministries.show', $ministry),
-                'color' => $ministry->color,
-            ];
+            foreach ($ministries as $ministry) {
+                $results[] = [
+                    'type' => 'ministry',
+                    'icon' => 'church',
+                    'title' => $ministry->name,
+                    'subtitle' => $ministry->members_count . ' учасників',
+                    'url' => route('ministries.show', $ministry),
+                    'color' => $ministry->color,
+                ];
+            }
         }
 
         // Search groups
-        $groups = Group::where('church_id', $churchId)
-            ->where('name', 'like', "%{$search}%")
-            ->limit(3)
-            ->get();
+        if ($user->canView('groups')) {
+            $groups = Group::where('church_id', $churchId)
+                ->where('name', 'like', "%{$search}%")
+                ->limit(3)
+                ->get();
 
-        foreach ($groups as $group) {
-            $results[] = [
-                'type' => 'group',
-                'icon' => 'users',
-                'title' => $group->name,
-                'subtitle' => $group->location ?? 'Домашня група',
-                'url' => route('groups.show', $group),
-            ];
+            foreach ($groups as $group) {
+                $results[] = [
+                    'type' => 'group',
+                    'icon' => 'users',
+                    'title' => $group->name,
+                    'subtitle' => $group->location ?? 'Домашня група',
+                    'url' => route('groups.show', $group),
+                ];
+            }
         }
 
         // Search events
-        $events = Event::where('church_id', $churchId)
-            ->where('title', 'like', "%{$search}%")
-            ->where('date', '>=', now()->subDays(7))
-            ->orderBy('date')
-            ->limit(3)
-            ->get();
+        if ($user->canView('events')) {
+            $events = Event::where('church_id', $churchId)
+                ->where('title', 'like', "%{$search}%")
+                ->where('date', '>=', now()->subDays(7))
+                ->orderBy('date')
+                ->limit(3)
+                ->get();
 
-        foreach ($events as $event) {
-            $results[] = [
-                'type' => 'event',
-                'icon' => 'calendar',
-                'title' => $event->title,
-                'subtitle' => $event->date->format('d.m.Y'),
-                'url' => route('events.show', $event),
-            ];
+            foreach ($events as $event) {
+                $results[] = [
+                    'type' => 'event',
+                    'icon' => 'calendar',
+                    'title' => $event->title,
+                    'subtitle' => $event->date->format('d.m.Y'),
+                    'url' => route('events.show', $event),
+                ];
+            }
         }
 
         // Search boards
-        $boards = Board::where('church_id', $churchId)
-            ->where('is_archived', false)
-            ->where('name', 'like', "%{$search}%")
-            ->withCount('cards')
-            ->limit(3)
-            ->get();
+        if ($user->canView('boards')) {
+            $boards = Board::where('church_id', $churchId)
+                ->where('is_archived', false)
+                ->where('name', 'like', "%{$search}%")
+                ->withCount('cards')
+                ->limit(3)
+                ->get();
 
-        foreach ($boards as $board) {
-            $results[] = [
-                'type' => 'board',
-                'icon' => 'kanban',
-                'title' => $board->name,
-                'subtitle' => $board->cards_count . ' карток',
-                'url' => route('boards.show', $board),
-            ];
+            foreach ($boards as $board) {
+                $results[] = [
+                    'type' => 'board',
+                    'icon' => 'kanban',
+                    'title' => $board->name,
+                    'subtitle' => $board->cards_count . ' карток',
+                    'url' => route('boards.show', $board),
+                ];
+            }
         }
 
         return response()->json(['results' => $results]);
