@@ -22,7 +22,8 @@ class LandingController extends Controller
             'events' => \App\Models\Event::count(),
         ];
 
-        return view('landing.home', compact('stats'));
+        return view('landing.home', compact('stats'))
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
 
     /**
@@ -30,7 +31,8 @@ class LandingController extends Controller
      */
     public function features()
     {
-        return view('landing.features');
+        return view('landing.features')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
 
     /**
@@ -38,7 +40,8 @@ class LandingController extends Controller
      */
     public function contact()
     {
-        return view('landing.contact');
+        return view('landing.contact')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
 
     /**
@@ -83,7 +86,8 @@ class LandingController extends Controller
      */
     public function docs()
     {
-        return view('landing.docs');
+        return view('landing.docs')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
 
     /**
@@ -91,7 +95,8 @@ class LandingController extends Controller
      */
     public function faq()
     {
-        return view('landing.faq');
+        return view('landing.faq')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
 
     /**
@@ -99,7 +104,8 @@ class LandingController extends Controller
      */
     public function terms()
     {
-        return view('landing.terms');
+        return view('landing.terms')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
 
     /**
@@ -107,7 +113,8 @@ class LandingController extends Controller
      */
     public function privacy()
     {
-        return view('landing.privacy');
+        return view('landing.privacy')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
 
     /**
@@ -115,7 +122,8 @@ class LandingController extends Controller
      */
     public function register()
     {
-        return view('landing.register');
+        return view('landing.register')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
 
     /**
