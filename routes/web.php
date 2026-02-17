@@ -38,6 +38,7 @@ use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\MonobankSyncController;
 use App\Http\Controllers\PrivatbankSyncController;
 use App\Http\Controllers\LocaleSwitchController;
+use App\Http\Controllers\ServantApprovalController;
 use Illuminate\Support\Facades\Route;
 
 // Health check endpoint (for monitoring)
@@ -589,6 +590,11 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('permissions', fn() => redirect()->route('settings.index', ['tab' => 'permissions']))->name('permissions.index');
         Route::put('permissions', [\App\Http\Controllers\RolePermissionController::class, 'update'])->name('permissions.update');
         Route::post('permissions/reset', [\App\Http\Controllers\RolePermissionController::class, 'reset'])->name('permissions.reset');
+
+        // Servant/role approval management
+        Route::get('servant-approvals', [ServantApprovalController::class, 'index'])->name('servant-approvals.index');
+        Route::post('servant-approvals/{user}/approve', [ServantApprovalController::class, 'approve'])->name('servant-approvals.approve');
+        Route::post('servant-approvals/{user}/reject', [ServantApprovalController::class, 'reject'])->name('servant-approvals.reject');
 
         // Google Calendar integration
         Route::get('google-calendar/redirect', [\App\Http\Controllers\GoogleCalendarController::class, 'redirect'])->name('google-calendar.redirect');
