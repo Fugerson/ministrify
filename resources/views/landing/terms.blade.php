@@ -8,7 +8,7 @@
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
             <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Умови використання</h1>
-            <p class="text-gray-600 dark:text-gray-400">Останнє оновлення: {{ now()->format('d.m.Y') }}</p>
+            <p class="text-gray-600 dark:text-gray-400">Останнє оновлення: 16.02.2026</p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
