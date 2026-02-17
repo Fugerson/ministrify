@@ -1,16 +1,16 @@
 @extends('layouts.landing')
 
-@section('title', 'Зв\'язатися з нами - Ministrify')
-@section('description', 'Маєте питання про Ministrify? Напишіть нам і ми відповімо протягом 24 годин. Безкоштовна консультація для церков.')
-@section('keywords', 'контакти Ministrify, підтримка, допомога, консультація для церков')
+@section('title', __('landing.contact_us_title'))
+@section('description', __('landing.contact_us_meta'))
+@section('keywords', __('landing.contact_us_keywords'))
 
 @section('schema')
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "name": "Контакти Ministrify",
-    "description": "Зв'яжіться з командою Ministrify",
+    "name": "{{ __('landing.contact_us_page') }}",
+    "description": "{{ __('landing.contact_team') }}",
     "mainEntity": {
         "@type": "Organization",
         "name": "Ministrify",
@@ -31,10 +31,10 @@
     <div class="container mx-auto px-4 relative z-10">
         <div class="text-center max-w-3xl mx-auto">
             <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
-                Зв'яжіться з нами
+                {{ __('landing.contact_us_heading') }}
             </h1>
             <p class="text-xl text-indigo-100">
-                Маєте питання або пропозиції? Ми завжди раді допомогти!
+                {{ __('landing.contact_us_description') }}
             </p>
         </div>
     </div>
@@ -48,7 +48,7 @@
             <!-- Contact Form -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                    Напишіть нам
+                    {{ __('landing.write_to_us') }}
                 </h2>
 
                 @if(session('success'))
@@ -80,12 +80,12 @@
 
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Ваше ім'я *
+                            {{ __('landing.your_name_field') }}
                         </label>
                         <input type="text" id="name" name="name" required
                                value="{{ old('name') }}"
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all @error('name') border-red-500 @enderror"
-                               placeholder="Ваше ім'я">
+                               placeholder="{{ __('landing.your_name_placeholder') }}">
                         @error('name')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -106,21 +106,21 @@
 
                     <div>
                         <label for="church" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Назва церкви
+                            {{ __('landing.church_name_field') }}
                         </label>
                         <input type="text" id="church" name="church"
                                value="{{ old('church') }}"
                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                               placeholder="Назва вашої церкви (необов'язково)">
+                               placeholder="{{ __('landing.church_name_placeholder') }}">
                     </div>
 
                     <div>
                         <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Повідомлення *
+                            {{ __('landing.message_field') }}
                         </label>
                         <textarea id="message" name="message" rows="5" required
                                   class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none @error('message') border-red-500 @enderror"
-                                  placeholder="Опишіть ваше питання або пропозицію...">{{ old('message') }}</textarea>
+                                  placeholder="{{ __('landing.message_placeholder') }}">{{ old('message') }}</textarea>
                         @error('message')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -128,8 +128,8 @@
 
                     <button type="submit" :disabled="submitting"
                             class="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50">
-                        <span x-show="!submitting">Надіслати повідомлення</span>
-                        <span x-show="submitting" x-cloak>Надсилання...</span>
+                        <span x-show="!submitting">{{ __('landing.send_message') }}</span>
+                        <span x-show="submitting" x-cloak>{{ __('landing.sending') }}</span>
                     </button>
                 </form>
             </div>
@@ -189,14 +189,14 @@
                 <!-- FAQ Link -->
                 <div class="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
-                        Часті питання
+                        {{ __('landing.frequently_asked') }}
                     </h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-4">
-                        Можливо, відповідь на ваше питання вже є у розділі FAQ.
+                        {{ __('landing.faq_might_help') }}
                     </p>
                     <a href="{{ route('landing.faq') }}"
                        class="inline-flex items-center text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300">
-                        Переглянути FAQ
+                        {{ __('landing.view_faq') }}
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -206,14 +206,14 @@
                 <!-- Demo Request -->
                 <div class="mt-6 p-6 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-100 dark:border-amber-800">
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
-                        Хочете побачити демо?
+                        {{ __('landing.want_demo') }}
                     </h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-4">
-                        Запишіться на безкоштовну 30-хвилинну демонстрацію системи.
+                        {{ __('landing.sign_up_demo') }}
                     </p>
                     <a href="{{ route('landing.register') }}"
                        class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors">
-                        Спробувати безкоштовно
+                        {{ __('landing.try_free_button') }}
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -234,26 +234,25 @@
                 </svg>
             </div>
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                Працюємо для церков по всій Україні
+                {{ __('landing.serving_ukraine') }}
             </h2>
             <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Ministrify — це хмарний сервіс, доступний з будь-якої точки світу.
-                Ми допомагаємо церквам України та української діаспори ефективно управляти громадою.
+                {{ __('landing.ministrify_description') }}
             </p>
 
             <!-- Stats -->
             <div class="grid grid-cols-3 gap-8 mt-12 max-w-lg mx-auto">
                 <div>
-                    <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">24/7</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Доступність</div>
+                    <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ __('landing.availability_24_7') }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('landing.availability_label') }}</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">&lt;24г</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Час відповіді</div>
+                    <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ __('landing.response_time_24h') }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('landing.response_time_label') }}</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">UA</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Підтримка</div>
+                    <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ __('landing.ukrainian_support') }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('landing.support_label') }}</div>
                 </div>
             </div>
         </div>
