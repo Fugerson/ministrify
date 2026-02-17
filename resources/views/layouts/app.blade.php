@@ -1545,6 +1545,7 @@
                                 </div>
                             </template>
 
+                            @if(auth()->user()->canCreate('people') || auth()->user()->canCreate('events') || auth()->user()->canCreate('groups'))
                             <template x-if="!loading && query.length < 2">
                                 <div class="px-4 py-6">
                                     <p class="text-xs font-medium text-gray-400 uppercase mb-3">Швидкі дії</p>
@@ -1579,6 +1580,7 @@
                                     </div>
                                 </div>
                             </template>
+                            @endif
 
                             <template x-if="!loading && results.length > 0">
                                 <div class="py-2">
