@@ -276,9 +276,17 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
-        // Check role-based permissions
+        // Check role-based permissions (approved role)
         if ($this->churchRole && $this->churchRole->hasPermission($module, $action)) {
             return true;
+        }
+
+        // For pending users: allow view-only access using requested role
+        // This allows users waiting for approval to at least view the system
+        if ($this->servant_approval_status === 'pending' && $action === 'view' && $this->requestedChurchRole) {
+            if ($this->requestedChurchRole->hasPermission($module, 'view')) {
+                return true;
+            }
         }
 
         // Check per-user permission overrides
