@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SupportTicket;
 use App\Models\SupportMessage;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -139,12 +140,12 @@ class SupportController extends Controller
 
         $attachments = [];
         foreach ($request->file('attachments') as $file) {
-            $path = $file->store("support/{$ticketId}", 'public');
+            $stored = ImageService::storeWithHeicConversion($file, "support/{$ticketId}");
             $attachments[] = [
                 'name' => $file->getClientOriginalName(),
-                'path' => $path,
-                'size' => $file->getSize(),
-                'mime' => $file->getMimeType(),
+                'path' => $stored['path'],
+                'size' => $stored['size'],
+                'mime' => $stored['mime_type'],
             ];
         }
 

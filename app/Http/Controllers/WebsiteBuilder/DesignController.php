@@ -4,6 +4,7 @@ namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\RequiresChurch;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -146,10 +147,10 @@ class DesignController extends Controller
         ]);
 
         $church = $this->getChurchOrFail();
-        $path = $request->file('hero_image')->store("churches/{$church->id}/hero", 'public');
+        $stored = ImageService::storeWithHeicConversion($request->file('hero_image'), "churches/{$church->id}/hero");
 
         $heroSettings = $church->getPublicSiteSetting('hero', []);
-        $heroSettings['image'] = $path;
+        $heroSettings['image'] = $stored['path'];
         $church->setPublicSiteSetting('hero', $heroSettings);
 
         return back()->with('success', 'Hero зображення завантажено');
@@ -162,11 +163,11 @@ class DesignController extends Controller
         ]);
 
         $church = $this->getChurchOrFail();
-        $path = $request->file('slide_image')->store("churches/{$church->id}/hero/slides", 'public');
+        $stored = ImageService::storeWithHeicConversion($request->file('slide_image'), "churches/{$church->id}/hero/slides");
 
         $heroSettings = $church->getPublicSiteSetting('hero', []);
         $slides = $heroSettings['slides'] ?? [];
-        $slides[] = ['image' => $path];
+        $slides[] = ['image' => $stored['path']];
         $heroSettings['slides'] = $slides;
         $church->setPublicSiteSetting('hero', $heroSettings);
 

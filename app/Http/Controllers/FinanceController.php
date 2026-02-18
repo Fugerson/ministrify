@@ -14,6 +14,7 @@ use App\Models\Transaction;
 use App\Models\TransactionAttachment;
 use App\Models\TransactionCategory;
 use App\Rules\BelongsToChurch;
+use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -909,17 +910,15 @@ class FinanceController extends Controller
 
         if ($request->hasFile('receipts')) {
             foreach ($request->file('receipts') as $file) {
-
-                $path = $file->store("receipts/{$church->id}", 'public');
+                $stored = ImageService::storeWithHeicConversion($file, "receipts/{$church->id}");
 
                 $transaction->attachments()->create([
-                    'filename' => basename($path),
+                    'filename' => $stored['filename'],
                     'original_name' => $file->getClientOriginalName(),
-                    'path' => $path,
-                    'mime_type' => $file->getMimeType(),
-                    'size' => $file->getSize(),
+                    'path' => $stored['path'],
+                    'mime_type' => $stored['mime_type'],
+                    'size' => $stored['size'],
                 ]);
-
             }
         }
 
@@ -1068,17 +1067,15 @@ class FinanceController extends Controller
 
         if ($request->hasFile('receipts')) {
             foreach ($request->file('receipts') as $file) {
-
-                $path = $file->store("receipts/{$church->id}", 'public');
+                $stored = ImageService::storeWithHeicConversion($file, "receipts/{$church->id}");
 
                 $transaction->attachments()->create([
-                    'filename' => basename($path),
+                    'filename' => $stored['filename'],
                     'original_name' => $file->getClientOriginalName(),
-                    'path' => $path,
-                    'mime_type' => $file->getMimeType(),
-                    'size' => $file->getSize(),
+                    'path' => $stored['path'],
+                    'mime_type' => $stored['mime_type'],
+                    'size' => $stored['size'],
                 ]);
-
             }
         }
 

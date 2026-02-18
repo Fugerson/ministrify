@@ -5,6 +5,7 @@ namespace App\Http\Controllers\WebsiteBuilder;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Testimonial;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -36,7 +37,8 @@ class TestimonialController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')->store("churches/{$church->id}/testimonials", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('photo'), "churches/{$church->id}/testimonials");
+            $validated['photo'] = $stored['path'];
         }
 
         $validated['church_id'] = $church->id;
@@ -67,7 +69,8 @@ class TestimonialController extends Controller
             if ($testimonial->photo) {
                 Storage::disk('public')->delete($testimonial->photo);
             }
-            $validated['photo'] = $request->file('photo')->store("churches/{$church->id}/testimonials", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('photo'), "churches/{$church->id}/testimonials");
+            $validated['photo'] = $stored['path'];
         }
 
         $testimonial->update($validated);

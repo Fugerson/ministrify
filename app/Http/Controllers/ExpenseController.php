@@ -6,6 +6,7 @@ use App\Models\Ministry;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Rules\BelongsToChurch;
+use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -96,7 +97,8 @@ class ExpenseController extends Controller
         // Handle receipt upload
         $receiptPath = null;
         if ($request->hasFile('receipt_photo')) {
-            $receiptPath = $request->file('receipt_photo')->store('receipts', 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('receipt_photo'), 'receipts');
+            $receiptPath = $stored['path'];
         }
 
         Transaction::create([
@@ -157,7 +159,8 @@ class ExpenseController extends Controller
             if (!empty($paymentData['receipt_photo'])) {
                 Storage::disk('public')->delete($paymentData['receipt_photo']);
             }
-            $paymentData['receipt_photo'] = $request->file('receipt_photo')->store('receipts', 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('receipt_photo'), 'receipts');
+            $paymentData['receipt_photo'] = $stored['path'];
         }
 
         $expense->update([

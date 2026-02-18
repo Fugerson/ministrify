@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\User;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -216,7 +217,8 @@ class OnboardingController extends Controller
             if ($church->logo) {
                 Storage::disk('public')->delete($church->logo);
             }
-            $validated['logo'] = $request->file('logo')->store('logos', 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('logo'), 'logos');
+            $validated['logo'] = $stored['path'];
         }
 
         // Only update fields that were actually submitted

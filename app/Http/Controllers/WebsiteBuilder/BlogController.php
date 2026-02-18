@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\BlogPost;
 use App\Models\BlogCategory;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -63,8 +64,8 @@ class BlogController extends Controller
         ]);
 
         if ($request->hasFile('featured_image')) {
-            $validated['featured_image'] = $request->file('featured_image')
-                ->store("churches/{$church->id}/blog", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('featured_image'), "churches/{$church->id}/blog");
+            $validated['featured_image'] = $stored['path'];
         }
 
         if (empty($validated['slug'])) {
@@ -127,8 +128,8 @@ class BlogController extends Controller
             if ($blogPost->featured_image) {
                 Storage::disk('public')->delete($blogPost->featured_image);
             }
-            $validated['featured_image'] = $request->file('featured_image')
-                ->store("churches/{$church->id}/blog", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('featured_image'), "churches/{$church->id}/blog");
+            $validated['featured_image'] = $stored['path'];
         }
 
         // Set published_at if publishing for first time

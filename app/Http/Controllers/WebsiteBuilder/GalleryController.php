@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Gallery;
 use App\Models\GalleryPhoto;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -40,7 +41,8 @@ class GalleryController extends Controller
         ]);
 
         if ($request->hasFile('cover_photo')) {
-            $validated['cover_photo'] = $request->file('cover_photo')->store("churches/{$church->id}/galleries", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('cover_photo'), "churches/{$church->id}/galleries");
+            $validated['cover_photo'] = $stored['path'];
         }
 
         $validated['church_id'] = $church->id;
@@ -85,7 +87,8 @@ class GalleryController extends Controller
             if ($gallery->cover_photo) {
                 Storage::disk('public')->delete($gallery->cover_photo);
             }
-            $validated['cover_photo'] = $request->file('cover_photo')->store("churches/{$church->id}/galleries", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('cover_photo'), "churches/{$church->id}/galleries");
+            $validated['cover_photo'] = $stored['path'];
         }
 
         $gallery->update($validated);
@@ -149,14 +152,14 @@ class GalleryController extends Controller
         $maxOrder = $gallery->photos()->max('sort_order') ?? 0;
 
         foreach ($request->file('photos') as $index => $file) {
-            $path = $file->store("churches/{$church->id}/galleries/{$gallery->id}", 'public');
+            $stored = ImageService::storeWithHeicConversion($file, "churches/{$church->id}/galleries/{$gallery->id}");
 
             GalleryPhoto::create([
                 'gallery_id' => $gallery->id,
-                'file_path' => $path,
+                'file_path' => $stored['path'],
                 'original_filename' => $file->getClientOriginalName(),
-                'file_size' => $file->getSize(),
-                'mime_type' => $file->getMimeType(),
+                'file_size' => $stored['size'],
+                'mime_type' => $stored['mime_type'],
                 'sort_order' => $maxOrder + $index + 1,
             ]);
         }

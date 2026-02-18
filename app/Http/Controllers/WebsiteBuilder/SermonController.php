@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Sermon;
 use App\Models\SermonSeries;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -58,7 +59,8 @@ class SermonController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail'] = $request->file('thumbnail')->store("churches/{$church->id}/sermons/thumbnails", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('thumbnail'), "churches/{$church->id}/sermons/thumbnails");
+            $validated['thumbnail'] = $stored['path'];
         }
 
         $validated['church_id'] = $church->id;
@@ -111,7 +113,8 @@ class SermonController extends Controller
             if ($sermon->thumbnail) {
                 Storage::disk('public')->delete($sermon->thumbnail);
             }
-            $validated['thumbnail'] = $request->file('thumbnail')->store("churches/{$church->id}/sermons/thumbnails", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('thumbnail'), "churches/{$church->id}/sermons/thumbnails");
+            $validated['thumbnail'] = $stored['path'];
         }
 
         $sermon->update($validated);
@@ -157,7 +160,8 @@ class SermonController extends Controller
         ]);
 
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail'] = $request->file('thumbnail')->store("churches/{$church->id}/sermons/series", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('thumbnail'), "churches/{$church->id}/sermons/series");
+            $validated['thumbnail'] = $stored['path'];
         }
 
         $validated['church_id'] = $church->id;
@@ -185,7 +189,8 @@ class SermonController extends Controller
             if ($series->thumbnail) {
                 Storage::disk('public')->delete($series->thumbnail);
             }
-            $validated['thumbnail'] = $request->file('thumbnail')->store("churches/{$church->id}/sermons/series", 'public');
+            $stored = ImageService::storeWithHeicConversion($request->file('thumbnail'), "churches/{$church->id}/sermons/series");
+            $validated['thumbnail'] = $stored['path'];
         }
 
         $series->update($validated);
