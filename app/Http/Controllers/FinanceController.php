@@ -48,10 +48,10 @@ class FinanceController extends Controller
 
         // Calculate totals in UAH (using amount_uah for converted amounts, fallback to amount)
         $totalIncome = (clone $incomeQuery)
-            ->selectRaw('COALESCE(SUM(amount_uah), SUM(amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
             ->value('total') ?? 0;
         $totalExpense = (clone $expenseQuery)
-            ->selectRaw('COALESCE(SUM(amount_uah), SUM(amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
             ->value('total') ?? 0;
         $periodBalance = $totalIncome - $totalExpense;
 
@@ -69,10 +69,10 @@ class FinanceController extends Controller
             }
         }
         $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()
-            ->selectRaw('COALESCE(SUM(amount_uah), SUM(amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
             ->value('total') ?? 0;
         $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()
-            ->selectRaw('COALESCE(SUM(amount_uah), SUM(amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
             ->value('total') ?? 0;
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
 
@@ -154,7 +154,7 @@ class FinanceController extends Controller
                     $join->whereYear('transactions.date', $year);
                 }
             })
-            ->selectRaw('transaction_categories.*, COALESCE(SUM(transactions.amount), 0) as total_amount')
+            ->selectRaw('transaction_categories.*, COALESCE(SUM(COALESCE(transactions.amount_uah, transactions.amount)), 0) as total_amount')
             ->groupBy('transaction_categories.id')
             ->orderByDesc('total_amount')
             ->get();
@@ -176,7 +176,7 @@ class FinanceController extends Controller
                     $join->whereYear('transactions.date', $year);
                 }
             })
-            ->selectRaw('transaction_categories.*, COALESCE(SUM(transactions.amount), 0) as total_amount')
+            ->selectRaw('transaction_categories.*, COALESCE(SUM(COALESCE(transactions.amount_uah, transactions.amount)), 0) as total_amount')
             ->groupBy('transaction_categories.id')
             ->orderByDesc('total_amount')
             ->get();
@@ -197,7 +197,7 @@ class FinanceController extends Controller
                     $join->whereYear('transactions.date', $year);
                 }
             })
-            ->selectRaw('ministries.*, COALESCE(SUM(transactions.amount), 0) as total_expense')
+            ->selectRaw('ministries.*, COALESCE(SUM(COALESCE(transactions.amount_uah, transactions.amount)), 0) as total_expense')
             ->groupBy('ministries.id')
             ->orderByDesc('total_expense')
             ->get();
@@ -327,10 +327,12 @@ class FinanceController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        // Current balance (all time)
+        // Current balance (all time) - in UAH
         $currentBalance = (float) $church->initial_balance
-            + Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount')
-            - Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount');
+            + (Transaction::where('church_id', $church->id)->incoming()->completed()
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0)
+            - (Transaction::where('church_id', $church->id)->outgoing()->completed()
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
 
         // Initial period from request or default to month
         $initialPeriod = $request->get('period', 'month');
@@ -460,12 +462,14 @@ class FinanceController extends Controller
         $income = Transaction::where('church_id', $churchId)
             ->incoming()->completed()
             ->where('date', '<', $date)
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0;
 
         $expense = Transaction::where('church_id', $churchId)
             ->outgoing()->completed()
             ->where('date', '<', $date)
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0;
 
         return $initialBalance + $income - $expense;
     }
@@ -492,6 +496,7 @@ class FinanceController extends Controller
 
         $query = Transaction::where('church_id', $church->id)
             ->incoming()
+            ->completed()
             ->whereBetween('date', [$startDate, $endDate])
             ->with(['category', 'person', 'recorder']);
 
@@ -747,6 +752,7 @@ class FinanceController extends Controller
 
         $query = Transaction::where('church_id', $church->id)
             ->outgoing()
+            ->completed()
             ->whereBetween('date', [$startDate, $endDate])
             ->with(['category', 'ministry', 'recorder']);
 

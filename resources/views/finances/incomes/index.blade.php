@@ -248,7 +248,7 @@ window.incomesManager = function() {
                     date: data.transaction.date.substring(0, 10),
                     payment_method: data.transaction.payment_method || 'cash',
                     notes: data.transaction.notes || '',
-                    is_anonymous: true
+                    is_anonymous: data.transaction.is_anonymous ?? true
                 };
 
                 this.isEdit = true;
@@ -539,12 +539,12 @@ window.incomesManager = function() {
                                class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                :class="{ 'border-red-500': errors.amount }"
                                placeholder="0.00">
-                        @if(count($categories) > 0)
+                        @if(count($enabledCurrencies) > 1)
                         <select x-model="formData.currency"
                                 class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="UAH">₴ UAH</option>
-                            <option value="USD">$ USD</option>
-                            <option value="EUR">€ EUR</option>
+                            @foreach($enabledCurrencies as $code)
+                            <option value="{{ $code }}">{{ \App\Helpers\CurrencyHelper::SYMBOLS[$code] ?? $code }} {{ $code }}</option>
+                            @endforeach
                         </select>
                         @endif
                     </div>

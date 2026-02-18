@@ -159,7 +159,7 @@ function exportButton() {
                             <td class="px-4 py-3 whitespace-nowrap text-right">
                                 <span class="text-sm font-semibold" :class="item.transaction.direction === 'in' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
                                     <span x-text="(item.transaction.direction === 'in' ? '+' : '-') + formatNumber(item.transaction.amount)"></span>
-                                    <span class="text-xs" x-text="item.transaction.currency || '₴'"></span>
+                                    <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
                                 </span>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-right">
@@ -244,7 +244,7 @@ function exportButton() {
                         <!-- Amount -->
                         <div class="text-center py-4">
                             <span class="text-3xl font-bold" :class="transaction?.direction === 'in' ? 'text-green-600' : 'text-red-600'"
-                                  x-text="(transaction?.direction === 'in' ? '+' : '-') + formatNumber(transaction?.amount || 0) + ' ' + (transaction?.currency || '₴')">
+                                  x-text="(transaction?.direction === 'in' ? '+' : '-') + formatNumber(transaction?.amount || 0) + ' ' + currencySymbol(transaction?.currency)">
                             </span>
                         </div>
 
@@ -435,26 +435,28 @@ function journalApp() {
             const transactions = this.periodTransactions;
             const { start } = this.dateRange;
 
-            // Calculate balance before period start
+            // Calculate balance before period start (in UAH)
             let balanceBefore = this.balanceBeforeYear;
             for (let t of this.allTransactions) {
                 const date = new Date(t.date);
                 if (date < start) {
+                    const amt = parseFloat(t.amount_uah || t.amount);
                     if (t.direction === 'in') {
-                        balanceBefore += parseFloat(t.amount);
+                        balanceBefore += amt;
                     } else {
-                        balanceBefore -= parseFloat(t.amount);
+                        balanceBefore -= amt;
                     }
                 }
             }
 
-            // Calculate income and expense for period
+            // Calculate income and expense for period (in UAH)
             let income = 0, expense = 0;
             for (let t of transactions) {
+                const amt = parseFloat(t.amount_uah || t.amount);
                 if (t.direction === 'in') {
-                    income += parseFloat(t.amount);
+                    income += amt;
                 } else {
-                    expense += parseFloat(t.amount);
+                    expense += amt;
                 }
             }
 
@@ -474,10 +476,11 @@ function journalApp() {
 
             for (let t of this.periodTransactions) {
                 const balance = currentBalance;
+                const amt = parseFloat(t.amount_uah || t.amount);
                 if (t.direction === 'in') {
-                    currentBalance -= parseFloat(t.amount);
+                    currentBalance -= amt;
                 } else {
-                    currentBalance += parseFloat(t.amount);
+                    currentBalance += amt;
                 }
 
                 // Apply filters
@@ -519,6 +522,11 @@ function journalApp() {
         formatWeekday(dateStr) {
             const date = new Date(dateStr);
             return date.toLocaleDateString('uk-UA', { weekday: 'long' });
+        },
+
+        currencySymbol(code) {
+            const symbols = { UAH: '₴', USD: '$', EUR: '€' };
+            return symbols[code] || code || '₴';
         },
 
         formatNumber(num) {
@@ -649,7 +657,7 @@ window.incomeModal = function() {
                 date: transaction.date.substring(0, 10),
                 payment_method: transaction.payment_method || 'cash',
                 notes: transaction.notes || '',
-                is_anonymous: true
+                is_anonymous: transaction.is_anonymous ?? true
             };
             this.errors = {};
             this.modalOpen = true;
