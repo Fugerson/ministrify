@@ -1389,9 +1389,19 @@ class FinanceController extends Controller
         }
 
         $church = $this->getCurrentChurch();
-        $year = $request->get('year', now()->year);
+        $year = (int) $request->get('year', now()->year);
+        $month = $request->get('month') ? (int) $request->get('month') : null;
+        $period = $request->get('period', 'year');
 
-        return response()->json($this->getMonthlyData($church->id, $year));
+        $data = match ($period) {
+            'month' => $this->getDailyData($church->id, $year, $month ?? (int) now()->month),
+            'quarter' => $this->getQuarterData($church->id, $year, $month),
+            'year' => $this->getMonthlyData($church->id, $year),
+            'all' => $this->getAllTimeData($church->id),
+            default => $this->getMonthlyData($church->id, $year),
+        };
+
+        return response()->json($data);
     }
 
     // Private helpers
@@ -1421,6 +1431,101 @@ class FinanceController extends Controller
             ];
         }
         return $months;
+    }
+
+    private function getDailyData(int $churchId, int $year, int $month): array
+    {
+        $daysInMonth = Carbon::create($year, $month)->daysInMonth;
+
+        $dailyRaw = Transaction::where('church_id', $churchId)
+            ->completed()
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->selectRaw('DAY(date) as day, direction, SUM(amount) as total')
+            ->groupBy('day', 'direction')
+            ->get();
+
+        $grouped = $dailyRaw->groupBy('day');
+
+        $days = [];
+        for ($d = 1; $d <= $daysInMonth; $d++) {
+            $dayData = $grouped[$d] ?? collect();
+            $income = (float) $dayData->where('direction', 'in')->sum('total');
+            $expense = (float) $dayData->where('direction', 'out')->sum('total');
+
+            $days[] = [
+                'month' => $d,
+                'income' => $income,
+                'expense' => $expense,
+                'balance' => $income - $expense,
+            ];
+        }
+        return $days;
+    }
+
+    private function getQuarterData(int $churchId, int $year, ?int $month): array
+    {
+        $quarter = $month ? (int) ceil($month / 3) : (int) ceil(now()->month / 3);
+        $startMonth = ($quarter - 1) * 3 + 1;
+        $endMonth = $quarter * 3;
+
+        $monthlyRaw = Transaction::where('church_id', $churchId)
+            ->completed()
+            ->whereYear('date', $year)
+            ->whereRaw('MONTH(date) BETWEEN ? AND ?', [$startMonth, $endMonth])
+            ->selectRaw('MONTH(date) as month, direction, SUM(amount) as total')
+            ->groupBy('month', 'direction')
+            ->get();
+
+        $grouped = $monthlyRaw->groupBy('month');
+
+        $months = [];
+        for ($m = $startMonth; $m <= $endMonth; $m++) {
+            $monthData = $grouped[$m] ?? collect();
+            $income = (float) $monthData->where('direction', 'in')->sum('total');
+            $expense = (float) $monthData->where('direction', 'out')->sum('total');
+
+            $months[] = [
+                'month' => $this->getMonthName($m),
+                'income' => $income,
+                'expense' => $expense,
+                'balance' => $income - $expense,
+            ];
+        }
+        return $months;
+    }
+
+    private function getAllTimeData(int $churchId): array
+    {
+        $yearlyRaw = Transaction::where('church_id', $churchId)
+            ->completed()
+            ->selectRaw('YEAR(date) as year, direction, SUM(amount) as total')
+            ->groupBy('year', 'direction')
+            ->get();
+
+        $grouped = $yearlyRaw->groupBy('year');
+
+        if ($grouped->isEmpty()) {
+            return [['month' => (string) now()->year, 'income' => 0, 'expense' => 0, 'balance' => 0]];
+        }
+
+        $minYear = $grouped->keys()->min();
+        $maxYear = $grouped->keys()->max();
+
+        $years = [];
+        for ($y = $minYear; $y <= $maxYear; $y++) {
+            $yearData = $grouped[$y] ?? collect();
+            $income = (float) $yearData->where('direction', 'in')->sum('total');
+            $expense = (float) $yearData->where('direction', 'out')->sum('total');
+
+            $years[] = [
+                'month' => (string) $y,
+                'income' => $income,
+                'expense' => $expense,
+                'balance' => $income - $expense,
+            ];
+        }
+        return $years;
     }
 
     private function getYearComparison(int $churchId, int $year): array

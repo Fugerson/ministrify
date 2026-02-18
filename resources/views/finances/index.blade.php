@@ -160,14 +160,14 @@
                 <div>
                     <p class="text-green-100 text-sm font-medium">Надходження</p>
                     <p class="text-2xl sm:text-3xl font-bold mt-1">{{ number_format($totalIncome, 0, ',', ' ') }} ₴</p>
-                    @if($yearComparison['growth']['income'] != 0)
-                        <p class="text-green-100 text-sm mt-2">
+                    <p class="text-green-100 text-sm mt-2">
+                        {{ $periodLabel }}
+                        @if($yearComparison['growth']['income'] != 0)
                             <span class="{{ $yearComparison['growth']['income'] > 0 ? '' : 'text-red-200' }}">
-                                {{ $yearComparison['growth']['income'] > 0 ? '+' : '' }}{{ $yearComparison['growth']['income'] }}%
+                                ({{ $yearComparison['growth']['income'] > 0 ? '+' : '' }}{{ $yearComparison['growth']['income'] }}%)
                             </span>
-                            порівняно з минулим роком
-                        </p>
-                    @endif
+                        @endif
+                    </p>
                 </div>
                 <div class="p-3 bg-green-400 bg-opacity-30 rounded-full">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,14 +183,14 @@
                 <div>
                     <p class="text-red-100 text-sm font-medium">Витрати</p>
                     <p class="text-2xl sm:text-3xl font-bold mt-1">{{ number_format($totalExpense, 0, ',', ' ') }} ₴</p>
-                    @if($yearComparison['growth']['expense'] != 0)
-                        <p class="text-red-100 text-sm mt-2">
+                    <p class="text-red-100 text-sm mt-2">
+                        {{ $periodLabel }}
+                        @if($yearComparison['growth']['expense'] != 0)
                             <span class="{{ $yearComparison['growth']['expense'] < 0 ? 'text-green-200' : '' }}">
-                                {{ $yearComparison['growth']['expense'] > 0 ? '+' : '' }}{{ $yearComparison['growth']['expense'] }}%
+                                ({{ $yearComparison['growth']['expense'] > 0 ? '+' : '' }}{{ $yearComparison['growth']['expense'] }}%)
                             </span>
-                            порівняно з минулим роком
-                        </p>
-                    @endif
+                        @endif
+                    </p>
                 </div>
                 <div class="p-3 bg-red-400 bg-opacity-30 rounded-full">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,8 +221,26 @@
 
     <!-- Chart -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Динаміка за {{ $year }} рік</h3>
-        <div class="h-64">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="chartTitle">Динаміка за {{ $year }} рік</h3>
+            <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-0.5">
+                <button @click="switchChartPeriod('month')" :class="chartPeriod === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">Місяць</button>
+                <button @click="switchChartPeriod('quarter')" :class="chartPeriod === 'quarter' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">Квартал</button>
+                <button @click="switchChartPeriod('year')" :class="chartPeriod === 'year' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">Рік</button>
+                <button @click="switchChartPeriod('all')" :class="chartPeriod === 'all' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">Весь час</button>
+            </div>
+        </div>
+        <div class="h-64 relative">
+            <div x-show="chartLoading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 z-10">
+                <svg class="animate-spin h-6 w-6 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </div>
             <canvas id="financeChart"></canvas>
         </div>
     </div>
@@ -492,12 +510,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 function financesDashboard() {
+    const monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+
     return {
         selectedYear: '{{ $year }}',
         selectedMonth: '{{ $month ?? "" }}',
+        chartPeriod: 'year',
+        chartTitle: 'Динаміка за {{ $year }} рік',
+        chartLoading: false,
+        chartInstance: null,
 
         init() {
-            this.initChart();
+            this.initChart(@json($monthlyData));
             this.initPaymentMethodsChart();
         },
 
@@ -509,27 +533,61 @@ function financesDashboard() {
             window.location.href = url;
         },
 
-        initChart() {
+        switchChartPeriod(period) {
+            if (this.chartPeriod === period) return;
+            this.chartPeriod = period;
+            this.chartLoading = true;
+
+            const year = this.selectedYear;
+            const month = this.selectedMonth || {{ $month ?? 'new Date().getMonth() + 1' }};
+
+            let url = '{{ route("finances.chart-data") }}?period=' + period + '&year=' + year;
+            if (month) url += '&month=' + month;
+
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    this.updateChartTitle(period, year, month);
+                    this.initChart(data);
+                    this.chartLoading = false;
+                })
+                .catch(() => { this.chartLoading = false; });
+        },
+
+        updateChartTitle(period, year, month) {
+            const m = parseInt(month);
+            const q = Math.ceil(m / 3);
+            const titles = {
+                month: (monthNames[m] || '') + ' ' + year,
+                quarter: q + '-й квартал ' + year,
+                year: 'Динаміка за ' + year + ' рік',
+                all: 'Динаміка за весь час',
+            };
+            this.chartTitle = titles[period] || titles.year;
+        },
+
+        initChart(chartData) {
             const ctx = document.getElementById('financeChart');
             if (!ctx) return;
 
-            const monthlyData = @json($monthlyData);
+            if (this.chartInstance) {
+                this.chartInstance.destroy();
+            }
 
-            // Calculate cumulative balance
             let cumulativeBalance = 0;
-            const balanceData = monthlyData.map(d => {
+            const balanceData = chartData.map(d => {
                 cumulativeBalance += d.balance;
                 return cumulativeBalance;
             });
 
-            new Chart(ctx, {
+            this.chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: monthlyData.map(d => d.month),
+                    labels: chartData.map(d => d.month),
                     datasets: [
                         {
                             label: 'Надходження',
-                            data: monthlyData.map(d => d.income),
+                            data: chartData.map(d => d.income),
                             backgroundColor: 'rgba(34, 197, 94, 0.8)',
                             borderRadius: 4,
                             yAxisID: 'y',
@@ -537,7 +595,7 @@ function financesDashboard() {
                         },
                         {
                             label: 'Витрати',
-                            data: monthlyData.map(d => d.expense),
+                            data: chartData.map(d => d.expense),
                             backgroundColor: 'rgba(239, 68, 68, 0.8)',
                             borderRadius: 4,
                             yAxisID: 'y',
@@ -552,10 +610,10 @@ function financesDashboard() {
                             borderWidth: 3,
                             fill: true,
                             tension: 0.4,
-                            pointRadius: 5,
+                            pointRadius: chartData.length > 20 ? 2 : 5,
                             pointBackgroundColor: 'rgba(59, 130, 246, 1)',
                             pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
+                            pointBorderWidth: chartData.length > 20 ? 1 : 2,
                             pointHoverRadius: 7,
                             yAxisID: 'y1',
                             order: 1,
@@ -577,9 +635,7 @@ function financesDashboard() {
                             callbacks: {
                                 label: function(context) {
                                     let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
+                                    if (label) label += ': ';
                                     const value = context.parsed.y;
                                     const sign = context.datasetIndex === 2 && value >= 0 ? '+' : '';
                                     label += sign + value.toLocaleString('uk-UA') + ' ₴';
@@ -604,9 +660,7 @@ function financesDashboard() {
                                     return value.toLocaleString('uk-UA') + ' ₴';
                                 }
                             },
-                            grid: {
-                                drawOnChartArea: true,
-                            }
+                            grid: { drawOnChartArea: true }
                         },
                         y1: {
                             type: 'linear',
@@ -624,9 +678,7 @@ function financesDashboard() {
                                     return sign + value.toLocaleString('uk-UA') + ' ₴';
                                 }
                             },
-                            grid: {
-                                drawOnChartArea: false,
-                            }
+                            grid: { drawOnChartArea: false }
                         }
                     }
                 }

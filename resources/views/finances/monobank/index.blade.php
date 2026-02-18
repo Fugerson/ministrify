@@ -354,7 +354,6 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($transactions as $tx)
                             @php
                                 $mccKey = $tx->mcc_category_key;
@@ -373,7 +372,8 @@
                                 ];
                                 $colorClass = $mccColors[$mccKey] ?? $mccColors['other'];
                             @endphp
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50" x-data="{ showImport: false }">
+                        <tbody x-data="{ showImport: false }" class="border-b border-gray-200 dark:border-gray-700">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                 @if($tab === 'new')
                                     <td class="px-3 py-3">
                                         <input type="checkbox" value="{{ $tx->id }}" x-model.number="selectedIds"
@@ -511,7 +511,9 @@
                                     </form>
                                 </td>
                             </tr>
+                        </tbody>
                         @empty
+                        <tbody>
                             <tr>
                                 <td colspan="{{ $tab === 'new' ? 8 : 7 }}" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -523,8 +525,8 @@
                                     @endif
                                 </td>
                             </tr>
+                        </tbody>
                         @endforelse
-                    </tbody>
                 </table>
 
             </div>
