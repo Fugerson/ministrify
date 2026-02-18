@@ -906,8 +906,10 @@ class FinanceController extends Controller
         ]);
 
         // Handle receipt uploads
+        \Log::warning('HEIC_DEBUG storeExpense: hasFile=' . ($request->hasFile('receipts') ? 'yes' : 'no') . ', allFiles=' . json_encode(array_keys($request->allFiles())));
         if ($request->hasFile('receipts')) {
             foreach ($request->file('receipts') as $file) {
+                \Log::warning('HEIC_DEBUG uploading: ' . $file->getClientOriginalName() . ' mime=' . $file->getMimeType() . ' ext=' . $file->getClientOriginalExtension() . ' size=' . $file->getSize());
                 $path = $file->store("receipts/{$church->id}", 'public');
 
                 $transaction->attachments()->create([
@@ -917,6 +919,7 @@ class FinanceController extends Controller
                     'mime_type' => $file->getMimeType(),
                     'size' => $file->getSize(),
                 ]);
+                \Log::warning('HEIC_DEBUG saved: ' . $path);
             }
         }
 
@@ -1062,8 +1065,10 @@ class FinanceController extends Controller
 
         // Handle new receipt uploads
         $church = $this->getCurrentChurch();
+        \Log::warning('HEIC_DEBUG updateExpense: hasFile=' . ($request->hasFile('receipts') ? 'yes' : 'no') . ', allFiles=' . json_encode(array_keys($request->allFiles())));
         if ($request->hasFile('receipts')) {
             foreach ($request->file('receipts') as $file) {
+                \Log::warning('HEIC_DEBUG uploading: ' . $file->getClientOriginalName() . ' mime=' . $file->getMimeType() . ' ext=' . $file->getClientOriginalExtension() . ' size=' . $file->getSize());
                 $path = $file->store("receipts/{$church->id}", 'public');
 
                 $transaction->attachments()->create([
@@ -1073,6 +1078,7 @@ class FinanceController extends Controller
                     'mime_type' => $file->getMimeType(),
                     'size' => $file->getSize(),
                 ]);
+                \Log::warning('HEIC_DEBUG saved: ' . $path);
             }
         }
 

@@ -225,6 +225,14 @@
                                 <template x-if="preview.type === 'image'">
                                     <img :src="preview.url" class="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
                                 </template>
+                                <template x-if="preview.type === 'heic'">
+                                    <div class="w-full h-24 flex flex-col items-center justify-center bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+                                        <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span class="text-xs text-purple-600 dark:text-purple-400 mt-1">HEIC</span>
+                                    </div>
+                                </template>
                                 <template x-if="preview.type === 'pdf'">
                                     <div class="w-full h-24 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700">
                                         <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
@@ -272,8 +280,8 @@
 
                                     const preview = {
                                         name: file.name,
-                                        type: file.type === 'application/pdf' ? 'pdf' : 'image',
-                                        url: file.type !== 'application/pdf' ? URL.createObjectURL(file) : null
+                                        type: file.type === 'application/pdf' ? 'pdf' : (isHeic ? 'heic' : 'image'),
+                                        url: (!isHeic && file.type !== 'application/pdf') ? URL.createObjectURL(file) : null
                                     };
                                     this.previews.push(preview);
                                     this.files.push(file);
