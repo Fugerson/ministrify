@@ -483,7 +483,14 @@ window.expensesManager = function() {
 <div x-data="expensesManager()" x-cloak @expense-edit.window="openEdit($event.detail)" @expense-delete.window="confirmDelete($event.detail)">
 @include('finances.partials.tabs')
 
-<div id="finance-content" x-data="expensesPage()" @finance-period-changed.window="if($event.detail.isUserAction) handlePeriodReload($event.detail)">
+<div id="finance-content" x-data="expensesPage()" @finance-period-changed.window="
+    const d = $event.detail;
+    if (d.isUserAction) {
+        handlePeriodReload(d);
+    } else if (!new URL(window.location.href).searchParams.has('start_date')) {
+        if (d.customMode || d.period !== 'month') handlePeriodReload(d);
+    }
+">
 <div class="space-y-4">
 
     <!-- Summary + Filters -->

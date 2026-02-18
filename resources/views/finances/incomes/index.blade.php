@@ -366,7 +366,14 @@ window.incomesManager = function() {
 <div x-data="incomesManager()" x-cloak @income-edit.window="openEdit($event.detail)" @income-delete.window="confirmDelete($event.detail)">
 @include('finances.partials.tabs')
 
-<div id="finance-content" x-data="incomesPage()" @finance-period-changed.window="if($event.detail.isUserAction) handlePeriodReload($event.detail)">
+<div id="finance-content" x-data="incomesPage()" @finance-period-changed.window="
+    const d = $event.detail;
+    if (d.isUserAction) {
+        handlePeriodReload(d);
+    } else if (!new URL(window.location.href).searchParams.has('start_date')) {
+        if (d.customMode || d.period !== 'month') handlePeriodReload(d);
+    }
+">
 <div class="space-y-4">
 
     <!-- Summary + Filters -->
