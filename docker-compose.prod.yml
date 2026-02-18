@@ -201,6 +201,7 @@ services:
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306
+      PMA_ABSOLUTE_URI: https://ministrify.app/pma/
       UPLOAD_LIMIT: 100M
     ports:
       - "127.0.0.1:8083:80"
