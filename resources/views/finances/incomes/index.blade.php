@@ -133,11 +133,12 @@ window.incomesPage = function() {
         categoryFilter: '',
         paymentFilter: '',
         sortBy: 'date_desc',
+        perPage: parseInt(localStorage.getItem('financePerPage') || '25'),
+        currentPage: 1,
 
         get filteredIncomes() {
             let items = [...this.allIncomes];
 
-            // Search filter
             if (this.search.trim()) {
                 const q = this.search.trim().toLowerCase();
                 items = items.filter(i =>
@@ -148,17 +149,14 @@ window.incomesPage = function() {
                 );
             }
 
-            // Category filter
             if (this.categoryFilter) {
                 items = items.filter(i => String(i.category_id) === String(this.categoryFilter));
             }
 
-            // Payment method filter
             if (this.paymentFilter) {
                 items = items.filter(i => i.payment_method === this.paymentFilter);
             }
 
-            // Sort
             switch (this.sortBy) {
                 case 'date_asc':
                     items.sort((a, b) => a.date_full.localeCompare(b.date_full));
@@ -175,6 +173,58 @@ window.incomesPage = function() {
             }
 
             return items;
+        },
+
+        get totalPages() {
+            if (this.perPage === 0) return 1;
+            return Math.max(1, Math.ceil(this.filteredIncomes.length / this.perPage));
+        },
+
+        get paginatedIncomes() {
+            if (this.perPage === 0) return this.filteredIncomes;
+            const start = (this.currentPage - 1) * this.perPage;
+            return this.filteredIncomes.slice(start, start + this.perPage);
+        },
+
+        get showFrom() {
+            if (this.filteredIncomes.length === 0) return 0;
+            if (this.perPage === 0) return 1;
+            return (this.currentPage - 1) * this.perPage + 1;
+        },
+
+        get showTo() {
+            if (this.perPage === 0) return this.filteredIncomes.length;
+            return Math.min(this.currentPage * this.perPage, this.filteredIncomes.length);
+        },
+
+        get visiblePages() {
+            const pages = [];
+            const total = this.totalPages;
+            const current = this.currentPage;
+            if (total <= 7) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                if (current > 3) pages.push('...');
+                for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+                    pages.push(i);
+                }
+                if (current < total - 2) pages.push('...');
+                pages.push(total);
+            }
+            return pages;
+        },
+
+        setPerPage(val) {
+            this.perPage = parseInt(val);
+            this.currentPage = 1;
+            localStorage.setItem('financePerPage', val);
+        },
+
+        goToPage(page) {
+            if (page === '...' || page < 1 || page > this.totalPages) return;
+            this.currentPage = page;
+            document.getElementById('finance-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         },
 
         get totalFiltered() {
@@ -194,6 +244,7 @@ window.incomesPage = function() {
             this.categoryFilter = '';
             this.paymentFilter = '';
             this.sortBy = 'date_desc';
+            this.currentPage = 1;
         },
 
         formatNumber(num) {
@@ -396,12 +447,12 @@ window.incomesManager = function() {
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" x-model="search" placeholder="Пошук..."
+                <input type="text" x-model="search" @input="currentPage = 1" placeholder="Пошук..."
                        class="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
             </div>
 
             <!-- Category -->
-            <select x-model="categoryFilter"
+            <select x-model="categoryFilter" @change="currentPage = 1"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                 <option value="">Усі категорії</option>
                 @foreach($categories as $category)
@@ -410,7 +461,7 @@ window.incomesManager = function() {
             </select>
 
             <!-- Payment method -->
-            <select x-model="paymentFilter"
+            <select x-model="paymentFilter" @change="currentPage = 1"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                 <option value="">Усі способи</option>
                 <option value="cash">💵 Готівка</option>
@@ -456,14 +507,13 @@ window.incomesManager = function() {
                         </tr>
                     </template>
 
-                    <!-- Data rows -->
-                    <template x-for="income in filteredIncomes" :key="income.id">
+                    <!-- Data rows (paginated) -->
+                    <template x-for="income in paginatedIncomes" :key="income.id">
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
                             @click="$dispatch('income-edit', income.id)"
                             :data-income-id="income.id">
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900 dark:text-white" x-text="income.date"></div>
-                                <!-- Mobile: show category below date -->
                                 <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                     <span x-text="income.category_icon"></span> <span x-text="income.category_name"></span>
                                 </div>
@@ -484,7 +534,6 @@ window.incomesManager = function() {
                                 <template x-if="income.currency !== 'UAH' && income.amount_uah">
                                     <span class="block text-xs text-gray-400 dark:text-gray-500" x-text="Math.round(income.amount_uah).toLocaleString('uk-UA') + ' ₴'"></span>
                                 </template>
-                                <!-- Mobile: show notes -->
                                 <template x-if="income.notes">
                                     <span class="block text-xs text-gray-400 dark:text-gray-500 md:hidden truncate max-w-[120px]" x-text="income.notes"></span>
                                 </template>
@@ -495,9 +544,42 @@ window.incomesManager = function() {
             </table>
         </div>
 
-        <!-- Count footer -->
-        <div x-show="filteredIncomes.length > 0" class="px-4 md:px-6 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-            <span x-text="'Записів: ' + filteredIncomes.length"></span>
+        <!-- Pagination footer -->
+        <div x-show="filteredIncomes.length > 0" class="px-4 md:px-6 py-3 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <!-- Info + Per page -->
+                <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                    <span x-text="showFrom + '–' + showTo + ' з ' + filteredIncomes.length"></span>
+                    <select @change="setPerPage($event.target.value)" :value="perPage"
+                            class="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-1 focus:ring-primary-500">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="0">Усі</option>
+                    </select>
+                </div>
+
+                <!-- Page buttons -->
+                <div x-show="totalPages > 1" class="flex items-center gap-1">
+                    <button @click="goToPage(currentPage - 1)" :disabled="currentPage <= 1"
+                            class="px-2 py-1 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                        &laquo;
+                    </button>
+                    <template x-for="page in visiblePages" :key="'p'+page">
+                        <button @click="goToPage(page)"
+                                :class="page === currentPage ? 'bg-primary-600 text-white border-primary-600' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                                :disabled="page === '...'"
+                                class="px-3 py-1 text-sm rounded-lg border min-w-[36px]"
+                                x-text="page">
+                        </button>
+                    </template>
+                    <button @click="goToPage(currentPage + 1)" :disabled="currentPage >= totalPages"
+                            class="px-2 py-1 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                        &raquo;
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
