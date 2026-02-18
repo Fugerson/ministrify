@@ -259,7 +259,16 @@ class ServantApprovalController extends Controller
                 throw new \RuntimeException('Обрана людина не знайдена або вже привʼязана до іншого користувача');
             }
 
-            // Link existing Person to User
+            // First: detach auto-created Person (unique constraint user_id+church_id)
+            if ($autoCreatedPersonId && $autoCreatedPersonId !== $linkPersonId) {
+                $autoCreatedPerson = Person::find($autoCreatedPersonId);
+                if ($autoCreatedPerson) {
+                    $autoCreatedPerson->update(['user_id' => null]);
+                    $autoCreatedPerson->delete();
+                }
+            }
+
+            // Then: link existing Person to User
             $existingPerson->update(['user_id' => $user->id]);
 
             // Update pivot to point to the existing Person
@@ -270,15 +279,6 @@ class ServantApprovalController extends Controller
                     'person_id' => $existingPerson->id,
                     'updated_at' => now(),
                 ]);
-
-            // Soft-delete auto-created Person if it's different
-            if ($autoCreatedPersonId && $autoCreatedPersonId !== $linkPersonId) {
-                $autoCreatedPerson = Person::find($autoCreatedPersonId);
-                if ($autoCreatedPerson) {
-                    $autoCreatedPerson->update(['user_id' => null]);
-                    $autoCreatedPerson->delete();
-                }
-            }
         });
 
         Log::channel('security')->info('User linked to existing Person', [
