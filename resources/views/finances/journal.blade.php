@@ -662,6 +662,33 @@ window.incomeModal = function() {
             this.errors = {};
             this.modalOpen = true;
         },
+        async deleteIncome() {
+            if (!confirm('Видалити це надходження?')) return;
+            this.loading = true;
+            try {
+                const response = await fetch(`/finances/incomes/${this.editId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.modalOpen = false;
+                    showToast('success', data.message);
+                    if (window.journalRemoveTransaction) {
+                        window.journalRemoveTransaction(this.editId);
+                    }
+                } else {
+                    showToast('error', data.message || 'Помилка видалення');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання');
+            } finally {
+                this.loading = false;
+            }
+        },
         async submit() {
             this.loading = true;
             this.errors = {};
@@ -681,7 +708,6 @@ window.incomeModal = function() {
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
-                    // Update transaction on the fly
                     if (data.transaction && window.journalUpdateTransaction) {
                         window.journalUpdateTransaction(data.transaction, !this.isEdit);
                     }
@@ -980,16 +1006,27 @@ window.exchangeModal = function() {
                         <textarea x-model="formData.notes" rows="2"
                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
                     </div>
-                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button type="button" @click="modalOpen = false"
-                                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">
-                            Скасувати
-                        </button>
-                        <button type="submit" :disabled="loading"
-                                class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl disabled:opacity-50">
-                            <span x-show="!loading" x-text="isEdit ? 'Зберегти' : 'Додати'"></span>
-                            <span x-show="loading">Збереження...</span>
-                        </button>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div>
+                            @if(auth()->user()->canDelete('finances'))
+                            <button x-show="isEdit" type="button" @click="deleteIncome()"
+                                    :disabled="loading"
+                                    class="px-4 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-xl text-sm font-medium disabled:opacity-50">
+                                Видалити
+                            </button>
+                            @endif
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" @click="modalOpen = false"
+                                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">
+                                Скасувати
+                            </button>
+                            <button type="submit" :disabled="loading"
+                                    class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl disabled:opacity-50">
+                                <span x-show="!loading" x-text="isEdit ? 'Зберегти' : 'Додати'"></span>
+                                <span x-show="loading">Збереження...</span>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
