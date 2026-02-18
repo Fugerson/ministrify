@@ -105,9 +105,11 @@ class ServantApprovalController extends Controller
         // Handle Person linking if requested
         $linkPersonId = $validated['link_person_id'] ?? null;
         if ($linkPersonId) {
-            $linkResult = $this->linkUserToPerson($user, $church, $linkPersonId);
-            if ($linkResult !== true) {
-                return response()->json(['message' => $linkResult], 400);
+            try {
+                $this->linkUserToPerson($user, $church, $linkPersonId);
+                $user->unsetRelation('person');
+            } catch (\RuntimeException $e) {
+                return response()->json(['message' => $e->getMessage()], 400);
             }
         }
 
@@ -231,22 +233,12 @@ class ServantApprovalController extends Controller
     }
 
     /**
-     * Link user to an existing Person, removing the auto-created one.
+     * Link user to an existing Person, soft-deleting the auto-created one.
      *
-     * @return true|string  True on success, error message string on failure
+     * @throws \RuntimeException if target Person not found or already linked
      */
-    private function linkUserToPerson(User $user, $church, int $linkPersonId)
+    private function linkUserToPerson(User $user, \App\Models\Church $church, int $linkPersonId)
     {
-        // Validate the target Person
-        $existingPerson = Person::where('id', $linkPersonId)
-            ->where('church_id', $church->id)
-            ->whereNull('user_id')
-            ->first();
-
-        if (!$existingPerson) {
-            return 'Обрана людина не знайдена або вже привʼязана до іншого користувача';
-        }
-
         // Find the auto-created Person via pivot
         $pivot = DB::table('church_user')
             ->where('user_id', $user->id)
@@ -255,7 +247,18 @@ class ServantApprovalController extends Controller
 
         $autoCreatedPersonId = $pivot?->person_id;
 
-        DB::transaction(function () use ($user, $church, $existingPerson, $autoCreatedPersonId) {
+        DB::transaction(function () use ($user, $church, $linkPersonId, $autoCreatedPersonId) {
+            // Lock target Person to prevent race conditions
+            $existingPerson = Person::where('id', $linkPersonId)
+                ->where('church_id', $church->id)
+                ->whereNull('user_id')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$existingPerson) {
+                throw new \RuntimeException('Обрана людина не знайдена або вже привʼязана до іншого користувача');
+            }
+
             // Link existing Person to User
             $existingPerson->update(['user_id' => $user->id]);
 
@@ -268,26 +271,23 @@ class ServantApprovalController extends Controller
                     'updated_at' => now(),
                 ]);
 
-            // Delete auto-created Person if it's different and has no important data
-            if ($autoCreatedPersonId && $autoCreatedPersonId !== $existingPerson->id) {
+            // Soft-delete auto-created Person if it's different
+            if ($autoCreatedPersonId && $autoCreatedPersonId !== $linkPersonId) {
                 $autoCreatedPerson = Person::find($autoCreatedPersonId);
                 if ($autoCreatedPerson) {
-                    // Clear user_id so it doesn't conflict
                     $autoCreatedPerson->update(['user_id' => null]);
-                    $autoCreatedPerson->forceDelete();
+                    $autoCreatedPerson->delete();
                 }
             }
         });
 
         Log::channel('security')->info('User linked to existing Person', [
             'user_id' => $user->id,
-            'linked_person_id' => $existingPerson->id,
+            'linked_person_id' => $linkPersonId,
             'deleted_auto_person_id' => $autoCreatedPersonId,
             'church_id' => $church->id,
             'linked_by' => auth()->id(),
         ]);
-
-        return true;
     }
 
     /**
@@ -326,6 +326,13 @@ class ServantApprovalController extends Controller
                 }
                 // Only first name match — still suggest
                 if (!$lastName || !$pLast) {
+                    return true;
+                }
+            }
+
+            // Cross-match: person's first_name/last_name may be swapped
+            if ($firstName && $lastName && $pFirst && $pLast) {
+                if ($firstName === $pLast && $lastName === $pFirst) {
                     return true;
                 }
             }
