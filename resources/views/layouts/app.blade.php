@@ -2097,5 +2097,7 @@
         //     }
         // });
     </script>
+
+<x-image-lightbox />
 </body>
 </html>

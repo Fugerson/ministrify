@@ -1088,7 +1088,7 @@ class FinanceController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $message,
-                'transaction' => $transaction->fresh()->load(['category', 'ministry']),
+                'transaction' => $transaction->fresh()->load(['category', 'ministry', 'attachments']),
                 'budget_warning' => $budgetWarning,
             ]);
         }

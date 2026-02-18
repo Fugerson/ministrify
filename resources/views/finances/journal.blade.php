@@ -287,20 +287,29 @@ function exportButton() {
                             <span class="text-gray-500 dark:text-gray-400 text-sm">Прикріплені файли:</span>
                             <div class="mt-2 grid grid-cols-2 gap-2">
                                 <template x-for="attachment in transaction?.attachments" :key="attachment.id">
-                                    <a :href="'/storage/' + attachment.path" target="_blank"
-                                       class="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                    <div>
+                                        <!-- Image attachments — open in lightbox -->
                                         <template x-if="attachment.path.match(/\.(jpg|jpeg|png|gif|webp)$/i)">
-                                            <img :src="'/storage/' + attachment.path" class="w-10 h-10 object-cover rounded">
-                                        </template>
-                                        <template x-if="!attachment.path.match(/\.(jpg|jpeg|png|gif|webp)$/i)">
-                                            <div class="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
-                                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                </svg>
+                                            <div @click="$dispatch('open-lightbox', '/storage/' + attachment.path)"
+                                                 class="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer hover:opacity-80 transition-opacity">
+                                                <img :src="'/storage/' + attachment.path" class="w-16 h-16 object-cover rounded">
+                                                <a href="#" @click.prevent="$dispatch('open-lightbox', '/storage/' + attachment.path)"
+                                                   class="ml-2 text-sm text-gray-700 dark:text-gray-300 truncate" x-text="attachment.original_name || 'Файл'"></a>
                                             </div>
                                         </template>
-                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 truncate" x-text="attachment.original_name || 'Файл'"></span>
-                                    </a>
+                                        <!-- Non-image attachments — open in new tab -->
+                                        <template x-if="!attachment.path.match(/\.(jpg|jpeg|png|gif|webp)$/i)">
+                                            <a :href="'/storage/' + attachment.path" target="_blank"
+                                               class="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                                <div class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+                                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                    </svg>
+                                                </div>
+                                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 truncate" x-text="attachment.original_name || 'Файл'"></span>
+                                            </a>
+                                        </template>
+                                    </div>
                                 </template>
                             </div>
                         </div>

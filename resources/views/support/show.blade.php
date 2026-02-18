@@ -55,18 +55,19 @@
                             @if($message->attachments)
                                 <div class="mt-3 flex flex-wrap gap-2">
                                     @foreach($message->attachments as $attachment)
-                                        <a href="{{ Storage::url($attachment['path']) }}" target="_blank"
-                                           class="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors">
-                                            @if(str_starts_with($attachment['mime'], 'image/'))
-                                                <img src="{{ Storage::url($attachment['path']) }}" alt="{{ $attachment['name'] }}"
-                                                     class="w-16 h-16 object-cover rounded">
-                                            @else
+                                        @if(str_starts_with($attachment['mime'], 'image/'))
+                                            <img src="{{ Storage::url($attachment['path']) }}" alt="{{ $attachment['name'] }}"
+                                                 class="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                                                 @click="$dispatch('open-lightbox', '{{ Storage::url($attachment['path']) }}')">
+                                        @else
+                                            <a href="{{ Storage::url($attachment['path']) }}" target="_blank"
+                                               class="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors">
                                                 <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                                 </svg>
                                                 <span class="text-sm text-gray-700 dark:text-gray-300">{{ $attachment['name'] }}</span>
-                                            @endif
-                                        </a>
+                                            </a>
+                                        @endif
                                     @endforeach
                                 </div>
                             @endif

@@ -12,7 +12,8 @@
                 @if($gallery->images && count($gallery->images) > 0)
                     @foreach(array_slice($gallery->images, 0, 4) as $image)
                         <div class="aspect-square rounded-xl overflow-hidden">
-                            <img src="{{ Storage::url($image) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" loading="lazy">
+                            <img src="{{ Storage::url($image) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer hover:opacity-80 transition-opacity" loading="lazy"
+                                 @click="$dispatch('open-lightbox', '{{ Storage::url($image) }}')">
                         </div>
                     @endforeach
                 @endif
