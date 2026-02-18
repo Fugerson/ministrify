@@ -175,6 +175,16 @@
                     </button>
                 </span>
             </template>
+            <template x-if="filters.tag">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
+                    <span x-text="filters.tag"></span>
+                    <button @click="filters.tag = ''" class="hover:text-teal-900 dark:hover:text-teal-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            </template>
             @if($church->shepherds_enabled)
             <template x-if="filters.shepherd">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-sm">
@@ -278,6 +288,18 @@
             </div>
             @endif
 
+            <!-- Tag -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Тег</label>
+                <select x-model="filters.tag"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
+                    <option value="">Всі</option>
+                    @foreach($tags as $tag)
+                    <option value="{{ $tag->name }}">{{ $tag->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <!-- Birth Date Range -->
             <div>
                 <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Дата народження</label>
@@ -352,6 +374,7 @@
                             'gender' => $person->gender ?? '',
                             'marital_status' => $person->marital_status ?? '',
                             'role' => $person->churchRoleRelation?->name ?? '',
+                            'tags' => $person->tags->pluck('name')->join(', '),
                             'shepherd' => $person->shepherd?->full_name ?? '',
                         ]))"
                         x-transition:enter="transition ease-out duration-100"
@@ -847,6 +870,7 @@ function peopleTable() {
             gender: '',
             marital_status: '',
             role: '',
+            tag: '',
             shepherd: ''
         },
         maritalStatusLabels: @js(\App\Models\Person::MARITAL_STATUSES),
@@ -854,7 +878,7 @@ function peopleTable() {
         filteredCount: {{ $people->count() }},
         perPage: 25,
         currentPage: 1,
-        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'id' => $p->id, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
+        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'id' => $p->id, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'tags' => $p->tags->pluck('name')->join(', '), 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
         filteredIndices: [],
 
         // Bulk selection state
@@ -931,6 +955,7 @@ function peopleTable() {
             if (this.filters.marital_status) count++;
             if (this.filters.ministry) count++;
             if (this.filters.role) count++;
+            if (this.filters.tag) count++;
             if (this.filters.shepherd) count++;
             if (this.filters.birth_from || this.filters.birth_to) count++;
             return count;
@@ -966,7 +991,7 @@ function peopleTable() {
         get hasFilters() {
             return this.filters.search || this.filters.birth_from || this.filters.birth_to ||
                    this.filters.ministry || this.filters.gender || this.filters.marital_status ||
-                   this.filters.role || this.filters.shepherd;
+                   this.filters.role || this.filters.tag || this.filters.shepherd;
         },
 
         matchesFilters(person) {
@@ -989,7 +1014,8 @@ function peopleTable() {
                 this.matchText(person.ministry, this.filters.ministry) &&
                 this.matchExact(person.gender, this.filters.gender) &&
                 this.matchExact(person.marital_status, this.filters.marital_status) &&
-                this.matchText(person.role, this.filters.role)
+                this.matchText(person.role, this.filters.role) &&
+                this.matchText(person.tags, this.filters.tag)
             );
         },
 
@@ -1023,6 +1049,7 @@ function peopleTable() {
                 gender: '',
                 marital_status: '',
                 role: '',
+                tag: '',
                 shepherd: ''
             };
             this.currentPage = 1;
