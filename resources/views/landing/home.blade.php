@@ -1,8 +1,8 @@
 @extends('layouts.landing')
 
-@section('title', __('Ministrify — Система управління церквою | Українська CRM для церков'))
-@section('description', __('Безкоштовна українська платформа для управління церквою: члени, події, пожертви, групи, команди. Інтеграція з LiqPay, Monobank та Telegram.'))
-@section('keywords', __('церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви, українська CRM, безкоштовно'))
+@section('title', __('landing.home_title'))
+@section('description', __('landing.home_meta'))
+@section('keywords', __('landing.home_keywords'))
 
 @section('content')
 {{-- Hero Section --}}
@@ -84,7 +84,7 @@
                         </div>
                         <div>
                             <div class="text-sm font-semibold text-gray-900 dark:text-white">Telegram</div>
-                            <div class="text-xs text-gray-500">{{ __('Сповіщення') }}</div>
+                            <div class="text-xs text-gray-500">{{ __('landing.notifications') }}</div>
                         </div>
                     </div>
                 </div>

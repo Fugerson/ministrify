@@ -1,6 +1,17 @@
 <?php
 
 return [
+    // Home page meta
+    'home_title' => 'Ministrify — Система управління церквою | Українська CRM для церков',
+    'home_meta' => 'Безкоштовна українська платформа для управління церквою: члени, події, пожертви, групи, команди. Інтеграція з LiqPay, Monobank та Telegram.',
+    'home_keywords' => 'церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви, українська CRM, безкоштовно',
+
+    // Schema.org
+    'schema_description' => 'Сучасна українська платформа для управління церквою: члени, події, пожертви, групи, команди, Telegram-бот.',
+    'schema_available' => 'Доступний для всіх церков',
+    'schema_features' => 'База членів церкви, Планування подій, Фінансовий облік, Telegram-бот, Домашні групи, Команди служіння',
+    'schema_org_description' => 'Сучасна українська платформа для управління церквою',
+
     // Hero section
     'system_church_management' => 'Система управління церквою',
     'manage_church' => 'Керуйте церквою',
@@ -215,6 +226,8 @@ return [
     'church_name_required' => 'Назва церкви *',
     'city_required' => 'Місто *',
     'church_administrator' => 'Адміністратор церкви',
+    'your_name' => 'Ваше ім\'я *',
+    'phone' => 'Телефон',
     'password_required' => 'Пароль *',
     'password_confirmation' => 'Підтвердження пароля *',
     'agree_terms' => 'Я погоджуюся з умовами використання та політикою приватності',
@@ -398,4 +411,19 @@ return [
     'footer_terms' => 'Умови використання',
     'footer_privacy' => 'Політика приватності',
     'footer_all_rights' => 'Всі права захищені.',
+
+    // Theme toggle
+    'light_theme_title' => 'Світла тема',
+    'dark_theme_title' => 'Темна тема',
+
+    // Pricing (commented out)
+    'pricing' => 'Ціни',
+
+    // Contact page - commented section
+    'contact_other_ways' => 'Інші способи зв\'язку',
+    'contact_response_24h' => 'Відповідаємо протягом 24 годин',
+    'contact_quick_responses' => 'Швидкі відповіді у робочий час',
+    'contact_support_schedule' => 'Графік підтримки',
+    'contact_schedule_hours' => 'Пн-Пт: 9:00 - 18:00',
+    'contact_timezone' => 'За київським часом (UTC+2)',
 ];

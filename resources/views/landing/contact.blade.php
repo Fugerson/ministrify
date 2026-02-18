@@ -138,7 +138,7 @@
             <div class="lg:pl-8">
                 {{-- Приховано: Інші способи зв'язку
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                    Інші способи зв'язку
+                    {{ __('landing.contact_other_ways') }}
                 </h2>
 
                 <div class="space-y-6">
@@ -152,7 +152,7 @@
                         <div>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Email</h3>
                             <p class="text-gray-600 dark:text-gray-400">hello@ministrify.one</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Відповідаємо протягом 24 годин</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">{{ __('landing.contact_response_24h') }}</p>
                         </div>
                     </div>
 
@@ -166,7 +166,7 @@
                         <div>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Telegram</h3>
                             <p class="text-gray-600 dark:text-gray-400">@ministrify_support</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Швидкі відповіді у робочий час</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">{{ __('landing.contact_quick_responses') }}</p>
                         </div>
                     </div>
 
@@ -178,9 +178,9 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Графік підтримки</h3>
-                            <p class="text-gray-600 dark:text-gray-400">Пн-Пт: 9:00 - 18:00</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">За київським часом (UTC+2)</p>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('landing.contact_support_schedule') }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400">{{ __('landing.contact_schedule_hours') }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">{{ __('landing.contact_timezone') }}</p>
                         </div>
                     </div>
                 </div>

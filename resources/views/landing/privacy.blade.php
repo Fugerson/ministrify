@@ -14,15 +14,15 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mt-0">{{ __('landing.privacy_section_1') }}</h2>
-                <p>Ministrify поважає вашу приватність та захищає ваші персональні дані. Ця політика пояснює, як ми збираємо, використовуємо та захищаємо вашу інформацію.</p>
+                <p>{{ __('landing.privacy_intro') }}</p>
 
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('landing.privacy_section_2') }}</h2>
-                <p>Ми можемо збирати наступну інформацію:</p>
+                <p>{{ __('landing.privacy_collect_intro') }}</p>
                 <ul>
-                    <li><strong>Реєстраційні дані:</strong> ім'я, email, назва церкви</li>
-                    <li><strong>Дані членів церкви:</strong> імена, контакти, дати народження (вводяться вами)</li>
-                    <li><strong>Технічні дані:</strong> IP-адреса, тип браузера, час відвідування</li>
-                    <li><strong>Дані використання:</strong> які функції ви використовуєте</li>
+                    <li><strong>{{ __('landing.privacy_registration_data') }}</strong></li>
+                    <li><strong>{{ __('landing.privacy_member_data') }}</strong></li>
+                    <li><strong>{{ __('landing.privacy_technical_data') }}</strong></li>
+                    <li><strong>{{ __('landing.privacy_usage_data') }}</strong></li>
                 </ul>
 
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('landing.privacy_section_3') }}</h2>

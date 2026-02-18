@@ -118,7 +118,7 @@
 
                     <div>
                         <label for="admin_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Ваше ім'я *
+                            {{ __('landing.your_name') }}
                         </label>
                         <input type="text" id="admin_name" name="admin_name" required
                                value="{{ old('admin_name') }}"
@@ -138,7 +138,7 @@
 
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Телефон
+                            {{ __('landing.phone') }}
                         </label>
                         <input type="tel" id="phone" name="phone"
                                value="{{ old('phone') }}"

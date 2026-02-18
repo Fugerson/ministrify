@@ -12,10 +12,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     {{-- Primary Meta Tags --}}
-    <title>@yield('title', __('Ministrify — Система управління церквою'))</title>
-    <meta name="title" content="@yield('title', __('Ministrify — Система управління церквою'))">
-    <meta name="description" content="@yield('description', __('Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди. Українська мова, LiqPay та Monobank.'))">
-    <meta name="keywords" content="@yield('keywords', __('церква, управління церквою, church management, CRM для церкви, пожертви онлайн, облік членів церкви'))">
+    <title>@yield('title', __('landing.home_title'))</title>
+    <meta name="title" content="@yield('title', __('landing.home_title'))">
+    <meta name="description" content="@yield('description', __('landing.home_meta'))">
+    <meta name="keywords" content="@yield('keywords', __('landing.home_keywords'))">
     <meta name="author" content="Ministrify">
     <meta name="robots" content="index, follow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -24,8 +24,8 @@
     {{-- Open Graph / Facebook --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="@yield('title', __('Ministrify — Система управління церквою'))">
-    <meta property="og:description" content="@yield('description', __('Сучасна платформа для управління церквою: члени, події, пожертви, групи, команди.'))">
+    <meta property="og:title" content="@yield('title', __('landing.home_title'))">
+    <meta property="og:description" content="@yield('description', __('landing.home_meta'))">
     <meta property="og:image" content="@yield('og_image', asset('icon-512x512.png'))">
     <meta property="og:locale" content="{{ app()->getLocale() === 'en' ? 'en_US' : 'uk_UA' }}">
     <meta property="og:site_name" content="Ministrify">
@@ -33,8 +33,8 @@
     {{-- Twitter --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ url()->current() }}">
-    <meta name="twitter:title" content="@yield('title', __('Ministrify — Система управління церквою'))">
-    <meta name="twitter:description" content="@yield('description', __('Сучасна платформа для управління церквою.'))">
+    <meta name="twitter:title" content="@yield('title', __('landing.home_title'))">
+    <meta name="twitter:description" content="@yield('description', __('landing.home_meta'))">
     <meta name="twitter:image" content="@yield('og_image', asset('icon-512x512.png'))">
 
     {{-- Favicon --}}
@@ -113,7 +113,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Church Management Software",
         "operatingSystem": "Web, iOS, Android",
-        "description": "{{ __('Сучасна українська платформа для управління церквою: члени, події, пожертви, групи, команди, Telegram-бот.') }}",
+        "description": "{{ __('landing.schema_description') }}",
         "url": "{{ url('/') }}",
         "inLanguage": "{{ app()->getLocale() }}",
         "author": {
@@ -125,7 +125,7 @@
         "offers": {
             "@type": "Offer",
             "availability": "https://schema.org/InStock",
-            "description": "{{ __('Доступний для всіх церков') }}"
+            "description": "{{ __('landing.schema_available') }}"
         },
         "aggregateRating": {
             "@type": "AggregateRating",
@@ -134,7 +134,7 @@
             "bestRating": "5",
             "worstRating": "1"
         },
-        "featureList": "{{ __('База членів церкви, Планування подій, Фінансовий облік, Telegram-бот, Домашні групи, Команди служіння') }}"
+        "featureList": "{{ __('landing.schema_features') }}"
     }
     </script>
     <script type="application/ld+json">
@@ -144,7 +144,7 @@
         "name": "Ministrify",
         "url": "{{ url('/') }}",
         "logo": "{{ asset('icon-512x512.png') }}",
-        "description": "{{ __('Сучасна українська платформа для управління церквою') }}",
+        "description": "{{ __('landing.schema_org_description') }}",
         "foundingDate": "2024",
         "foundingLocation": "Ukraine",
         "areaServed": {
@@ -230,11 +230,11 @@
 
                 {{-- Desktop Menu --}}
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('Огляд функцій') }}</a>
+                    <a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('landing.features_overview') }}</a>
                     {{-- TODO: Розкоментувати після бета-тестування
-                    <a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('Ціни') }}</a>
+                    <a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('landing.pricing') }}</a>
                     --}}
-                    <a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('Контакти') }}</a>
+                    <a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium">{{ __('landing.contacts') }}</a>
                 </div>
 
                 {{-- CTA Buttons --}}
@@ -243,23 +243,23 @@
                     <div class="flex items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
                         <button @click="darkMode = false; localStorage.setItem('theme', 'light')"
                                 :class="!darkMode ? 'bg-white dark:bg-gray-600 shadow' : ''"
-                                class="p-1.5 rounded-md transition-all" title="Світла тема">
+                                class="p-1.5 rounded-md transition-all" title="{{ __('landing.light_theme_title') }}">
                             <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
                             </svg>
                         </button>
                         <button @click="darkMode = true; localStorage.setItem('theme', 'dark')"
                                 :class="darkMode ? 'bg-white dark:bg-gray-600 shadow' : ''"
-                                class="p-1.5 rounded-md transition-all" title="Темна тема">
+                                class="p-1.5 rounded-md transition-all" title="{{ __('landing.dark_theme_title') }}">
                             <svg class="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                             </svg>
                         </button>
                     </div>
                     <x-locale-switcher />
-                    <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">{{ __('Увійти') }}</a>
+                    <a href="{{ route('login') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">{{ __('landing.login') }}</a>
                     <a href="{{ url('/register-church') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-primary-600/25 hover:shadow-primary-600/40">
-                        {{ __('Почати безкоштовно') }}
+                        {{ __('landing.sign_up') }}
                     </a>
                 </div>
 
@@ -278,15 +278,15 @@
         {{-- Mobile Menu --}}
         <div x-show="mobileMenu" x-cloak x-transition class="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
             <div class="px-4 py-4 space-y-3">
-                <a href="{{ url('/features') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('Огляд функцій') }}</a>
+                <a href="{{ url('/features') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('landing.features_overview') }}</a>
                 {{-- TODO: Розкоментувати після бета-тестування
-                <a href="{{ url('/pricing') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('Ціни') }}</a>
+                <a href="{{ url('/pricing') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('landing.pricing') }}</a>
                 --}}
-                <a href="{{ url('/contact') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('Контакти') }}</a>
+                <a href="{{ url('/contact') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('landing.contacts') }}</a>
                 <hr class="border-gray-200 dark:border-gray-800">
                 {{-- Theme Toggle --}}
                 <div class="flex items-center justify-between px-3 py-2">
-                    <span class="text-gray-600 dark:text-gray-300 font-medium">{{ __('Тема') }}</span>
+                    <span class="text-gray-600 dark:text-gray-300 font-medium">{{ __('landing.theme') }}</span>
                     <div class="flex items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
                         <button @click="darkMode = false; localStorage.setItem('theme', 'light')"
                                 :class="!darkMode ? 'bg-white dark:bg-gray-600 shadow' : ''"
@@ -306,8 +306,8 @@
                 </div>
                 <hr class="border-gray-200 dark:border-gray-800">
                 <x-locale-switcher />
-                <a href="{{ route('login') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('Увійти') }}</a>
-                <a href="{{ url('/register-church') }}" class="block px-3 py-2 bg-primary-600 text-white text-center rounded-lg font-semibold">{{ __('Почати безкоштовно') }}</a>
+                <a href="{{ route('login') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium">{{ __('landing.login') }}</a>
+                <a href="{{ url('/register-church') }}" class="block px-3 py-2 bg-primary-600 text-white text-center rounded-lg font-semibold">{{ __('landing.sign_up') }}</a>
             </div>
         </div>
     </nav>
@@ -332,45 +332,45 @@
                         <span class="text-lg font-bold text-gray-900 dark:text-white">Ministrify</span>
                     </a>
                     <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        {{ __('Сучасна платформа для управління церквою. Зроблено в Україні 🇺🇦') }}
+                        {{ __('landing.footer_modern_platform') }}
                     </p>
                 </div>
 
                 {{-- Product --}}
                 <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Продукт') }}</h4>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('landing.footer_product') }}</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Огляд функцій') }}</a></li>
+                        <li><a href="{{ url('/features') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('landing.footer_features_overview') }}</a></li>
                         {{-- TODO: Розкоментувати після бета-тестування
-                        <li><a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Ціни') }}</a></li>
+                        <li><a href="{{ url('/pricing') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('landing.pricing') }}</a></li>
                         --}}
-                        <li><a href="{{ url('/register-church') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Реєстрація') }}</a></li>
+                        <li><a href="{{ url('/register-church') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('landing.footer_registration') }}</a></li>
                     </ul>
                 </div>
 
                 {{-- Support --}}
                 <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Підтримка') }}</h4>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('landing.footer_support') }}</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Контакти') }}</a></li>
-                        <li><a href="{{ url('/docs') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Документація') }}</a></li>
+                        <li><a href="{{ url('/contact') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('landing.contacts') }}</a></li>
+                        <li><a href="{{ url('/docs') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('landing.footer_documentation') }}</a></li>
                         <li><a href="{{ url('/faq') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">FAQ</a></li>
                     </ul>
                 </div>
 
                 {{-- Legal --}}
                 <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Правова інформація') }}</h4>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('landing.footer_legal_info') }}</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ url('/terms') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Умови використання') }}</a></li>
-                        <li><a href="{{ url('/privacy') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('Політика приватності') }}</a></li>
+                        <li><a href="{{ url('/terms') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('landing.footer_terms') }}</a></li>
+                        <li><a href="{{ url('/privacy') }}" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">{{ __('landing.footer_privacy') }}</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between">
                 <p class="text-gray-500 dark:text-gray-400 text-sm">
-                    © {{ date('Y') }} Ministrify. {{ __('Всі права захищені.') }}
+                    © {{ date('Y') }} Ministrify. {{ __('landing.footer_all_rights') }}
                 </p>
 {{-- Приховано: соціальні мережі
                 <div class="flex items-center space-x-4 mt-4 md:mt-0">

@@ -1,6 +1,17 @@
 <?php
 
 return [
+    // Home page meta
+    'home_title' => 'Ministrify — Church Management System | Ukrainian Church CRM',
+    'home_meta' => 'Free Ukrainian church management platform: members, events, donations, groups, teams. Integration with LiqPay, Monobank and Telegram.',
+    'home_keywords' => 'church, church management, church management system, church CRM, online donations, church member tracking, Ukrainian CRM, free',
+
+    // Schema.org
+    'schema_description' => 'A modern Ukrainian platform for church management: members, events, donations, groups, teams, Telegram bot.',
+    'schema_available' => 'Available for all churches',
+    'schema_features' => 'Church member database, Event planning, Financial accounting, Telegram bot, Home groups, Ministry teams',
+    'schema_org_description' => 'A modern Ukrainian platform for church management',
+
     // Hero section
     'system_church_management' => 'Church Management System',
     'manage_church' => 'Manage your church',
@@ -214,6 +225,8 @@ return [
     'church_name_required' => 'Church name *',
     'city_required' => 'City *',
     'church_administrator' => 'Church Administrator',
+    'your_name' => 'Your name *',
+    'phone' => 'Phone',
     'password_required' => 'Password *',
     'password_confirmation' => 'Password confirmation *',
     'agree_terms' => 'I agree to the terms of use and privacy policy',
@@ -397,4 +410,19 @@ return [
     'footer_terms' => 'Terms of Use',
     'footer_privacy' => 'Privacy Policy',
     'footer_all_rights' => 'All rights reserved.',
+
+    // Theme toggle
+    'light_theme_title' => 'Light theme',
+    'dark_theme_title' => 'Dark theme',
+
+    // Pricing (commented out)
+    'pricing' => 'Pricing',
+
+    // Contact page - commented section
+    'contact_other_ways' => 'Other ways to contact',
+    'contact_response_24h' => 'We respond within 24 hours',
+    'contact_quick_responses' => 'Quick responses during business hours',
+    'contact_support_schedule' => 'Support schedule',
+    'contact_schedule_hours' => 'Mon-Fri: 9:00 - 18:00',
+    'contact_timezone' => 'Kyiv time (UTC+2)',
 ];
