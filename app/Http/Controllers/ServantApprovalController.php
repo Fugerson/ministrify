@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Person;
 use App\Models\ChurchRole;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ServantApprovalController extends Controller
@@ -42,11 +44,30 @@ class ServantApprovalController extends Controller
             ->orderBy('sort_order')
             ->get();
 
+        // Load available People (without linked user) for manual linking
+        $availablePeople = Person::where('church_id', $church->id)
+            ->whereNull('user_id')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get(['id', 'first_name', 'last_name', 'email', 'phone']);
+
+        // Find potential matches for each pending user
+        $potentialMatches = [];
+        $allPending = $servantPending->merge($churchRolePending)->unique('id');
+        foreach ($allPending as $user) {
+            $matches = $this->findPotentialMatches($user, $availablePeople);
+            if ($matches->isNotEmpty()) {
+                $potentialMatches[$user->id] = $matches;
+            }
+        }
+
         return view('settings.servant-approvals.index', compact(
             'servantPending',
             'churchRolePending',
             'churchRoles',
-            'church'
+            'church',
+            'availablePeople',
+            'potentialMatches'
         ));
     }
 
@@ -66,6 +87,7 @@ class ServantApprovalController extends Controller
 
         $validated = $request->validate([
             'church_role_id' => 'nullable|exists:church_roles,id',
+            'link_person_id' => 'nullable|integer|exists:people,id',
         ]);
 
         $roleId = $validated['church_role_id'] ?? $user->requested_church_role_id;
@@ -80,6 +102,15 @@ class ServantApprovalController extends Controller
             return response()->json(['message' => 'Невірна роль'], 400);
         }
 
+        // Handle Person linking if requested
+        $linkPersonId = $validated['link_person_id'] ?? null;
+        if ($linkPersonId) {
+            $linkResult = $this->linkUserToPerson($user, $church, $linkPersonId);
+            if ($linkResult !== true) {
+                return response()->json(['message' => $linkResult], 400);
+            }
+        }
+
         // Update user
         $oldRoleId = $user->church_role_id;
         $user->update([
@@ -89,7 +120,7 @@ class ServantApprovalController extends Controller
         ]);
 
         // Update pivot records
-        \Illuminate\Support\Facades\DB::table('church_user')
+        DB::table('church_user')
             ->where('user_id', $user->id)
             ->where('church_id', $church->id)
             ->update([
@@ -106,11 +137,13 @@ class ServantApprovalController extends Controller
             'role_id' => $roleId,
             'role_name' => $role->name,
             'approved_by' => auth()->id(),
+            'linked_person_id' => $linkPersonId,
         ]);
 
         $this->logAuditAction('servant_approved', 'User', $user->id, $user->name, [
             'role' => $role->name,
             'approved_by' => auth()->user()->name,
+            'linked_person_id' => $linkPersonId,
         ]);
 
         // Send notification
@@ -195,5 +228,109 @@ class ServantApprovalController extends Controller
             'success' => true,
             'message' => "Заявку {$user->name} відхилено",
         ]);
+    }
+
+    /**
+     * Link user to an existing Person, removing the auto-created one.
+     *
+     * @return true|string  True on success, error message string on failure
+     */
+    private function linkUserToPerson(User $user, $church, int $linkPersonId)
+    {
+        // Validate the target Person
+        $existingPerson = Person::where('id', $linkPersonId)
+            ->where('church_id', $church->id)
+            ->whereNull('user_id')
+            ->first();
+
+        if (!$existingPerson) {
+            return 'Обрана людина не знайдена або вже привʼязана до іншого користувача';
+        }
+
+        // Find the auto-created Person via pivot
+        $pivot = DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+
+        $autoCreatedPersonId = $pivot?->person_id;
+
+        DB::transaction(function () use ($user, $church, $existingPerson, $autoCreatedPersonId) {
+            // Link existing Person to User
+            $existingPerson->update(['user_id' => $user->id]);
+
+            // Update pivot to point to the existing Person
+            DB::table('church_user')
+                ->where('user_id', $user->id)
+                ->where('church_id', $church->id)
+                ->update([
+                    'person_id' => $existingPerson->id,
+                    'updated_at' => now(),
+                ]);
+
+            // Delete auto-created Person if it's different and has no important data
+            if ($autoCreatedPersonId && $autoCreatedPersonId !== $existingPerson->id) {
+                $autoCreatedPerson = Person::find($autoCreatedPersonId);
+                if ($autoCreatedPerson) {
+                    // Clear user_id so it doesn't conflict
+                    $autoCreatedPerson->update(['user_id' => null]);
+                    $autoCreatedPerson->forceDelete();
+                }
+            }
+        });
+
+        Log::channel('security')->info('User linked to existing Person', [
+            'user_id' => $user->id,
+            'linked_person_id' => $existingPerson->id,
+            'deleted_auto_person_id' => $autoCreatedPersonId,
+            'church_id' => $church->id,
+            'linked_by' => auth()->id(),
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Find potential Person matches for a pending user.
+     */
+    private function findPotentialMatches(User $user, $availablePeople): \Illuminate\Support\Collection
+    {
+        $nameParts = explode(' ', mb_strtolower(trim($user->name)), 2);
+        $firstName = $nameParts[0] ?? '';
+        $lastName = $nameParts[1] ?? '';
+        $email = mb_strtolower($user->email ?? '');
+        $phone = preg_replace('/\D/', '', $user->person?->phone ?? '');
+
+        return $availablePeople->filter(function ($person) use ($firstName, $lastName, $email, $phone) {
+            $pFirst = mb_strtolower($person->first_name ?? '');
+            $pLast = mb_strtolower($person->last_name ?? '');
+            $pEmail = mb_strtolower($person->email ?? '');
+            $pPhone = preg_replace('/\D/', '', $person->phone ?? '');
+
+            // Exact email match
+            if ($email && $pEmail && $email === $pEmail) {
+                return true;
+            }
+
+            // Phone match — compare last 9 digits (works for any country code)
+            if ($phone && $pPhone && strlen($phone) >= 9 && strlen($pPhone) >= 9) {
+                if (substr($phone, -9) === substr($pPhone, -9)) {
+                    return true;
+                }
+            }
+
+            // Name match (first + last)
+            if ($firstName && $pFirst && $firstName === $pFirst) {
+                if ($lastName && $pLast && $lastName === $pLast) {
+                    return true;
+                }
+                // Only first name match — still suggest
+                if (!$lastName || !$pLast) {
+                    return true;
+                }
+            }
+
+            return false;
+        })->values();
     }
 }
