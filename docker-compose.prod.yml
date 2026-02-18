@@ -194,8 +194,20 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
-  # phpMyAdmin removed from production for security
-  # Use SSH tunnel for database access: ssh -p 2222 -L 8888:localhost:3306 root@49.12.100.17
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ministrify_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "127.0.0.1:8083:80"
+    networks:
+      - ministrify
+    depends_on:
+      - mysql
 
 networks:
   ministrify:
