@@ -303,21 +303,16 @@ class FinanceController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        // Always load a full year of data for client-side period switching
-        $yearStart = now()->startOfYear();
-        $yearEnd = now()->endOfYear();
-
-        // Build query - get ALL transactions for the year (period filtering done client-side)
+        // Load ALL completed transactions for client-side period switching
         $transactions = Transaction::where('church_id', $church->id)
             ->completed()
-            ->whereBetween('date', [$yearStart, $yearEnd])
             ->with(['category', 'person', 'ministry', 'recorder', 'attachments'])
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Calculate balance before the year
-        $balanceBeforeYear = $this->calculateBalanceBeforeDate($church->id, $yearStart);
+        // Balance before all transactions = church initial balance
+        $balanceBeforeYear = (float) ($church->initial_balance ?? 0);
 
         // Get filter options
         $categories = TransactionCategory::where('church_id', $church->id)->orderBy('name')->get();
