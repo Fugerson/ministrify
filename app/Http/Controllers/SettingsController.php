@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\ChurchRole;
 use App\Models\ChurchRolePermission;
+use App\Models\Person;
 use App\Models\TransactionCategory;
 use App\Services\ImageService;
 use App\Services\NbuExchangeRateService;
@@ -62,10 +63,27 @@ class SettingsController extends Controller
         $permissionModules = ChurchRolePermission::MODULES;
         $permissionActions = ChurchRolePermission::ACTIONS;
 
+        // Available people for person linking (pending user approvals)
+        $availablePeople = Person::where('church_id', $church->id)
+            ->whereNull('user_id')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get(['id', 'first_name', 'last_name', 'email', 'phone']);
+
+        // Find potential matches for pending users
+        $potentialMatches = [];
+        foreach ($users->filter(fn($u) => !$u->church_role_id) as $u) {
+            $matches = $this->findPersonMatches($u, $availablePeople);
+            if ($matches->isNotEmpty()) {
+                $potentialMatches[$u->id] = $matches;
+            }
+        }
+
         return view('settings.index', compact(
             'church', 'tags', 'users', 'ministries',
             'transactionCategories', 'auditLogs', 'churchRoles', 'rolesJson',
-            'permissionModules', 'permissionActions'
+            'permissionModules', 'permissionActions',
+            'availablePeople', 'potentialMatches'
         ));
     }
 
@@ -530,5 +548,38 @@ class SettingsController extends Controller
         $category->delete();
 
         return back()->with('success', 'Категорію видалено.');
+    }
+
+    private function findPersonMatches($user, $availablePeople): \Illuminate\Support\Collection
+    {
+        $nameParts = explode(' ', mb_strtolower(trim($user->name)), 2);
+        $firstName = $nameParts[0] ?? '';
+        $lastName = $nameParts[1] ?? '';
+        $email = mb_strtolower($user->email ?? '');
+        $phone = preg_replace('/\D/', '', $user->person?->phone ?? '');
+
+        return $availablePeople->filter(function ($person) use ($firstName, $lastName, $email, $phone) {
+            $pFirst = mb_strtolower($person->first_name ?? '');
+            $pLast = mb_strtolower($person->last_name ?? '');
+            $pEmail = mb_strtolower($person->email ?? '');
+            $pPhone = preg_replace('/\D/', '', $person->phone ?? '');
+
+            if ($email && $pEmail && $email === $pEmail) return true;
+
+            if ($phone && $pPhone && strlen($phone) >= 9 && strlen($pPhone) >= 9) {
+                if (substr($phone, -9) === substr($pPhone, -9)) return true;
+            }
+
+            if ($firstName && $pFirst && $firstName === $pFirst) {
+                if ($lastName && $pLast && $lastName === $pLast) return true;
+                if (!$lastName || !$pLast) return true;
+            }
+
+            if ($firstName && $lastName && $pFirst && $pLast) {
+                if ($firstName === $pLast && $lastName === $pFirst) return true;
+            }
+
+            return false;
+        })->values();
     }
 }

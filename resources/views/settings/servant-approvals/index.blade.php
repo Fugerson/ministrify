@@ -14,6 +14,17 @@
         </p>
     </div>
 
+    @php
+        $mapPerson = function($p) {
+            return ['id' => $p->id, 'name' => $p->full_name, 'email' => $p->email, 'phone' => $p->phone];
+        };
+        $availablePeopleJs = $availablePeople->map($mapPerson)->values();
+        $matchesJs = [];
+        foreach ($potentialMatches as $userId => $matches) {
+            $matchesJs[$userId] = $matches->map($mapPerson)->values();
+        }
+    @endphp
+
     <!-- Alerts -->
     @if ($servantPending->isEmpty() && $churchRolePending->isEmpty())
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-8">
@@ -34,7 +45,7 @@
 
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach ($servantPending as $user)
-                    <div class="px-6 py-4" x-data="personLinker({{ $user->id }}, {{ json_encode(($potentialMatches[$user->id] ?? collect())->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'email' => $p->email, 'phone' => $p->phone])->values()) }})">
+                    <div class="px-6 py-4" x-data="personLinker({{ $user->id }}, @json($matchesJs[$user->id] ?? []))">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
@@ -98,7 +109,7 @@
 
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach ($churchRolePending as $user)
-                    <div class="px-6 py-4" x-data="personLinker({{ $user->id }}, {{ json_encode(($potentialMatches[$user->id] ?? collect())->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'email' => $p->email, 'phone' => $p->phone])->values()) }})">
+                    <div class="px-6 py-4" x-data="personLinker({{ $user->id }}, @json($matchesJs[$user->id] ?? []))">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
@@ -199,7 +210,7 @@
 
 <script>
 // Available people for manual search (passed from server)
-const availablePeople = @json($availablePeople->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'email' => $p->email, 'phone' => $p->phone])->values());
+const availablePeople = @json($availablePeopleJs);
 
 function personLinker(userId, suggestedMatches) {
     return {

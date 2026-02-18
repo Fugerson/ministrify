@@ -268,6 +268,7 @@ class UserController extends Controller
             'email' => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
             'church_role_id' => ['nullable', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
             'person_id' => 'nullable|exists:people,id',
+            'link_person_id' => 'nullable|integer|exists:people,id',
             'password' => ['nullable', 'string', 'min:10', new SecurePassword],
         ]);
 
@@ -283,6 +284,9 @@ class UserController extends Controller
             ->first();
         $hadNoRole = !$pivotRecord || $pivotRecord->church_role_id === null;
 
+        // link_person_id: lightweight linking (approval flow) — no name/email override
+        $linkPersonId = $validated['link_person_id'] ?? null;
+
         if (!empty($validated['person_id'])) {
             $person = Person::where('id', $validated['person_id'])
                 ->where('church_id', $church->id)
@@ -292,16 +296,43 @@ class UserController extends Controller
             $email = $person->email;
 
             if (empty($email)) {
-                return back()->withInput()->withErrors(['person_id' => 'Ця людина не має email. Додайте email в профілі або відв\'яжіть користувача.']);
+                $error = 'Ця людина не має email. Додайте email в профілі або відв\'яжіть користувача.';
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $error], 422);
+                }
+                return back()->withInput()->withErrors(['person_id' => $error]);
             }
 
             // Check if email is already taken by another user
             if (User::where('email', $email)->where('id', '!=', $user->id)->exists()) {
-                return back()->withInput()->withErrors(['person_id' => 'Користувач з таким email вже існує.']);
+                $error = 'Користувач з таким email вже існує.';
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $error], 422);
+                }
+                return back()->withInput()->withErrors(['person_id' => $error]);
             }
+        } elseif ($linkPersonId) {
+            // Lightweight link: just verify Person belongs to this church and is free
+            $linkPerson = Person::where('id', $linkPersonId)
+                ->where('church_id', $church->id)
+                ->first();
+
+            if (!$linkPerson) {
+                return response()->json(['message' => 'Обрана людина не знайдена'], 422);
+            }
+            if ($linkPerson->user_id && $linkPerson->user_id !== $user->id) {
+                return response()->json(['message' => 'Ця людина вже привʼязана до іншого користувача'], 422);
+            }
+
+            // Use existing User name/email — don't override
+            if (empty($name)) $name = $user->name;
+            if (empty($email)) $email = $user->email;
         } else {
             // No person selected - require name and email
             if (empty($name) || empty($email)) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => 'Вкажіть ім\'я та email, або оберіть людину.'], 422);
+                }
                 return back()->withInput()->withErrors(['name' => 'Вкажіть ім\'я та email, або оберіть людину.']);
             }
         }
@@ -321,23 +352,78 @@ class UserController extends Controller
         }
 
         // Update person link
-        // Remove old link
-        Person::where('user_id', $user->id)->where('church_id', $church->id)->update(['user_id' => null]);
+        $oldPerson = Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
+        $newPersonId = $validated['person_id'] ?? $linkPersonId;
 
-        // Add new link
-        if (!empty($validated['person_id'])) {
-            $person->update(['user_id' => $user->id]);
+        if ($newPersonId && (!$oldPerson || $oldPerson->id !== (int) $newPersonId)) {
+            // Detach old person first (unique constraint: user_id + church_id)
+            if ($oldPerson) {
+                $oldPerson->update(['user_id' => null]);
+            }
+
+            // Link new person
+            $targetPerson = $linkPersonId
+                ? $linkPerson
+                : $person;
+            $targetPerson->update(['user_id' => $user->id]);
+
+            // Soft-delete old auto-created Person if it has no meaningful data
+            if ($oldPerson) {
+                $hasData = $oldPerson->assignments()->exists()
+                    || $oldPerson->ministries()->exists()
+                    || $oldPerson->groups()->exists()
+                    || $oldPerson->transactions()->exists()
+                    || $oldPerson->attendanceRecords()->exists();
+
+                if (!$hasData) {
+                    $oldPerson->delete();
+                }
+            }
+        } elseif (!$newPersonId && $oldPerson) {
+            // Unlinking person entirely
+            $oldPerson->update(['user_id' => null]);
+        }
+
+        // Auto-create Person if user has none after all operations
+        $currentPerson = Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
+        if (!$currentPerson) {
+            $nameParts = explode(' ', $name, 2);
+            $currentPerson = Person::create([
+                'church_id' => $church->id,
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'email' => $email,
+            ]);
+            $newPersonId = $currentPerson->id;
+        }
+
+        if (!$newPersonId) {
+            $newPersonId = $currentPerson->id;
         }
 
         // Sync pivot record
+        $pivotUpdate = [
+            'church_role_id' => $churchRoleId,
+            'person_id' => $newPersonId,
+            'updated_at' => now(),
+        ];
+        // Mark as approved if granting role to pending user
+        if ($hadNoRole && $churchRoleId !== null) {
+            $pivotUpdate['role_approval_status'] = 'approved';
+        }
         DB::table('church_user')
             ->where('user_id', $user->id)
             ->where('church_id', $church->id)
-            ->update([
-                'church_role_id' => $churchRoleId,
-                'person_id' => $validated['person_id'] ?? null,
-                'updated_at' => now(),
+            ->update($pivotUpdate);
+
+        // Update user's approval status if granting role
+        if ($hadNoRole && $churchRoleId !== null) {
+            $user->update([
+                'servant_approval_status' => 'approved',
+                'servant_approved_at' => now(),
             ]);
+        }
 
         // Send notification if user was granted access (had no role before, now has one)
         if ($hadNoRole && $churchRoleId !== null) {

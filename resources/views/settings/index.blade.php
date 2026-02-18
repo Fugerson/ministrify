@@ -1896,6 +1896,17 @@
         </div>
         @endif
 
+        @php
+            $mapPerson = function($p) {
+                return ['id' => $p->id, 'name' => $p->full_name, 'email' => $p->email, 'phone' => $p->phone];
+            };
+            $availablePeopleJs = $availablePeople->map($mapPerson)->values();
+            $matchesJs = [];
+            foreach ($potentialMatches as $uid => $matches) {
+                $matchesJs[$uid] = $matches->map($mapPerson)->values();
+            }
+        @endphp
+
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
@@ -1941,14 +1952,46 @@
                                 </div>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">{{ $user->email }}</td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap"
+                            <td class="px-3 md:px-6 py-3 md:py-4"
                                 x-data="{
                                     editing: false,
                                     saving: false,
                                     selectedRoleId: '{{ $user->church_role_id ?? '' }}',
+                                    linkedPersonId: null,
+                                    linkedPersonName: '',
+                                    showPersonSearch: false,
+                                    personSearch: '',
+                                    suggestedMatches: @js($matchesJs[$user->id] ?? []),
+                                    isPending: {{ $user->church_role_id ? 'false' : 'true' }},
+                                    get filteredPeople() {
+                                        if (!this.personSearch || this.personSearch.length < 2) return [];
+                                        const q = this.personSearch.toLowerCase();
+                                        return window._availablePeople.filter(p =>
+                                            (p.name && p.name.toLowerCase().includes(q)) ||
+                                            (p.email && p.email.toLowerCase().includes(q)) ||
+                                            (p.phone && p.phone.includes(q))
+                                        ).slice(0, 8);
+                                    },
+                                    selectPerson(p) {
+                                        this.linkedPersonId = p.id;
+                                        this.linkedPersonName = p.name + (p.email ? ' (' + p.email + ')' : '');
+                                        this.showPersonSearch = false;
+                                        this.personSearch = '';
+                                    },
+                                    clearPerson() { this.linkedPersonId = null; this.linkedPersonName = ''; },
                                     async saveRole() {
                                         this.saving = true;
                                         try {
+                                            const body = {
+                                                _method: 'PUT',
+                                                name: @js($user->name),
+                                                email: @js($user->email),
+                                                church_role_id: this.selectedRoleId || null,
+                                            };
+                                            // link_person_id: lightweight linking without name/email override
+                                            if (this.linkedPersonId) {
+                                                body.link_person_id = this.linkedPersonId;
+                                            }
                                             const res = await fetch('{{ route('settings.users.update', $user) }}', {
                                                 method: 'POST',
                                                 headers: {
@@ -1956,19 +1999,17 @@
                                                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                                     'Accept': 'application/json',
                                                 },
-                                                body: JSON.stringify({
-                                                    _method: 'PUT',
-                                                    name: @js($user->name),
-                                                    email: @js($user->email),
-                                                    church_role_id: this.selectedRoleId || null,
-                                                    person_id: {{ $user->person?->id ?? 'null' }},
-                                                }),
+                                                body: JSON.stringify(body),
                                             });
                                             if (res.ok) {
                                                 window.location.reload();
+                                            } else {
+                                                const data = await res.json();
+                                                alert(data.message || 'Помилка');
                                             }
                                         } catch (e) {
                                             console.error(e);
+                                            alert('Помилка збереження');
                                         } finally {
                                             this.saving = false;
                                         }
@@ -1994,21 +2035,84 @@
                                     </button>
                                     @endif
                                 </div>
-                                <div x-show="editing" x-cloak class="flex items-center gap-1">
-                                    <select x-model="selectedRoleId" class="text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1 pl-2 pr-7">
-                                        <option value="">Без ролі</option>
-                                        @foreach($churchRoles as $role)
-                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button @click="saveRole()" :disabled="saving"
-                                            class="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    </button>
-                                    <button @click="editing = false; selectedRoleId = '{{ $user->church_role_id ?? '' }}'"
-                                            class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <div x-show="editing" x-cloak>
+                                    <div class="flex items-center gap-1">
+                                        <select x-model="selectedRoleId" class="text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1 pl-2 pr-7">
+                                            <option value="">Без ролі</option>
+                                            @foreach($churchRoles as $role)
+                                            <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <button @click="saveRole()" :disabled="saving"
+                                                class="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        </button>
+                                        <button @click="editing = false; selectedRoleId = '{{ $user->church_role_id ?? '' }}'; clearPerson()"
+                                                class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                     </button>
+                                    </div>
+
+                                    {{-- Person linking for pending users --}}
+                                    <template x-if="isPending">
+                                        <div class="mt-2">
+                                            {{-- Suggested matches --}}
+                                            <template x-if="suggestedMatches.length > 0 && !linkedPersonId">
+                                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded p-2 mb-1">
+                                                    <p class="text-xs font-medium text-amber-800 dark:text-amber-200 mb-1">Можливий збіг:</p>
+                                                    <template x-for="m in suggestedMatches" x-bind:key="m.id">
+                                                        <button x-on:click="selectPerson(m)"
+                                                                class="block w-full text-left px-2 py-1 text-xs bg-white dark:bg-gray-700 rounded border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 mb-1">
+                                                            <span class="font-medium" x-text="m.name"></span>
+                                                            <span class="text-gray-500 ml-1" x-text="m.email || ''"></span>
+                                                            <span class="text-gray-500 ml-1" x-text="m.phone || ''"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            {{-- Selected person --}}
+                                            <template x-if="linkedPersonId">
+                                                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded px-2 py-1 flex items-center justify-between text-xs">
+                                                    <span class="text-green-800 dark:text-green-200">
+                                                        Привʼязати: <span class="font-medium" x-text="linkedPersonName"></span>
+                                                    </span>
+                                                    <button x-on:click="clearPerson()" class="text-red-500 hover:text-red-700 ml-1">&times;</button>
+                                                </div>
+                                            </template>
+
+                                            {{-- Manual search --}}
+                                            <template x-if="!linkedPersonId">
+                                                <div>
+                                                    <button x-on:click="showPersonSearch = !showPersonSearch"
+                                                            class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                                                        <span x-text="showPersonSearch ? 'Сховати' : 'Знайти в базі'"></span>
+                                                    </button>
+                                                    <template x-if="showPersonSearch">
+                                                        <div class="mt-1 relative">
+                                                            <input type="text" x-model="personSearch"
+                                                                   placeholder="Імʼя, email, телефон..."
+                                                                   class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                            <template x-if="filteredPeople.length > 0">
+                                                                <div class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-32 overflow-y-auto">
+                                                                    <template x-for="p in filteredPeople" x-bind:key="p.id">
+                                                                        <button x-on:click="selectPerson(p)"
+                                                                                class="block w-full text-left px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-600 text-xs border-b border-gray-100 dark:border-gray-600 last:border-0">
+                                                                            <span class="font-medium" x-text="p.name"></span>
+                                                                            <span class="text-gray-500 ml-1" x-text="p.email || ''"></span>
+                                                                        </button>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                            <template x-if="personSearch.length >= 2 && filteredPeople.length === 0">
+                                                                <p class="text-xs text-gray-400 mt-1">Нікого не знайдено</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
                                 </div>
                                 @else
                                 @if($user->churchRole)
@@ -2534,6 +2638,8 @@
 
 @push('scripts')
 <script>
+window._availablePeople = @json($availablePeopleJs);
+
 function permissionsManager() {
     const moduleKeys = @json(array_keys($permissionModules));
     const modulesConfig = @json($permissionModules);
