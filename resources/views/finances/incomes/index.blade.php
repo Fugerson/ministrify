@@ -33,7 +33,6 @@
 @endsection
 
 @section('content')
-<!-- Scripts must be defined BEFORE Alpine components that use them -->
 <script>
 window.exchangeManager = function() {
     return {
@@ -127,69 +126,78 @@ window.exchangeManager = function() {
     };
 };
 
-// AJAX filter for incomes (no page reload)
-@php
-$incomesJson = $incomes->map(function($i) {
-    return [
-        'id' => $i->id,
-        'date' => $i->date->format('d.m'),
-        'date_full' => $i->date->format('Y-m-d'),
-        'category_name' => $i->category?->name ?? 'Без категорії',
-        'category_icon' => $i->category?->icon ?? '💰',
-        'category_color' => $i->category?->color ?? '#3B82F6',
-        'payment_method' => $i->payment_method_label,
-        'amount' => $i->amount,
-        'amount_formatted' => \App\Helpers\CurrencyHelper::format($i->amount, $i->currency ?? 'UAH'),
-        'currency' => $i->currency ?? 'UAH',
-        'amount_uah' => $i->amount_uah,
-    ];
-});
-@endphp
-window.incomesFilter = function() {
+window.incomesPage = function() {
     return {
-        loading: false,
-        incomes: @json($incomesJson),
-        totalFormatted: '{{ number_format($totals["total"], 0, ",", " ") }} ₴',
+        allIncomes: @json($incomesJson),
+        search: '',
+        categoryFilter: '',
+        paymentFilter: '',
+        sortBy: 'date_desc',
 
-        async onPeriodChange(detail) {
-            if (!detail || !detail.dateRange) return;
+        get filteredIncomes() {
+            let items = [...this.allIncomes];
 
-            const { start, end } = detail.dateRange;
-            const startDate = formatDateLocal(start);
-            const endDate = formatDateLocal(end);
-
-            // Skip if URL already has matching dates (server already rendered correct data)
-            const url = new URL(window.location.href);
-            if (url.searchParams.get('start_date') === startDate && url.searchParams.get('end_date') === endDate) {
-                return;
+            // Search filter
+            if (this.search.trim()) {
+                const q = this.search.trim().toLowerCase();
+                items = items.filter(i =>
+                    (i.category_name && i.category_name.toLowerCase().includes(q)) ||
+                    (i.person_name && i.person_name.toLowerCase().includes(q)) ||
+                    (i.notes && i.notes.toLowerCase().includes(q)) ||
+                    (i.amount_formatted && i.amount_formatted.includes(q))
+                );
             }
 
-            this.loading = true;
-
-            // Update URL without reload (for bookmarking)
-            url.searchParams.set('start_date', startDate);
-            url.searchParams.set('end_date', endDate);
-            url.searchParams.delete('year');
-            url.searchParams.delete('month');
-            history.replaceState(null, '', url.toString());
-
-            try {
-                const response = await fetch(`/finances/incomes?start_date=${startDate}&end_date=${endDate}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    this.incomes = data.incomes;
-                    this.totalFormatted = data.total_formatted;
-                }
-            } catch (e) {
-                console.error('Filter error:', e);
-            } finally {
-                this.loading = false;
+            // Category filter
+            if (this.categoryFilter) {
+                items = items.filter(i => String(i.category_id) === String(this.categoryFilter));
             }
+
+            // Payment method filter
+            if (this.paymentFilter) {
+                items = items.filter(i => i.payment_method === this.paymentFilter);
+            }
+
+            // Sort
+            switch (this.sortBy) {
+                case 'date_asc':
+                    items.sort((a, b) => a.date_full.localeCompare(b.date_full));
+                    break;
+                case 'date_desc':
+                    items.sort((a, b) => b.date_full.localeCompare(a.date_full));
+                    break;
+                case 'amount_desc':
+                    items.sort((a, b) => parseFloat(b.amount_uah || b.amount) - parseFloat(a.amount_uah || a.amount));
+                    break;
+                case 'amount_asc':
+                    items.sort((a, b) => parseFloat(a.amount_uah || a.amount) - parseFloat(b.amount_uah || b.amount));
+                    break;
+            }
+
+            return items;
+        },
+
+        get totalFiltered() {
+            return this.filteredIncomes.reduce((sum, i) => sum + parseFloat(i.amount_uah || i.amount), 0);
+        },
+
+        get totalFilteredFormatted() {
+            return Math.round(this.totalFiltered).toLocaleString('uk-UA') + ' ₴';
+        },
+
+        get isFiltered() {
+            return this.search || this.categoryFilter || this.paymentFilter;
+        },
+
+        clearFilters() {
+            this.search = '';
+            this.categoryFilter = '';
+            this.paymentFilter = '';
+            this.sortBy = 'date_desc';
+        },
+
+        formatNumber(num) {
+            return Math.round(num).toLocaleString('uk-UA');
         }
     };
 };
@@ -326,16 +334,9 @@ window.incomesManager = function() {
 
                 if (response.ok && data.success) {
                     this.deleteModalOpen = false;
+                    this.modalOpen = false;
                     showToast('success', data.message);
-
-                    const row = document.querySelector(`tr[data-income-id="${this.deleteId}"]`);
-                    if (row) {
-                        row.style.transition = 'opacity 0.3s';
-                        row.style.opacity = '0';
-                        setTimeout(() => row.remove(), 300);
-                    }
-
-                    setTimeout(() => location.reload(), 1000);
+                    setTimeout(() => location.reload(), 500);
                 } else {
                     showToast('error', data.message || 'Помилка видалення');
                 }
@@ -365,130 +366,132 @@ window.incomesManager = function() {
 <div x-data="incomesManager()" x-cloak @income-edit.window="openEdit($event.detail)" @income-delete.window="confirmDelete($event.detail)">
 @include('finances.partials.tabs')
 
-<div id="finance-content" x-data="incomesFilter()" @finance-period-changed.window="onPeriodChange($event.detail)">
-<div class="space-y-6">
+<div id="finance-content" x-data="incomesPage()" @finance-period-changed.window="if($event.detail.isUserAction) handlePeriodReload($event.detail)">
+<div class="space-y-4">
 
-    <!-- Summary card -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
-        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 inline-block">
-            <p class="text-sm text-green-600 dark:text-green-400">Загалом за період</p>
-            <p class="text-2xl font-bold text-green-700 dark:text-green-300" x-text="totalFormatted">{{ number_format($totals['total'], 0, ',', ' ') }} ₴</p>
+    <!-- Summary + Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg px-4 py-2 inline-flex items-center gap-2">
+                <p class="text-sm text-green-600 dark:text-green-400">Загалом:</p>
+                <p class="text-lg font-bold text-green-700 dark:text-green-300" x-text="totalFilteredFormatted"></p>
+                <span x-show="isFiltered" class="text-xs text-green-500 dark:text-green-400" x-text="'(' + filteredIncomes.length + ' з ' + allIncomes.length + ')'"></span>
+            </div>
+            <button x-show="isFiltered" @click="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                Скинути фільтри
+            </button>
+        </div>
+
+        <!-- Filter row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Search -->
+            <div class="relative">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" x-model="search" placeholder="Пошук..."
+                       class="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            </div>
+
+            <!-- Category -->
+            <select x-model="categoryFilter"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                <option value="">Усі категорії</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}">{{ $category->icon_emoji }} {{ $category->name }}</option>
+                @endforeach
+            </select>
+
+            <!-- Payment method -->
+            <select x-model="paymentFilter"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                <option value="">Усі способи</option>
+                <option value="cash">💵 Готівка</option>
+                <option value="card">💳 Картка</option>
+            </select>
+
+            <!-- Sort -->
+            <select x-model="sortBy"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                <option value="date_desc">Дата (нові)</option>
+                <option value="date_asc">Дата (старі)</option>
+                <option value="amount_desc">Сума (більше)</option>
+                <option value="amount_asc">Сума (менше)</option>
+            </select>
         </div>
     </div>
 
     <!-- Incomes list -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div class="px-3 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <form method="GET" class="flex items-center space-x-4">
-                @if(request('start_date'))
-                    <input type="hidden" name="start_date" value="{{ request('start_date') }}">
-                @endif
-                @if(request('end_date'))
-                    <input type="hidden" name="end_date" value="{{ request('end_date') }}">
-                @endif
-                <select name="category" onchange="this.form.submit()"
-                        class="w-full sm:w-auto px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    <option value="">Усі категорії</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                            {{ $category->icon_emoji }} {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
-        </div>
-
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дата</th>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Категорія</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Дарувальник</th>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Спосіб</th>
                         <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Сума</th>
-                        @if(auth()->user()->canEdit('finances') || auth()->user()->canDelete('finances'))
-                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
-                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    <!-- Loading indicator -->
-                    <template x-if="loading">
-                        <tr>
-                            <td colspan="5" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                <svg class="animate-spin h-6 w-6 mx-auto text-primary-600" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </td>
-                        </tr>
-                    </template>
-
                     <!-- Empty state -->
-                    <template x-if="!loading && incomes.length === 0">
+                    <template x-if="filteredIncomes.length === 0">
                         <tr>
                             <td colspan="5" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                Немає надходжень за цей період
+                                <template x-if="isFiltered">
+                                    <span>Нічого не знайдено за вашим запитом</span>
+                                </template>
+                                <template x-if="!isFiltered">
+                                    <span>Немає надходжень за цей період</span>
+                                </template>
                             </td>
                         </tr>
                     </template>
 
                     <!-- Data rows -->
-                    <template x-for="income in incomes" :key="income.id">
-                        <tr x-show="!loading" class="hover:bg-gray-50 dark:hover:bg-gray-700/50" :data-income-id="income.id">
+                    <template x-for="income in filteredIncomes" :key="income.id">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                            @click="$dispatch('income-edit', income.id)"
+                            :data-income-id="income.id">
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900 dark:text-white" x-text="income.date"></div>
+                                <!-- Mobile: show category below date -->
                                 <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                     <span x-text="income.category_icon"></span> <span x-text="income.category_name"></span>
                                 </div>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                      :style="`background-color: ${income.category_color}30; color: ${income.category_color}`">
+                                      :style="`background-color: ${income.category_color}20; color: ${income.category_color}`">
                                     <span x-text="income.category_icon"></span>&nbsp;<span x-text="income.category_name"></span>
                                 </span>
                             </td>
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell" x-text="income.payment_method">
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden lg:table-cell">
+                                <span class="text-sm text-gray-600 dark:text-gray-400" x-text="income.person_name || '—'"></span>
+                            </td>
+                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell" x-text="income.payment_method_label">
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
                                 <span class="text-sm font-semibold text-green-600 dark:text-green-400" x-text="'+' + income.amount_formatted"></span>
                                 <template x-if="income.currency !== 'UAH' && income.amount_uah">
                                     <span class="block text-xs text-gray-400 dark:text-gray-500" x-text="Math.round(income.amount_uah).toLocaleString('uk-UA') + ' ₴'"></span>
                                 </template>
+                                <!-- Mobile: show notes -->
+                                <template x-if="income.notes">
+                                    <span class="block text-xs text-gray-400 dark:text-gray-500 md:hidden truncate max-w-[120px]" x-text="income.notes"></span>
+                                </template>
                             </td>
-                            @if(auth()->user()->canEdit('finances') || auth()->user()->canDelete('finances'))
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm">
-                                <div class="flex items-center justify-end gap-1">
-                                    @if(auth()->user()->canEdit('finances'))
-                                    <button type="button" @click.prevent.stop="$dispatch('income-edit', income.id)"
-                                            class="p-2 text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    @endif
-                                    @if(auth()->user()->canDelete('finances'))
-                                    <button type="button" @click.prevent.stop="$dispatch('income-delete', income.id)"
-                                            class="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                    @endif
-                                </div>
-                            </td>
-                            @endif
                         </tr>
                     </template>
                 </tbody>
             </table>
         </div>
 
-        @if($incomes->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $incomes->withQueryString()->links() }}
-            </div>
-        @endif
+        <!-- Count footer -->
+        <div x-show="filteredIncomes.length > 0" class="px-4 md:px-6 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+            <span x-text="'Записів: ' + filteredIncomes.length"></span>
+        </div>
     </div>
 </div>
 </div><!-- /finance-content -->
@@ -600,7 +603,14 @@ window.incomesManager = function() {
                 </div>
 
                 <!-- Buttons -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    @if(auth()->user()->canDelete('finances'))
+                    <button x-show="isEdit" type="button" @click="confirmDelete(editId)"
+                            class="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors text-sm">
+                        Видалити
+                    </button>
+                    @endif
+                    <div class="flex-1"></div>
                     <button type="button" @click="modalOpen = false"
                             class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
                         Скасувати
@@ -653,17 +663,14 @@ window.incomesManager = function() {
                 </svg>
             </div>
 
-            <!-- Title -->
             <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">
                 Видалити надходження?
             </h3>
 
-            <!-- Message -->
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
                 Ви впевнені, що хочете видалити цей запис? Цю дію неможливо скасувати.
             </p>
 
-            <!-- Actions -->
             <div class="mt-6 flex justify-center space-x-3">
                 <button type="button" @click="deleteModalOpen = false"
                         class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">

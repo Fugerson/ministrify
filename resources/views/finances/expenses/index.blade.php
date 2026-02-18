@@ -33,7 +33,6 @@
 @endsection
 
 @section('content')
-<!-- Scripts must be defined BEFORE Alpine components that use them -->
 <script>
 window.exchangeManager = function() {
     return {
@@ -127,85 +126,98 @@ window.exchangeManager = function() {
     };
 };
 
-// AJAX filter for expenses (no page reload)
 @php
 $remaining = $totals['budget'] - $totals['spent'];
-$expensesJson = $expenses->map(function($e) {
-    return [
-        'id' => $e->id,
-        'date' => $e->date->format('d.m'),
-        'date_full' => $e->date->format('Y-m-d'),
-        'description' => $e->description,
-        'notes' => $e->notes,
-        'ministry_name' => $e->ministry?->name ?? '-',
-        'category_name' => $e->category?->name ?? '-',
-        'payment_method' => $e->payment_method_label,
-        'amount' => $e->amount,
-        'amount_formatted' => \App\Helpers\CurrencyHelper::format($e->amount, $e->currency ?? 'UAH'),
-        'currency' => $e->currency ?? 'UAH',
-        'amount_uah' => $e->amount_uah,
-    ];
-});
 @endphp
-window.expensesFilter = function() {
+window.expensesPage = function() {
     return {
-        loading: false,
-        expenses: @json($expensesJson),
+        allExpenses: @json($expensesJson),
+        search: '',
+        categoryFilter: '',
+        ministryFilter: '',
+        paymentFilter: '',
+        sortBy: 'date_desc',
         budget: {{ $totals['budget'] }},
-        spent: {{ $totals['spent'] }},
-        remaining: {{ $totals['budget'] - $totals['spent'] }},
-        budgetFormatted: '{{ number_format($totals["budget"], 0, ",", " ") }} ₴',
-        spentFormatted: '{{ number_format($totals["spent"], 0, ",", " ") }} ₴',
-        remainingFormatted: '{{ number_format($totals["budget"] - $totals["spent"], 0, ",", " ") }} ₴',
 
-        init() {
-            // data pre-loaded from server
+        get filteredExpenses() {
+            let items = [...this.allExpenses];
+
+            // Search filter
+            if (this.search.trim()) {
+                const q = this.search.trim().toLowerCase();
+                items = items.filter(i =>
+                    (i.description && i.description.toLowerCase().includes(q)) ||
+                    (i.notes && i.notes.toLowerCase().includes(q)) ||
+                    (i.ministry_name && i.ministry_name.toLowerCase().includes(q)) ||
+                    (i.category_name && i.category_name.toLowerCase().includes(q)) ||
+                    (i.amount_formatted && i.amount_formatted.includes(q))
+                );
+            }
+
+            // Category filter
+            if (this.categoryFilter) {
+                items = items.filter(i => String(i.category_id) === String(this.categoryFilter));
+            }
+
+            // Ministry filter
+            if (this.ministryFilter) {
+                items = items.filter(i => String(i.ministry_id) === String(this.ministryFilter));
+            }
+
+            // Payment method filter
+            if (this.paymentFilter) {
+                items = items.filter(i => i.payment_method === this.paymentFilter);
+            }
+
+            // Sort
+            switch (this.sortBy) {
+                case 'date_asc':
+                    items.sort((a, b) => a.date_full.localeCompare(b.date_full));
+                    break;
+                case 'date_desc':
+                    items.sort((a, b) => b.date_full.localeCompare(a.date_full));
+                    break;
+                case 'amount_desc':
+                    items.sort((a, b) => parseFloat(b.amount_uah || b.amount) - parseFloat(a.amount_uah || a.amount));
+                    break;
+                case 'amount_asc':
+                    items.sort((a, b) => parseFloat(a.amount_uah || a.amount) - parseFloat(b.amount_uah || b.amount));
+                    break;
+            }
+
+            return items;
         },
 
-        async onPeriodChange(detail) {
-            if (!detail || !detail.dateRange) return;
+        get totalFiltered() {
+            return this.filteredExpenses.reduce((sum, i) => sum + parseFloat(i.amount_uah || i.amount), 0);
+        },
 
-            const { start, end } = detail.dateRange;
-            const startDate = formatDateLocal(start);
-            const endDate = formatDateLocal(end);
+        get totalFilteredFormatted() {
+            return Math.round(this.totalFiltered).toLocaleString('uk-UA') + ' ₴';
+        },
 
-            // Skip if URL already has matching dates (server already rendered correct data)
-            const url = new URL(window.location.href);
-            if (url.searchParams.get('start_date') === startDate && url.searchParams.get('end_date') === endDate) {
-                return;
-            }
+        get remaining() {
+            return this.budget - this.totalFiltered;
+        },
 
-            this.loading = true;
+        get remainingFormatted() {
+            return Math.round(this.remaining).toLocaleString('uk-UA') + ' ₴';
+        },
 
-            // Update URL without reload
-            url.searchParams.set('start_date', startDate);
-            url.searchParams.set('end_date', endDate);
-            url.searchParams.delete('year');
-            url.searchParams.delete('month');
-            history.replaceState(null, '', url.toString());
+        get isFiltered() {
+            return this.search || this.categoryFilter || this.ministryFilter || this.paymentFilter;
+        },
 
-            try {
-                const response = await fetch(`/finances/expenses?start_date=${startDate}&end_date=${endDate}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    this.expenses = data.expenses;
-                    this.budget = data.totals.budget;
-                    this.spent = data.totals.spent;
-                    this.remaining = data.totals.remaining;
-                    this.budgetFormatted = data.totals.budget_formatted;
-                    this.spentFormatted = data.totals.spent_formatted;
-                    this.remainingFormatted = data.totals.remaining_formatted;
-                }
-            } catch (e) {
-                console.error('Filter error:', e);
-            } finally {
-                this.loading = false;
-            }
+        clearFilters() {
+            this.search = '';
+            this.categoryFilter = '';
+            this.ministryFilter = '';
+            this.paymentFilter = '';
+            this.sortBy = 'date_desc';
+        },
+
+        formatNumber(num) {
+            return Math.round(num).toLocaleString('uk-UA');
         }
     };
 };
@@ -303,7 +315,7 @@ window.expensesManager = function() {
 
         handleFileSelect(event) {
             const files = Array.from(event.target.files);
-            const maxSize = 10 * 1024 * 1024; // 10 MB
+            const maxSize = 10 * 1024 * 1024;
             const rejected = [];
             const accepted = [];
             for (const file of files) {
@@ -433,16 +445,9 @@ window.expensesManager = function() {
 
                 if (response.ok && data.success) {
                     this.deleteModalOpen = false;
+                    this.modalOpen = false;
                     showToast('success', data.message);
-
-                    const row = document.querySelector(`tr[data-expense-id="${this.deleteId}"]`);
-                    if (row) {
-                        row.style.transition = 'opacity 0.3s';
-                        row.style.opacity = '0';
-                        setTimeout(() => row.remove(), 300);
-                    }
-
-                    setTimeout(() => location.reload(), 1000);
+                    setTimeout(() => location.reload(), 500);
                 } else {
                     showToast('error', data.message || 'Помилка видалення');
                 }
@@ -478,51 +483,82 @@ window.expensesManager = function() {
 <div x-data="expensesManager()" x-cloak @expense-edit.window="openEdit($event.detail)" @expense-delete.window="confirmDelete($event.detail)">
 @include('finances.partials.tabs')
 
-<div id="finance-content" x-data="expensesFilter()" @finance-period-changed.window="onPeriodChange($event.detail)">
-<div class="space-y-6">
+<div id="finance-content" x-data="expensesPage()" @finance-period-changed.window="if($event.detail.isUserAction) handlePeriodReload($event.detail)">
+<div class="space-y-4">
 
-    <!-- Summary card -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
-            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                <p class="text-sm text-blue-600 dark:text-blue-400">Бюджет</p>
-                <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" x-text="budgetFormatted">{{ number_format($totals['budget'], 0, ',', ' ') }} ₴</p>
+    <!-- Summary + Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg px-4 py-2">
+                <p class="text-xs text-blue-600 dark:text-blue-400">Бюджет</p>
+                <p class="text-lg font-bold text-blue-700 dark:text-blue-300" x-text="formatNumber(budget) + ' ₴'"></p>
             </div>
-            <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                <p class="text-sm text-red-600 dark:text-red-400">Витрачено</p>
-                <p class="text-2xl font-bold text-red-700 dark:text-red-300" x-text="spentFormatted">{{ number_format($totals['spent'], 0, ',', ' ') }} ₴</p>
+            <div class="bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2">
+                <p class="text-xs text-red-600 dark:text-red-400">Витрачено</p>
+                <p class="text-lg font-bold text-red-700 dark:text-red-300" x-text="totalFilteredFormatted"></p>
+                <span x-show="isFiltered" class="text-xs text-red-500 dark:text-red-400" x-text="'(' + filteredExpenses.length + ' з ' + allExpenses.length + ')'"></span>
             </div>
-            <div :class="remaining < 0 ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-green-50 dark:bg-green-900/20'" class="rounded-lg p-4">
-                <p class="text-sm" :class="remaining < 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'">Залишок</p>
-                <p class="text-2xl font-bold" :class="remaining < 0 ? 'text-orange-700 dark:text-orange-300' : 'text-green-700 dark:text-green-300'" x-text="remainingFormatted">
-                    {{ number_format($remaining, 0, ',', ' ') }} ₴
-                </p>
+            <div :class="remaining < 0 ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-green-50 dark:bg-green-900/20'" class="rounded-lg px-4 py-2">
+                <p class="text-xs" :class="remaining < 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'">Залишок</p>
+                <p class="text-lg font-bold" :class="remaining < 0 ? 'text-orange-700 dark:text-orange-300' : 'text-green-700 dark:text-green-300'" x-text="remainingFormatted"></p>
             </div>
+        </div>
+
+        <!-- Filter row -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 flex-1">
+                <!-- Search -->
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" x-model="search" placeholder="Пошук..."
+                           class="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+
+                <!-- Category -->
+                <select x-model="categoryFilter"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                    <option value="">Усі категорії</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+
+                <!-- Ministry -->
+                <select x-model="ministryFilter"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                    <option value="">Усі команди</option>
+                    @foreach($ministries as $ministry)
+                        <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
+                    @endforeach
+                </select>
+
+                <!-- Payment method -->
+                <select x-model="paymentFilter"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                    <option value="">Усі способи</option>
+                    <option value="cash">💵 Готівка</option>
+                    <option value="card">💳 Картка</option>
+                </select>
+
+                <!-- Sort -->
+                <select x-model="sortBy"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                    <option value="date_desc">Дата (нові)</option>
+                    <option value="date_asc">Дата (старі)</option>
+                    <option value="amount_desc">Сума (більше)</option>
+                    <option value="amount_asc">Сума (менше)</option>
+                </select>
+            </div>
+            <button x-show="isFiltered" @click="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 whitespace-nowrap">
+                Скинути
+            </button>
         </div>
     </div>
 
     <!-- Expenses list -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div class="px-3 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <form method="GET" class="flex items-center space-x-4">
-                @if(request('start_date'))
-                    <input type="hidden" name="start_date" value="{{ request('start_date') }}">
-                @endif
-                @if(request('end_date'))
-                    <input type="hidden" name="end_date" value="{{ request('end_date') }}">
-                @endif
-                <select name="ministry" onchange="this.form.submit()"
-                        class="w-full sm:w-auto px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    <option value="">Всі команди</option>
-                    @foreach($ministries as $ministry)
-                        <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
-                            {{ $ministry->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
-        </div>
-
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
@@ -532,42 +568,34 @@ window.expensesManager = function() {
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Команда</th>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Категорія</th>
                         <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Сума</th>
-                        @if(auth()->user()->canEdit('finances') || auth()->user()->canDelete('finances'))
-                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
-                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    <!-- Loading indicator -->
-                    <template x-if="loading">
-                        <tr>
-                            <td colspan="6" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                <svg class="animate-spin h-6 w-6 mx-auto text-primary-600" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </td>
-                        </tr>
-                    </template>
-
                     <!-- Empty state -->
-                    <template x-if="!loading && expenses.length === 0">
+                    <template x-if="filteredExpenses.length === 0">
                         <tr>
-                            <td colspan="6" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                Немає витрат за цей період
+                            <td colspan="5" class="px-3 md:px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <template x-if="isFiltered">
+                                    <span>Нічого не знайдено за вашим запитом</span>
+                                </template>
+                                <template x-if="!isFiltered">
+                                    <span>Немає витрат за цей період</span>
+                                </template>
                             </td>
                         </tr>
                     </template>
 
                     <!-- Data rows -->
-                    <template x-for="expense in expenses" :key="expense.id">
-                        <tr x-show="!loading" class="hover:bg-gray-50 dark:hover:bg-gray-700/50" :data-expense-id="expense.id">
+                    <template x-for="expense in filteredExpenses" :key="expense.id">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                            @click="$dispatch('expense-edit', expense.id)"
+                            :data-expense-id="expense.id">
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" x-text="expense.date">
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4">
                                 <p class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px] sm:max-w-none" x-text="expense.description"></p>
                                 <template x-if="expense.notes">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block" x-text="expense.notes.substring(0, 50) + (expense.notes.length > 50 ? '...' : '')"></p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block truncate max-w-[250px]" x-text="expense.notes"></p>
                                 </template>
                                 <p class="md:hidden text-xs text-gray-400 dark:text-gray-500 mt-0.5" x-text="expense.ministry_name !== '-' ? expense.ministry_name : ''"></p>
                             </td>
@@ -581,39 +609,16 @@ window.expensesManager = function() {
                                     <span class="block text-xs text-gray-400 dark:text-gray-500" x-text="Math.round(expense.amount_uah).toLocaleString('uk-UA') + ' ₴'"></span>
                                 </template>
                             </td>
-                            @if(auth()->user()->canEdit('finances') || auth()->user()->canDelete('finances'))
-                            <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm">
-                                <div class="flex items-center justify-end gap-1">
-                                    @if(auth()->user()->canEdit('finances'))
-                                    <button type="button" @click.prevent.stop="$dispatch('expense-edit', expense.id)"
-                                            class="p-2 text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    @endif
-                                    @if(auth()->user()->canDelete('finances'))
-                                    <button type="button" @click.prevent.stop="$dispatch('expense-delete', expense.id)"
-                                            class="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                    @endif
-                                </div>
-                            </td>
-                            @endif
                         </tr>
                     </template>
                 </tbody>
             </table>
         </div>
 
-        @if($expenses->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $expenses->withQueryString()->links() }}
-            </div>
-        @endif
+        <!-- Count footer -->
+        <div x-show="filteredExpenses.length > 0" class="px-4 md:px-6 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+            <span x-text="'Записів: ' + filteredExpenses.length"></span>
+        </div>
     </div>
 </div>
 </div><!-- /finance-content -->
@@ -843,7 +848,14 @@ window.expensesManager = function() {
                 </div>
 
                 <!-- Buttons -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    @if(auth()->user()->canDelete('finances'))
+                    <button x-show="isEdit" type="button" @click="confirmDelete(editId)"
+                            class="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors text-sm">
+                        Видалити
+                    </button>
+                    @endif
+                    <div class="flex-1"></div>
                     <button type="button" @click="modalOpen = false"
                             class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
                         Скасувати
@@ -896,17 +908,14 @@ window.expensesManager = function() {
                 </svg>
             </div>
 
-            <!-- Title -->
             <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">
                 Видалити витрату?
             </h3>
 
-            <!-- Message -->
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
                 Ви впевнені, що хочете видалити цей запис? Цю дію неможливо скасувати.
             </p>
 
-            <!-- Actions -->
             <div class="mt-6 flex justify-center space-x-3">
                 <button type="button" @click="deleteModalOpen = false"
                         class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">

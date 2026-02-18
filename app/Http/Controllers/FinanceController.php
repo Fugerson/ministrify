@@ -489,17 +489,13 @@ class FinanceController extends Controller
             $endDate = Carbon::create($year, $month, 1)->endOfMonth();
         }
 
-        $query = Transaction::where('church_id', $church->id)
+        $incomes = Transaction::where('church_id', $church->id)
             ->incoming()
             ->completed()
             ->whereBetween('date', [$startDate, $endDate])
-            ->with(['category', 'person', 'recorder']);
-
-        if ($categoryId = $request->get('category')) {
-            $query->where('category_id', $categoryId);
-        }
-
-        $incomes = $query->orderByDesc('date')->paginate(20);
+            ->with(['category', 'person', 'recorder'])
+            ->orderByDesc('date')
+            ->get();
 
         $categories = TransactionCategory::where('church_id', $church->id)
             ->forIncome()
@@ -507,44 +503,34 @@ class FinanceController extends Controller
             ->get();
 
         $totals = [
-            'total' => Transaction::where('church_id', $church->id)
-                ->incoming()
-                ->completed()
-                ->whereBetween('date', [$startDate, $endDate])
-                ->sum('amount_uah'),
+            'total' => $incomes->sum('amount_uah'),
         ];
 
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
-        // Return JSON for AJAX requests
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'incomes' => $incomes->map(function ($income) {
-                    return [
-                        'id' => $income->id,
-                        'date' => $income->date->format('d.m'),
-                        'date_full' => $income->date->format('Y-m-d'),
-                        'category_name' => $income->category?->name ?? 'Без категорії',
-                        'category_icon' => $income->category?->icon ?? '💰',
-                        'category_color' => $income->category?->color ?? '#3B82F6',
-                        'payment_method' => $income->payment_method_label,
-                        'amount' => $income->amount,
-                        'amount_formatted' => CurrencyHelper::format($income->amount, $income->currency ?? 'UAH'),
-                        'currency' => $income->currency ?? 'UAH',
-                        'amount_uah' => $income->amount_uah,
-                    ];
-                }),
-                'total' => $totals['total'],
-                'total_formatted' => number_format($totals['total'], 0, ',', ' ') . ' ₴',
-                'has_more_pages' => $incomes->hasMorePages(),
-                'current_page' => $incomes->currentPage(),
-                'last_page' => $incomes->lastPage(),
-            ]);
-        }
+        $incomesJson = $incomes->map(function ($income) {
+            return [
+                'id' => $income->id,
+                'date' => $income->date->format('d.m'),
+                'date_full' => $income->date->format('Y-m-d'),
+                'category_id' => $income->category_id,
+                'category_name' => $income->category?->name ?? 'Без категорії',
+                'category_icon' => $income->category?->icon ?? '💰',
+                'category_color' => $income->category?->color ?? '#3B82F6',
+                'payment_method' => $income->payment_method ?? '',
+                'payment_method_label' => $income->payment_method_label,
+                'person_name' => $income->is_anonymous ? 'Анонімно' : ($income->person ? $income->person->first_name . ' ' . $income->person->last_name : ''),
+                'is_anonymous' => $income->is_anonymous,
+                'notes' => $income->notes ?? '',
+                'amount' => $income->amount,
+                'amount_formatted' => CurrencyHelper::format($income->amount, $income->currency ?? 'UAH'),
+                'currency' => $income->currency ?? 'UAH',
+                'amount_uah' => $income->amount_uah,
+            ];
+        });
 
-        return view('finances.incomes.index', compact('incomes', 'categories', 'totals', 'enabledCurrencies', 'exchangeRates'));
+        return view('finances.incomes.index', compact('incomes', 'incomesJson', 'categories', 'totals', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function createIncome()
@@ -745,28 +731,18 @@ class FinanceController extends Controller
             $endDate = Carbon::create($year, $month, 1)->endOfMonth();
         }
 
-        $query = Transaction::where('church_id', $church->id)
+        $expenses = Transaction::where('church_id', $church->id)
             ->outgoing()
             ->completed()
             ->whereBetween('date', [$startDate, $endDate])
-            ->with(['category', 'ministry', 'recorder']);
-
-        if ($categoryId = $request->get('category')) {
-            $query->where('category_id', $categoryId);
-        }
-
-        $expenses = $query->orderByDesc('date')->paginate(20);
+            ->with(['category', 'ministry', 'recorder'])
+            ->orderByDesc('date')
+            ->get();
 
         $categories = TransactionCategory::where('church_id', $church->id)
             ->forExpense()
             ->orderBy('sort_order')
             ->get();
-
-        $spent = Transaction::where('church_id', $church->id)
-            ->outgoing()
-            ->completed()
-            ->whereBetween('date', [$startDate, $endDate])
-            ->sum('amount_uah');
 
         $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
 
@@ -774,47 +750,34 @@ class FinanceController extends Controller
 
         $totals = [
             'budget' => $budget,
-            'spent' => $spent,
+            'spent' => $expenses->sum('amount_uah'),
         ];
 
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
         $exchangeRates = ExchangeRate::getLatestRates();
 
-        // Return JSON for AJAX requests
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'expenses' => $expenses->map(function ($expense) {
-                    return [
-                        'id' => $expense->id,
-                        'date' => $expense->date->format('d.m'),
-                        'date_full' => $expense->date->format('Y-m-d'),
-                        'description' => $expense->description,
-                        'notes' => $expense->notes,
-                        'ministry_name' => $expense->ministry?->name ?? '-',
-                        'category_name' => $expense->category?->name ?? '-',
-                        'payment_method' => $expense->payment_method_label,
-                        'amount' => $expense->amount,
-                        'amount_formatted' => CurrencyHelper::format($expense->amount, $expense->currency ?? 'UAH'),
-                        'currency' => $expense->currency ?? 'UAH',
-                        'amount_uah' => $expense->amount_uah,
-                    ];
-                }),
-                'totals' => [
-                    'budget' => $totals['budget'],
-                    'spent' => $totals['spent'],
-                    'remaining' => $totals['budget'] - $totals['spent'],
-                    'budget_formatted' => number_format($totals['budget'], 0, ',', ' ') . ' ₴',
-                    'spent_formatted' => number_format($totals['spent'], 0, ',', ' ') . ' ₴',
-                    'remaining_formatted' => number_format($totals['budget'] - $totals['spent'], 0, ',', ' ') . ' ₴',
-                ],
-                'has_more_pages' => $expenses->hasMorePages(),
-                'current_page' => $expenses->currentPage(),
-                'last_page' => $expenses->lastPage(),
-            ]);
-        }
+        $expensesJson = $expenses->map(function ($expense) {
+            return [
+                'id' => $expense->id,
+                'date' => $expense->date->format('d.m'),
+                'date_full' => $expense->date->format('Y-m-d'),
+                'description' => $expense->description ?? '',
+                'notes' => $expense->notes ?? '',
+                'ministry_id' => $expense->ministry_id,
+                'ministry_name' => $expense->ministry?->name ?? '-',
+                'category_id' => $expense->category_id,
+                'category_name' => $expense->category?->name ?? '-',
+                'payment_method' => $expense->payment_method ?? '',
+                'payment_method_label' => $expense->payment_method_label,
+                'expense_type' => $expense->expense_type ?? '',
+                'amount' => $expense->amount,
+                'amount_formatted' => CurrencyHelper::format($expense->amount, $expense->currency ?? 'UAH'),
+                'currency' => $expense->currency ?? 'UAH',
+                'amount_uah' => $expense->amount_uah,
+            ];
+        });
 
-        return view('finances.expenses.index', compact('expenses', 'categories', 'totals', 'ministries', 'enabledCurrencies', 'exchangeRates'));
+        return view('finances.expenses.index', compact('expenses', 'expensesJson', 'categories', 'totals', 'ministries', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function createExpense(Request $request)
