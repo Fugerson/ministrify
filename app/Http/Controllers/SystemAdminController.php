@@ -817,7 +817,7 @@ class SystemAdminController extends Controller
             'category' => 'required|in:bug,question,feature,other',
             'message' => 'required|string|max:10000',
             'priority' => 'required|in:low,normal,high,urgent',
-            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,pdf|max:5120',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:5120',
         ]);
 
         $ticket = SupportTicket::create([

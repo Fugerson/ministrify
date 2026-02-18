@@ -214,7 +214,7 @@
                             Додати нові файли
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                            JPG, PNG, PDF до 10 МБ
+                            JPG, PNG, HEIC, PDF до 10 МБ
                         </p>
                     </div>
 
@@ -266,7 +266,8 @@
                             addFiles(fileList) {
                                 for (let file of fileList) {
                                     if (this.previews.length >= 10) break;
-                                    if (!file.type.match('image.*') && file.type !== 'application/pdf') continue;
+                                    const isHeic = file.name.match(/\.heic$/i) || file.name.match(/\.heif$/i);
+                                    if (!file.type.match('image.*') && file.type !== 'application/pdf' && !isHeic) continue;
                                     if (file.size > 10 * 1024 * 1024) continue;
 
                                     const preview = {
