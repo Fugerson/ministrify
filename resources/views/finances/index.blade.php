@@ -766,7 +766,7 @@ function financesDashboard() {
                                    :class="{ 'border-red-500': errors.amount }">
                             <select x-model="formData.currency"
                                     class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                @foreach($enabledCurrencies ?? ['UAH', 'USD', 'EUR'] as $curr)
+                                @foreach($enabledCurrencies ?? ['UAH'] as $curr)
                                     <option value="{{ $curr }}">{{ $curr }}</option>
                                 @endforeach
                             </select>
@@ -859,7 +859,7 @@ function financesDashboard() {
                                    :class="{ 'border-red-500': errors.amount }">
                             <select x-model="formData.currency"
                                     class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                @foreach($enabledCurrencies ?? ['UAH', 'USD', 'EUR'] as $curr)
+                                @foreach($enabledCurrencies ?? ['UAH'] as $curr)
                                     <option value="{{ $curr }}">{{ $curr }}</option>
                                 @endforeach
                             </select>
@@ -961,7 +961,7 @@ function financesDashboard() {
                                    class="flex-1 px-4 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <select x-model="formData.from_currency" @change="updateRate()"
                                     class="w-24 px-2 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                @foreach($enabledCurrencies ?? ['UAH', 'USD', 'EUR'] as $curr)
+                                @foreach($enabledCurrencies ?? ['UAH'] as $curr)
                                     <option value="{{ $curr }}">{{ $curr }}</option>
                                 @endforeach
                             </select>
@@ -982,7 +982,7 @@ function financesDashboard() {
                                    class="flex-1 px-4 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-white">
                             <select x-model="formData.to_currency" @change="updateRate()"
                                     class="w-24 px-2 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                @foreach($enabledCurrencies ?? ['UAH', 'USD', 'EUR'] as $curr)
+                                @foreach($enabledCurrencies ?? ['UAH'] as $curr)
                                     <option value="{{ $curr }}">{{ $curr }}</option>
                                 @endforeach
                             </select>
