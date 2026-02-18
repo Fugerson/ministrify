@@ -516,7 +516,7 @@ class FinanceController extends Controller
                 'date_full' => $income->date->format('Y-m-d'),
                 'category_id' => $income->category_id,
                 'category_name' => $income->category?->name ?? 'Без категорії',
-                'category_icon' => $income->category?->icon ?? '💰',
+                'category_icon' => $income->category?->icon_emoji ?? '💰',
                 'category_color' => $income->category?->color ?? '#3B82F6',
                 'payment_method' => $income->payment_method ?? '',
                 'payment_method_label' => $income->payment_method_label,

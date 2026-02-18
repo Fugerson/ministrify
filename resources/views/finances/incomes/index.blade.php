@@ -435,7 +435,7 @@ window.incomesManager = function() {
                 <p class="text-lg font-bold text-green-700 dark:text-green-300" x-text="totalFilteredFormatted"></p>
                 <span x-show="isFiltered" class="text-xs text-green-500 dark:text-green-400" x-text="'(' + filteredIncomes.length + ' з ' + allIncomes.length + ')'"></span>
             </div>
-            <button x-show="isFiltered" @click="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            <button type="button" x-show="isFiltered" @click="clearFilters()" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                 Скинути фільтри
             </button>
         </div>
@@ -469,7 +469,7 @@ window.incomesManager = function() {
             </select>
 
             <!-- Sort -->
-            <select x-model="sortBy"
+            <select x-model="sortBy" @change="currentPage = 1"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                 <option value="date_desc">Дата (нові)</option>
                 <option value="date_asc">Дата (старі)</option>
