@@ -1,19 +1,19 @@
 @extends('layouts.guest')
 
-@section('title', __('Вхід'))
+@section('title', __('auth.login_title'))
 
 @section('content')
 <form method="POST" action="{{ route('login') }}" class="space-y-5">
     @csrf
 
     <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Email') }}</label>
+        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('auth.email_label') }}</label>
         <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
     </div>
 
     <div x-data="{ showPassword: false }">
-        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Пароль') }}</label>
+        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('auth.password_label') }}</label>
         <div class="relative">
             <input :type="showPassword ? 'text' : 'password'" name="password" id="password" required
                    class="w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
@@ -33,17 +33,17 @@
     <div class="flex items-center justify-between">
         <label class="flex items-center cursor-pointer">
             <input type="checkbox" name="remember" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-primary-600 focus:ring-primary-500 focus:ring-offset-0 dark:focus:ring-offset-gray-800">
-            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Запам\'ятати') }}</span>
+            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ __('auth.remember_me') }}</span>
         </label>
 
         <a href="{{ route('password.request') }}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
-            {{ __('Забули пароль?') }}
+            {{ __('auth.forgot_password') }}
         </a>
     </div>
 
     <button type="submit"
             class="w-full py-3.5 px-4 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold rounded-xl shadow-lg shadow-primary-500/30 transition-all duration-200 transform hover:scale-[1.02]">
-        {{ __('Увійти') }}
+        {{ __('auth.login_button') }}
     </button>
 
     @if(config('services.google.client_id'))
@@ -52,7 +52,7 @@
             <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
         </div>
         <div class="relative flex justify-center text-sm">
-            <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">{{ __('або') }}</span>
+            <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">{{ __('auth.or') }}</span>
         </div>
     </div>
 
@@ -64,25 +64,25 @@
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
-        <span class="font-medium text-gray-700 dark:text-gray-200">{{ __('Увійти з Google') }}</span>
+        <span class="font-medium text-gray-700 dark:text-gray-200">{{ __('auth.login_with_google') }}</span>
     </a>
     @endif
 </form>
 
 <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center space-y-3">
     <div>
-        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Хочете приєднатися до церкви?') }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('auth.want_join_church') }}</p>
         <a href="{{ route('join') }}" class="mt-1 inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold">
-            {{ __('Приєднатися') }}
+            {{ __('auth.join') }}
             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
         </a>
     </div>
     <div>
-        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Хочете зареєструвати нову церкву?') }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('auth.want_register_church') }}</p>
         <a href="{{ route('register') }}" class="mt-1 inline-flex items-center text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
-            {{ __('Реєстрація церкви') }} →
+            {{ __('auth.register_church') }} →
         </a>
     </div>
 </div>
