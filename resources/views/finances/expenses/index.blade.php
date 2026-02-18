@@ -673,13 +673,12 @@ window.expensesManager = function() {
         </div>
 
         <!-- Pagination footer -->
-        <div x-show="filteredExpenses.length > 0" class="px-4 md:px-6 py-3 border-t border-gray-200 dark:border-gray-700">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <!-- Info + Per page -->
-                <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+        <div x-show="filteredExpenses.length > 0" class="px-3 md:px-4 py-2 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                     <span x-text="showFrom + '–' + showTo + ' з ' + filteredExpenses.length"></span>
                     <select @change="setPerPage($event.target.value)" :value="perPage"
-                            class="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-1 focus:ring-primary-500">
+                            class="px-1.5 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:ring-1 focus:ring-primary-500">
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
@@ -687,23 +686,21 @@ window.expensesManager = function() {
                         <option value="0">Усі</option>
                     </select>
                 </div>
-
-                <!-- Page buttons -->
-                <div x-show="totalPages > 1" class="flex items-center gap-1">
+                <div x-show="totalPages > 1" class="flex items-center gap-0.5">
                     <button @click="goToPage(currentPage - 1)" :disabled="currentPage <= 1"
-                            class="px-2 py-1 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                            class="px-1.5 py-0.5 text-xs rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                         &laquo;
                     </button>
                     <template x-for="page in visiblePages" :key="'p'+page">
                         <button @click="goToPage(page)"
                                 :class="page === currentPage ? 'bg-primary-600 text-white border-primary-600' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'"
                                 :disabled="page === '...'"
-                                class="px-3 py-1 text-sm rounded-lg border min-w-[36px]"
+                                class="px-2 py-0.5 text-xs rounded border min-w-[28px]"
                                 x-text="page">
                         </button>
                     </template>
                     <button @click="goToPage(currentPage + 1)" :disabled="currentPage >= totalPages"
-                            class="px-2 py-1 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                            class="px-1.5 py-0.5 text-xs rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                         &raquo;
                     </button>
                 </div>
