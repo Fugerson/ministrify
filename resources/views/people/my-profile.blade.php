@@ -54,7 +54,7 @@
                       }">
                     @csrf
                     @method('PUT')
-                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" x-ref="photoInput" @change="uploadPhoto($event)">
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" class="hidden" x-ref="photoInput" @change="uploadPhoto($event)">
 
                     @if($errors->any())
                         <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">

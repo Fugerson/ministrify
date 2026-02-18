@@ -97,7 +97,7 @@
                             </svg>
                             Прикріпити файл
                         </label>
-                        <input type="file" name="attachments[]" id="reply-attachments" multiple accept="image/*,.pdf"
+                        <input type="file" name="attachments[]" id="reply-attachments" multiple accept="image/*,.heic,.heif,.pdf"
                                @change="files = Array.from($event.target.files)" class="hidden">
                         <template x-if="files.length > 0">
                             <span class="text-sm text-gray-500 dark:text-gray-400" x-text="files.length + ' файл(ів)'"></span>

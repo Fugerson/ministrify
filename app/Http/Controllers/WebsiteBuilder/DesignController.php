@@ -142,7 +142,7 @@ class DesignController extends Controller
     public function uploadHeroImage(Request $request)
     {
         $request->validate([
-            'hero_image' => 'required|image|max:5120', // 5MB max
+            'hero_image' => 'required|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120', // 5MB max
         ]);
 
         $church = $this->getChurchOrFail();
@@ -158,7 +158,7 @@ class DesignController extends Controller
     public function uploadHeroSlide(Request $request)
     {
         $request->validate([
-            'slide_image' => 'required|image|max:5120',
+            'slide_image' => 'required|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
         ]);
 
         $church = $this->getChurchOrFail();

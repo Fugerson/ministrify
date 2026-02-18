@@ -56,7 +56,7 @@
             <div x-data="{ files: [] }">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Скріншоти (необов'язково)</label>
                 <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 transition-colors">
-                    <input type="file" name="attachments[]" multiple accept="image/*,.pdf"
+                    <input type="file" name="attachments[]" multiple accept="image/*,.heic,.heif,.pdf"
                            @change="files = Array.from($event.target.files)"
                            class="hidden" id="attachments">
                     <label for="attachments" class="cursor-pointer">

@@ -854,7 +854,7 @@ class FinanceController extends Controller
             'notes' => 'nullable|string',
             'force_over_budget' => 'boolean',
             'receipts' => 'nullable|array|max:10',
-            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf|max:10240',
+            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -1005,7 +1005,7 @@ class FinanceController extends Controller
             'notes' => 'nullable|string',
             'force_over_budget' => 'boolean',
             'receipts' => 'nullable|array|max:10',
-            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf|max:10240',
+            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
             'delete_attachments' => 'nullable|array',
             'delete_attachments.*' => 'integer|exists:transaction_attachments,id',
         ]);

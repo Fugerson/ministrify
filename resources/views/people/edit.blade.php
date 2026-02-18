@@ -41,7 +41,7 @@
                            @dragleave.prevent="isDragging = false"
                            @drop.prevent="handleDrop($event)"
                            :class="isDragging ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : ''">
-                        <input type="file" name="photo" accept="image/*" class="sr-only" @change="handleFileSelect($event)">
+                        <input type="file" name="photo" accept="image/*,.heic,.heif" class="sr-only" @change="handleFileSelect($event)">
                         <div class="text-center">
                             <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>

@@ -28,7 +28,7 @@ class StoreExpenseRequest extends FormRequest
             'notes' => 'nullable|string|max:5000',
             'force_over_budget' => 'boolean',
             'receipts' => 'nullable|array|max:10',
-            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf|max:10240',
+            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
         ];
     }
 

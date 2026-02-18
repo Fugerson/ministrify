@@ -36,7 +36,7 @@ class UpdatePersonRequest extends FormRequest
             'anniversary' => 'nullable|date',
             'address' => 'nullable|string|max:500',
             'telegram_username' => 'nullable|string|max:100',
-            'photo' => 'nullable|image|max:5120',
+            'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
             'membership_status' => ['nullable', Rule::in(array_keys(Person::MEMBERSHIP_STATUSES))],
             'church_role' => ['nullable', Rule::in(array_keys(Person::CHURCH_ROLES))],
             'first_visit_date' => 'nullable|date',

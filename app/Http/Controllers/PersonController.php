@@ -202,7 +202,7 @@ class PersonController extends Controller
             'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
             'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'notes' => 'nullable|string',
-            'photo' => 'nullable|image|max:2048',
+            'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'tags' => 'nullable|array',
             'ministries' => 'nullable|array',
         ]);
@@ -448,7 +448,7 @@ class PersonController extends Controller
                 'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
                 'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
                 'notes' => 'nullable|string',
-                'photo' => 'nullable|image|max:5120',
+                'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
                 'tags' => 'nullable|array',
                 'ministries' => 'nullable|array',
             ]);
@@ -460,7 +460,7 @@ class PersonController extends Controller
                 'telegram_username' => 'nullable|string|max:255',
                 'address' => 'nullable|string|max:500',
                 'birth_date' => 'nullable|date',
-                'photo' => 'nullable|image|max:5120',
+                'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
             ]);
         }
 
@@ -722,7 +722,7 @@ class PersonController extends Controller
             return response()->json(['photo_url' => null]);
         }
 
-        $request->validate(['photo' => 'required|image|max:5120']);
+        $request->validate(['photo' => 'required|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120']);
 
         $this->imageService->delete($person->photo);
         $path = $this->imageService->storeProfilePhoto($request->file('photo'), 'people');
@@ -1325,7 +1325,7 @@ class PersonController extends Controller
         }
 
         $request->validate([
-            'photo' => 'required|image|max:5120', // 5MB max
+            'photo' => 'required|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120', // 5MB max
         ]);
 
         try {

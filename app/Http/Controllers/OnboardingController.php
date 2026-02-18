@@ -203,7 +203,7 @@ class OnboardingController extends Controller
             'address' => 'nullable|string|max:500',
             'public_email' => 'nullable|email|max:255',
             'public_phone' => 'nullable|string|max:50',
-            'logo' => 'nullable|image|max:2048',
+            'logo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
         ]);
 
         // Use existing name if not provided

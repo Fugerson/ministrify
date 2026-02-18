@@ -93,7 +93,7 @@ class SettingsController extends Controller
             'name' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'address' => 'nullable|string|max:500',
-            'logo' => 'nullable|image|max:2048',
+            'logo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -257,9 +257,9 @@ class SettingsController extends Controller
             'instagram_url' => 'nullable|url|max:255',
             'youtube_url' => 'nullable|url|max:255',
             'service_times' => 'nullable|string|max:255',
-            'cover_image' => 'nullable|image|max:4096',
+            'cover_image' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:4096',
             'pastor_name' => 'nullable|string|max:255',
-            'pastor_photo' => 'nullable|image|max:2048',
+            'pastor_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'pastor_message' => 'nullable|string|max:2000',
         ]);
 

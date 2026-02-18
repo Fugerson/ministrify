@@ -189,7 +189,7 @@
                                             </svg>
                                         </div>
                                     </template>
-                                    <input type="file" x-ref="fileInput" x-init="fileInput = $refs.fileInput" @change="uploadPhoto(row, $event)" accept="image/*" class="hidden">
+                                    <input type="file" x-ref="fileInput" x-init="fileInput = $refs.fileInput" @change="uploadPhoto(row, $event)" accept="image/*,.heic,.heif" class="hidden">
                                     <div x-show="row.uploadingPhoto" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
                                         <svg class="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -69,7 +69,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Вибрати файл</span>
-                    <input type="file" name="logo" accept="image/*" class="hidden"
+                    <input type="file" name="logo" accept="image/*,.heic,.heif" class="hidden"
                            @change="const f=$event.target.files[0]; if(f){if(f.size>2*1024*1024){alert('Макс. 2MB');$event.target.value='';return}preview=URL.createObjectURL(f)}">
                 </label>
             </div>

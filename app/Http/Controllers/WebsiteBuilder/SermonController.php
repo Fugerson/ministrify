@@ -46,7 +46,7 @@ class SermonController extends Controller
             'video_url' => 'nullable|url|max:500',
             'audio_url' => 'nullable|url|max:500',
             'audio_file' => 'nullable|file|mimes:mp3,wav,m4a|max:51200',
-            'thumbnail' => 'nullable|image|max:2048',
+            'thumbnail' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'scripture_reference' => 'nullable|string|max:255',
             'tags' => 'nullable|array',
             'is_featured' => 'boolean',
@@ -93,7 +93,7 @@ class SermonController extends Controller
             'video_url' => 'nullable|url|max:500',
             'audio_url' => 'nullable|url|max:500',
             'audio_file' => 'nullable|file|mimes:mp3,wav,m4a|max:51200',
-            'thumbnail' => 'nullable|image|max:2048',
+            'thumbnail' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'scripture_reference' => 'nullable|string|max:255',
             'tags' => 'nullable|array',
             'is_featured' => 'boolean',
@@ -151,7 +151,7 @@ class SermonController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'thumbnail' => 'nullable|image|max:2048',
+            'thumbnail' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -176,7 +176,7 @@ class SermonController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'thumbnail' => 'nullable|image|max:2048',
+            'thumbnail' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);

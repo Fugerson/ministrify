@@ -366,7 +366,7 @@
                                                                 <div class="flex items-center gap-2 mt-1">
                                                                     <button @click="updateComment(comment, editContent); editing=false" class="px-2 py-1 bg-primary-600 text-white text-xs rounded">Зберегти</button>
                                                                     <button @click="editing=false; editContent=comment.content; editFileNames=[]; _editCommentFiles=[]" class="px-2 py-1 text-gray-500 text-xs">Скасувати</button>
-                                                                    <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
+                                                                    <input type="file" multiple accept="image/*,.heic,.heif,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
                                                                            x-ref="editFileInput"
                                                                            @change="onEditFilesChange($event)"
                                                                            class="hidden">

@@ -35,7 +35,7 @@ class GalleryController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'event_date' => 'nullable|date',
-            'cover_photo' => 'nullable|image|max:2048',
+            'cover_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'is_public' => 'boolean',
         ]);
 
@@ -77,7 +77,7 @@ class GalleryController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'event_date' => 'nullable|date',
-            'cover_photo' => 'nullable|image|max:2048',
+            'cover_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'is_public' => 'boolean',
         ]);
 
@@ -142,7 +142,7 @@ class GalleryController extends Controller
 
         $request->validate([
             'photos' => 'required|array|max:50',
-            'photos.*' => 'image|max:5120', // 5MB per photo
+            'photos.*' => 'mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120', // 5MB per photo
         ]);
 
         $church = $this->getChurchOrFail();

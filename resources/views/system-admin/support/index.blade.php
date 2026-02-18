@@ -246,7 +246,7 @@
                              @dragover.prevent="$el.classList.add('border-primary-500')"
                              @dragleave.prevent="$el.classList.remove('border-primary-500')"
                              @drop.prevent="handleDrop($event)">
-                            <input type="file" multiple accept="image/*,.pdf"
+                            <input type="file" multiple accept="image/*,.heic,.heif,.pdf"
                                    @change="addFiles($event.target.files)"
                                    class="hidden" id="ticket-attachments" x-ref="fileInput">
                             <label for="ticket-attachments" class="cursor-pointer">

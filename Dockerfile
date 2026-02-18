@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libmagickwand-dev \
+    libheif-dev \
     zip \
     unzip \
     supervisor \
@@ -25,6 +27,9 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Configure and install GD with JPEG/WebP support
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Install Imagick with HEIF support
+RUN pecl install imagick && docker-php-ext-enable imagick
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
