@@ -475,7 +475,7 @@ window.expensesManager = function() {
 };
 </script>
 
-<div x-data="expensesManager()" x-cloak>
+<div x-data="expensesManager()" x-cloak @expense-edit.window="openEdit($event.detail)" @expense-delete.window="confirmDelete($event.detail)">
 @include('finances.partials.tabs')
 
 <div id="finance-content" x-data="expensesFilter()" @finance-period-changed.window="onPeriodChange($event.detail)">
@@ -585,7 +585,7 @@ window.expensesManager = function() {
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm">
                                 <div class="flex items-center justify-end gap-1">
                                     @if(auth()->user()->canEdit('finances'))
-                                    <button type="button" @click.prevent.stop="openEdit(expense.id)"
+                                    <button type="button" @click.prevent.stop="$dispatch('expense-edit', expense.id)"
                                             class="p-2 text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -593,7 +593,7 @@ window.expensesManager = function() {
                                     </button>
                                     @endif
                                     @if(auth()->user()->canDelete('finances'))
-                                    <button type="button" @click.prevent.stop="confirmDelete(expense.id)"
+                                    <button type="button" @click.prevent.stop="$dispatch('expense-delete', expense.id)"
                                             class="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
