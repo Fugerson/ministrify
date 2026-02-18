@@ -254,8 +254,14 @@
                                 for (let file of fileList) {
                                     if (this.previews.length >= 10) break;
                                     const isHeic = file.name.match(/\.heic$/i) || file.name.match(/\.heif$/i);
-                                    if (!file.type.match('image.*') && file.type !== 'application/pdf' && !isHeic) continue;
-                                    if (file.size > 10 * 1024 * 1024) continue;
+                                    if (!file.type.match('image.*') && file.type !== 'application/pdf' && !isHeic) {
+                                        showToast('error', 'Непідтримуваний формат: ' + file.name + '. Дозволено: JPG, PNG, HEIC, PDF');
+                                        continue;
+                                    }
+                                    if (file.size > 10 * 1024 * 1024) {
+                                        showToast('error', 'Файл занадто великий: ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' МБ). Максимум 10 МБ.');
+                                        continue;
+                                    }
 
                                     const preview = {
                                         name: file.name,

@@ -303,7 +303,21 @@ window.expensesManager = function() {
 
         handleFileSelect(event) {
             const files = Array.from(event.target.files);
-            this.selectedFiles = files.slice(0, 10);
+            const maxSize = 10 * 1024 * 1024; // 10 MB
+            const rejected = [];
+            const accepted = [];
+            for (const file of files) {
+                if (accepted.length >= 10) break;
+                if (file.size > maxSize) {
+                    rejected.push(file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' МБ)');
+                    continue;
+                }
+                accepted.push(file);
+            }
+            this.selectedFiles = accepted;
+            if (rejected.length) {
+                showToast('error', 'Файл занадто великий (макс. 10 МБ): ' + rejected.join(', '));
+            }
         },
 
         removeFile(index) {
@@ -365,6 +379,11 @@ window.expensesManager = function() {
                     body: formData
                 });
 
+                if (response.status === 413) {
+                    showToast('error', 'Файл занадто великий для завантаження. Максимум 10 МБ на файл.');
+                    return;
+                }
+
                 const data = await response.json();
 
                 if (response.ok && data.success) {
@@ -377,15 +396,14 @@ window.expensesManager = function() {
                         this.budgetMessage = data.message;
                     } else {
                         this.errors = data.errors || {};
-                        if (data.message && !data.errors) {
-                            showToast('error', data.message);
-                        }
+                        const errorMsgs = Object.values(data.errors || {}).flat();
+                        showToast('error', errorMsgs.length ? errorMsgs[0] : (data.message || 'Помилка валідації'));
                     }
                 } else {
                     showToast('error', data.message || 'Помилка збереження');
                 }
             } catch (error) {
-                showToast('error', 'Помилка з\'єднання');
+                showToast('error', 'Помилка збереження. Перевірте розмір файлів (макс. 10 МБ).');
             } finally {
                 this.loading = false;
             }
