@@ -99,6 +99,14 @@ class BlockoutDateController extends Controller
         // Auto-decline pending assignments that conflict
         $this->handleConflictingAssignments($person, $blockout);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Блокування створено!',
+                'redirect_url' => route('blockouts.index'),
+            ]);
+        }
+
         return redirect()->route('blockouts.index')
             ->with('success', 'Період недоступності додано');
     }
@@ -163,6 +171,13 @@ class BlockoutDateController extends Controller
             $blockout->ministries()->sync($validated['ministry_ids']);
         } else {
             $blockout->ministries()->detach();
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Блокування оновлено!',
+            ]);
         }
 
         return redirect()->route('blockouts.index')

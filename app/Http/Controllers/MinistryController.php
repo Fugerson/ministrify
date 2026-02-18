@@ -83,6 +83,14 @@ class MinistryController extends Controller
 
         \App\Models\Church::clearMinistriesCache($church->id);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Команду створено!',
+                'redirect_url' => route('ministries.show', $ministry),
+            ]);
+        }
+
         return redirect()->route('ministries.show', $ministry)
             ->with('success', 'Служіння створено.');
     }
@@ -391,6 +399,13 @@ class MinistryController extends Controller
         $ministry->update($validated);
 
         \App\Models\Church::clearMinistriesCache($ministry->church_id);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Команду оновлено!',
+            ]);
+        }
 
         return redirect()->route('ministries.show', $ministry)
             ->with('success', 'Служіння оновлено.');

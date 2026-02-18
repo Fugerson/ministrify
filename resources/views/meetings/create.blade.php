@@ -3,7 +3,7 @@
 @section('title', 'Нова зустріч - ' . $ministry->name)
 
 @section('content')
-<div class="max-w-3xl mx-auto">
+<div class="max-w-3xl mx-auto" x-data="meetingCreateForm()">
     <div class="mb-6">
         <a href="{{ route('meetings.index', $ministry) }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,8 +16,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6" x-data="{ copyFrom: null }">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Нова зустріч</h2>
 
-        <form method="POST" action="{{ route('meetings.store', $ministry) }}" class="space-y-6">
-            @csrf
+        <form @submit.prevent="submitForm" class="space-y-6" x-ref="form">
 
             <!-- Copy from previous -->
             @if($previousMeetings->isNotEmpty())
@@ -50,9 +49,9 @@
                     <input type="text" name="title" id="title" value="{{ old('title') }}" required
                            placeholder="Репетиція прославлення, Молодіжна зустріч..."
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                    @error('title')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.title">
+                        <p class="mt-1 text-sm text-red-600" x-text="errors.title[0]"></p>
+                    </template>
                 </div>
 
                 <div>
@@ -99,11 +98,45 @@
                 <a href="{{ route('meetings.index', $ministry) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                     Скасувати
                 </a>
-                <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
-                    Створити зустріч
+                <button type="submit" :disabled="saving"
+                        class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
+                    <span x-show="!saving">Створити зустріч</span>
+                    <span x-show="saving" class="flex items-center justify-center gap-2">
+                        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        Збереження...
+                    </span>
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+function meetingCreateForm() {
+    return {
+        saving: false,
+        errors: {},
+        async submitForm() {
+            this.saving = true;
+            this.errors = {};
+            const formData = new FormData(this.$refs.form);
+            try {
+                const response = await fetch('{{ route("meetings.store", $ministry) }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: formData,
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', 'Перевірте правильність заповнення форми.'); }
+                    else { showToast('error', data.message || 'Помилка збереження.'); }
+                    this.saving = false; return;
+                }
+                showToast('success', data.message || 'Збережено!');
+                setTimeout(() => window.location.href = data.redirect_url, 800);
+            } catch (e) { showToast('error', "Помилка з'єднання з сервером."); this.saving = false; }
+        }
+    }
+}
+</script>
 @endsection

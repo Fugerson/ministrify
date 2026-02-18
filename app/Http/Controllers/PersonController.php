@@ -231,6 +231,13 @@ class PersonController extends Controller
                 ->first();
 
             if ($existingPerson) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Людина з цим email вже існує. Перенаправляю на її профіль.',
+                        'redirect_url' => route('people.show', $existingPerson),
+                    ]);
+                }
                 return redirect()->route('people.show', $existingPerson)
                     ->with('warning', 'Людина з цим email вже існує. Перенаправляю на її профіль.');
             }
@@ -259,6 +266,14 @@ class PersonController extends Controller
                     ]);
                 }
             }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Людину успішно додано!',
+                'redirect_url' => route('people.show', $person),
+            ]);
         }
 
         return redirect()->route('people.show', $person)

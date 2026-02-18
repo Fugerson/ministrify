@@ -89,6 +89,14 @@ class AnnouncementController extends Controller
             'expires_at' => $validated['expires_at'] ?? null,
         ]);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Оголошення створено!',
+                'redirect_url' => route('announcements.index'),
+            ]);
+        }
+
         return redirect()->route('announcements.index')
             ->with('success', 'Оголошення опубліковано');
     }
@@ -125,6 +133,13 @@ class AnnouncementController extends Controller
             'is_pinned' => $request->boolean('is_pinned'),
             'expires_at' => $validated['expires_at'] ?? null,
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Оголошення оновлено!',
+            ]);
+        }
 
         return redirect()->route('announcements.index')
             ->with('success', 'Оголошення оновлено');

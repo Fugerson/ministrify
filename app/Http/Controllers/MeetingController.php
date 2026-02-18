@@ -76,6 +76,14 @@ class MeetingController extends Controller
             ]);
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Зустріч створено!',
+                'redirect_url' => route('meetings.show', [$ministry, $meeting]),
+            ]);
+        }
+
         return redirect()->route('meetings.show', [$ministry, $meeting])
             ->with('success', 'Зустріч створено');
     }
@@ -124,6 +132,13 @@ class MeetingController extends Controller
         ]);
 
         $meeting->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Зустріч оновлено!',
+            ]);
+        }
 
         return redirect()->route('meetings.show', [$ministry, $meeting])
             ->with('success', 'Зустріч оновлено');

@@ -620,6 +620,7 @@ class FinanceController extends Controller
                 'success' => true,
                 'message' => 'Надходження додано!',
                 'transaction' => $transaction->load('category'),
+                'redirect_url' => route('finances.incomes'),
             ]);
         }
 
@@ -928,11 +929,16 @@ class FinanceController extends Controller
         }
 
         if ($request->wantsJson()) {
+            $redirectUrl = route('finances.expenses.index');
+            if (!empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry') {
+                $redirectUrl = route('ministries.show', ['ministry' => $validated['ministry_id'], 'tab' => 'expenses']);
+            }
             return response()->json([
                 'success' => true,
                 'message' => $message,
                 'transaction' => $transaction->load(['category', 'ministry']),
                 'budget_warning' => $budgetWarning,
+                'redirect_url' => $redirectUrl,
             ]);
         }
 

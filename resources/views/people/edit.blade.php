@@ -3,10 +3,8 @@
 @section('title', 'Редагувати: ' . $person->full_name)
 
 @section('content')
-<div class="max-w-3xl mx-auto">
-    <form method="POST" action="{{ route('people.update', $person) }}" enctype="multipart/form-data" class="space-y-6" x-data="{ submitting: false }" @submit="submitting = true">
-        @csrf
-        @method('PUT')
+<div class="max-w-3xl mx-auto" x-data="personEditForm()">
+    <form @submit.prevent="submitForm" enctype="multipart/form-data" x-ref="form" class="space-y-6">
 
         <!-- Photo Upload Card -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -55,6 +53,7 @@
                 </div>
                 <input type="hidden" name="remove_photo" x-ref="removePhotoInput" value="0">
             </div>
+            <template x-if="errors.photo"><p class="mt-1 text-xs text-red-500" x-text="errors.photo[0]"></p></template>
         </div>
 
         <!-- Basic Info -->
@@ -65,15 +64,17 @@
                 <div>
                     <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ім'я *</label>
                     <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $person->first_name) }}" required
-                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 {{ $errors->has('first_name') ? 'ring-2 ring-red-500' : '' }} border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                    @error('first_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
+                           :class="errors.first_name ? 'ring-2 ring-red-500' : ''">
+                    <template x-if="errors.first_name"><p class="mt-1 text-xs text-red-500" x-text="errors.first_name[0]"></p></template>
                 </div>
 
                 <div>
                     <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Прізвище *</label>
                     <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $person->last_name) }}" required
-                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 {{ $errors->has('last_name') ? 'ring-2 ring-red-500' : '' }} border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                    @error('last_name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
+                           :class="errors.last_name ? 'ring-2 ring-red-500' : ''">
+                    <template x-if="errors.last_name"><p class="mt-1 text-xs text-red-500" x-text="errors.last_name[0]"></p></template>
                 </div>
             </div>
         </div>
@@ -87,12 +88,14 @@
                     <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Телефон</label>
                     <input type="tel" name="phone" id="phone" value="{{ old('phone', $person->phone) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                    <template x-if="errors.phone"><p class="mt-1 text-xs text-red-500" x-text="errors.phone[0]"></p></template>
                 </div>
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                     <input type="email" name="email" id="email" value="{{ old('email', $person->email) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                    <template x-if="errors.email"><p class="mt-1 text-xs text-red-500" x-text="errors.email[0]"></p></template>
                 </div>
 
                 <div>
@@ -252,10 +255,10 @@
                    class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                     Назад
                 </a>
-                <button type="submit" :disabled="submitting"
+                <button type="submit" :disabled="saving"
                         class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                    <span x-show="!submitting">Зберегти</span>
-                    <span x-show="submitting" class="inline-flex items-center gap-2">
+                    <span x-show="!saving">Зберегти</span>
+                    <span x-show="saving" class="inline-flex items-center gap-2">
                         <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                         Збереження...
                     </span>
@@ -305,6 +308,49 @@ function avatarUpload() {
             this.$refs.removePhotoInput.value = '1';
             const input = this.$el.querySelector('input[type="file"]');
             input.value = '';
+        }
+    }
+}
+
+function personEditForm() {
+    return {
+        saving: false,
+        errors: {},
+        async submitForm() {
+            this.saving = true;
+            this.errors = {};
+            const formData = new FormData(this.$refs.form);
+            formData.append('_method', 'PUT');
+            try {
+                const response = await fetch('{{ route("people.update", $person) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+                if (response.status === 413) {
+                    showToast('error', 'Файл занадто великий. Максимум 2 МБ.');
+                    this.saving = false;
+                    return;
+                }
+                const data = await response.json();
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.errors = data.errors;
+                        showToast('error', 'Перевірте правильність заповнення форми.');
+                    } else {
+                        showToast('error', data.message || 'Помилка збереження.');
+                    }
+                    this.saving = false;
+                    return;
+                }
+                showToast('success', data.message || 'Збережено!');
+            } catch (e) {
+                showToast('error', "Помилка з'єднання з сервером.");
+            }
+            this.saving = false;
         }
     }
 }

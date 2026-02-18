@@ -3,7 +3,7 @@
 @section('title', 'Додати період недоступності')
 
 @section('content')
-<div class="max-w-2xl mx-auto space-y-6">
+<div class="max-w-2xl mx-auto space-y-6" x-data="blockoutCreateForm()">
     <!-- Header with back link -->
     <div class="flex items-center gap-4">
         <a href="{{ route('blockouts.index') }}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
@@ -17,8 +17,7 @@
         </div>
     </div>
 
-    <form action="{{ route('blockouts.store') }}" method="POST" class="space-y-6">
-        @csrf
+    <form @submit.prevent="submitForm" class="space-y-6" x-ref="form">
 
         <!-- Date Range Card -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -39,9 +38,9 @@
                            min="{{ now()->format('Y-m-d') }}"
                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500"
                            required>
-                    @error('start_date')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.start_date">
+                        <p class="mt-1 text-sm text-red-600" x-text="errors.start_date[0]"></p>
+                    </template>
                 </div>
 
                 <div>
@@ -53,9 +52,9 @@
                            min="{{ now()->format('Y-m-d') }}"
                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500"
                            required>
-                    @error('end_date')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.end_date">
+                        <p class="mt-1 text-sm text-red-600" x-text="errors.end_date[0]"></p>
+                    </template>
                 </div>
             </div>
 
@@ -129,9 +128,9 @@
                 </label>
                 @endforeach
             </div>
-            @error('reason')
-                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-            @enderror
+            <template x-if="errors.reason">
+                <p class="mt-2 text-sm text-red-600" x-text="errors.reason[0]"></p>
+            </template>
 
             <div class="mt-4">
                 <label for="reason_note" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -236,9 +235,13 @@
                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
                 Скасувати
             </a>
-            <button type="submit"
-                    class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                Зберегти
+            <button type="submit" :disabled="saving"
+                    class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
+                <span x-show="!saving">Зберегти</span>
+                <span x-show="saving" class="flex items-center gap-2">
+                    <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    Збереження...
+                </span>
             </button>
         </div>
     </form>
@@ -257,7 +260,6 @@ function toggleMinistrySelection() {
     const ministrySelection = document.getElementById('ministry-selection');
     ministrySelection.classList.toggle('hidden', appliesToAll);
 
-    // Update radio button styling
     document.querySelectorAll('input[name="applies_to_all"]').forEach(input => {
         const label = input.closest('label');
         if (input.checked) {
@@ -292,6 +294,33 @@ function updateReasonSelection() {
     });
 }
 
+function blockoutCreateForm() {
+    return {
+        saving: false,
+        errors: {},
+        async submitForm() {
+            this.saving = true;
+            this.errors = {};
+            const formData = new FormData(this.$refs.form);
+            try {
+                const response = await fetch('{{ route("blockouts.store") }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: formData,
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', 'Перевірте правильність заповнення форми.'); }
+                    else { showToast('error', data.message || 'Помилка збереження.'); }
+                    this.saving = false; return;
+                }
+                showToast('success', data.message || 'Збережено!');
+                setTimeout(() => window.location.href = data.redirect_url, 800);
+            } catch (e) { showToast('error', "Помилка з'єднання з сервером."); this.saving = false; }
+        }
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     toggleTimeFields();
@@ -299,7 +328,6 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleRecurrenceEnd();
     updateReasonSelection();
 
-    // Sync end date with start date
     document.getElementById('start_date').addEventListener('change', function() {
         const endDate = document.getElementById('end_date');
         if (endDate.value < this.value) {

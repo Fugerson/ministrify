@@ -70,6 +70,14 @@ class PrayerRequestController extends Controller
             'is_urgent' => $request->boolean('is_urgent'),
         ]);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Молитовний запит створено!',
+                'redirect_url' => route('prayer-requests.index'),
+            ]);
+        }
+
         return redirect()->route('prayer-requests.index')
             ->with('success', 'Молитовне прохання додано.');
     }
@@ -122,6 +130,13 @@ class PrayerRequestController extends Controller
             'is_public' => $request->boolean('is_public', true),
             'is_urgent' => $request->boolean('is_urgent'),
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Молитовний запит оновлено!',
+            ]);
+        }
 
         return redirect()->route('prayer-requests.show', $prayerRequest)
             ->with('success', 'Прохання оновлено.');

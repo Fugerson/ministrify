@@ -296,6 +296,14 @@ class EventController extends Controller
             );
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Подію створено!',
+                'redirect_url' => route('events.show', $event),
+            ]);
+        }
+
         return redirect()->route('events.show', $event)
             ->with('success', 'Подію створено.');
     }

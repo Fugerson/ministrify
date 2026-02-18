@@ -3,7 +3,7 @@
 @section('title', 'Додати витрату')
 
 @section('content')
-<div class="max-w-2xl mx-auto">
+<div class="max-w-2xl mx-auto" x-data="expenseCreateForm()">
     <a href="{{ request('redirect_to') === 'ministry' && request('ministry') ? route('ministries.show', ['ministry' => request('ministry'), 'tab' => 'expenses']) : route('finances.expenses.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm mb-6">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -11,29 +11,8 @@
         Назад
     </a>
 
-    <form method="POST" action="{{ route('finances.expenses.store') }}" enctype="multipart/form-data" class="space-y-6">
-        @csrf
+    <form @submit.prevent="submitForm" enctype="multipart/form-data" x-ref="form" class="space-y-6">
         <input type="hidden" name="redirect_to" value="{{ old('redirect_to', request('redirect_to')) }}">
-
-        {{-- Budget exceeded warning --}}
-        @if(session('budget_exceeded'))
-            <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
-                <div class="flex items-start">
-                    <svg class="w-5 h-5 text-orange-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                    </svg>
-                    <div class="flex-1">
-                        <h3 class="text-sm font-medium text-orange-800 dark:text-orange-200">Перевищення бюджету</h3>
-                        <p class="mt-1 text-sm text-orange-700 dark:text-orange-300">{{ session('error') }}</p>
-                        <label class="mt-3 flex items-center">
-                            <input type="checkbox" name="force_over_budget" value="1"
-                                   class="rounded border-orange-300 text-orange-600 focus:ring-orange-500">
-                            <span class="ml-2 text-sm text-orange-800 dark:text-orange-200">Все одно додати витрату (потрібне підтвердження)</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        @endif
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова витрата</h2>
@@ -75,9 +54,9 @@
                             :nullable="false"
                             required
                         />
-                        @error('ministry_id')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
+                        <template x-if="errors.ministry_id">
+                            <p class="mt-1 text-sm text-red-500" x-text="errors.ministry_id[0]"></p>
+                        </template>
                     </div>
                 @endif
 
@@ -107,18 +86,18 @@
                                 Курс: 1 <span x-text="currency"></span> = <span x-text="exchangeRates[currency]?.toFixed(2)"></span> ₴
                             </p>
                         </template>
-                        @error('amount')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
+                        <template x-if="errors.amount">
+                            <p class="mt-1 text-sm text-red-500" x-text="errors.amount[0]"></p>
+                        </template>
                     </div>
 
                     <div>
                         <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата <span class="text-red-500">*</span></label>
                         <input type="date" name="date" id="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('date')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
+                        <template x-if="errors.date">
+                            <p class="mt-1 text-sm text-red-500" x-text="errors.date[0]"></p>
+                        </template>
                     </div>
                 </div>
 
@@ -127,9 +106,9 @@
                     <input type="text" name="description" id="description" value="{{ old('description') }}" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                            placeholder="Струни для гітари">
-                    @error('description')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.description">
+                        <p class="mt-1 text-sm text-red-500" x-text="errors.description[0]"></p>
+                    </template>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -175,7 +154,7 @@
                     </div>
                 </div>
 
-                <div x-data="receiptUploader()">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Чеки / Квитанції</label>
 
                     <!-- Drop zone -->
@@ -229,66 +208,10 @@
                             </div>
                         </template>
                     </div>
-                    @error('receipts')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                    @error('receipts.*')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.receipts || errors['receipts.0']">
+                        <p class="mt-1 text-sm text-red-500" x-text="errors.receipts ? errors.receipts[0] : errors['receipts.0'][0]"></p>
+                    </template>
                 </div>
-
-                <script>
-                    function receiptUploader() {
-                        return {
-                            dragover: false,
-                            previews: [],
-                            files: [],
-                            handleFiles(event) {
-                                this.addFiles(event.target.files);
-                            },
-                            handleDrop(event) {
-                                this.dragover = false;
-                                this.addFiles(event.dataTransfer.files);
-                            },
-                            addFiles(fileList) {
-                                for (let file of fileList) {
-                                    if (this.previews.length >= 10) break;
-                                    const isHeic = file.name.match(/\.heic$/i) || file.name.match(/\.heif$/i);
-                                    if (!file.type.match('image.*') && file.type !== 'application/pdf' && !isHeic) {
-                                        showToast('error', 'Непідтримуваний формат: ' + file.name + '. Дозволено: JPG, PNG, HEIC, PDF');
-                                        continue;
-                                    }
-                                    if (file.size > 10 * 1024 * 1024) {
-                                        showToast('error', 'Файл занадто великий: ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' МБ). Максимум 10 МБ.');
-                                        continue;
-                                    }
-
-                                    const preview = {
-                                        name: file.name,
-                                        type: file.type === 'application/pdf' ? 'pdf' : (isHeic ? 'heic' : 'image'),
-                                        url: (!isHeic && file.type !== 'application/pdf') ? URL.createObjectURL(file) : null
-                                    };
-                                    this.previews.push(preview);
-                                    this.files.push(file);
-                                }
-                                this.updateInput();
-                            },
-                            removeFile(index) {
-                                if (this.previews[index].url) {
-                                    URL.revokeObjectURL(this.previews[index].url);
-                                }
-                                this.previews.splice(index, 1);
-                                this.files.splice(index, 1);
-                                this.updateInput();
-                            },
-                            updateInput() {
-                                const dt = new DataTransfer();
-                                this.files.forEach(f => dt.items.add(f));
-                                this.$refs.fileInput.files = dt.files;
-                            }
-                        }
-                    }
-                </script>
 
                 <div>
                     <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
@@ -302,10 +225,123 @@
             <a href="{{ route('finances.expenses.index') }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 Скасувати
             </a>
-            <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
-                Зберегти
+            <button type="submit" :disabled="saving"
+                    class="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                <span x-show="!saving">Зберегти</span>
+                <span x-show="saving" class="flex items-center justify-center gap-2">
+                    <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Збереження...
+                </span>
             </button>
         </div>
     </form>
 </div>
+
+<script>
+function expenseCreateForm() {
+    return {
+        saving: false,
+        errors: {},
+        dragover: false,
+        previews: [],
+        files: [],
+
+        handleFiles(event) {
+            this.addFiles(event.target.files);
+        },
+
+        handleDrop(event) {
+            this.dragover = false;
+            this.addFiles(event.dataTransfer.files);
+        },
+
+        addFiles(fileList) {
+            for (let file of fileList) {
+                if (this.previews.length >= 10) break;
+                const isHeic = file.name.match(/\.heic$/i) || file.name.match(/\.heif$/i);
+                if (!file.type.match('image.*') && file.type !== 'application/pdf' && !isHeic) {
+                    showToast('error', 'Непідтримуваний формат: ' + file.name + '. Дозволено: JPG, PNG, HEIC, PDF');
+                    continue;
+                }
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast('error', 'Файл занадто великий: ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' МБ). Максимум 10 МБ.');
+                    continue;
+                }
+                this.previews.push({
+                    name: file.name,
+                    type: file.type === 'application/pdf' ? 'pdf' : (isHeic ? 'heic' : 'image'),
+                    url: (!isHeic && file.type !== 'application/pdf') ? URL.createObjectURL(file) : null
+                });
+                this.files.push(file);
+            }
+            this.updateInput();
+        },
+
+        removeFile(index) {
+            if (this.previews[index].url) URL.revokeObjectURL(this.previews[index].url);
+            this.previews.splice(index, 1);
+            this.files.splice(index, 1);
+            this.updateInput();
+        },
+
+        updateInput() {
+            const dt = new DataTransfer();
+            this.files.forEach(f => dt.items.add(f));
+            this.$refs.fileInput.files = dt.files;
+        },
+
+        async submitForm() {
+            this.saving = true;
+            this.errors = {};
+
+            const formData = new FormData(this.$refs.form);
+            // Add files manually
+            formData.delete('receipts[]');
+            this.files.forEach(f => formData.append('receipts[]', f));
+
+            try {
+                const response = await fetch('{{ route("finances.expenses.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+
+                if (response.status === 413) {
+                    showToast('error', 'Файл занадто великий для завантаження. Максимум 10 МБ на файл.');
+                    this.saving = false;
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.errors = data.errors;
+                        showToast('error', 'Перевірте правильність заповнення форми.');
+                    } else {
+                        showToast('error', data.message || 'Помилка збереження.');
+                    }
+                    this.saving = false;
+                    return;
+                }
+
+                showToast('success', data.message || 'Збережено!');
+                if (data.budget_warning) {
+                    showToast('warning', data.budget_warning);
+                }
+                setTimeout(() => window.location.href = data.redirect_url, 800);
+            } catch (e) {
+                showToast('error', 'Помилка з\'єднання з сервером.');
+                this.saving = false;
+            }
+        }
+    }
+}
+</script>
 @endsection

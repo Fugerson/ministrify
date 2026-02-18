@@ -59,6 +59,14 @@ class GroupController extends Controller
             ]);
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Групу створено!',
+                'redirect_url' => route('groups.show', $group),
+            ]);
+        }
+
         return redirect()->route('groups.show', $group)
             ->with('success', 'Групу створено');
     }
@@ -108,6 +116,13 @@ class GroupController extends Controller
         ]);
 
         $group->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Групу оновлено!',
+            ]);
+        }
 
         return redirect()->route('groups.show', $group)
             ->with('success', 'Групу оновлено');

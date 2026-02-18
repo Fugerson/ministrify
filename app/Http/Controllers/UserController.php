@@ -135,6 +135,14 @@ class UserController extends Controller
                 'updated_at' => now(),
             ]);
 
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Користувача додано!',
+                    'redirect_url' => route('settings.users.index'),
+                ]);
+            }
+
             return redirect()->route('settings.users.index')
                 ->with('success', 'Користувача додано до церкви.');
         }
@@ -220,6 +228,14 @@ class UserController extends Controller
             }
         } catch (\Exception $e) {
             $message .= ' Налаштуйте пароль вручну або надішліть запрошення пізніше.';
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Користувача додано!',
+                'redirect_url' => route('settings.users.index'),
+            ]);
         }
 
         return redirect()->route('settings.users.index')
