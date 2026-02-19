@@ -644,10 +644,10 @@
                                 <div x-show="showCreateModal"
                                      x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                                      x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col" @click.stop>
+                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col" @click.stop>
                                     {{-- Header --}}
-                                    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
-                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.create_event') }}</h3>
+                                    <div class="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+                                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Нова подія') }}</h2>
                                         <button @click="closeCreateModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -655,44 +655,51 @@
                                         </button>
                                     </div>
                                     {{-- Body --}}
-                                    <div class="p-4 space-y-4 overflow-y-auto">
+                                    <div class="p-6 space-y-4 overflow-y-auto">
                                         <div x-show="createError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg" x-text="createError"></div>
 
                                         {{-- Title --}}
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.title') }} *</label>
-                                            <input type="text" x-model="cf.title" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="{{ __('forms.title') }}">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Назва') }} *</label>
+                                            <input type="text" x-model="cf.title"
+                                                   class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                                                   placeholder="{{ __('Недільне богослужіння') }}">
                                         </div>
 
                                         {{-- Date & Time --}}
-                                        <div class="grid grid-cols-2 gap-3">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.select_date') }} *</label>
-                                                <input type="date" x-model="cf.date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>
+                                                <input type="date" x-model="cf.date"
+                                                       class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
                                             </div>
-                                            <div x-show="!cf.allDay">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.select_time') }}</label>
-                                                <input type="time" x-model="cf.time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                            <div x-show="!cf.allDay" x-transition>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Час') }} *</label>
+                                                <input type="time" x-model="cf.time"
+                                                       class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
                                             </div>
                                         </div>
 
-                                        {{-- All day & Multi-day --}}
-                                        <div class="flex flex-wrap gap-4">
-                                            <label class="flex items-center gap-2 cursor-pointer">
-                                                <input type="checkbox" x-model="cf.allDay" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
-                                                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.all_day') }}</span>
-                                            </label>
-                                            <label class="flex items-center gap-2 cursor-pointer">
-                                                <input type="checkbox" x-model="cf.multiDay" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
-                                                <span class="text-sm text-gray-600 dark:text-gray-400">Кілька днів</span>
-                                            </label>
-                                        </div>
+                                        {{-- Multi-day toggle --}}
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" x-model="cf.multiDay"
+                                                   class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на кілька днів') }}</span>
+                                        </label>
 
-                                        {{-- End date --}}
+                                        {{-- End date for multi-day --}}
                                         <div x-show="cf.multiDay" x-collapse>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата закінчення *</label>
-                                            <input type="date" x-model="cf.endDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата закінчення') }} *</label>
+                                            <input type="date" x-model="cf.endDate"
+                                                   class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
                                         </div>
+
+                                        {{-- All day toggle --}}
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" x-model="cf.allDay"
+                                                   class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на весь день') }}</span>
+                                        </label>
 
                                         {{-- Recurrence --}}
                                         <div>
@@ -704,55 +711,113 @@
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                                 </svg>
-                                                Повторення
+                                                {{ __('Повторення') }}
                                                 <span x-show="cf.recurrence" x-cloak class="text-xs text-primary-600 dark:text-primary-400 font-medium"
-                                                      x-text="cf.recurrence ? '(' + ({'daily':'щодня','weekly':'щотижня','biweekly':'що 2 тижні','monthly':'щомісяця'}[cf.recurrence] || '') + ')' : ''"></span>
+                                                      x-text="cf.recurrence ? '(' + ({'daily':'щодня','weekly':'щотижня','biweekly':'що 2 тижні','monthly':'щомісяця','yearly':'щороку','weekdays':'пн-пт','custom':'свій'}[cf.recurrence] || '') + ')' : ''"></span>
                                             </button>
+
                                             <div x-show="cf.showRecurrence" x-collapse class="mt-3 space-y-3">
-                                                <select x-model="cf.recurrence" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                                    <option value="">Не повторювати</option>
-                                                    <option value="weekly">Щотижня</option>
-                                                    <option value="biweekly">Що 2 тижні</option>
-                                                    <option value="monthly">Щомісяця</option>
+                                                <select x-model="cf.recurrence" @change="cfUpdateRecurrence()"
+                                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                    <option value="">{{ __('Не повторювати') }}</option>
+                                                    <option value="daily">{{ __('Щодня') }}</option>
+                                                    <option value="weekly">{{ __('Щотижня') }}</option>
+                                                    <option value="biweekly">{{ __('Що 2 тижні') }}</option>
+                                                    <option value="monthly">{{ __('Щомісяця') }}</option>
+                                                    <option value="yearly">{{ __('Щороку') }}</option>
+                                                    <option value="weekdays">{{ __('Кожен робочий день (пн-пт)') }}</option>
+                                                    <option value="custom">{{ __('Користувацьке...') }}</option>
                                                 </select>
-                                                <div x-show="cf.recurrence" x-collapse class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-2">
+
+                                                {{-- Custom recurrence settings --}}
+                                                <div x-show="cf.recurrence === 'custom'" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
                                                     <div class="flex items-center gap-2">
-                                                        <span class="text-sm text-gray-600 dark:text-gray-400">Після</span>
-                                                        <input type="number" x-model="cf.recurrenceCount" min="2" max="52" class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
-                                                        <span class="text-sm text-gray-600 dark:text-gray-400">повторень</span>
+                                                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Кожні') }}</span>
+                                                        <input type="number" x-model="cf.customInterval" min="1" max="99"
+                                                               class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                                        <select x-model="cf.customFrequency"
+                                                                class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                            <option value="day">{{ __('днів') }}</option>
+                                                            <option value="week">{{ __('тижнів') }}</option>
+                                                            <option value="month">{{ __('місяців') }}</option>
+                                                            <option value="year">{{ __('років') }}</option>
+                                                        </select>
                                                     </div>
+                                                </div>
+
+                                                {{-- Recurrence end settings --}}
+                                                <div x-show="cf.recurrence && cf.recurrence !== ''" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
+                                                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('Закінчується') }}</label>
+                                                    <div class="space-y-2">
+                                                        <label class="flex items-center gap-2 cursor-pointer">
+                                                            <input type="radio" x-model="cf.endType" value="count" class="text-primary-600 focus:ring-primary-500">
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('Після') }}</span>
+                                                            <input type="number" x-model="cf.recurrenceCount" min="2" max="365" :disabled="cf.endType !== 'count'"
+                                                                   class="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center disabled:opacity-50">
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('повторень') }}</span>
+                                                        </label>
+                                                        <label class="flex items-center gap-2 cursor-pointer">
+                                                            <input type="radio" x-model="cf.endType" value="date" class="text-primary-600 focus:ring-primary-500">
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('До дати') }}</span>
+                                                            <input type="date" x-model="cf.recurrenceEndDate" :disabled="cf.endType !== 'date'"
+                                                                   class="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
+                                                        </label>
+                                                    </div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="cfPreviewText()"></p>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {{-- Notes --}}
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
-                                            <textarea x-model="cf.notes" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Додаткова інформація..."></textarea>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Нотатки') }}</label>
+                                            <textarea x-model="cf.notes" rows="2"
+                                                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                      placeholder="{{ __('Додаткова інформація...') }}"></textarea>
                                         </div>
 
-                                        {{-- Checkboxes --}}
-                                        <div class="flex flex-wrap gap-4 pt-2 border-t border-gray-200 dark:border-gray-600">
-                                            <label class="flex items-center gap-2 cursor-pointer">
-                                                <input type="checkbox" x-model="cf.isService" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
-                                                <span class="text-sm text-gray-600 dark:text-gray-400">Подія з планом</span>
-                                            </label>
-                                            <label class="flex items-center gap-2 cursor-pointer">
-                                                <input type="checkbox" x-model="cf.trackAttendance" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
-                                                <span class="text-sm text-gray-600 dark:text-gray-400">Відвідуваність</span>
-                                            </label>
+                                        {{-- Service Plan Option --}}
+                                        <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" x-model="cf.isService"
+                                                       class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
+                                                <label class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    {{ __('Це подія з планом') }}
+                                                </label>
+                                            </div>
+                                            <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                                                {{ __('Увімкніть, щоб створити план події з таймлайном (прославлення, проповідь, оголошення тощо)') }}
+                                            </p>
                                         </div>
+
+                                        {{-- Attendance Tracking Option --}}
+                                        @if($currentChurch->attendance_enabled)
+                                        <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" x-model="cf.trackAttendance"
+                                                       class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
+                                                <label class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    {{ __('Відстежувати відвідуваність') }}
+                                                </label>
+                                            </div>
+                                            <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                                                {{ __('Увімкніть, щоб відмічати хто був на цій події') }}
+                                            </p>
+                                        </div>
+                                        @endif
                                     </div>
                                     {{-- Footer --}}
-                                    <div class="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-                                        <button @click="closeCreateModal()" class="flex-1 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __('app.cancel') }}</button>
+                                    <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:space-x-4 p-6 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
+                                        <button @click="closeCreateModal()" class="w-full sm:w-auto text-center px-4 py-2.5 md:py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                                            {{ __('Скасувати') }}
+                                        </button>
                                         <button @click="submitCreateEvent()" :disabled="createSubmitting || !cf.title.trim() || !cf.date"
-                                                class="flex-1 px-4 py-2 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                                class="w-full sm:w-auto px-6 py-2.5 md:py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
                                             <svg x-show="createSubmitting" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
-                                            <span x-text="createSubmitting ? 'Створення...' : '{{ __('app.create') }}'"></span>
+                                            <span x-text="createSubmitting ? '{{ __('Створення...') }}' : '{{ __('Створити') }}'"></span>
                                         </button>
                                     </div>
                                 </div>
@@ -812,7 +877,7 @@
                                 showCreateModal: false,
                                 createSubmitting: false,
                                 createError: '',
-                                cf: { title: '', date: '', time: '10:00', allDay: false, multiDay: false, endDate: '', notes: '', isService: true, trackAttendance: false, recurrence: '', recurrenceCount: 12, showRecurrence: false },
+                                cf: { title: '', date: '', time: '10:00', allDay: false, multiDay: false, endDate: '', notes: '', isService: true, trackAttendance: false, recurrence: '', recurrenceCount: 12, showRecurrence: false, endType: 'count', recurrenceEndDate: '', customInterval: 1, customFrequency: 'week' },
 
                                 // Form state
                                 selectedSongId: '',
@@ -855,7 +920,9 @@
                                 },
 
                                 openCreateModal() {
-                                    this.cf = { title: '', date: '', time: '10:00', allDay: false, multiDay: false, endDate: '', notes: '', isService: true, trackAttendance: false, recurrence: '', recurrenceCount: 12, showRecurrence: false };
+                                    const defaultEnd = new Date();
+                                    defaultEnd.setMonth(defaultEnd.getMonth() + 3);
+                                    this.cf = { title: '', date: '', time: '10:00', allDay: false, multiDay: false, endDate: '', notes: '', isService: true, trackAttendance: false, recurrence: '', recurrenceCount: 12, showRecurrence: false, endType: 'count', recurrenceEndDate: defaultEnd.toISOString().split('T')[0], customInterval: 1, customFrequency: 'week' };
                                     this.createError = '';
                                     this.createSubmitting = false;
                                     this.showCreateModal = true;
@@ -863,6 +930,40 @@
 
                                 closeCreateModal() {
                                     this.showCreateModal = false;
+                                },
+
+                                cfUpdateRecurrence() {
+                                    switch(this.cf.recurrence) {
+                                        case 'daily': this.cf.recurrenceCount = 30; break;
+                                        case 'weekly': case 'biweekly': this.cf.recurrenceCount = 12; break;
+                                        case 'monthly': this.cf.recurrenceCount = 12; break;
+                                        case 'yearly': this.cf.recurrenceCount = 5; break;
+                                        case 'weekdays': this.cf.recurrenceCount = 20; break;
+                                    }
+                                },
+
+                                cfPreviewText() {
+                                    if (!this.cf.recurrence) return '';
+                                    const typeLabels = {
+                                        'daily': 'щодня', 'weekly': 'щотижня', 'biweekly': 'що 2 тижні',
+                                        'monthly': 'щомісяця', 'yearly': 'щороку', 'weekdays': 'кожен робочий день',
+                                        'custom': 'кожні ' + this.cf.customInterval + ' ' + ({'day':'днів','week':'тижнів','month':'місяців','year':'років'}[this.cf.customFrequency] || '')
+                                    };
+                                    const label = typeLabels[this.cf.recurrence] || '';
+                                    if (this.cf.endType === 'count') {
+                                        return 'Буде створено ' + this.cf.recurrenceCount + ' подій (' + label + ')';
+                                    } else {
+                                        const d = this.cf.recurrenceEndDate ? new Date(this.cf.recurrenceEndDate).toLocaleDateString('uk-UA', {day:'numeric',month:'long',year:'numeric'}) : '';
+                                        return 'Повторюватиметься ' + label + ' до ' + d;
+                                    }
+                                },
+
+                                cfGetRecurrenceRule() {
+                                    if (!this.cf.recurrence) return '';
+                                    if (this.cf.recurrence === 'custom') {
+                                        return 'custom:' + this.cf.customInterval + ':' + this.cf.customFrequency;
+                                    }
+                                    return this.cf.recurrence;
                                 },
 
                                 async submitCreateEvent() {
@@ -883,10 +984,15 @@
                                         if (this.cf.allDay) body.append('all_day', '1');
                                         if (this.cf.multiDay && this.cf.endDate) body.append('end_date', this.cf.endDate);
                                         if (this.cf.notes) body.append('notes', this.cf.notes);
-                                        if (this.cf.recurrence) {
-                                            body.append('recurrence_rule', this.cf.recurrence);
-                                            body.append('recurrence_end_type', 'count');
-                                            body.append('recurrence_end_count', this.cf.recurrenceCount);
+                                        const rule = this.cfGetRecurrenceRule();
+                                        if (rule) {
+                                            body.append('recurrence_rule', rule);
+                                            body.append('recurrence_end_type', this.cf.endType);
+                                            if (this.cf.endType === 'count') {
+                                                body.append('recurrence_end_count', this.cf.recurrenceCount);
+                                            } else {
+                                                body.append('recurrence_end_date', this.cf.recurrenceEndDate);
+                                            }
                                         }
                                         const response = await fetch('{{ route('events.store') }}', {
                                             method: 'POST',
