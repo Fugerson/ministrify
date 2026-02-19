@@ -169,13 +169,13 @@
                                 </a>
                                 @endif
                                 @can('manage-ministry', $ministry)
-                                <a href="{{ route('events.create', ['ministry' => $ministry->id]) }}"
+                                <button @click="openCreateModal()"
                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
                                     {{ __('app.create') }}
-                                </a>
+                                </button>
                                 @endcan
                             </div>
                         </div>
@@ -631,6 +631,135 @@
                             </div>
                         </div>
 
+                        {{-- Create Event Modal --}}
+                        @can('manage-ministry', $ministry)
+                        <div x-show="showCreateModal" x-cloak
+                             class="fixed inset-0 z-[110] overflow-y-auto"
+                             @keydown.escape.window="showCreateModal && closeCreateModal()">
+                            <div x-show="showCreateModal"
+                                 x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                 x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 bg-black/50" @click="closeCreateModal()"></div>
+                            <div class="fixed inset-0 flex items-center justify-center p-4">
+                                <div x-show="showCreateModal"
+                                     x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col" @click.stop>
+                                    {{-- Header --}}
+                                    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.create_event') }}</h3>
+                                        <button @click="closeCreateModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    {{-- Body --}}
+                                    <div class="p-4 space-y-4 overflow-y-auto">
+                                        <div x-show="createError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg" x-text="createError"></div>
+
+                                        {{-- Title --}}
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.title') }} *</label>
+                                            <input type="text" x-model="cf.title" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="{{ __('forms.title') }}">
+                                        </div>
+
+                                        {{-- Date & Time --}}
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.select_date') }} *</label>
+                                                <input type="date" x-model="cf.date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                            </div>
+                                            <div x-show="!cf.allDay">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.select_time') }}</label>
+                                                <input type="time" x-model="cf.time" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                            </div>
+                                        </div>
+
+                                        {{-- All day & Multi-day --}}
+                                        <div class="flex flex-wrap gap-4">
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" x-model="cf.allDay" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
+                                                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.all_day') }}</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" x-model="cf.multiDay" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
+                                                <span class="text-sm text-gray-600 dark:text-gray-400">Кілька днів</span>
+                                            </label>
+                                        </div>
+
+                                        {{-- End date --}}
+                                        <div x-show="cf.multiDay" x-collapse>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата закінчення *</label>
+                                            <input type="date" x-model="cf.endDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                        </div>
+
+                                        {{-- Recurrence --}}
+                                        <div>
+                                            <button type="button" @click="cf.showRecurrence = !cf.showRecurrence"
+                                                    class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                                <svg class="w-4 h-4 transition-transform" :class="cf.showRecurrence ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                </svg>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                </svg>
+                                                Повторення
+                                                <span x-show="cf.recurrence" x-cloak class="text-xs text-primary-600 dark:text-primary-400 font-medium"
+                                                      x-text="cf.recurrence ? '(' + ({'daily':'щодня','weekly':'щотижня','biweekly':'що 2 тижні','monthly':'щомісяця'}[cf.recurrence] || '') + ')' : ''"></span>
+                                            </button>
+                                            <div x-show="cf.showRecurrence" x-collapse class="mt-3 space-y-3">
+                                                <select x-model="cf.recurrence" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                                    <option value="">Не повторювати</option>
+                                                    <option value="weekly">Щотижня</option>
+                                                    <option value="biweekly">Що 2 тижні</option>
+                                                    <option value="monthly">Щомісяця</option>
+                                                </select>
+                                                <div x-show="cf.recurrence" x-collapse class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-2">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-sm text-gray-600 dark:text-gray-400">Після</span>
+                                                        <input type="number" x-model="cf.recurrenceCount" min="2" max="52" class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                                        <span class="text-sm text-gray-600 dark:text-gray-400">повторень</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Notes --}}
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                                            <textarea x-model="cf.notes" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Додаткова інформація..."></textarea>
+                                        </div>
+
+                                        {{-- Checkboxes --}}
+                                        <div class="flex flex-wrap gap-4 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" x-model="cf.isService" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
+                                                <span class="text-sm text-gray-600 dark:text-gray-400">Подія з планом</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" x-model="cf.trackAttendance" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
+                                                <span class="text-sm text-gray-600 dark:text-gray-400">Відвідуваність</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {{-- Footer --}}
+                                    <div class="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
+                                        <button @click="closeCreateModal()" class="flex-1 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __('app.cancel') }}</button>
+                                        <button @click="submitCreateEvent()" :disabled="createSubmitting || !cf.title.trim() || !cf.date"
+                                                class="flex-1 px-4 py-2 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                            <svg x-show="createSubmitting" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            <span x-text="createSubmitting ? 'Створення...' : '{{ __('app.create') }}'"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endcan
+
                     </div>
 
                     @php
@@ -679,6 +808,12 @@
                                 modalAvailableSongs: [],
                                 modalRoutes: {},
 
+                                // Create event modal
+                                showCreateModal: false,
+                                createSubmitting: false,
+                                createError: '',
+                                cf: { title: '', date: '', time: '10:00', allDay: false, multiDay: false, endDate: '', notes: '', isService: true, trackAttendance: false, recurrence: '', recurrenceCount: 12, showRecurrence: false },
+
                                 // Form state
                                 selectedSongId: '',
                                 selectedKey: '',
@@ -717,6 +852,61 @@
                                     }
 
                                     this.modalLoading = false;
+                                },
+
+                                openCreateModal() {
+                                    this.cf = { title: '', date: '', time: '10:00', allDay: false, multiDay: false, endDate: '', notes: '', isService: true, trackAttendance: false, recurrence: '', recurrenceCount: 12, showRecurrence: false };
+                                    this.createError = '';
+                                    this.createSubmitting = false;
+                                    this.showCreateModal = true;
+                                },
+
+                                closeCreateModal() {
+                                    this.showCreateModal = false;
+                                },
+
+                                async submitCreateEvent() {
+                                    if (!this.cf.title.trim() || !this.cf.date) return;
+                                    this.createSubmitting = true;
+                                    this.createError = '';
+                                    try {
+                                        const body = new URLSearchParams({
+                                            _token: '{{ csrf_token() }}',
+                                            title: this.cf.title.trim(),
+                                            date: this.cf.date,
+                                            ministry_id: this.ministryId,
+                                            is_service: this.cf.isService ? '1' : '0',
+                                            service_type: 'sunday_service',
+                                            track_attendance: this.cf.trackAttendance ? '1' : '0',
+                                        });
+                                        if (!this.cf.allDay && this.cf.time) body.append('time', this.cf.time);
+                                        if (this.cf.allDay) body.append('all_day', '1');
+                                        if (this.cf.multiDay && this.cf.endDate) body.append('end_date', this.cf.endDate);
+                                        if (this.cf.notes) body.append('notes', this.cf.notes);
+                                        if (this.cf.recurrence) {
+                                            body.append('recurrence_rule', this.cf.recurrence);
+                                            body.append('recurrence_end_type', 'count');
+                                            body.append('recurrence_end_count', this.cf.recurrenceCount);
+                                        }
+                                        const response = await fetch('{{ route('events.store') }}', {
+                                            method: 'POST',
+                                            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                            body: body,
+                                        });
+                                        const data = await response.json().catch(() => ({}));
+                                        if (response.ok && data.success) {
+                                            window.location.reload();
+                                        } else if (response.status === 422 && data.errors) {
+                                            this.createError = Object.values(data.errors).flat().join(', ');
+                                            this.createSubmitting = false;
+                                        } else {
+                                            this.createError = data.message || '{{ __('messages.error') }}';
+                                            this.createSubmitting = false;
+                                        }
+                                    } catch (e) {
+                                        this.createError = '{{ __('messages.error') }}';
+                                        this.createSubmitting = false;
+                                    }
                                 },
 
                                 closeModal() {
