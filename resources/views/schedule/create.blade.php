@@ -4,7 +4,7 @@
 
 @php
     $ministriesData = $ministries->map(function($m) {
-        return ['id' => $m->id, 'name' => $m->name, 'color' => $m->color];
+        return ['id' => $m->id, 'name' => $m->name, 'color' => $m->color, 'is_worship' => $m->is_worship_ministry, 'is_sunday_part' => $m->is_sunday_service_part];
     })->values();
 @endphp
 
@@ -148,7 +148,7 @@
 
                 <!-- Ministry/Team Selection -->
                 @if($ministries->count() > 0)
-                <div x-data="ministrySelector()">
+                <div x-data="ministrySelector()" x-effect="if(isServiceMinistry) { document.getElementById('is_service').checked = true; }">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
                     <x-searchable-select
                         name="ministry_id"
@@ -170,6 +170,8 @@
                             <span x-text="selected?.name"></span>
                         </span>
                     </div>
+                    <!-- Auto-set service_type for worship/sunday service ministries -->
+                    <input type="hidden" name="service_type" :value="isServiceMinistry ? 'sunday_service' : ''">
                 </div>
                 @endif
 
@@ -474,6 +476,9 @@ function ministrySelector() {
         ministries: @json($ministriesData),
         get selected() {
             return this.ministries.find(m => m.id == this.selectedId);
+        },
+        get isServiceMinistry() {
+            return this.selected?.is_worship || this.selected?.is_sunday_part || false;
         }
     }
 }
