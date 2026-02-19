@@ -379,6 +379,7 @@ class DashboardController extends Controller
 
             $groupStatsRaw = DB::table('groups')
                 ->where('church_id', $church->id)
+                ->whereNull('deleted_at')
                 ->selectRaw("
                     COUNT(*) as total,
                     SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,

@@ -453,7 +453,7 @@
                                 {{ $person->birth_date->format('d.m.Y') }}
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">
-                                {{ $person->birth_date->age }} років
+                                {{ $person->birth_date->age }} {{ trans_choice('рік|роки|років', $person->birth_date->age) }}
                             </div>
                             @else
                             <span class="text-gray-400">—</span>

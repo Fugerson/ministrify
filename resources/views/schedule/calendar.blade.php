@@ -400,7 +400,7 @@
                                             </div>
                                             <div>
                                                 <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? 'Без команди' }} &bull; {{ $item->time ? $item->time->format('H:i') : '-' }}</p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? 'Без команди' }}@if($item->time) &bull; {{ $item->time->format('H:i') }}@endif</p>
                                             </div>
                                         </div>
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -554,7 +554,7 @@
                                                 </div>
                                                 <div>
                                                     <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? 'Без команди' }} &bull; {{ $item->time ? $item->time->format('H:i') : '-' }}</p>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? 'Без команди' }}@if($item->time) &bull; {{ $item->time->format('H:i') }}@endif</p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-2">
