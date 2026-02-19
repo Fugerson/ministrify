@@ -305,7 +305,7 @@
                                     </div>
                                     <div class="space-y-0.5">
                                         <template x-for="event in day.events.slice(0, 2)" :key="event.id">
-                                            <button @click="openEventModal(event)"
+                                            <button @click="event.isService ? openEventModal(event) : (window.location.href = event.eventUrl)"
                                                class="block w-full text-left px-1 py-0.5 text-xs rounded truncate transition-colors cursor-pointer"
                                                :class="event.isPast ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60'">
                                                 <span x-text="event.time" class="font-medium"></span>
@@ -325,7 +325,7 @@
                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Події цього місяця</h4>
                             <div class="space-y-2">
                                 <template x-for="event in currentMonthEvents" :key="event.id">
-                                    <button @click="openEventModal(event)"
+                                    <button @click="event.isService ? openEventModal(event) : (window.location.href = event.eventUrl)"
                                        class="block w-full text-left p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
                                        :class="{ 'opacity-60': event.isPast }">
                                         <div class="flex items-center justify-between">
@@ -793,17 +793,17 @@
                                             @endif
                                         </div>
 
-                                        {{-- Service Plan Option --}}
+                                        {{-- Sunday Service Option --}}
                                         <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
                                             <div class="flex items-center">
                                                 <input type="checkbox" x-model="cf.isService"
                                                        class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
                                                 <label class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                    {{ __('Це подія з планом') }}
+                                                    {{ __('Недільне служіння') }}
                                                 </label>
                                             </div>
                                             <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                                                {{ __('Увімкніть, щоб створити план події з таймлайном (прославлення, проповідь, оголошення тощо)') }}
+                                                {{ __('Увімкніть для планування служіння з піснями та командою') }}
                                             </p>
                                         </div>
 
@@ -854,6 +854,8 @@
                                 'time' => $e->time?->format('H:i') ?? '',
                                 'fullDate' => $e->date->translatedFormat('l, j M'),
                                 'dataUrl' => route('ministries.worship-events.data', [$ministry, $e]),
+                                'eventUrl' => route('events.show', $e),
+                                'isService' => (bool) $e->is_service,
                                 'songsCount' => $e->songs_count ?? 0,
                                 'teamCount' => $e->team_count ?? 0,
                                 'isPast' => $e->date->isPast(),
