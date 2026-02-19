@@ -776,6 +776,23 @@
                                                       placeholder="{{ __('Додаткова інформація...') }}"></textarea>
                                         </div>
 
+                                        {{-- Ministry/Team (read-only) --}}
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
+                                            <div class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed">
+                                                {{ $ministry->name }}
+                                            </div>
+                                            @if($ministry->color)
+                                            <div class="mt-2">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                                                      style="background-color: {{ $ministry->color }}20; color: {{ $ministry->color }}; border: 1px solid {{ $ministry->color }}40">
+                                                    <span class="w-2 h-2 rounded-full" style="background-color: {{ $ministry->color }}"></span>
+                                                    {{ $ministry->name }}
+                                                </span>
+                                            </div>
+                                            @endif
+                                        </div>
+
                                         {{-- Service Plan Option --}}
                                         <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
                                             <div class="flex items-center">
