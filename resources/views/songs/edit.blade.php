@@ -18,7 +18,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Редагувати пісню</h2>
-                <button type="button" onclick="if(confirm('Видалити цю пісню?')) document.getElementById('delete-song-form').submit()"
+                <button type="button" onclick="if(confirm('{{ __('messages.confirm_delete_song') }}')) document.getElementById('delete-song-form').submit()"
                         class="text-red-600 hover:text-red-700 text-sm">Видалити</button>
             </div>
 

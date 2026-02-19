@@ -663,7 +663,7 @@ window.incomeModal = function() {
             this.modalOpen = true;
         },
         async deleteIncome() {
-            if (!confirm('Видалити це надходження?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_income') }}')) return;
             this.loading = true;
             try {
                 const response = await fetch(`/finances/incomes/${this.editId}`, {
@@ -776,7 +776,7 @@ window.expenseModal = function() {
             this.modalOpen = true;
         },
         async deleteExpense() {
-            if (!confirm('Видалити цю витрату?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_expense') }}')) return;
             this.loading = true;
             try {
                 const response = await fetch(`/finances/expenses/${this.editId}`, {

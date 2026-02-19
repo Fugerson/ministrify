@@ -175,7 +175,7 @@
                                             @endif
                                         </button>
                                     </form>
-                                    <form action="{{ route('donations.campaigns.destroy', $campaign) }}" method="POST" class="inline" onsubmit="return confirm('Видалити кампанію?')">
+                                    <form action="{{ route('donations.campaigns.destroy', $campaign) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete_campaign') }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">

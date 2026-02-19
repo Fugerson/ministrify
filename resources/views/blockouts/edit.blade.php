@@ -309,7 +309,7 @@ function updateReasonSelection() {
 }
 
 function confirmDelete() {
-    if (confirm('Ви впевнені, що хочете видалити цей період недоступності?')) {
+    if (confirm('{{ __('messages.confirm_delete_blockout') }}')) {
         document.getElementById('delete-form').submit();
     }
 }

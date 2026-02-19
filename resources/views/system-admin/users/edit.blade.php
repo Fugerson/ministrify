@@ -117,7 +117,7 @@
         <div class="flex justify-between">
             @if($user->id !== auth()->id())
             <button type="button"
-                    onclick="if(confirm('Ви впевнені, що хочете видалити цього користувача?')) { document.getElementById('delete-user-form').submit(); }"
+                    onclick="if(confirm('{{ __('messages.confirm_delete_person') }}')) { document.getElementById('delete-user-form').submit(); }"
                     class="px-6 py-3 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300 font-medium rounded-xl">
                 Видалити користувача
             </button>

@@ -15,7 +15,7 @@
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Редагувати прохання</h2>
             <form action="{{ route('prayer-requests.destroy', $prayerRequest) }}" method="POST"
-                  onsubmit="return confirm('Видалити це прохання?')">
+                  onsubmit="return confirm('{{ __('messages.confirm_delete_prayer_request') }}')">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="text-red-600 hover:text-red-700 text-sm">Видалити</button>

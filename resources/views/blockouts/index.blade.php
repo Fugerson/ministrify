@@ -100,7 +100,7 @@
                         </svg>
                     </a>
                     <form action="{{ route('blockouts.destroy', $blockout) }}" method="POST" class="inline"
-                          onsubmit="return confirm('Видалити цей період?')">
+                          onsubmit="return confirm('{{ __('messages.confirm_delete_blockout') }}')">
                         @csrf
                         @method('DELETE')
                         <button type="submit"

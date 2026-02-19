@@ -79,7 +79,7 @@
 
         <!-- Delete form outside main form -->
         <div class="mt-4 text-center">
-            <form method="POST" action="{{ route('groups.attendance.destroy', [$group, $attendance]) }}" onsubmit="return confirm('Видалити запис?')">
+            <form method="POST" action="{{ route('groups.attendance.destroy', [$group, $attendance]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_record') }}')">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="text-red-600 hover:text-red-700 text-sm font-medium hover:underline">

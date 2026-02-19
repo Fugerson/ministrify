@@ -121,7 +121,7 @@
                             </form>
                             <hr class="border-gray-200 dark:border-gray-700">
                             <form action="{{ route('finances.monobank.disconnect') }}" method="POST"
-                                  onsubmit="return confirm('Ви впевнені? Токен буде видалено.')">
+                                  onsubmit="return confirm('{{ __('messages.confirm_disconnect_monobank') }}')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">

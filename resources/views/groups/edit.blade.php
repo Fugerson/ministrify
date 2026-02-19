@@ -51,7 +51,7 @@
             <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 @can('delete', $group)
                 <button type="button"
-                        onclick="if(confirm('Видалити групу? Усі дані про членство будуть втрачені.')) { document.getElementById('delete-group-form').submit(); }"
+                        onclick="if(confirm('{{ __('messages.confirm_delete_group') }}')) { document.getElementById('delete-group-form').submit(); }"
                         class="text-red-600 hover:text-red-700 text-sm font-medium">
                     Видалити групу
                 </button>

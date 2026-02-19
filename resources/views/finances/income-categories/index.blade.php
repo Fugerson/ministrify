@@ -65,7 +65,7 @@
                                 </button>
                                 @if($category->incomes_count == 0)
                                     <form action="{{ route('settings.income-categories.destroy', $category) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Видалити категорію?')">
+                                          onsubmit="return confirm('{{ __('messages.confirm_delete_category') }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-400 hover:text-red-600">

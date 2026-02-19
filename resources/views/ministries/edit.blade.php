@@ -68,7 +68,7 @@
 
         <div class="flex items-center justify-between">
             <button type="button"
-                    onclick="if(confirm('Видалити команду? Ця дія незворотна.')) { document.getElementById('delete-ministry-form').submit(); }"
+                    onclick="if(confirm('{{ __('messages.confirm_delete_ministry') }}')) { document.getElementById('delete-ministry-form').submit(); }"
                     class="text-red-600 hover:text-red-800 text-sm font-medium">
                 Видалити команду
             </button>

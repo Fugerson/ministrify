@@ -404,7 +404,7 @@ function churchRolesManager() {
         },
 
         async deleteRole(id, name) {
-            if (!confirm(`Видалити роль "${name}"?`)) return;
+            if (!confirm('{{ __('messages.confirm_delete_role') }}')) return;
 
             try {
                 const response = await fetch(`/settings/church-roles/${id}`, {
@@ -466,7 +466,7 @@ function churchRolesManager() {
         },
 
         async resetToDefaults() {
-            if (!confirm('Скинути всі ролі до стандартних? Це можливо лише якщо жодна роль не використовується.')) return;
+            if (!confirm('{{ __('messages.confirm_reset_all_roles') }}')) return;
 
             try {
                 const response = await fetch('{{ route("settings.church-roles.reset") }}', {

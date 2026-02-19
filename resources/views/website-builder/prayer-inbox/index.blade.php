@@ -66,7 +66,7 @@
                                         <option value="closed" {{ $request->status === 'closed' ? 'selected' : '' }}>Закрито</option>
                                     </select>
                                 </form>
-                                <form action="{{ route('website-builder.prayer-inbox.destroy', $request) }}" method="POST" class="inline" onsubmit="return confirm('Видалити цей запит?')">
+                                <form action="{{ route('website-builder.prayer-inbox.destroy', $request) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete_prayer_request') }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">

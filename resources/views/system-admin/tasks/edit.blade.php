@@ -137,7 +137,7 @@
                     </a>
                 </div>
 
-                <form action="{{ route('system.tasks.destroy', $task) }}" method="POST" class="inline" onsubmit="return confirm('Видалити задачу?')">
+                <form action="{{ route('system.tasks.destroy', $task) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete_task') }}')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="px-4 py-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors">

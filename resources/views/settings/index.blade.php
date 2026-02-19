@@ -834,7 +834,7 @@
                             Підключено {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
                         </span>
                         <form action="{{ route('settings.google-calendar.disconnect') }}" method="POST" class="inline"
-                              onsubmit="return confirm('Відключити Google Calendar?')">
+                              onsubmit="return confirm('{{ __('messages.confirm_disconnect_google') }}')">
                             @csrf
                             <button type="submit" class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
                                 Відключити
@@ -1027,7 +1027,7 @@
                                 </p>
                                 <div class="space-y-2">
                                     <!-- Unlink from Google -->
-                                    <button @click="if (confirm('Відв\'язати всі події від Google Calendar? Події залишаться в обох системах, але більше не будуть синхронізуватися.')) { unlinkEvents() }"
+                                    <button @click="if (confirm('{{ __('messages.confirm_unlink_google_events') }}')) { unlinkEvents() }"
                                             :disabled="rollbackLoading"
                                             class="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50">
                                         <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1039,7 +1039,7 @@
                                         </div>
                                     </button>
                                     <!-- Delete imported -->
-                                    <button @click="if (confirm('Видалити всі імпортовані з Google події? Ця дія незворотна!')) { deleteImported() }"
+                                    <button @click="if (confirm('{{ __('messages.confirm_delete_google_events') }}')) { deleteImported() }"
                                             :disabled="rollbackLoading"
                                             class="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50">
                                         <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1281,7 +1281,7 @@
                             <span class="text-gray-900 dark:text-white">{{ $ministry->name }}</span>
                         </a>
                         <form method="POST" action="{{ route('settings.ministries.destroy', $ministry) }}"
-                              onsubmit="return confirm('Видалити команду?')">
+                              onsubmit="return confirm('{{ __('messages.confirm_delete_category') }}')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
@@ -1381,7 +1381,7 @@
                                 </button>
                                 @if($category->transactions_count == 0)
                                     <form action="{{ route('settings.transaction-categories.destroy', $category) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Видалити категорію?')">
+                                          onsubmit="return confirm('{{ __('messages.confirm_delete_category') }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-400 hover:text-red-600">
@@ -1435,7 +1435,7 @@
                                 </button>
                                 @if($category->transactions_count == 0)
                                     <form action="{{ route('settings.transaction-categories.destroy', $category) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Видалити категорію?')">
+                                          onsubmit="return confirm('{{ __('messages.confirm_delete_category') }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-400 hover:text-red-600">
@@ -1583,7 +1583,7 @@
                             <span class="text-gray-900 dark:text-white">{{ $tag->name }}</span>
                         </div>
                         <form method="POST" action="{{ route('tags.destroy', $tag) }}"
-                              onsubmit="return confirm('Видалити тег?')">
+                              onsubmit="return confirm('{{ __('messages.confirm_delete_tag') }}')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
@@ -2140,7 +2140,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </a>
-                                <form action="{{ route('settings.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Ви впевнені?')">
+                                <form action="{{ route('settings.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-2 inline-flex text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
@@ -2697,7 +2697,7 @@ function permissionsManager() {
 
         async resetToDefaults() {
             const roleName = this.roles[this.currentRoleId]?.name || 'цієї ролі';
-            if (!confirm(`Скинути права для "${roleName}" до стандартних?`)) {
+            if (!confirm('{{ __('messages.confirm_reset_role_permissions') }}'.replace(':role', roleName))) {
                 return;
             }
 

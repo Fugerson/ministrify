@@ -114,7 +114,7 @@ if(auth()->user()->canCreate('announcements')) {
                     </a>
                     <span class="text-gray-300 dark:text-gray-600">|</span>
                     <form action="{{ route('announcements.destroy', $announcement) }}" method="POST" class="inline"
-                          onsubmit="return confirm('Видалити це оголошення?')">
+                          onsubmit="return confirm('{{ __('messages.confirm_delete_announcement') }}')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400">

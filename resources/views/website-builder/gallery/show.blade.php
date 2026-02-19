@@ -109,7 +109,7 @@
                     </div>
                     <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         <form action="{{ route('website-builder.gallery.photos.delete', $photo) }}" method="POST"
-                              onsubmit="return confirm('Видалити це фото?')">
+                              onsubmit="return confirm('{{ __('messages.confirm_delete_photo') }}')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-lg transition-colors">

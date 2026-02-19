@@ -1099,7 +1099,7 @@ function churchBoard() {
         },
 
         async deleteComment(comment) {
-            if (!confirm('Видалити коментар?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_comment') }}')) return;
 
             const cardId = this.cardPanel.data.card.id;
             try {
@@ -1356,7 +1356,7 @@ function churchBoard() {
         },
 
         async deleteAttachment(file) {
-            if (!confirm('Видалити файл?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_file') }}')) return;
 
             try {
                 await fetch(`/boards/attachments/${file.id}`, {
@@ -1516,7 +1516,7 @@ function churchBoard() {
         },
 
         async deleteCard(cardId) {
-            if (!confirm('Видалити завдання?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_task') }}')) return;
 
             try {
                 const response = await fetch(`/boards/cards/${cardId}`, {
@@ -1687,7 +1687,7 @@ function churchBoard() {
         },
 
         async deleteEpic(epic) {
-            if (!confirm(`Видалити проєкт "${epic.name}"? Завдання залишаться.`)) return;
+            if (!confirm('{{ __('messages.confirm_delete_project') }}'.replace(':name', epic.name))) return;
 
             try {
                 const response = await fetch(`/boards/epics/${epic.id}`, {

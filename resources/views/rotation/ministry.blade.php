@@ -314,7 +314,7 @@ async function autoAssignEvent(eventId) {
 }
 
 async function autoAssignAll() {
-    if (!confirm('Запустити авто-розподіл для всіх подій на 4 тижні?')) return;
+    if (!confirm('{{ __('messages.confirm_auto_assign') }}')) return;
 
     try {
         const response = await fetch(`/rotation/ministry/{{ $ministry->id }}/auto-assign`, {

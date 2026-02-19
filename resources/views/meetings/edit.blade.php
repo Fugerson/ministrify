@@ -89,7 +89,7 @@
 
             <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button type="button"
-                        onclick="if(confirm('Видалити зустріч?')) { document.getElementById('delete-meeting-form').submit(); }"
+                        onclick="if(confirm('{{ __('messages.confirm_delete_meeting') }}')) { document.getElementById('delete-meeting-form').submit(); }"
                         class="text-red-600 hover:text-red-700 text-sm font-medium">
                     Видалити зустріч
                 </button>

@@ -21,7 +21,7 @@
     </a>
     @endcan
     @can('delete', $group)
-    <form method="POST" action="{{ route('groups.destroy', $group) }}" onsubmit="return confirm('Видалити групу? Усі дані про членство будуть втрачені.')">
+    <form method="POST" action="{{ route('groups.destroy', $group) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_group') }}')">
         @csrf
         @method('DELETE')
         <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
@@ -221,7 +221,7 @@
                                 @endif
                                 @if($member->pivot->role !== 'leader')
                                 <hr class="my-1 border-gray-200 dark:border-gray-700">
-                                <form method="POST" action="{{ route('groups.members.remove', [$group, $member]) }}" onsubmit="return confirm('Видалити учасника з групи?')">
+                                <form method="POST" action="{{ route('groups.members.remove', [$group, $member]) }}" onsubmit="return confirm('{{ __('messages.confirm_remove_member') }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">

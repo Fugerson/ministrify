@@ -194,7 +194,7 @@
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $item->description }}</p>
                                 @endif
                             </div>
-                            <form method="POST" action="{{ route('meetings.agenda.destroy', $item) }}" onsubmit="return confirm('Видалити пункт?')" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <form method="POST" action="{{ route('meetings.agenda.destroy', $item) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_plan_item') }}')" class="opacity-0 group-hover:opacity-100 transition-opacity">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="p-1 text-gray-400 hover:text-red-500">
@@ -307,7 +307,7 @@
                         <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ $material->content }}</p>
                         @endif
                     </div>
-                    <form method="POST" action="{{ route('meetings.materials.destroy', $material) }}" onsubmit="return confirm('Видалити матеріал?')" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <form method="POST" action="{{ route('meetings.materials.destroy', $material) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_material') }}')" class="opacity-0 group-hover:opacity-100 transition-opacity">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="p-1 text-gray-400 hover:text-red-500">
@@ -422,7 +422,7 @@
                                 <option value="absent" {{ $attendee->status === 'absent' ? 'selected' : '' }}>Був відсутній</option>
                             </select>
                         </form>
-                        <form method="POST" action="{{ route('meetings.attendees.destroy', $attendee) }}" onsubmit="return confirm('Видалити учасника?')">
+                        <form method="POST" action="{{ route('meetings.attendees.destroy', $attendee) }}" onsubmit="return confirm('{{ __('messages.confirm_remove_member') }}')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-1 text-gray-400 hover:text-red-500">

@@ -411,7 +411,7 @@ function resourcesManager() {
 
         deleteItem() {
             this.menuOpen = false;
-            if (!confirm('Видалити цей елемент?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_item') }}')) return;
 
             const form = document.getElementById('deleteForm');
             form.action = `/resources/${this.selectedId}`;

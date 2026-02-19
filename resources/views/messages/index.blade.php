@@ -97,7 +97,7 @@ $commTabs = [
                             <p class="font-medium text-gray-900 dark:text-white">{{ $template->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{{ Str::limit($template->content, 100) }}</p>
                         </div>
-                        <form method="POST" action="{{ route('messages.templates.destroy', $template) }}" onsubmit="return confirm('Видалити?')">
+                        <form method="POST" action="{{ route('messages.templates.destroy', $template) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_short') }}')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="ml-2 p-1 text-gray-400 hover:text-red-500">

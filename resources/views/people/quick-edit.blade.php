@@ -890,7 +890,7 @@ function quickEdit() {
         async deletePhoto(row) {
             if (!row.id || !row.photo_url) return;
 
-            if (!confirm('Видалити фото?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_photo') }}')) return;
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 

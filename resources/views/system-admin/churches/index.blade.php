@@ -76,7 +76,7 @@
                     </button>
                 </form>
                 <form method="POST" action="{{ route('system.churches.destroy', $church) }}"
-                      onsubmit="return confirm('УВАГА! Ви впевнені, що хочете НАЗАВЖДИ видалити церкву \'' + @js($church->name) + '\' та ВСІ пов\'язані дані ({{ $church->users_count }} користувачів, {{ $church->people_count }} людей, {{ $church->events_count }} подій)? Цю дію НЕМОЖЛИВО скасувати!');">
+                      onsubmit="return confirm('{{ __('messages.confirm_delete_church_warning', ['name' => $church->name]) }}');">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="py-2 px-3 bg-red-100 dark:bg-red-600/20 hover:bg-red-200 dark:hover:bg-red-600/30 text-red-600 dark:text-red-400 text-sm rounded-lg">
@@ -158,7 +158,7 @@
                                     </button>
                                 </form>
                                 <form method="POST" action="{{ route('system.churches.destroy', $church) }}" class="inline"
-                                      onsubmit="return confirm('УВАГА! Ви впевнені, що хочете НАЗАВЖДИ видалити церкву \'' + @js($church->name) + '\' та ВСІ пов\'язані дані ({{ $church->users_count }} користувачів, {{ $church->people_count }} людей, {{ $church->events_count }} подій)? Цю дію НЕМОЖЛИВО скасувати!');">
+                                      onsubmit="return confirm('{{ __('messages.confirm_delete_church_warning', ['name' => $church->name]) }}');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Видалити назавжди">

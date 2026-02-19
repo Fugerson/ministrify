@@ -1367,7 +1367,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                             <span class="text-lg">🎵</span>
                             <a href="/songs/${songId}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>${escapeHtml(title)}</a>
                             ${keyBadge}
-                            <button type="button" @click.stop="if(confirm('Видалити пісню з цього пункту?')) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title="Видалити пісню">
+                            <button type="button" @click.stop="if(confirm('{{ __('messages.confirm_remove_song') }}')) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title="Видалити пісню">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
@@ -1596,7 +1596,7 @@ function planTemplatesManager() {
         },
 
         async applyCustomTemplate(templateId) {
-            if (!confirm('Застосувати шаблон? Поточний план буде замінено.')) return;
+            if (!confirm('{{ __('messages.confirm_apply_template') }}')) return;
 
             try {
                 const response = await fetch(`/service-plan-templates/apply/{{ $event->id }}/${templateId}`, {
@@ -1621,7 +1621,7 @@ function planTemplatesManager() {
         },
 
         async deleteTemplate(templateId) {
-            if (!confirm('Видалити цей шаблон?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_template') }}')) return;
 
             try {
                 const response = await fetch(`/service-plan-templates/${templateId}`, {
@@ -1925,7 +1925,7 @@ function planEditor() {
         },
 
         async deleteItem(id) {
-            if (!confirm('Видалити цей пункт?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_plan_item') }}')) return;
 
             try {
                 const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {
@@ -2138,7 +2138,7 @@ window.insertPlanRow = function(item) {
 
 // Global delete function for dynamically added rows
 window.planEditorDeleteItem = async function(id) {
-    if (!confirm('Видалити цей пункт?')) return;
+    if (!confirm('{{ __('messages.confirm_delete_plan_item') }}')) return;
 
     try {
         const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {

@@ -190,7 +190,7 @@
                     </form>
                 </div>
 
-                <form action="{{ route('finances.privatbank.disconnect') }}" method="POST" onsubmit="return confirm('Відключити ПриватБанк?')">
+                <form action="{{ route('finances.privatbank.disconnect') }}" method="POST" onsubmit="return confirm('{{ __('messages.confirm_disconnect_privatbank') }}')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">

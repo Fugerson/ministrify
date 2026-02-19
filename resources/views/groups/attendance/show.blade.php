@@ -11,7 +11,7 @@
         </svg>
         Редагувати
     </a>
-    <form method="POST" action="{{ route('groups.attendance.destroy', [$group, $attendance]) }}" onsubmit="return confirm('Видалити запис?')">
+    <form method="POST" action="{{ route('groups.attendance.destroy', [$group, $attendance]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_record') }}')">
         @csrf
         @method('DELETE')
         <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">

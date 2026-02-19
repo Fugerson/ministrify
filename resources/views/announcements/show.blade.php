@@ -79,7 +79,7 @@
                 </button>
             </form>
             <form action="{{ route('announcements.destroy', $announcement) }}" method="POST" class="inline ml-auto"
-                  onsubmit="return confirm('Видалити це оголошення?')">
+                  onsubmit="return confirm('{{ __('messages.confirm_delete_announcement') }}')">
                 @csrf
                 @method('DELETE')
                 <button type="submit"

@@ -1102,7 +1102,7 @@
 
         @if(auth()->user()->canDelete('people'))
         <form method="POST" action="{{ route('people.destroy', $person) }}"
-              onsubmit="return confirm('Ви впевнені, що хочете видалити цю людину?')">
+              onsubmit="return confirm('{{ __('messages.confirm_delete_person') }}')">
             @csrf
             @method('DELETE')
             <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium">
@@ -1198,7 +1198,7 @@ function userRoleManager() {
         },
 
         async resetPassword() {
-            if (!confirm('Згенерувати новий пароль для цього користувача?')) return;
+            if (!confirm('{{ __('messages.confirm_generate_password') }}')) return;
 
             this.resettingPassword = true;
 
@@ -1263,7 +1263,7 @@ function userRoleManager() {
             if (hadNoRole && newRoleId) {
                 const roleSelect = document.querySelector('select[x-model="churchRoleId"]');
                 const roleName = roleSelect.options[roleSelect.selectedIndex].text;
-                if (!confirm(`Надати доступ з роллю "${roleName}"? Користувач отримає email-сповіщення.`)) {
+                if (!confirm('{{ __('messages.confirm_grant_access') }}'.replace(':role', roleName))) {
                     this.churchRoleId = '';
                     return;
                 }
@@ -1551,7 +1551,7 @@ function familyManager() {
         },
 
         async deleteRelationship(relationshipId) {
-            if (!confirm('Видалити цей сімейний зв\'язок?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_family_link') }}')) return;
 
             try {
                 const response = await fetch(`/family/${relationshipId}`, {

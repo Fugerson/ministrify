@@ -1530,7 +1530,7 @@
                                     {{-- Remove button --}}
                                     @can('manage-ministry', $ministry)
                                     <form method="POST" action="{{ route('ministries.members.remove', [$ministry, $member]) }}"
-                                          onsubmit="return confirm('Видалити учасника з команди?')" class="shrink-0">
+                                          onsubmit="return confirm('{{ __('messages.confirm_remove_team_member') }}')" class="shrink-0">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
@@ -1716,7 +1716,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
                                             </a>
-                                            <form method="POST" :action="'/finances/expenses/' + t.id" onsubmit="return confirm('Видалити витрату?')">
+                                            <form method="POST" :action="'/finances/expenses/' + t.id" onsubmit="return confirm('{{ __('messages.confirm_delete_expense') }}')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <input type="hidden" name="redirect_to" value="ministry">
@@ -2261,7 +2261,7 @@
                                             <button @click="editGoal({{ $goal->id }}, {{ json_encode(['title' => $goal->title, 'description' => $goal->description, 'period' => $goal->period, 'due_date' => $goal->due_date?->format('Y-m-d'), 'priority' => $goal->priority, 'status' => $goal->status]) }})" class="p-1.5 text-gray-400 hover:text-gray-600">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                             </button>
-                                            <form method="POST" action="{{ route('ministries.goals.destroy', [$ministry, $goal]) }}" onsubmit="return confirm('Видалити?')">
+                                            <form method="POST" action="{{ route('ministries.goals.destroy', [$ministry, $goal]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_short') }}')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                             </form>
@@ -2295,7 +2295,7 @@
                                                 @can('manage-ministry', $ministry)
                                                 <div class="flex items-center gap-1">
                                                     <button @click="editTask({{ $task->id }}, {{ json_encode(['title' => $task->title, 'description' => $task->description, 'goal_id' => $task->goal_id, 'assigned_to' => $task->assigned_to, 'due_date' => $task->due_date?->format('Y-m-d'), 'priority' => $task->priority, 'status' => $task->status]) }})" class="p-1 text-gray-400 hover:text-gray-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
-                                                    <form method="POST" action="{{ route('ministries.tasks.destroy', [$ministry, $task]) }}" onsubmit="return confirm('Видалити?')">@csrf @method('DELETE')<button type="submit" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></form>
+                                                    <form method="POST" action="{{ route('ministries.tasks.destroy', [$ministry, $task]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_short') }}')">@csrf @method('DELETE')<button type="submit" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></form>
                                                 </div>
                                                 @endcan
                                             </div>
@@ -3295,7 +3295,7 @@
                             Видалення команди є незворотнім. Всі дані команди (цілі, задачі, ресурси) будуть втрачені.
                         </p>
                         <button type="button"
-                                onclick="if(confirm('Видалити команду «' + @js($ministry->name) + '»? Ця дія незворотна і видалить всі дані команди.')) { document.getElementById('delete-ministry-form').submit(); }"
+                                onclick="if(confirm('{{ __('messages.confirm_delete_ministry_named', ['name' => $ministry->name]) }}')) { document.getElementById('delete-ministry-form').submit(); }"
                                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                             Видалити команду
                         </button>
@@ -3459,7 +3459,7 @@ function resourcesManager() {
 
         deleteItem() {
             this.menuOpen = false;
-            if (!confirm('Видалити цей елемент?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_item') }}')) return;
             const form = document.getElementById('resDeleteForm');
             form.action = `/resources/${this.selectedId}`;
             form.submit();
@@ -3831,7 +3831,7 @@ function songsLibrary() {
         },
 
         async deleteSong(song) {
-            if (!confirm(`Видалити пісню "${song.title}"?`)) return;
+            if (!confirm('{{ __('messages.confirm_delete_song') }}')) return;
 
             try {
                 const response = await fetch(`/songs/${song.id}`, {
@@ -3982,7 +3982,7 @@ function ministryRolesManager() {
         },
 
         async deleteRole(id) {
-            if (!confirm('Видалити цю роль?')) return;
+            if (!confirm('{{ __('messages.confirm_delete_role') }}')) return;
             this.loading = true;
 
             try {

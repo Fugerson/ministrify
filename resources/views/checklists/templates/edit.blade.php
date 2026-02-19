@@ -83,7 +83,7 @@
         <!-- Actions -->
         <div class="flex items-center justify-between">
             <button type="button"
-                    onclick="if(confirm('Видалити цей шаблон?')) { document.getElementById('delete-template-form').submit(); }"
+                    onclick="if(confirm('{{ __('messages.confirm_delete_template') }}')) { document.getElementById('delete-template-form').submit(); }"
                     class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
                 Видалити шаблон
             </button>
