@@ -304,16 +304,13 @@
                                               x-text="day.date"></span>
                                     </div>
                                     <div class="space-y-0.5">
-                                        <template x-for="event in day.events.slice(0, 2)" :key="event.id">
+                                        <template x-for="event in day.events" :key="event.id">
                                             <button @click="event.isSundayService ? openEventModal(event) : (window.location.href = event.eventUrl)"
                                                class="block w-full text-left px-1 py-0.5 text-xs rounded truncate transition-colors cursor-pointer"
                                                :class="event.isPast ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60'">
                                                 <span x-text="event.time" class="font-medium"></span>
                                                 <span x-text="event.title" class="hidden sm:inline"></span>
                                             </button>
-                                        </template>
-                                        <template x-if="day.events.length > 2">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 px-1" x-text="'+' + (day.events.length - 2) + ' ще'"></div>
                                         </template>
                                     </div>
                                 </div>
