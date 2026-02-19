@@ -188,7 +188,10 @@ class MinistryController extends Controller
         $ministryRoles = collect();
         if ($ministry->is_worship_ministry || $ministry->is_sunday_service_part) {
             $scheduleEventsQuery = Event::where('church_id', $church->id)
-                ->where('service_type', 'sunday_service')
+                ->where(function ($q) use ($ministry) {
+                    $q->where('service_type', 'sunday_service')
+                      ->orWhere('ministry_id', $ministry->id);
+                })
                 ->orderBy('date')
                 ->orderBy('time');
 
