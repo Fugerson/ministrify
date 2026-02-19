@@ -812,6 +812,8 @@
                                             title: this.createTitle.trim(),
                                             date: this.createDate,
                                             ministry_id: this.createMinistryId,
+                                            is_service: '1',
+                                            service_type: 'sunday_service',
                                         });
                                         if (this.createTime) body.append('time', this.createTime);
                                         const response = await fetch(this.createStoreUrl, {
@@ -821,7 +823,7 @@
                                         });
                                         const data = await response.json().catch(() => ({}));
                                         if (response.ok && data.success) {
-                                            window.location.href = data.redirect_url;
+                                            window.location.reload();
                                         } else {
                                             this.createError = data.message || '{{ __('messages.error') }}';
                                             this.createSubmitting = false;
