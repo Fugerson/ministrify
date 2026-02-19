@@ -1268,7 +1268,7 @@ class FinanceController extends Controller
         $month = $request->get('month', now()->month);
 
         $ministries = Ministry::where('church_id', $church->id)
-            ->with(['budgets' => function ($q) use ($year, $month) {
+            ->with(['leader', 'budgets' => function ($q) use ($year, $month) {
                 $q->where('year', $year)->where('month', $month);
             }])
             ->orderBy('name')

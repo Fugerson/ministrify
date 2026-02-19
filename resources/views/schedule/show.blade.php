@@ -77,7 +77,7 @@
             </div>
             <div class="text-right shrink-0">
                 @if($canEdit)
-                <div class="flex items-center gap-2 justify-end mb-2" x-data="{ allDay: {{ !$event->time ? 'true' : 'false' }} }">
+                <div class="flex items-center gap-2 justify-end mb-2">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" x-model="allDay" @change="
                             if (allDay) {
@@ -689,7 +689,7 @@
                     <div class="space-y-2 max-h-96 overflow-y-auto">
                         @foreach($allPeople as $person)
                         <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                             x-show="!search || '{{ mb_strtolower($person->full_name) }}'.includes(search.toLowerCase())">
+                             x-show="!search || @js(mb_strtolower($person->full_name)).includes(search.toLowerCase())">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                                     <span class="text-primary-600 dark:text-primary-400 text-xs font-medium">
@@ -1468,6 +1468,7 @@ function eventEditor() {
         date: @json($event->date?->format('Y-m-d')),
         time: @json($event->time?->format('H:i')),
         notes: @json($event->notes ?? ''),
+        allDay: {{ !$event->time ? 'true' : 'false' }},
         ministryId: @json($event->ministry_id),
         ministryColor: @json($event->ministry?->color ?? '#3b82f6'),
         isService: {{ $event->is_service ? 'true' : 'false' }},

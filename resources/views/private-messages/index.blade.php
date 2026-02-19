@@ -339,7 +339,7 @@ if(auth()->user()->canCreate('announcements')) {
                                 @foreach($availableUsers as $user)
                                     <button type="button"
                                             @click="composeMode = 'user'; composeRecipient = { id: {{ $user->id }}, name: @js($user->name), role: @js($user->role) }; showUserDropdown = false; userSearch = ''"
-                                            x-show="userSearch === '' || '{{ mb_strtolower($user->name) }}'.indexOf(userSearch.toLowerCase()) !== -1"
+                                            x-show="userSearch === '' || @js(mb_strtolower($user->name)).indexOf(userSearch.toLowerCase()) !== -1"
                                             class="w-full flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
                                             <span class="text-lg font-semibold text-white">{{ mb_substr($user->name, 0, 1) }}</span>

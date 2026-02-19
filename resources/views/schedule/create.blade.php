@@ -148,14 +148,7 @@
 
                 <!-- Ministry/Team Selection -->
                 @if($ministries->count() > 0)
-                <div x-data="{
-                    selectedId: '{{ $selectedMinistry ?? old('ministry_id', '') }}',
-                    ministries: @json($ministriesData),
-                    get selected() {
-                        const self = this;
-                        return this.ministries.find(function(m) { return m.id == self.selectedId; });
-                    }
-                }">
+                <div x-data="ministrySelector()">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
                     <x-searchable-select
                         name="ministry_id"
@@ -471,6 +464,16 @@ function reminderSettings(initial = []) {
             } else {
                 this.reminders[index].time = '18:00';
             }
+        }
+    }
+}
+
+function ministrySelector() {
+    return {
+        selectedId: '{{ $selectedMinistry ?? old('ministry_id', '') }}',
+        ministries: @json($ministriesData),
+        get selected() {
+            return this.ministries.find(m => m.id == this.selectedId);
         }
     }
 }

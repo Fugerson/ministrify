@@ -2,7 +2,7 @@
 
 @section('title', 'Мій розклад')
 
-@push('head')
+@push('scripts')
 <script src="/js/pwa-db.js"></script>
 @endpush
 

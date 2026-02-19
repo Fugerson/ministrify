@@ -54,6 +54,12 @@ const PWA_DB = {
         const tx = this.db.transaction('my-schedule', 'readwrite');
         const store = tx.objectStore('my-schedule');
 
+        // Set up transaction completion promise IMMEDIATELY to avoid missing auto-commit
+        const txComplete = new Promise((resolve, reject) => {
+            tx.oncomplete = resolve;
+            tx.onerror = reject;
+        });
+
         // Clear existing data
         await new Promise((resolve, reject) => {
             const clearRequest = store.clear();
@@ -66,16 +72,14 @@ const PWA_DB = {
             store.put(item);
         }
 
-        // Save sync timestamp
+        // Wait for transaction to complete
+        await txComplete;
+
+        // Save sync timestamp in a separate transaction (after the main one completes)
         await this.setSyncMeta('my-schedule', {
             key: 'my-schedule',
             synced_at: new Date().toISOString(),
             count: responsibilities.length
-        });
-
-        return new Promise((resolve, reject) => {
-            tx.oncomplete = resolve;
-            tx.onerror = reject;
         });
     },
 
