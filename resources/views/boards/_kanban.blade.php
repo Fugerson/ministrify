@@ -753,7 +753,7 @@ function churchBoard() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     if (data.success && data.card) {
                         // Find epic info
                         const epic = this.epics.find(e => e.id == data.card.epic_id);
@@ -888,7 +888,7 @@ function churchBoard() {
                 const response = await fetch(`/boards/cards/${cardId}`, {
                     headers: { 'Accept': 'application/json' }
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 // Fix due_date: ISO timestamp → YYYY-MM-DD for <input type="date">
                 if (data.card.due_date) {
@@ -1063,7 +1063,7 @@ function churchBoard() {
             });
 
             if (!response.ok) return;
-            const result = await response.json();
+            const result = await response.json().catch(() => ({}));
 
             const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
             if (cardEl) {
@@ -1163,7 +1163,7 @@ function churchBoard() {
                     });
                 }
 
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
                 if (result.success) {
                     comment.content = content;
                     comment.is_edited = true;
@@ -1191,7 +1191,7 @@ function churchBoard() {
                     return;
                 }
 
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
                 if (result.success) {
                     comment.attachments = result.attachments;
                 }
@@ -1216,7 +1216,7 @@ function churchBoard() {
                 });
 
                 if (!response.ok) return;
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
                 if (result.success) {
                     this.cardPanel.data.checklist.push(result.item);
                     this.updateCardChecklistCount(cardId);
@@ -1307,7 +1307,7 @@ function churchBoard() {
                     if (window.showGlobalToast) showGlobalToast('Помилка завантаження файлу', 'error');
                     return;
                 }
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
                 if (result.success) {
                     this.cardPanel.data.attachments.push(result.attachment);
                     if (window.showGlobalToast) showGlobalToast('Файл завантажено', 'success');
@@ -1340,7 +1340,7 @@ function churchBoard() {
                         body: formData
                     });
                     if (response.ok) {
-                        const result = await response.json();
+                        const result = await response.json().catch(() => ({}));
                         if (result.success) {
                             this.cardPanel.data.attachments.push(result.attachment);
                             uploaded++;
@@ -1383,7 +1383,7 @@ function churchBoard() {
                 });
 
                 if (!response.ok) return;
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
                 if (result.success) {
                     this.cardPanel.data.related_cards.push(result.related_card);
                     this.cardPanel.data.available_cards = this.cardPanel.data.available_cards.filter(c => c.id != relatedCardId);
@@ -1417,7 +1417,7 @@ function churchBoard() {
                     }
                 });
 
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
                 if (result.success && result.card) {
                     // Find epic and assignee info
                     const epic = this.epics.find(e => e.id == result.card.epic_id);
@@ -1504,7 +1504,7 @@ function churchBoard() {
                     return;
                 }
 
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
                 if (result.success) {
                     this.cardPanel.data.comments.unshift(result.comment);
                     this.updateCardCommentCount(cardId, this.cardPanel.data.comments.length);
@@ -1583,7 +1583,7 @@ function churchBoard() {
                     return;
                 }
 
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
 
                 if (result.success && result.epic) {
                     const newEpic = {
@@ -1640,7 +1640,7 @@ function churchBoard() {
                     return;
                 }
 
-                const result = await response.json();
+                const result = await response.json().catch(() => ({}));
 
                 if (result.success && result.epic) {
                     // Update in epics array

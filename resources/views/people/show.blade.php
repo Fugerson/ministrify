@@ -1212,7 +1212,7 @@ function userRoleManager() {
                     }
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (response.ok) {
                     this.generatedPassword = data.password;
@@ -1241,7 +1241,7 @@ function userRoleManager() {
                     body: JSON.stringify({ email: this.userEmail })
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (response.ok) {
                     this.editingEmail = false;
@@ -1312,7 +1312,7 @@ function userRoleManager() {
                     })
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (response.ok) {
                     this.showCreateModal = false;
@@ -1380,7 +1380,7 @@ function shepherdSearch() {
                     },
                     body: JSON.stringify({ shepherd_id: shepherd.id })
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this.selectedId = shepherd.id;
                     this.selectedName = shepherd.full_name;
@@ -1407,7 +1407,7 @@ function shepherdSearch() {
                     },
                     body: JSON.stringify({ shepherd_id: null })
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this.selectedId = null;
                     this.selectedName = '';
@@ -1493,7 +1493,7 @@ function familyManager() {
                     console.error('Search failed:', response.status);
                     return;
                 }
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 this.searchResults = data;
             } catch (error) {
                 console.error('Search error:', error);
@@ -1530,7 +1530,7 @@ function familyManager() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     if (data.success && data.member) {
                         this.familyMembers.push(data.member);
                         this.showAddModal = false;
@@ -1540,7 +1540,7 @@ function familyManager() {
                         if (window.showGlobalToast) showGlobalToast('Члена сім\'ї додано', 'success');
                     }
                 } else {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     this.error = data.error || data.message || 'Помилка при збереженні';
                 }
             } catch (error) {

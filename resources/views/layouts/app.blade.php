@@ -1640,7 +1640,7 @@
                     this.loading = true;
                     try {
                         const response = await fetch(`/search?q=${encodeURIComponent(this.query)}`);
-                        const data = await response.json();
+                        const data = await response.json().catch(() => ({}));
                         this.results = data.results;
                         this.selectedIndex = 0;
                     } catch (error) {
@@ -1719,7 +1719,7 @@
                 async fetchCount() {
                     try {
                         const response = await fetch('{{ route("pm.unread-count") }}');
-                        const data = await response.json();
+                        const data = await response.json().catch(() => ({}));
                         this.count = data.count;
                     } catch (e) {}
                 },

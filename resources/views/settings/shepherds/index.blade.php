@@ -228,7 +228,7 @@ function shepherdsManager() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     if (data.shepherd) {
                         // Add to shepherds list
                         this.shepherds.push(data.shepherd);
@@ -241,7 +241,7 @@ function shepherdsManager() {
                         if (window.showGlobalToast) showGlobalToast('Опікуна додано', 'success');
                     }
                 } else {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     alert(data.message || 'Помилка при додаванні');
                 }
             } catch (error) {
@@ -281,7 +281,7 @@ function shepherdsManager() {
                     this.availablePeople.sort((a, b) => a.full_name.localeCompare(b.full_name));
                     if (window.showGlobalToast) showGlobalToast('Статус опікуна прибрано', 'success');
                 } else {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     alert(data.message || 'Помилка при видаленні');
                 }
             } catch (error) {

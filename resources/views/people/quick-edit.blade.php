@@ -740,7 +740,7 @@ function quickEdit() {
                     })
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (data.success) {
                     this.showGrantAccessModal = false;
@@ -810,7 +810,7 @@ function quickEdit() {
                     })
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (data.success) {
                     // Update created rows with real IDs
@@ -870,7 +870,7 @@ function quickEdit() {
                     body: formData
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (data.success) {
                     row.photo_url = data.photo_url;
@@ -903,7 +903,7 @@ function quickEdit() {
                     }
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (data.success) {
                     row.photo_url = null;

@@ -182,7 +182,7 @@ function checklistManager(eventId, hasChecklistInitial) {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     if (data.success) {
                         this.checklistId = data.checklist.id;
                         this.items = (data.checklist.items || []).map(i => ({
@@ -243,7 +243,7 @@ function checklistManager(eventId, hasChecklistInitial) {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     item.is_completed = data.is_completed;
                     this.progress = data.progress;
 
@@ -277,7 +277,7 @@ function checklistManager(eventId, hasChecklistInitial) {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     if (data.success && data.item) {
                         this.items.push({
                             id: data.item.id,

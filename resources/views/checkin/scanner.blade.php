@@ -155,7 +155,7 @@ function qrScanner() {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 this.todayEvents = data.events;
             } catch (error) {
                 console.error('Failed to load events:', error);
@@ -244,7 +244,7 @@ function qrScanner() {
                     }
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (data.success) {
                     this.showSuccessToast(data.already_checked_in

@@ -1065,7 +1065,7 @@ window.incomeModal = function() {
                     },
                     body: JSON.stringify(this.formData)
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
@@ -1128,7 +1128,7 @@ window.expenseModal = function() {
                     },
                     body: JSON.stringify(this.formData)
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
@@ -1218,7 +1218,7 @@ window.exchangeModal = function() {
                     },
                     body: JSON.stringify(this.formData)
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);

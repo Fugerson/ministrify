@@ -460,7 +460,7 @@ function messengerApp() {
 
             try {
                 const response = await fetch(`/pm/${id}/poll?last_id=0`);
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 this.messages = data.messages.map(m => ({
                     ...m,
                     time: m.created_at,
@@ -488,7 +488,7 @@ function messengerApp() {
 
             try {
                 const response = await fetch(`/pm/${this.selectedUser.id}/poll?last_id=${this.lastMessageId}`);
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (data.messages.length > 0) {
                     data.messages.forEach(msg => {
@@ -585,7 +585,7 @@ function messengerApp() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     if (data.broadcast) {
                         alert(`Повідомлення надіслано ${data.count} користувачам`);
                     }
@@ -615,7 +615,7 @@ function messengerApp() {
         async updateUnreadBadges() {
             try {
                 const response = await fetch('/pm/unread-count');
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 // Update tab badge
                 const pmBadge = document.getElementById('pm-badge');

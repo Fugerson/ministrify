@@ -24,7 +24,7 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
             if (response.ok && data.success) {
                 this.open = false;
                 if (typeof showToast === 'function') {

@@ -358,7 +358,7 @@ window.expenseEditModal = function() {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 const t = data.transaction;
 
                 this.formData = {
@@ -442,7 +442,7 @@ window.expenseEditModal = function() {
                     return;
                 }
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);

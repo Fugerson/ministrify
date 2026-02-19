@@ -334,7 +334,7 @@ function songImportWizard() {
                     method: 'POST',
                     body: formData,
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (data.success) {
                     this.headers = data.headers;
@@ -380,7 +380,7 @@ function songImportWizard() {
                     method: 'POST',
                     body: formData,
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 this.importResult = data;
                 this.step = 3;
             } catch (error) {

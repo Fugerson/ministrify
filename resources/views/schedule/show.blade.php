@@ -1507,7 +1507,7 @@ function eventEditor() {
                     },
                     body: JSON.stringify({ [field]: value })
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this._original[originalKey] = value; // Update original after successful save
                     showGlobalToast('Збережено', 'success');
@@ -1553,7 +1553,7 @@ function planTemplatesManager() {
                     headers: { 'Accept': 'application/json' }
                 });
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     this.customTemplates = data.templates || [];
                 }
             } catch (err) {
@@ -1578,7 +1578,7 @@ function planTemplatesManager() {
                     })
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     showGlobalToast('Шаблон збережено', 'success');
                     this.showSaveModal = false;
@@ -1606,7 +1606,7 @@ function planTemplatesManager() {
                     }
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     showGlobalToast('Шаблон застосовано', 'success');
                     setTimeout(() => window.location.reload(), 500);
@@ -1631,7 +1631,7 @@ function planTemplatesManager() {
                     }
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     showGlobalToast('Шаблон видалено', 'success');
                     this.customTemplates = this.customTemplates.filter(t => t.id !== templateId);
@@ -1774,7 +1774,7 @@ async function askInTelegram(itemId, personName, personId = null) {
             body: body
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (data.success) {
             showGlobalToast(`Запит надіслано: ${personName}`, 'success');
@@ -1901,7 +1901,7 @@ function planEditor() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     if (data.success && data.item) {
                         this.insertNewRow(data.item);
                         // Clear form
@@ -2213,7 +2213,7 @@ function servicePlanManager() {
                     return;
                 }
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success && data.item) {
                     // Use global insertNewRow function
                     window.insertPlanRow(data.item);
@@ -2278,7 +2278,7 @@ function servicePlanManager() {
                     return;
                 }
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this.showTextModal = false;
                     window.location.reload();
@@ -2307,7 +2307,7 @@ async function sendTelegramNotify(itemId, button) {
             }
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (data.success) {
             button.innerHTML = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
@@ -2399,7 +2399,7 @@ async function sendTelegramNotify(itemId, button) {
             const response = await fetch(`${pollUrl}?since=${encodeURIComponent(lastCheck)}`);
             if (!response.ok) return;
 
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
             lastCheck = data.server_time;
 
             // Update each responsibility row
@@ -2540,7 +2540,7 @@ function reminderManager() {
                     body: new URLSearchParams(params)
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     showGlobalToast('Нагадування збережено', 'success');
                 } else {
@@ -2596,7 +2596,7 @@ function initPlanSortable() {
                     body: JSON.stringify({ items: items })
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success || response.ok) {
                     showGlobalToast('Порядок оновлено', 'success');
                 } else {

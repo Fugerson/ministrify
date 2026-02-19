@@ -98,7 +98,7 @@ function groupEditForm() {
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
                     body: formData,
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', 'Перевірте правильність заповнення форми.'); }
                     else { showToast('error', data.message || 'Помилка збереження.'); }

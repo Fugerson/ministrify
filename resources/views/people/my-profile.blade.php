@@ -173,7 +173,7 @@
                                      'Accept': 'application/json',
                                  }
                              });
-                             const data = await response.json();
+                             const data = await response.json().catch(() => ({}));
                              if (data.error) {
                                  this.error = data.error;
                              } else {
@@ -359,7 +359,7 @@
                              if (response.ok) {
                                  this.subscribed = true;
                              } else {
-                                 const data = await response.json();
+                                 const data = await response.json().catch(() => ({}));
                                  this.error = data.error || '{{ __('app.subscription_error') }}';
                              }
                          } catch (e) {

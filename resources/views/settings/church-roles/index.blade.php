@@ -286,14 +286,14 @@ function churchRolesManager() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     const role = this.roles.find(r => r.id === id);
                     if (role) {
                         role.is_admin_role = data.is_admin_role;
                     }
                     if (window.showGlobalToast) showGlobalToast('Статус оновлено', 'success');
                 } else {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     alert(data.message || 'Помилка');
                 }
             } catch (error) {
@@ -311,7 +311,7 @@ function churchRolesManager() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     this.permissions = data.permissions;
                     this.showPermissionsModal = true;
                 }
@@ -348,7 +348,7 @@ function churchRolesManager() {
                     this.showPermissionsModal = false;
                     if (window.showGlobalToast) showGlobalToast('Права збережено', 'success');
                 } else {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     alert(data.message || 'Помилка збереження');
                 }
             } catch (error) {
@@ -371,7 +371,7 @@ function churchRolesManager() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     if (data.role) {
                         this.roles.push(data.role);
                     }
@@ -379,7 +379,7 @@ function churchRolesManager() {
                     this.newColor = '#6b7280';
                     if (window.showGlobalToast) showGlobalToast('Роль додано', 'success');
                 } else {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     alert(data.message || 'Помилка при додаванні');
                 }
             } catch (error) {
@@ -419,7 +419,7 @@ function churchRolesManager() {
                     this.roles = this.roles.filter(r => r.id !== id);
                     if (window.showGlobalToast) showGlobalToast('Роль видалено', 'success');
                 } else {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     alert(data.message || 'Помилка при видаленні');
                 }
             } catch (error) {
@@ -481,7 +481,7 @@ function churchRolesManager() {
                     // Reload page as this is a complete reset
                     window.location.reload();
                 } else {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     alert(data.message || 'Помилка при скиданні');
                 }
             } catch (error) {

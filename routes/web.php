@@ -270,11 +270,11 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('people/{person}/create-account', [PersonController::class, 'createAccount'])->name('people.create-account');
     Route::post('people/{person}/reset-password', [PersonController::class, 'resetPassword'])->name('people.reset-password');
     Route::post('people/{person}/update-shepherd', [PersonController::class, 'updateShepherd'])->name('people.update-shepherd');
-    Route::get('people-export', [PersonController::class, 'export'])->name('people.export');
-    Route::post('people-import', [PersonController::class, 'import'])->name('people.import');
-    Route::post('people-bulk-action', [PersonController::class, 'bulkAction'])->name('people.bulk-action');
-    Route::get('people-quick-edit', [PersonController::class, 'quickEdit'])->name('people.quick-edit');
-    Route::post('people-quick-save', [PersonController::class, 'quickSave'])->name('people.quick-save');
+    Route::get('people-export', [PersonController::class, 'export'])->name('people.export')->middleware('permission:people,view');
+    Route::post('people-import', [PersonController::class, 'import'])->name('people.import')->middleware('permission:people,create');
+    Route::post('people-bulk-action', [PersonController::class, 'bulkAction'])->name('people.bulk-action')->middleware('permission:people,edit');
+    Route::get('people-quick-edit', [PersonController::class, 'quickEdit'])->name('people.quick-edit')->middleware('permission:people,edit');
+    Route::post('people-quick-save', [PersonController::class, 'quickSave'])->name('people.quick-save')->middleware('permission:people,edit');
     Route::post('people/{person}/upload-photo', [PersonController::class, 'uploadPhoto'])->name('people.upload-photo');
     Route::delete('people/{person}/delete-photo', [PersonController::class, 'deletePhoto'])->name('people.delete-photo');
 
@@ -918,10 +918,10 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('create', [AnnouncementController::class, 'create'])->name('create')->middleware('permission:announcements,create');
         Route::post('/', [AnnouncementController::class, 'store'])->name('store')->middleware('permission:announcements,create');
         Route::get('{announcement}', [AnnouncementController::class, 'show'])->name('show');
-        Route::get('{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit');
-        Route::put('{announcement}', [AnnouncementController::class, 'update'])->name('update');
-        Route::delete('{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy');
-        Route::post('{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('pin');
+        Route::get('{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit')->middleware('permission:announcements,edit');
+        Route::put('{announcement}', [AnnouncementController::class, 'update'])->name('update')->middleware('permission:announcements,edit');
+        Route::delete('{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy')->middleware('permission:announcements,delete');
+        Route::post('{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('pin')->middleware('permission:announcements,edit');
     });
 
     // Donations

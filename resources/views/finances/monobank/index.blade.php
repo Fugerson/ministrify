@@ -621,7 +621,7 @@ function importForm(txId, defaultCategoryId) {
         async loadSuggestions() {
             try {
                 const response = await fetch(`/finances/monobank/${txId}/suggestions`);
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (data.suggested_category_id) {
                     this.categoryId = String(data.suggested_category_id);

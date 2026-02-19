@@ -207,7 +207,7 @@ async function runAutoAssign() {
             body: JSON.stringify({ weeks: parseInt(weeks) }),
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (data.success) {
             displayResults(data);

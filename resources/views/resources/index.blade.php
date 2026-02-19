@@ -398,7 +398,7 @@ function resourcesManager() {
                     if (response.ok) {
                         window.location.reload();
                     } else {
-                        const data = await response.json();
+                        const data = await response.json().catch(() => ({}));
                         alert(data.message || 'Помилка завантаження');
                     }
                 } catch (error) {

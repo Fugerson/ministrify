@@ -688,7 +688,7 @@
 
                                     try {
                                         const response = await fetch(event.dataUrl);
-                                        const data = await response.json();
+                                        const data = await response.json().catch(() => ({}));
 
                                         this.modalEvent = data.event;
                                         this.modalSongs = data.songs || [];
@@ -770,7 +770,7 @@
                                         });
 
                                         if (response.ok) {
-                                            const result = await response.json();
+                                            const result = await response.json().catch(() => ({}));
                                             // Add to local list with empty team
                                             const song = this.modalAvailableSongs.find(s => s.id == this.selectedSongId);
                                             if (song) {
@@ -855,7 +855,7 @@
                                             const person = this.modalMembers.find(m => m.id == this.selectedPersonId);
                                             const role = this.modalRoles.find(r => r.id == this.selectedRoleId);
                                             if (person && role) {
-                                                const result = await response.json();
+                                                const result = await response.json().catch(() => ({}));
                                                 if (!this.selectedSongForTeam.team) {
                                                     this.selectedSongForTeam.team = [];
                                                 }
@@ -900,7 +900,7 @@
                                             const person = this.modalMembers.find(m => m.id == this.selectedPersonId);
                                             const role = this.modalRoles.find(r => r.id == this.selectedRoleId);
                                             if (person && role) {
-                                                const result = await response.json();
+                                                const result = await response.json().catch(() => ({}));
                                                 this.modalGeneralTeam.push({
                                                     id: result.id || Date.now(),
                                                     person_id: person.id,
@@ -1103,7 +1103,7 @@
                                         });
 
                                         if (response.ok) {
-                                            const result = await response.json();
+                                            const result = await response.json().catch(() => ({}));
                                             const member = this.gridData.members.find(m => m.id == personId);
                                             const rId = String(roleId);
                                             const eId = String(eventId);
@@ -1126,7 +1126,7 @@
                                             // Force reactivity
                                             this.gridData = { ...this.gridData, grid: { ...this.gridData.grid } };
                                         } else {
-                                            const err = await response.json();
+                                            const err = await response.json().catch(() => ({}));
                                             if (err.error) alert(err.error);
                                         }
                                     } catch (error) {
@@ -1169,7 +1169,7 @@
                                             }
                                         });
 
-                                        const result = await response.json();
+                                        const result = await response.json().catch(() => ({}));
                                         if (response.ok && result.success) {
                                             // Update status to pending
                                             const rId = String(roleId);
@@ -3444,7 +3444,7 @@ function resourcesManager() {
                         body: formData
                     });
                     if (!response.ok) {
-                        const data = await response.json();
+                        const data = await response.json().catch(() => ({}));
                         this.uploadError = data.message || 'Помилка завантаження';
                     }
                 } catch (error) {
@@ -3481,11 +3481,11 @@ function resourcesManager() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     this._docCreated = true;
                     this.openDocument({ id: data.id, name: 'Новий документ', content: '' });
                 } else {
-                    const err = await response.json();
+                    const err = await response.json().catch(() => ({}));
                     alert(err.message || 'Помилка');
                 }
             } catch (error) {
@@ -3795,7 +3795,7 @@ function songsLibrary() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
                     const wasEditing = this.editingId;
                     if (this.editingId) {
                         const index = this.songs.findIndex(s => s.id === this.editingId);
@@ -3819,7 +3819,7 @@ function songsLibrary() {
                         this.showViewModal = true;
                     }
                 } else {
-                    const err = await response.json();
+                    const err = await response.json().catch(() => ({}));
                     alert(err.message || 'Помилка збереження');
                 }
             } catch (error) {

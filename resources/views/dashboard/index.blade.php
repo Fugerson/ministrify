@@ -336,7 +336,7 @@ function dashboardBuilder() {
                 if (response.ok) {
                     window.location.reload();
                 } else {
-                    const err = await response.json();
+                    const err = await response.json().catch(() => ({}));
                     alert('{{ __('Помилка збереження:') }} ' + (err.message || '{{ __('Невідома помилка') }}'));
                 }
             } catch (e) {

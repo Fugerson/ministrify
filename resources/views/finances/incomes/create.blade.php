@@ -163,7 +163,7 @@ function incomeCreateForm() {
                     },
                     body: formData,
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;

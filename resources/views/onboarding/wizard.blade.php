@@ -583,7 +583,7 @@
                             return;
                         }
 
-                        const data = await response.json();
+                        const data = await response.json().catch(() => ({}));
 
                         if (data.success) {
                             this.stepsState[this.currentStep] = {
@@ -627,7 +627,7 @@
                             }
                         });
 
-                        const data = await response.json();
+                        const data = await response.json().catch(() => ({}));
 
                         if (data.success) {
                             this.stepsState[this.currentStep] = { completed: false, skipped: true };

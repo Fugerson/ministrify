@@ -176,9 +176,9 @@ function chatApp() {
         async pollMessages() {
             try {
                 const response = await fetch(`{{ route('pm.poll', $user) }}?last_id=${this.lastMessageId}`);
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
-                if (data.messages.length > 0) {
+                if (data.messages && data.messages.length > 0) {
                     data.messages.forEach(msg => {
                         // Avoid duplicates by checking real message ID
                         if (!this.newMessages.find(m => m.id === msg.id)) {

@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             const response = await fetch(`{{ route('dashboard.charts') }}?type=${type}`);
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
 
             if (analyticsChart) {
                 analyticsChart.destroy();

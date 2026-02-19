@@ -616,14 +616,14 @@ class FinanceController extends Controller
 
     public function editIncome(Transaction $transaction)
     {
+        $this->authorizeChurch($transaction);
+
         if (!auth()->user()->canEdit('finances')) {
             if (request()->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'У вас немає прав для редагування записів.'], 403);
             }
             return redirect()->route('finances.incomes')->with('error', 'У вас немає прав для редагування записів.');
         }
-
-        $this->authorizeChurch($transaction);
 
         $church = $this->getCurrentChurch();
         $categories = TransactionCategory::where('church_id', $church->id)
@@ -648,14 +648,14 @@ class FinanceController extends Controller
 
     public function updateIncome(Request $request, Transaction $transaction)
     {
+        $this->authorizeChurch($transaction);
+
         if (!auth()->user()->canEdit('finances')) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'У вас немає прав для редагування записів.'], 403);
             }
             abort(403, 'У вас немає прав для редагування записів.');
         }
-
-        $this->authorizeChurch($transaction);
 
         $validated = $request->validate([
             'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
@@ -691,6 +691,8 @@ class FinanceController extends Controller
 
     public function destroyIncome(Request $request, Transaction $transaction)
     {
+        $this->authorizeChurch($transaction);
+
         if (!auth()->user()->canDelete('finances')) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'У вас немає прав для видалення записів.'], 403);
@@ -698,7 +700,6 @@ class FinanceController extends Controller
             abort(403, 'У вас немає прав для видалення записів.');
         }
 
-        $this->authorizeChurch($transaction);
         $transaction->delete();
 
         if ($request->wantsJson()) {
@@ -920,14 +921,14 @@ class FinanceController extends Controller
 
     public function editExpense(Transaction $transaction)
     {
+        $this->authorizeChurch($transaction);
+
         if (!auth()->user()->canEdit('finances')) {
             if (request()->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'У вас немає прав для редагування записів.'], 403);
             }
             return redirect()->route('finances.expenses.index')->with('error', 'У вас немає прав для редагування записів.');
         }
-
-        $this->authorizeChurch($transaction);
 
         $church = $this->getCurrentChurch();
         $categories = TransactionCategory::where('church_id', $church->id)
@@ -956,14 +957,14 @@ class FinanceController extends Controller
 
     public function updateExpense(Request $request, Transaction $transaction)
     {
+        $this->authorizeChurch($transaction);
+
         if (!auth()->user()->canEdit('finances')) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'У вас немає прав для редагування записів.'], 403);
             }
             abort(403, 'У вас немає прав для редагування записів.');
         }
-
-        $this->authorizeChurch($transaction);
 
         $validated = $request->validate([
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
@@ -1075,14 +1076,14 @@ class FinanceController extends Controller
 
     public function destroyExpense(Request $request, Transaction $transaction)
     {
+        $this->authorizeChurch($transaction);
+
         if (!auth()->user()->canDelete('finances')) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'У вас немає прав для видалення записів.'], 403);
             }
             abort(403, 'У вас немає прав для видалення записів.');
         }
-
-        $this->authorizeChurch($transaction);
         $ministryId = $transaction->ministry_id;
         $transaction->delete();
 

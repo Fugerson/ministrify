@@ -101,7 +101,7 @@ async function togglePresence(personId, button) {
             body: JSON.stringify({ person_id: personId })
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (data.success) {
             const indicator = button.querySelector('.check-indicator');

@@ -107,7 +107,7 @@ function linkedCards() {
         async loadCards() {
             try {
                 const response = await fetch(`/boards/linked-cards?entity_type={{ $entityType }}&entity_id={{ $entityId }}`);
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 this.cards = data;
             } catch (error) {
                 console.error('Failed to load linked cards:', error);

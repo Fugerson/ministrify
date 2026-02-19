@@ -109,7 +109,7 @@ window.exchangeManager = function() {
                     },
                     body: JSON.stringify(this.formData)
                 });
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
@@ -298,7 +298,7 @@ window.incomesManager = function() {
 
                 if (!response.ok) throw new Error('Failed to load');
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 this.formData = {
                     amount: data.transaction.amount,
@@ -340,7 +340,7 @@ window.incomesManager = function() {
                     body: JSON.stringify(this.formData)
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (response.ok && data.success) {
                     this.modalOpen = false;
@@ -381,7 +381,7 @@ window.incomesManager = function() {
                     }
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
                 if (response.ok && data.success) {
                     this.deleteModalOpen = false;

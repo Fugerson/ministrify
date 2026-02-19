@@ -226,7 +226,7 @@ function sectionsManager() {
                     body: JSON.stringify({ sections })
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this.hasChanges = false;
                     this.originalOrder = sections;

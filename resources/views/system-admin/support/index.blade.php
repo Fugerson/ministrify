@@ -559,7 +559,7 @@ function supportKanban() {
                     body: formData
                 });
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this.allTickets.unshift(data.ticket);
                     this.showCreateModal = false;

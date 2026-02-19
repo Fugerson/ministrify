@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Person;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class AttendanceController extends Controller
@@ -158,25 +159,26 @@ class AttendanceController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        // Update attendance records
-        $attendance->records()->delete();
+        // Update attendance records in a transaction to prevent data loss
+        DB::transaction(function () use ($attendance, $validated) {
+            $attendance->records()->delete();
 
-        if (!empty($validated['present'])) {
-            // Validate all person IDs belong to this church
-            $church = $this->getCurrentChurch();
-            $validPersonIds = Person::where('church_id', $church->id)
-                ->whereIn('id', $validated['present'])
-                ->pluck('id')
-                ->toArray();
+            if (!empty($validated['present'])) {
+                $church = $this->getCurrentChurch();
+                $validPersonIds = Person::where('church_id', $church->id)
+                    ->whereIn('id', $validated['present'])
+                    ->pluck('id')
+                    ->toArray();
 
-            foreach ($validPersonIds as $personId) {
-                AttendanceRecord::create([
-                    'attendance_id' => $attendance->id,
-                    'person_id' => $personId,
-                    'present' => true,
-                ]);
+                foreach ($validPersonIds as $personId) {
+                    AttendanceRecord::create([
+                        'attendance_id' => $attendance->id,
+                        'person_id' => $personId,
+                        'present' => true,
+                    ]);
+                }
             }
-        }
+        });
 
         return redirect()->route('attendance.show', $attendance)
             ->with('success', 'Відвідуваність оновлено.');

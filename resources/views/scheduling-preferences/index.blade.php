@@ -149,7 +149,7 @@
                                     preferred_times_per_month: this.preferred || null
                                 })
                             });
-                            const data = await response.json();
+                            const data = await response.json().catch(() => ({}));
                             if (data.success) {
                                 this.open = false;
                             }

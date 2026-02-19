@@ -300,7 +300,7 @@ async function autoAssignEvent(eventId) {
             },
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (data.success) {
             showToast('success', 'Розподіл завершено', data.message);
@@ -327,7 +327,7 @@ async function autoAssignAll() {
             body: JSON.stringify({ weeks: 4 }),
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (data.success) {
             showToast('success', 'Розподіл завершено',
