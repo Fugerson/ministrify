@@ -368,7 +368,7 @@
                                     {{ Str::limit($expense->description, 30) }}
                                 </p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $expense->date->format('d.m.Y') }} • {{ $expense->ministry?->name }}
+                                    {{ $expense->date->format('d.m.Y') }}@if($expense->ministry) &bull; {{ $expense->ministry->name }}@endif
                                 </p>
                             </div>
                         </div>

@@ -580,7 +580,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['attendance_30_days'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Відвідувань за 30 днів</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Відвідувань (3 міс.)</p>
                 </div>
             </div>
         </div>

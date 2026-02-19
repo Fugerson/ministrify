@@ -61,6 +61,8 @@ class ShepherdController extends Controller
      */
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('settings', 'edit'), 403);
+
         $validated = $request->validate([
             'person_id' => 'required|exists:people,id',
         ]);
@@ -119,6 +121,8 @@ class ShepherdController extends Controller
      */
     public function toggleFeature(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('settings', 'edit'), 403);
+
         $church = $this->getCurrentChurch();
 
         $validated = $request->validate([

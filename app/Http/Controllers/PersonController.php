@@ -303,7 +303,7 @@ class PersonController extends Controller
                 ->where('status', 'confirmed')
                 ->count(),
             'attendance_30_days' => $person->attendanceRecords()
-                ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subDays(30)))
+                ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
                 ->where('present', true)
                 ->count(),
             'attendance_rate' => $this->calculateAttendanceRate($person),

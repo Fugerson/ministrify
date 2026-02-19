@@ -197,6 +197,8 @@ class AttendanceController extends Controller
 
     public function toggleFeature(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('settings', 'edit'), 403);
+
         $church = $this->getCurrentChurch();
 
         $validated = $request->validate([

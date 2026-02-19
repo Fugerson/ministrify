@@ -309,6 +309,8 @@ class DonationController extends Controller
      */
     public function toggleCampaign(DonationCampaign $campaign)
     {
+        abort_unless(auth()->user()->hasPermission('finances', 'edit'), 403);
+
         $church = $this->getCurrentChurch();
 
         if ($campaign->church_id !== $church->id) {
@@ -325,6 +327,8 @@ class DonationController extends Controller
      */
     public function destroyCampaign(DonationCampaign $campaign)
     {
+        abort_unless(auth()->user()->hasPermission('finances', 'delete'), 403);
+
         $church = $this->getCurrentChurch();
 
         if ($campaign->church_id !== $church->id) {

@@ -64,7 +64,7 @@ class ServicePlanController extends Controller
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'type' => 'nullable|string|in:' . implode(',', array_keys(ServicePlanItem::typeLabels())),
-            'start_time' => 'nullable|string|max:10',
+            'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'responsible_names' => 'nullable|string|max:255',
