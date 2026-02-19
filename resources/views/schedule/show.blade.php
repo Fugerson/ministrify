@@ -11,7 +11,7 @@
     })->values();
 
     $availablePeopleData = $event->responsibilities->map(function($r) {
-        return ['id' => $r->person_id, 'name' => $r->person?->full_name ?? 'Невідомий'];
+        return ['id' => $r->person_id, 'name' => $r->person?->full_name ?? __('app.unknown_person')];
     })->unique('id')->values();
 
     // Fallback for songs autocomplete
@@ -130,24 +130,28 @@
             <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" x-model="isService" @change="saveField('is_service', isService); $store.event.isService = isService"
                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Подія з планом</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.event_with_plan') }}</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="isSundayService" @change="saveField('service_type', isSundayService ? 'sunday_service' : null)"
+                <input type="checkbox" x-model="isSundayService" @change="if(isSundayService) { isService = true; hasMusic = true; saveField('is_service', true); $store.event.isService = true; saveField('service_type', 'sunday_service'); }"
                        class="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Недільне служіння</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.sunday_service') }}</span>
             </label>
-            @if($currentChurch->attendance_enabled)
             <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" x-model="trackAttendance" @change="saveField('track_attendance', trackAttendance); $store.event.trackAttendance = trackAttendance"
                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Відвідуваність</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Відвідуваність') }}</span>
             </label>
-            @endif
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" x-model="hasMusic" @change="if(!hasMusic) { isSundayService = false; } saveField('service_type', hasMusic ? 'sunday_service' : null)"
+                       class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія з музичним супроводом') }}</span>
+            </label>
             @else
-            @if($event->is_service)<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Подія з планом</span>@endif
-            @if($event->service_type === 'sunday_service')<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Недільне служіння</span>@endif
-            @if($event->track_attendance)<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Відвідуваність</span>@endif
+            @if($event->is_service)<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> {{ __('Подія з планом') }}</span>@endif
+            @if($event->service_type === 'sunday_service')<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> {{ __('Недільне служіння') }}</span>@endif
+            @if($event->track_attendance)<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> {{ __('Відвідуваність') }}</span>@endif
+            @if($event->service_type === 'sunday_service')<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> {{ __('Подія з музичним супроводом') }}</span>@endif
             @endif
         </div>
 
@@ -1474,6 +1478,7 @@ function eventEditor() {
         isService: {{ $event->is_service ? 'true' : 'false' }},
         isSundayService: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
         trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }},
+        hasMusic: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
         ministries: @json($ministriesData),
 
         // Store original values to detect changes
@@ -1485,14 +1490,15 @@ function eventEditor() {
             ministryId: @json($event->ministry_id),
             isService: {{ $event->is_service ? 'true' : 'false' }},
             isSundayService: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
-            trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }}
+            trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }},
+            hasMusic: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }}
         },
 
         async saveField(field, value) {
             // Check if value actually changed
             const originalKey = field === 'ministry_id' ? 'ministryId' :
                                field === 'is_service' ? 'isService' :
-                               field === 'service_type' ? 'isSundayService' :
+                               field === 'service_type' ? 'hasMusic' :
                                field === 'track_attendance' ? 'trackAttendance' : field;
             if (this._original[originalKey] === value) {
                 return; // No change, skip save
