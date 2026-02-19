@@ -630,67 +630,67 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Create Event Modal --}}
-                    @can('manage-ministry', $ministry)
-                    <div x-show="showCreateModal" x-cloak
-                         class="fixed inset-0 z-[110] overflow-y-auto"
-                         @keydown.escape.window="closeCreateModal()">
-                        <div x-show="showCreateModal"
-                             x-transition:enter="ease-out duration-200"
-                             x-transition:enter-start="opacity-0"
-                             x-transition:enter-end="opacity-100"
-                             x-transition:leave="ease-in duration-150"
-                             x-transition:leave-start="opacity-100"
-                             x-transition:leave-end="opacity-0"
-                             class="fixed inset-0 bg-black/50"
-                             @click="closeCreateModal()"></div>
-                        <div class="fixed inset-0 flex items-center justify-center p-4">
+                        {{-- Create Event Modal (inside worshipCalendar scope) --}}
+                        @can('manage-ministry', $ministry)
+                        <div x-show="showCreateModal" x-cloak
+                             class="fixed inset-0 z-[110] overflow-y-auto"
+                             @keydown.escape.window="closeCreateModal()">
                             <div x-show="showCreateModal"
                                  x-transition:enter="ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
                                  x-transition:leave="ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 scale-95"
-                                 class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md"
-                                 @click.stop>
-                                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.create_event') }}</h3>
-                                    <button @click="closeCreateModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="p-4 space-y-4">
-                                    <div x-show="createError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg" x-text="createError"></div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.title') }} *</label>
-                                        <input type="text" x-model="createTitle" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="{{ __('forms.title') }}">
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 bg-black/50"
+                                 @click="closeCreateModal()"></div>
+                            <div class="fixed inset-0 flex items-center justify-center p-4">
+                                <div x-show="showCreateModal"
+                                     x-transition:enter="ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 scale-95"
+                                     x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 scale-95"
+                                     class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md"
+                                     @click.stop>
+                                    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.create_event') }}</h3>
+                                        <button @click="closeCreateModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.select_date') }} *</label>
-                                        <input type="date" x-model="createDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                    <div class="p-4 space-y-4">
+                                        <div x-show="createError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg" x-text="createError"></div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.title') }} *</label>
+                                            <input type="text" x-model="createTitle" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="{{ __('forms.title') }}">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.select_date') }} *</label>
+                                            <input type="date" x-model="createDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.select_time') }}</label>
+                                            <input type="time" x-model="createTime" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('forms.select_time') }}</label>
-                                        <input type="time" x-model="createTime" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                    <div class="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
+                                        <button @click="closeCreateModal()" class="flex-1 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __('app.cancel') }}</button>
+                                        <button @click="submitCreateEvent()" :disabled="createSubmitting || !createTitle.trim() || !createDate"
+                                                class="flex-1 px-4 py-2 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <span x-show="!createSubmitting">{{ __('app.create') }}</span>
+                                            <span x-show="createSubmitting">...</span>
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
-                                    <button @click="closeCreateModal()" class="flex-1 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __('app.cancel') }}</button>
-                                    <button @click="submitCreateEvent()" :disabled="createSubmitting || !createTitle.trim() || !createDate"
-                                            class="flex-1 px-4 py-2 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <span x-show="!createSubmitting">{{ __('app.create') }}</span>
-                                        <span x-show="createSubmitting">...</span>
-                                    </button>
                                 </div>
                             </div>
                         </div>
+                        @endcan
                     </div>
-                    @endcan
 
                     @php
                         $calendarEventsData = $scheduleEvents->map(function($e) use ($ministry) {
