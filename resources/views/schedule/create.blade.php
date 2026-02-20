@@ -9,7 +9,7 @@
 @endphp
 
 @section('content')
-<div class="max-w-2xl mx-auto" x-data="eventCreateForm()">
+<div class="max-w-2xl mx-auto" x-data="eventCreateForm()" @set-music.window="hasMusicChecked = $event.detail"
     <form class="space-y-6" x-ref="form" @submit.prevent="submitForm">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -173,8 +173,8 @@
                     <!-- Auto-check music checkbox for worship/sunday service ministries -->
                     <template x-if="isServiceMinistry">
                         <script x-init="
-                            const cb = document.getElementById('has_music');
-                            if (cb && !cb.checked) { cb.checked = true; cb.dispatchEvent(new Event('input')); }
+                            document.getElementById('is_service').checked = true;
+                            $dispatch('set-music', true);
                         "></script>
                     </template>
                 </div>
@@ -201,7 +201,7 @@
                         <input type="checkbox" name="is_sunday_service" id="is_sunday_service" value="1"
                                {{ old('is_sunday_service') ? 'checked' : '' }}
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600"
-                               x-on:change="if($el.checked) { document.getElementById('is_service').checked = true; document.getElementById('has_music').checked = true; document.getElementById('has_music').dispatchEvent(new Event('input')); }">
+                               x-on:change="if($el.checked) { document.getElementById('is_service').checked = true; hasMusicChecked = true; }">
                         <label for="is_sunday_service" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             {{ __('Недільне служіння') }}
                         </label>
@@ -227,7 +227,7 @@
                 </div>
 
                 <!-- Musical Accompaniment Option -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-600" x-data="{ hasMusicChecked: {{ old('service_type') === 'sunday_service' ? 'true' : 'false' }} }">
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
                     <div class="flex items-center">
                         <input type="checkbox" id="has_music" value="1"
                                x-model="hasMusicChecked"
@@ -355,6 +355,7 @@ function eventCreateForm() {
     return {
         saving: false,
         errors: {},
+        hasMusicChecked: {{ old('service_type') === 'sunday_service' ? 'true' : 'false' }},
         async submitForm() {
             this.saving = true;
             this.errors = {};
