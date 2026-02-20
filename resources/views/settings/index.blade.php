@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Налаштування')
+@section('title', __('app.settings'))
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-4 md:space-y-6" x-data="{
@@ -20,42 +20,42 @@
             <button @click="setTab('general')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'general' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Загальні
+                {{ __('app.tab_general') }}
             </button>
             <button @click="setTab('public')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'public' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Сайт
+                {{ __('app.tab_public') }}
             </button>
             <button @click="setTab('integrations')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'integrations' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Інтеграції
+                {{ __('app.tab_integrations') }}
             </button>
             <button @click="setTab('data')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'data' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Категорії
+                {{ __('app.tab_data') }}
             </button>
             <button @click="setTab('finance')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'finance' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Фінанси
+                {{ __('app.finances') }}
             </button>
             <button @click="setTab('users')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'users' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Користувачі
+                {{ __('app.tab_users') }}
             </button>
 <button @click="setTab('permissions')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'permissions' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Права доступу
+                {{ __('app.tab_permissions') }}
             </button>
             <button @click="setTab('audit')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'audit' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
-                Журнал дій
+                {{ __('app.tab_audit') }}
             </button>
         </div>
     </div>
@@ -103,28 +103,28 @@
          }">
 
         <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Основна інформація</h2>
-            <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
-            <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">Збереження...</span>
+            <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.basic_info') }}</h2>
+            <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">{{ __('app.saved_check') }}</span>
+            <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.saving') }}</span>
         </div>
 
         <div class="p-4 md:p-6 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_required') }}</label>
                     <input type="text" id="name" x-model="name" @input="debounceSave()" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 </div>
 
                 <div>
-                    <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Місто *</label>
+                    <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.city_required') }}</label>
                     <input type="text" id="city" x-model="city" @input="debounceSave()" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 </div>
             </div>
 
             <div>
-                <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Адреса</label>
+                <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.address') }}</label>
                 <input type="text" id="address" x-model="address" @input="debounceSave()"
                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             </div>
@@ -135,10 +135,10 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
          x-data="{ uploading: false, saved: false }">
         <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Логотип</h2>
+            <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.logo') }}</h2>
             <div>
-                <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
-                <span x-show="uploading" class="text-sm text-gray-500 dark:text-gray-400">Завантаження...</span>
+                <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">{{ __('app.saved_check') }}</span>
+                <span x-show="uploading" class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.uploading') }}</span>
             </div>
         </div>
 
@@ -177,9 +177,9 @@
                         <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">Обрати зображення</p>
+                        <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.choose_image') }}</p>
                         <p x-show="fileName" x-text="fileName" class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate"></p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WebP</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.image_formats') }}</p>
                     </div>
                     <template x-if="uploading">
                         <svg class="w-5 h-5 text-primary-500 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -203,8 +203,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-white">Конструктор сайту</h3>
-                    <p class="text-sm text-white/80">Редагуйте сторінки, меню та дизайн</p>
+                    <h3 class="text-lg font-semibold text-white">{{ __('app.website_builder') }}</h3>
+                    <p class="text-sm text-white/80">{{ __('app.website_builder_desc') }}</p>
                 </div>
             </div>
             <svg class="w-5 h-5 text-white/70 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,15 +220,15 @@
         <!-- Enable/Disable & URL -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Публічний сайт церкви</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Створіть мін-сайт для вашої громади</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.public_church_site') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.public_church_site_desc') }}</p>
             </div>
 
             <div class="p-6 space-y-6">
                 <div class="flex items-center justify-between p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl">
                     <div>
-                        <h3 class="font-medium text-gray-900 dark:text-white">Активувати публічний сайт</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Дозволити публічний доступ до сторінки церкви</p>
+                        <h3 class="font-medium text-gray-900 dark:text-white">{{ __('app.enable_public_site') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.enable_public_site_desc') }}</p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" name="public_site_enabled" value="1"
@@ -239,7 +239,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL сайту *</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.site_url') }}</label>
                     <div class="flex items-center">
                         <span class="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-gray-500 dark:text-gray-400 text-sm">
                             {{ url('/c/') }}/
@@ -255,7 +255,7 @@
                             <button type="button"
                                     @click="navigator.clipboard.writeText('{{ route('public.church', $church->slug) }}'); copied = true; setTimeout(() => copied = false, 2000)"
                                     class="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
-                                    :title="copied ? 'Скопійовано!' : 'Копіювати посилання'">
+                                    :title="copied ? '{{ __('app.copied') }}' : '{{ __('app.copy_link') }}'">
                                 <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                 <svg x-show="copied" x-cloak class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </button>
@@ -267,14 +267,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис церкви</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.church_description') }}</label>
                     <textarea name="public_description" rows="3"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              placeholder="Коротко про вашу церкву...">{{ old('public_description', $church->public_description) }}</textarea>
+                              placeholder="{{ __('app.church_description_placeholder') }}">{{ old('public_description', $church->public_description) }}</textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Фонове зображення</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.cover_image') }}</label>
                     @if($church->cover_image)
                         <div class="mb-2">
                             <img src="{{ Storage::url($church->cover_image) }}" class="h-32 object-cover rounded-lg">

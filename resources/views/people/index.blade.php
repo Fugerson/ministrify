@@ -5,11 +5,11 @@
 @section('actions')
 <div class="flex items-center gap-2">
     @if(auth()->user()->canEdit('people'))
-    <a href="{{ route('people.quick-edit') }}" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-xl transition-colors" title="Швидке редагування">
+    <a href="{{ route('people.quick-edit') }}" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-xl transition-colors" title="{{ __('app.quick_edit') }}">
         <svg class="w-4 h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
         </svg>
-        <span class="hidden sm:inline">Швидке редагування</span>
+        <span class="hidden sm:inline">{{ __('app.quick_edit') }}</span>
     </a>
     @endif
     <a href="{{ route('people.create') }}" id="people-add-btn" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
@@ -56,7 +56,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
                     </svg>
-                    Тег
+                    {{ __('app.tag') }}
                 </button>
                 <!-- Send Message -->
                 <button @click="bulkAction = 'message'; showBulkModal = true"
@@ -72,7 +72,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                     </svg>
-                    Доступ
+                    {{ __('app.access') }}
                 </button>
                 <!-- Export Selected -->
                 <button @click="exportSelected()"
@@ -102,7 +102,7 @@
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" x-model="filters.search" placeholder="Пошук за ім'ям, телефоном, email..."
+                <input type="text" x-model="filters.search" placeholder="{{ __('app.search') }}..."
                     class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20">
                 <button x-show="filters.search" @click="filters.search = ''" x-cloak
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -137,7 +137,7 @@
         <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <template x-if="filters.gender">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
-                    <span x-text="filters.gender === 'male' ? 'Чоловіки' : 'Жінки'"></span>
+                    <span x-text="filters.gender === 'male' ? '{{ __('app.male') }}' : '{{ __('app.female') }}'"></span>
                     <button @click="filters.gender = ''" class="hover:text-blue-900 dark:hover:text-blue-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -188,7 +188,7 @@
             @if($church->shepherds_enabled)
             <template x-if="filters.shepherd">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-sm">
-                    <span x-text="filters.shepherd === 'none' ? 'Без опікуна' : filters.shepherd"></span>
+                    <span x-text="filters.shepherd === 'none' ? '{{ __('app.no_shepherd') }}' : filters.shepherd"></span>
                     <button @click="filters.shepherd = ''" class="hover:text-amber-900 dark:hover:text-amber-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -209,7 +209,7 @@
             </template>
 
             <button @click="clearFilters()" class="text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 font-medium">
-                Очистити все
+                {{ __('app.clear_all') }}
             </button>
         </div>
     </div>
@@ -222,27 +222,27 @@
 
             <!-- Gender -->
             <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Стать</label>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.gender') }}</label>
                 <div class="flex flex-wrap gap-2">
                     <button @click="filters.gender = filters.gender === 'male' ? '' : 'male'"
                         :class="filters.gender === 'male' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
                         class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
-                        Чоловіки
+                        {{ __('app.male') }}
                     </button>
                     <button @click="filters.gender = filters.gender === 'female' ? '' : 'female'"
                         :class="filters.gender === 'female' ? 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
                         class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
-                        Жінки
+                        {{ __('app.female') }}
                     </button>
                 </div>
             </div>
 
             <!-- Marital Status -->
             <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Сімейний стан</label>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.family_status') }}</label>
                 <select x-model="filters.marital_status"
                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">Всі</option>
+                    <option value="">{{ __('app.all') }}</option>
                     @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
@@ -254,7 +254,7 @@
                 <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Команда</label>
                 <select x-model="filters.ministry"
                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">Всі</option>
+                    <option value="">{{ __('app.all') }}</option>
                     @foreach($ministries as $ministry)
                     <option value="{{ $ministry->name }}">{{ $ministry->name }}</option>
                     @endforeach
@@ -263,10 +263,10 @@
 
             <!-- Role -->
             <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Роль в церкві</label>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.church_role') }}</label>
                 <select x-model="filters.role"
                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">Всі</option>
+                    <option value="">{{ __('app.all') }}</option>
                     @foreach($churchRoles as $role)
                     <option value="{{ $role->name }}">{{ $role->name }}</option>
                     @endforeach
@@ -276,24 +276,24 @@
             @if($church->shepherds_enabled)
             <!-- Shepherd -->
             <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Опікун</label>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.shepherd') }}</label>
                 <select x-model="filters.shepherd"
                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">Всі</option>
+                    <option value="">{{ __('app.all') }}</option>
                     @foreach($shepherds as $shepherd)
                     <option value="{{ $shepherd->full_name }}">{{ $shepherd->full_name }}</option>
                     @endforeach
-                    <option value="none">Без опікуна</option>
+                    <option value="none">{{ __('app.no_shepherd') }}</option>
                 </select>
             </div>
             @endif
 
             <!-- Tag -->
             <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Тег</label>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.tag') }}</label>
                 <select x-model="filters.tag"
                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">Всі</option>
+                    <option value="">{{ __('app.all') }}</option>
                     @foreach($tags as $tag)
                     <option value="{{ $tag->name }}">{{ $tag->name }}</option>
                     @endforeach
@@ -304,7 +304,7 @@
             <div>
                 <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Дата народження</label>
                 <div class="relative">
-                    <input type="text" x-ref="dateRange" x-model="filters.dateRangeDisplay" placeholder="Виберіть діапазон..." readonly
+                    <input type="text" x-ref="dateRange" x-model="filters.dateRangeDisplay" placeholder="{{ __('app.select_range') }}" readonly
                         @click="openDatePicker()"
                         class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 cursor-pointer">
                     <button type="button" x-show="filters.birth_from || filters.birth_to" @click="clearDateFilter()"
@@ -320,7 +320,7 @@
 
     @if($peopleLimited)
     <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-amber-800 dark:text-amber-200 text-sm">
-        Показано перші 1000 людей. Використовуйте пошук для уточнення.
+        {{ __('app.limited_notice') }}
     </div>
     @endif
 
@@ -344,7 +344,7 @@
                             Ім'я
                         </th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
-                            Контакти
+                            {{ __('app.contacts') }}
                         </th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
                             Дата народження
@@ -357,7 +357,7 @@
                         </th>
                         @if($church->shepherds_enabled)
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden xl:table-cell">
-                            Опікун
+                            {{ __('app.shepherd') }}
                         </th>
                         @endif
                         <th class="px-4 py-3 w-10"></th>
@@ -526,8 +526,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Поки що нікого немає</h3>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">Додайте першу людину або імпортуйте дані</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.empty_people_title') }}</h3>
+                            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.empty_people_desc') }}</p>
                             <div class="flex items-center justify-center gap-3">
                                 <a href="{{ route('people.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -555,24 +555,24 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Нічого не знайдено</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-4">Спробуйте змінити параметри фільтрів</p>
+            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.no_results_desc') }}</p>
             <button @click="clearFilters()" class="text-primary-600 hover:text-primary-700 font-medium">
-                Очистити фільтри
+                {{ __('app.clear_filters') }}
             </button>
         </div>
 
         <!-- Pagination -->
         <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <span class="hidden sm:inline">Показувати</span>
+                <span class="hidden sm:inline">{{ __('app.show_per_page') }}</span>
                 <select x-model.number="perPage" @change="currentPage = 1"
                     class="px-2 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20">
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
-                    <option value="0">Всі</option>
+                    <option value="0">{{ __('app.all') }}</option>
                 </select>
-                <span class="hidden sm:inline">записів</span>
+                <span class="hidden sm:inline">{{ __('app.records') }}</span>
             </div>
 
             <div class="flex items-center gap-0.5">
@@ -617,13 +617,13 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                Експорт Excel
+                {{ __('app.export_excel') }}
             </a>
             <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors text-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                 </svg>
-                Імпорт CSV
+                {{ __('app.import_csv') }}
             </a>
         </div>
     </div>
@@ -653,9 +653,9 @@
                 <template x-if="bulkAction === 'ministry'">
                     <div>
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додати до команди</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.add_to_ministry') }}</h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Вибрано людей: <span x-text="selectedIds.length"></span>
+                                {{ __('app.selected_people') }} <span x-text="selectedIds.length"></span>
                             </p>
                         </div>
                         <div class="p-6">
@@ -686,7 +686,7 @@
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                     </svg>
-                                    Зачекайте...
+                                    {{ __('app.please_wait') }}
                                 </span>
                             </button>
                         </div>
@@ -697,9 +697,9 @@
                 <template x-if="bulkAction === 'tag'">
                     <div>
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додати тег</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.add_tag') }}</h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Вибрано людей: <span x-text="selectedIds.length"></span>
+                                {{ __('app.selected_people') }} <span x-text="selectedIds.length"></span>
                             </p>
                         </div>
                         <div class="p-6">
@@ -720,7 +720,7 @@
                             <button @click="executeBulkAction()" :disabled="!bulkValue || bulkLoading"
                                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50">
                                 <span x-show="!bulkLoading">Додати</span>
-                                <span x-show="bulkLoading">Зачекайте...</span>
+                                <span x-show="bulkLoading">{{ __('app.please_wait') }}</span>
                             </button>
                         </div>
                     </div>
@@ -730,16 +730,16 @@
                 <template x-if="bulkAction === 'message'">
                     <div>
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Надіслати Telegram</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.send_telegram') }}</h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Вибрано людей: <span x-text="selectedIds.length"></span>
+                                {{ __('app.selected_people') }} <span x-text="selectedIds.length"></span>
                             </p>
                         </div>
                         <div class="p-6">
-                            <textarea x-model="bulkMessage" rows="4" placeholder="Введіть повідомлення..."
+                            <textarea x-model="bulkMessage" rows="4" placeholder="{{ __('app.enter_message') }}"
                                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"></textarea>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                Повідомлення отримають тільки ті, хто підключив Telegram
+                                {{ __('app.telegram_notice') }}
                             </p>
                         </div>
                         <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3">
@@ -749,7 +749,7 @@
                             <button @click="executeBulkAction()" :disabled="!bulkMessage || bulkLoading"
                                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50">
                                 <span x-show="!bulkLoading">Надіслати</span>
-                                <span x-show="bulkLoading">Зачекайте...</span>
+                                <span x-show="bulkLoading">{{ __('app.please_wait') }}</span>
                             </button>
                         </div>
                     </div>
@@ -759,7 +759,7 @@
                 <template x-if="bulkAction === 'delete'">
                     <div>
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 class="text-lg font-semibold text-red-600">Видалити людей</h3>
+                            <h3 class="text-lg font-semibold text-red-600">{{ __('app.delete_people') }}</h3>
                         </div>
                         <div class="p-6">
                             <div class="flex items-start gap-4">
@@ -773,7 +773,7 @@
                                         Ви впевнені, що хочете видалити <strong x-text="selectedIds.length"></strong> людей?
                                     </p>
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        Цю дію можна буде скасувати через архів.
+                                        {{ __('app.delete_can_undo') }}
                                     </p>
                                 </div>
                             </div>
@@ -785,7 +785,7 @@
                             <button @click="executeBulkAction()" :disabled="bulkLoading"
                                     class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50">
                                 <span x-show="!bulkLoading">Видалити</span>
-                                <span x-show="bulkLoading">Зачекайте...</span>
+                                <span x-show="bulkLoading">{{ __('app.please_wait') }}</span>
                             </button>
                         </div>
                     </div>

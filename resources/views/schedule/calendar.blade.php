@@ -40,12 +40,12 @@
                 <button @click="switchView('week')" type="button"
                    :class="currentView === 'week' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
                    class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
-                    Тиждень
+                    {{ __('app.week') }}
                 </button>
                 <button @click="switchView('month')" type="button"
                    :class="currentView === 'month' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
                    class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
-                    Місяць
+                    {{ __('app.month') }}
                 </button>
             </div>
 
@@ -165,13 +165,13 @@
                         error: false,
                         lastSynced: '{{ $lastSyncedAt ?? '' }}',
                         get syncStatus() {
-                            if (this.syncing) return 'Синхронізація...';
-                            if (!this.lastSynced) return 'Не синхронізовано';
+                            if (this.syncing) return '{{ __('app.syncing') }}';
+                            if (!this.lastSynced) return '{{ __('app.not_synced') }}';
                             const diff = Math.floor((Date.now() - new Date(this.lastSynced).getTime()) / 60000);
-                            if (diff < 1) return 'Щойно';
-                            if (diff < 60) return diff + ' хв тому';
-                            if (diff < 1440) return Math.floor(diff / 60) + ' год тому';
-                            return Math.floor(diff / 1440) + ' дн тому';
+                            if (diff < 1) return '{{ __('app.just_now') }}';
+                            if (diff < 60) return diff + ' {{ __('app.min_ago') }}';
+                            if (diff < 1440) return Math.floor(diff / 60) + ' {{ __('app.hour_ago') }}';
+                            return Math.floor(diff / 1440) + ' {{ __('app.day_ago') }}';
                         }
                     }" class="inline-flex items-center gap-1.5">
                         <span class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline" x-text="syncStatus"></span>
@@ -192,7 +192,7 @@
                             .catch(e => { syncing = false; message = 'Помилка з\'єднання'; error = true; })
                         "
                                 :disabled="syncing"
-                                title="Синхронізувати з Google Calendar"
+                                title="{{ __('app.sync_google') }}"
                                 class="w-9 h-9 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors disabled:opacity-50">
                             <svg x-show="!syncing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -235,14 +235,14 @@
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                 </svg>
-                                Експорт (.ics)
+                                {{ __('app.export_ics') }}
                             </a>
                             <a href="{{ route('calendar.export', ['start_date' => $startDate->format('Y-m-d'), 'end_date' => $endDate->format('Y-m-d')]) }}"
                                class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
-                                Експорт поточного періоду
+                                {{ __('app.export_current_period') }}
                             </a>
                             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                             @if(auth()->user()->can('create', \App\Models\Event::class))
@@ -251,7 +251,7 @@
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
-                                Імпорт з файлу (.ics)
+                                {{ __('app.import_ics') }}
                             </a>
                             @endif
                             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
@@ -260,7 +260,7 @@
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                 </svg>
-                                Підписатися на календар
+                                {{ __('app.subscribe_calendar') }}
                             </button>
                         </div>
                     </div>
@@ -313,7 +313,7 @@
                                         </p>
                                         <p class="text-gray-700 dark:text-gray-300 truncate">{{ $item->title }}</p>
                                         <div class="flex items-center mt-1">
-                                            <span class="w-2 h-2 rounded-full bg-purple-500" title="Зустріч"></span>
+                                            <span class="w-2 h-2 rounded-full bg-purple-500" title="{{ __('app.meeting') }}"></span>
                                         </div>
                                     </a>
                                 @else
@@ -327,7 +327,7 @@
                                        class="block p-2 {{ $roundedClass }} text-xs transition-all hover:shadow-md {{ $isMultiDay && !$isFirstDay ? '-ml-2 pl-4' : '' }}"
                                        style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30; border-left: {{ $isFirstDay ? '3px' : '0' }} solid {{ $item->ministry_display_color ?? '#3b82f6' }};">
                                         @if($isFirstDay)
-                                            <p class="font-medium text-gray-900 dark:text-white truncate">{{ $item->time ? $item->time->format('H:i') : ($isMultiDay ? '' : 'Весь день') }}</p>
+                                            <p class="font-medium text-gray-900 dark:text-white truncate">{{ $item->time ? $item->time->format('H:i') : ($isMultiDay ? '' : __('app.all_day')) }}</p>
                                         @endif
                                         <p class="text-gray-700 dark:text-gray-300 truncate">{{ $item->title }}</p>
                                         @if($isFirstDay)
@@ -400,7 +400,7 @@
                                             </div>
                                             <div>
                                                 <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? 'Без команди' }}@if($item->time) &bull; {{ $item->time->format('H:i') }}@endif</p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? __('app.no_ministry') }}@if($item->time) &bull; {{ $item->time->format('H:i') }}@endif</p>
                                             </div>
                                         </div>
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -487,7 +487,7 @@
         <!-- Events List (below calendar) -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Події місяця</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.month_events') }}</h3>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @php
@@ -536,7 +536,7 @@
                                             </div>
                                             <div class="flex items-center gap-2">
                                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
-                                                    Зустріч
+                                                    {{ __('app.meeting') }}
                                                 </span>
                                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -554,7 +554,7 @@
                                                 </div>
                                                 <div>
                                                     <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? 'Без команди' }}@if($item->time) &bull; {{ $item->time->format('H:i') }}@endif</p>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $item->ministry_display_name ?? __('app.no_ministry') }}@if($item->time) &bull; {{ $item->time->format('H:i') }}@endif</p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-2">
@@ -588,7 +588,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400">Немає подій у цьому місяці</p>
+                        <p class="text-gray-500 dark:text-gray-400">{{ __('app.no_events_this_month') }}</p>
                         @if(auth()->user()->can('create', \App\Models\Event::class))
                         <a href="{{ route('events.create') }}" class="mt-3 inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -610,7 +610,7 @@
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                     </svg>
-                    Найближчі події ({{ $months[$nextMonth - 1] ?? 'наступний місяць' }})
+                    Найближчі події ({{ $months[$nextMonth - 1] ?? __('app.next_month') }})
                 </h3>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -625,7 +625,7 @@
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">{{ $item->title }}</p>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $item->ministry_display_name ?? 'Без команди' }}
+                                    {{ $item->ministry_display_name ?? __('app.no_ministry') }}
                                     @if($item->time)
                                         &bull; {{ $item->time->format('H:i') }}
                                     @endif
@@ -661,14 +661,14 @@
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
         <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
             <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Підписка на календар</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Додайте календар до Google, Apple або Outlook</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.calendar_subscription') }}</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('app.add_to_calendars') }}</p>
             </div>
             <div class="px-6 py-4 space-y-4">
                 <!-- iCal Feed URL -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        URL для підписки (iCal)
+                        {{ __('app.ical_url') }}
                     </label>
                     <div class="flex gap-2">
                         <input type="text" id="icalUrl" readonly
@@ -682,33 +682,33 @@
 
                 <!-- Instructions -->
                 <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                    <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Як підписатися?</h4>
+                    <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">{{ __('app.how_to_subscribe') }}</h4>
                     <div class="text-sm text-blue-700 dark:text-blue-400 space-y-2">
                         <details class="cursor-pointer">
                             <summary class="font-medium">Google Calendar</summary>
                             <ol class="mt-2 ml-4 list-decimal space-y-1">
-                                <li>Відкрийте Google Calendar</li>
-                                <li>Натисніть "+" біля "Інші календарі"</li>
-                                <li>Виберіть "З URL-адреси"</li>
-                                <li>Вставте скопійовану URL-адресу</li>
-                                <li>Натисніть "Додати календар"</li>
+                                <li>{{ __('app.open_google_calendar') }}</li>
+                                <li>{{ __('app.click_plus_other') }}</li>
+                                <li>{{ __('app.select_from_url') }}</li>
+                                <li>{{ __('app.paste_url') }}</li>
+                                <li>{{ __('app.click_add_calendar') }}</li>
                             </ol>
                         </details>
                         <details class="cursor-pointer">
-                            <summary class="font-medium">Apple Calendar (iPhone/Mac)</summary>
+                            <summary class="font-medium">{{ __('app.apple_calendar') }}</summary>
                             <ol class="mt-2 ml-4 list-decimal space-y-1">
-                                <li>Відкрийте "Налаштування" > "Календар"</li>
-                                <li>Виберіть "Облікові записи" > "Додати обліковий запис"</li>
-                                <li>Виберіть "Інше" > "Додати підписку на календар"</li>
-                                <li>Вставте URL-адресу</li>
+                                <li>{{ __('app.open_settings_calendar') }}</li>
+                                <li>{{ __('app.select_accounts_add') }}</li>
+                                <li>{{ __('app.select_other_subscription') }}</li>
+                                <li>{{ __('app.paste_url') }}</li>
                             </ol>
                         </details>
                         <details class="cursor-pointer">
-                            <summary class="font-medium">Outlook</summary>
+                            <summary class="font-medium">{{ __('app.outlook_calendar') }}</summary>
                             <ol class="mt-2 ml-4 list-decimal space-y-1">
-                                <li>Відкрийте Outlook Calendar</li>
-                                <li>Виберіть "Додати календар" > "З інтернету"</li>
-                                <li>Вставте URL-адресу</li>
+                                <li>{{ __('app.open_outlook') }}</li>
+                                <li>{{ __('app.select_add_from_internet') }}</li>
+                                <li>{{ __('app.paste_url') }}</li>
                             </ol>
                         </details>
                     </div>
@@ -727,7 +727,7 @@
 
                 <!-- API Info -->
                 <details class="text-sm text-gray-500 dark:text-gray-400">
-                    <summary class="cursor-pointer font-medium">API для розробників</summary>
+                    <summary class="cursor-pointer font-medium">{{ __('app.api_for_developers') }}</summary>
                     <div class="mt-2 space-y-2 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                         <p><strong>JSON API:</strong></p>
                         <code class="block text-xs bg-gray-100 dark:bg-gray-600 p-2 rounded overflow-x-auto">
@@ -762,7 +762,7 @@ function copyIcalUrl(e) {
     navigator.clipboard.writeText(input.value).then(() => {
         if (btn) {
             const originalText = btn.textContent;
-            btn.textContent = 'Скопійовано!';
+            btn.textContent = '{{ __('app.copied') }}';
             setTimeout(() => btn.textContent = originalText, 2000);
         }
     });
@@ -875,7 +875,7 @@ function calendarNavigator(initialState) {
             })
             .catch(error => {
                 console.error('Error loading calendar:', error);
-                alert('Помилка при завантаженні календаря');
+                alert('{{ __('app.calendar_load_error') }}');
             })
             .finally(() => {
                 this.loading = false;

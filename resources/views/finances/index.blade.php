@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Фінанси')
+@section('title', __('app.finances'))
 
 @section('actions')
 @if(auth()->user()->canCreate('finances'))
@@ -10,21 +10,21 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
-        Надходження
+        {{ __('app.income_action') }}
     </button>
     <button type="button" onclick="window.openExpenseModal && window.openExpenseModal()"
        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
         </svg>
-        Витрата
+        {{ __('app.expense_action') }}
     </button>
     <button type="button" onclick="window.openExchangeModal && window.openExchangeModal()"
        class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
         </svg>
-        Обмін
+        {{ __('app.exchange') }}
     </button>
 </div>
 @endif
@@ -47,19 +47,19 @@
                 </select>
                 <select x-model="selectedMonth" @change="updatePeriod()"
                         class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    <option value="" {{ empty($month) ? 'selected' : '' }}>Весь рік</option>
-                    <option value="1" {{ $month == 1 ? 'selected' : '' }}>Січень</option>
-                    <option value="2" {{ $month == 2 ? 'selected' : '' }}>Лютий</option>
-                    <option value="3" {{ $month == 3 ? 'selected' : '' }}>Березень</option>
-                    <option value="4" {{ $month == 4 ? 'selected' : '' }}>Квітень</option>
-                    <option value="5" {{ $month == 5 ? 'selected' : '' }}>Травень</option>
-                    <option value="6" {{ $month == 6 ? 'selected' : '' }}>Червень</option>
-                    <option value="7" {{ $month == 7 ? 'selected' : '' }}>Липень</option>
-                    <option value="8" {{ $month == 8 ? 'selected' : '' }}>Серпень</option>
-                    <option value="9" {{ $month == 9 ? 'selected' : '' }}>Вересень</option>
-                    <option value="10" {{ $month == 10 ? 'selected' : '' }}>Жовтень</option>
-                    <option value="11" {{ $month == 11 ? 'selected' : '' }}>Листопад</option>
-                    <option value="12" {{ $month == 12 ? 'selected' : '' }}>Грудень</option>
+                    <option value="" {{ empty($month) ? 'selected' : '' }}>{{ __('app.all_year') }}</option>
+                    <option value="1" {{ $month == 1 ? 'selected' : '' }}>{{ __('app.january') }}</option>
+                    <option value="2" {{ $month == 2 ? 'selected' : '' }}>{{ __('app.february') }}</option>
+                    <option value="3" {{ $month == 3 ? 'selected' : '' }}>{{ __('app.march') }}</option>
+                    <option value="4" {{ $month == 4 ? 'selected' : '' }}>{{ __('app.april') }}</option>
+                    <option value="5" {{ $month == 5 ? 'selected' : '' }}>{{ __('app.may') }}</option>
+                    <option value="6" {{ $month == 6 ? 'selected' : '' }}>{{ __('app.june') }}</option>
+                    <option value="7" {{ $month == 7 ? 'selected' : '' }}>{{ __('app.july') }}</option>
+                    <option value="8" {{ $month == 8 ? 'selected' : '' }}>{{ __('app.august') }}</option>
+                    <option value="9" {{ $month == 9 ? 'selected' : '' }}>{{ __('app.september') }}</option>
+                    <option value="10" {{ $month == 10 ? 'selected' : '' }}>{{ __('app.october') }}</option>
+                    <option value="11" {{ $month == 11 ? 'selected' : '' }}>{{ __('app.november') }}</option>
+                    <option value="12" {{ $month == 12 ? 'selected' : '' }}>{{ __('app.december') }}</option>
                 </select>
             </div>
         </div>
@@ -68,7 +68,7 @@
     <!-- Current Balance Card - Multi-currency -->
     <div id="finance-balance" class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-4 sm:p-6 text-white">
         <div>
-            <p class="text-indigo-100 text-sm font-medium mb-3">Поточний баланс каси</p>
+            <p class="text-indigo-100 text-sm font-medium mb-3">{{ __('app.current_cash_balance') }}</p>
 
             @php
                 $currencySymbols = ['UAH' => '₴', 'USD' => '$', 'EUR' => '€'];
@@ -98,30 +98,30 @@
 
             @if($hasMultipleCurrencies)
             <p class="text-xs text-indigo-200 mt-2">
-                Еквівалент у гривні: {{ number_format($currentBalance, 0, ',', ' ') }} ₴
+                {{ __('app.equivalent_uah') }} {{ number_format($currentBalance, 0, ',', ' ') }} ₴
             </p>
             @endif
 
             <div class="mt-4 text-sm text-indigo-100 space-y-1 max-w-sm">
                 @if($initialBalance > 0)
                 <div class="flex justify-between gap-4">
-                    <span>Початковий баланс{{ $initialBalanceDate ? ' (' . $initialBalanceDate->format('d.m.Y') . ')' : '' }}:</span>
+                    <span>{{ __('app.initial_balance') }}{{ $initialBalanceDate ? ' (' . $initialBalanceDate->format('d.m.Y') . ')' : '' }}:</span>
                     <span class="font-medium whitespace-nowrap">{{ number_format($initialBalance, 0, ',', ' ') }} ₴</span>
                 </div>
                 @endif
                 <div class="flex justify-between gap-4">
-                    <span>+ Всього надходжень:</span>
+                    <span>{{ __('app.total_income_label') }}</span>
                     <span class="font-medium text-green-200 whitespace-nowrap">{{ number_format($allTimeIncome, 0, ',', ' ') }} ₴</span>
                 </div>
                 <div class="flex justify-between gap-4">
-                    <span>- Всього витрат:</span>
+                    <span>{{ __('app.total_expense_label') }}</span>
                     <span class="font-medium text-red-200 whitespace-nowrap">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
                 </div>
             </div>
 
             @if(count($incomeByCurrency) > 1 || count($expenseByCurrency) > 1 || !empty($incomeByCurrency['USD']) || !empty($incomeByCurrency['EUR']) || !empty($expenseByCurrency['USD']) || !empty($expenseByCurrency['EUR']))
             <div class="mt-3 pt-3 border-t border-white/20">
-                <p class="text-xs text-indigo-200 mb-2">Рух за період по валютах:</p>
+                <p class="text-xs text-indigo-200 mb-2">{{ __('app.period_flow_by_currency') }}</p>
                 <div class="flex flex-wrap gap-3">
                     @foreach(['UAH' => '₴', 'USD' => '$', 'EUR' => '€'] as $code => $symbol)
                         @php
@@ -146,7 +146,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Вказати початковий баланс
+                {{ __('app.set_initial_balance') }}
             </a>
         </div>
         @endif
@@ -158,7 +158,7 @@
         <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-4 sm:p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-green-100 text-sm font-medium">Надходження</p>
+                    <p class="text-green-100 text-sm font-medium">{{ __('app.income_action') }}</p>
                     <p class="text-2xl sm:text-3xl font-bold mt-1">{{ number_format($totalIncome, 0, ',', ' ') }} ₴</p>
                     <p class="text-green-100 text-sm mt-2">
                         {{ $periodLabel }}
@@ -181,7 +181,7 @@
         <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-4 sm:p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-red-100 text-sm font-medium">Витрати</p>
+                    <p class="text-red-100 text-sm font-medium">{{ __('app.expenses') }}</p>
                     <p class="text-2xl sm:text-3xl font-bold mt-1">{{ number_format($totalExpense, 0, ',', ' ') }} ₴</p>
                     <p class="text-red-100 text-sm mt-2">
                         {{ $periodLabel }}
@@ -204,7 +204,7 @@
         <div class="bg-gradient-to-br {{ $periodBalance >= 0 ? 'from-blue-500 to-blue-600' : 'from-orange-500 to-orange-600' }} rounded-xl shadow-lg p-4 sm:p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-blue-100 text-sm font-medium">Результат за період</p>
+                    <p class="text-blue-100 text-sm font-medium">{{ __('app.period_result') }}</p>
                     <p class="text-2xl sm:text-3xl font-bold mt-1">{{ $periodBalance >= 0 ? '+' : '' }}{{ number_format($periodBalance, 0, ',', ' ') }} ₴</p>
                     <p class="text-blue-100 text-sm mt-2">
                         {{ $periodLabel }}
@@ -222,16 +222,16 @@
     <!-- Chart -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="chartTitle">Динаміка за {{ $year }} рік</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="chartTitle">{{ __('app.chart_dynamics', ['year' => $year]) }}</h3>
             <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-0.5">
                 <button @click="switchChartPeriod('month')" :class="chartPeriod === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">Місяць</button>
+                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">{{ __('app.period_month') }}</button>
                 <button @click="switchChartPeriod('quarter')" :class="chartPeriod === 'quarter' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">Квартал</button>
+                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">{{ __('app.period_quarter') }}</button>
                 <button @click="switchChartPeriod('year')" :class="chartPeriod === 'year' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">Рік</button>
+                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">{{ __('app.period_year') }}</button>
                 <button @click="switchChartPeriod('all')" :class="chartPeriod === 'all' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">Весь час</button>
+                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">{{ __('app.period_all_time') }}</button>
             </div>
         </div>
         <div class="h-64 relative">
@@ -250,8 +250,8 @@
         <!-- Income by category -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Надходження по категоріях</h3>
-                <a href="{{ route('finances.incomes') }}" class="text-sm text-primary-600 hover:text-primary-500">Усі →</a>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.income_by_category') }}</h3>
+                <a href="{{ route('finances.incomes') }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
             </div>
             <div class="p-6">
                 @if($incomeByCategory->count() > 0)
@@ -276,7 +276,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="text-gray-500 dark:text-gray-400 text-center py-8">Немає надходжень за цей період</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-center py-8">{{ __('app.no_income_this_period') }}</p>
                 @endif
             </div>
         </div>
@@ -284,8 +284,8 @@
         <!-- Expense by ministry -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Витрати по командах</h3>
-                <a href="{{ route('finances.expenses.index') }}" class="text-sm text-primary-600 hover:text-primary-500">Усі →</a>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.expense_by_ministry') }}</h3>
+                <a href="{{ route('finances.expenses.index') }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
             </div>
             <div class="p-6">
                 @if($expenseByMinistry->count() > 0)
@@ -310,7 +310,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="text-gray-500 dark:text-gray-400 text-center py-8">Немає витрат за цей період</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-center py-8">{{ __('app.no_expense_this_period') }}</p>
                 @endif
             </div>
         </div>
@@ -321,7 +321,7 @@
         <!-- Recent incomes -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Останні надходження</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.recent_incomes') }}</h3>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($recentIncomes as $income)
@@ -332,7 +332,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $income->category?->name ?? 'Без категорії' }}
+                                    {{ $income->category?->name ?? __('app.no_category') }}
                                 </p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
                                     {{ $income->date->format('d.m.Y') }} • {{ $income->payment_method_label ?? 'Готівка' }}
@@ -344,7 +344,7 @@
                         </span>
                     </div>
                 @empty
-                    <p class="px-6 py-8 text-gray-500 dark:text-gray-400 text-center">Немає надходжень</p>
+                    <p class="px-6 py-8 text-gray-500 dark:text-gray-400 text-center">{{ __('app.no_incomes') }}</p>
                 @endforelse
             </div>
         </div>
@@ -352,7 +352,7 @@
         <!-- Recent expenses -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Останні витрати</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.recent_expenses') }}</h3>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($recentExpenses as $expense)
@@ -377,7 +377,7 @@
                         </span>
                     </div>
                 @empty
-                    <p class="px-6 py-8 text-gray-500 dark:text-gray-400 text-center">Немає витрат</p>
+                    <p class="px-6 py-8 text-gray-500 dark:text-gray-400 text-center">{{ __('app.no_expenses') }}</p>
                 @endforelse
             </div>
         </div>
@@ -388,7 +388,7 @@
         <!-- Activity Feed -->
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Стрічка активності</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.activity_feed') }}</h3>
             </div>
             <div class="p-4 max-h-80 overflow-y-auto">
                 <div class="space-y-3">
@@ -413,7 +413,7 @@
                             <p class="text-sm text-gray-900 dark:text-white">
                                 @if($activity->direction === 'in')
                                     <span class="font-medium text-green-600 dark:text-green-400">+{{ number_format($activity->amount, 0, ',', ' ') }} ₴</span>
-                                    <span class="text-gray-500 dark:text-gray-400">{{ $activity->category?->name ?? 'Надходження' }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400">{{ $activity->category?->name ?? __('app.income_action') }}</span>
                                 @else
                                     <span class="font-medium text-red-600 dark:text-red-400">-{{ number_format($activity->amount, 0, ',', ' ') }} ₴</span>
                                     <span class="text-gray-500 dark:text-gray-400">{{ Str::limit($activity->description, 25) }}</span>
@@ -428,7 +428,7 @@
                         </div>
                     </div>
                     @empty
-                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">Немає активності</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.no_activity') }}</p>
                     @endforelse
                 </div>
             </div>
@@ -437,7 +437,7 @@
         <!-- Payment Methods -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Способи оплати</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.payment_methods') }}</h3>
             </div>
             <div class="p-6">
                 @if($paymentMethods->count() > 0)
@@ -463,7 +463,7 @@
                     @endforeach
                 </div>
                 @else
-                <p class="text-gray-500 dark:text-gray-400 text-center py-8">Немає даних</p>
+                <p class="text-gray-500 dark:text-gray-400 text-center py-8">{{ __('app.no_data') }}</p>
                 @endif
             </div>
         </div>
@@ -473,8 +473,8 @@
     @if($activeCampaigns->count() > 0)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Активні збори</h3>
-            <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500">Усі →</a>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.active_campaigns') }}</h3>
+            <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
         </div>
         <div class="space-y-4">
             @foreach($activeCampaigns as $campaign)
@@ -496,7 +496,7 @@
                 </div>
                 @if($campaign->days_remaining !== null)
                 <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {{ $campaign->days_remaining > 0 ? 'Залишилось ' . $campaign->days_remaining . ' днів' : 'Завершено' }}
+                    {{ $campaign->days_remaining > 0 ? __('app.days_remaining', ['days' => $campaign->days_remaining]) : __('app.campaign_completed') }}
                 </p>
                 @endif
             </div>
@@ -510,13 +510,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 function financesDashboard() {
-    const monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+    const monthNames = ['', '{{ __('app.january') }}', '{{ __('app.february') }}', '{{ __('app.march') }}', '{{ __('app.april') }}', '{{ __('app.may') }}', '{{ __('app.june') }}', '{{ __('app.july') }}', '{{ __('app.august') }}', '{{ __('app.september') }}', '{{ __('app.october') }}', '{{ __('app.november') }}', '{{ __('app.december') }}'];
 
     return {
         selectedYear: '{{ $year }}',
         selectedMonth: '{{ $month ?? "" }}',
         chartPeriod: 'year',
-        chartTitle: 'Динаміка за {{ $year }} рік',
+        chartTitle: '{{ __('app.chart_dynamics', ['year' => $year]) }}',
         chartLoading: false,
         chartInstance: null,
 
@@ -557,11 +557,12 @@ function financesDashboard() {
         updateChartTitle(period, year, month) {
             const m = parseInt(month);
             const q = Math.ceil(m / 3);
+            const chartDynTpl = '{{ __('app.chart_dynamics', ['year' => '__YEAR__']) }}';
             const titles = {
                 month: (monthNames[m] || '') + ' ' + year,
-                quarter: q + '-й квартал ' + year,
-                year: 'Динаміка за ' + year + ' рік',
-                all: 'Динаміка за весь час',
+                quarter: q + '{{ __('app.quarter_label') }} ' + year,
+                year: chartDynTpl.replace('__YEAR__', year),
+                all: '{{ __('app.chart_dynamics_all') }}',
             };
             this.chartTitle = titles[period] || titles.year;
         },
@@ -586,7 +587,7 @@ function financesDashboard() {
                     labels: chartData.map(d => d.month),
                     datasets: [
                         {
-                            label: 'Надходження',
+                            label: '{{ __('app.income_action') }}',
                             data: chartData.map(d => d.income),
                             backgroundColor: 'rgba(34, 197, 94, 0.8)',
                             borderRadius: 4,
@@ -594,7 +595,7 @@ function financesDashboard() {
                             order: 2,
                         },
                         {
-                            label: 'Витрати',
+                            label: '{{ __('app.expenses') }}',
                             data: chartData.map(d => d.expense),
                             backgroundColor: 'rgba(239, 68, 68, 0.8)',
                             borderRadius: 4,
@@ -602,7 +603,7 @@ function financesDashboard() {
                             order: 2,
                         },
                         {
-                            label: 'Баланс (накопичувальний)',
+                            label: '{{ __('app.balance_cumulative') }}',
                             data: balanceData,
                             type: 'line',
                             borderColor: 'rgba(59, 130, 246, 1)',
@@ -652,7 +653,7 @@ function financesDashboard() {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Надходження / Витрати',
+                                text: '{{ __('app.incomes_expenses_axis') }}',
                                 color: '#6b7280',
                             },
                             ticks: {
@@ -668,7 +669,7 @@ function financesDashboard() {
                             position: 'right',
                             title: {
                                 display: true,
-                                text: 'Накопичувальний баланс',
+                                text: '{{ __('app.cumulative_balance_axis') }}',
                                 color: '#3b82f6',
                             },
                             ticks: {
@@ -750,7 +751,7 @@ function financesDashboard() {
                  x-transition:enter-end="opacity-100 scale-100"
                  @click.stop>
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додати надходження</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.add_income_title') }}</h3>
                     <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

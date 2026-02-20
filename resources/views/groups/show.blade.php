@@ -17,7 +17,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
         </svg>
-        Редагувати
+        {{ __('app.edit') }}
     </a>
     @endcan
     @can('delete', $group)
@@ -28,7 +28,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
             </svg>
-            Видалити
+            {{ __('app.delete') }}
         </button>
     </form>
     @endcan
@@ -71,7 +71,7 @@
                         <svg class="w-4 h-4 mr-1.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
-                        Лідер: <a href="{{ route('people.show', $group->leader) }}" class="ml-1 text-primary-600 dark:text-primary-400 hover:underline">{{ $group->leader->full_name }}</a>
+                        {{ __('app.leader') }}: <a href="{{ route('people.show', $group->leader) }}" class="ml-1 text-primary-600 dark:text-primary-400 hover:underline">{{ $group->leader->full_name }}</a>
                     </div>
                     @endif
                     @if($group->meeting_day)
@@ -94,12 +94,12 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $group->members->count() }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Учасників</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.members') }}</div>
         </div>
         @if($currentChurch->attendance_enabled)
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendanceStats['total_meetings'] }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Зустрічей</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.meetings_count') }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex items-center">
@@ -114,15 +114,15 @@
                 </svg>
                 @endif
             </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Сер. відвідув.</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.avg_attendance') }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             @if($attendanceStats['last_meeting'])
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendanceStats['last_meeting']->date->format('d.m') }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Остання зустріч</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.last_meeting') }}</div>
             @else
             <div class="text-2xl font-bold text-gray-400">—</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Немає даних</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_data') }}</div>
             @endif
         </div>
         @endif
@@ -132,14 +132,14 @@
         <!-- Members -->
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Учасники ({{ $group->members->count() }})</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.members') }} ({{ $group->members->count() }})</h3>
                 @can('update', $group)
                 <button type="button" onclick="document.getElementById('addMemberModal').classList.remove('hidden')"
                         class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    Додати
+                    {{ __('app.add') }}
                 </button>
                 @endcan
             </div>
@@ -168,12 +168,12 @@
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                     </svg>
-                                    Лідер
+                                    {{ __('app.leader') }}
                                 </span>
                                 @elseif($member->pivot->role === 'assistant')
-                                <span class="text-amber-600 dark:text-amber-400 font-medium">Помічник</span>
+                                <span class="text-amber-600 dark:text-amber-400 font-medium">{{ __('app.assistant_role') }}</span>
                                 @else
-                                <span class="text-gray-500 dark:text-gray-400">Учасник</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('app.member_role') }}</span>
                                 @endif
                             </p>
                         </div>
@@ -195,7 +195,7 @@
                                     @method('PUT')
                                     <input type="hidden" name="role" value="leader">
                                     <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        Зробити лідером
+                                        {{ __('app.make_leader') }}
                                     </button>
                                 </form>
                                 @endif
@@ -205,7 +205,7 @@
                                     @method('PUT')
                                     <input type="hidden" name="role" value="assistant">
                                     <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        Зробити помічником
+                                        {{ __('app.make_assistant') }}
                                     </button>
                                 </form>
                                 @endif
@@ -215,7 +215,7 @@
                                     @method('PUT')
                                     <input type="hidden" name="role" value="member">
                                     <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        Зробити учасником
+                                        {{ __('app.make_member') }}
                                     </button>
                                 </form>
                                 @endif
@@ -225,7 +225,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                        Видалити з групи
+                                        {{ __('app.remove_from_group') }}
                                     </button>
                                 </form>
                                 @endif
@@ -239,11 +239,11 @@
                     <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <p>Немає учасників</p>
+                    <p>{{ __('app.no_members') }}</p>
                     @can('update', $group)
                     <button type="button" onclick="document.getElementById('addMemberModal').classList.remove('hidden')"
                             class="mt-3 text-sm text-primary-600 dark:text-primary-400 hover:underline">
-                        Додати першого учасника
+                        {{ __('app.add_first_member') }}
                     </button>
                     @endcan
                 </div>
@@ -255,9 +255,9 @@
         @if($currentChurch->attendance_enabled)
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Відвідуваність</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.attendance') }}</h3>
                 <a href="{{ route('groups.attendance.index', $group) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">
-                    Усі записи
+                    {{ __('app.all_records') }}
                 </a>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -286,10 +286,10 @@
                     <svg class="w-10 h-10 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
-                    <p class="text-sm">Немає записів відвідуваності</p>
+                    <p class="text-sm">{{ __('app.no_attendance_records') }}</p>
                     @can('update', $group)
                     <a href="{{ route('groups.attendance.create', $group) }}" class="mt-2 inline-block text-sm text-primary-600 dark:text-primary-400 hover:underline">
-                        Записати першу зустріч
+                        {{ __('app.record_first_meeting') }}
                     </a>
                     @endcan
                 </div>
@@ -302,7 +302,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    Записати зустріч
+                    {{ __('app.record_meeting') }}
                 </a>
             </div>
             @endcan
@@ -318,29 +318,29 @@
     <div class="min-h-screen px-4 flex items-center justify-center">
         <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('addMemberModal').classList.add('hidden')"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Додати учасника</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.add_member_title') }}</h3>
             <form method="POST" action="{{ route('groups.members.add', $group) }}">
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Людина</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.person_label') }}</label>
                         <x-person-select name="person_id" :people="$availablePeople" :required="true" :nullable="false" placeholder="Пошук людини..." />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Роль</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.role_label') }}</label>
                         <select name="role" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="member">Учасник</option>
-                            <option value="assistant">Помічник</option>
+                            <option value="member">{{ __('app.member_role') }}</option>
+                            <option value="assistant">{{ __('app.assistant_role') }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
                     <button type="button" onclick="document.getElementById('addMemberModal').classList.add('hidden')"
                             class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
-                        Скасувати
+                        {{ __('app.cancel') }}
                     </button>
                     <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
-                        Додати
+                        {{ __('app.add') }}
                     </button>
                 </div>
             </form>

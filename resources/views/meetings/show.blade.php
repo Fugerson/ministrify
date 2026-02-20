@@ -8,13 +8,13 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
         </svg>
-        Копіювати
+        {{ __('app.copy') }}
     </a>
     <a href="{{ route('meetings.edit', [$ministry, $meeting]) }}" class="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
         </svg>
-        Редагувати
+        {{ __('app.edit') }}
     </a>
 </div>
 @endsection
@@ -108,15 +108,15 @@
             <div class="flex gap-4">
                 <div class="text-center px-4 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                     <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $meeting->agendaItems->count() }}</span>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Пунктів плану</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.agenda_items') }}</p>
                 </div>
                 <div class="text-center px-4 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                     <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $meeting->materials->count() }}</span>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Матеріалів</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.materials_count') }}</p>
                 </div>
                 <div class="text-center px-4 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                     <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $meeting->attendees->count() }}</span>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Учасників</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.attendees_count') }}</p>
                 </div>
             </div>
         </div>
@@ -128,17 +128,17 @@
             <nav class="flex -mb-px overflow-x-auto no-scrollbar">
                 <button @click="activeTab = 'agenda'" :class="activeTab === 'agenda' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
                         class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">
-                    План зустрічі
+                    {{ __('app.meeting_agenda') }}
                     <span class="ml-1.5 px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded-full">{{ $meeting->agendaItems->count() }}</span>
                 </button>
                 <button @click="activeTab = 'materials'" :class="activeTab === 'materials' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
                         class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">
-                    Матеріали
+                    {{ __('app.materials') }}
                     <span class="ml-1.5 px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded-full">{{ $meeting->materials->count() }}</span>
                 </button>
                 <button @click="activeTab = 'attendees'" :class="activeTab === 'attendees' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
                         class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">
-                    Учасники
+                    {{ __('app.attendees') }}
                     <span class="ml-1.5 px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded-full">{{ $meeting->attendees->count() }}</span>
                 </button>
                 <button @click="activeTab = 'notes'" :class="activeTab === 'notes' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
