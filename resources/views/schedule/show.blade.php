@@ -919,8 +919,7 @@
                         <span>Назад до розкладу</span>
                     </a>
 
-                    @if($event->ministry)
-                    @can('manage-ministry', $event->ministry)
+                    @can('delete', $event)
                         @php
                             $hasRelatedEvents = $event->parent_event_id || $event->childEvents()->count() > 0;
                             $relatedCount = $event->parent_event_id
@@ -1038,7 +1037,6 @@
                             </template>
                         </div>
                     @endcan
-                    @endif
                 </div>
             </div>
         </div>
