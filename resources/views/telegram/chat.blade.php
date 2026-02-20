@@ -79,7 +79,7 @@
 
 <script>
 // Scroll to bottom on load
-document.addEventListener('DOMContentLoaded', function() {
+onPageReady(function() {
     const messages = document.getElementById('messages');
     messages.scrollTop = messages.scrollHeight;
 });

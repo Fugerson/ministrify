@@ -14,9 +14,10 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+onPageReady(function() {
     const ctx = document.getElementById('attendanceChart');
     if (ctx) {
+        var old = Chart.getChart(ctx); if (old) old.destroy();
         const isDark = document.documentElement.classList.contains('dark');
         const textColor = isDark ? '#9ca3af' : '#6b7280';
         const gridColor = isDark ? '#374151' : '#f3f4f6';

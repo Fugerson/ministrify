@@ -6,6 +6,16 @@
 }" :class="{ 'dark': darkMode }">
 <head>
     <script>
+        // Global helper: works on initial load AND wire:navigate SPA navigation
+        // DOMContentLoaded doesn't re-fire on SPA navigation, this handles both cases
+        window.onPageReady = function(fn) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', fn, { once: true });
+            } else {
+                fn();
+            }
+        };
+
         // Apply dark mode immediately before any rendering to prevent FOUC
         // Dark is default, only light if explicitly set
         (function() {
@@ -1705,21 +1715,21 @@
     <!-- Show session messages as toasts -->
     @if(session('success'))
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            onPageReady(function() {
                 showToast('success', '{{ session('success') }}');
             });
         </script>
     @endif
     @if(session('error'))
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            onPageReady(function() {
                 showToast('error', '{{ session('error') }}');
             });
         </script>
     @endif
     @if(session('warning'))
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            onPageReady(function() {
                 showToast('warning', '{{ session('warning') }}');
             });
         </script>

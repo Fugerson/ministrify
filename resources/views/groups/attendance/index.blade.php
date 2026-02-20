@@ -120,8 +120,11 @@
 @if($chartData->count() > 1)
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('attendanceChart').getContext('2d');
+onPageReady(function() {
+    var el = document.getElementById('attendanceChart');
+    if (!el) return;
+    var old = Chart.getChart(el); if (old) old.destroy();
+    const ctx = el.getContext('2d');
     const chartData = @json($chartData);
 
     new Chart(ctx, {

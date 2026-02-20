@@ -110,7 +110,9 @@
 
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
         <script>
-            new Sortable(document.getElementById('team-list'), {
+            onPageReady(function() {
+            var el = document.getElementById('team-list');
+            if (el) new Sortable(el, {
                 animation: 150,
                 handle: '.drag-handle',
                 onEnd: async function() {
@@ -126,6 +128,7 @@
                         body: JSON.stringify({ order })
                     });
                 }
+            });
             });
         </script>
     @endif

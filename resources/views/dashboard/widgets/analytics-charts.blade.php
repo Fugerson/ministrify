@@ -39,11 +39,13 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+onPageReady(function() {
     const analyticsCtx = document.getElementById('analyticsChart');
     if (!analyticsCtx) return;
 
-    let analyticsChart = null;
+    let analyticsChart = Chart.getChart(analyticsCtx);
+    if (analyticsChart) analyticsChart.destroy();
+    analyticsChart = null;
     const chartLoader = document.getElementById('chartLoader');
     const chartLegend = document.getElementById('chartLegend');
     const chartTabs = document.querySelectorAll('.chart-tab');

@@ -105,8 +105,11 @@
 
 @if(count($monthlyData) > 0)
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('monthlyChart').getContext('2d');
+onPageReady(function() {
+    var el = document.getElementById('monthlyChart');
+    if (!el) return;
+    var old = Chart.getChart(el); if (old) old.destroy();
+    const ctx = el.getContext('2d');
     const months = ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру'];
     const data = @json($monthlyData);
 

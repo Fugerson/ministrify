@@ -1575,9 +1575,10 @@ function familyManager() {
 }
 @endif
 
-document.addEventListener('DOMContentLoaded', function() {
+onPageReady(function() {
     const ctx = document.getElementById('attendanceChart');
     if (!ctx) return;
+    var old = Chart.getChart(ctx); if (old) old.destroy();
 
     const isDark = document.documentElement.classList.contains('dark');
     const textColor = isDark ? '#9ca3af' : '#6b7280';

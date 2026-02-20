@@ -86,6 +86,7 @@
 
 @push('scripts')
 <script>
+onPageReady(function() {
 document.getElementById('search').addEventListener('input', function(e) {
     const search = e.target.value.toLowerCase();
     document.querySelectorAll('.person-item').forEach(function(item) {
@@ -109,6 +110,7 @@ function selectAll() {
     });
     updateCount();
 }
+});
 </script>
 @endpush
 @endsection

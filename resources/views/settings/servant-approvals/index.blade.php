@@ -291,29 +291,34 @@ function closeRejectModal() {
     document.getElementById('rejectForm').reset();
 }
 
-document.getElementById('rejectForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const userId = document.getElementById('rejectUserId').value;
-    const reason = document.querySelector('textarea[name="reason"]').value;
+onPageReady(function() {
+    var rejectForm = document.getElementById('rejectForm');
+    if (rejectForm) {
+        rejectForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userId = document.getElementById('rejectUserId').value;
+            const reason = document.querySelector('textarea[name="reason"]').value;
 
-    fetch(`/settings/servant-approvals/${userId}/reject`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        },
-        body: JSON.stringify({ reason: reason })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert('{{ __("Помилка") }}: ' + data.message);
-        }
-    })
-    .catch(err => alert('{{ __("Помилка запиту") }}: ' + err));
+            fetch(`/settings/servant-approvals/${userId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ reason: reason })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('{{ __("Помилка") }}: ' + data.message);
+                }
+            })
+            .catch(err => alert('{{ __("Помилка запиту") }}: ' + err));
+        });
+    }
 });
 </script>
 @endsection

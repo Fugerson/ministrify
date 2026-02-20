@@ -322,7 +322,7 @@ function blockoutCreateForm() {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
+onPageReady(function() {
     toggleTimeFields();
     toggleMinistrySelection();
     toggleRecurrenceEnd();

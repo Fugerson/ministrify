@@ -315,7 +315,7 @@ function confirmDelete() {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
+onPageReady(function() {
     // Sync end date with start date
     document.getElementById('start_date').addEventListener('change', function() {
         const endDate = document.getElementById('end_date');
