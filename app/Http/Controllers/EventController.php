@@ -212,7 +212,7 @@ class EventController extends Controller
 
         $ministries = $query->with('positions')->get();
 
-        $selectedMinistry = $request->get('ministry');
+        $selectedMinistry = $request->get('ministry_id') ?? $request->get('ministry');
 
         return view('schedule.create', compact('ministries', 'selectedMinistry'));
     }
