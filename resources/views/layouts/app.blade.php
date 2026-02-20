@@ -54,7 +54,7 @@
             }
         });
 
-        // Global fetch interceptor — auto-reload on expired session (401/419)
+        // Global fetch interceptor — auto-redirect on expired session (401/419)
         (function() {
             const originalFetch = window.fetch;
             let reloading = false;
@@ -62,7 +62,17 @@
                 return originalFetch.apply(this, args).then(response => {
                     if ((response.status === 401 || response.status === 419) && !reloading) {
                         reloading = true;
-                        window.location.reload();
+                        // Verify session is actually expired before redirecting
+                        originalFetch('/api/auth-check', { credentials: 'same-origin' })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (!data.authenticated) {
+                                    window.location.href = '/login';
+                                } else {
+                                    reloading = false; // Session valid — 401 was from an API (e.g. expired Google token)
+                                }
+                            })
+                            .catch(() => { window.location.href = '/login'; });
                     }
                     return response;
                 });

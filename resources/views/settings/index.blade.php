@@ -1121,6 +1121,9 @@
                     if (res.ok) {
                         const data = await res.json();
                         this.calendars = data.calendars || [];
+                    } else if (res.status === 401) {
+                        this.calendars = [];
+                        console.warn('Google Calendar token expired — reconnect required');
                     }
                 } catch (e) {
                     console.error('Failed to load calendars', e);

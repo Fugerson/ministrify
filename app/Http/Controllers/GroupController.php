@@ -143,7 +143,7 @@ class GroupController extends Controller
 
         $validated = $request->validate([
             'person_id' => ['required', new BelongsToChurch(Person::class)],
-            'role' => 'nullable|string',
+            'role' => 'nullable|in:leader,assistant,member',
         ]);
 
         if ($group->members()->where('people.id', $validated['person_id'])->exists()) {
@@ -170,6 +170,11 @@ class GroupController extends Controller
     {
         $this->authorize('update', $group);
         abort_unless($person->church_id === auth()->user()->church_id, 404);
+
+        // Clear leader_id if removing the current leader
+        if ($group->leader_id === $person->id) {
+            $group->update(['leader_id' => null]);
+        }
 
         $group->members()->detach($person->id);
 

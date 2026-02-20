@@ -831,7 +831,12 @@ class FinanceController extends Controller
         if (!empty($validated['ministry_id'])) {
             $ministry = Ministry::find($validated['ministry_id']);
             if ($ministry) {
-                $budgetCheck = $ministry->canAddExpense((float) $validated['amount']);
+                $expenseAmountUah = (float) $validated['amount'];
+                $currency = $validated['currency'] ?? 'UAH';
+                if ($currency !== 'UAH') {
+                    $expenseAmountUah = ExchangeRate::toUah($expenseAmountUah, $currency, $validated['date'] ?? now()->toDateString());
+                }
+                $budgetCheck = $ministry->canAddExpense($expenseAmountUah);
 
                 if (!$budgetCheck['allowed'] && !$request->boolean('force_over_budget')) {
                     if ($request->wantsJson()) {
@@ -988,16 +993,21 @@ class FinanceController extends Controller
         // Check ministry budget limits (only if amount increased or ministry changed)
         $budgetWarning = null;
         $newMinistryId = $validated['ministry_id'] ?? null;
-        $amountDifference = (float) $validated['amount'] - (float) $transaction->amount;
+        $newCurrency = $validated['currency'] ?? 'UAH';
+        $newAmountUah = (float) $validated['amount'];
+        if ($newCurrency !== 'UAH') {
+            $newAmountUah = ExchangeRate::toUah($newAmountUah, $newCurrency, $validated['date'] ?? now()->toDateString());
+        }
+        $oldAmountUah = (float) ($transaction->amount_uah ?? $transaction->amount);
 
         // Check budget if: ministry changed to new one, or amount increased for same ministry
         if ($newMinistryId) {
             $ministry = Ministry::find($newMinistryId);
             if ($ministry) {
-                // Calculate effective new expense for budget check
+                // Calculate effective new expense for budget check (in UAH)
                 $checkAmount = ($transaction->ministry_id === $newMinistryId)
-                    ? $amountDifference  // Same ministry - only check the increase
-                    : (float) $validated['amount'];  // New ministry - check full amount
+                    ? $newAmountUah - $oldAmountUah  // Same ministry - only check the increase
+                    : $newAmountUah;  // New ministry - check full amount
 
                 if ($checkAmount > 0) {
                     $budgetCheck = $ministry->canAddExpense($checkAmount);

@@ -543,6 +543,7 @@ return [
     'notes_placeholder' => 'Додаткова інформація про людину...',
     'no_notes' => 'Немає нотаток',
     'copied' => 'Скопійовано!',
+    'copy_link' => 'Копіювати посилання',
     'reset_password_error' => 'Помилка при скиданні пароля',
     'update_email_error' => 'Помилка при оновленні email',
     'create_account_error' => 'Помилка при створенні акаунту',

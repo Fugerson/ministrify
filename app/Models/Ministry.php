@@ -140,10 +140,10 @@ class Ministry extends Model
 
     public function getSpentThisMonthAttribute(): float
     {
-        return $this->expenses()
+        return (float) $this->expenses()
             ->whereYear('date', now()->year)
             ->whereMonth('date', now()->month)
-            ->sum('amount');
+            ->sum('amount_uah');
     }
 
     public function getBudgetUsagePercentAttribute(): float

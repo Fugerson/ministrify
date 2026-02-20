@@ -243,7 +243,7 @@ class Event extends Model
 
     public function getFilledPositionsCountAttribute(): int
     {
-        return $this->assignments()->count();
+        return $this->assignments()->whereIn('status', ['confirmed', 'attended'])->count();
     }
 
     public function getTotalPositionsCountAttribute(): int
@@ -257,7 +257,7 @@ class Event extends Model
             return new \Illuminate\Database\Eloquent\Collection();
         }
 
-        $filledPositionIds = $this->assignments()->pluck('position_id')->toArray();
+        $filledPositionIds = $this->assignments()->whereIn('status', ['confirmed', 'attended'])->pluck('position_id')->toArray();
 
         return $this->ministry->positions()
             ->whereNotIn('id', $filledPositionIds)

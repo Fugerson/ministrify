@@ -352,20 +352,23 @@ class PersonController extends Controller
             ->take(20)
             ->values();
 
-        // Attendance chart data (last 12 weeks)
+        // Attendance chart data (last 12 weeks) — uses already-loaded records
+        $allAttendanceRecords = $person->attendanceRecords()
+            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subWeeks(12)->startOfWeek()))
+            ->with('attendance')
+            ->where('present', true)
+            ->get();
+
         $attendanceChartData = [];
         for ($i = 11; $i >= 0; $i--) {
             $weekStart = now()->subWeeks($i)->startOfWeek();
             $weekEnd = $weekStart->copy()->endOfWeek();
 
-            $attended = $person->attendanceRecords()
-                ->whereHas('attendance', fn($q) => $q->whereBetween('date', [$weekStart, $weekEnd]))
-                ->where('present', true)
-                ->count();
-
             $attendanceChartData[] = [
                 'week' => $weekStart->format('d.m'),
-                'count' => $attended,
+                'count' => $allAttendanceRecords->filter(
+                    fn($r) => $r->attendance->date->between($weekStart, $weekEnd)
+                )->count(),
             ];
         }
 
@@ -1111,7 +1114,12 @@ class PersonController extends Controller
 
         // Additional validations for shepherd
         if ($shepherdId) {
-            $shepherd = Person::find($shepherdId);
+            $church = $this->getCurrentChurch();
+            $shepherd = Person::where('church_id', $church->id)->find($shepherdId);
+
+            if (!$shepherd) {
+                return response()->json(['message' => 'Опікуна не знайдено'], 404);
+            }
 
             if (!$shepherd->is_shepherd) {
                 return response()->json(['message' => 'Ця людина не є опікуном'], 400);
@@ -1290,13 +1298,12 @@ class PersonController extends Controller
 
             $person->update($data);
 
-            // Update ministry (single ministry for quick edit simplicity)
+            // Update ministry (add/remove single ministry for quick edit)
             if ($hasMinistryField) {
                 if ($ministryId) {
-                    $person->ministries()->sync([$ministryId]);
-                } else {
-                    $person->ministries()->detach();
+                    $person->ministries()->syncWithoutDetaching([$ministryId]);
                 }
+                // Note: empty ministry_id in quick edit = no change (don't detach all)
             }
 
             $stats['updated']++;

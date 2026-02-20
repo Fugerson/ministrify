@@ -307,10 +307,9 @@ const PWA_SYNC = {
             window.dispatchEvent(new CustomEvent('pwa-offline'));
         });
 
-        // Initial sync if online
-        if (navigator.onLine) {
-            this.syncSchedule();
-        }
+        // Note: initial sync is handled by the Alpine component's loadData()
+        // Do NOT call syncSchedule() here — it causes a race condition
+        // with concurrent IndexedDB readwrite transactions that hangs loadData()
     }
 };
 

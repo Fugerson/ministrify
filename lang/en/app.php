@@ -546,6 +546,7 @@ return [
     'notes_placeholder' => 'Additional information about the person...',
     'no_notes' => 'No notes',
     'copied' => 'Copied!',
+    'copy_link' => 'Copy link',
     'reset_password_error' => 'Error resetting password',
     'update_email_error' => 'Error updating email',
     'create_account_error' => 'Error creating account',
