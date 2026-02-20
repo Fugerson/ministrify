@@ -83,6 +83,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
+                                    @if(auth()->user()->canEdit('boards'))
                                     <button type="button" @click="$refs.cardFileInput.click()" class="p-2 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors" title="Прикріпити файл">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                                     </button>
@@ -94,6 +95,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </button>
+                                    @endif
                                     <button @click="closePanel()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -154,11 +156,13 @@
                                                         </template>
                                                     </button>
                                                     <span class="flex-1 text-sm" :class="item.is_completed ? 'line-through text-gray-400' : 'text-gray-700 dark:text-gray-300'" x-text="item.title"></span>
+                                                    @if(auth()->user()->canEdit('boards'))
                                                     <button @click="deleteChecklistItem(item)" class="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                         </svg>
                                                     </button>
+                                                    @endif
                                                 </div>
                                             </template>
                                         </div>
@@ -198,11 +202,13 @@
                                                     <span class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs" x-text="cardPanel.data.attachments.length"></span>
                                                 </template>
                                             </label>
+                                            @if(auth()->user()->canEdit('boards'))
                                             <label class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 cursor-pointer flex items-center gap-1">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                                 Додати
                                                 <input type="file" multiple class="hidden" @change="uploadAttachments($event)">
                                             </label>
+                                            @endif
                                         </div>
 
                                         <div class="space-y-2">
@@ -222,9 +228,11 @@
                                                         <button @click="file.is_image ? (lightboxUrl = file.url) : window.open(file.url, '_blank')" class="text-sm text-gray-700 dark:text-gray-300 hover:text-primary-600 truncate block text-left" x-text="file.name"></button>
                                                         <span class="text-xs text-gray-400" x-text="file.size"></span>
                                                     </div>
+                                                    @if(auth()->user()->canDelete('boards'))
                                                     <button @click="deleteAttachment(file)" class="p-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 flex-shrink-0">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                     </button>
+                                                    @endif
                                                 </div>
                                             </template>
                                             <template x-if="!cardPanel.data.attachments || cardPanel.data.attachments.length === 0">
@@ -243,10 +251,12 @@
                                                     <span class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs" x-text="cardPanel.data.related_cards.length"></span>
                                                 </template>
                                             </label>
+                                            @if(auth()->user()->canEdit('boards'))
                                             <button @click="showLinkSearch = !showLinkSearch" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                                 Зв'язати
                                             </button>
+                                            @endif
                                         </div>
 
                                         <template x-if="showLinkSearch">
@@ -274,9 +284,11 @@
                                                         <span class="truncate" :class="related.is_completed ? 'line-through text-gray-400' : ''" x-text="related.title"></span>
                                                         <span class="ml-auto text-xs text-gray-400 flex-shrink-0" x-text="related.column_name"></span>
                                                     </button>
+                                                    @if(auth()->user()->canEdit('boards'))
                                                     <button @click="removeRelatedCard(related)" class="p-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 flex-shrink-0">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                     </button>
+                                                    @endif
                                                 </div>
                                             </template>
                                         </div>
@@ -631,18 +643,22 @@
 
                                     <!-- Actions -->
                                     <div class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-1">
+                                        @if(auth()->user()->canCreate('boards'))
                                         <button @click="duplicateCard()" class="w-full px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                             </svg>
                                             Дублювати
                                         </button>
+                                        @endif
+                                        @if(auth()->user()->canDelete('boards'))
                                         <button @click="deleteCard(cardPanel.data.card.id)" class="w-full px-3 py-2 text-sm text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-2">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
                                             Видалити
                                         </button>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

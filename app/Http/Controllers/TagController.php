@@ -14,6 +14,8 @@ class TagController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->canEdit('settings'), 403);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|max:7',
@@ -27,6 +29,7 @@ class TagController extends Controller
 
     public function update(Request $request, Tag $tag)
     {
+        abort_unless(auth()->user()->canEdit('settings'), 403);
         $this->authorizeChurch($tag);
 
         $validated = $request->validate([
@@ -41,6 +44,7 @@ class TagController extends Controller
 
     public function destroy(Tag $tag)
     {
+        abort_unless(auth()->user()->canEdit('settings'), 403);
         $this->authorizeChurch($tag);
 
         $tag->delete();

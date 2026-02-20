@@ -12,12 +12,14 @@
         <span class="hidden sm:inline">{{ __('app.quick_edit') }}</span>
     </a>
     @endif
+    @if(auth()->user()->canCreate('people'))
     <a href="{{ route('people.create') }}" id="people-add-btn" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
         Додати
     </a>
+    @endif
 </div>
 @endsection
 

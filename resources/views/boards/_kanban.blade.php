@@ -272,12 +272,14 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                         </svg>
                                     </button>
+                                    @if(auth()->user()->canCreate('boards'))
                                     <button type="button" @click="openAddCardModal({{ $column->id }})"
                                             class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                         </svg>
                                     </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -405,6 +407,7 @@
                             @endforeach
                         </div>
 
+                        @if(auth()->user()->canCreate('boards'))
                         <!-- Quick Add -->
                         <div x-show="!collapsed" class="p-2 border-t border-gray-200/50 dark:border-gray-700/50">
                             <button type="button" @click="openAddCardModal({{ $column->id }})"
@@ -415,6 +418,7 @@
                                 <span>Додати завдання</span>
                             </button>
                         </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
@@ -424,7 +428,9 @@
     @include('boards._card_panel')
 
     <!-- Add Card Modal -->
+    @if(auth()->user()->canCreate('boards'))
     @include('boards._add_card_modal')
+    @endif
 
     <!-- Epic Modal -->
     @include('boards._epic_modal')
@@ -605,6 +611,11 @@ function churchBoard() {
         },
 
         initSortable() {
+            if (typeof Sortable === 'undefined') {
+                // Sortable CDN may not have loaded yet — retry shortly
+                setTimeout(() => this.initSortable(), 100);
+                return;
+            }
             document.querySelectorAll('.kanban-cards').forEach(container => {
                 if (container._sortable) container._sortable.destroy();
                 container._sortable = new Sortable(container, {

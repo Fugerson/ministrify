@@ -378,6 +378,7 @@
             </div>
             <input type="hidden" name="joined_date" value="{{ $person->joined_date?->format('Y-m-d') }}">
 
+            @if($isAdmin)
             <!-- User Account & System Access -->
             <div class="mt-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800"
                  x-data="userRoleManager()">
@@ -395,7 +396,7 @@
                                     <template x-if="!editingEmail">
                                         <div class="flex items-center gap-2">
                                             <p class="text-sm text-gray-600 dark:text-gray-400" x-text="userEmail">{{ $person->user->email }}</p>
-                                            <button @click="editingEmail = true; $nextTick(() => $refs.emailInput.focus())"
+                                            <button @click="editingEmail = true; setTimeout(() => { $refs.emailInput?.focus() }, 50)"
                                                     class="p-1 text-gray-400 hover:text-purple-600 rounded transition-colors" title="Редагувати email">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
@@ -565,6 +566,7 @@
                     </div>
                 </template>
             </div>
+            @endif
             @endif
         </div>
     </div>

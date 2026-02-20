@@ -265,18 +265,18 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     // People
     Route::resource('people', PersonController::class);
     Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore')->withTrashed();
-    Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role');
-    Route::post('people/{person}/update-email', [PersonController::class, 'updateEmail'])->name('people.update-email');
-    Route::post('people/{person}/create-account', [PersonController::class, 'createAccount'])->name('people.create-account');
-    Route::post('people/{person}/reset-password', [PersonController::class, 'resetPassword'])->name('people.reset-password');
-    Route::post('people/{person}/update-shepherd', [PersonController::class, 'updateShepherd'])->name('people.update-shepherd');
+    Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role')->middleware('permission:people,edit');
+    Route::post('people/{person}/update-email', [PersonController::class, 'updateEmail'])->name('people.update-email')->middleware('permission:people,edit');
+    Route::post('people/{person}/create-account', [PersonController::class, 'createAccount'])->name('people.create-account')->middleware('permission:people,edit');
+    Route::post('people/{person}/reset-password', [PersonController::class, 'resetPassword'])->name('people.reset-password')->middleware('permission:people,edit');
+    Route::post('people/{person}/update-shepherd', [PersonController::class, 'updateShepherd'])->name('people.update-shepherd')->middleware('permission:people,edit');
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export')->middleware('permission:people,view');
     Route::post('people-import', [PersonController::class, 'import'])->name('people.import')->middleware('permission:people,create');
     Route::post('people-bulk-action', [PersonController::class, 'bulkAction'])->name('people.bulk-action')->middleware('permission:people,edit');
     Route::get('people-quick-edit', [PersonController::class, 'quickEdit'])->name('people.quick-edit')->middleware('permission:people,edit');
     Route::post('people-quick-save', [PersonController::class, 'quickSave'])->name('people.quick-save')->middleware('permission:people,edit');
-    Route::post('people/{person}/upload-photo', [PersonController::class, 'uploadPhoto'])->name('people.upload-photo');
-    Route::delete('people/{person}/delete-photo', [PersonController::class, 'deletePhoto'])->name('people.delete-photo');
+    Route::post('people/{person}/upload-photo', [PersonController::class, 'uploadPhoto'])->name('people.upload-photo')->middleware('permission:people,edit');
+    Route::delete('people/{person}/delete-photo', [PersonController::class, 'deletePhoto'])->name('people.delete-photo')->middleware('permission:people,edit');
 
     // Family Relationships
     Route::post('people/{person}/family', [\App\Http\Controllers\FamilyRelationshipController::class, 'store'])->name('family.store');
@@ -291,7 +291,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     });
 
     // Tags
-    Route::resource('tags', TagController::class)->except(['show', 'create', 'edit']);
+    Route::resource('tags', TagController::class)->except(['show', 'create', 'edit'])->middleware('permission:settings,edit');
 
     // Ministries
     Route::resource('ministries', MinistryController::class);
@@ -846,7 +846,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     });
 
     // Kanban Boards
-    Route::prefix('boards')->name('boards.')->group(function () {
+    Route::middleware('permission:boards,view')->prefix('boards')->name('boards.')->group(function () {
         Route::get('/', [BoardController::class, 'index'])->name('index');
         Route::get('create', [BoardController::class, 'create'])->name('create');
         Route::post('/', [BoardController::class, 'store'])->name('store');
