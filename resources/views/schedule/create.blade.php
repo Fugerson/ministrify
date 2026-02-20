@@ -9,7 +9,7 @@
 @endphp
 
 @section('content')
-<div class="max-w-2xl mx-auto" x-data="eventCreateForm()" @set-music.window="hasMusicChecked = $event.detail"
+<div class="max-w-2xl mx-auto" x-data="eventCreateForm()" @set-music.window="hasMusicChecked = $event.detail">
     <form class="space-y-6" x-ref="form" @submit.prevent="submitForm">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
