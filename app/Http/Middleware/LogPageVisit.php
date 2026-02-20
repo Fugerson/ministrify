@@ -79,6 +79,8 @@ class LogPageVisit
             'sanctum',
             'telescope',
             'horizon',
+            'api/',
+            'pm/unread-count',
         ];
 
         foreach ($skipPrefixes as $prefix) {

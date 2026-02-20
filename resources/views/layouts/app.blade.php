@@ -1015,10 +1015,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                         </svg>
                         <span x-show="!collapsed" class="sidebar-text flex-1">{{ __('Комунікації') }}</span>
-                        @php $initialPmCount = \App\Models\PrivateMessage::unreadCount(auth()->user()->church_id, auth()->id()); @endphp
-                        @if($initialPmCount > 0)
-                        <span x-cloak x-show="count > 0" x-text="count > 99 ? '99+' : count" class="sidebar-badge px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
-                        @endif
+                        <span x-cloak x-show="$store.pmCount > 0" x-text="$store.pmCount > 99 ? '99+' : $store.pmCount" class="sidebar-badge px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
                     </a>
                 </div>
                 @elseif(auth()->user()->canView('announcements'))
@@ -1220,7 +1217,7 @@
                             <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                             {{ __('Комунікації') }}
                         </span>
-                        <span x-cloak x-show="count > 0" x-text="count > 99 ? '99+' : count" class="px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
+                        <span x-cloak x-show="$store.pmCount > 0" x-text="$store.pmCount > 99 ? '99+' : $store.pmCount" class="px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
                     </a>
                 </div>
                 @elseif(auth()->user()->canView('announcements'))
@@ -1694,6 +1691,13 @@
     <!-- Alpine.js Collapse plugin (Alpine itself is included by Livewire) -->
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- Init Alpine store for PM count -->
+    <script>
+        document.addEventListener('alpine:init', function() {
+            Alpine.store('pmCount', {{ auth()->check() && auth()->user()->church_id ? \App\Models\PrivateMessage::unreadCount(auth()->user()->church_id, auth()->id()) : 0 }});
+        });
+    </script>
+
     <!-- Toast Notifications -->
     @include('components.toast')
 
@@ -1721,31 +1725,32 @@
         </script>
     @endif
 
-    <!-- PM Badge Polling -->
+    <!-- PM Badge Polling (singleton — one global interval shared by all badges) -->
     <script>
-        function pmBadge() {
-            return {
-                count: {{ \App\Models\PrivateMessage::unreadCount(auth()->user()->church_id, auth()->id()) }},
-                interval: null,
+        (function() {
+            var pmPollingStarted = false;
+            window.pmBadge = function() {
+                return {
+                    get count() { return Alpine.store('pmCount') || 0; },
+                    set count(v) { Alpine.store('pmCount', v); },
 
-                startPolling() {
-                    this.fetchCount();
-                    this.interval = setInterval(() => this.fetchCount(), 10000); // кожні 10 сек
-                },
+                    startPolling() {
+                        if (pmPollingStarted) return;
+                        pmPollingStarted = true;
+                        this.fetchCount();
+                        setInterval(() => this.fetchCount(), 30000); // кожні 30 сек
+                    },
 
-                async fetchCount() {
-                    try {
-                        const response = await fetch('{{ route("pm.unread-count") }}');
-                        const data = await response.json().catch(() => ({}));
-                        this.count = data.count;
-                    } catch (e) {}
-                },
-
-                destroy() {
-                    if (this.interval) clearInterval(this.interval);
+                    async fetchCount() {
+                        try {
+                            var response = await fetch('{{ route("pm.unread-count") }}');
+                            var data = await response.json().catch(function() { return {}; });
+                            Alpine.store('pmCount', data.count || 0);
+                        } catch (e) {}
+                    }
                 }
-            }
-        }
+            };
+        })();
     </script>
 
     <!-- PWA Service Worker Registration & Install Prompt -->
