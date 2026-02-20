@@ -747,6 +747,7 @@
     @stack('styles')
 
     @include('partials.design-themes')
+    @livewireStyles
 </head>
 <body class="font-sans antialiased bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
@@ -806,7 +807,7 @@
         <!-- Top Navigation Bar -->
         <nav class="top-nav-bar hidden lg:flex fixed top-0 left-0 right-0 z-40 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 items-center justify-between">
             <div class="flex items-center gap-6">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 flex-shrink-0">
+                <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center gap-2 flex-shrink-0">
                     @if($currentChurch->logo)
                     <img src="/storage/{{ $currentChurch->logo }}" alt="{{ $currentChurch->name }}" class="w-8 h-8 rounded-lg object-contain">
                     @else
@@ -815,20 +816,20 @@
                     <span class="font-bold text-gray-900 dark:text-white">{{ $currentChurch->name ?? 'Ministrify' }}</span>
                 </a>
                 <div class="flex items-center gap-1 flex-wrap">
-                    <a href="{{ route('dashboard') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Головна') }}</a>
+                    <a wire:navigate href="{{ route('dashboard') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Головна') }}</a>
                     @hasChurchRole
-                    @if(auth()->user()->canView('people'))<a href="{{ route('people.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Люди') }}</a>@endif
-                    @if(auth()->user()->canView('groups'))<a href="{{ route('groups.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Групи') }}</a>@endif
-                    @if(auth()->user()->canView('ministries'))<a href="{{ route('ministries.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Команди') }}</a>@endif
-                    @if(auth()->user()->canView('events'))<a href="{{ route('schedule') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Розклад') }}</a>@endif
-                    @if(auth()->user()->canView('finances'))<a href="{{ route('finances.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Фінанси') }}</a>@endif
-                    @if(auth()->user()->canView('announcements'))<a href="{{ route('announcements.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Комунікації') }}</a>@endif
-                    @if(auth()->user()->canView('reports'))<a href="{{ route('reports.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Звіти') }}</a>@endif
-                    @if(auth()->user()->canView('resources'))<a href="{{ route('resources.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Ресурси') }}</a>@endif
-                    @if(auth()->user()->canView('boards'))<a href="{{ route('boards.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Завдання') }}</a>@endif
+                    @if(auth()->user()->canView('people'))<a wire:navigate href="{{ route('people.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Люди') }}</a>@endif
+                    @if(auth()->user()->canView('groups'))<a wire:navigate href="{{ route('groups.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Групи') }}</a>@endif
+                    @if(auth()->user()->canView('ministries'))<a wire:navigate href="{{ route('ministries.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Команди') }}</a>@endif
+                    @if(auth()->user()->canView('events'))<a wire:navigate href="{{ route('schedule') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Розклад') }}</a>@endif
+                    @if(auth()->user()->canView('finances'))<a wire:navigate href="{{ route('finances.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Фінанси') }}</a>@endif
+                    @if(auth()->user()->canView('announcements'))<a wire:navigate href="{{ route('announcements.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Комунікації') }}</a>@endif
+                    @if(auth()->user()->canView('reports'))<a wire:navigate href="{{ route('reports.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Звіти') }}</a>@endif
+                    @if(auth()->user()->canView('resources'))<a wire:navigate href="{{ route('resources.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Ресурси') }}</a>@endif
+                    @if(auth()->user()->canView('boards'))<a wire:navigate href="{{ route('boards.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Завдання') }}</a>@endif
                     @endhasChurchRole
                     @if(auth()->user()->canView('settings'))
-                    <a href="{{ route('settings.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Налаштування') }}</a>
+                    <a wire:navigate href="{{ route('settings.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Налаштування') }}</a>
                     @endif
                 </div>
             </div>
@@ -843,68 +844,68 @@
         @if($menuPosition === 'bottom')
         <!-- Bottom Dock Navigation -->
         <nav class="bottom-dock-nav hidden lg:flex fixed bottom-0 left-0 right-0 z-40 h-16 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 items-center justify-center gap-1">
-            <a href="{{ route('dashboard') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Головна') }}</span>
             </a>
             @hasChurchRole
             @if(auth()->user()->canView('people'))
-            <a href="{{ route('people.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('people.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Люди') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('groups'))
-            <a href="{{ route('groups.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('groups.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Групи') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('ministries'))
-            <a href="{{ route('ministries.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('ministries.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Команди') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('events'))
-            <a href="{{ route('schedule') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('schedule') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Розклад') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('finances'))
-            <a href="{{ route('finances.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('finances.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Фінанси') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('announcements'))
-            <a href="{{ route('announcements.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('announcements.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Чат') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('reports'))
-            <a href="{{ route('reports.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('reports.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Звіти') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('resources'))
-            <a href="{{ route('resources.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('resources.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Ресурси') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('boards'))
-            <a href="{{ route('boards.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('boards.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Завдання') }}</span>
             </a>
             @endif
             @endhasChurchRole
             @if(auth()->user()->canView('settings'))
-            <a href="{{ route('settings.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a wire:navigate href="{{ route('settings.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Налашт.') }}</span>
             </a>
@@ -913,7 +914,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('Пошук') }}</span>
             </button>
-            <a href="{{ route('my-profile') }}" class="flex flex-col items-center px-2 py-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <a wire:navigate href="{{ route('my-profile') }}" class="flex flex-col items-center px-2 py-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <x-user-avatar size="sm" />
                 <span class="text-[10px] mt-0.5">{{ __('Профіль') }}</span>
             </a>
@@ -940,7 +941,7 @@
             </button>
 
             <div class="flex items-center h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0" :class="collapsed ? 'justify-center px-2' : 'px-6'">
-                <a href="{{ route('dashboard') }}" class="flex items-center flex-shrink-0 min-w-0" :class="collapsed ? '' : 'space-x-2 overflow-hidden'">
+                <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center flex-shrink-0 min-w-0" :class="collapsed ? '' : 'space-x-2 overflow-hidden'">
                     @if($currentChurch->logo)
                     <img src="/storage/{{ $currentChurch->logo }}" alt="{{ $currentChurch->name }}" class="w-8 h-8 rounded-lg object-contain flex-shrink-0">
                     @else
@@ -951,7 +952,7 @@
             </div>
 
             <nav id="sidebar-nav" class="flex-1 py-4 space-y-1 overflow-y-auto no-scrollbar" :class="collapsed ? 'px-2' : 'px-4'">
-                <a href="{{ route('dashboard') }}" id="nav-dashboard" class="flex items-center py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :class="collapsed ? 'justify-center px-2' : 'px-3'" :title="collapsed ? '{{ __("Головна") }}' : ''">
+                <a wire:navigate href="{{ route('dashboard') }}" id="nav-dashboard" class="flex items-center py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :class="collapsed ? 'justify-center px-2' : 'px-3'" :title="collapsed ? '{{ __("Головна") }}' : ''">
                     <svg class="w-5 h-5 flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
@@ -959,7 +960,7 @@
                 </a>
                 @hasChurchRole
                 @if(auth()->user()->canView('people'))
-                <a href="{{ route('people.index') }}" id="nav-people" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Люди") }}' : ''">
+                <a wire:navigate href="{{ route('people.index') }}" id="nav-people" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Люди") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/>
                     </svg>
@@ -967,7 +968,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('groups'))
-                <a href="{{ route('groups.index') }}" id="nav-groups" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Групи") }}' : ''">
+                <a wire:navigate href="{{ route('groups.index') }}" id="nav-groups" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Групи") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
@@ -975,7 +976,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('ministries'))
-                <a href="{{ route('ministries.index') }}" id="nav-ministries" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Команди") }}' : ''">
+                <a wire:navigate href="{{ route('ministries.index') }}" id="nav-ministries" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Команди") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
@@ -983,7 +984,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
-                <a href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Розклад") }}' : ''">
+                <a wire:navigate href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Розклад") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
@@ -994,7 +995,7 @@
                 @hasChurchRole
                 @if(auth()->user()->canView('announcements') && auth()->user()->church_id && auth()->user()->churchRole)
                 <div x-data="pmBadge()" x-init="startPolling()" @pm-read.window="fetchCount()" class="relative">
-                    <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Комунікації") }}' : ''">
+                    <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Комунікації") }}' : ''">
                         <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                         </svg>
@@ -1006,7 +1007,7 @@
                     </a>
                 </div>
                 @elseif(auth()->user()->canView('announcements'))
-                <a href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Комунікації") }}' : ''">
+                <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Комунікації") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
@@ -1015,7 +1016,7 @@
                 @endif
                 @endhasChurchRole
                 @if(auth()->user()->canView('finances'))
-                <a href="{{ route('finances.index') }}" id="nav-finances" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Фінанси") }}' : ''">
+                <a wire:navigate href="{{ route('finances.index') }}" id="nav-finances" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Фінанси") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
@@ -1023,7 +1024,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('reports'))
-                <a href="{{ route('reports.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Звіти") }}' : ''">
+                <a wire:navigate href="{{ route('reports.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Звіти") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
@@ -1031,7 +1032,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('resources'))
-                <a href="{{ route('resources.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Ресурси") }}' : ''">
+                <a wire:navigate href="{{ route('resources.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Ресурси") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                     </svg>
@@ -1039,7 +1040,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('boards'))
-                <a href="{{ route('boards.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Завдання") }}' : ''">
+                <a wire:navigate href="{{ route('boards.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Завдання") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
@@ -1067,7 +1068,7 @@
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-divider-text">{{ __('Адміністрування') }}</p>
                 </div>
                 <div x-show="collapsed" class="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700"></div>
-                <a href="{{ route('settings.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Налаштування") }}' : ''">
+                <a wire:navigate href="{{ route('settings.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Налаштування") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -1076,7 +1077,7 @@
                 </a>
                 @endif
 
-                <a href="{{ route('support.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Підтримка") }}' : ''">
+                <a wire:navigate href="{{ route('support.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Підтримка") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
@@ -1087,7 +1088,7 @@
                 <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
                     <p class="px-3 text-xs font-semibold text-red-400 uppercase tracking-wider">System Admin</p>
                 </div>
-                <a href="{{ route('system.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
+                <a wire:navigate href="{{ route('system.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
@@ -1113,7 +1114,7 @@
                             &larr; {{ __('Вийти') }}
                         </button>
                     </form>
-                    <a href="{{ route('system.index') }}" class="px-2 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
+                    <a wire:navigate href="{{ route('system.index') }}" class="px-2 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
                         Admin
                     </a>
                 </div>
@@ -1151,7 +1152,7 @@
                x-transition:leave-end="{{ $menuPosition === 'right' ? 'translate-x-full' : '-translate-x-full' }}"
                class="lg:hidden fixed inset-y-0 {{ $menuPosition === 'right' ? 'right-0' : 'left-0' }} z-50 w-[calc(100vw-3rem)] max-w-72 bg-white dark:bg-gray-800 shadow-xl flex flex-col">
             <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
+                <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
                     <img src="/storage/{{ $currentChurch->logo }}" alt="{{ $currentChurch->name }}" class="w-8 h-8 rounded-lg object-contain">
                     @else
@@ -1166,31 +1167,31 @@
                 </button>
             </div>
             <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-                <a href="{{ route('dashboard') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('dashboard') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                     {{ __('Головна') }}
                 </a>
                 @hasChurchRole
                 @if(auth()->user()->canView('people'))
-                <a href="{{ route('people.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('people.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
                     {{ __('Люди') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('groups'))
-                <a href="{{ route('groups.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('groups.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     {{ __('Групи') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('ministries'))
-                <a href="{{ route('ministries.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('ministries.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     {{ __('Команди') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
-                <a href="{{ route('schedule') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('schedule') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     {{ __('Розклад') }}
                 </a>
@@ -1199,7 +1200,7 @@
                 @hasChurchRole
                 @if(auth()->user()->canView('announcements') && auth()->user()->church_id && auth()->user()->churchRole)
                 <div x-data="pmBadge()" x-init="startPolling()" @pm-read.window="fetchCount()">
-                    <a href="{{ route('announcements.index') }}" @click="sidebarOpen = false" class="flex items-center justify-between px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    <a wire:navigate href="{{ route('announcements.index') }}" @click="sidebarOpen = false" class="flex items-center justify-between px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                         <span class="flex items-center">
                             <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                             {{ __('Комунікації') }}
@@ -1208,32 +1209,32 @@
                     </a>
                 </div>
                 @elseif(auth()->user()->canView('announcements'))
-                <a href="{{ route('announcements.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('announcements.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                     {{ __('Комунікації') }}
                 </a>
                 @endif
                 @endhasChurchRole
                 @if(auth()->user()->canView('finances'))
-                <a href="{{ route('finances.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('finances.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                     {{ __('Фінанси') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('reports'))
-                <a href="{{ route('reports.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('reports.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     {{ __('Звіти') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('resources'))
-                <a href="{{ route('resources.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('resources.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                     {{ __('Ресурси') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('boards'))
-                <a href="{{ route('boards.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('boards.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                     {{ __('Завдання') }}
                 </a>
@@ -1254,19 +1255,19 @@
                 @endhasChurchRole
                 @if(auth()->user()->canView('settings'))
                 <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700"><p class="px-4 text-xs font-semibold text-gray-400 uppercase">{{ __('Адміністрування') }}</p></div>
-                <a href="{{ route('settings.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('settings.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     {{ __('Налаштування') }}
                 </a>
                 @endif
 
-                <a href="{{ route('support.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                <a wire:navigate href="{{ route('support.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     {{ __('Підтримка') }}
                 </a>
                 @if(auth()->user()->isSuperAdmin())
                 <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700"><p class="px-4 text-xs font-semibold text-red-400 uppercase">System Admin</p></div>
-                <a href="{{ route('system.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
+                <a wire:navigate href="{{ route('system.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     System Admin
                 </a>
@@ -1290,7 +1291,7 @@
                             ← Вийти
                         </button>
                     </form>
-                    <a href="{{ route('system.index') }}" class="px-2 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
+                    <a wire:navigate href="{{ route('system.index') }}" class="px-2 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
                         Admin
                     </a>
                 </div>
@@ -1341,10 +1342,10 @@
                                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                             </svg>
                         </button>
-                        <a href="{{ route('my-schedule') }}" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl" title="Мій розклад">
+                        <a wire:navigate href="{{ route('my-schedule') }}" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl" title="Мій розклад">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </a>
-                        <a href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center">
+                        <a wire:navigate href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center">
                             <x-user-avatar size="md" />
                         </a>
                         <form method="POST" action="{{ route('logout') }}">
@@ -1418,23 +1419,23 @@
         <!-- Mobile Bottom Nav -->
         <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40 safe-bottom">
             <div class="flex items-center justify-around h-16">
-                <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('dashboard') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+                <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('dashboard') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                     <span class="text-xs mt-1">Головна</span>
                 </a>
-                <a href="{{ route('people.index') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('people.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+                <a wire:navigate href="{{ route('people.index') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('people.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
                     <span class="text-xs mt-1">Люди</span>
                 </a>
-                <a href="{{ route('schedule') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+                <a wire:navigate href="{{ route('schedule') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <span class="text-xs mt-1">Розклад</span>
                 </a>
-                <a href="{{ route('groups.index') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('groups.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+                <a wire:navigate href="{{ route('groups.index') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('groups.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     <span class="text-xs mt-1">Групи</span>
                 </a>
-                <a href="{{ route('my-profile') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('my-profile*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+                <a wire:navigate href="{{ route('my-profile') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('my-profile*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
                     <span class="text-xs mt-1">Профіль</span>
                 </a>
@@ -1453,25 +1454,25 @@
                  x-transition:leave-end="opacity-0 scale-95"
                  class="absolute bottom-16 right-0 mb-2 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 @if(auth()->user()->canCreate('people'))
-                <a href="{{ route('people.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <a wire:navigate href="{{ route('people.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова людина</span>
                 </a>
                 @endif
                 @can('create', \App\Models\Event::class)
-                <a href="{{ route('events.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <a wire:navigate href="{{ route('events.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова подія</span>
                 </a>
                 @endcan
                 @if(auth()->user()->canCreate('groups'))
-                <a href="{{ route('groups.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <a wire:navigate href="{{ route('groups.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова група</span>
                 </a>
                 @endif
                 @if(auth()->user()->canCreate('finances'))
-                <a href="{{ route('expenses.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <a wire:navigate href="{{ route('expenses.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     <span class="text-gray-700 dark:text-gray-200">Нова витрата</span>
                 </a>
@@ -1551,7 +1552,7 @@
                                     <p class="text-xs font-medium text-gray-400 uppercase mb-3">Швидкі дії</p>
                                     <div class="space-y-1">
                                         @if(auth()->user()->canCreate('people'))
-                                        <a href="{{ route('people.create') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <a wire:navigate href="{{ route('people.create') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <span class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
                                                 <svg class="w-4 h-4 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                                             </span>
@@ -1560,7 +1561,7 @@
                                         </a>
                                         @endif
                                         @if(auth()->user()->canCreate('events'))
-                                        <a href="{{ route('events.create') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <a wire:navigate href="{{ route('events.create') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <span class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center mr-3">
                                                 <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                             </span>
@@ -1569,7 +1570,7 @@
                                         </a>
                                         @endif
                                         @if(auth()->user()->canCreate('groups'))
-                                        <a href="{{ route('groups.create') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <a wire:navigate href="{{ route('groups.create') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <span class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center mr-3">
                                                 <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                             </span>
@@ -1673,9 +1674,10 @@
 
     @stack('scripts')
 
-    <!-- Alpine.js - defer ensures all inline scripts (pmBadge, toast, PWA) are defined before Alpine starts -->
+    @livewireScripts
+
+    <!-- Alpine.js Collapse plugin (Alpine itself is included by Livewire) -->
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Toast Notifications -->
     @include('components.toast')
