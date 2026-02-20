@@ -9,10 +9,17 @@
         // Apply dark mode immediately before any rendering to prevent FOUC
         // Dark is default, only light if explicitly set
         (function() {
-            const theme = localStorage.getItem('theme');
-            if (theme !== 'light') {
-                document.documentElement.classList.add('dark');
-            }
+            var applyTheme = function() {
+                var theme = localStorage.getItem('theme');
+                if (theme !== 'light') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            };
+            applyTheme();
+            // Re-apply after Livewire SPA navigation
+            document.addEventListener('livewire:navigated', applyTheme);
         })();
 
         // Handle back/forward cache - check if user is still authenticated
