@@ -298,6 +298,21 @@ return [
     'role_admin' => 'Адміністратор',
     'role_leader' => 'Лідер',
     'role_volunteer' => 'Служитель',
+    'role_assistant' => 'Помічник',
+    'role_member' => 'Учасник',
+
+    // Gender & Marital
+    'gender_male' => 'Чоловік',
+    'gender_female' => 'Жінка',
+    'marital_single' => 'Неодружений/а',
+    'marital_married' => 'Одружений/а',
+    'marital_widowed' => 'Вдівець/вдова',
+    'marital_divorced' => 'Розлучений/а',
+
+    // Group statuses
+    'status_active' => 'Активна',
+    'status_paused' => 'На паузі',
+    'status_vacation' => 'У відпустці',
 
     // Telegram
     'telegram_bot' => 'Telegram бот',
@@ -493,6 +508,9 @@ return [
     'pending_confirmation' => 'Очікує підтвердження',
     'this_is_you' => '(це ви)',
     'grant_access' => 'Надати доступ',
+    'grant' => 'Надати',
+    'select_access_level' => 'Оберіть рівень доступу для обраних людей:',
+    'grant_access_notice' => 'Акаунти будуть створені для людей з email. Люди без email або з існуючим акаунтом будуть пропущені.',
     'grant_system_access' => 'Надати доступ до системи',
     'email_for_login' => 'Email для входу',
     'select_role' => 'Оберіть роль...',

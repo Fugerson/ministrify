@@ -10,7 +10,7 @@
     <!-- Mobile Welcome -->
     <div class="lg:hidden">
         <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('Привіт, :name!', ['name' => explode(' ', auth()->user()->name)[0]]) }}</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">{{ now()->locale('uk')->translatedFormat('l, d F') }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ now()->locale(app()->getLocale())->translatedFormat('l, d F') }}</p>
     </div>
 
     @hasChurchRole

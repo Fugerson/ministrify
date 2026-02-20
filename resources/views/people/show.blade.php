@@ -350,7 +350,7 @@
                     <select name="gender"
                             class="w-full font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border-0 p-0 focus:ring-0 text-sm cursor-pointer">
                         <option value="" class="bg-white dark:bg-gray-800">-- Не вказано --</option>
-                        @foreach(\App\Models\Person::GENDERS as $value => $label)
+                        @foreach(\App\Models\Person::getGenders() as $value => $label)
                             <option value="{{ $value }}" {{ $person->gender === $value ? 'selected' : '' }} class="bg-white dark:bg-gray-800">{{ $label }}</option>
                         @endforeach
                     </select>
@@ -360,7 +360,7 @@
                     <select name="marital_status" x-model="maritalStatus"
                             class="w-full font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border-0 p-0 focus:ring-0 text-sm cursor-pointer">
                         <option value="" class="bg-white dark:bg-gray-800">-- Не вказано --</option>
-                        @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
+                        @foreach(\App\Models\Person::getMaritalStatuses() as $value => $label)
                             <option value="{{ $value }}" {{ $person->marital_status === $value ? 'selected' : '' }} class="bg-white dark:bg-gray-800">{{ $label }}</option>
                         @endforeach
                     </select>

@@ -243,7 +243,7 @@
                 <select x-model="filters.marital_status"
                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
                     <option value="">{{ __('app.all') }}</option>
-                    @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
+                    @foreach(\App\Models\Person::getMaritalStatuses() as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
@@ -755,6 +755,43 @@
                     </div>
                 </template>
 
+                <!-- Grant Access -->
+                <template x-if="bulkAction === 'grant_access'">
+                    <div>
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.grant_access') }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {{ __('app.selected_people') }} <span x-text="selectedIds.length"></span>
+                            </p>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('app.select_access_level') }}</p>
+                            <div class="space-y-2 max-h-64 overflow-y-auto">
+                                @foreach($churchRoles as $role)
+                                <label class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <input type="radio" name="bulk_role" value="{{ $role->id }}" x-model="bulkValue"
+                                           class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 focus:ring-primary-500">
+                                    <span class="ml-3 text-gray-900 dark:text-white">{{ $role->name }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                            <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                                {{ __('app.grant_access_notice') }}
+                            </p>
+                        </div>
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3">
+                            <button @click="showBulkModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                                {{ __('app.cancel') }}
+                            </button>
+                            <button @click="executeBulkAction()" :disabled="!bulkValue || bulkLoading"
+                                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50">
+                                <span x-show="!bulkLoading">{{ __('app.grant') }}</span>
+                                <span x-show="bulkLoading">{{ __('app.please_wait') }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
                 <!-- Delete Confirmation -->
                 <template x-if="bulkAction === 'delete'">
                     <div>
@@ -873,7 +910,7 @@ function peopleTable() {
             tag: '',
             shepherd: ''
         },
-        maritalStatusLabels: @js(\App\Models\Person::MARITAL_STATUSES),
+        maritalStatusLabels: @js(\App\Models\Person::getMaritalStatuses()),
         flatpickrInstance: null,
         filteredCount: {{ $people->count() }},
         perPage: 25,
@@ -1119,7 +1156,8 @@ function peopleTable() {
                         action: this.bulkAction,
                         ids: this.selectedIds,
                         value: this.bulkValue,
-                        message: this.bulkMessage
+                        message: this.bulkMessage,
+                        church_role_id: this.bulkAction === 'grant_access' ? this.bulkValue : null
                     })
                 });
 

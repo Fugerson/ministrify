@@ -146,7 +146,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <span class="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/50 px-2 py-1 rounded-lg">{{ now()->locale('uk')->translatedFormat('F') }}</span>
+            <span class="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/50 px-2 py-1 rounded-lg">{{ now()->locale(app()->getLocale())->translatedFormat('F') }}</span>
         </div>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['events_this_month'] }}</p>
         <p class="text-xs text-gray-500 dark:text-gray-400 -mt-1 mb-2">подій цього місяця</p>

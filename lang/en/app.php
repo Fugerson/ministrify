@@ -301,6 +301,21 @@ return [
     'role_admin' => 'Administrator',
     'role_leader' => 'Leader',
     'role_volunteer' => 'Minister',
+    'role_assistant' => 'Assistant',
+    'role_member' => 'Member',
+
+    // Gender & Marital
+    'gender_male' => 'Male',
+    'gender_female' => 'Female',
+    'marital_single' => 'Single',
+    'marital_married' => 'Married',
+    'marital_widowed' => 'Widowed',
+    'marital_divorced' => 'Divorced',
+
+    // Group statuses
+    'status_active' => 'Active',
+    'status_paused' => 'Paused',
+    'status_vacation' => 'On vacation',
 
     // Telegram
     'telegram_bot' => 'Telegram Bot',
@@ -496,6 +511,9 @@ return [
     'pending_confirmation' => 'Pending confirmation',
     'this_is_you' => '(this is you)',
     'grant_access' => 'Grant access',
+    'grant' => 'Grant',
+    'select_access_level' => 'Select access level for selected people:',
+    'grant_access_notice' => 'Accounts will be created for people with email. People without email or with existing accounts will be skipped.',
     'grant_system_access' => 'Grant system access',
     'email_for_login' => 'Email for login',
     'select_role' => 'Select role...',

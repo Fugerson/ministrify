@@ -142,7 +142,7 @@
         </div>
         @if(!$initialBalance && !$initialBalanceDate)
         <div class="mt-4 pt-4 border-t border-white/20">
-            <a href="{{ route('settings.index') }}#finance" class="text-sm text-white/80 hover:text-white inline-flex items-center">
+            <a href="{{ route('settings.index') }}?tab=finance" class="text-sm text-white/80 hover:text-white inline-flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>

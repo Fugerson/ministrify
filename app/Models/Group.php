@@ -29,6 +29,15 @@ class Group extends Model
         self::STATUS_VACATION => 'У відпустці',
     ];
 
+    public static function getStatuses(): array
+    {
+        return [
+            self::STATUS_ACTIVE => __('app.status_active'),
+            self::STATUS_PAUSED => __('app.status_paused'),
+            self::STATUS_VACATION => __('app.status_vacation'),
+        ];
+    }
+
     public const ROLE_LEADER = 'leader';
     public const ROLE_ASSISTANT = 'assistant';
     public const ROLE_MEMBER = 'member';
@@ -38,6 +47,15 @@ class Group extends Model
         self::ROLE_ASSISTANT => 'Помічник',
         self::ROLE_MEMBER => 'Учасник',
     ];
+
+    public static function getRoles(): array
+    {
+        return [
+            self::ROLE_LEADER => __('app.role_leader'),
+            self::ROLE_ASSISTANT => __('app.role_assistant'),
+            self::ROLE_MEMBER => __('app.role_member'),
+        ];
+    }
 
     protected $fillable = [
         'church_id',

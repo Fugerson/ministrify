@@ -58,6 +58,14 @@ class Person extends Model
         self::GENDER_FEMALE => 'Жінка',
     ];
 
+    public static function getGenders(): array
+    {
+        return [
+            self::GENDER_MALE => __('app.gender_male'),
+            self::GENDER_FEMALE => __('app.gender_female'),
+        ];
+    }
+
     // Marital status
     public const MARITAL_SINGLE = 'single';
     public const MARITAL_MARRIED = 'married';
@@ -70,6 +78,16 @@ class Person extends Model
         self::MARITAL_WIDOWED => 'Вдівець/вдова',
         self::MARITAL_DIVORCED => 'Розлучений/а',
     ];
+
+    public static function getMaritalStatuses(): array
+    {
+        return [
+            self::MARITAL_SINGLE => __('app.marital_single'),
+            self::MARITAL_MARRIED => __('app.marital_married'),
+            self::MARITAL_WIDOWED => __('app.marital_widowed'),
+            self::MARITAL_DIVORCED => __('app.marital_divorced'),
+        ];
+    }
 
     // Age categories
     public const AGE_CHILD = 'child';        // 0-12

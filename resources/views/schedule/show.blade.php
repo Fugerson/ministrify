@@ -2351,27 +2351,7 @@ async function sendTelegramNotify(itemId, button) {
     };
 
     function showToast(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-
-        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
-
-        toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 transform translate-x-full transition-transform duration-300`;
-        toast.innerHTML = `
-            <span class="text-lg">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-            <span>${message}</span>
-        `;
-
-        container.appendChild(toast);
-
-        // Animate in
-        setTimeout(() => toast.classList.remove('translate-x-full'), 10);
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            toast.classList.add('translate-x-full');
-            setTimeout(() => toast.remove(), 300);
-        }, 5000);
+        showGlobalToast(message, type);
     }
 
     function updateStatusBadge(row, status, statusLabel) {

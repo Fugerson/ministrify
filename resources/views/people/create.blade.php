@@ -89,7 +89,7 @@
                     <select name="gender" id="gender"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         <option value="">-- Не вказано --</option>
-                        @foreach(\App\Models\Person::GENDERS as $value => $label)
+                        @foreach(\App\Models\Person::getGenders() as $value => $label)
                         <option value="{{ $value }}" {{ old('gender') == $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
@@ -100,7 +100,7 @@
                     <select name="marital_status" id="marital_status"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         <option value="">-- Не вказано --</option>
-                        @foreach(\App\Models\Person::MARITAL_STATUSES as $value => $label)
+                        @foreach(\App\Models\Person::getMaritalStatuses() as $value => $label)
                         <option value="{{ $value }}" {{ old('marital_status') == $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>

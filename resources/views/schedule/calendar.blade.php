@@ -839,47 +839,13 @@ function calendarNavigator(initialState) {
         },
 
         loadCalendar() {
-            this.loading = true;
             const params = new URLSearchParams({
                 view: this.currentView,
                 year: this.currentYear,
                 ...(this.currentView === 'week' ? { week: this.currentWeek } : { month: this.currentMonth })
             });
 
-            fetch(`{{ route('schedule') }}?${params}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'text/html'
-                }
-            })
-            .then(response => response.text())
-            .then(html => {
-                // Extract calendar content from response (after navigation bar)
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const newContent = doc.querySelector('.space-y-4');
-
-                if (newContent) {
-                    // Replace only the content after navigation
-                    const currentContent = document.querySelector('.space-y-4');
-                    if (currentContent) {
-                        currentContent.innerHTML = newContent.innerHTML;
-                        // Re-initialize Alpine.js for new elements
-                        this.$dispatch('contentUpdated');
-                    }
-                }
-
-                // Update browser history without reload
-                const newUrl = `{{ route('schedule') }}?view=${this.currentView}&year=${this.currentYear}${this.currentView === 'week' ? '&week=' + this.currentWeek : '&month=' + this.currentMonth}`;
-                window.history.pushState({ view: this.currentView, year: this.currentYear, month: this.currentMonth, week: this.currentWeek }, '', newUrl);
-            })
-            .catch(error => {
-                console.error('Error loading calendar:', error);
-                alert('{{ __('app.calendar_load_error') }}');
-            })
-            .finally(() => {
-                this.loading = false;
-            });
+            window.location.href = `{{ route('schedule') }}?${params}`;
         }
     };
 }

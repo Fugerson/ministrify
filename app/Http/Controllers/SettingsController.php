@@ -26,7 +26,7 @@ class SettingsController extends Controller
     {
         $church = $this->getCurrentChurch();
         $tags = $church->tags;
-        $users = $church->users()->with(['person', 'churchRole'])->get();
+        $users = $church->users()->with(['person', 'churchRole.permissions'])->get();
         $ministries = $church->ministries()->orderBy('name')->get();
 
         // Transaction categories (unified)

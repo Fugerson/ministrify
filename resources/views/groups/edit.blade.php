@@ -37,7 +37,7 @@
                 <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус</label>
                 <select name="status" id="status"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                    @foreach(\App\Models\Group::STATUSES as $value => $label)
+                    @foreach(\App\Models\Group::getStatuses() as $value => $label)
                     <option value="{{ $value }}" {{ old('status', $group->status) == $value ? 'selected' : '' }}>
                         {{ $label }}
                     </option>
