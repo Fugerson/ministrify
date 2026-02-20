@@ -18,8 +18,16 @@
                 }
             };
             applyTheme();
-            // Re-apply after Livewire SPA navigation
-            document.addEventListener('livewire:navigated', applyTheme);
+            // MutationObserver: instantly re-apply dark class if Livewire removes it during SPA navigation
+            new MutationObserver(function() {
+                var theme = localStorage.getItem('theme');
+                var hasDark = document.documentElement.classList.contains('dark');
+                if (theme !== 'light' && !hasDark) {
+                    document.documentElement.classList.add('dark');
+                } else if (theme === 'light' && hasDark) {
+                    document.documentElement.classList.remove('dark');
+                }
+            }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         })();
 
         // Handle back/forward cache - check if user is still authenticated
