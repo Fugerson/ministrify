@@ -34,6 +34,13 @@
                 <span>Super Admin</span>
             </label>
 
+            <select name="per_page"
+                    class="w-full lg:w-auto px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <option value="20" {{ request('per_page', 20) == 20 ? 'selected' : '' }}>20</option>
+                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+            </select>
+
             <div class="flex gap-3 sm:col-span-2 lg:contents">
                 <button type="submit" class="flex-1 lg:flex-none px-6 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">Фільтрувати</button>
                 <a href="{{ route('system.users.index') }}" class="flex-1 lg:flex-none px-6 py-2 text-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg">Скинути</a>

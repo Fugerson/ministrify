@@ -149,7 +149,8 @@ class SystemAdminController extends Controller
             $query->where('is_super_admin', true);
         }
 
-        $users = $query->latest()->paginate(20);
+        $perPage = in_array((int) $request->per_page, [20, 50, 100]) ? (int) $request->per_page : 20;
+        $users = $query->latest()->paginate($perPage)->withQueryString();
 
         // Load all church memberships with roles for each user
         $userIds = $users->pluck('id');
