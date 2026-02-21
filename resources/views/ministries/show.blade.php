@@ -1589,7 +1589,7 @@
                                                 {{ $member->full_name }}
                                             </a>
                                             {{-- Role badge --}}
-                                            @can('contribute-ministry', $ministry)
+                                            @can('manage-ministry', $ministry)
                                             <div class="relative">
                                                 <button type="button" @click="open = !open"
                                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-colors"

@@ -557,7 +557,7 @@ class MinistryController extends Controller
     public function updateMemberRole(Request $request, Ministry $ministry, Person $person)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('contribute-ministry', $ministry);
+        Gate::authorize('manage-ministry', $ministry);
         abort_unless($person->church_id === auth()->user()->church_id, 404);
 
         $validated = $request->validate([
