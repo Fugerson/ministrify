@@ -14,20 +14,6 @@
 
         {{-- Dropdown Menu --}}
         <div x-show="profileOpen" @click.outside="profileOpen = false" x-transition class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
-            {{-- Language Section --}}
-            <div class="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.language') }}</div>
-            <div class="px-4 py-2">
-                <select onchange="window.switchLocaleAccount(this.value)"
-                        class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                    @php $localeLabels = ['uk' => '🇺🇦 Українська', 'en' => '🇬🇧 English']; @endphp
-                    @foreach(config('app.available_locales', ['uk', 'en']) as $code)
-                        <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }}>{{ $localeLabels[$code] ?? $code }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <hr class="my-2 border-gray-200 dark:border-gray-700">
-
             {{-- Profile --}}
             <a href="{{ route('my-profile') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">{{ __('app.my_profile') }}</a>
 

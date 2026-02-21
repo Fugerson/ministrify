@@ -565,30 +565,6 @@
                 </template>
             </div>
 
-            <!-- Language Setting -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.language_setting') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.language_setting_desc') }}</p>
-                </div>
-                <div class="p-6">
-                    @php $localeLabels = ['uk' => '🇺🇦 Українська', 'en' => '🇬🇧 English']; @endphp
-                    <div class="grid grid-cols-2 gap-4" x-data="{ currentLocale: '{{ app()->getLocale() }}' }">
-                        @foreach(config('app.available_locales', ['uk', 'en']) as $code)
-                            <button type="button"
-                                    onclick="window.switchLocaleAccount && window.switchLocaleAccount('{{ $code }}')"
-                                    class="p-4 rounded-xl border-2 transition-all hover:scale-[1.02] text-center {{ app()->getLocale() === $code ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }}">
-                                <span class="text-3xl block mb-2">{{ $code === 'uk' ? '🇺🇦' : '🇬🇧' }}</span>
-                                <h3 class="font-semibold text-gray-900 dark:text-white text-sm">{{ $localeLabels[$code] ?? $code }}</h3>
-                                @if(app()->getLocale() === $code)
-                                    <span class="inline-block mt-2 text-xs bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">{{ __('app.active') }}</span>
-                                @endif
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
             <!-- Menu Position -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
                  x-data="{
