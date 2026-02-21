@@ -586,13 +586,44 @@
                                                     </div>
                                                 </template>
 
-                                                {{-- Worship: no song selected yet --}}
+                                                {{-- Worship: no song selected — show general team --}}
                                                 <template x-if="isWorshipMinistry && !selectedSongForTeam">
-                                                    <div class="flex flex-col items-center justify-center h-full py-8 text-center">
-                                                        <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                                                        </svg>
-                                                        <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть пісню зліва,<br>щоб призначити команду</p>
+                                                    <div class="flex flex-col h-full">
+                                                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-3">
+                                                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                                            </svg>
+                                                            Команда
+                                                        </h4>
+                                                        <div class="flex-1 overflow-y-auto mb-3">
+                                                            <template x-if="modalGeneralTeam.length > 0">
+                                                                <div class="space-y-2">
+                                                                    <template x-for="member in modalGeneralTeam" :key="'wt-'+member.id">
+                                                                        <div class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg group">
+                                                                            <div class="flex items-center gap-2">
+                                                                                <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="member.person_name"></span>
+                                                                                <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" x-text="member.role_name"></span>
+                                                                            </div>
+                                                                            @if($canEditEvent)
+                                                                            <button @click="removeTeamMember(member.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                                </svg>
+                                                                            </button>
+                                                                            @endif
+                                                                        </div>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                            <template x-if="modalGeneralTeam.length === 0">
+                                                                <div class="flex flex-col items-center justify-center py-8 text-center">
+                                                                    <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                                                    </svg>
+                                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть пісню зліва,<br>щоб призначити команду</p>
+                                                                </div>
+                                                            </template>
+                                                        </div>
                                                     </div>
                                                 </template>
 
