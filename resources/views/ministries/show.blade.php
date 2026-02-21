@@ -223,21 +223,15 @@
 
                                                 {{-- Summary bar --}}
                                                 <div class="px-3 py-1.5 flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 border-b border-gray-50 dark:border-gray-700/50">
-                                                    <span class="flex items-center gap-1">
-                                                        <span>🎵</span>
-                                                        <span x-text="event.songsCount + ' ' + (event.songsCount === 1 ? 'пісня' : (event.songsCount >= 2 && event.songsCount <= 4 ? 'пісні' : 'пісень'))"></span>
-                                                    </span>
-                                                    <span class="flex items-center gap-1">
-                                                        <span>👥</span>
-                                                        <span x-text="event.teamCount + ' уч.'"></span>
-                                                    </span>
+                                                    <span x-text="'🎵 ' + event.songsCount + ' ' + (event.songsCount === 1 ? 'пісня' : (event.songsCount >= 2 && event.songsCount <= 4 ? 'пісні' : 'пісень'))"></span>
+                                                    <span x-text="'👥 ' + event.teamCount + ' уч.'"></span>
                                                 </div>
 
                                                 {{-- Card body: flat member list --}}
                                                 <div class="flex-1 px-3 py-2 space-y-0.5 min-h-[50px]">
                                                     {{-- Empty state --}}
                                                     <template x-if="getEventRoles(event.id).length === 0">
-                                                        <p class="text-xs text-gray-400 dark:text-gray-500 italic py-3 text-center">{{ __('app.empty') ?? 'порожньо' }}</p>
+                                                        <p class="text-xs text-gray-400 dark:text-gray-500 italic py-3 text-center">порожньо</p>
                                                     </template>
 
                                                     {{-- Flat list of members with role icons --}}
@@ -260,7 +254,7 @@
                                                     <button @click.stop="openEventModal(event)"
                                                         class="w-full text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium py-1 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-center gap-1">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                        {{ __('app.open') ?? 'Відкрити' }}
+                                                        Відкрити
                                                     </button>
                                                 </div>
                                             </div>
