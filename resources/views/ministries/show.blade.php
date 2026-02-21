@@ -211,7 +211,7 @@
                                             <div class="flex-shrink-0 w-56 sm:w-64 snap-start bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-600 transition-all cursor-pointer flex flex-col"
                                                  @click="openEventModal(event)">
                                                 {{-- Card header --}}
-                                                <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 rounded-t-xl">
+                                                <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 rounded-t-xl">
                                                     <div class="flex items-center justify-between">
                                                         <div>
                                                             <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="event.dateLabel"></span>
