@@ -781,4 +781,15 @@ return [
     'cancel' => 'Cancel',
     'check_form_errors' => 'Please check the form for errors.',
     'connection_error' => 'Server connection error.',
+
+    // PWA Install
+    'install_app' => 'Install App',
+    'install_app_desc' => 'Add Ministrify to your phone home screen',
+    'install_app_btn' => 'Install on device',
+    'app_installed' => 'App is already installed',
+    'how_to_install' => 'How to install?',
+    'ios_step_1' => 'Tap the "Share" button (square with arrow) at the bottom of Safari',
+    'ios_step_2' => 'Select "Add to Home Screen"',
+    'ios_step_3' => 'Tap "Add"',
+    'install_not_available' => 'Open the site in Chrome or Safari on your phone to install the app.',
 ];

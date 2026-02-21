@@ -483,6 +483,88 @@
                 </template>
             </div>
 
+            <!-- PWA Install -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+                 x-data="{
+                     installable: !!window.pwaInstallPrompt,
+                     installed: false,
+                     isIos: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+                     isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true,
+                     showIosGuide: false,
+                     init() {
+                         window.addEventListener('pwa-installable', () => { this.installable = true; });
+                         window.addEventListener('appinstalled', () => { this.installed = true; this.installable = false; });
+                     },
+                     async install() {
+                         if (!window.pwaInstallPrompt) return;
+                         window.pwaInstallPrompt.prompt();
+                         const { outcome } = await window.pwaInstallPrompt.userChoice;
+                         if (outcome === 'accepted') { this.installed = true; }
+                         window.pwaInstallPrompt = null;
+                         this.installable = false;
+                     }
+                 }">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.install_app') }}</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.install_app_desc') }}</p>
+                    </div>
+                </div>
+
+                <!-- Already installed / standalone mode -->
+                <template x-if="isStandalone || installed">
+                    <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span class="text-sm font-medium">{{ __('app.app_installed') }}</span>
+                    </div>
+                </template>
+
+                <!-- Installable (Chrome/Edge/etc) -->
+                <template x-if="!isStandalone && !installed && installable">
+                    <button @click="install()" type="button"
+                            class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        {{ __('app.install_app_btn') }}
+                    </button>
+                </template>
+
+                <!-- iOS instructions -->
+                <template x-if="!isStandalone && !installed && !installable && isIos">
+                    <div>
+                        <button @click="showIosGuide = !showIosGuide" type="button"
+                                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            {{ __('app.how_to_install') }}
+                        </button>
+                        <div x-show="showIosGuide" x-cloak x-transition class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                <li>{{ __('app.ios_step_1') }}</li>
+                                <li>{{ __('app.ios_step_2') }}</li>
+                                <li>{{ __('app.ios_step_3') }}</li>
+                            </ol>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Not installable (desktop browser without PWA support) -->
+                <template x-if="!isStandalone && !installed && !installable && !isIos">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('app.install_not_available') }}
+                    </p>
+                </template>
+            </div>
+
             <!-- Language Setting -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
