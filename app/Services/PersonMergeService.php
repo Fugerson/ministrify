@@ -284,4 +284,200 @@ class PersonMergeService
             ]);
         });
     }
+
+    /**
+     * Merge two people with explicit field selection (git-merge style).
+     *
+     * @param Person $personA The base/primary person (receives merged data)
+     * @param Person $personB The secondary person (will be soft-deleted)
+     * @param array $fieldSelections ['phone' => 'A', 'email' => 'B', ...] — which person's value to keep per field
+     */
+    public function mergeWithFieldSelection(Person $personA, Person $personB, array $fieldSelections): void
+    {
+        DB::transaction(function () use ($personA, $personB, $fieldSelections) {
+            // Map JS field names to model field names
+            if (isset($fieldSelections['photo_url'])) {
+                $fieldSelections['photo'] = $fieldSelections['photo_url'];
+                unset($fieldSelections['photo_url']);
+            }
+
+            // 1. Apply field selections
+            $scalarFields = [
+                'phone', 'email', 'iban', 'gender', 'marital_status',
+                'telegram_username', 'telegram_chat_id', 'photo',
+                'address', 'birth_date', 'anniversary', 'first_visit_date',
+                'joined_date', 'baptism_date', 'church_role', 'church_role_id',
+                'membership_status', 'notes', 'is_shepherd',
+            ];
+
+            $updates = [];
+            foreach ($scalarFields as $field) {
+                if (isset($fieldSelections[$field])) {
+                    if ($fieldSelections[$field] === 'B') {
+                        // Take value from personB
+                        $updates[$field] = $personB->{$field};
+                    }
+                    // 'A' means keep personA's value — no action needed
+                } else {
+                    // No explicit selection — fallback: fill NULLs from secondary
+                    if (empty($personA->{$field}) && !empty($personB->{$field})) {
+                        $updates[$field] = $personB->{$field};
+                    }
+                }
+            }
+
+            if (!empty($updates)) {
+                $personA->update($updates);
+            }
+
+            // 2. Transfer user account link
+            if (!$personA->user_id && $personB->user_id) {
+                $userId = $personB->user_id;
+                $personB->update(['user_id' => null]);
+                $personA->update(['user_id' => $userId]);
+
+                DB::table('church_user')
+                    ->where('person_id', $personB->id)
+                    ->update(['person_id' => $personA->id, 'updated_at' => now()]);
+            }
+
+            // 3. Transfer BelongsToMany pivots (union — always combine)
+
+            // ministry_person
+            $existingMinistries = DB::table('ministry_person')
+                ->where('person_id', $personA->id)
+                ->pluck('ministry_id')
+                ->toArray();
+
+            DB::table('ministry_person')
+                ->where('person_id', $personB->id)
+                ->whereNotIn('ministry_id', $existingMinistries)
+                ->update(['person_id' => $personA->id]);
+
+            DB::table('ministry_person')
+                ->where('person_id', $personB->id)
+                ->delete();
+
+            // group_person
+            $existingGroups = DB::table('group_person')
+                ->where('person_id', $personA->id)
+                ->pluck('group_id')
+                ->toArray();
+
+            DB::table('group_person')
+                ->where('person_id', $personB->id)
+                ->whereNotIn('group_id', $existingGroups)
+                ->update(['person_id' => $personA->id]);
+
+            DB::table('group_person')
+                ->where('person_id', $personB->id)
+                ->delete();
+
+            // person_tag
+            $existingTags = DB::table('person_tag')
+                ->where('person_id', $personA->id)
+                ->pluck('tag_id')
+                ->toArray();
+
+            DB::table('person_tag')
+                ->where('person_id', $personB->id)
+                ->whereNotIn('tag_id', $existingTags)
+                ->update(['person_id' => $personA->id]);
+
+            DB::table('person_tag')
+                ->where('person_id', $personB->id)
+                ->delete();
+
+            // 4. Transfer HasMany relationships
+            $hasManyTables = [
+                'assignments',
+                'event_responsibilities',
+                'person_worship_skills',
+                'event_worship_team',
+                'unavailable_dates',
+                'attendance_records',
+                'transactions',
+                'person_communications',
+                'blockout_dates',
+                'telegram_messages',
+                'family_relationships',
+                'prayer_requests',
+                'online_donations',
+                'scheduling_preferences',
+                'meeting_attendees',
+            ];
+
+            foreach ($hasManyTables as $table) {
+                if (\Schema::hasTable($table)) {
+                    DB::table($table)
+                        ->where('person_id', $personB->id)
+                        ->update(['person_id' => $personA->id]);
+                }
+            }
+
+            if (\Schema::hasTable('family_relationships')) {
+                DB::table('family_relationships')
+                    ->where('related_person_id', $personB->id)
+                    ->update(['related_person_id' => $personA->id]);
+            }
+
+            if (\Schema::hasTable('kanban_cards') && \Schema::hasColumn('kanban_cards', 'person_id')) {
+                DB::table('kanban_cards')
+                    ->where('person_id', $personB->id)
+                    ->update(['person_id' => $personA->id]);
+            }
+
+            if (\Schema::hasTable('staff_members') && \Schema::hasColumn('staff_members', 'person_id')) {
+                DB::table('staff_members')
+                    ->where('person_id', $personB->id)
+                    ->update(['person_id' => $personA->id]);
+            }
+
+            if (\Schema::hasTable('testimonials') && \Schema::hasColumn('testimonials', 'person_id')) {
+                DB::table('testimonials')
+                    ->where('person_id', $personB->id)
+                    ->update(['person_id' => $personA->id]);
+            }
+
+            if (\Schema::hasTable('monobank_transactions') && \Schema::hasColumn('monobank_transactions', 'person_id')) {
+                DB::table('monobank_transactions')
+                    ->where('person_id', $personB->id)
+                    ->update(['person_id' => $personA->id]);
+            }
+
+            if (\Schema::hasTable('privatbank_transactions') && \Schema::hasColumn('privatbank_transactions', 'person_id')) {
+                DB::table('privatbank_transactions')
+                    ->where('person_id', $personB->id)
+                    ->update(['person_id' => $personA->id]);
+            }
+
+            // 5. Transfer shepherd relationships
+            Person::where('shepherd_id', $personB->id)
+                ->update(['shepherd_id' => $personA->id]);
+
+            if (!$personA->shepherd_id && $personB->shepherd_id && $personB->shepherd_id !== $personA->id) {
+                $personA->update(['shepherd_id' => $personB->shepherd_id]);
+            }
+
+            // 6. Transfer leadership roles
+            DB::table('groups')
+                ->where('leader_id', $personB->id)
+                ->update(['leader_id' => $personA->id]);
+
+            DB::table('ministries')
+                ->where('leader_id', $personB->id)
+                ->update(['leader_id' => $personA->id]);
+
+            // 7. Soft delete secondary
+            $personB->delete();
+
+            Log::info('People merged with field selection', [
+                'primary_id' => $personA->id,
+                'secondary_id' => $personB->id,
+                'primary_name' => $personA->full_name,
+                'secondary_name' => $personB->full_name,
+                'field_selections' => $fieldSelections,
+            ]);
+        });
+    }
 }

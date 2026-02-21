@@ -1756,6 +1756,8 @@ class PersonController extends Controller
         $validated = $request->validate([
             'primary_id' => 'required|integer|exists:people,id',
             'secondary_id' => 'required|integer|exists:people,id|different:primary_id',
+            'field_selections' => 'nullable|array',
+            'field_selections.*' => 'in:A,B',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -1763,7 +1765,11 @@ class PersonController extends Controller
         $primary = Person::where('church_id', $church->id)->findOrFail($validated['primary_id']);
         $secondary = Person::where('church_id', $church->id)->findOrFail($validated['secondary_id']);
 
-        $this->mergeService->merge($primary, $secondary);
+        if (!empty($validated['field_selections'])) {
+            $this->mergeService->mergeWithFieldSelection($primary, $secondary, $validated['field_selections']);
+        } else {
+            $this->mergeService->merge($primary, $secondary);
+        }
 
         $this->logAuditAction('people_merged', 'Person', $primary->id, $primary->full_name, [
             'merged_from_id' => $secondary->id,
@@ -1791,6 +1797,8 @@ class PersonController extends Controller
             'membership_status' => $person->membership_status,
             'telegram_username' => $person->telegram_username,
             'telegram_chat_id' => $person->telegram_chat_id,
+            'address' => $person->address,
+            'notes' => $person->notes,
             'has_user' => (bool) $person->user_id,
             'ministries' => $person->ministries->pluck('name')->toArray(),
             'tags' => $person->tags->pluck('name')->toArray(),
