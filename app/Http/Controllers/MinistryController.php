@@ -406,7 +406,9 @@ class MinistryController extends Controller
             return $e;
         });
 
-        return response()->json(compact('events', 'roles', 'grid', 'members', 'songs'));
+        $currentPersonId = auth()->user()->person?->id;
+
+        return response()->json(compact('events', 'roles', 'grid', 'members', 'songs', 'currentPersonId'));
     }
 
     public function edit(Ministry $ministry)

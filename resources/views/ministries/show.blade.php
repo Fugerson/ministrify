@@ -250,12 +250,46 @@
                                                 </div>
 
                                                 {{-- Card footer --}}
-                                                <div class="px-3 py-2 border-t border-gray-100 dark:border-gray-700">
-                                                    <button @click.stop="openEventModal(event)"
-                                                        class="w-full text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium py-1 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-center gap-1">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                        Відкрити
-                                                    </button>
+                                                <div class="px-3 py-2 border-t border-gray-100 dark:border-gray-700 relative">
+                                                    <div class="flex gap-1">
+                                                        {{-- Signup button --}}
+                                                        <template x-if="isCurrentMember() && !isSignedUp(event.id)">
+                                                            <button @click.stop="signupEvent = signupEvent === event.id ? null : event.id"
+                                                                class="flex-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-medium py-1 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex items-center justify-center gap-1">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                                                Записатися
+                                                            </button>
+                                                        </template>
+                                                        {{-- Open button --}}
+                                                        <button @click.stop="openEventModal(event)"
+                                                            :class="isCurrentMember() && !isSignedUp(event.id) ? 'flex-1' : 'w-full'"
+                                                            class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium py-1 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-center gap-1">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                            Відкрити
+                                                        </button>
+                                                    </div>
+
+                                                    {{-- Role selection popup --}}
+                                                    <div x-show="signupEvent === event.id"
+                                                         x-transition:enter="transition ease-out duration-100"
+                                                         x-transition:enter-start="opacity-0 scale-95"
+                                                         x-transition:enter-end="opacity-100 scale-100"
+                                                         x-transition:leave="transition ease-in duration-75"
+                                                         x-transition:leave-start="opacity-100 scale-100"
+                                                         x-transition:leave-end="opacity-0 scale-95"
+                                                         @click.stop
+                                                         @click.outside="signupEvent = null"
+                                                         class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 py-1 z-20">
+                                                        <div class="px-2 py-1 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Оберіть роль</div>
+                                                        <template x-for="role in gridData.roles" :key="'signup-'+event.id+'-'+role.id">
+                                                            <button @click.stop="selfSignup(event.id, role.id)"
+                                                                class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/30 flex items-center gap-2 transition-colors">
+                                                                <span x-show="role.icon" x-text="role.icon" class="text-sm"></span>
+                                                                <span x-show="!role.icon" class="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[9px]" x-text="role.name.charAt(0)"></span>
+                                                                <span x-text="role.name"></span>
+                                                            </button>
+                                                        </template>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </template>
@@ -665,7 +699,8 @@
 
                                 // Grid state
                                 gridView: new URL(window.location).searchParams.get('view') === 'grid',
-                                gridData: { events: [], roles: [], grid: {}, members: [], songs: {} },
+                                gridData: { events: [], roles: [], grid: {}, members: [], songs: {}, currentPersonId: null },
+                                signupEvent: null,
                                 gridLoading: false,
                                 editingCell: null,
                                 gridDropdown: { open: false, eventId: null, roleId: null, style: {} },
@@ -1128,6 +1163,27 @@
                                         count += (this.gridData.grid[rId]?.[eId] || []).length;
                                     }
                                     return count;
+                                },
+
+                                isCurrentMember() {
+                                    if (!this.gridData.currentPersonId) return false;
+                                    return this.gridData.members.some(m => m.id === this.gridData.currentPersonId);
+                                },
+
+                                isSignedUp(eventId) {
+                                    const eId = String(eventId);
+                                    const pid = this.gridData.currentPersonId;
+                                    if (!pid) return true;
+                                    for (const rId in (this.gridData.grid || {})) {
+                                        const members = this.gridData.grid[rId]?.[eId] || [];
+                                        if (members.some(m => m.person_id == pid)) return true;
+                                    }
+                                    return false;
+                                },
+
+                                async selfSignup(eventId, roleId) {
+                                    await this.gridAssign(eventId, roleId, this.gridData.currentPersonId);
+                                    this.signupEvent = null;
                                 },
 
                                 async gridAssign(eventId, roleId, personId) {
