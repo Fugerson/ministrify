@@ -108,7 +108,7 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $person->full_name }}</h2>
-                            <p class="text-gray-500 dark:text-gray-400">{{ auth()->user()->role === 'admin' ? __('app.role_admin') : (auth()->user()->role === 'leader' ? __('app.role_leader') : __('app.role_volunteer')) }}</p>
+                            <p class="text-gray-500 dark:text-gray-400">{{ auth()->user()->churchRole?->name ?? __('app.role_volunteer') }}</p>
                             <button type="button" @click="$refs.photoInput.click()"
                                     class="inline-flex items-center gap-1.5 mt-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
