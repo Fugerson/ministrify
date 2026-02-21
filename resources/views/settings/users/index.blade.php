@@ -100,12 +100,43 @@
     </div>
     @endif
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+         x-data="{
+             perPage: parseInt(localStorage.getItem('users_per_page') || '50'),
+             currentPage: 1,
+             totalRows: {{ $activeUsers->count() }},
+             get totalPages() { return this.perPage === 0 ? 1 : Math.ceil(this.totalRows / this.perPage) },
+             setPerPage(val) {
+                 this.perPage = parseInt(val);
+                 this.currentPage = 1;
+                 localStorage.setItem('users_per_page', val);
+             },
+             showRow(index) {
+                 if (this.perPage === 0) return true;
+                 return index >= (this.currentPage - 1) * this.perPage && index < this.currentPage * this.perPage;
+             }
+         }">
+        <!-- Per page selector -->
+        <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                Всього: <span class="font-medium text-gray-900 dark:text-white" x-text="totalRows"></span>
+            </span>
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500 dark:text-gray-400">На сторінці:</span>
+                <select x-model="perPage" @change="setPerPage($event.target.value)"
+                        class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1 pl-2 pr-7">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="0">Всі</option>
+                </select>
+            </div>
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ім'я</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Імʼя</th>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Email</th>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Роль</th>
                         <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Статус</th>
@@ -114,7 +145,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($activeUsers as $user)
-                    <tr>
+                    <tr x-show="showRow({{ $loop->index }})" x-cloak>
                         <td class="px-3 md:px-6 py-3 md:py-4">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-9 w-9 md:h-10 md:w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -255,6 +286,22 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+        <!-- Pagination -->
+        <div x-show="totalPages > 1" class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                Сторінка <span x-text="currentPage"></span> з <span x-text="totalPages"></span>
+            </span>
+            <div class="flex items-center gap-1">
+                <button @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1"
+                        class="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300">
+                    &larr;
+                </button>
+                <button @click="currentPage = Math.min(totalPages, currentPage + 1)" :disabled="currentPage === totalPages"
+                        class="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300">
+                    &rarr;
+                </button>
+            </div>
         </div>
     </div>
 
