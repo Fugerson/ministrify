@@ -340,9 +340,16 @@ class MinistryController extends Controller
             ->get();
 
         $grid = [];
+        $seen = []; // track person_id per role+event to skip duplicates
         foreach ($teamEntries as $entry) {
             $roleId = (string) $entry->ministry_role_id;
             $eventId = (string) $entry->event_id;
+            $key = $roleId . '-' . $eventId . '-' . $entry->person_id;
+
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
 
             if (!isset($grid[$roleId])) {
                 $grid[$roleId] = [];
