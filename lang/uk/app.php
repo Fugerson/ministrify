@@ -796,8 +796,9 @@ return [
     'ios_step_3_title' => 'Натисніть "Додати"',
     'ios_step_3_desc' => 'Іконка Ministrify з\'явиться на вашому головному екрані',
     'install_not_available' => 'Відкрийте сайт у Chrome або Safari на телефоні, щоб встановити додаток.',
-    'ios_open_safari_title' => 'Відкрийте в Safari',
-    'ios_open_safari_desc' => 'На iPhone встановити додаток можна тільки через Safari. Скопіюйте посилання та відкрийте його в Safari.',
-    'copy_link' => 'Скопіювати посилання',
-    'link_copied' => 'Скопійовано!',
+    'ios_chrome_guide_title' => 'Щоб встановити додаток через Chrome, виконайте 3 кроки:',
+    'ios_chrome_step_1_title' => 'Натисніть меню "⋯"',
+    'ios_chrome_step_1_desc' => 'Натисніть три крапки (⋯) внизу або вгорі екрана в Chrome',
+    'ios_chrome_step_2_title' => 'Оберіть "На початковий екран"',
+    'ios_chrome_step_2_desc' => 'Знайдіть у меню пункт "Додати на початковий екран"',
 ];

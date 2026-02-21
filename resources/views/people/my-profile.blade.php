@@ -538,33 +538,8 @@
                     </button>
                 </template>
 
-                <!-- iOS Chrome/Firefox — redirect to Safari -->
-                <template x-if="!isStandalone && !installed && !installable && isIos && !isIosSafari">
-                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-                        <div class="flex items-start gap-3">
-                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_open_safari_title') }}</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('app.ios_open_safari_desc') }}</p>
-                                <button onclick="navigator.clipboard.writeText(window.location.origin + '/my-profile'); this.textContent = '{{ __('app.link_copied') }}';"
-                                        type="button"
-                                        class="inline-flex items-center gap-2 px-3 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg text-sm font-medium hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                    </svg>
-                                    {{ __('app.copy_link') }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- iOS Safari instructions -->
-                <template x-if="!isStandalone && !installed && !installable && isIosSafari">
+                <!-- iOS instructions (any browser) -->
+                <template x-if="!isStandalone && !installed && !installable && isIos">
                     <div>
                         <button @click="showIosGuide = !showIosGuide" type="button"
                                 class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors">
@@ -574,49 +549,95 @@
                             {{ __('app.install_app_btn') }}
                         </button>
                         <div x-show="showIosGuide" x-cloak x-transition class="mt-4 space-y-4">
-                            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">{{ __('app.ios_guide_title') }}</p>
+                            <!-- Safari instructions -->
+                            <template x-if="isIosSafari">
+                                <div class="space-y-4">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 text-center">{{ __('app.ios_guide_title') }}</p>
 
-                            <!-- Step 1 -->
-                            <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">1</div>
-                                <div class="flex-1">
-                                    <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_step_1_title') }}</p>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_step_1_desc') }}</p>
-                                </div>
-                                <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
-                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                                    </svg>
-                                </div>
-                            </div>
+                                    <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">1</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_step_1_title') }}</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_step_1_desc') }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                            </svg>
+                                        </div>
+                                    </div>
 
-                            <!-- Step 2 -->
-                            <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">2</div>
-                                <div class="flex-1">
-                                    <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_step_2_title') }}</p>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_step_2_desc') }}</p>
-                                </div>
-                                <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
-                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                </div>
-                            </div>
+                                    <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">2</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_step_2_title') }}</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_step_2_desc') }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                        </div>
+                                    </div>
 
-                            <!-- Step 3 -->
-                            <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">3</div>
-                                <div class="flex-1">
-                                    <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_step_3_title') }}</p>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_step_3_desc') }}</p>
+                                    <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">3</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_step_3_title') }}</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_step_3_desc') }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                                            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
-                                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                    </svg>
+                            </template>
+
+                            <!-- Chrome/other browser instructions -->
+                            <template x-if="!isIosSafari">
+                                <div class="space-y-4">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 text-center">{{ __('app.ios_chrome_guide_title') }}</p>
+
+                                    <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">1</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_chrome_step_1_title') }}</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_chrome_step_1_desc') }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                                            <span class="text-xl text-blue-500 font-bold">⋯</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">2</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_chrome_step_2_title') }}</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_chrome_step_2_desc') }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg">3</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_step_3_title') }}</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.ios_step_3_desc') }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                                            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            </template>
                         </div>
                     </div>
                 </template>
