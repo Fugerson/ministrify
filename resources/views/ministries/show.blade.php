@@ -190,90 +190,121 @@
                                 </svg>
                             </div>
 
-                            {{-- Grid table --}}
-                            <div x-show="!gridLoading" class="overflow-x-auto">
+                            {{-- Event cards --}}
+                            <div x-show="!gridLoading">
                                 {{-- Empty state --}}
-                                <template x-if="gridData.roles.length === 0 || gridData.events.length === 0">
+                                <template x-if="gridData.events.length === 0">
                                     <div class="text-center py-8">
                                         <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                                             <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                                             </svg>
                                         </div>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400" x-text="gridData.roles.length === 0 ? 'Створіть ролі для цього служіння' : 'Немає подій у цьому місяці'"></p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_events_this_month') ?? 'Немає подій у цьому місяці' }}</p>
                                     </div>
                                 </template>
 
-                                <template x-if="gridData.roles.length > 0 && gridData.events.length > 0">
-                                    <table class="w-full border-collapse text-sm">
-                                        <thead>
-                                            <tr>
-                                                <th class="sticky left-0 z-10 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase border-b border-r border-gray-200 dark:border-gray-600 min-w-[140px]">
-                                                    Роль
-                                                </th>
-                                                <template x-for="event in gridData.events" :key="event.id">
-                                                    <th class="px-2 py-2 text-center border-b border-gray-200 dark:border-gray-600 min-w-[100px]">
-                                                        <div class="text-xs font-semibold text-gray-900 dark:text-white" x-text="event.dateLabel"></div>
-                                                        <div class="text-[10px] text-gray-400 dark:text-gray-500" x-text="event.dayOfWeek"></div>
-                                                    </th>
-                                                </template>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="role in gridData.roles" :key="role.id">
-                                                <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-750/50">
-                                                    <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 px-3 py-2 border-r border-gray-200 dark:border-gray-600">
-                                                        <div class="flex items-center gap-1.5">
-                                                            <span x-show="role.icon" x-text="role.icon" class="text-sm"></span>
-                                                            <span class="font-medium text-gray-700 dark:text-gray-300 text-xs" x-text="role.name"></span>
-                                                        </div>
-                                                    </td>
-                                                    <template x-for="event in gridData.events" :key="event.id">
-                                                        <td class="px-1 py-1.5 text-center border-r border-gray-100 dark:border-gray-700 align-top">
-                                                            <div class="flex flex-wrap gap-1 justify-center min-h-[28px] items-start">
-                                                                {{-- Assigned people --}}
-                                                                <template x-for="member in getGridCell(role.id, event.id)" :key="member.id">
-                                                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs"
-                                                                        :class="{
-                                                                            'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300': member.status === 'confirmed',
-                                                                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300': member.status === 'declined',
-                                                                            'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300': member.status === 'pending',
-                                                                            'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300': !member.status
-                                                                        }">
-                                                                        {{-- Status icon --}}
-                                                                        <span x-show="member.status === 'confirmed'" class="flex-shrink-0">✅</span>
-                                                                        <span x-show="member.status === 'declined'" class="flex-shrink-0">❌</span>
-                                                                        <span x-show="member.status === 'pending'" class="flex-shrink-0">⏳</span>
-                                                                        <span x-text="member.person_name" class="truncate max-w-[70px]"></span>
-                                                                        {{-- TG send button --}}
+                                {{-- Cards grid --}}
+                                <template x-if="gridData.events.length > 0">
+                                    <div class="flex gap-4 overflow-x-auto pb-4 snap-x" @click.away="addingToEvent = null">
+                                        <template x-for="event in gridData.events" :key="event.id">
+                                            <div class="flex-shrink-0 w-56 sm:w-64 snap-start bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col">
+                                                {{-- Card header --}}
+                                                <div class="px-3 py-2.5 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 rounded-t-xl">
+                                                    <div class="text-sm font-semibold text-gray-900 dark:text-white" x-text="event.dateLabel"></div>
+                                                    <div class="text-xs text-gray-400 dark:text-gray-500" x-text="event.dayOfWeek"></div>
+                                                </div>
+
+                                                {{-- Card body: roles & members --}}
+                                                <div class="flex-1 px-3 py-2 space-y-2 min-h-[60px]">
+                                                    {{-- Empty state --}}
+                                                    <template x-if="getEventRoles(event.id).length === 0">
+                                                        <p class="text-xs text-gray-400 dark:text-gray-500 italic py-2 text-center">порожньо</p>
+                                                    </template>
+
+                                                    {{-- Role groups --}}
+                                                    <template x-for="roleGroup in getEventRoles(event.id)" :key="'rg-'+event.id+'-'+roleGroup.roleId">
+                                                        <div>
+                                                            <div class="flex items-center gap-1 mb-1">
+                                                                <span x-show="roleGroup.roleIcon" x-text="roleGroup.roleIcon" class="text-xs"></span>
+                                                                <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide" x-text="roleGroup.roleName"></span>
+                                                            </div>
+                                                            <template x-for="member in roleGroup.members" :key="'m-'+member.id">
+                                                                <div class="flex items-center justify-between gap-1 py-0.5 group">
+                                                                    <div class="flex items-center gap-1 min-w-0">
+                                                                        <span x-show="member.status === 'confirmed'" class="flex-shrink-0 text-xs">✅</span>
+                                                                        <span x-show="member.status === 'declined'" class="flex-shrink-0 text-xs">❌</span>
+                                                                        <span x-show="member.status === 'pending'" class="flex-shrink-0 text-xs">⏳</span>
+                                                                        <span x-show="!member.status" class="flex-shrink-0 text-xs">◻️</span>
+                                                                        <span class="text-xs text-gray-700 dark:text-gray-300 truncate" x-text="member.person_name"></span>
+                                                                    </div>
+                                                                    <div class="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        {{-- TG button --}}
                                                                         <button x-show="member.has_telegram && member.status !== 'confirmed'"
-                                                                            @click.stop="gridNotify(event.id, member.id, role.id)"
-                                                                            class="inline-flex items-center justify-center w-3.5 h-3.5 flex-shrink-0 text-blue-500 hover:text-blue-700 transition-colors"
+                                                                            @click.stop="gridNotify(event.id, member.id, roleGroup.roleId)"
+                                                                            class="w-4 h-4 flex items-center justify-center text-blue-500 hover:text-blue-700 transition-colors"
                                                                             :title="member.status === 'pending' ? 'Нагадати' : 'Запитати в Telegram'">
                                                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                                                                         </button>
                                                                         {{-- Remove button --}}
-                                                                        <button @click.stop="gridRemove(event.id, member.id, role.id)"
-                                                                            class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full text-current opacity-40 hover:opacity-100 hover:bg-red-500 hover:text-white text-[10px] leading-none flex-shrink-0 transition-all">
+                                                                        <button @click.stop="gridRemove(event.id, member.id, roleGroup.roleId)"
+                                                                            class="w-4 h-4 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-500 hover:text-white text-[10px] transition-all">
                                                                             &times;
                                                                         </button>
-                                                                    </span>
-                                                                </template>
-                                                                {{-- Add select --}}
-                                                                <select @change="if($event.target.value) { gridAssign(event.id, role.id, parseInt($event.target.value)); $event.target.value = ''; }"
-                                                                    class="w-24 text-xs border border-dashed border-gray-300 dark:border-gray-600 rounded px-1 py-0.5 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none">
-                                                                    <option value="">+</option>
-                                                                    <template x-for="member in gridData.members" :key="'sel-'+member.id">
-                                                                        <option :value="member.id" x-text="member.name"></option>
-                                                                    </template>
-                                                                </select>
-                                                            </div>
-                                                        </td>
+                                                                    </div>
+                                                                </div>
+                                                            </template>
+                                                        </div>
                                                     </template>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
+                                                </div>
+
+                                                {{-- Card footer: add button --}}
+                                                <div class="px-3 py-2 border-t border-gray-100 dark:border-gray-700 relative">
+                                                    <button @click="addingToEvent = (addingToEvent === event.id ? null : event.id); addStep = 'role'; selectedAddRole = null;"
+                                                        class="w-full text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium py-1 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-center gap-1">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                        Додати
+                                                    </button>
+
+                                                    {{-- Two-step dropdown --}}
+                                                    <div x-show="addingToEvent === event.id" x-cloak x-transition
+                                                        class="absolute bottom-full left-0 right-0 mb-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 max-h-52 overflow-y-auto">
+
+                                                        {{-- Step 1: Choose role --}}
+                                                        <template x-if="addStep === 'role'">
+                                                            <div class="py-1">
+                                                                <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Оберіть роль</div>
+                                                                <template x-for="role in gridData.roles" :key="'add-role-'+role.id">
+                                                                    <button @click="selectedAddRole = role; addStep = 'person';"
+                                                                        class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-1.5 transition-colors">
+                                                                        <span x-show="role.icon" x-text="role.icon" class="text-sm"></span>
+                                                                        <span x-text="role.name"></span>
+                                                                    </button>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+
+                                                        {{-- Step 2: Choose person --}}
+                                                        <template x-if="addStep === 'person' && selectedAddRole">
+                                                            <div class="py-1">
+                                                                <button @click="addStep = 'role'"
+                                                                    class="w-full text-left px-3 py-1.5 text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                                                    <span x-text="selectedAddRole.icon ? selectedAddRole.icon + ' ' + selectedAddRole.name : selectedAddRole.name"></span>
+                                                                </button>
+                                                                <template x-for="member in gridData.members" :key="'add-m-'+member.id">
+                                                                    <button @click="gridAssign(event.id, selectedAddRole.id, member.id); addingToEvent = null;"
+                                                                        class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
+                                                                        <span x-text="member.name"></span>
+                                                                    </button>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </template>
                             </div>
 
@@ -683,6 +714,9 @@
                                 gridLoading: false,
                                 editingCell: null,
                                 gridDropdown: { open: false, eventId: null, roleId: null, style: {} },
+                                addingToEvent: null,
+                                addStep: 'role',
+                                selectedAddRole: null,
 
                                 // Modal state
                                 showModal: false,
@@ -1112,6 +1146,24 @@
                                     return this.gridData.grid?.[roleId]?.[eventId] || [];
                                 },
 
+                                getEventRoles(eventId) {
+                                    const result = [];
+                                    const eId = String(eventId);
+                                    for (const role of this.gridData.roles) {
+                                        const rId = String(role.id);
+                                        const members = this.gridData.grid?.[rId]?.[eId] || [];
+                                        if (members.length > 0) {
+                                            result.push({
+                                                roleId: role.id,
+                                                roleName: role.name,
+                                                roleIcon: role.icon,
+                                                members: members
+                                            });
+                                        }
+                                    }
+                                    return result;
+                                },
+
                                 async gridAssign(eventId, roleId, personId) {
                                     const formData = new FormData();
                                     formData.append('person_id', personId);
@@ -1159,6 +1211,7 @@
                                         console.error('Error assigning:', error);
                                     }
                                     this.gridDropdown.open = false;
+                                    this.addingToEvent = null;
                                 },
 
                                 async gridRemove(eventId, memberId, roleId) {
