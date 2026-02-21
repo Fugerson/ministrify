@@ -770,6 +770,8 @@ class EventController extends Controller
      */
     public function exportIcal(Request $request, CalendarService $calendarService)
     {
+        abort_unless(auth()->user()->canView('events'), 403);
+
         $church = $this->getCurrentChurch();
 
         $ministryId = $request->get('ministry');

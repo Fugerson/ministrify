@@ -1228,6 +1228,8 @@ class DashboardController extends Controller
 
     public function calendarEventsApi(Request $request)
     {
+        abort_unless(auth()->user()->canView('events'), 403);
+
         $church = $this->getCurrentChurch();
         $month = (int) $request->get('month', now()->month);
         $year = (int) $request->get('year', now()->year);

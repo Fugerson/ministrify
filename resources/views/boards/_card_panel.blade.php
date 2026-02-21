@@ -167,6 +167,7 @@
                                             </template>
                                         </div>
 
+                                        @if(auth()->user()->canEdit('boards'))
                                         <div class="mt-2" x-data="{ adding: false, newItem: '' }">
                                             <template x-if="!adding">
                                                 <button @click="adding = true" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1">
@@ -190,6 +191,7 @@
                                                 </div>
                                             </template>
                                         </div>
+                                        @endif
                                     </div>
 
                                     <!-- Attachments -->

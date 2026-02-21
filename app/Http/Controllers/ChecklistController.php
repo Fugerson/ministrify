@@ -15,6 +15,8 @@ class ChecklistController extends Controller
     // Checklist Templates
     public function templates()
     {
+        abort_unless(auth()->user()->canView('events'), 403);
+
         $church = $this->getCurrentChurch();
 
         $templates = ChecklistTemplate::where('church_id', $church->id)
@@ -27,11 +29,15 @@ class ChecklistController extends Controller
 
     public function createTemplate()
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
+
         return view('checklists.templates.create');
     }
 
     public function storeTemplate(Request $request)
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -129,6 +135,8 @@ class ChecklistController extends Controller
     // Event Checklists
     public function createForEvent(Request $request, Event $event)
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
+
         $church = $this->getCurrentChurch();
 
         if ($event->church_id !== $church->id) {

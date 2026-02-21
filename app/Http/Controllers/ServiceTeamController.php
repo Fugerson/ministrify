@@ -17,6 +17,7 @@ class ServiceTeamController extends Controller
      */
     public function addTeamMember(Request $request, Event $event)
     {
+        abort_unless($this->canEditServiceEvent($request->input('ministry_id')), 403);
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
@@ -80,6 +81,7 @@ class ServiceTeamController extends Controller
      */
     public function removeTeamMember(Request $request, Event $event, EventMinistryTeam $member)
     {
+        abort_unless($this->canEditServiceEvent($member->ministry_id), 403);
         $this->authorizeChurch($event);
 
         if ($member->event_id !== $event->id) {
@@ -97,6 +99,7 @@ class ServiceTeamController extends Controller
 
     public function sendNotification(Request $request, Event $event, EventMinistryTeam $member)
     {
+        abort_unless($this->canEditServiceEvent($member->ministry_id), 403);
         $this->authorizeChurch($event);
 
         if ($member->event_id !== $event->id) {
@@ -148,6 +151,23 @@ class ServiceTeamController extends Controller
         }
 
         return response()->json(['success' => false, 'message' => 'Не вдалося надіслати повідомлення'], 500);
+    }
+
+    /**
+     * Check if user can edit service events (has permission OR is a ministry member)
+     */
+    protected function canEditServiceEvent(?int $ministryId = null): bool
+    {
+        if (auth()->user()->canEdit('events')) {
+            return true;
+        }
+
+        if ($ministryId) {
+            $ministry = Ministry::find($ministryId);
+            return $ministry && $ministry->isMember();
+        }
+
+        return false;
     }
 
     protected function authorizeChurch($model): void

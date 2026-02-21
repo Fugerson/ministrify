@@ -13,6 +13,8 @@ class ServicePlanTemplateController extends Controller
      */
     public function index()
     {
+        abort_unless(auth()->user()->canView('events'), 403);
+
         $church = $this->getCurrentChurch();
 
         $templates = ServicePlanTemplate::where('church_id', $church->id)
@@ -113,6 +115,8 @@ class ServicePlanTemplateController extends Controller
      */
     public function destroy(ServicePlanTemplate $template)
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
+
         $church = $this->getCurrentChurch();
 
         // Verify template belongs to church

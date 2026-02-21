@@ -375,6 +375,10 @@
 
                         </div>{{-- end calendar view wrapper --}}
 
+                        @php
+                            $canEditEvent = $ministry->isMember() || auth()->user()->canEdit('events');
+                        @endphp
+
                         {{-- Event Detail Modal --}}
                         <div x-show="showModal" x-cloak
                              class="fixed inset-0 z-[100] overflow-y-auto"
@@ -458,11 +462,13 @@
                                                                         <span class="text-xs text-blue-500" x-text="(new Set(song.team?.map(t => t.person_id) || [])).size + ' уч.'"></span>
                                                                     </div>
                                                                 </div>
+                                                                @if($canEditEvent)
                                                                 <button @click.stop="removeSong(song.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                                     </svg>
                                                                 </button>
+                                                                @endif
                                                             </div>
                                                         </template>
                                                     </div>
@@ -478,6 +484,7 @@
                                                 </template>
 
                                                 {{-- Add song form --}}
+                                                @if($canEditEvent)
                                                 <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
                                                     <div class="flex gap-2 items-center">
                                                         <div class="flex-1 min-w-0">
@@ -492,6 +499,7 @@
                                                         </button>
                                                     </div>
                                                 </div>
+                                                @endif
                                             </div>
 
                                             {{-- Team Section (Right for worship, Full width for non-worship) --}}
@@ -515,11 +523,13 @@
                                                                                 <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="member.person_name"></span>
                                                                                 <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" x-text="member.role_name"></span>
                                                                             </div>
+                                                                            @if($canEditEvent)
                                                                             <button @click="removeTeamMember(member.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                                                 </svg>
                                                                             </button>
+                                                                            @endif
                                                                         </div>
                                                                     </template>
                                                                 </div>
@@ -534,6 +544,7 @@
                                                             </template>
                                                         </div>
 
+                                                        @if($canEditEvent)
                                                         <template x-if="modalRoles.length > 0">
                                                             <div class="border-t border-gray-200 dark:border-gray-600 pt-3 mt-auto">
                                                                 <div class="grid grid-cols-2 gap-2 mb-2">
@@ -551,6 +562,7 @@
                                                                 </button>
                                                             </div>
                                                         </template>
+                                                        @endif
                                                     </div>
                                                 </template>
 
@@ -583,11 +595,13 @@
                                                                                 <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="member.person_name"></span>
                                                                                 <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" x-text="member.role_name"></span>
                                                                             </div>
+                                                                            @if($canEditEvent)
                                                                             <button @click="removeTeamMember(member.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                                                 </svg>
                                                                             </button>
+                                                                            @endif
                                                                         </div>
                                                                     </template>
                                                                 </div>
@@ -602,6 +616,7 @@
                                                             </template>
                                                         </div>
 
+                                                        @if($canEditEvent)
                                                         <template x-if="modalRoles.length > 0">
                                                             <div class="border-t border-gray-200 dark:border-gray-600 pt-3 mt-auto">
                                                                 <div class="grid grid-cols-2 gap-2 mb-2">
@@ -619,6 +634,7 @@
                                                                 </button>
                                                             </div>
                                                         </template>
+                                                        @endif
                                                     </div>
                                                 </template>
                                             </div>

@@ -279,9 +279,9 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::delete('people/{person}/delete-photo', [PersonController::class, 'deletePhoto'])->name('people.delete-photo')->middleware('permission:people,edit');
 
     // Family Relationships
-    Route::post('people/{person}/family', [\App\Http\Controllers\FamilyRelationshipController::class, 'store'])->name('family.store');
-    Route::delete('family/{familyRelationship}', [\App\Http\Controllers\FamilyRelationshipController::class, 'destroy'])->name('family.destroy');
-    Route::get('people/{person}/family/search', [\App\Http\Controllers\FamilyRelationshipController::class, 'search'])->name('family.search');
+    Route::post('people/{person}/family', [\App\Http\Controllers\FamilyRelationshipController::class, 'store'])->name('family.store')->middleware('permission:people,edit');
+    Route::delete('family/{familyRelationship}', [\App\Http\Controllers\FamilyRelationshipController::class, 'destroy'])->name('family.destroy')->middleware('permission:people,edit');
+    Route::get('people/{person}/family/search', [\App\Http\Controllers\FamilyRelationshipController::class, 'search'])->name('family.search')->middleware('permission:people,view');
 
     // Migration tools
     Route::prefix('migrate')->name('migration.')->group(function () {
@@ -326,16 +326,16 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('ministries/{ministry}/worship-stats', [WorshipTeamController::class, 'stats'])->name('ministries.worship-stats');
     Route::get('ministries/{ministry}/worship-events/{event}', [WorshipTeamController::class, 'eventShow'])->name('ministries.worship-events.show');
     Route::get('ministries/{ministry}/worship-events/{event}/data', [WorshipTeamController::class, 'eventData'])->name('ministries.worship-events.data');
-    Route::post('events/{event}/songs', [WorshipTeamController::class, 'addSong'])->name('events.songs.add');
-    Route::delete('events/{event}/songs/{song}', [WorshipTeamController::class, 'removeSong'])->name('events.songs.remove');
-    Route::post('events/{event}/songs/reorder', [WorshipTeamController::class, 'reorderSongs'])->name('events.songs.reorder');
-    Route::post('events/{event}/worship-team', [WorshipTeamController::class, 'addTeamMember'])->name('events.worship-team.add');
-    Route::delete('events/{event}/worship-team/{member}', [WorshipTeamController::class, 'removeTeamMember'])->name('events.worship-team.remove');
+    Route::post('events/{event}/songs', [WorshipTeamController::class, 'addSong'])->name('events.songs.add')->middleware('permission:events,view');
+    Route::delete('events/{event}/songs/{song}', [WorshipTeamController::class, 'removeSong'])->name('events.songs.remove')->middleware('permission:events,view');
+    Route::post('events/{event}/songs/reorder', [WorshipTeamController::class, 'reorderSongs'])->name('events.songs.reorder')->middleware('permission:events,view');
+    Route::post('events/{event}/worship-team', [WorshipTeamController::class, 'addTeamMember'])->name('events.worship-team.add')->middleware('permission:events,view');
+    Route::delete('events/{event}/worship-team/{member}', [WorshipTeamController::class, 'removeTeamMember'])->name('events.worship-team.remove')->middleware('permission:events,view');
 
     // Service Team (for ministries with is_sunday_service_part or is_worship_ministry)
-    Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add');
-    Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove');
-    Route::post('events/{event}/ministry-team/{member}/notify', [ServiceTeamController::class, 'sendNotification'])->name('events.ministry-team.notify');
+    Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add')->middleware('permission:events,view');
+    Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove')->middleware('permission:events,view');
+    Route::post('events/{event}/ministry-team/{member}/notify', [ServiceTeamController::class, 'sendNotification'])->name('events.ministry-team.notify')->middleware('permission:events,view');
 
 
     // Person worship skills
@@ -400,7 +400,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::resource('events', EventController::class);
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
     Route::get('calendar', [EventController::class, 'calendar'])->name('calendar');
-    Route::get('qr-scanner', [QrCheckinController::class, 'scanner'])->name('qr-scanner');
+    Route::get('qr-scanner', [QrCheckinController::class, 'scanner'])->name('qr-scanner')->middleware('permission:attendance,edit');
     Route::post('events/{event}/toggle-qr-checkin', [QrCheckinController::class, 'toggleQrCheckin'])->name('events.toggle-qr-checkin');
     Route::post('events/{event}/generate-qr', [QrCheckinController::class, 'generateQr'])->name('events.generate-qr');
     Route::post('events/{event}/attendance', [EventController::class, 'saveAttendance'])->name('events.attendance.save');
@@ -446,7 +446,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     });
 
     // Calendar Export/Import
-    Route::get('calendar/export', [EventController::class, 'exportIcal'])->name('calendar.export');
+    Route::get('calendar/export', [EventController::class, 'exportIcal'])->name('calendar.export')->middleware('permission:events,view');
     Route::get('calendar/import', [EventController::class, 'importForm'])->name('calendar.import');
     Route::post('calendar/import', [EventController::class, 'importIcal'])->name('calendar.import.store');
     Route::get('events/{event}/google', [EventController::class, 'addToGoogle'])->name('events.google');

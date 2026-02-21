@@ -15,6 +15,8 @@ class FamilyRelationshipController extends Controller
      */
     public function store(Request $request, Person $person)
     {
+        abort_unless(auth()->user()->canEdit('people'), 403);
+
         $church = $this->getCurrentChurch();
 
         if ($person->church_id !== $church->id) {
@@ -126,6 +128,8 @@ class FamilyRelationshipController extends Controller
      */
     public function destroy(Request $request, FamilyRelationship $familyRelationship)
     {
+        abort_unless(auth()->user()->canEdit('people'), 403);
+
         $church = $this->getCurrentChurch();
 
         if ($familyRelationship->church_id !== $church->id) {
@@ -146,6 +150,8 @@ class FamilyRelationshipController extends Controller
      */
     public function search(Request $request, Person $person)
     {
+        abort_unless(auth()->user()->canView('people'), 403);
+
         $church = $this->getCurrentChurch();
 
         if ($person->church_id !== $church->id) {

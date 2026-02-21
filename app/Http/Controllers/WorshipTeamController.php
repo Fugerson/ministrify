@@ -257,6 +257,7 @@ class WorshipTeamController extends Controller
      */
     public function addSong(Request $request, Event $event)
     {
+        abort_unless($this->canEditWorshipEvent(), 403);
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
@@ -291,6 +292,7 @@ class WorshipTeamController extends Controller
      */
     public function removeSong(Request $request, Event $event, Song $song)
     {
+        abort_unless($this->canEditWorshipEvent(), 403);
         $this->authorizeChurch($event);
 
         // Get the event_song_id before detaching
@@ -319,6 +321,7 @@ class WorshipTeamController extends Controller
      */
     public function reorderSongs(Request $request, Event $event)
     {
+        abort_unless($this->canEditWorshipEvent(), 403);
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
@@ -338,6 +341,7 @@ class WorshipTeamController extends Controller
      */
     public function addTeamMember(Request $request, Event $event)
     {
+        abort_unless($this->canEditWorshipEvent($request->input('ministry_id')), 403);
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
@@ -400,6 +404,7 @@ class WorshipTeamController extends Controller
      */
     public function removeTeamMember(Request $request, Event $event, EventMinistryTeam $member)
     {
+        abort_unless($this->canEditWorshipEvent($member->ministry_id), 403);
         $this->authorizeChurch($event);
 
         if ($member->event_id !== $event->id) {
@@ -461,6 +466,28 @@ class WorshipTeamController extends Controller
             ->get(['id', 'first_name', 'last_name']);
 
         return response()->json($members);
+    }
+
+    /**
+     * Check if user can edit worship events (has permission OR is a ministry member)
+     */
+    protected function canEditWorshipEvent(?int $ministryId = null): bool
+    {
+        if (auth()->user()->canEdit('events')) {
+            return true;
+        }
+
+        // If specific ministry provided, check membership
+        if ($ministryId) {
+            $ministry = Ministry::find($ministryId);
+            return $ministry && $ministry->isMember();
+        }
+
+        // Otherwise check if member of any worship/service ministry
+        return Ministry::where('church_id', $this->getCurrentChurch()->id)
+            ->where(fn($q) => $q->where('is_worship_ministry', true)->orWhere('is_sunday_service_part', true))
+            ->get()
+            ->contains(fn($m) => $m->isMember());
     }
 
     protected function authorizeChurch($model): void

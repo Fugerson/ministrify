@@ -15,6 +15,8 @@ class QrCheckinController extends Controller
      */
     public function scanner()
     {
+        abort_unless(auth()->user()->canEdit('attendance'), 403);
+
         return view('checkin.scanner');
     }
 
@@ -125,6 +127,8 @@ class QrCheckinController extends Controller
      */
     public function adminCheckin(Request $request): JsonResponse
     {
+        abort_unless(auth()->user()->canEdit('attendance'), 403);
+
         $request->validate([
             'event_id' => 'required|exists:events,id',
             'person_id' => 'required|exists:people,id',
@@ -174,6 +178,8 @@ class QrCheckinController extends Controller
      */
     public function todayEvents(): JsonResponse
     {
+        abort_unless(auth()->user()->canEdit('attendance'), 403);
+
         $user = auth()->user();
 
         $events = Event::where('church_id', $this->getCurrentChurch()->id)

@@ -214,6 +214,7 @@
             <div class="flex-1"></div>
 
             <!-- Actions -->
+            @if(auth()->user()->canCreate('boards'))
             <button @click="openAddCardModal()"
                     class="flex items-center gap-2 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,6 +223,7 @@
                 <span class="hidden sm:inline">Завдання</span>
                 <kbd class="hidden sm:inline px-1.5 py-0.5 text-[10px] font-mono bg-primary-500 rounded">N</kbd>
             </button>
+            @endif
 
             <button @click="editingEpic = null; newEpic = { name: '', color: '#6366f1', description: '', showInGeneral: false }; showEpicModal = true"
                     class="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors border border-gray-200 dark:border-gray-700">
@@ -466,6 +468,9 @@ let _editCommentFiles = [];
 
 function churchBoard() {
     return {
+        canCreateCards: @json(auth()->user()->canCreate('boards')),
+        canEditCards: @json(auth()->user()->canEdit('boards')),
+        canDeleteCards: @json(auth()->user()->canDelete('boards')),
         filters: {
             priority: '',
             assignee: '',
@@ -587,21 +592,21 @@ function churchBoard() {
                     break;
                 case 'n':
                 case 'N':
-                    if (!e.metaKey && !e.ctrlKey) {
+                    if (!e.metaKey && !e.ctrlKey && this.canCreateCards) {
                         e.preventDefault();
                         this.openAddCardModal();
                     }
                     break;
                 case 'c':
                 case 'C':
-                    if (this.cardPanel.open && this.cardPanel.data) {
+                    if (this.cardPanel.open && this.cardPanel.data && this.canEditCards) {
                         e.preventDefault();
                         this.toggleCardComplete();
                     }
                     break;
                 case 'm':
                 case 'M':
-                    if (this.cardPanel.open) {
+                    if (this.cardPanel.open && this.canEditCards) {
                         e.preventDefault();
                         const statusSelect = document.querySelector('[x-model="cardPanel.data.card.column_id"]');
                         if (statusSelect) statusSelect.focus();
@@ -611,6 +616,7 @@ function churchBoard() {
         },
 
         initSortable() {
+            if (!this.canEditCards) return;
             if (typeof Sortable === 'undefined') {
                 // Sortable CDN may not have loaded yet — retry shortly
                 setTimeout(() => this.initSortable(), 100);
