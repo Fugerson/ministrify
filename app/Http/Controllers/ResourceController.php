@@ -333,7 +333,7 @@ class ResourceController extends Controller
      */
     public function ministryCreateFolder(Request $request, Ministry $ministry)
     {
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -370,7 +370,7 @@ class ResourceController extends Controller
      */
     public function ministryCreateDocument(Request $request, Ministry $ministry)
     {
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -413,10 +413,10 @@ class ResourceController extends Controller
             abort(404);
         }
 
-        // Ministry documents require ministry management permission
+        // Ministry documents require ministry contribution permission
         if ($resource->ministry_id) {
             $ministry = Ministry::findOrFail($resource->ministry_id);
-            Gate::authorize('manage-ministry', $ministry);
+            Gate::authorize('contribute-ministry', $ministry);
         }
 
         if (!$resource->isDocument()) {
@@ -442,7 +442,7 @@ class ResourceController extends Controller
      */
     public function ministryUpload(Request $request, Ministry $ministry)
     {
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $churchId = $this->getCurrentChurch()->id;
 

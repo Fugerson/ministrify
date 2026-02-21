@@ -168,7 +168,7 @@
                                     Статистика
                                 </a>
                                 @endif
-                                @can('manage-ministry', $ministry)
+                                @can('contribute-ministry', $ministry)
                                 <a href="{{ route('events.create', ['ministry_id' => $ministry->id]) }}"
                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1348,7 +1348,7 @@
                                 </button>
                                 <button @click="goToToday()" class="ml-2 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Сьогодні</button>
                             </div>
-                            @can('manage-ministry', $ministry)
+                            @can('contribute-ministry', $ministry)
                             <a href="{{ route('events.create', ['ministry' => $ministry->id]) }}"
                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1510,7 +1510,7 @@
                 @endphp
 
                 <!-- Add member form -->
-                @can('manage-ministry', $ministry)
+                @can('contribute-ministry', $ministry)
                 @if($availablePeople->count() > 0)
                 <form method="POST" action="{{ route('ministries.members.add', $ministry) }}" class="mb-5 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     @csrf
@@ -1589,7 +1589,7 @@
                                                 {{ $member->full_name }}
                                             </a>
                                             {{-- Role badge --}}
-                                            @can('manage-ministry', $ministry)
+                                            @can('contribute-ministry', $ministry)
                                             <div class="relative">
                                                 <button type="button" @click="open = !open"
                                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-colors"
@@ -1659,7 +1659,7 @@
                                     </div>
 
                                     {{-- Remove button --}}
-                                    @can('manage-ministry', $ministry)
+                                    @can('contribute-ministry', $ministry)
                                     <form method="POST" action="{{ route('ministries.members.remove', [$ministry, $member]) }}"
                                           onsubmit="return confirm('{{ __('messages.confirm_remove_team_member') }}')" class="shrink-0">
                                         @csrf
@@ -1809,7 +1809,7 @@
                                 <th class="py-2 px-3 font-medium">Дата</th>
                                 <th class="py-2 px-3 font-medium">Примітка</th>
                                 <th class="py-2 px-3 font-medium">Чек</th>
-                                @can('manage-ministry', $ministry)
+                                @can('contribute-ministry', $ministry)
                                 <th class="py-2 pl-3 font-medium"></th>
                                 @endcan
                             </tr>
@@ -1837,7 +1837,7 @@
                                             </a>
                                         </template>
                                     </td>
-                                    @can('manage-ministry', $ministry)
+                                    @can('contribute-ministry', $ministry)
                                     <td class="py-2 pl-3">
                                         <div class="flex items-center gap-1">
                                             <a :href="'/finances/expenses/' + t.id + '/edit?redirect_to=ministry&ministry={{ $ministry->id }}'"
@@ -1869,7 +1869,7 @@
                 <p x-show="allTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-8">Немає витрат</p>
                 <p x-show="allTransactions.length > 0 && filteredTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-8">Немає витрат за цей період</p>
 
-                @can('manage-ministry', $ministry)
+                @can('contribute-ministry', $ministry)
                 <div class="mt-4">
                     <a href="{{ route('finances.expenses.create', ['ministry' => $ministry->id, 'redirect_to' => 'ministry']) }}"
                        class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500">
@@ -1908,7 +1908,7 @@
                 </nav>
 
                 <!-- Actions -->
-                @can('manage-ministry', $ministry)
+                @can('contribute-ministry', $ministry)
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <button @click="showCreateFolder = true" class="inline-flex items-center text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
@@ -1996,7 +1996,7 @@
                             </p>
                         </div>
                         {{-- Context menu --}}
-                        @can('manage-ministry', $ministry)
+                        @can('contribute-ministry', $ministry)
                         <button @click.stop="openMenu({{ $resource->id }}, '{{ addslashes($resource->name) }}', $event)"
                                 class="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
@@ -2012,7 +2012,7 @@
                 @endif
 
                 <!-- Create folder modal -->
-                @can('manage-ministry', $ministry)
+                @can('contribute-ministry', $ministry)
                 <div x-show="showCreateFolder" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
                     <div class="min-h-screen px-4 flex items-center justify-center">
                         <div class="fixed inset-0 bg-black/50" @click="showCreateFolder = false"></div>
@@ -2305,7 +2305,7 @@
                                 <p class="text-xs text-indigo-600 dark:text-indigo-400">Куди ми рухаємось</p>
                             </div>
                         </div>
-                        @can('manage-ministry', $ministry)
+                        @can('contribute-ministry', $ministry)
                         <button @click="editingVision = !editingVision" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 text-sm font-medium">
                             <span x-text="editingVision ? 'Скасувати' : 'Редагувати'"></span>
                         </button>
@@ -2318,7 +2318,7 @@
                             <p class="text-gray-500 dark:text-gray-400 italic">Бачення ще не визначено.</p>
                         @endif
                     </div>
-                    @can('manage-ministry', $ministry)
+                    @can('contribute-ministry', $ministry)
                     <form x-show="editingVision" method="POST" action="{{ route('ministries.vision.update', $ministry) }}" class="space-y-3">
                         @csrf
                         <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500" placeholder="Опишіть бачення вашого служіння...">{{ $ministry->vision }}</textarea>
@@ -2332,7 +2332,7 @@
                 <!-- Goals Header -->
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-semibold text-gray-900 dark:text-white">Цілі</h3>
-                    @can('manage-ministry', $ministry)
+                    @can('contribute-ministry', $ministry)
                     <div class="flex gap-2">
                         <button @click="showTaskModal = true; taskForm.goal_id = ''" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -2387,7 +2387,7 @@
                                             </div>
                                             <span class="text-xs font-medium text-gray-500">{{ $goal->calculated_progress }}%</span>
                                         </div>
-                                        @can('manage-ministry', $ministry)
+                                        @can('contribute-ministry', $ministry)
                                         <div class="flex items-center gap-1">
                                             <button @click="editGoal({{ $goal->id }}, {{ json_encode(['title' => $goal->title, 'description' => $goal->description, 'period' => $goal->period, 'due_date' => $goal->due_date?->format('Y-m-d'), 'priority' => $goal->priority, 'status' => $goal->status]) }})" class="p-1.5 text-gray-400 hover:text-gray-600">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
@@ -2404,7 +2404,7 @@
                                     <div class="divide-y divide-gray-200 dark:divide-gray-700">
                                         @foreach($goal->tasks as $task)
                                             <div class="p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                                @can('manage-ministry', $ministry)
+                                                @can('contribute-ministry', $ministry)
                                                 <form method="POST" action="{{ route('ministries.tasks.toggle', [$ministry, $task]) }}">
                                                     @csrf
                                                     <button type="submit" class="w-5 h-5 rounded-full border-2 flex items-center justify-center @if($task->is_done) border-green-500 bg-green-500 @else border-gray-300 hover:border-primary-500 @endif">
@@ -2423,7 +2423,7 @@
                                                         @if($task->due_date)<span class="@if($task->is_overdue) text-red-600 @endif">{{ $task->due_date->format('d.m') }}</span>@endif
                                                     </div>
                                                 </div>
-                                                @can('manage-ministry', $ministry)
+                                                @can('contribute-ministry', $ministry)
                                                 <div class="flex items-center gap-1">
                                                     <button @click="editTask({{ $task->id }}, {{ json_encode(['title' => $task->title, 'description' => $task->description, 'goal_id' => $task->goal_id, 'assigned_to' => $task->assigned_to, 'due_date' => $task->due_date?->format('Y-m-d'), 'priority' => $task->priority, 'status' => $task->status]) }})" class="p-1 text-gray-400 hover:text-gray-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
                                                     <form method="POST" action="{{ route('ministries.tasks.destroy', [$ministry, $task]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_short') }}')">@csrf @method('DELETE')<button type="submit" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></form>
@@ -2433,7 +2433,7 @@
                                         @endforeach
                                     </div>
                                 @endif
-                                @can('manage-ministry', $ministry)
+                                @can('contribute-ministry', $ministry)
                                 <div class="p-2 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700">
                                     <button @click="showTaskModal = true; taskForm.goal_id = {{ $goal->id }}" class="text-xs text-gray-500 hover:text-primary-600 flex items-center gap-1">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -2450,7 +2450,7 @@
                             <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-3">Цілей ще немає</p>
-                        @can('manage-ministry', $ministry)
+                        @can('contribute-ministry', $ministry)
                         <button @click="showGoalModal = true; resetGoalForm()" class="inline-flex items-center px-3 py-1.5 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Створити ціль
@@ -2459,7 +2459,7 @@
                     </div>
                 @endif
 
-                @can('manage-ministry', $ministry)
+                @can('contribute-ministry', $ministry)
                 <!-- Goal Modal -->
                 <div x-show="showGoalModal" class="fixed inset-0 z-50" style="display: none;">
                     <div class="absolute inset-0 bg-black/50" @click="showGoalModal = false"></div>
@@ -2615,7 +2615,7 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-2">
-                        @can('manage-ministry', $ministry)
+                        @can('contribute-ministry', $ministry)
                         <a href="{{ route('songs.import.page') }}"
                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2780,7 +2780,7 @@
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає пісень</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-4">Додайте першу пісню до бібліотеки</p>
-                    @can('manage-ministry', $ministry)
+                    @can('contribute-ministry', $ministry)
                     <button @click="openCreateModal()" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -3065,7 +3065,7 @@
                                         <div class="text-sm text-gray-500 dark:text-gray-400">
                                             Використано <span x-text="viewingSong.times_used || 0"></span> раз
                                         </div>
-                                        @can('manage-ministry', $ministry)
+                                        @can('contribute-ministry', $ministry)
                                         <div class="flex items-center gap-2">
                                             <button @click="showViewModal = false; openEditModal(viewingSong)"
                                                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">

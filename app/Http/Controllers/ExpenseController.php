@@ -92,7 +92,7 @@ class ExpenseController extends Controller
         $church = $this->getCurrentChurch();
         $ministry = Ministry::findOrFail($validated['ministry_id']);
 
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         // Handle receipt upload
         $receiptPath = null;
@@ -124,7 +124,7 @@ class ExpenseController extends Controller
     {
         $this->authorizeExpense($expense);
         if ($expense->ministry) {
-            Gate::authorize('manage-ministry', $expense->ministry);
+            Gate::authorize('contribute-ministry', $expense->ministry);
         }
 
         $church = $this->getCurrentChurch();
@@ -140,7 +140,7 @@ class ExpenseController extends Controller
     {
         $this->authorizeExpense($expense);
         if ($expense->ministry) {
-            Gate::authorize('manage-ministry', $expense->ministry);
+            Gate::authorize('contribute-ministry', $expense->ministry);
         }
 
         $validated = $request->validate([
@@ -181,7 +181,7 @@ class ExpenseController extends Controller
     {
         $this->authorizeExpense($expense);
         if ($expense->ministry) {
-            Gate::authorize('manage-ministry', $expense->ministry);
+            Gate::authorize('contribute-ministry', $expense->ministry);
         }
 
         $paymentData = $expense->payment_data ?? [];

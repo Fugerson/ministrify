@@ -391,6 +391,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return false;
     }
 
+    public function canContributeToMinistry(Ministry $ministry): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $ministry->isMember($this);
+    }
+
     // Onboarding Methods
 
     public const ONBOARDING_STEPS = [

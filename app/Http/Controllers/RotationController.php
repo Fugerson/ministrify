@@ -109,7 +109,7 @@ class RotationController extends Controller
      */
     public function autoAssignBulk(Request $request, Ministry $ministry)
     {
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $request->validate([
             'weeks' => 'integer|min:1|max:12',

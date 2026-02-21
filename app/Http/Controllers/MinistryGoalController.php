@@ -193,6 +193,6 @@ class MinistryGoalController extends Controller
             abort(404);
         }
 
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
     }
 }

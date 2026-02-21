@@ -12,7 +12,7 @@ class PositionController extends Controller
     public function store(Request $request, Ministry $ministry)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -33,7 +33,7 @@ class PositionController extends Controller
         $ministry = $position->ministry;
         abort_unless($ministry, 404);
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -49,7 +49,7 @@ class PositionController extends Controller
         $ministry = $position->ministry;
         abort_unless($ministry, 404);
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $position->delete();
 
@@ -86,7 +86,7 @@ class PositionController extends Controller
             foreach ($ministryIds as $ministryId) {
                 $ministry = Ministry::find($ministryId);
                 if ($ministry) {
-                    Gate::authorize('manage-ministry', $ministry);
+                    Gate::authorize('contribute-ministry', $ministry);
                 }
             }
         }

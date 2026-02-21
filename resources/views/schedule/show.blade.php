@@ -800,7 +800,7 @@
 
             <!-- Checklist -->
             @if($event->ministry)
-            @can('manage-ministry', $event->ministry)
+            @can('contribute-ministry', $event->ministry)
                 <x-event-checklist :event="$event" :templates="$checklistTemplates" />
             @endcan
             @endif
@@ -808,7 +808,7 @@
             <!-- Reminders -->
             @if($currentChurch->telegram_bot_token)
             @if($event->ministry)
-            @can('manage-ministry', $event->ministry)
+            @can('contribute-ministry', $event->ministry)
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
                  x-data="reminderManager()">
                 <div class="flex items-center justify-between mb-4">

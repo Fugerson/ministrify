@@ -76,7 +76,7 @@
             @endforeach
         </nav>
 
-        @can('manage-ministry', $ministry)
+        @can('contribute-ministry', $ministry)
         <div class="flex items-center gap-2">
             <!-- Create folder button -->
             <button @click="showCreateFolder = true"
@@ -126,7 +126,7 @@
             </div>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Папка порожня</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-4">Створіть папку або завантажте файли</p>
-            @can('manage-ministry', $ministry)
+            @can('contribute-ministry', $ministry)
             <div class="flex items-center justify-center gap-3">
                 <button @click="showCreateFolder = true"
                         class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
@@ -205,7 +205,7 @@
                         {{ $resource->created_at->format('d.m.Y') }}
                     </td>
                     <td class="px-4 py-3 text-right">
-                        @can('manage-ministry', $ministry)
+                        @can('contribute-ministry', $ministry)
                         <button @click.stop="openMenu({{ $resource->id }}, '{{ addslashes($resource->name) }}', $event)"
                                 class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +223,7 @@
     </div>
 
     <!-- Create folder modal -->
-    @can('manage-ministry', $ministry)
+    @can('contribute-ministry', $ministry)
     <div x-show="showCreateFolder" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
         <div class="min-h-screen px-4 flex items-center justify-center">
             <div class="fixed inset-0 bg-black/50" @click="showCreateFolder = false"></div>

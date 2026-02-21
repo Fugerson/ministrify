@@ -118,7 +118,7 @@ class MinistryController extends Controller
         ]);
 
         // Default tab: 'goals' for managers, 'schedule' for others
-        $defaultTab = Gate::allows('manage-ministry', $ministry) ? 'goals' : 'schedule';
+        $defaultTab = Gate::allows('contribute-ministry', $ministry) ? 'goals' : 'schedule';
         $tab = request('tab', $defaultTab);
 
         // Get boards for task creation
@@ -421,7 +421,7 @@ class MinistryController extends Controller
     public function edit(Ministry $ministry)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $church = $this->getCurrentChurch();
         $people = Person::where('church_id', $church->id)
@@ -434,7 +434,7 @@ class MinistryController extends Controller
     public function update(Request $request, Ministry $ministry)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -480,7 +480,7 @@ class MinistryController extends Controller
     public function addMember(Request $request, Ministry $ministry)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $validated = $request->validate([
             'person_id' => ['required', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
@@ -510,7 +510,7 @@ class MinistryController extends Controller
     public function removeMember(Ministry $ministry, Person $person)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
         abort_unless($person->church_id === auth()->user()->church_id, 404);
 
         $ministry->members()->detach($person->id);
@@ -527,7 +527,7 @@ class MinistryController extends Controller
     public function updateMemberPositions(Request $request, Ministry $ministry, Person $person)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
         abort_unless($person->church_id === auth()->user()->church_id, 404);
 
         $validated = $request->validate([
@@ -557,7 +557,7 @@ class MinistryController extends Controller
     public function updateMemberRole(Request $request, Ministry $ministry, Person $person)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
         abort_unless($person->church_id === auth()->user()->church_id, 404);
 
         $validated = $request->validate([
@@ -646,7 +646,7 @@ class MinistryController extends Controller
     public function storeWorshipRole(Request $request, Ministry $ministry)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         if (!$ministry->is_worship_ministry) {
             abort(404);
@@ -679,7 +679,7 @@ class MinistryController extends Controller
     {
         $this->authorizeChurch($ministry);
         $this->authorizeChurch($role);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         if (!$ministry->is_worship_ministry) {
             abort(404);
@@ -704,7 +704,7 @@ class MinistryController extends Controller
     {
         $this->authorizeChurch($ministry);
         $this->authorizeChurch($role);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         if (!$ministry->is_worship_ministry) {
             abort(404);
@@ -722,7 +722,7 @@ class MinistryController extends Controller
     public function storeMinistryRole(Request $request, Ministry $ministry)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         if (!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) {
             abort(404);
@@ -754,7 +754,7 @@ class MinistryController extends Controller
     public function updateMinistryRole(Request $request, Ministry $ministry, MinistryRole $role)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         if ((!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) || $role->ministry_id !== $ministry->id) {
             abort(404);
@@ -778,7 +778,7 @@ class MinistryController extends Controller
     public function destroyMinistryRole(Request $request, Ministry $ministry, MinistryRole $role)
     {
         $this->authorizeChurch($ministry);
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         if ((!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) || $role->ministry_id !== $ministry->id) {
             abort(404);

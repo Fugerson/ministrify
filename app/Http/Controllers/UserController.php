@@ -395,8 +395,8 @@ class UserController extends Controller
                     $oldPerson->delete();
                 }
             }
-        } elseif (!$newPersonId && $oldPerson) {
-            // Unlinking person entirely
+        } elseif (!$newPersonId && $oldPerson && $request->has('person_id')) {
+            // Unlinking person entirely (only when explicitly cleared in the form)
             $oldPerson->update(['user_id' => null]);
         }
 

@@ -271,7 +271,7 @@ class EventController extends Controller
         // If ministry selected, authorize
         if (!empty($validated['ministry_id'])) {
             $ministry = Ministry::findOrFail($validated['ministry_id']);
-            Gate::authorize('manage-ministry', $ministry);
+            Gate::authorize('contribute-ministry', $ministry);
         }
 
         $validated['church_id'] = $church->id;
@@ -818,7 +818,7 @@ class EventController extends Controller
             abort(404);
         }
 
-        Gate::authorize('manage-ministry', $ministry);
+        Gate::authorize('contribute-ministry', $ministry);
 
         $result = $calendarService->importFromIcal($request->file('file'), $church, $ministry);
 

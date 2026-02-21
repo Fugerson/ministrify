@@ -38,12 +38,20 @@ class AuthServiceProvider extends ServiceProvider
             }
         });
 
-        // Ministry management
+        // Ministry management (leader + admin only)
         Gate::define('manage-ministry', function (User $user, ?Ministry $ministry = null) {
             if (!$ministry) {
                 return false;
             }
             return $user->canManageMinistry($ministry);
+        });
+
+        // Ministry contribution (any member)
+        Gate::define('contribute-ministry', function (User $user, ?Ministry $ministry = null) {
+            if (!$ministry) {
+                return false;
+            }
+            return $user->canContributeToMinistry($ministry);
         });
 
         Gate::define('view-ministry', function (User $user, ?Ministry $ministry = null) {

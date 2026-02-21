@@ -70,7 +70,7 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">Куди ми рухаємось</p>
                 </div>
             </div>
-            @can('manage-ministry', $ministry)
+            @can('contribute-ministry', $ministry)
             <button @click="editingVision = !editingVision" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 text-sm">
                 <span x-text="editingVision ? 'Скасувати' : 'Редагувати'"></span>
             </button>
@@ -85,7 +85,7 @@
             @endif
         </div>
 
-        @can('manage-ministry', $ministry)
+        @can('contribute-ministry', $ministry)
         <form x-show="editingVision" method="POST" action="{{ route('ministries.vision.update', $ministry) }}" class="space-y-3">
             @csrf
             <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Опишіть бачення вашого служіння...">{{ $ministry->vision }}</textarea>
@@ -102,7 +102,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Цілі</h2>
-            @can('manage-ministry', $ministry)
+            @can('contribute-ministry', $ministry)
             <div class="flex gap-2">
                 <button @click="showTaskModal = true; taskForm.goal_id = ''" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +182,7 @@
                                         </div>
                                         <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ $goal->calculated_progress }}%</span>
                                     </div>
-                                    @can('manage-ministry', $ministry)
+                                    @can('contribute-ministry', $ministry)
                                     <div class="flex items-center gap-1">
                                         <button @click="editGoal({{ $goal->id }}, {{ json_encode([
                                             'title' => $goal->title,
@@ -215,7 +215,7 @@
                                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                                     @foreach($goal->tasks as $task)
                                         <div class="p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                            @can('manage-ministry', $ministry)
+                                            @can('contribute-ministry', $ministry)
                                             <form method="POST" action="{{ route('ministries.tasks.toggle', [$ministry, $task]) }}">
                                                 @csrf
                                                 <button type="submit" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
@@ -264,7 +264,7 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                            @can('manage-ministry', $ministry)
+                                            @can('contribute-ministry', $ministry)
                                             <div class="flex items-center gap-1">
                                                 <button @click="editTask({{ $task->id }}, {{ json_encode([
                                                     'title' => $task->title,
@@ -296,7 +296,7 @@
                             @endif
 
                             <!-- Add task to goal -->
-                            @can('manage-ministry', $ministry)
+                            @can('contribute-ministry', $ministry)
                             <div class="p-3 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700">
                                 <button @click="showTaskModal = true; taskForm.goal_id = {{ $goal->id }}" class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@
                         </svg>
                     </div>
                     <p class="text-gray-500 dark:text-gray-400 mb-4">Цілей ще немає</p>
-                    @can('manage-ministry', $ministry)
+                    @can('contribute-ministry', $ministry)
                     <button @click="showGoalModal = true; resetGoalForm()" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -331,7 +331,7 @@
     </div>
 
     <!-- Goal Modal -->
-    @can('manage-ministry', $ministry)
+    @can('contribute-ministry', $ministry)
     <div x-show="showGoalModal" class="fixed inset-0 z-50" style="display: none;">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showGoalModal = false"></div>
         <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
@@ -408,7 +408,7 @@
     @endcan
 
     <!-- Task Modal -->
-    @can('manage-ministry', $ministry)
+    @can('contribute-ministry', $ministry)
     <div x-show="showTaskModal" class="fixed inset-0 z-50" style="display: none;">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showTaskModal = false"></div>
         <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
