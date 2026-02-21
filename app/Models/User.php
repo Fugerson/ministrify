@@ -136,7 +136,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Join a new church: create pivot record + Person for the new church.
      */
-    public function joinChurch(int $churchId, ?int $roleId = null): void
+    public function joinChurch(int $churchId, ?int $roleId = null, ?string $phone = null): void
     {
         // Find or create Person for the new church
         $person = Person::where('user_id', $this->id)
@@ -162,6 +162,11 @@ class User extends Authenticatable implements MustVerifyEmail
                         ->whereNull('user_id')
                         ->first();
                 }
+            }
+
+            // Fallback: try to find by phone number
+            if (!$person && $phone) {
+                $person = Person::findByPhoneInChurch($phone, $churchId);
             }
 
             if ($person) {

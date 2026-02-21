@@ -394,11 +394,20 @@ class OnboardingController extends Controller
                 'onboarding_completed' => true, // Skip onboarding for invited users
             ]);
 
-            // Create or merge Person record by email
+            // Create or merge Person record by email/name
             $nameParts = explode(' ', $userData['name'], 2);
             $person = \App\Models\Person::where('email', $userData['email'])
                 ->where('church_id', $church->id)
                 ->first();
+
+            // Fallback: try by name
+            if (!$person && ($nameParts[0] ?? '') && ($nameParts[1] ?? '')) {
+                $person = \App\Models\Person::where('church_id', $church->id)
+                    ->where('first_name', $nameParts[0])
+                    ->where('last_name', $nameParts[1])
+                    ->whereNull('user_id')
+                    ->first();
+            }
 
             if (!$person) {
                 $person = \App\Models\Person::create([

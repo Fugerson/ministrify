@@ -109,18 +109,43 @@ class UserController extends Controller
             // Add to this church via pivot
             $personId = !empty($validated['person_id']) ? $person->id : null;
 
-            // Create Person if needed
+            // Find or create Person
             if (!$personId) {
-                $nameParts = explode(' ', $name, 2);
-                $newPerson = Person::create([
-                    'church_id' => $church->id,
-                    'user_id' => $existingUser->id,
-                    'first_name' => $nameParts[0],
-                    'last_name' => $nameParts[1] ?? '',
-                    'email' => $email,
-                    'membership_status' => 'member',
-                ]);
-                $personId = $newPerson->id;
+                // Try to find existing unlinked Person by email
+                $foundPerson = Person::where('church_id', $church->id)
+                    ->where('email', $email)
+                    ->whereNull('user_id')
+                    ->first();
+
+                // Fallback: try by name
+                if (!$foundPerson) {
+                    $nameParts = explode(' ', $name, 2);
+                    $fn = $nameParts[0];
+                    $ln = $nameParts[1] ?? '';
+                    if ($fn && $ln) {
+                        $foundPerson = Person::where('church_id', $church->id)
+                            ->where('first_name', $fn)
+                            ->where('last_name', $ln)
+                            ->whereNull('user_id')
+                            ->first();
+                    }
+                }
+
+                if ($foundPerson) {
+                    $foundPerson->update(['user_id' => $existingUser->id]);
+                    $personId = $foundPerson->id;
+                } else {
+                    $nameParts = $nameParts ?? explode(' ', $name, 2);
+                    $newPerson = Person::create([
+                        'church_id' => $church->id,
+                        'user_id' => $existingUser->id,
+                        'first_name' => $nameParts[0],
+                        'last_name' => $nameParts[1] ?? '',
+                        'email' => $email,
+                        'membership_status' => 'member',
+                    ]);
+                    $personId = $newPerson->id;
+                }
             } else {
                 $person->update(['user_id' => $existingUser->id]);
             }
@@ -189,6 +214,20 @@ class UserController extends Controller
                 ->where('email', $email)
                 ->whereNull('user_id')
                 ->first();
+
+            // Fallback: try to find by name
+            if (!$existingPerson) {
+                $nameParts = explode(' ', $name, 2);
+                $fn = $nameParts[0];
+                $ln = $nameParts[1] ?? '';
+                if ($fn && $ln) {
+                    $existingPerson = Person::where('church_id', $church->id)
+                        ->where('first_name', $fn)
+                        ->where('last_name', $ln)
+                        ->whereNull('user_id')
+                        ->first();
+                }
+            }
 
             if ($existingPerson) {
                 $existingPerson->update(['user_id' => $user->id]);

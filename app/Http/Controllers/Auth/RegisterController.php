@@ -84,7 +84,7 @@ class RegisterController extends Controller
             }
 
             // Join the new church (no role — pending approval)
-            $existingUser->joinChurch($church->id);
+            $existingUser->joinChurch($church->id, null, $request->phone);
             $existingUser->switchToChurch($church->id);
 
             Auth::login($existingUser);
@@ -152,6 +152,11 @@ class RegisterController extends Controller
                     ->where('last_name', $lastName)
                     ->whereNull('user_id')
                     ->first();
+            }
+
+            // Fallback: try to find by phone number
+            if (!$person && $request->phone) {
+                $person = Person::findByPhoneInChurch($request->phone, $church->id);
             }
 
             if ($person) {

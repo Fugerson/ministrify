@@ -243,6 +243,23 @@ class PersonController extends Controller
             }
         }
 
+        // Check for duplicate by phone in same church
+        if (!empty($validated['phone'])) {
+            $existingByPhone = Person::findByPhoneInChurch($validated['phone'], $church->id, false);
+
+            if ($existingByPhone) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Людина з цим номером телефону вже існує. Перенаправляю на її профіль.',
+                        'redirect_url' => route('people.show', $existingByPhone),
+                    ]);
+                }
+                return redirect()->route('people.show', $existingByPhone)
+                    ->with('warning', 'Людина з цим номером телефону вже існує.');
+            }
+        }
+
         // Check for duplicate by name in same church (unless explicitly forced)
         if (!$request->boolean('force_duplicate')) {
             $existingByName = Person::where('church_id', $church->id)
@@ -1297,6 +1314,17 @@ class PersonController extends Controller
                     ->first();
                 if ($existing) {
                     $person = $existing;
+                    $stats['updated']++;
+                    goto skip_create;
+                }
+            }
+
+            // Check for duplicate by phone in same church
+            $phone = $data['phone'] ?? null;
+            if ($phone) {
+                $existingByPhone = Person::findByPhoneInChurch($phone, $church->id, false);
+                if ($existingByPhone) {
+                    $person = $existingByPhone;
                     $stats['updated']++;
                     goto skip_create;
                 }

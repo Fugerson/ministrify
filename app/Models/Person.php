@@ -146,6 +146,80 @@ class Person extends Model
 
     protected $appends = ['full_name'];
 
+    /**
+     * Normalize a phone number to a standard format for comparison.
+     * Handles Ukrainian numbers: +380XXXXXXXXX, 380XXXXXXXXX, 0XXXXXXXXX → 0XXXXXXXXX
+     */
+    public static function normalizePhone(?string $phone): ?string
+    {
+        if (!$phone) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D/', '', $phone);
+
+        // Ukrainian: 380XXXXXXXXX (12 digits) → 0XXXXXXXXX
+        if (strlen($digits) === 12 && str_starts_with($digits, '380')) {
+            return '0' . substr($digits, 3);
+        }
+
+        // Local: 0XXXXXXXXX (10 digits) — already normalized
+        if (strlen($digits) === 10 && str_starts_with($digits, '0')) {
+            return $digits;
+        }
+
+        // 9 digits without leading 0 → add it
+        if (strlen($digits) === 9) {
+            return '0' . $digits;
+        }
+
+        return $digits;
+    }
+
+    /**
+     * Find a Person in a church by phone number (handles format differences).
+     * @param bool $unlinkedOnly If true, only find persons without user_id (for join/merge flows)
+     */
+    public static function findByPhoneInChurch(?string $phone, int $churchId, bool $unlinkedOnly = true): ?self
+    {
+        if (!$phone) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D/', '', $phone);
+
+        // Extract core 9 digits
+        if (strlen($digits) === 12 && str_starts_with($digits, '380')) {
+            $core = substr($digits, 3);
+        } elseif (strlen($digits) === 10 && str_starts_with($digits, '0')) {
+            $core = substr($digits, 1);
+        } elseif (strlen($digits) === 9) {
+            $core = $digits;
+        } else {
+            // Non-standard format — try exact match only
+            $q = self::where('church_id', $churchId)->where('phone', $phone);
+            if ($unlinkedOnly) {
+                $q->whereNull('user_id');
+            }
+            return $q->first();
+        }
+
+        // Search all possible formats of this Ukrainian phone number
+        $q = self::where('church_id', $churchId)
+            ->where(function ($query) use ($core) {
+                $query->where('phone', '0' . $core)
+                      ->orWhere('phone', '+380' . $core)
+                      ->orWhere('phone', '380' . $core)
+                      ->orWhere('phone', $core);
+            });
+
+        if ($unlinkedOnly) {
+            $q->whereNull('user_id');
+        }
+
+        return $q->first();
+    }
+
     // Note: Person lifecycle events are handled by PersonObserver
     // See: App\Observers\PersonObserver (registered in EventServiceProvider)
 
