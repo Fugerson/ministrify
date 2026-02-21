@@ -49,8 +49,8 @@ class EventPolicy
             return true;
         }
 
-        // Ministry leader can update events in their ministry
-        if ($user->person && $event->ministry && $event->ministry->leader_id === $user->person->id) {
+        // Ministry member can update events in their ministry
+        if ($event->ministry && $event->ministry->isMember($user)) {
             return true;
         }
 
@@ -72,8 +72,8 @@ class EventPolicy
             return true;
         }
 
-        // Ministry leader can delete events in their ministry
-        if ($user->person && $event->ministry && $event->ministry->leader_id === $user->person->id) {
+        // Ministry member can delete events in their ministry
+        if ($event->ministry && $event->ministry->isMember($user)) {
             return true;
         }
 
