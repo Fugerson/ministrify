@@ -273,6 +273,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export')->middleware('permission:people,view');
     Route::post('people-import', [PersonController::class, 'import'])->name('people.import')->middleware('permission:people,create');
     Route::post('people-bulk-action', [PersonController::class, 'bulkAction'])->name('people.bulk-action')->middleware('permission:people,edit');
+    Route::get('people-duplicates', [PersonController::class, 'findDuplicates'])->name('people.duplicates');
+    Route::post('people-merge', [PersonController::class, 'mergePeople'])->name('people.merge');
     Route::get('people-quick-edit', [PersonController::class, 'quickEdit'])->name('people.quick-edit')->middleware('permission:people,edit');
     Route::post('people-quick-save', [PersonController::class, 'quickSave'])->name('people.quick-save')->middleware('permission:people,edit');
     Route::post('people/{person}/upload-photo', [PersonController::class, 'uploadPhoto'])->name('people.upload-photo')->middleware('permission:people,edit');

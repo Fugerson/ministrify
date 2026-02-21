@@ -20,14 +20,17 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\ImageService;
+use App\Services\PersonMergeService;
 
 class PersonController extends Controller
 {
     protected ImageService $imageService;
+    protected PersonMergeService $mergeService;
 
-    public function __construct(ImageService $imageService)
+    public function __construct(ImageService $imageService, PersonMergeService $mergeService)
     {
         $this->imageService = $imageService;
+        $this->mergeService = $mergeService;
     }
     public function index(Request $request)
     {
@@ -1703,6 +1706,97 @@ class PersonController extends Controller
         }
 
         return response()->json(['success' => false, 'message' => 'Невідома дія']);
+    }
+
+    /**
+     * Find potential duplicate people (AJAX, admin only)
+     */
+    public function findDuplicates()
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Недостатньо прав'], 403);
+        }
+
+        $church = $this->getCurrentChurch();
+        $pairs = $this->mergeService->findDuplicates($church->id);
+
+        // Eager load relationships for all people in pairs
+        $personIds = $pairs->flatMap(fn($p) => [$p['personA']->id, $p['personB']->id])->unique();
+        if ($personIds->isNotEmpty()) {
+            $loaded = Person::with(['ministries', 'tags'])->whereIn('id', $personIds)->get()->keyBy('id');
+            $pairs = $pairs->map(function ($pair) use ($loaded) {
+                return [
+                    'personA' => $loaded[$pair['personA']->id] ?? $pair['personA'],
+                    'personB' => $loaded[$pair['personB']->id] ?? $pair['personB'],
+                    'reasons' => $pair['reasons'],
+                ];
+            });
+        }
+
+        $result = $pairs->map(function ($pair) {
+            return [
+                'personA' => $this->formatPersonForDuplicates($pair['personA']),
+                'personB' => $this->formatPersonForDuplicates($pair['personB']),
+                'reasons' => $pair['reasons'],
+            ];
+        })->values();
+
+        return response()->json(['pairs' => $result]);
+    }
+
+    /**
+     * Merge two people (AJAX, admin only)
+     */
+    public function mergePeople(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Недостатньо прав'], 403);
+        }
+
+        $validated = $request->validate([
+            'primary_id' => 'required|integer|exists:people,id',
+            'secondary_id' => 'required|integer|exists:people,id|different:primary_id',
+        ]);
+
+        $church = $this->getCurrentChurch();
+
+        $primary = Person::where('church_id', $church->id)->findOrFail($validated['primary_id']);
+        $secondary = Person::where('church_id', $church->id)->findOrFail($validated['secondary_id']);
+
+        $this->mergeService->merge($primary, $secondary);
+
+        $this->logAuditAction('people_merged', 'Person', $primary->id, $primary->full_name, [
+            'merged_from_id' => $secondary->id,
+            'merged_from_name' => $secondary->full_name,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('app.duplicates_merged_success'),
+        ]);
+    }
+
+    private function formatPersonForDuplicates(Person $person): array
+    {
+        return [
+            'id' => $person->id,
+            'full_name' => $person->full_name,
+            'first_name' => $person->first_name,
+            'last_name' => $person->last_name,
+            'phone' => $person->phone,
+            'email' => $person->email,
+            'photo_url' => $person->photo ? \Illuminate\Support\Facades\Storage::url($person->photo) : null,
+            'birth_date' => $person->birth_date?->format('d.m.Y'),
+            'gender' => $person->gender,
+            'membership_status' => $person->membership_status,
+            'telegram_username' => $person->telegram_username,
+            'telegram_chat_id' => $person->telegram_chat_id,
+            'has_user' => (bool) $person->user_id,
+            'ministries' => $person->ministries->pluck('name')->toArray(),
+            'tags' => $person->tags->pluck('name')->toArray(),
+            'created_at' => $person->created_at?->format('d.m.Y'),
+            'url' => route('people.show', $person),
+        ];
     }
 
     protected function authorizeChurch($model): void

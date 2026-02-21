@@ -4,6 +4,15 @@
 
 @section('actions')
 <div class="flex items-center gap-2">
+    @if(auth()->user()->isAdmin())
+    <button onclick="document.dispatchEvent(new CustomEvent('open-duplicates'))"
+            class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition-colors" title="{{ __('app.find_duplicates') }}">
+        <svg class="w-4 h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+        </svg>
+        <span class="hidden sm:inline">{{ __('app.duplicates') }}</span>
+    </button>
+    @endif
     @if(auth()->user()->canEdit('people'))
     <a href="{{ route('people.quick-edit') }}" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-xl transition-colors" title="{{ __('app.quick_edit') }}">
         <svg class="w-4 h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -833,6 +842,334 @@
         </div>
     </div>
     @endif
+
+    <!-- Duplicates Modal -->
+    @if(auth()->user()->isAdmin())
+    <div x-show="showDuplicatesModal" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @keydown.escape.window="if(showDuplicatesModal && !mergePreview) showDuplicatesModal = false; if(mergePreview) mergePreview = null;">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div x-show="showDuplicatesModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity"
+                 @click="if(!mergePreview) showDuplicatesModal = false; else mergePreview = null;"></div>
+
+            <div x-show="showDuplicatesModal" x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-4xl sm:w-full max-h-[90vh] flex flex-col">
+
+                <!-- Header -->
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="mergePreview ? '{{ __('app.duplicates_merge_preview') }}' : '{{ __('app.find_duplicates') }}'"></h3>
+                        <p x-show="!mergePreview && duplicatePairs.length > 0" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5"
+                           x-text="'{{ __('app.duplicates_pair') }}'.replace(':current', currentDuplicateIndex + 1).replace(':total', duplicatePairs.length)"></p>
+                    </div>
+                    <button @click="if(mergePreview) mergePreview = null; else showDuplicatesModal = false;" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 overflow-y-auto p-6">
+                    <!-- Loading -->
+                    <div x-show="duplicatesLoading" class="flex flex-col items-center justify-center py-12">
+                        <svg class="animate-spin w-8 h-8 text-primary-600 mb-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <p class="text-gray-500 dark:text-gray-400">{{ __('app.duplicates_loading') }}</p>
+                    </div>
+
+                    <!-- No duplicates -->
+                    <div x-show="!duplicatesLoading && duplicatePairs.length === 0 && !mergePreview" class="flex flex-col items-center justify-center py-12">
+                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ __('app.duplicates_not_found') }}</h4>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.duplicates_not_found_desc') }}</p>
+                    </div>
+
+                    <!-- ========== MERGE PREVIEW ========== -->
+                    <template x-if="mergePreview">
+                        <div>
+                            <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm text-blue-800 dark:text-blue-200">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>{{ __('app.duplicates_preview_desc') }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Result card -->
+                            <div class="border-2 border-primary-300 dark:border-primary-700 bg-primary-50/30 dark:bg-primary-900/10 rounded-xl p-5">
+                                <!-- Header with photo -->
+                                <div class="flex items-center gap-3 mb-5">
+                                    <template x-if="mergePreview.result.photo_url">
+                                        <img :src="mergePreview.result.photo_url" class="w-14 h-14 rounded-xl object-cover ring-2 ring-primary-300 dark:ring-primary-700">
+                                    </template>
+                                    <template x-if="!mergePreview.result.photo_url">
+                                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center ring-2 ring-primary-300 dark:ring-primary-700">
+                                            <span class="text-lg font-semibold text-white" x-text="(mergePreview.result.full_name?.[0] || '')"></span>
+                                        </div>
+                                    </template>
+                                    <div>
+                                        <div class="text-lg font-semibold text-gray-900 dark:text-white" x-text="mergePreview.result.full_name"></div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.duplicates_merge_result') }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Fields table -->
+                                <dl class="space-y-0 divide-y divide-gray-200 dark:divide-gray-700">
+                                    <template x-for="field in mergePreview.fields" :key="field.key">
+                                        <div class="flex items-center justify-between py-2.5 gap-4" :class="field.source === 'secondary' ? 'bg-green-50/50 dark:bg-green-900/10 -mx-3 px-3 rounded-lg' : ''">
+                                            <dt class="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0 w-32" x-text="field.label"></dt>
+                                            <dd class="text-sm font-medium text-right min-w-0">
+                                                <span :class="field.source === 'secondary' ? 'text-green-700 dark:text-green-400' : 'text-gray-900 dark:text-white'" x-text="field.value || '—'"></span>
+                                                <template x-if="field.source === 'secondary'">
+                                                    <span class="ml-1.5 inline-flex px-1.5 py-0.5 text-[10px] font-semibold bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded" x-text="'← ' + mergePreview.secondary_name"></span>
+                                                </template>
+                                            </dd>
+                                        </div>
+                                    </template>
+                                </dl>
+
+                                <!-- Merged collections -->
+                                <template x-if="mergePreview.merged_ministries && mergePreview.merged_ministries.length > 0">
+                                    <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.ministries') }}</div>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            <template x-for="m in mergePreview.merged_ministries" :key="m.name">
+                                                <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
+                                                      :class="m.from === 'secondary' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-green-300 dark:ring-green-700' : 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'"
+                                                      x-text="m.name"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="mergePreview.merged_tags && mergePreview.merged_tags.length > 0">
+                                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.tags') }}</div>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            <template x-for="t in mergePreview.merged_tags" :key="t.name">
+                                                <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
+                                                      :class="t.from === 'secondary' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-green-300 dark:ring-green-700' : 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'"
+                                                      x-text="t.name"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Account info -->
+                                <template x-if="mergePreview.account_note">
+                                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="flex items-center gap-2 text-sm" :class="mergePreview.account_from_secondary ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                            </svg>
+                                            <span x-text="mergePreview.account_note"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Will be deleted notice -->
+                            <div class="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-300">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    <span>{{ __('app.duplicates_will_delete') }}: <strong x-text="mergePreview.secondary_name"></strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- ========== PAIR COMPARISON ========== -->
+                    <template x-if="!duplicatesLoading && duplicatePairs.length > 0 && !mergePreview">
+                        <div>
+                            <!-- Reason badges -->
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.duplicate_found') }}:</span>
+                                <template x-for="reason in currentPair.reasons" :key="reason">
+                                    <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full"
+                                          :class="{
+                                              'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300': reason === 'phone',
+                                              'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300': reason === 'email',
+                                              'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300': reason === 'name'
+                                          }"
+                                          x-text="reason === 'phone' ? '{{ __('app.duplicates_reason_phone') }}' : (reason === 'email' ? '{{ __('app.duplicates_reason_email') }}' : '{{ __('app.duplicates_reason_name') }}')">
+                                    </span>
+                                </template>
+                            </div>
+
+                            <!-- Side-by-side comparison -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Person A -->
+                                <div class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <template x-if="currentPair.personA.photo_url">
+                                            <img :src="currentPair.personA.photo_url" class="w-12 h-12 rounded-xl object-cover">
+                                        </template>
+                                        <template x-if="!currentPair.personA.photo_url">
+                                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                                                <span class="text-sm font-semibold text-white" x-text="(currentPair.personA.first_name?.[0] || '') + (currentPair.personA.last_name?.[0] || '')"></span>
+                                            </div>
+                                        </template>
+                                        <div class="min-w-0">
+                                            <a :href="currentPair.personA.url" target="_blank" class="font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400" x-text="currentPair.personA.full_name"></a>
+                                            <div x-show="currentPair.personA.has_user" class="text-xs text-green-600 dark:text-green-400 font-medium">{{ __('app.duplicates_has_account') }}</div>
+                                        </div>
+                                    </div>
+
+                                    <dl class="space-y-2 text-sm">
+                                        <template x-for="f in duplicateFields" :key="f.key">
+                                            <div class="flex justify-between gap-2">
+                                                <dt class="text-gray-500 dark:text-gray-400 flex-shrink-0" x-text="f.label"></dt>
+                                                <dd class="text-gray-900 dark:text-white font-medium truncate text-right" x-text="getDuplicateFieldValue(currentPair.personA, f.key) || '—'"></dd>
+                                            </div>
+                                        </template>
+                                        <div x-show="(currentPair.personA.ministries || []).length > 0">
+                                            <dt class="text-gray-500 dark:text-gray-400 mb-1">{{ __('app.ministries') }}</dt>
+                                            <dd class="flex flex-wrap gap-1">
+                                                <template x-for="m in currentPair.personA.ministries || []" :key="m">
+                                                    <span class="inline-flex px-2 py-0.5 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-md" x-text="m"></span>
+                                                </template>
+                                            </dd>
+                                        </div>
+                                        <div x-show="(currentPair.personA.tags || []).length > 0">
+                                            <dt class="text-gray-500 dark:text-gray-400 mb-1">{{ __('app.tags') }}</dt>
+                                            <dd class="flex flex-wrap gap-1">
+                                                <template x-for="t in currentPair.personA.tags || []" :key="t">
+                                                    <span class="inline-flex px-2 py-0.5 text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-md" x-text="t"></span>
+                                                </template>
+                                            </dd>
+                                        </div>
+                                    </dl>
+
+                                    <button @click="showMergePreview(currentPair.personA, currentPair.personB)"
+                                            class="mt-4 w-full inline-flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
+                                        {{ __('app.duplicates_keep_record') }}
+                                    </button>
+                                </div>
+
+                                <!-- Person B -->
+                                <div class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <template x-if="currentPair.personB.photo_url">
+                                            <img :src="currentPair.personB.photo_url" class="w-12 h-12 rounded-xl object-cover">
+                                        </template>
+                                        <template x-if="!currentPair.personB.photo_url">
+                                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                                                <span class="text-sm font-semibold text-white" x-text="(currentPair.personB.first_name?.[0] || '') + (currentPair.personB.last_name?.[0] || '')"></span>
+                                            </div>
+                                        </template>
+                                        <div class="min-w-0">
+                                            <a :href="currentPair.personB.url" target="_blank" class="font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400" x-text="currentPair.personB.full_name"></a>
+                                            <div x-show="currentPair.personB.has_user" class="text-xs text-green-600 dark:text-green-400 font-medium">{{ __('app.duplicates_has_account') }}</div>
+                                        </div>
+                                    </div>
+
+                                    <dl class="space-y-2 text-sm">
+                                        <template x-for="f in duplicateFields" :key="f.key">
+                                            <div class="flex justify-between gap-2">
+                                                <dt class="text-gray-500 dark:text-gray-400 flex-shrink-0" x-text="f.label"></dt>
+                                                <dd class="text-gray-900 dark:text-white font-medium truncate text-right" x-text="getDuplicateFieldValue(currentPair.personB, f.key) || '—'"></dd>
+                                            </div>
+                                        </template>
+                                        <div x-show="(currentPair.personB.ministries || []).length > 0">
+                                            <dt class="text-gray-500 dark:text-gray-400 mb-1">{{ __('app.ministries') }}</dt>
+                                            <dd class="flex flex-wrap gap-1">
+                                                <template x-for="m in currentPair.personB.ministries || []" :key="m">
+                                                    <span class="inline-flex px-2 py-0.5 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-md" x-text="m"></span>
+                                                </template>
+                                            </dd>
+                                        </div>
+                                        <div x-show="(currentPair.personB.tags || []).length > 0">
+                                            <dt class="text-gray-500 dark:text-gray-400 mb-1">{{ __('app.tags') }}</dt>
+                                            <dd class="flex flex-wrap gap-1">
+                                                <template x-for="t in currentPair.personB.tags || []" :key="t">
+                                                    <span class="inline-flex px-2 py-0.5 text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-md" x-text="t"></span>
+                                                </template>
+                                            </dd>
+                                        </div>
+                                    </dl>
+
+                                    <button @click="showMergePreview(currentPair.personB, currentPair.personA)"
+                                            class="mt-4 w-full inline-flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
+                                        {{ __('app.duplicates_keep_record') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+                    <!-- Preview mode: Back + Confirm -->
+                    <template x-if="mergePreview">
+                        <div class="flex items-center justify-between w-full">
+                            <button @click="mergePreview = null"
+                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                {{ __('app.previous') }}
+                            </button>
+                            <button @click="confirmMerge()"
+                                    :disabled="mergingId !== null"
+                                    class="inline-flex items-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50">
+                                <template x-if="mergingId">
+                                    <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                </template>
+                                {{ __('app.duplicates_confirm_merge') }}
+                            </button>
+                        </div>
+                    </template>
+                    <!-- Compare mode: navigation -->
+                    <template x-if="!mergePreview && !duplicatesLoading && duplicatePairs.length > 1">
+                        <div class="flex items-center justify-between w-full">
+                            <button @click="currentDuplicateIndex = Math.max(0, currentDuplicateIndex - 1)"
+                                    :disabled="currentDuplicateIndex === 0"
+                                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-40">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                {{ __('app.previous') }}
+                            </button>
+                            <span class="text-sm text-gray-500 dark:text-gray-400" x-text="(currentDuplicateIndex + 1) + ' / ' + duplicatePairs.length"></span>
+                            <button @click="currentDuplicateIndex = Math.min(duplicatePairs.length - 1, currentDuplicateIndex + 1)"
+                                    :disabled="currentDuplicateIndex >= duplicatePairs.length - 1"
+                                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-40">
+                                {{ __('app.next') }}
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                    <template x-if="!mergePreview && (duplicatesLoading || duplicatePairs.length <= 1)">
+                        <div></div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
@@ -928,7 +1265,30 @@ function peopleTable() {
         bulkMessage: '',
         bulkLoading: false,
 
+        // Duplicates state
+        showDuplicatesModal: false,
+        duplicatesLoading: false,
+        duplicatePairs: [],
+        currentDuplicateIndex: 0,
+        mergingId: null,
+        mergePreview: null,
+
+        duplicateFields: [
+            { key: 'phone', label: '{{ __("app.phone") }}' },
+            { key: 'email', label: 'Email' },
+            { key: 'birth_date', label: '{{ __("app.date_of_birth") }}' },
+            { key: 'gender', label: '{{ __("app.gender") }}' },
+            { key: 'membership_status', label: '{{ __("app.membership_status") }}' },
+            { key: 'telegram_username', label: 'Telegram' },
+            { key: 'created_at', label: '{{ __("app.duplicates_created_at") }}' },
+        ],
+
+        get currentPair() {
+            return this.duplicatePairs[this.currentDuplicateIndex] || { personA: {}, personB: {}, reasons: [] };
+        },
+
         init() {
+            document.addEventListener('open-duplicates', () => this.openDuplicates());
             this.$nextTick(() => {
                 this.updateFilteredIndices();
             });
@@ -1140,6 +1500,141 @@ function peopleTable() {
         exportSelected() {
             const ids = this.selectedIds.join(',');
             window.location.href = `{{ route('people.export') }}?ids=${ids}`;
+        },
+
+        async openDuplicates() {
+            this.showDuplicatesModal = true;
+            this.duplicatesLoading = true;
+            this.duplicatePairs = [];
+            this.currentDuplicateIndex = 0;
+            this.mergingId = null;
+
+            try {
+                const response = await fetch('{{ route("people.duplicates") }}', {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                const data = await response.json();
+                this.duplicatePairs = data.pairs || [];
+            } catch (error) {
+                console.error('Failed to load duplicates:', error);
+                this.duplicatePairs = [];
+            } finally {
+                this.duplicatesLoading = false;
+            }
+        },
+
+        getDuplicateFieldValue(person, key) {
+            if (!person) return '';
+            if (key === 'gender') {
+                const map = { 'male': '{{ __("app.gender_male") }}', 'female': '{{ __("app.gender_female") }}' };
+                return map[person.gender] || person.gender || '';
+            }
+            return person[key] || '';
+        },
+
+        showMergePreview(primary, secondary) {
+            const fields = [];
+            for (const f of this.duplicateFields) {
+                const pVal = primary[f.key] || '';
+                const sVal = secondary[f.key] || '';
+                const value = pVal || sVal;
+                if (!value) continue;
+                fields.push({
+                    key: f.key,
+                    label: f.label,
+                    value: f.key === 'gender' ? this.getDuplicateFieldValue({ [f.key]: value }, f.key) : value,
+                    source: (!pVal && sVal) ? 'secondary' : 'primary'
+                });
+            }
+
+            // Merge ministries
+            const pMinistries = (primary.ministries || []).map(n => ({ name: n, from: 'primary' }));
+            const sMinistries = (secondary.ministries || []).filter(n => !(primary.ministries || []).includes(n)).map(n => ({ name: n, from: 'secondary' }));
+
+            // Merge tags
+            const pTags = (primary.tags || []).map(n => ({ name: n, from: 'primary' }));
+            const sTags = (secondary.tags || []).filter(n => !(primary.tags || []).includes(n)).map(n => ({ name: n, from: 'secondary' }));
+
+            // Account info
+            let accountNote = null;
+            let accountFromSecondary = false;
+            if (primary.has_user) {
+                accountNote = '{{ __("app.duplicates_has_account") }}';
+            } else if (secondary.has_user) {
+                accountNote = '{{ __("app.duplicates_has_account") }} ← ' + secondary.full_name;
+                accountFromSecondary = true;
+            }
+
+            // Photo — take primary's, or secondary's if primary has none
+            const photoUrl = primary.photo_url || secondary.photo_url;
+
+            this.mergePreview = {
+                primary_id: primary.id,
+                secondary_id: secondary.id,
+                secondary_name: secondary.full_name,
+                result: {
+                    full_name: primary.full_name,
+                    photo_url: photoUrl,
+                },
+                fields: fields,
+                merged_ministries: [...pMinistries, ...sMinistries],
+                merged_tags: [...pTags, ...sTags],
+                account_note: accountNote,
+                account_from_secondary: accountFromSecondary,
+            };
+        },
+
+        async confirmMerge() {
+            if (!this.mergePreview) return;
+
+            this.mergingId = this.mergePreview.primary_id;
+            const secondaryId = this.mergePreview.secondary_id;
+
+            try {
+                const response = await fetch('{{ route("people.merge") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ primary_id: this.mergePreview.primary_id, secondary_id: secondaryId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.mergePreview = null;
+
+                    // Remove this pair from the list
+                    this.duplicatePairs.splice(this.currentDuplicateIndex, 1);
+
+                    // Also remove any other pairs involving the secondary person
+                    this.duplicatePairs = this.duplicatePairs.filter(p =>
+                        p.personA.id !== secondaryId && p.personB.id !== secondaryId
+                    );
+
+                    // Adjust index if needed
+                    if (this.currentDuplicateIndex >= this.duplicatePairs.length) {
+                        this.currentDuplicateIndex = Math.max(0, this.duplicatePairs.length - 1);
+                    }
+
+                    // If no more pairs, close after a short delay
+                    if (this.duplicatePairs.length === 0) {
+                        setTimeout(() => {
+                            this.showDuplicatesModal = false;
+                            window.location.reload();
+                        }, 1000);
+                    }
+                } else {
+                    alert(data.message || 'Error');
+                }
+            } catch (error) {
+                console.error('Merge failed:', error);
+                alert('Error merging records');
+            } finally {
+                this.mergingId = null;
+            }
         },
 
         async executeBulkAction() {
