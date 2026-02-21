@@ -489,6 +489,7 @@
                      installable: !!window.pwaInstallPrompt,
                      installed: false,
                      isIos: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+                     isIosSafari: (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) && !(/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent)),
                      isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true,
                      showIosGuide: false,
                      init() {
@@ -537,8 +538,33 @@
                     </button>
                 </template>
 
-                <!-- iOS instructions -->
-                <template x-if="!isStandalone && !installed && !installable && isIos">
+                <!-- iOS Chrome/Firefox — redirect to Safari -->
+                <template x-if="!isStandalone && !installed && !installable && isIos && !isIosSafari">
+                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900 dark:text-white mb-1">{{ __('app.ios_open_safari_title') }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('app.ios_open_safari_desc') }}</p>
+                                <button onclick="navigator.clipboard.writeText(window.location.origin + '/my-profile'); this.textContent = '{{ __('app.link_copied') }}';"
+                                        type="button"
+                                        class="inline-flex items-center gap-2 px-3 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg text-sm font-medium hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    {{ __('app.copy_link') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- iOS Safari instructions -->
+                <template x-if="!isStandalone && !installed && !installable && isIosSafari">
                     <div>
                         <button @click="showIosGuide = !showIosGuide" type="button"
                                 class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors">

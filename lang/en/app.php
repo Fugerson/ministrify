@@ -799,4 +799,8 @@ return [
     'ios_step_3_title' => 'Tap "Add"',
     'ios_step_3_desc' => 'The Ministrify icon will appear on your home screen',
     'install_not_available' => 'Open the site in Chrome or Safari on your phone to install the app.',
+    'ios_open_safari_title' => 'Open in Safari',
+    'ios_open_safari_desc' => 'On iPhone, you can only install the app through Safari. Copy the link and open it in Safari.',
+    'copy_link' => 'Copy link',
+    'link_copied' => 'Copied!',
 ];

@@ -796,4 +796,8 @@ return [
     'ios_step_3_title' => 'Натисніть "Додати"',
     'ios_step_3_desc' => 'Іконка Ministrify з\'явиться на вашому головному екрані',
     'install_not_available' => 'Відкрийте сайт у Chrome або Safari на телефоні, щоб встановити додаток.',
+    'ios_open_safari_title' => 'Відкрийте в Safari',
+    'ios_open_safari_desc' => 'На iPhone встановити додаток можна тільки через Safari. Скопіюйте посилання та відкрийте його в Safari.',
+    'copy_link' => 'Скопіювати посилання',
+    'link_copied' => 'Скопійовано!',
 ];
