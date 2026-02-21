@@ -9,7 +9,7 @@
     <div class="relative">
         <button @click="profileOpen = !profileOpen" class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
             <x-user-avatar size="sm" />
-            <span class="text-sm text-gray-700 dark:text-gray-300">{{ auth()->user()->name }}</span>
+            <span class="text-sm text-gray-700 dark:text-gray-300">{{ auth()->user()->person?->full_name ?? auth()->user()->name }}</span>
         </button>
 
         {{-- Dropdown Menu --}}
