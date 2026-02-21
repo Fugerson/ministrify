@@ -243,6 +243,36 @@ class PersonController extends Controller
             }
         }
 
+        // Check for duplicate by name in same church (unless explicitly forced)
+        if (!$request->boolean('force_duplicate')) {
+            $existingByName = Person::where('church_id', $church->id)
+                ->where('first_name', $validated['first_name'])
+                ->where('last_name', $validated['last_name'])
+                ->first();
+
+            if ($existingByName) {
+                $info = $existingByName->first_name . ' ' . $existingByName->last_name;
+                if ($existingByName->phone) $info .= ', тел: ' . $existingByName->phone;
+                if ($existingByName->email) $info .= ', email: ' . $existingByName->email;
+
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'duplicate' => true,
+                        'message' => __('app.duplicate_person_warning'),
+                        'existing_person' => [
+                            'id' => $existingByName->id,
+                            'name' => $existingByName->full_name,
+                            'info' => $info,
+                            'url' => route('people.show', $existingByName),
+                            'photo_url' => $existingByName->photo ? \Illuminate\Support\Facades\Storage::url($existingByName->photo) : null,
+                        ],
+                    ], 409);
+                }
+                return redirect()->route('people.show', $existingByName)
+                    ->with('warning', 'Людина з таким іменем вже існує.');
+            }
+        }
+
         $person = Person::create($validated);
 
         // Attach tags (only tags belonging to this church)
@@ -1267,6 +1297,21 @@ class PersonController extends Controller
                     ->first();
                 if ($existing) {
                     $person = $existing;
+                    $stats['updated']++;
+                    goto skip_create;
+                }
+            }
+
+            // Check for duplicate by name in same church
+            $firstName = $data['first_name'] ?? null;
+            $lastName = $data['last_name'] ?? null;
+            if ($firstName && $lastName) {
+                $existingByName = Person::where('church_id', $church->id)
+                    ->where('first_name', $firstName)
+                    ->where('last_name', $lastName)
+                    ->first();
+                if ($existingByName) {
+                    $person = $existingByName;
                     $stats['updated']++;
                     goto skip_create;
                 }

@@ -771,4 +771,14 @@ return [
     'tg_step4_title' => 'Or enter code manually',
     'tg_step4_desc' => 'Get a 6-digit code in the "My Profile" section',
     'tg_what_bot_can_do' => 'What the bot can do:',
+
+    // Duplicate prevention
+    'duplicate_found' => 'Possible duplicate',
+    'duplicate_person_exists' => 'A person with this name already exists in the database:',
+    'duplicate_person_warning' => 'A person with this first and last name already exists in this church.',
+    'go_to_profile' => 'Go to profile',
+    'create_anyway' => 'Create anyway',
+    'cancel' => 'Cancel',
+    'check_form_errors' => 'Please check the form for errors.',
+    'connection_error' => 'Server connection error.',
 ];

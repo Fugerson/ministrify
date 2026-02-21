@@ -768,4 +768,14 @@ return [
     'tg_step4_title' => 'Або введіть код вручну',
     'tg_step4_desc' => 'Отримайте 6-значний код в розділі «Мій профіль»',
     'tg_what_bot_can_do' => 'Що вміє бот:',
+
+    // Duplicate prevention
+    'duplicate_found' => 'Можливий дублікат',
+    'duplicate_person_exists' => 'Людина з таким іменем та прізвищем вже є в базі:',
+    'duplicate_person_warning' => 'Людина з таким іменем та прізвищем вже існує в цій церкві.',
+    'go_to_profile' => 'Перейти до профілю',
+    'create_anyway' => 'Створити все одно',
+    'cancel' => 'Скасувати',
+    'check_form_errors' => 'Перевірте правильність заповнення форми.',
+    'connection_error' => "Помилка з'єднання з сервером.",
 ];

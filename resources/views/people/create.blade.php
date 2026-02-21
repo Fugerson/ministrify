@@ -196,6 +196,51 @@
             </button>
         </div>
     </form>
+
+    <!-- Duplicate person warning modal -->
+    <template x-if="duplicateWarning">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="duplicateWarning = null">
+            <div class="fixed inset-0 bg-black/50" @click="duplicateWarning = null"></div>
+            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.duplicate_found') }}</h3>
+                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('app.duplicate_person_exists') }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 flex items-center gap-3">
+                    <template x-if="duplicateWarning.photo_url">
+                        <img :src="duplicateWarning.photo_url" class="w-10 h-10 rounded-full object-cover" alt="">
+                    </template>
+                    <template x-if="!duplicateWarning.photo_url">
+                        <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-semibold text-sm" x-text="duplicateWarning.name?.charAt(0)"></div>
+                    </template>
+                    <div class="min-w-0">
+                        <p class="font-medium text-gray-900 dark:text-white truncate" x-text="duplicateWarning.name"></p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate" x-text="duplicateWarning.info"></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+                    <button @click="duplicateWarning = null" class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        {{ __('app.cancel') }}
+                    </button>
+                    <a :href="duplicateWarning.url" class="px-4 py-2 text-sm text-center bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                        {{ __('app.go_to_profile') }}
+                    </a>
+                    <button @click="submitForm(true)" class="px-4 py-2 text-sm text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg transition-colors">
+                        {{ __('app.create_anyway') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
 
 <script>
@@ -203,10 +248,15 @@ function personCreateForm() {
     return {
         saving: false,
         errors: {},
-        async submitForm() {
+        duplicateWarning: null,
+        async submitForm(forceDuplicate = false) {
             this.saving = true;
             this.errors = {};
+            this.duplicateWarning = null;
             const formData = new FormData(this.$refs.form);
+            if (forceDuplicate) {
+                formData.append('force_duplicate', '1');
+            }
             try {
                 const response = await fetch('{{ route("people.store") }}', {
                     method: 'POST',
@@ -218,19 +268,24 @@ function personCreateForm() {
                 });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) {
+                    if (response.status === 409 && data.duplicate) {
+                        this.duplicateWarning = data.existing_person;
+                        this.saving = false;
+                        return;
+                    }
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', 'Перевірте правильність заповнення форми.');
+                        showToast('error', '{{ __("app.check_form_errors") }}');
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || '{{ __("app.save_error") }}');
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || '{{ __("app.saved") }}');
                 setTimeout(() => window.location.href = data.redirect_url, 800);
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', "{{ __('app.connection_error') }}");
                 this.saving = false;
             }
         }
