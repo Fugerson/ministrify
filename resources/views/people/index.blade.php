@@ -586,7 +586,7 @@
         <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <span class="hidden sm:inline">{{ __('app.show_per_page') }}</span>
-                <select x-model.number="perPage" @change="currentPage = 1"
+                <select x-model.number="perPage" @change="currentPage = 1; localStorage.setItem('people_per_page', perPage)"
                     class="px-2 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20">
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -1369,7 +1369,7 @@ function peopleTable() {
         maritalStatusLabels: @js(\App\Models\Person::getMaritalStatuses()),
         flatpickrInstance: null,
         filteredCount: {{ $people->count() }},
-        perPage: 25,
+        perPage: parseInt(localStorage.getItem('people_per_page')) || 25,
         currentPage: 1,
         allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'id' => $p->id, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'tags' => $p->tags->pluck('name')->join(', '), 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
         filteredIndices: [],
