@@ -150,10 +150,24 @@ class User extends Authenticatable implements MustVerifyEmail
                 ->whereNull('user_id')
                 ->first();
 
+            // Fallback: try to find by first_name + last_name
+            if (!$person) {
+                $nameParts = explode(' ', $this->name, 2);
+                $firstName = $nameParts[0];
+                $lastName = $nameParts[1] ?? '';
+                if ($firstName && $lastName) {
+                    $person = Person::where('church_id', $churchId)
+                        ->where('first_name', $firstName)
+                        ->where('last_name', $lastName)
+                        ->whereNull('user_id')
+                        ->first();
+                }
+            }
+
             if ($person) {
                 $person->update(['user_id' => $this->id]);
             } else {
-                $nameParts = explode(' ', $this->name, 2);
+                $nameParts = $nameParts ?? explode(' ', $this->name, 2);
                 $person = Person::create([
                     'church_id' => $churchId,
                     'user_id' => $this->id,

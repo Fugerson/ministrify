@@ -145,8 +145,21 @@ class RegisterController extends Controller
                 ->whereNull('user_id')
                 ->first();
 
+            // Fallback: try to find by first_name + last_name
+            if (!$person && $firstName && $lastName) {
+                $person = Person::where('church_id', $church->id)
+                    ->where('first_name', $firstName)
+                    ->where('last_name', $lastName)
+                    ->whereNull('user_id')
+                    ->first();
+            }
+
             if ($person) {
-                $person->update(['user_id' => $user->id]);
+                $person->update([
+                    'user_id' => $user->id,
+                    'email' => $person->email ?: $request->email,
+                    'phone' => $person->phone ?: $request->phone,
+                ]);
             } else {
                 $person = Person::create([
                     'church_id' => $church->id,
