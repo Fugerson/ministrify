@@ -6,6 +6,7 @@ use App\Models\Board;
 use App\Models\BoardCard;
 use App\Models\Event;
 use App\Models\EventMinistryTeam;
+use App\Models\EventSong;
 use App\Models\Ministry;
 use App\Models\MinistryRole;
 use App\Models\Person;
@@ -303,20 +304,26 @@ class MinistryController extends Controller
 
         $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
 
-        $events = Event::where('church_id', $church->id)
+        $rawEvents = Event::where('church_id', $church->id)
             ->where('service_type', 'sunday_service')
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->orderBy('date')
             ->orderBy('time')
-            ->get()
-            ->map(fn($e) => [
-                'id' => $e->id,
-                'title' => $e->title,
-                'date' => $e->date->format('Y-m-d'),
-                'dateLabel' => $e->date->format('j') . ' ' . $monthNames[$e->date->month],
-                'dayOfWeek' => mb_substr($e->date->translatedFormat('D'), 0, 2),
-            ]);
+            ->get();
+
+        $events = $rawEvents->map(fn($e) => [
+            'id' => $e->id,
+            'title' => $e->title,
+            'date' => $e->date->format('Y-m-d'),
+            'dateLabel' => $e->date->format('j') . ' ' . $monthNames[$e->date->month],
+            'dayOfWeek' => mb_substr($e->date->translatedFormat('D'), 0, 2),
+            'dataUrl' => route('ministries.worship-events.data', [$ministry, $e]),
+            'eventUrl' => route('ministries.worship-events.show', [$ministry, $e]),
+            'time' => $e->time?->format('H:i') ?? '',
+            'fullDate' => $e->date->translatedFormat('l, j M'),
+            'isSundayService' => true,
+        ]);
 
         $roles = $ministry->ministryRoles()->orderBy('sort_order')->get()
             ->map(fn($r) => [
@@ -365,7 +372,41 @@ class MinistryController extends Controller
                 'has_telegram' => (bool) $m->telegram_chat_id,
             ]);
 
-        return response()->json(compact('events', 'roles', 'grid', 'members'));
+        // Songs per event
+        $songs = [];
+        if (count($eventIds) > 0) {
+            $eventSongs = EventSong::whereIn('event_id', $eventIds)
+                ->with('song')
+                ->orderBy('order')
+                ->get();
+
+            foreach ($eventSongs as $es) {
+                $eId = (string) $es->event_id;
+                if (!isset($songs[$eId])) {
+                    $songs[$eId] = [];
+                }
+                $songs[$eId][] = [
+                    'title' => $es->song?->title ?? '?',
+                    'key' => $es->key,
+                ];
+            }
+        }
+
+        // Add counts to events
+        $teamByEvent = [];
+        foreach ($teamEntries as $entry) {
+            $eId = (string) $entry->event_id;
+            $teamByEvent[$eId] = ($teamByEvent[$eId] ?? 0) + 1;
+        }
+
+        $events = $events->map(function ($e) use ($songs, $teamByEvent) {
+            $eId = (string) $e['id'];
+            $e['songsCount'] = count($songs[$eId] ?? []);
+            $e['teamCount'] = $teamByEvent[$eId] ?? 0;
+            return $e;
+        });
+
+        return response()->json(compact('events', 'roles', 'grid', 'members', 'songs'));
     }
 
     public function edit(Ministry $ministry)

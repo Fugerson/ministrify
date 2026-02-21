@@ -206,101 +206,62 @@
 
                                 {{-- Cards grid --}}
                                 <template x-if="gridData.events.length > 0">
-                                    <div class="flex gap-4 overflow-x-auto pb-4 snap-x" @click.away="addingToEvent = null">
+                                    <div class="flex gap-4 overflow-x-auto pb-4 snap-x">
                                         <template x-for="event in gridData.events" :key="event.id">
-                                            <div class="flex-shrink-0 w-56 sm:w-64 snap-start bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col">
+                                            <div class="flex-shrink-0 w-56 sm:w-64 snap-start bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-600 transition-all cursor-pointer flex flex-col"
+                                                 @click="openEventModal(event)">
                                                 {{-- Card header --}}
-                                                <div class="px-3 py-2.5 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 rounded-t-xl">
-                                                    <div class="text-sm font-semibold text-gray-900 dark:text-white" x-text="event.dateLabel"></div>
-                                                    <div class="text-xs text-gray-400 dark:text-gray-500" x-text="event.dayOfWeek"></div>
+                                                <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 rounded-t-xl">
+                                                    <div class="flex items-center justify-between">
+                                                        <div>
+                                                            <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="event.dateLabel"></span>
+                                                            <span class="text-xs text-gray-400 dark:text-gray-500 ml-1" x-text="'· ' + event.dayOfWeek"></span>
+                                                        </div>
+                                                        <span x-show="event.time" class="text-[11px] text-gray-400 dark:text-gray-500" x-text="event.time"></span>
+                                                    </div>
                                                 </div>
 
-                                                {{-- Card body: roles & members --}}
-                                                <div class="flex-1 px-3 py-2 space-y-2 min-h-[60px]">
+                                                {{-- Summary bar --}}
+                                                <div class="px-3 py-1.5 flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 border-b border-gray-50 dark:border-gray-700/50">
+                                                    <span class="flex items-center gap-1">
+                                                        <span>🎵</span>
+                                                        <span x-text="event.songsCount + ' ' + (event.songsCount === 1 ? 'пісня' : (event.songsCount >= 2 && event.songsCount <= 4 ? 'пісні' : 'пісень'))"></span>
+                                                    </span>
+                                                    <span class="flex items-center gap-1">
+                                                        <span>👥</span>
+                                                        <span x-text="event.teamCount + ' уч.'"></span>
+                                                    </span>
+                                                </div>
+
+                                                {{-- Card body: flat member list --}}
+                                                <div class="flex-1 px-3 py-2 space-y-0.5 min-h-[50px]">
                                                     {{-- Empty state --}}
                                                     <template x-if="getEventRoles(event.id).length === 0">
-                                                        <p class="text-xs text-gray-400 dark:text-gray-500 italic py-2 text-center">порожньо</p>
+                                                        <p class="text-xs text-gray-400 dark:text-gray-500 italic py-3 text-center">{{ __('app.empty') ?? 'порожньо' }}</p>
                                                     </template>
 
-                                                    {{-- Role groups --}}
+                                                    {{-- Flat list of members with role icons --}}
                                                     <template x-for="roleGroup in getEventRoles(event.id)" :key="'rg-'+event.id+'-'+roleGroup.roleId">
-                                                        <div>
-                                                            <div class="flex items-center gap-1 mb-1">
-                                                                <span x-show="roleGroup.roleIcon" x-text="roleGroup.roleIcon" class="text-xs"></span>
-                                                                <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide" x-text="roleGroup.roleName"></span>
+                                                        <template x-for="member in roleGroup.members" :key="'m-'+member.id">
+                                                            <div class="flex items-center gap-1.5 py-0.5">
+                                                                <span x-show="roleGroup.roleIcon" x-text="roleGroup.roleIcon" class="text-xs flex-shrink-0" :title="roleGroup.roleName"></span>
+                                                                <span x-show="!roleGroup.roleIcon" class="w-4 h-4 flex-shrink-0 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[9px] text-gray-500 dark:text-gray-400" x-text="roleGroup.roleName.charAt(0)"></span>
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 truncate" x-text="member.person_name"></span>
+                                                                <span x-show="member.status === 'confirmed'" class="text-[10px] flex-shrink-0">✅</span>
+                                                                <span x-show="member.status === 'declined'" class="text-[10px] flex-shrink-0">❌</span>
+                                                                <span x-show="member.status === 'pending'" class="text-[10px] flex-shrink-0">⏳</span>
                                                             </div>
-                                                            <template x-for="member in roleGroup.members" :key="'m-'+member.id">
-                                                                <div class="flex items-center justify-between gap-1 py-0.5 group">
-                                                                    <div class="flex items-center gap-1 min-w-0">
-                                                                        <span x-show="member.status === 'confirmed'" class="flex-shrink-0 text-xs">✅</span>
-                                                                        <span x-show="member.status === 'declined'" class="flex-shrink-0 text-xs">❌</span>
-                                                                        <span x-show="member.status === 'pending'" class="flex-shrink-0 text-xs">⏳</span>
-                                                                        <span x-show="!member.status" class="flex-shrink-0 text-xs">◻️</span>
-                                                                        <span class="text-xs text-gray-700 dark:text-gray-300 truncate" x-text="member.person_name"></span>
-                                                                    </div>
-                                                                    <div class="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        {{-- TG button --}}
-                                                                        <button x-show="member.has_telegram && member.status !== 'confirmed'"
-                                                                            @click.stop="gridNotify(event.id, member.id, roleGroup.roleId)"
-                                                                            class="w-4 h-4 flex items-center justify-center text-blue-500 hover:text-blue-700 transition-colors"
-                                                                            :title="member.status === 'pending' ? 'Нагадати' : 'Запитати в Telegram'">
-                                                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-                                                                        </button>
-                                                                        {{-- Remove button --}}
-                                                                        <button @click.stop="gridRemove(event.id, member.id, roleGroup.roleId)"
-                                                                            class="w-4 h-4 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-500 hover:text-white text-[10px] transition-all">
-                                                                            &times;
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </template>
-                                                        </div>
+                                                        </template>
                                                     </template>
                                                 </div>
 
-                                                {{-- Card footer: add button --}}
-                                                <div class="px-3 py-2 border-t border-gray-100 dark:border-gray-700 relative">
-                                                    <button @click="addingToEvent = (addingToEvent === event.id ? null : event.id); addStep = 'role'; selectedAddRole = null;"
+                                                {{-- Card footer --}}
+                                                <div class="px-3 py-2 border-t border-gray-100 dark:border-gray-700">
+                                                    <button @click.stop="openEventModal(event)"
                                                         class="w-full text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium py-1 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-center gap-1">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                        Додати
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        {{ __('app.open') ?? 'Відкрити' }}
                                                     </button>
-
-                                                    {{-- Two-step dropdown --}}
-                                                    <div x-show="addingToEvent === event.id" x-cloak x-transition
-                                                        class="absolute bottom-full left-0 right-0 mb-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 max-h-52 overflow-y-auto">
-
-                                                        {{-- Step 1: Choose role --}}
-                                                        <template x-if="addStep === 'role'">
-                                                            <div class="py-1">
-                                                                <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Оберіть роль</div>
-                                                                <template x-for="role in gridData.roles" :key="'add-role-'+role.id">
-                                                                    <button @click="selectedAddRole = role; addStep = 'person';"
-                                                                        class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-1.5 transition-colors">
-                                                                        <span x-show="role.icon" x-text="role.icon" class="text-sm"></span>
-                                                                        <span x-text="role.name"></span>
-                                                                    </button>
-                                                                </template>
-                                                            </div>
-                                                        </template>
-
-                                                        {{-- Step 2: Choose person --}}
-                                                        <template x-if="addStep === 'person' && selectedAddRole">
-                                                            <div class="py-1">
-                                                                <button @click="addStep = 'role'"
-                                                                    class="w-full text-left px-3 py-1.5 text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1">
-                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                                                                    <span x-text="selectedAddRole.icon ? selectedAddRole.icon + ' ' + selectedAddRole.name : selectedAddRole.name"></span>
-                                                                </button>
-                                                                <template x-for="member in gridData.members" :key="'add-m-'+member.id">
-                                                                    <button @click="gridAssign(event.id, selectedAddRole.id, member.id); addingToEvent = null;"
-                                                                        class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
-                                                                        <span x-text="member.name"></span>
-                                                                    </button>
-                                                                </template>
-                                                            </div>
-                                                        </template>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </template>
@@ -710,13 +671,10 @@
 
                                 // Grid state
                                 gridView: new URL(window.location).searchParams.get('view') === 'grid',
-                                gridData: { events: [], roles: [], grid: {}, members: [] },
+                                gridData: { events: [], roles: [], grid: {}, members: [], songs: {} },
                                 gridLoading: false,
                                 editingCell: null,
                                 gridDropdown: { open: false, eventId: null, roleId: null, style: {} },
-                                addingToEvent: null,
-                                addStep: 'role',
-                                selectedAddRole: null,
 
                                 // Modal state
                                 showModal: false,
@@ -777,6 +735,7 @@
                                     this.selectedPersonId = '';
                                     this.selectedRoleId = '';
                                     this.selectedSongForTeam = null;
+                                    if (this.gridView) this.loadGrid();
                                 },
 
                                 selectSong(song) {
@@ -1164,6 +1123,19 @@
                                     return result;
                                 },
 
+                                getEventSongs(eventId) {
+                                    return this.gridData.songs?.[String(eventId)] || [];
+                                },
+
+                                getEventTeamCount(eventId) {
+                                    const eId = String(eventId);
+                                    let count = 0;
+                                    for (const rId in (this.gridData.grid || {})) {
+                                        count += (this.gridData.grid[rId]?.[eId] || []).length;
+                                    }
+                                    return count;
+                                },
+
                                 async gridAssign(eventId, roleId, personId) {
                                     const formData = new FormData();
                                     formData.append('person_id', personId);
@@ -1211,7 +1183,6 @@
                                         console.error('Error assigning:', error);
                                     }
                                     this.gridDropdown.open = false;
-                                    this.addingToEvent = null;
                                 },
 
                                 async gridRemove(eventId, memberId, roleId) {
