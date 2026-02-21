@@ -149,7 +149,8 @@ class SystemAdminController extends Controller
             $query->where('is_super_admin', true);
         }
 
-        $perPage = in_array((int) $request->per_page, [20, 50, 100]) ? (int) $request->per_page : 20;
+        $rawPerPage = $request->per_page ?? $request->cookie('system_users_per_page', 20);
+        $perPage = in_array((int) $rawPerPage, [20, 50, 100]) ? (int) $rawPerPage : 20;
         $users = $query->latest()->paginate($perPage)->withQueryString();
 
         // Load all church memberships with roles for each user
@@ -184,7 +185,7 @@ class SystemAdminController extends Controller
         // Count deleted users
         $deletedCount = User::onlyTrashed()->count();
 
-        return view('system-admin.users.index', compact('users', 'churches', 'deletedCount'));
+        return view('system-admin.users.index', compact('users', 'churches', 'deletedCount', 'perPage'));
     }
 
     /**

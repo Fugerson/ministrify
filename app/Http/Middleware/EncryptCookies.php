@@ -13,5 +13,6 @@ class EncryptCookies extends Middleware
      */
     protected $except = [
         'locale', // Don't encrypt locale cookie - needs to be readable by SetLocale middleware
+        'system_users_per_page',
     ];
 }

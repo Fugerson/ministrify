@@ -35,11 +35,11 @@
             </label>
 
             <select name="per_page" id="perPageSelect"
-                    onchange="localStorage.setItem('system_users_per_page', this.value)"
+                    onchange="document.cookie='system_users_per_page='+this.value+';path=/;max-age=31536000'; this.form.submit()"
                     class="w-full lg:w-auto px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                <option value="20" {{ request('per_page', 20) == 20 ? 'selected' : '' }}>20</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                <option value="20" {{ $perPage == 20 ? 'selected' : '' }}>20</option>
+                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
             </select>
 
             <div class="flex gap-3 sm:col-span-2 lg:contents">
@@ -323,16 +323,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    (function() {
-        var saved = localStorage.getItem('system_users_per_page');
-        if (saved && !new URLSearchParams(window.location.search).has('per_page')) {
-            var url = new URL(window.location);
-            url.searchParams.set('per_page', saved);
-            window.location.replace(url);
-        }
-    })();
-</script>
-@endpush
