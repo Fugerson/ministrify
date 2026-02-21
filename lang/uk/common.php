@@ -62,7 +62,7 @@ return [
     'december' => 'Грудень',
 
     // Common Fields
-    'name' => "Ім'я",
+    'name' => 'Імʼя',
     'email' => 'Email',
     'phone' => 'Телефон',
     'address' => 'Адреса',

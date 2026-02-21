@@ -2,9 +2,9 @@
 
 return [
     // Form Labels
-    'first_name' => "Ім'я",
+    'first_name' => 'Імʼя',
     'last_name' => 'Прізвище',
-    'full_name' => "Повне ім'я",
+    'full_name' => 'Повне імʼя',
     'email' => 'Email адреса',
     'phone' => 'Номер телефону',
     'password' => 'Пароль',
@@ -24,7 +24,7 @@ return [
     'notes' => 'Примітки',
     'description' => 'Опис',
     'title' => 'Заголовок',
-    'name' => "Ім'я",
+    'name' => 'Імʼя',
     'status' => 'Статус',
     'active' => 'Активний',
     'inactive' => 'Неактивний',
