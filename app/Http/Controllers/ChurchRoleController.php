@@ -51,21 +51,16 @@ class ChurchRoleController extends Controller
             'sort_order' => $maxOrder + 1,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'role' => [
-                    'id' => $role->id,
-                    'name' => $role->name,
-                    'color' => $role->color,
-                    'is_admin_role' => $role->is_admin_role ?? false,
-                    'is_default' => $role->is_default ?? false,
-                    'people_count' => 0,
-                ],
-            ]);
-        }
-
-        return back()->with('success', 'Роль додано');
+        return $this->successResponse($request, 'Роль додано', null, [], [
+            'role' => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'color' => $role->color,
+                'is_admin_role' => $role->is_admin_role ?? false,
+                'is_default' => $role->is_default ?? false,
+                'people_count' => 0,
+            ],
+        ]);
     }
 
     public function update(Request $request, ChurchRole $churchRole)
@@ -83,14 +78,10 @@ class ChurchRoleController extends Controller
             'color' => $validated['color'],
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Роль оновлено');
+        return $this->successResponse($request, 'Роль оновлено');
     }
 
-    public function destroy(ChurchRole $churchRole)
+    public function destroy(Request $request, ChurchRole $churchRole)
     {
         $this->authorizeChurch($churchRole);
 
@@ -99,23 +90,23 @@ class ChurchRoleController extends Controller
         $rolesCount = ChurchRole::where('church_id', $church->id)->count();
 
         if ($rolesCount <= 1) {
-            return response()->json(['message' => 'Не можна видалити останню роль'], 400);
+            return $this->errorResponse($request, 'Не можна видалити останню роль', 400);
         }
 
         if ($churchRole->people()->count() > 0) {
-            return response()->json(['message' => 'Роль використовується. Спочатку змініть роль у людей.'], 400);
+            return $this->errorResponse($request, 'Роль використовується. Спочатку змініть роль у людей.', 400);
         }
 
         if ($churchRole->users()->count() > 0) {
-            return response()->json(['message' => 'Роль має користувачів з доступом. Спочатку змініть їх роль.'], 400);
+            return $this->errorResponse($request, 'Роль має користувачів з доступом. Спочатку змініть їх роль.', 400);
         }
 
         $churchRole->delete();
 
-        return response()->json(['success' => true]);
+        return $this->successResponse($request, 'Роль видалено');
     }
 
-    public function toggleAdmin(ChurchRole $churchRole)
+    public function toggleAdmin(Request $request, ChurchRole $churchRole)
     {
         $this->authorizeChurch($churchRole);
 
@@ -128,9 +119,7 @@ class ChurchRoleController extends Controller
                 ->count();
 
             if ($adminRolesCount <= 1) {
-                return response()->json([
-                    'message' => 'Потрібна хоча б одна роль з повним доступом'
-                ], 400);
+                return $this->errorResponse($request, 'Потрібна хоча б одна роль з повним доступом', 400);
             }
 
             $churchRole->update(['is_admin_role' => false]);
@@ -138,13 +127,12 @@ class ChurchRoleController extends Controller
             $churchRole->update(['is_admin_role' => true]);
         }
 
-        return response()->json([
-            'success' => true,
+        return $this->successResponse($request, 'Оновлено', null, [], [
             'is_admin_role' => $churchRole->is_admin_role,
         ]);
     }
 
-    public function setDefault(ChurchRole $churchRole)
+    public function setDefault(Request $request, ChurchRole $churchRole)
     {
         $this->authorizeChurch($churchRole);
 
@@ -156,7 +144,7 @@ class ChurchRoleController extends Controller
         // Set this one as default
         $churchRole->update(['is_default' => true]);
 
-        return response()->json(['success' => true]);
+        return $this->successResponse($request, 'Роль за замовчуванням оновлено');
     }
 
     public function reorder(Request $request)
@@ -174,10 +162,10 @@ class ChurchRoleController extends Controller
                 ->update(['sort_order' => $index + 1]);
         }
 
-        return response()->json(['success' => true]);
+        return $this->successResponse($request, 'Порядок оновлено');
     }
 
-    public function resetToDefaults()
+    public function resetToDefaults(Request $request)
     {
         $church = $this->getCurrentChurch();
 
@@ -187,9 +175,7 @@ class ChurchRoleController extends Controller
             ->count();
 
         if ($usedRoles > 0) {
-            return response()->json([
-                'message' => 'Неможливо скинути - деякі ролі використовуються людьми'
-            ], 400);
+            return $this->errorResponse($request, 'Неможливо скинути - деякі ролі використовуються людьми', 400);
         }
 
         // Delete all current roles
@@ -203,7 +189,7 @@ class ChurchRoleController extends Controller
             'action' => 'reset_church_roles_to_defaults',
         ]);
 
-        return response()->json(['success' => true]);
+        return $this->successResponse($request, 'Ролі скинуто до стандартних');
     }
 
     protected function authorizeChurch($model): void

@@ -110,41 +110,37 @@ class SettingsController extends Controller
             'updated_fields' => array_keys($validated),
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Налаштування церкви оновлено.');
+        return $this->successResponse($request, 'Налаштування церкви оновлено.');
     }
 
     public function updateTelegram(Request $request)
     {
         // Telegram bot is now configured globally via .env
         // This method is kept for backwards compatibility
-        return back()->with('info', 'Telegram бот налаштовується централізовано адміністратором системи.');
+        return $this->successResponse(request(), 'Telegram бот налаштовується централізовано адміністратором системи.');
     }
 
     public function testTelegram()
     {
         if (!config('services.telegram.bot_token')) {
-            return back()->with('error', 'Telegram бот не налаштовано в системі.');
+            return $this->errorResponse(request(), 'Telegram бот не налаштовано в системі.');
         }
 
         try {
             $telegram = TelegramService::make();
             $botInfo = $telegram->getMe();
 
-            return back()->with('success', "Бот підключено: @{$botInfo['username']}");
+            return $this->successResponse(request(), "Бот підключено: @{$botInfo['username']}");
         } catch (\Exception $e) {
             \Log::error('Telegram connection error', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Помилка підключення до Telegram.');
+            return $this->errorResponse(request(), 'Помилка підключення до Telegram.');
         }
     }
 
     public function setupWebhook()
     {
         if (!config('services.telegram.bot_token')) {
-            return back()->with('error', 'Telegram бот не налаштовано в системі.');
+            return $this->errorResponse(request(), 'Telegram бот не налаштовано в системі.');
         }
 
         try {
@@ -153,13 +149,13 @@ class SettingsController extends Controller
             $result = $telegram->setWebhook($webhookUrl);
 
             if ($result) {
-                return back()->with('success', "Webhook встановлено: {$webhookUrl}");
+                return $this->successResponse(request(), "Webhook встановлено: {$webhookUrl}");
             } else {
-                return back()->with('error', 'Не вдалося встановити webhook.');
+                return $this->errorResponse(request(), 'Не вдалося встановити webhook.');
             }
         } catch (\Exception $e) {
             \Log::error('Telegram webhook error', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Помилка налаштування webhook.');
+            return $this->errorResponse(request(), 'Помилка налаштування webhook.');
         }
     }
 
@@ -218,11 +214,7 @@ class SettingsController extends Controller
             'notifications' => $settings['notifications'],
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Налаштування сповіщень оновлено.');
+        return $this->successResponse($request, 'Налаштування сповіщень оновлено.');
     }
 
     public function updateSelfRegistration(Request $request)
@@ -284,7 +276,7 @@ class SettingsController extends Controller
             'slug' => $validated['slug'],
         ]);
 
-        return back()->with('success', 'Налаштування публічного сайту оновлено.');
+        return $this->successResponse($request, 'Налаштування публічного сайту оновлено.');
     }
 
     /**
@@ -318,7 +310,7 @@ class SettingsController extends Controller
             'monobank_enabled' => $validated['monobank_enabled'] ?? false,
         ]);
 
-        return back()->with('success', 'Налаштування платежів оновлено.');
+        return $this->successResponse($request, 'Налаштування платежів оновлено.');
     }
 
     /**
@@ -364,7 +356,7 @@ class SettingsController extends Controller
             'design_theme' => $oldTheme,
         ]);
 
-        return back()->with('success', 'Стиль дизайну оновлено!');
+        return $this->successResponse($request, 'Стиль дизайну оновлено!');
     }
 
     public function updateMenuPosition(Request $request)
@@ -384,7 +376,7 @@ class SettingsController extends Controller
             'menu_position' => $oldPosition,
         ]);
 
-        return back()->with('success', 'Позицію меню оновлено!');
+        return $this->successResponse($request, 'Позицію меню оновлено!');
     }
 
     /**
@@ -431,11 +423,7 @@ class SettingsController extends Controller
             'initial_balance_date' => $oldDate,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Початковий баланс оновлено.');
+        return $this->successResponse($request, 'Початковий баланс оновлено.');
     }
 
     /**
@@ -473,11 +461,7 @@ class SettingsController extends Controller
             app(NbuExchangeRateService::class)->getCurrentRates();
         }
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Налаштування валют оновлено.');
+        return $this->successResponse($request, 'Налаштування валют оновлено.');
     }
 
     /**
@@ -505,7 +489,7 @@ class SettingsController extends Controller
                 ->max('sort_order') + 1,
         ]);
 
-        return back()->with('success', 'Категорію додано.');
+        return $this->successResponse($request, 'Категорію додано.');
     }
 
     /**
@@ -527,13 +511,13 @@ class SettingsController extends Controller
 
         $category->update($validated);
 
-        return back()->with('success', 'Категорію оновлено.');
+        return $this->successResponse($request, 'Категорію оновлено.');
     }
 
     /**
      * Delete a transaction category
      */
-    public function destroyTransactionCategory(TransactionCategory $category)
+    public function destroyTransactionCategory(Request $request, TransactionCategory $category)
     {
         $church = $this->getCurrentChurch();
 
@@ -542,12 +526,12 @@ class SettingsController extends Controller
         }
 
         if ($category->transactions()->count() > 0) {
-            return back()->with('error', 'Неможливо видалити категорію з транзакціями.');
+            return $this->errorResponse($request, 'Неможливо видалити категорію з транзакціями.');
         }
 
         $category->delete();
 
-        return back()->with('success', 'Категорію видалено.');
+        return $this->successResponse($request, 'Категорію видалено.');
     }
 
     private function findPersonMatches($user, $availablePeople): \Illuminate\Support\Collection

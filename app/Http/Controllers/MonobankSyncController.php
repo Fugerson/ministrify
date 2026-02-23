@@ -210,6 +210,9 @@ class MonobankSyncController extends Controller
         $validation = $service->validateToken($request->token);
 
         if (!$validation) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Невірний токен або помилка з\'єднання з Monobank', 'errors' => ['token' => ['Невірний токен або помилка з\'єднання з Monobank']]], 422);
+            }
             return back()->withErrors(['token' => 'Невірний токен або помилка з\'єднання з Monobank']);
         }
 
@@ -229,8 +232,7 @@ class MonobankSyncController extends Controller
             'client_name' => $validation['name'],
         ]);
 
-        return redirect()->route('finances.monobank.index')
-            ->with('success', "Monobank підключено! Ім'я: {$validation['name']}");
+        return $this->successResponse($request, "Monobank підключено! Ім'я: {$validation['name']}", 'finances.monobank.index');
     }
 
     /**
@@ -245,13 +247,13 @@ class MonobankSyncController extends Controller
         $church = $this->getCurrentChurch();
         $church->update(['monobank_account_id' => $request->account_id]);
 
-        return back()->with('success', 'Рахунок обрано');
+        return $this->successResponse($request, 'Рахунок обрано');
     }
 
     /**
      * Disconnect Monobank
      */
-    public function disconnect()
+    public function disconnect(Request $request)
     {
         $church = $this->getCurrentChurch();
         $service = new MonobankPersonalService();
@@ -262,8 +264,7 @@ class MonobankSyncController extends Controller
             'action' => 'monobank_disconnected',
         ]);
 
-        return redirect()->route('finances.monobank.index')
-            ->with('success', 'Monobank відключено');
+        return $this->successResponse($request, 'Monobank відключено', 'finances.monobank.index');
     }
 
     /**
@@ -278,7 +279,7 @@ class MonobankSyncController extends Controller
         $result = $service->syncTransactions($days);
 
         if ($result['error']) {
-            return back()->with('error', $result['error']);
+            return $this->errorResponse($request, $result['error']);
         }
 
         // Log sync action
@@ -293,7 +294,7 @@ class MonobankSyncController extends Controller
             $message .= " ({$result['skipped']} вже існували)";
         }
 
-        return back()->with('success', $message);
+        return $this->successResponse($request, $message);
     }
 
     /**
@@ -395,7 +396,7 @@ class MonobankSyncController extends Controller
         });
 
         if (!$transaction) {
-            return back()->with('error', 'Транзакція вже оброблена');
+            return $this->errorResponse($request, 'Транзакція вже оброблена');
         }
 
         // Update sender mapping for smart categorization
@@ -414,13 +415,13 @@ class MonobankSyncController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Транзакцію імпортовано як пожертву');
+        return $this->successResponse($request, 'Транзакцію імпортовано як пожертву');
     }
 
     /**
      * Ignore transaction
      */
-    public function ignore(MonobankTransaction $monoTransaction)
+    public function ignore(Request $request, MonobankTransaction $monoTransaction)
     {
         $church = $this->getCurrentChurch();
 
@@ -430,13 +431,13 @@ class MonobankSyncController extends Controller
 
         $monoTransaction->update(['is_ignored' => true]);
 
-        return back()->with('success', 'Транзакцію приховано');
+        return $this->successResponse($request, 'Транзакцію приховано');
     }
 
     /**
      * Restore ignored transaction
      */
-    public function restore(MonobankTransaction $monoTransaction)
+    public function restore(Request $request, MonobankTransaction $monoTransaction)
     {
         $church = $this->getCurrentChurch();
 
@@ -446,7 +447,7 @@ class MonobankSyncController extends Controller
 
         $monoTransaction->update(['is_ignored' => false]);
 
-        return back()->with('success', 'Транзакцію відновлено');
+        return $this->successResponse($request, 'Транзакцію відновлено');
     }
 
     /**
@@ -525,7 +526,7 @@ class MonobankSyncController extends Controller
             ]);
         }
 
-        return back()->with('success', "Імпортовано {$imported} транзакцій");
+        return $this->successResponse($request, "Імпортовано {$imported} транзакцій");
     }
 
     /**
@@ -545,7 +546,7 @@ class MonobankSyncController extends Controller
             ->where('is_processed', false)
             ->update(['is_ignored' => true]);
 
-        return back()->with('success', "Приховано {$count} транзакцій");
+        return $this->successResponse($request, "Приховано {$count} транзакцій");
     }
 
     /**
@@ -583,7 +584,7 @@ class MonobankSyncController extends Controller
         $church->update(['monobank_auto_sync' => !$church->monobank_auto_sync]);
 
         $status = $church->monobank_auto_sync ? 'увімкнено' : 'вимкнено';
-        return back()->with('success', "Автосинхронізацію {$status}");
+        return $this->successResponse($request, "Автосинхронізацію {$status}");
     }
 
     /**
@@ -637,9 +638,9 @@ class MonobankSyncController extends Controller
         $result = $service->setWebhook($webhookUrl);
 
         if ($result) {
-            return back()->with('success', 'Webhook налаштовано. Тепер транзакції будуть надходити автоматично.');
+            return $this->successResponse($request, 'Webhook налаштовано. Тепер транзакції будуть надходити автоматично.');
         }
 
-        return back()->with('error', 'Не вдалося налаштувати webhook. Спробуйте пізніше.');
+        return $this->errorResponse($request, 'Не вдалося налаштувати webhook. Спробуйте пізніше.');
     }
 }

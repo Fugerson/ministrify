@@ -10,9 +10,7 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto" x-data="checklistForm()">
-    <form method="POST" action="{{ route('checklists.templates.update', $template) }}" class="space-y-6">
-        @csrf
-        @method('PUT')
+    <form @submit.prevent="submit($refs.f)" x-ref="f" class="space-y-6">
 
         <!-- Basic Info -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -24,6 +22,9 @@
                     <input type="text" name="name" id="name" required
                            value="{{ old('name', $template->name) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                    <template x-if="errors.name">
+                        <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
+                    </template>
                 </div>
 
                 <div>
@@ -83,7 +84,7 @@
         <!-- Actions -->
         <div class="flex items-center justify-between">
             <button type="button"
-                    onclick="if(confirm('{{ __('messages.confirm_delete_template') }}')) { document.getElementById('delete-template-form').submit(); }"
+                    @click="ajaxDelete('{{ route('checklists.templates.destroy', $template) }}', '{{ __('messages.confirm_delete_template') }}', null, '{{ route('checklists.templates') }}')"
                     class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
                 Видалити шаблон
             </button>
@@ -93,23 +94,19 @@
                    class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                     Скасувати
                 </a>
-                <button type="submit"
-                        class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                <button type="submit" :disabled="saving"
+                        class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
                     Зберегти
                 </button>
             </div>
         </div>
-    </form>
-
-    <form id="delete-template-form" method="POST" action="{{ route('checklists.templates.destroy', $template) }}" class="hidden">
-        @csrf
-        @method('DELETE')
     </form>
 </div>
 
 <script>
 function checklistForm() {
     return {
+        ...ajaxForm({ url: '{{ route('checklists.templates.update', $template) }}', method: 'PUT' }),
         items: @json($templateItemsData),
 
         addItem() {

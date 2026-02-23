@@ -57,24 +57,16 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <form action="{{ route('website-builder.prayer-inbox.status', $request) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('PUT')
-                                    <select name="status" onchange="this.form.submit()" class="text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-primary-500 focus:border-primary-500">
-                                        <option value="active" {{ $request->status === 'active' ? 'selected' : '' }}>Активне</option>
-                                        <option value="answered" {{ $request->status === 'answered' ? 'selected' : '' }}>Відповідь отримано</option>
-                                        <option value="closed" {{ $request->status === 'closed' ? 'selected' : '' }}>Закрито</option>
-                                    </select>
-                                </form>
-                                <form action="{{ route('website-builder.prayer-inbox.destroy', $request) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete_prayer_request') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <select @change="ajaxAction('{{ route('website-builder.prayer-inbox.status', $request) }}', 'PUT', { status: $event.target.value })" class="text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                                    <option value="active" {{ $request->status === 'active' ? 'selected' : '' }}>Активне</option>
+                                    <option value="answered" {{ $request->status === 'answered' ? 'selected' : '' }}>Відповідь отримано</option>
+                                    <option value="closed" {{ $request->status === 'closed' ? 'selected' : '' }}>Закрито</option>
+                                </select>
+                                <button type="button" @click="ajaxDelete('{{ route('website-builder.prayer-inbox.destroy', $request) }}', '{{ __('messages.confirm_delete_prayer_request') }}', () => $el.closest('.p-6').remove())" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>

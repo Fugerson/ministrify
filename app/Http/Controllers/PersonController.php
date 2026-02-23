@@ -35,7 +35,7 @@ class PersonController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('people')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();
@@ -169,10 +169,10 @@ class PersonController extends Controller
         return view('people.index', compact('people', 'peopleLimited', 'tags', 'ministries', 'churchRoles', 'stats', 'shepherds', 'church'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         if (!auth()->user()->canCreate('people')) {
-            return redirect()->route('people.index')->with('error', 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
         }
 
         $church = $this->getCurrentChurch();
@@ -186,7 +186,7 @@ class PersonController extends Controller
     public function store(Request $request)
     {
         if (!auth()->user()->canCreate('people')) {
-            return redirect()->route('people.index')->with('error', 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
         }
 
         $validated = $request->validate([
@@ -234,15 +234,7 @@ class PersonController extends Controller
                 ->first();
 
             if ($existingPerson) {
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Людина з цим email вже існує. Перенаправляю на її профіль.',
-                        'redirect_url' => route('people.show', $existingPerson),
-                    ]);
-                }
-                return redirect()->route('people.show', $existingPerson)
-                    ->with('warning', 'Людина з цим email вже існує. Перенаправляю на її профіль.');
+                return $this->successResponse($request, 'Людина з цим email вже існує. Перенаправляю на її профіль.', 'people.show', [$existingPerson]);
             }
         }
 
@@ -251,15 +243,7 @@ class PersonController extends Controller
             $existingByPhone = Person::findByPhoneInChurch($validated['phone'], $church->id, false);
 
             if ($existingByPhone) {
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Людина з цим номером телефону вже існує. Перенаправляю на її профіль.',
-                        'redirect_url' => route('people.show', $existingByPhone),
-                    ]);
-                }
-                return redirect()->route('people.show', $existingByPhone)
-                    ->with('warning', 'Людина з цим номером телефону вже існує.');
+                return $this->successResponse($request, 'Людина з цим номером телефону вже існує. Перенаправляю на її профіль.', 'people.show', [$existingByPhone]);
             }
         }
 
@@ -318,16 +302,7 @@ class PersonController extends Controller
             }
         }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Людину успішно додано!',
-                'redirect_url' => route('people.show', $person),
-            ]);
-        }
-
-        return redirect()->route('people.show', $person)
-            ->with('success', 'Людину успішно додано.');
+        return $this->successResponse($request, 'Людину успішно додано.', 'people.show', [$person]);
     }
 
     public function show(Person $person)
@@ -464,7 +439,7 @@ class PersonController extends Controller
         return round(($attended / $totalEvents) * 100);
     }
 
-    public function edit(Person $person)
+    public function edit(Request $request, Person $person)
     {
         $this->authorizeChurch($person);
 
@@ -472,7 +447,7 @@ class PersonController extends Controller
         $isOwnProfile = $user->person && $user->person->id === $person->id;
 
         if (!$isOwnProfile && !$user->canEdit('people')) {
-            return redirect()->route('people.index')->with('error', 'У вас немає прав для редагування записів.');
+            return $this->errorResponse($request, 'У вас немає прав для редагування записів.');
         }
 
         $church = $this->getCurrentChurch();
@@ -592,40 +567,33 @@ class PersonController extends Controller
             }
         }
 
-        // Return JSON for AJAX requests
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Дані успішно оновлено.']);
-        }
-
-        return redirect()->route('people.show', $person)
-            ->with('success', 'Дані успішно оновлено.');
+        return $this->successResponse($request, 'Дані успішно оновлено.', 'people.show', [$person]);
     }
 
-    public function destroy(Person $person)
+    public function destroy(Request $request, Person $person)
     {
         $this->authorizeChurch($person);
 
         if (!auth()->user()->canDelete('people')) {
-            return redirect()->route('people.index')->with('error', 'У вас немає прав для видалення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для видалення записів.');
         }
 
         $person->delete();
 
-        return redirect()->route('people.index')->with('success', 'Людину видалено.');
+        return $this->successResponse($request, 'Людину видалено.', 'people.index');
     }
 
-    public function restore(Person $person)
+    public function restore(Request $request, Person $person)
     {
         $this->authorizeChurch($person);
 
         if (!auth()->user()->canDelete('people')) {
-            return redirect()->route('people.index')->with('error', 'У вас немає прав для відновлення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для відновлення записів.');
         }
 
         $person->restore();
 
-        return redirect()->route('people.show', $person)
-            ->with('success', 'Людину відновлено.');
+        return $this->successResponse($request, 'Людину відновлено.', 'people.show', [$person]);
     }
 
     public function export(Request $request)
@@ -667,19 +635,18 @@ class PersonController extends Controller
                 'filename' => $request->file('file')->getClientOriginalName(),
             ]);
 
-            return back()->with('success', 'Людей успішно імпортовано.');
+            return $this->successResponse($request, 'Людей успішно імпортовано.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Помилка імпорту: ' . $e->getMessage());
+            return $this->errorResponse($request, 'Помилка імпорту: ' . $e->getMessage());
         }
     }
 
-    public function myProfile()
+    public function myProfile(Request $request)
     {
         $user = auth()->user();
 
         if (!$user->person) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Ваш профіль не знайдено.');
+            return $this->errorResponse($request, 'Ваш профіль не знайдено.');
         }
 
         $person = $user->person->load(['tags', 'ministries', 'unavailableDates' => function ($q) {
@@ -700,8 +667,7 @@ class PersonController extends Controller
         $user = auth()->user();
 
         if (!$user->person) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Ваш профіль не знайдено.');
+            return $this->errorResponse($request, 'Ваш профіль не знайдено.');
         }
 
         $person = $user->person;
@@ -820,7 +786,7 @@ class PersonController extends Controller
         $person = $user->person;
         $person->update($validated);
 
-        return back()->with('success', 'Профіль оновлено.');
+        return $this->successResponse($request, 'Профіль оновлено.');
     }
 
     public function addUnavailableDate(Request $request)
@@ -840,10 +806,10 @@ class PersonController extends Controller
         $validated['person_id'] = $user->person->id;
         UnavailableDate::create($validated);
 
-        return back()->with('success', 'Дати недоступності додано.');
+        return $this->successResponse($request, 'Дати недоступності додано.');
     }
 
-    public function removeUnavailableDate(UnavailableDate $unavailableDate)
+    public function removeUnavailableDate(Request $request, UnavailableDate $unavailableDate)
     {
         $user = auth()->user();
 
@@ -853,7 +819,7 @@ class PersonController extends Controller
 
         $unavailableDate->delete();
 
-        return back()->with('success', 'Дати видалено.');
+        return $this->successResponse($request, 'Дати видалено.');
     }
 
     public function generateTelegramCode()
@@ -888,12 +854,12 @@ class PersonController extends Controller
         ]);
     }
 
-    public function unlinkTelegram()
+    public function unlinkTelegram(Request $request)
     {
         $user = auth()->user();
 
         if (!$user->person) {
-            return back()->with('error', 'Профіль не знайдено');
+            return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
         $user->person->update(['telegram_chat_id' => null]);
@@ -901,7 +867,7 @@ class PersonController extends Controller
         // Log telegram unlink
         $this->logAuditAction('telegram_unlinked', 'Person', $user->person->id, $user->person->full_name);
 
-        return back()->with('success', 'Telegram від\'єднано');
+        return $this->successResponse($request, 'Telegram від\'єднано');
     }
 
     public function updateTheme(Request $request)
@@ -1201,10 +1167,10 @@ class PersonController extends Controller
     /**
      * Quick edit view - Excel-like editing interface
      */
-    public function quickEdit()
+    public function quickEdit(Request $request)
     {
         if (!auth()->user()->canView('people')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();

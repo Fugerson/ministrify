@@ -3,7 +3,7 @@
 @section('title', 'Додати пісню')
 
 @section('content')
-<div class="max-w-4xl mx-auto" x-data="songCreateForm()">
+<div class="max-w-4xl mx-auto">
     <a href="{{ route('songs.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm mb-6">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -11,7 +11,7 @@
         Назад до бібліотеки
     </a>
 
-    <form @submit.prevent="submitForm" class="space-y-6" x-ref="form">
+    <form @submit.prevent="submit($refs.f)" x-ref="f" x-data="{ ...ajaxForm({url:'{{ route("songs.store") }}', method:'POST'}) }" class="space-y-6">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
@@ -187,33 +187,4 @@
         </div>
     </form>
 </div>
-
-<script>
-function songCreateForm() {
-    return {
-        saving: false,
-        errors: {},
-        async submitForm() {
-            this.saving = true;
-            this.errors = {};
-            const formData = new FormData(this.$refs.form);
-            try {
-                const response = await fetch('{{ route("songs.store") }}', {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                    body: formData,
-                });
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) {
-                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', 'Перевірте правильність заповнення форми.'); }
-                    else { showToast('error', data.message || 'Помилка збереження.'); }
-                    this.saving = false; return;
-                }
-                showToast('success', data.message || 'Збережено!');
-                setTimeout(() => window.location.href = data.redirect_url || '{{ route("songs.index") }}', 800);
-            } catch (e) { showToast('error', "Помилка з'єднання з сервером."); this.saving = false; }
-        }
-    }
-}
-</script>
 @endsection

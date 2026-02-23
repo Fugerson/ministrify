@@ -38,6 +38,6 @@ class AboutController extends Controller
 
         $church->setPublicSiteSetting('about', $validated);
 
-        return back()->with('success', 'Розділ "Про нас" оновлено');
+        return $this->successResponse($request, 'Розділ "Про нас" оновлено');
     }
 }

@@ -1103,14 +1103,11 @@
         </a>
 
         @if(auth()->user()->canDelete('people'))
-        <form method="POST" action="{{ route('people.destroy', $person) }}"
-              onsubmit="return confirm('{{ __('messages.confirm_delete_person') }}')">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium">
-                Видалити
-            </button>
-        </form>
+        <button type="button"
+                @click="ajaxDelete('{{ route('people.destroy', $person) }}', '{{ __('messages.confirm_delete_person') }}', null, '{{ route('people.index') }}')"
+                class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium">
+            Видалити
+        </button>
         @endif
     </div>
 </div>

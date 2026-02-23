@@ -4,8 +4,7 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto">
-    <form method="POST" action="{{ route('attendance.store') }}" class="space-y-6">
-        @csrf
+    <form @submit.prevent="submit($refs.attendForm)" x-ref="attendForm" x-data="{ ...ajaxForm({ url: '{{ route('attendance.store') }}', method: 'POST' }) }" class="space-y-6">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -77,8 +76,8 @@
             <a href="{{ route('attendance.index') }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 {{ __('Скасувати') }}
             </a>
-            <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                {{ __('Зберегти') }}
+            <button type="submit" :disabled="saving" class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors">
+                <span x-text="saving ? '{{ __('Збереження...') }}' : '{{ __('Зберегти') }}'"></span>
             </button>
         </div>
     </form>

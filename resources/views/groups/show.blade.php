@@ -21,16 +21,13 @@
     </a>
     @endcan
     @can('delete', $group)
-    <form method="POST" action="{{ route('groups.destroy', $group) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_group') }}')">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-            </svg>
-            {{ __('app.delete') }}
-        </button>
-    </form>
+    <button @click="ajaxDelete('{{ route('groups.destroy', $group) }}', '{{ __('messages.confirm_delete_group') }}', null, '{{ route('groups.index') }}')"
+            class="inline-flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        {{ __('app.delete') }}
+    </button>
     @endcan
 </div>
 @endsection
@@ -190,44 +187,29 @@
                             <div x-show="open" @click.away="open = false" x-cloak
                                  class="absolute right-0 mt-1 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10">
                                 @if($member->pivot->role !== 'leader')
-                                <form method="POST" action="{{ route('groups.members.role', [$group, $member]) }}">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="role" value="leader">
-                                    <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        {{ __('app.make_leader') }}
-                                    </button>
-                                </form>
+                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'leader'}).then(() => window.location.reload())"
+                                        class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    {{ __('app.make_leader') }}
+                                </button>
                                 @endif
                                 @if($member->pivot->role !== 'assistant')
-                                <form method="POST" action="{{ route('groups.members.role', [$group, $member]) }}">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="role" value="assistant">
-                                    <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        {{ __('app.make_assistant') }}
-                                    </button>
-                                </form>
+                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'assistant'}).then(() => window.location.reload())"
+                                        class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    {{ __('app.make_assistant') }}
+                                </button>
                                 @endif
                                 @if($member->pivot->role !== 'member')
-                                <form method="POST" action="{{ route('groups.members.role', [$group, $member]) }}">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="role" value="member">
-                                    <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        {{ __('app.make_member') }}
-                                    </button>
-                                </form>
+                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'member'}).then(() => window.location.reload())"
+                                        class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    {{ __('app.make_member') }}
+                                </button>
                                 @endif
                                 @if($member->pivot->role !== 'leader')
                                 <hr class="my-1 border-gray-200 dark:border-gray-700">
-                                <form method="POST" action="{{ route('groups.members.remove', [$group, $member]) }}" onsubmit="return confirm('{{ __('messages.confirm_remove_member') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                        {{ __('app.remove_from_group') }}
-                                    </button>
-                                </form>
+                                <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', '{{ __('messages.confirm_remove_member') }}', () => window.location.reload())"
+                                        class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                    {{ __('app.remove_from_group') }}
+                                </button>
                                 @endif
                             </div>
                         </div>
@@ -319,8 +301,8 @@
         <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('addMemberModal').classList.add('hidden')"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.add_member_title') }}</h3>
-            <form method="POST" action="{{ route('groups.members.add', $group) }}">
-                @csrf
+            <form @submit.prevent="submit($refs.addMemberForm)" x-ref="addMemberForm"
+                  x-data="{ ...ajaxForm({url: '{{ route('groups.members.add', $group) }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); }}) }">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.person_label') }}</label>
@@ -339,7 +321,7 @@
                             class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
                         {{ __('app.cancel') }}
                     </button>
-                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                    <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
                         {{ __('app.add') }}
                     </button>
                 </div>

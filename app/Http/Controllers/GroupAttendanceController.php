@@ -74,7 +74,7 @@ class GroupAttendanceController extends Controller
 
         $presentIds = $validated['present'] ?? [];
 
-        return DB::transaction(function () use ($group, $validated, $presentIds) {
+        return DB::transaction(function () use ($request, $group, $validated, $presentIds) {
             // Check for duplicate with lock to prevent race condition
             $existing = $group->attendances()
                 ->whereDate('date', $validated['date'])
@@ -82,6 +82,13 @@ class GroupAttendanceController extends Controller
                 ->first();
 
             if ($existing) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Відвідуваність за цю дату вже існує. Ви можете її редагувати.',
+                        'redirect_url' => route('groups.attendance.edit', [$group, $existing]),
+                    ], 422);
+                }
                 return redirect()->route('groups.attendance.edit', [$group, $existing])
                     ->with('info', 'Відвідуваність за цю дату вже існує. Ви можете її редагувати.');
             }
@@ -108,8 +115,7 @@ class GroupAttendanceController extends Controller
                 ]);
             }
 
-            return redirect()->route('groups.show', $group)
-                ->with('success', 'Відвідуваність записано');
+            return $this->successResponse($request, 'Відвідуваність записано.', 'groups.show', ['group' => $group->id]);
         });
     }
 
@@ -185,11 +191,10 @@ class GroupAttendanceController extends Controller
             }
         }
 
-        return redirect()->route('groups.show', $group)
-            ->with('success', 'Відвідуваність оновлено');
+        return $this->successResponse($request, 'Відвідуваність оновлено.', 'groups.show', ['group' => $group->id]);
     }
 
-    public function destroy(Group $group, Attendance $attendance)
+    public function destroy(Request $request, Group $group, Attendance $attendance)
     {
         $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
@@ -197,7 +202,7 @@ class GroupAttendanceController extends Controller
 
         $attendance->delete();
 
-        return back()->with('success', 'Запис відвідуваності видалено');
+        return $this->successResponse($request, 'Запис відвідуваності видалено.', 'groups.show', ['group' => $group->id]);
     }
 
     /**

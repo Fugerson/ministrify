@@ -46,7 +46,7 @@ class TestimonialController extends Controller
 
         Testimonial::create($validated);
 
-        return back()->with('success', 'Свідчення додано');
+        return $this->successResponse($request, 'Свідчення додано');
     }
 
     public function update(Request $request, Testimonial $testimonial)
@@ -75,10 +75,10 @@ class TestimonialController extends Controller
 
         $testimonial->update($validated);
 
-        return back()->with('success', 'Свідчення оновлено');
+        return $this->successResponse($request, 'Свідчення оновлено');
     }
 
-    public function destroy(Testimonial $testimonial)
+    public function destroy(Request $request, Testimonial $testimonial)
     {
         $this->authorize('delete', $testimonial);
 
@@ -88,7 +88,7 @@ class TestimonialController extends Controller
 
         $testimonial->delete();
 
-        return back()->with('success', 'Свідчення видалено');
+        return $this->successResponse($request, 'Свідчення видалено');
     }
 
     public function reorder(Request $request)

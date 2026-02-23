@@ -273,7 +273,7 @@
 
         <div class="flex items-center justify-between">
             <button type="button"
-                    onclick="if(confirm('{{ __('messages.confirm_delete_event') }}')) { document.getElementById('delete-event-form').submit(); }"
+                    @click="ajaxDelete('{{ route('events.destroy', $event) }}', '{{ __('messages.confirm_delete_event') }}', null, '{{ route('schedule') }}')"
                     class="text-red-600 hover:text-red-800 text-sm font-medium">
                 Видалити подію
             </button>
@@ -293,10 +293,6 @@
         </div>
     </form>
 
-    <form id="delete-event-form" method="POST" action="{{ route('events.destroy', $event) }}" class="hidden">
-        @csrf
-        @method('DELETE')
-    </form>
 </div>
 @endsection
 

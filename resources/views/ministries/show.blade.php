@@ -1512,13 +1512,14 @@
                 <!-- Add member form -->
                 @can('contribute-ministry', $ministry)
                 @if($availablePeople->count() > 0)
-                <form method="POST" action="{{ route('ministries.members.add', $ministry) }}" class="mb-5 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    @csrf
+                <form @submit.prevent="submit($refs.addMemberForm)" x-ref="addMemberForm"
+                      x-data="{ ...ajaxForm({ url: '{{ route('ministries.members.add', $ministry) }}', method: 'POST', onSuccess: () => window.location.reload(), stayOnPage: true }) }"
+                      class="mb-5 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div class="flex gap-2">
                         <div class="flex-1">
                             <x-person-select name="person_id" :people="$availablePeople" placeholder="Додати учасника..." :required="true" :nullable="false" />
                         </div>
-                        <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg whitespace-nowrap text-sm">
+                        <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg whitespace-nowrap text-sm">
                             Додати
                         </button>
                     </div>
@@ -1660,14 +1661,10 @@
 
                                     {{-- Remove button --}}
                                     @can('contribute-ministry', $ministry)
-                                    <form method="POST" action="{{ route('ministries.members.remove', [$ministry, $member]) }}"
-                                          onsubmit="return confirm('{{ __('messages.confirm_remove_team_member') }}')" class="shrink-0">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </form>
+                                    <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', '{{ __('messages.confirm_remove_team_member') }}', () => window.location.reload())"
+                                            class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
                                     @endcan
                                 </div>
                             </div>
@@ -1847,17 +1844,12 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
                                             </a>
-                                            <form method="POST" :action="'/finances/expenses/' + t.id" onsubmit="return confirm('{{ __('messages.confirm_delete_expense') }}')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="redirect_to" value="ministry">
-                                                <input type="hidden" name="ministry_id" value="{{ $ministry->id }}">
-                                                <button type="submit" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded" title="Видалити">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                    </svg>
-                                                </button>
-                                            </form>
+                                            <button @click="ajaxDelete('/finances/expenses/' + t.id, '{{ __('messages.confirm_delete_expense') }}', () => { allTransactions = allTransactions.filter(tr => tr.id !== t.id); })"
+                                                    class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded" title="Видалити">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
                                         </div>
                                     </td>
                                     @endcan
@@ -2018,8 +2010,8 @@
                         <div class="fixed inset-0 bg-black/50" @click="showCreateFolder = false"></div>
                         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова папка</h3>
-                            <form method="POST" action="{{ route('ministries.resources.folder.create', $ministry) }}">
-                                @csrf
+                            <form @submit.prevent="submit($refs.createFolderForm)" x-ref="createFolderForm"
+                                  x-data="{ ...ajaxForm({ url: '{{ route('ministries.resources.folder.create', $ministry) }}', method: 'POST', onSuccess: () => window.location.reload(), stayOnPage: true }) }">
                                 <input type="hidden" name="parent_id" value="{{ $currentFolder?->id }}">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва</label>
@@ -2032,7 +2024,7 @@
                                             class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
                                         Скасувати
                                     </button>
-                                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                                    <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
                                         Створити
                                     </button>
                                 </div>
@@ -2263,16 +2255,7 @@
                     </div>
                 </div>
 
-                <!-- Hidden forms for rename & delete -->
-                <form id="resRenameForm" method="POST" class="hidden">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="name" id="resRenameInput">
-                </form>
-                <form id="resDeleteForm" method="POST" class="hidden">
-                    @csrf
-                    @method('DELETE')
-                </form>
+                <!-- Rename & delete handled via AJAX in resourcesManager() -->
             </div>
 
             <!-- Board Tab -->
@@ -2319,11 +2302,12 @@
                         @endif
                     </div>
                     @can('contribute-ministry', $ministry)
-                    <form x-show="editingVision" method="POST" action="{{ route('ministries.vision.update', $ministry) }}" class="space-y-3">
-                        @csrf
+                    <form x-show="editingVision" @submit.prevent="submit($refs.visionForm)" x-ref="visionForm"
+                          x-data="{ ...ajaxForm({ url: '{{ route('ministries.vision.update', $ministry) }}', method: 'POST', onSuccess: () => window.location.reload(), stayOnPage: true }) }"
+                          class="space-y-3">
                         <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500" placeholder="Опишіть бачення вашого служіння...">{{ $ministry->vision }}</textarea>
                         <div class="flex justify-end">
-                            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">Зберегти</button>
+                            <button type="submit" :disabled="saving" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">Зберегти</button>
                         </div>
                     </form>
                     @endcan
@@ -2392,10 +2376,8 @@
                                             <button @click="editGoal({{ $goal->id }}, {{ json_encode(['title' => $goal->title, 'description' => $goal->description, 'period' => $goal->period, 'due_date' => $goal->due_date?->format('Y-m-d'), 'priority' => $goal->priority, 'status' => $goal->status]) }})" class="p-1.5 text-gray-400 hover:text-gray-600">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                             </button>
-                                            <form method="POST" action="{{ route('ministries.goals.destroy', [$ministry, $goal]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_short') }}')">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-                                            </form>
+                                            <button @click="ajaxDelete('{{ route('ministries.goals.destroy', [$ministry, $goal]) }}', '{{ __('messages.confirm_delete_short') }}', () => window.location.reload())"
+                                                    class="p-1.5 text-gray-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                         </div>
                                         @endcan
                                     </div>
@@ -2405,12 +2387,10 @@
                                         @foreach($goal->tasks as $task)
                                             <div class="p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                                 @can('contribute-ministry', $ministry)
-                                                <form method="POST" action="{{ route('ministries.tasks.toggle', [$ministry, $task]) }}">
-                                                    @csrf
-                                                    <button type="submit" class="w-5 h-5 rounded-full border-2 flex items-center justify-center @if($task->is_done) border-green-500 bg-green-500 @else border-gray-300 hover:border-primary-500 @endif">
-                                                        @if($task->is_done)<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>@endif
-                                                    </button>
-                                                </form>
+                                                <button @click="ajaxAction('{{ route('ministries.tasks.toggle', [$ministry, $task]) }}', 'POST').then(() => window.location.reload())"
+                                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center @if($task->is_done) border-green-500 bg-green-500 @else border-gray-300 hover:border-primary-500 @endif">
+                                                    @if($task->is_done)<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>@endif
+                                                </button>
                                                 @else
                                                 <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 @if($task->is_done) border-green-500 bg-green-500 @else border-gray-300 @endif">
                                                     @if($task->is_done)<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>@endif
@@ -2426,7 +2406,7 @@
                                                 @can('contribute-ministry', $ministry)
                                                 <div class="flex items-center gap-1">
                                                     <button @click="editTask({{ $task->id }}, {{ json_encode(['title' => $task->title, 'description' => $task->description, 'goal_id' => $task->goal_id, 'assigned_to' => $task->assigned_to, 'due_date' => $task->due_date?->format('Y-m-d'), 'priority' => $task->priority, 'status' => $task->status]) }})" class="p-1 text-gray-400 hover:text-gray-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
-                                                    <form method="POST" action="{{ route('ministries.tasks.destroy', [$ministry, $task]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_short') }}')">@csrf @method('DELETE')<button type="submit" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></form>
+                                                    <button @click="ajaxDelete('{{ route('ministries.tasks.destroy', [$ministry, $task]) }}', '{{ __('messages.confirm_delete_short') }}', () => window.location.reload())" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                                 </div>
                                                 @endcan
                                             </div>
@@ -2468,9 +2448,16 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white" x-text="editingGoalId ? 'Редагувати ціль' : 'Нова ціль'"></h3>
                             <button @click="showGoalModal = false" class="text-gray-400 hover:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
                         </div>
-                        <form :action="editingGoalId ? '{{ url('ministries/' . $ministry->id . '/goals') }}/' + editingGoalId : '{{ route('ministries.goals.store', $ministry) }}'" method="POST" class="p-4 space-y-4">
-                            @csrf
-                            <template x-if="editingGoalId"><input type="hidden" name="_method" value="PUT"></template>
+                        <form @submit.prevent="
+                                  const url = editingGoalId ? '{{ url('ministries/' . $ministry->id . '/goals') }}/' + editingGoalId : '{{ route('ministries.goals.store', $ministry) }}';
+                                  const method = editingGoalId ? 'PUT' : 'POST';
+                                  const fd = new FormData($refs.goalForm);
+                                  fetch(url, {
+                                      method: method,
+                                      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                                      body: fd
+                                  }).then(r => { if (r.ok) window.location.reload(); else r.json().then(d => alert(d.message || 'Помилка')).catch(() => alert('Помилка')); }).catch(() => alert('Помилка'));
+                              " x-ref="goalForm" class="p-4 space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
                                 <input type="text" name="title" x-model="goalForm.title" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
@@ -2531,9 +2518,16 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white" x-text="editingTaskId ? 'Редагувати задачу' : 'Нова задача'"></h3>
                             <button @click="showTaskModal = false" class="text-gray-400 hover:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
                         </div>
-                        <form :action="editingTaskId ? '{{ url('ministries/' . $ministry->id . '/tasks') }}/' + editingTaskId : '{{ route('ministries.tasks.store', $ministry) }}'" method="POST" class="p-4 space-y-4">
-                            @csrf
-                            <template x-if="editingTaskId"><input type="hidden" name="_method" value="PUT"></template>
+                        <form @submit.prevent="
+                                  const url = editingTaskId ? '{{ url('ministries/' . $ministry->id . '/tasks') }}/' + editingTaskId : '{{ route('ministries.tasks.store', $ministry) }}';
+                                  const method = editingTaskId ? 'PUT' : 'POST';
+                                  const fd = new FormData($refs.taskForm);
+                                  fetch(url, {
+                                      method: method,
+                                      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                                      body: fd
+                                  }).then(r => { if (r.ok) window.location.reload(); else r.json().then(d => alert(d.message || 'Помилка')).catch(() => alert('Помилка')); }).catch(() => alert('Помилка'));
+                              " x-ref="taskForm" class="p-4 space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
                                 <input type="text" name="title" x-model="taskForm.title" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
@@ -3102,9 +3096,9 @@
                     <!-- General Settings -->
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Загальні налаштування</h3>
-                        <form method="POST" action="{{ route('ministries.update', $ministry) }}" class="space-y-4">
-                            @csrf
-                            @method('PUT')
+                        <form @submit.prevent="submit($refs.settingsForm)" x-ref="settingsForm"
+                              x-data="{ ...ajaxForm({ url: '{{ route('ministries.update', $ministry) }}', method: 'PUT', onSuccess: () => window.location.reload(), stayOnPage: true }) }"
+                              class="space-y-4">
 
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
@@ -3152,7 +3146,7 @@
                             </div>
 
                             <div class="pt-4">
-                                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                                     Зберегти зміни
                                 </button>
                             </div>
@@ -3426,7 +3420,7 @@
                             Видалення команди є незворотнім. Всі дані команди (цілі, задачі, ресурси) будуть втрачені.
                         </p>
                         <button type="button"
-                                onclick="if(confirm('{{ __('messages.confirm_delete_ministry_named', ['name' => $ministry->name]) }}')) { document.getElementById('delete-ministry-form').submit(); }"
+                                @click="ajaxDelete('{{ route('ministries.destroy', $ministry) }}', '{{ __('messages.confirm_delete_ministry_named', ['name' => $ministry->name]) }}', null, '{{ route('ministries.index') }}')"
                                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                             Видалити команду
                         </button>
@@ -3435,10 +3429,7 @@
             </div>
             @endcan
 
-            <form id="delete-ministry-form" method="POST" action="{{ route('ministries.destroy', $ministry) }}" class="hidden">
-                @csrf
-                @method('DELETE')
-            </form>
+            <!-- Delete ministry handled via ajaxDelete -->
         </div>
     </div>
 
@@ -3545,12 +3536,28 @@ function resourcesManager() {
             this.$nextTick(() => this.$refs.renameInput?.focus());
         },
 
-        submitRename() {
+        async submitRename() {
             if (!this.renameName.trim()) return;
-            const form = document.getElementById('resRenameForm');
-            form.action = `/resources/${this.selectedId}/rename`;
-            document.getElementById('resRenameInput').value = this.renameName;
-            form.submit();
+            try {
+                const response = await fetch(`/resources/${this.selectedId}/rename`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ name: this.renameName })
+                });
+                if (response.ok) {
+                    this.showRename = false;
+                    window.location.reload();
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    alert(err.message || 'Помилка перейменування');
+                }
+            } catch (error) {
+                alert('Помилка перейменування');
+            }
         },
 
         showPreview(file) {
@@ -3590,10 +3597,7 @@ function resourcesManager() {
 
         deleteItem() {
             this.menuOpen = false;
-            if (!confirm('{{ __('messages.confirm_delete_item') }}')) return;
-            const form = document.getElementById('resDeleteForm');
-            form.action = `/resources/${this.selectedId}`;
-            form.submit();
+            ajaxDelete(`/resources/${this.selectedId}`, '{{ __('messages.confirm_delete_item') }}', () => window.location.reload());
         },
 
         async createAndOpenDocument() {

@@ -161,29 +161,26 @@
                             <div class="flex justify-between items-start mb-2">
                                 <h4 class="font-medium text-gray-900 dark:text-white">{{ $campaign->name }}</h4>
                                 <div class="flex gap-1">
-                                    <form action="{{ route('donations.campaigns.toggle', $campaign) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ $campaign->is_active ? 'Призупинити' : 'Активувати' }}">
-                                            @if($campaign->is_active)
-                                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                            @else
-                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                            @endif
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('donations.campaigns.destroy', $campaign) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete_campaign') }}')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
-                                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    <button type="button"
+                                            @click="ajaxAction('{{ route('donations.campaigns.toggle', $campaign) }}', 'POST').then(() => window.location.reload())"
+                                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ $campaign->is_active ? 'Призупинити' : 'Активувати' }}">
+                                        @if($campaign->is_active)
+                                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                        </button>
-                                    </form>
+                                        @else
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        @endif
+                                    </button>
+                                    <button type="button"
+                                            @click="ajaxDelete('{{ route('donations.campaigns.destroy', $campaign) }}', '{{ __('messages.confirm_delete_campaign') }}', () => window.location.reload())"
+                                            class="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                             @if($campaign->goal_amount)
@@ -241,12 +238,15 @@
         <div class="fixed inset-0 bg-gray-900/50" onclick="document.getElementById('newCampaignModal').classList.add('hidden')"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова кампанія збору</h3>
-            <form action="{{ route('donations.campaigns.store') }}" method="POST">
-                @csrf
+            <form @submit.prevent="submit($refs.campaignForm)" x-ref="campaignForm"
+                  x-data="{ ...ajaxForm({ url: '{{ route('donations.campaigns.store') }}', method: 'POST', onSuccess() { window.location.reload(); } }) }">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
                         <input type="text" name="name" required class="input w-full">
+                        <template x-if="errors.name">
+                            <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
+                        </template>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
@@ -269,7 +269,7 @@
                 </div>
                 <div class="flex justify-end gap-3 mt-6">
                     <button type="button" onclick="document.getElementById('newCampaignModal').classList.add('hidden')" class="btn-secondary">Скасувати</button>
-                    <button type="submit" class="btn-primary">Створити</button>
+                    <button type="submit" :disabled="saving" class="btn-primary disabled:opacity-50">Створити</button>
                 </div>
             </form>
         </div>

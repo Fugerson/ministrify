@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\Church;
 use Illuminate\Database\Eloquent\Model;
+use App\Http\Controllers\Traits\RespondsWithJson;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 
 abstract class Controller extends BaseController
 {
-    use AuthorizesRequests, ValidatesRequests;
+    use AuthorizesRequests, ValidatesRequests, RespondsWithJson;
 
     /**
      * Per-request cache for current church to avoid repeated DB lookups.

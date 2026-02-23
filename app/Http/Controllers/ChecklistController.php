@@ -62,8 +62,7 @@ class ChecklistController extends Controller
             ]);
         }
 
-        return redirect()->route('checklists.templates')
-            ->with('success', 'Шаблон створено успішно.');
+        return $this->successResponse($request, 'Шаблон створено успішно.', 'checklists.templates');
     }
 
     public function editTemplate(ChecklistTemplate $template)
@@ -119,17 +118,16 @@ class ChecklistController extends Controller
             }
         }
 
-        return redirect()->route('checklists.templates')
-            ->with('success', 'Шаблон оновлено успішно.');
+        return $this->successResponse($request, 'Шаблон оновлено успішно.', 'checklists.templates');
     }
 
-    public function destroyTemplate(ChecklistTemplate $template)
+    public function destroyTemplate(Request $request, ChecklistTemplate $template)
     {
         $this->authorizeChurchResource($template);
 
         $template->delete();
 
-        return redirect()->route('checklists.templates')->with('success', 'Шаблон видалено.');
+        return $this->successResponse($request, 'Шаблон видалено.', 'checklists.templates');
     }
 
     // Event Checklists
@@ -179,23 +177,17 @@ class ChecklistController extends Controller
             'items_count' => $checklist->items->count(),
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'checklist' => [
-                    'id' => $checklist->id,
-                    'items' => $checklist->items->map(fn($i) => [
-                        'id' => $i->id,
-                        'title' => $i->title,
-                        'description' => $i->description,
-                        'is_completed' => $i->is_completed,
-                    ]),
-                ],
-            ]);
-        }
-
-        return redirect()->route('events.show', $event)
-            ->with('success', 'Чеклист додано до події.');
+        return $this->successResponse($request, 'Чеклист додано до події.', 'events.show', [$event], [
+            'checklist' => [
+                'id' => $checklist->id,
+                'items' => $checklist->items->map(fn($i) => [
+                    'id' => $i->id,
+                    'title' => $i->title,
+                    'description' => $i->description,
+                    'is_completed' => $i->is_completed,
+                ]),
+            ],
+        ]);
     }
 
     public function addItem(Request $request, EventChecklist $checklist)
@@ -217,19 +209,14 @@ class ChecklistController extends Controller
             'order' => $maxOrder + 1,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'item' => [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'description' => $item->description,
-                    'is_completed' => false,
-                ],
-            ]);
-        }
-
-        return back()->with('success', 'Пункт додано.');
+        return $this->successResponse($request, 'Пункт додано.', null, [], [
+            'item' => [
+                'id' => $item->id,
+                'title' => $item->title,
+                'description' => $item->description,
+                'is_completed' => false,
+            ],
+        ]);
     }
 
     public function toggleItem(EventChecklistItem $item)
@@ -267,35 +254,26 @@ class ChecklistController extends Controller
 
         $item->update($validated);
 
-        return back()->with('success', 'Пункт оновлено.');
+        return $this->successResponse($request, 'Пункт оновлено.');
     }
 
-    public function deleteItem(EventChecklistItem $item)
+    public function deleteItem(Request $request, EventChecklistItem $item)
     {
         $this->authorizeChecklistItem($item);
 
         $item->delete();
 
-        if (request()->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Пункт видалено.');
+        return $this->successResponse($request, 'Пункт видалено.');
     }
 
-    public function deleteChecklist(EventChecklist $checklist)
+    public function deleteChecklist(Request $request, EventChecklist $checklist)
     {
         $this->authorizeEventChecklist($checklist);
 
         $event = $checklist->event;
         $checklist->delete();
 
-        if (request()->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return redirect()->route('events.show', $event)
-            ->with('success', 'Чеклист видалено.');
+        return $this->successResponse($request, 'Чеклист видалено.', 'events.show', [$event]);
     }
 
     private function authorizeChurchResource($model)

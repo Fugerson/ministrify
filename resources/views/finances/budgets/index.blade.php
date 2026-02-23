@@ -257,11 +257,7 @@
                     Бюджет: <span x-text="budgetMinistryName"></span>
                 </h3>
 
-                <form :action="'/finances/budgets/' + budgetMinistryId" method="POST" class="space-y-4">
-                    @csrf
-                    <input type="hidden" name="year" :value="year">
-                    <input type="hidden" name="month" :value="month">
-
+                <form @submit.prevent="saveBudget()" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Місячний бюджет (₴)
@@ -283,9 +279,10 @@
                                 class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                             Скасувати
                         </button>
-                        <button type="submit"
-                                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                            Зберегти
+                        <button type="submit" :disabled="budgetSaving"
+                                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                            <span x-show="!budgetSaving">Зберегти</span>
+                            <span x-show="budgetSaving">Збереження...</span>
                         </button>
                     </div>
                 </form>
@@ -304,6 +301,7 @@ function budgetsPage() {
         budgetMinistryName: '',
         budgetAmount: 0,
         budgetNotes: '',
+        budgetSaving: false,
 
         updatePeriod() {
             window.location.href = `{{ route('finances.budgets') }}?year=${this.year}&month=${this.month}`;
@@ -315,6 +313,41 @@ function budgetsPage() {
             this.budgetAmount = amount;
             this.budgetNotes = notes;
             this.showBudgetModal = true;
+        },
+
+        async saveBudget() {
+            this.budgetSaving = true;
+            try {
+                const res = await fetch('/finances/budgets/' + this.budgetMinistryId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        monthly_budget: this.budgetAmount,
+                        year: this.year,
+                        month: this.month,
+                        notes: this.budgetNotes,
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.showBudgetModal = false;
+                    showToast('success', data.message || 'Збережено');
+                    setTimeout(() => location.reload(), 600);
+                } else if (res.status === 422 && data.errors) {
+                    const msgs = Object.values(data.errors).flat();
+                    showToast('error', msgs[0] || 'Помилка валідації');
+                } else {
+                    showToast('error', data.message || 'Помилка збереження');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка збереження');
+            } finally {
+                this.budgetSaving = false;
+            }
         }
     }
 }

@@ -80,14 +80,14 @@ class GoogleCalendarController extends Controller
     /**
      * Disconnect Google Calendar
      */
-    public function disconnect()
+    public function disconnect(Request $request)
     {
         $user = auth()->user();
         $settings = $user->settings ?? [];
         unset($settings['google_calendar']);
         $user->update(['settings' => $settings]);
 
-        return back()->with('success', 'Google Calendar disconnected.');
+        return $this->successResponse($request, 'Google Calendar disconnected.');
     }
 
     /**

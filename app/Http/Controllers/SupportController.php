@@ -75,8 +75,7 @@ class SupportController extends Controller
             'is_from_admin' => false,
         ]);
 
-        return redirect()->route('support.show', $ticket)
-            ->with('success', 'Запит створено! Ми відповімо найближчим часом.');
+        return $this->successResponse($request, 'Запит створено! Ми відповімо найближчим часом.', 'support.show', [$ticket]);
     }
 
     public function show(SupportTicket $ticket)
@@ -128,8 +127,7 @@ class SupportController extends Controller
             'status' => $ticket->status === 'waiting' ? 'open' : $ticket->status,
         ]);
 
-        return redirect()->route('support.show', $ticket)
-            ->with('success', 'Повідомлення надіслано!');
+        return $this->successResponse($request, 'Повідомлення надіслано!', 'support.show', [$ticket]);
     }
 
     private function uploadAttachments(Request $request, int $ticketId): ?array
@@ -152,7 +150,7 @@ class SupportController extends Controller
         return $attachments ?: null;
     }
 
-    public function close(SupportTicket $ticket)
+    public function close(Request $request, SupportTicket $ticket)
     {
         if ($ticket->user_id !== auth()->id()) {
             abort(404);
@@ -160,7 +158,6 @@ class SupportController extends Controller
 
         $ticket->update(['status' => 'closed']);
 
-        return redirect()->route('support.index')
-            ->with('success', 'Запит закрито.');
+        return $this->successResponse($request, 'Запит закрито.', 'support.index');
     }
 }

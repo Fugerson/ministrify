@@ -28,12 +28,6 @@
         </div>
     </div>
 
-    @if(session('error'))
-        <div class="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg mb-4">
-            {{ session('error') }}
-        </div>
-    @endif
-
     <!-- Messages -->
     <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
         <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3">
@@ -55,14 +49,15 @@
 
         <!-- Input -->
         @if($hasBot)
-            <form method="POST" action="{{ route('telegram.chat.send', $person) }}" class="border-t border-gray-200 dark:border-gray-700 p-4">
-                @csrf
+            <form @submit.prevent="submit($refs.chatForm)" x-ref="chatForm"
+                  x-data="{ ...ajaxForm({ url: '{{ route('telegram.chat.send', $person) }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); } }) }"
+                  class="border-t border-gray-200 dark:border-gray-700 p-4">
                 <div class="flex gap-3">
                     <textarea name="message" rows="1" required
                               class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
                               placeholder="Напишіть повідомлення..."
-                              onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); this.form.submit(); }"></textarea>
-                    <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors flex items-center gap-2">
+                              @keydown.enter.prevent="if(!$event.shiftKey) submit($refs.chatForm)"></textarea>
+                    <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>

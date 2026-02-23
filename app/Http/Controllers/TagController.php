@@ -24,7 +24,7 @@ class TagController extends Controller
         $validated['church_id'] = $this->getCurrentChurch()->id;
         Tag::create($validated);
 
-        return back()->with('success', 'Тег створено.');
+        return $this->successResponse($request, 'Тег створено.');
     }
 
     public function update(Request $request, Tag $tag)
@@ -39,17 +39,17 @@ class TagController extends Controller
 
         $tag->update($validated);
 
-        return back()->with('success', 'Тег оновлено.');
+        return $this->successResponse($request, 'Тег оновлено.');
     }
 
-    public function destroy(Tag $tag)
+    public function destroy(Request $request, Tag $tag)
     {
         abort_unless(auth()->user()->canEdit('settings'), 403);
         $this->authorizeChurch($tag);
 
         $tag->delete();
 
-        return back()->with('success', 'Тег видалено.');
+        return $this->successResponse($request, 'Тег видалено.');
     }
 
     protected function authorizeChurch($model): void

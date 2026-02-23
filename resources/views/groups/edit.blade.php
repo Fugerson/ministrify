@@ -51,7 +51,7 @@
             <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 @can('delete', $group)
                 <button type="button"
-                        onclick="if(confirm('{{ __('messages.confirm_delete_group') }}')) { document.getElementById('delete-group-form').submit(); }"
+                        @click="ajaxDelete('{{ route('groups.destroy', $group) }}', '{{ __('messages.confirm_delete_group') }}', null, '{{ route('groups.index') }}')"
                         class="text-red-600 hover:text-red-700 text-sm font-medium">
                     {{ __('app.delete_group') }}
                 </button>
@@ -73,12 +73,6 @@
             </div>
         </form>
 
-        @can('delete', $group)
-        <form id="delete-group-form" method="POST" action="{{ route('groups.destroy', $group) }}" class="hidden">
-            @csrf
-            @method('DELETE')
-        </form>
-        @endcan
     </div>
 </div>
 

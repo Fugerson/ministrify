@@ -164,7 +164,7 @@ class GalleryController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Фото завантажено');
+        return $this->successResponse($request, 'Фото завантажено');
     }
 
     public function updatePhoto(Request $request, GalleryPhoto $photo)
@@ -179,10 +179,10 @@ class GalleryController extends Controller
 
         $photo->update($validated);
 
-        return back()->with('success', 'Опис фото оновлено');
+        return $this->successResponse($request, 'Опис фото оновлено');
     }
 
-    public function deletePhoto(GalleryPhoto $photo)
+    public function deletePhoto(Request $request, GalleryPhoto $photo)
     {
         abort_unless($photo->gallery, 404);
         $this->authorize('update', $photo->gallery);
@@ -196,7 +196,7 @@ class GalleryController extends Controller
 
         $photo->delete();
 
-        return back()->with('success', 'Фото видалено');
+        return $this->successResponse($request, 'Фото видалено');
     }
 
     public function reorderPhotos(Request $request, Gallery $gallery)
@@ -217,12 +217,12 @@ class GalleryController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function setCover(Gallery $gallery, GalleryPhoto $photo)
+    public function setCover(Request $request, Gallery $gallery, GalleryPhoto $photo)
     {
         $this->authorize('update', $gallery);
 
         $gallery->update(['cover_photo' => $photo->file_path]);
 
-        return back()->with('success', 'Обкладинку оновлено');
+        return $this->successResponse($request, 'Обкладинку оновлено');
     }
 }

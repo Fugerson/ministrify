@@ -1721,6 +1721,9 @@
     <!-- Toast Notifications -->
     @include('components.toast')
 
+    <!-- AJAX Form Helpers -->
+    @include('components.ajax-helpers')
+
 
     <!-- Show session messages as toasts -->
     @if(session('success'))

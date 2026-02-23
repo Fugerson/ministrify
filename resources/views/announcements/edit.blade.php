@@ -16,35 +16,29 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Редагувати оголошення</h1>
 
-        <form action="{{ route('announcements.update', $announcement) }}" method="POST" class="space-y-6">
-            @csrf
-            @method('PUT')
+        <form @submit.prevent="submit($refs.editAnnouncementForm)" x-ref="editAnnouncementForm"
+              x-data="{ ...ajaxForm({url: '{{ route('announcements.update', $announcement) }}', method: 'PUT'}) }"
+              class="space-y-6">
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Заголовок *</label>
                 <input type="text" name="title" value="{{ old('title', $announcement->title) }}" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                @error('title')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.title"><p class="mt-1 text-sm text-red-600" x-text="errors.title[0]"></p></template>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст оголошення *</label>
                 <textarea name="content" rows="8" required
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none">{{ old('content', $announcement->content) }}</textarea>
-                @error('content')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.content"><p class="mt-1 text-sm text-red-600" x-text="errors.content[0]"></p></template>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Актуально до</label>
                 <input type="date" name="expires_at" value="{{ old('expires_at', $announcement->expires_at?->format('Y-m-d')) }}"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                @error('expires_at')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.expires_at"><p class="mt-1 text-sm text-red-600" x-text="errors.expires_at[0]"></p></template>
             </div>
 
             <div class="flex items-center">
@@ -60,7 +54,7 @@
                    class="px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
                     Скасувати
                 </a>
-                <button type="submit"
+                <button type="submit" :disabled="saving"
                         class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl">
                     Зберегти
                 </button>

@@ -116,8 +116,7 @@ class ExpenseController extends Controller
             'status' => Transaction::STATUS_COMPLETED,
         ]);
 
-        return redirect()->route('finances.expenses.index')
-            ->with('success', 'Витрату додано.');
+        return $this->successResponse($request, 'Витрату додано.', 'finances.expenses.index');
     }
 
     public function edit(Transaction $expense)
@@ -173,11 +172,10 @@ class ExpenseController extends Controller
             'payment_data' => !empty($paymentData) ? $paymentData : null,
         ]);
 
-        return redirect()->route('finances.expenses.index')
-            ->with('success', 'Витрату оновлено.');
+        return $this->successResponse($request, 'Витрату оновлено.', 'finances.expenses.index');
     }
 
-    public function destroy(Transaction $expense)
+    public function destroy(Request $request, Transaction $expense)
     {
         $this->authorizeExpense($expense);
         if ($expense->ministry) {
@@ -191,7 +189,7 @@ class ExpenseController extends Controller
 
         $expense->delete();
 
-        return back()->with('success', 'Витрату видалено.');
+        return $this->successResponse($request, 'Витрату видалено.');
     }
 
     public function report(Request $request)

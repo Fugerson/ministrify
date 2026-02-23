@@ -3,7 +3,7 @@
 @section('title', 'Додати період недоступності')
 
 @section('content')
-<div class="max-w-2xl mx-auto space-y-6" x-data="blockoutCreateForm()">
+<div class="max-w-2xl mx-auto space-y-6">
     <!-- Header with back link -->
     <div class="flex items-center gap-4">
         <a href="{{ route('blockouts.index') }}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <form @submit.prevent="submitForm" class="space-y-6" x-ref="form">
+    <form @submit.prevent="submit($refs.f)" x-ref="f" x-data="{ ...ajaxForm({url:'{{ route("blockouts.store") }}', method:'POST'}) }" class="space-y-6">
 
         <!-- Date Range Card -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -292,33 +292,6 @@ function updateReasonSelection() {
             checkIcon.classList.add('hidden');
         }
     });
-}
-
-function blockoutCreateForm() {
-    return {
-        saving: false,
-        errors: {},
-        async submitForm() {
-            this.saving = true;
-            this.errors = {};
-            const formData = new FormData(this.$refs.form);
-            try {
-                const response = await fetch('{{ route("blockouts.store") }}', {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                    body: formData,
-                });
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) {
-                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', 'Перевірте правильність заповнення форми.'); }
-                    else { showToast('error', data.message || 'Помилка збереження.'); }
-                    this.saving = false; return;
-                }
-                showToast('success', data.message || 'Збережено!');
-                setTimeout(() => window.location.href = data.redirect_url, 800);
-            } catch (e) { showToast('error', "Помилка з'єднання з сервером."); this.saving = false; }
-        }
-    }
 }
 
 // Initialize on page load

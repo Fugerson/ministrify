@@ -180,8 +180,7 @@
             </h3>
         </div>
 
-        <form id="rejectForm" method="POST" class="p-6">
-            @csrf
+        <form id="rejectForm" class="p-6">
             <input type="hidden" id="rejectUserId" name="user_id">
 
             <div class="mb-4">

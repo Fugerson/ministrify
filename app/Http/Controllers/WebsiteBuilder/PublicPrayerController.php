@@ -44,15 +44,15 @@ class PublicPrayerController extends Controller
             $prayerRequest->update(['answered_at' => now()]);
         }
 
-        return redirect()->back()->with('success', 'Статус оновлено');
+        return $this->successResponse($request, 'Статус оновлено');
     }
 
-    public function destroy(PrayerRequest $prayerRequest)
+    public function destroy(Request $request, PrayerRequest $prayerRequest)
     {
         $this->authorize('delete', $prayerRequest);
 
         $prayerRequest->delete();
 
-        return redirect()->route('website-builder.prayer-inbox.index')->with('success', 'Запит видалено');
+        return $this->successResponse($request, 'Запит видалено');
     }
 }

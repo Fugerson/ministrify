@@ -18,7 +18,7 @@ class ResourceController extends Controller
     public function index(Request $request, ?Resource $folder = null)
     {
         if (!auth()->user()->canView('resources')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $churchId = $this->getCurrentChurch()->id;
@@ -86,7 +86,7 @@ class ResourceController extends Controller
             'icon' => $validated['icon'] ?? null,
         ]);
 
-        return back()->with('success', 'Папку створено');
+        return $this->successResponse($request, 'Папку створено');
     }
 
     /**
@@ -117,18 +117,12 @@ class ResourceController extends Controller
 
         // Check mime type
         if (!in_array($file->getMimeType(), Resource::ALLOWED_MIMES)) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Цей тип файлу не підтримується'], 422);
-            }
-            return back()->with('error', 'Цей тип файлу не підтримується');
+            return $this->errorResponse($request, 'Цей тип файлу не підтримується');
         }
 
         // Check church storage limit
         if (!Resource::canUpload($churchId, $file->getSize())) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Перевищено ліміт сховища. Видаліть непотрібні файли.'], 422);
-            }
-            return back()->with('error', 'Перевищено ліміт сховища. Видаліть непотрібні файли.');
+            return $this->errorResponse($request, 'Перевищено ліміт сховища. Видаліть непотрібні файли.');
         }
 
         // Validate parent belongs to church
@@ -153,7 +147,7 @@ class ResourceController extends Controller
             'mime_type' => $file->getMimeType(),
         ]);
 
-        return back()->with('success', 'Файл завантажено');
+        return $this->successResponse($request, 'Файл завантажено');
     }
 
     /**
@@ -190,7 +184,7 @@ class ResourceController extends Controller
 
         $resource->update(['name' => $validated['name']]);
 
-        return back()->with('success', 'Перейменовано');
+        return $this->successResponse($request, 'Перейменовано');
     }
 
     /**
@@ -217,7 +211,7 @@ class ResourceController extends Controller
 
         $resource->delete();
 
-        return back()->with('success', 'Видалено');
+        return $this->successResponse(request(), 'Видалено');
     }
 
     /**
@@ -240,7 +234,7 @@ class ResourceController extends Controller
         if ($resource->isFolder() && $validated['parent_id']) {
             $targetParent = Resource::find($validated['parent_id']);
             if ($targetParent && $this->isDescendant($resource, $targetParent)) {
-                return back()->with('error', 'Не можна перемістити папку в саму себе');
+                return $this->errorResponse($request, 'Не можна перемістити папку в саму себе');
             }
         }
 
@@ -254,7 +248,7 @@ class ResourceController extends Controller
 
         $resource->update(['parent_id' => $validated['parent_id']]);
 
-        return back()->with('success', 'Переміщено');
+        return $this->successResponse($request, 'Переміщено');
     }
 
     /**
@@ -362,7 +356,7 @@ class ResourceController extends Controller
             'icon' => $validated['icon'] ?? null,
         ]);
 
-        return back()->with('success', 'Папку створено');
+        return $this->successResponse($request, 'Папку створено');
     }
 
     /**
@@ -397,11 +391,7 @@ class ResourceController extends Controller
             'content' => '',
         ]);
 
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'id' => $resource->id]);
-        }
-
-        return back()->with('success', 'Документ створено');
+        return $this->successResponse($request, 'Документ створено', data: ['id' => $resource->id]);
     }
 
     /**
@@ -462,17 +452,11 @@ class ResourceController extends Controller
         $file = $request->file('file');
 
         if (!in_array($file->getMimeType(), Resource::ALLOWED_MIMES)) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Цей тип файлу не підтримується'], 422);
-            }
-            return back()->with('error', 'Цей тип файлу не підтримується');
+            return $this->errorResponse($request, 'Цей тип файлу не підтримується');
         }
 
         if (!Resource::canUpload($churchId, $file->getSize())) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Перевищено ліміт сховища'], 422);
-            }
-            return back()->with('error', 'Перевищено ліміт сховища');
+            return $this->errorResponse($request, 'Перевищено ліміт сховища');
         }
 
         // Validate parent belongs to ministry
@@ -498,6 +482,6 @@ class ResourceController extends Controller
             'mime_type' => $file->getMimeType(),
         ]);
 
-        return back()->with('success', 'Файл завантажено');
+        return $this->successResponse($request, 'Файл завантажено');
     }
 }

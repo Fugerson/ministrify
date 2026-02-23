@@ -84,16 +84,7 @@ class MinistryController extends Controller
 
         \App\Models\Church::clearMinistriesCache($church->id);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Команду створено!',
-                'redirect_url' => route('ministries.show', $ministry),
-            ]);
-        }
-
-        return redirect()->route('ministries.show', $ministry)
-            ->with('success', 'Служіння створено.');
+        return $this->successResponse($request, 'Команду створено!', 'ministries.show', [$ministry]);
     }
 
     public function show(Ministry $ministry)
@@ -453,18 +444,10 @@ class MinistryController extends Controller
 
         \App\Models\Church::clearMinistriesCache($ministry->church_id);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Команду оновлено!',
-            ]);
-        }
-
-        return redirect()->route('ministries.show', $ministry)
-            ->with('success', 'Служіння оновлено.');
+        return $this->successResponse($request, 'Команду оновлено!', 'ministries.show', [$ministry]);
     }
 
-    public function destroy(Ministry $ministry)
+    public function destroy(Request $request, Ministry $ministry)
     {
         $this->authorizeChurch($ministry);
         $this->authorize('delete', $ministry);
@@ -474,7 +457,7 @@ class MinistryController extends Controller
 
         \App\Models\Church::clearMinistriesCache($churchId);
 
-        return redirect()->route('ministries.index')->with('success', 'Служіння видалено.');
+        return $this->successResponse($request, 'Служіння видалено.', 'ministries.index');
     }
 
     public function addMember(Request $request, Ministry $ministry)
@@ -489,7 +472,7 @@ class MinistryController extends Controller
 
         // Check if already a member
         if ($ministry->members()->where('person_id', $validated['person_id'])->exists()) {
-            return back()->with('error', 'Ця людина вже є учасником служіння.');
+            return $this->errorResponse($request, 'Ця людина вже є учасником служіння.');
         }
 
         $ministry->members()->attach($validated['person_id'], [
@@ -504,10 +487,10 @@ class MinistryController extends Controller
             'position_ids' => $validated['position_ids'] ?? [],
         ]);
 
-        return back()->with('success', 'Учасника додано.');
+        return $this->successResponse($request, 'Учасника додано.');
     }
 
-    public function removeMember(Ministry $ministry, Person $person)
+    public function removeMember(Request $request, Ministry $ministry, Person $person)
     {
         $this->authorizeChurch($ministry);
         Gate::authorize('contribute-ministry', $ministry);
@@ -521,7 +504,7 @@ class MinistryController extends Controller
             'person_name' => $person->full_name,
         ]);
 
-        return back()->with('success', 'Учасника видалено.');
+        return $this->successResponse($request, 'Учасника видалено.');
     }
 
     public function updateMemberPositions(Request $request, Ministry $ministry, Person $person)
@@ -551,7 +534,7 @@ class MinistryController extends Controller
             'old_position_ids' => $oldPositionIds,
         ]);
 
-        return back()->with('success', 'Позиції оновлено.');
+        return $this->successResponse($request, 'Позиції оновлено.');
     }
 
     public function updateMemberRole(Request $request, Ministry $ministry, Person $person)
@@ -668,11 +651,7 @@ class MinistryController extends Controller
             'sort_order' => $maxOrder + 1,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'id' => $role->id]);
-        }
-
-        return back()->with('success', 'Роль додано');
+        return $this->successResponse($request, 'Роль додано', null, [], ['id' => $role->id]);
     }
 
     public function updateWorshipRole(Request $request, Ministry $ministry, WorshipRole $role)
@@ -693,11 +672,7 @@ class MinistryController extends Controller
 
         $role->update($validated);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Роль оновлено');
+        return $this->successResponse($request, 'Роль оновлено');
     }
 
     public function destroyWorshipRole(Request $request, Ministry $ministry, WorshipRole $role)
@@ -712,11 +687,7 @@ class MinistryController extends Controller
 
         $role->delete();
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Роль видалено');
+        return $this->successResponse($request, 'Роль видалено');
     }
 
     public function storeMinistryRole(Request $request, Ministry $ministry)
@@ -744,11 +715,7 @@ class MinistryController extends Controller
             'sort_order' => $maxOrder + 1,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'id' => $role->id]);
-        }
-
-        return back()->with('success', 'Роль додано');
+        return $this->successResponse($request, 'Роль додано', null, [], ['id' => $role->id]);
     }
 
     public function updateMinistryRole(Request $request, Ministry $ministry, MinistryRole $role)
@@ -768,11 +735,7 @@ class MinistryController extends Controller
 
         $role->update($validated);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Роль оновлено');
+        return $this->successResponse($request, 'Роль оновлено');
     }
 
     public function destroyMinistryRole(Request $request, Ministry $ministry, MinistryRole $role)
@@ -786,11 +749,7 @@ class MinistryController extends Controller
 
         $role->delete();
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Роль видалено');
+        return $this->successResponse($request, 'Роль видалено');
     }
 
     protected function authorizeChurch($model): void

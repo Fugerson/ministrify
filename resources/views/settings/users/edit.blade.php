@@ -17,8 +17,9 @@
         ] : null;
         $userHadNoRole = $user->church_role_id === null;
     @endphp
-    <form action="{{ route('settings.users.update', $user) }}" method="POST" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6"
+    <form x-ref="f" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6"
           x-data="{
+              ...ajaxForm({ url: '{{ route('settings.users.update', $user) }}', method: 'PUT' }),
               personSelected: {{ json_encode($initialPersonData) }},
               hadNoRole: {{ $userHadNoRole ? 'true' : 'false' }},
               showConfirm: false,
@@ -30,14 +31,12 @@
                       this.selectedRoleName = roleSelect.options[roleSelect.selectedIndex].text;
                       this.showConfirm = true;
                   } else {
-                      this.$el.submit();
+                      this.submit(this.$refs.f);
                   }
               }
           }"
           @person-selected.window="personSelected = $event.detail.person"
           @submit.prevent="submitForm()">
-        @csrf
-        @method('PUT')
 
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Прив'язати до людини</label>
@@ -77,19 +76,17 @@
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ім'я</label>
                     <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" x-bind:required="!personSelected"
-                        class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('name') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
-                    @error('name')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                        class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
+                        :class="errors.name ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''">
+                    <template x-if="errors.name"><p class="mt-1 text-sm text-red-500" x-text="errors.name[0]"></p></template>
                 </div>
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
                     <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" x-bind:required="!personSelected"
-                        class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('email') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
-                    @error('email')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                        class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
+                        :class="errors.email ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''">
+                    <template x-if="errors.email"><p class="mt-1 text-sm text-red-500" x-text="errors.email[0]"></p></template>
                 </div>
             </div>
         </div>
@@ -97,7 +94,8 @@
         <div>
             <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль</label>
             <select name="church_role_id" id="church_role_id"
-                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white @error('church_role_id') border-red-500 bg-red-50 dark:bg-red-900/20 @enderror">
+                class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
+                :class="errors.church_role_id ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''">
                 <option value="" {{ old('church_role_id', $user->church_role_id) === null ? 'selected' : '' }}>
                     Очікує підтвердження (без доступу)
                 </option>
@@ -107,24 +105,21 @@
                 </option>
                 @endforeach
             </select>
-            @error('church_role_id')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-            @enderror
+            <template x-if="errors.church_role_id"><p class="mt-1 text-sm text-red-500" x-text="errors.church_role_id[0]"></p></template>
         </div>
 
         <div>
             <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Новий пароль (залиште порожнім щоб не змінювати)</label>
             <input type="password" name="password" id="password"
                 class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-            @error('password')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-            @enderror
+            <template x-if="errors.password"><p class="mt-1 text-sm text-red-500" x-text="errors.password[0]"></p></template>
         </div>
 
         <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3">
             <a href="{{ route('settings.users.index') }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Скасувати</a>
-            <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700">
-                Зберегти
+            <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50">
+                <span x-show="!saving">Зберегти</span>
+                <span x-show="saving" x-cloak>Збереження...</span>
             </button>
         </div>
 
@@ -162,7 +157,7 @@
                                     class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
                                 Скасувати
                             </button>
-                            <button type="button" @click="showConfirm = false; $el.closest('form').submit();"
+                            <button type="button" @click="showConfirm = false; submit($refs.f);"
                                     class="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium transition-colors">
                                 Так, надати доступ
                             </button>

@@ -13,8 +13,7 @@
         </div>
 
         <!-- File Import -->
-        <form action="{{ route('calendar.import.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
-            @csrf
+        <form @submit.prevent="submit($refs.importForm)" x-ref="importForm" x-data="{ ...ajaxForm({ url: '{{ route('calendar.import.store') }}', method: 'POST' }) }" class="p-6 space-y-6">
 
             <!-- Info Box -->
             <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
@@ -52,9 +51,7 @@
                     :nullable="false"
                     required
                 />
-                @error('ministry_id')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.ministry_id"><p class="mt-1 text-sm text-red-500" x-text="errors.ministry_id[0]"></p></template>
             </div>
 
             <!-- File Upload -->
@@ -78,9 +75,7 @@
                     </div>
                 </div>
                 <p id="file-name" class="mt-2 text-sm text-gray-600 dark:text-gray-400 hidden"></p>
-                @error('file')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.file"><p class="mt-1 text-sm text-red-500" x-text="errors.file[0]"></p></template>
             </div>
 
             <!-- Actions -->
@@ -89,12 +84,12 @@
                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
                     Скасувати
                 </a>
-                <button type="submit"
-                        class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors inline-flex items-center">
+                <button type="submit" :disabled="saving"
+                        class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-medium rounded-xl transition-colors inline-flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
-                    Імпортувати
+                    <span x-text="saving ? 'Імпортування...' : 'Імпортувати'"></span>
                 </button>
             </div>
         </form>

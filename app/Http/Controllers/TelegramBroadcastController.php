@@ -37,7 +37,7 @@ class TelegramBroadcastController extends Controller
         $church = $this->getChurchOrFail();
 
         if (empty(config('services.telegram.bot_token'))) {
-            return back()->with('error', 'Telegram бот не налаштований');
+            return $this->errorResponse($request, 'Telegram бот не налаштований');
         }
 
         $telegram = TelegramService::make();
@@ -69,6 +69,6 @@ class TelegramBroadcastController extends Controller
             }
         }
 
-        return back()->with('success', "Надіслано: {$sent} повідомлень" . ($failed > 0 ? ", помилок: {$failed}" : ''));
+        return $this->successResponse($request, "Надіслано: {$sent} повідомлень" . ($failed > 0 ? ", помилок: {$failed}" : ''));
     }
 }

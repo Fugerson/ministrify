@@ -214,8 +214,7 @@ class BoardController extends Controller
             $board->columns()->create($column);
         }
 
-        return redirect()->route('boards.index')
-            ->with('success', 'Дошку створено.');
+        return $this->successResponse($request, 'Дошку створено.', 'boards.index');
     }
 
     public function edit(Board $board)
@@ -236,25 +235,23 @@ class BoardController extends Controller
 
         $board->update($validated);
 
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Дошку оновлено.');
+        return $this->successResponse($request, 'Дошку оновлено.', 'boards.show', [$board]);
     }
 
-    public function destroy(Board $board)
+    public function destroy(Request $request, Board $board)
     {
         $this->authorizeBoard($board);
         $board->delete();
 
-        return redirect()->route('boards.index')->with('success', 'Дошку видалено.');
+        return $this->successResponse($request, 'Дошку видалено.', 'boards.index');
     }
 
-    public function archive(Board $board)
+    public function archive(Request $request, Board $board)
     {
         $this->authorizeBoard($board);
         $board->update(['is_archived' => true]);
 
-        return redirect()->route('boards.index')
-            ->with('success', 'Дошку архівовано.');
+        return $this->successResponse($request, 'Дошку архівовано.', 'boards.index');
     }
 
     public function archived()
@@ -267,13 +264,12 @@ class BoardController extends Controller
         return view('boards.archived', compact('boards'));
     }
 
-    public function restore(Board $board)
+    public function restore(Request $request, Board $board)
     {
         $this->authorizeBoard($board);
         $board->update(['is_archived' => false]);
 
-        return redirect()->route('boards.index')
-            ->with('success', 'Дошку відновлено.');
+        return $this->successResponse($request, 'Дошку відновлено.', 'boards.index');
     }
 
     // Column Management
@@ -291,8 +287,7 @@ class BoardController extends Controller
 
         $board->columns()->create($validated);
 
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Колонку додано.');
+        return $this->successResponse($request, 'Колонку додано.', 'boards.show', [$board]);
     }
 
     public function updateColumn(Request $request, BoardColumn $column)
@@ -307,23 +302,21 @@ class BoardController extends Controller
 
         $column->update($validated);
 
-        return redirect()->route('boards.show', $column->board)
-            ->with('success', 'Колонку оновлено.');
+        return $this->successResponse($request, 'Колонку оновлено.', 'boards.show', [$column->board]);
     }
 
-    public function destroyColumn(BoardColumn $column)
+    public function destroyColumn(Request $request, BoardColumn $column)
     {
         $this->authorizeBoard($column->board);
         $board = $column->board;
 
         if ($column->cards()->count() > 0) {
-            return back()->with('error', 'Неможливо видалити колонку з картками.');
+            return $this->errorResponse($request, 'Неможливо видалити колонку з картками.');
         }
 
         $column->delete();
 
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Колонку видалено.');
+        return $this->successResponse($request, 'Колонку видалено.', 'boards.show', [$board]);
     }
 
     public function reorderColumns(Request $request, Board $board)
@@ -381,16 +374,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'created');
 
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'card' => $card,
-                'message' => 'Завдання додано.'
-            ]);
-        }
-
-        return redirect()->route('boards.index')
-            ->with('success', 'Завдання додано.');
+        return $this->successResponse($request, 'Завдання додано.', 'boards.index', [], ['card' => $card]);
     }
 
     // Quick card creation from entities
@@ -407,20 +391,20 @@ class BoardController extends Controller
 
         $board = Board::find($validated['board_id']);
         if (!$board) {
-            return back()->with('error', 'Дошку не знайдено.');
+            return $this->errorResponse($request, 'Дошку не знайдено.');
         }
         $this->authorizeBoard($board);
 
         // Get the first column (typically "To Do")
         $column = $board->columns()->orderBy('position')->first();
         if (!$column) {
-            return back()->with('error', 'Дошка не має колонок.');
+            return $this->errorResponse($request, 'Дошка не має колонок.');
         }
 
         // Get entity details
         $entityData = $this->getEntityData($validated['entity_type'], $validated['entity_id'], $church->id);
         if (!$entityData) {
-            return back()->with('error', 'Об\'єкт не знайдено.');
+            return $this->errorResponse($request, 'Об\'єкт не знайдено.');
         }
 
         $maxPosition = $column->cards()->max('position') ?? -1;
@@ -439,12 +423,7 @@ class BoardController extends Controller
             'entity_type' => $validated['entity_type'],
         ]);
 
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'card' => $card]);
-        }
-
-        return redirect()->route('boards.show', $board)
-            ->with('success', 'Картку створено з ' . $this->getEntityTypeLabel($validated['entity_type']) . '.');
+        return $this->successResponse($request, 'Картку створено з ' . $this->getEntityTypeLabel($validated['entity_type']) . '.', 'boards.show', [$board], ['card' => $card]);
     }
 
     private function getEntityData(string $type, int $id, int $churchId): ?array
@@ -725,12 +704,7 @@ class BoardController extends Controller
 
         $card->update($validated);
 
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return redirect()->route('boards.show', $card->column->board)
-            ->with('success', 'Картку оновлено.');
+        return $this->successResponse($request, 'Картку оновлено.', 'boards.show', [$card->column->board]);
     }
 
     public function destroyCard(Request $request, BoardCard $card)
@@ -739,11 +713,7 @@ class BoardController extends Controller
         $board = $card->column->board;
         $card->delete();
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Картку видалено.');
+        return $this->successResponse($request, 'Картку видалено.');
     }
 
     public function moveCard(Request $request, BoardCard $card)
@@ -821,14 +791,7 @@ class BoardController extends Controller
             BoardCardActivity::log($card, 'completed');
         }
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'is_completed' => $card->is_completed,
-            ]);
-        }
-
-        return back()->with('success', 'Статус картки оновлено.');
+        return $this->successResponse($request, 'Статус картки оновлено.', null, [], ['is_completed' => $card->is_completed]);
     }
 
     // Duplicate card
@@ -859,15 +822,7 @@ class BoardController extends Controller
             'duplicated_from' => $card->id,
         ]);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'card' => $newCard->load(['column', 'epic']),
-                'message' => 'Картку здубльовано',
-            ]);
-        }
-
-        return redirect()->route('boards.index')->with('success', 'Картку здубльовано.');
+        return $this->successResponse($request, 'Картку здубльовано.', 'boards.index', [], ['card' => $newCard->load(['column', 'epic'])]);
     }
 
     // Card Comments
@@ -912,27 +867,22 @@ class BoardController extends Controller
             'preview' => \Str::limit($validated['content'] ?? '', 50),
         ]);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'comment' => [
-                    'id' => $comment->id,
-                    'content' => $comment->content,
-                    'user_name' => auth()->user()->name,
-                    'user_initial' => mb_substr(auth()->user()->name, 0, 1),
-                    'created_at' => $comment->created_at->diffForHumans(),
-                    'is_mine' => true,
-                    'attachments' => $comment->attachments ? collect($comment->attachments)->map(fn($a) => [
-                        'name' => $a['name'],
-                        'url' => \Storage::url($a['path']),
-                        'mime_type' => $a['mime_type'],
-                        'is_image' => str_starts_with($a['mime_type'], 'image/'),
-                    ])->toArray() : [],
-                ],
-            ]);
-        }
-
-        return back()->with('success', 'Коментар додано.');
+        return $this->successResponse($request, 'Коментар додано.', null, [], [
+            'comment' => [
+                'id' => $comment->id,
+                'content' => $comment->content,
+                'user_name' => auth()->user()->name,
+                'user_initial' => mb_substr(auth()->user()->name, 0, 1),
+                'created_at' => $comment->created_at->diffForHumans(),
+                'is_mine' => true,
+                'attachments' => $comment->attachments ? collect($comment->attachments)->map(fn($a) => [
+                    'name' => $a['name'],
+                    'url' => \Storage::url($a['path']),
+                    'mime_type' => $a['mime_type'],
+                    'is_image' => str_starts_with($a['mime_type'], 'image/'),
+                ])->toArray() : [],
+            ],
+        ]);
     }
 
     public function destroyComment(Request $request, BoardCardComment $comment)
@@ -950,11 +900,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'comment_deleted', null, \Str::limit($commentContent, 50));
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Коментар видалено.');
+        return $this->successResponse($request, 'Коментар видалено.');
     }
 
     // Card Checklist
@@ -974,18 +920,13 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'checklist_added', null, null, $validated['title']);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'item' => [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'is_completed' => false,
-                ],
-            ]);
-        }
-
-        return back()->with('success', 'Пункт додано.');
+        return $this->successResponse($request, 'Пункт додано.', null, [], [
+            'item' => [
+                'id' => $item->id,
+                'title' => $item->title,
+                'is_completed' => false,
+            ],
+        ]);
     }
 
     public function toggleChecklistItem(Request $request, BoardCardChecklistItem $item)
@@ -998,14 +939,7 @@ class BoardController extends Controller
         $action = $item->is_completed ? 'checklist_completed' : 'checklist_uncompleted';
         BoardCardActivity::log($item->card, $action, null, null, null, ['title' => $item->title]);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'is_completed' => $item->is_completed,
-            ]);
-        }
-
-        return back();
+        return $this->successResponse($request, 'Пункт оновлено.', null, [], ['is_completed' => $item->is_completed]);
     }
 
     public function destroyChecklistItem(Request $request, BoardCardChecklistItem $item)
@@ -1018,11 +952,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'checklist_deleted', null, $title);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Пункт видалено.');
+        return $this->successResponse($request, 'Пункт видалено.');
     }
 
     // Update comment
@@ -1066,27 +996,22 @@ class BoardController extends Controller
             'comment_id' => $comment->id,
         ]);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'comment' => [
-                    'id' => $comment->id,
-                    'content' => $comment->content,
-                    'updated_at' => $comment->updated_at->diffForHumans(),
-                    'is_edited' => true,
-                ],
-                'attachments' => collect($comment->attachments ?? [])->map(function ($att) {
-                    return [
-                        'name' => $att['name'],
-                        'url' => \Storage::url($att['path']),
-                        'size' => isset($att['size']) ? number_format($att['size'] / 1024, 1) . ' KB' : '',
-                        'is_image' => str_starts_with($att['mime'] ?? '', 'image/'),
-                    ];
-                })->toArray(),
-            ]);
-        }
-
-        return back()->with('success', 'Коментар оновлено.');
+        return $this->successResponse($request, 'Коментар оновлено.', null, [], [
+            'comment' => [
+                'id' => $comment->id,
+                'content' => $comment->content,
+                'updated_at' => $comment->updated_at->diffForHumans(),
+                'is_edited' => true,
+            ],
+            'attachments' => collect($comment->attachments ?? [])->map(function ($att) {
+                return [
+                    'name' => $att['name'],
+                    'url' => \Storage::url($att['path']),
+                    'size' => isset($att['size']) ? number_format($att['size'] / 1024, 1) . ' KB' : '',
+                    'is_image' => str_starts_with($att['mime'] ?? '', 'image/'),
+                ];
+            })->toArray(),
+        ]);
     }
 
     // Delete a single attachment from a comment
@@ -1148,23 +1073,18 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'attachment_added', null, null, $file->getClientOriginalName());
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'attachment' => [
-                    'id' => $attachment->id,
-                    'name' => $attachment->name,
-                    'size' => $attachment->size_for_humans,
-                    'mime_type' => $attachment->mime_type,
-                    'url' => \Storage::url($attachment->path),
-                    'uploader' => auth()->user()->name,
-                    'created_at' => $attachment->created_at->diffForHumans(),
-                    'is_image' => str_starts_with($attachment->mime_type, 'image/'),
-                ],
-            ]);
-        }
-
-        return back()->with('success', 'Файл завантажено.');
+        return $this->successResponse($request, 'Файл завантажено.', null, [], [
+            'attachment' => [
+                'id' => $attachment->id,
+                'name' => $attachment->name,
+                'size' => $attachment->size_for_humans,
+                'mime_type' => $attachment->mime_type,
+                'url' => \Storage::url($attachment->path),
+                'uploader' => auth()->user()->name,
+                'created_at' => $attachment->created_at->diffForHumans(),
+                'is_image' => str_starts_with($attachment->mime_type, 'image/'),
+            ],
+        ]);
     }
 
     public function destroyAttachment(Request $request, \App\Models\BoardCardAttachment $attachment)
@@ -1180,11 +1100,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'attachment_deleted', null, $fileName);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Файл видалено.');
+        return $this->successResponse($request, 'Файл видалено.');
     }
 
     // Related cards
@@ -1218,19 +1134,14 @@ class BoardController extends Controller
             BoardCardActivity::log($card, 'related_added', null, null, $relatedCard->title);
         }
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'related_card' => [
-                    'id' => $relatedCard->id,
-                    'title' => $relatedCard->title,
-                    'column_name' => $relatedCard->column->name,
-                    'is_completed' => $relatedCard->is_completed,
-                ],
-            ]);
-        }
-
-        return back()->with('success', 'Картку пов\'язано.');
+        return $this->successResponse($request, 'Картку пов\'язано.', null, [], [
+            'related_card' => [
+                'id' => $relatedCard->id,
+                'title' => $relatedCard->title,
+                'column_name' => $relatedCard->column->name,
+                'is_completed' => $relatedCard->is_completed,
+            ],
+        ]);
     }
 
     public function removeRelatedCard(Request $request, BoardCard $card, BoardCard $relatedCard)
@@ -1244,11 +1155,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'related_removed', null, $relatedTitle);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Зв\'язок видалено.');
+        return $this->successResponse($request, 'Зв\'язок видалено.');
     }
 
     private function authorizeBoard(Board $board): void
@@ -1294,14 +1201,7 @@ class BoardController extends Controller
 
         $epic = $board->epics()->create($validated);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'epic' => $epic,
-            ]);
-        }
-
-        return redirect()->route('boards.index')->with('success', 'Епік створено.');
+        return $this->successResponse($request, 'Епік створено.', 'boards.index', [], ['epic' => $epic]);
     }
 
     public function updateEpic(Request $request, BoardEpic $epic)
@@ -1317,14 +1217,10 @@ class BoardController extends Controller
 
         $epic->update($validated);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'epic' => $epic]);
-        }
-
-        return redirect()->route('boards.index')->with('success', 'Епік оновлено.');
+        return $this->successResponse($request, 'Епік оновлено.', 'boards.index', [], ['epic' => $epic]);
     }
 
-    public function destroyEpic(BoardEpic $epic)
+    public function destroyEpic(Request $request, BoardEpic $epic)
     {
         $this->authorizeBoard($epic->board);
 
@@ -1333,10 +1229,6 @@ class BoardController extends Controller
 
         $epic->delete();
 
-        if (request()->ajax() || request()->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return redirect()->route('boards.index')->with('success', 'Епік видалено.');
+        return $this->successResponse($request, 'Епік видалено.', 'boards.index');
     }
 }

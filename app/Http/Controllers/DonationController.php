@@ -55,22 +55,22 @@ class DonationController extends Controller
         ]);
 
         if ($validated['payment_method'] === 'liqpay') {
-            return $this->processLiqPay($church, $transaction, $paymentSettings);
+            return $this->processLiqPay($request, $church, $transaction, $paymentSettings);
         } elseif ($validated['payment_method'] === 'monobank') {
-            return $this->processMonobank($church, $transaction, $paymentSettings);
+            return $this->processMonobank($request, $church, $transaction, $paymentSettings);
         }
 
-        return back()->with('error', 'Невідомий метод оплати');
+        return $this->errorResponse($request, 'Невідомий метод оплати');
     }
 
     /**
      * Process LiqPay payment
      */
-    private function processLiqPay(Church $church, Transaction $transaction, array $settings)
+    private function processLiqPay(Request $request, Church $church, Transaction $transaction, array $settings)
     {
         if (empty($settings['liqpay_public_key']) || empty($settings['liqpay_private_key'])) {
             $transaction->update(['status' => Transaction::STATUS_FAILED, 'notes' => 'LiqPay не налаштовано']);
-            return back()->with('error', 'LiqPay не налаштовано для цієї церкви');
+            return $this->errorResponse($request, 'LiqPay не налаштовано для цієї церкви');
         }
 
         $liqpay = new LiqPayService($settings['liqpay_public_key'], $settings['liqpay_private_key']);
@@ -97,13 +97,13 @@ class DonationController extends Controller
     /**
      * Process Monobank payment (redirect to jar)
      */
-    private function processMonobank(Church $church, Transaction $transaction, array $settings)
+    private function processMonobank(Request $request, Church $church, Transaction $transaction, array $settings)
     {
         $jarId = $settings['monobank_jar_id'] ?? null;
 
         if (empty($jarId)) {
             $transaction->update(['status' => Transaction::STATUS_FAILED, 'notes' => 'Monobank банка не налаштована']);
-            return back()->with('error', 'Monobank банка не налаштована');
+            return $this->errorResponse($request, 'Monobank банка не налаштована');
         }
 
         // Extract jar ID from URL if full URL provided
@@ -304,13 +304,13 @@ class DonationController extends Controller
             'is_active' => true,
         ]);
 
-        return back()->with('success', 'Кампанію створено!');
+        return $this->successResponse($request, 'Кампанію створено!');
     }
 
     /**
      * Toggle campaign active status
      */
-    public function toggleCampaign(DonationCampaign $campaign)
+    public function toggleCampaign(Request $request, DonationCampaign $campaign)
     {
         abort_unless(auth()->user()->hasPermission('finances', 'edit'), 403);
 
@@ -322,13 +322,13 @@ class DonationController extends Controller
 
         $campaign->update(['is_active' => !$campaign->is_active]);
 
-        return back()->with('success', $campaign->is_active ? 'Кампанію активовано!' : 'Кампанію призупинено!');
+        return $this->successResponse($request, $campaign->is_active ? 'Кампанію активовано!' : 'Кампанію призупинено!');
     }
 
     /**
      * Delete campaign
      */
-    public function destroyCampaign(DonationCampaign $campaign)
+    public function destroyCampaign(Request $request, DonationCampaign $campaign)
     {
         abort_unless(auth()->user()->hasPermission('finances', 'delete'), 403);
 
@@ -340,18 +340,18 @@ class DonationController extends Controller
 
         $campaign->delete();
 
-        return back()->with('success', 'Кампанію видалено!');
+        return $this->successResponse($request, 'Кампанію видалено!');
     }
 
     /**
      * Generate QR code data
      */
-    public function qrCode()
+    public function qrCode(Request $request)
     {
         $church = $this->getCurrentChurch();
 
         if (!$church->slug || !$church->public_site_enabled) {
-            return back()->with('error', 'Спочатку увімкніть публічний сайт та встановіть URL');
+            return $this->errorResponse($request, 'Спочатку увімкніть публічний сайт та встановіть URL');
         }
 
         $donateUrl = route('public.donate', $church->slug);

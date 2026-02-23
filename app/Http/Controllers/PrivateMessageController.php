@@ -110,12 +110,7 @@ class PrivateMessageController extends Controller
                 ]);
             }
 
-            if ($request->wantsJson()) {
-                return response()->json(['success' => true, 'broadcast' => true, 'count' => $recipients->count()]);
-            }
-
-            return redirect()->route('pm.index')
-                ->with('success', 'Повідомлення надіслано ' . $recipients->count() . ' користувачам');
+                return $this->successResponse($request, 'Повідомлення надіслано ' . $recipients->count() . ' користувачам', 'pm.index');
         }
 
         $validated = $request->validate([
@@ -136,12 +131,7 @@ class PrivateMessageController extends Controller
             'message' => $validated['message'],
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return redirect()->route('pm.show', $recipient)
-            ->with('success', 'Повідомлення надіслано');
+        return $this->successResponse($request, 'Повідомлення надіслано', 'pm.show', [$recipient]);
     }
 
     /**

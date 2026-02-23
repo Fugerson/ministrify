@@ -128,14 +128,15 @@
                     </div>
 
                     @if($request->status === 'active')
-                        <form action="{{ route('prayer-requests.pray', $request) }}" method="POST" class="sm:ml-4 w-full sm:w-auto">
-                            @csrf
-                            <button type="submit"
-                                    class="w-full sm:w-auto px-4 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg font-medium text-sm transition-colors {{ $request->hasPrayed(auth()->user()) ? 'opacity-50' : '' }}"
-                                    {{ $request->hasPrayed(auth()->user()) ? 'disabled' : '' }}>
-                                🙏 {{ $request->hasPrayed(auth()->user()) ? 'Помолився' : 'Молюсь' }}
+                        <div class="sm:ml-4 w-full sm:w-auto" x-data="{ prayed: {{ $request->hasPrayed(auth()->user()) ? 'true' : 'false' }}, prayerCount: {{ $request->prayer_count }} }">
+                            <button type="button"
+                                    @click="if(!prayed) { ajaxAction('{{ route('prayer-requests.pray', $request) }}', 'POST').then(() => { prayed = true; prayerCount++; }).catch(() => {}) }"
+                                    :disabled="prayed"
+                                    class="w-full sm:w-auto px-4 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg font-medium text-sm transition-colors"
+                                    :class="{ 'opacity-50': prayed }">
+                                🙏 <span x-text="prayed ? 'Помолився' : 'Молюсь'"></span>
                             </button>
-                        </form>
+                        </div>
                     @endif
                 </div>
             </div>

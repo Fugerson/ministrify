@@ -173,36 +173,32 @@
             @else
             <div class="space-y-2">
                 @foreach($meeting->agendaItems as $item)
-                <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl group">
-                    <form method="POST" action="{{ route('meetings.agenda.toggle', $item) }}">
-                        @csrf
-                        <button type="submit" class="mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center {{ $item->is_completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 dark:border-gray-500 hover:border-primary-500' }}">
-                            @if($item->is_completed)
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            @endif
-                        </button>
-                    </form>
+                <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl group"
+                     x-data="{ completed: {{ $item->is_completed ? 'true' : 'false' }} }">
+                    <button type="button" @click="ajaxAction('{{ route('meetings.agenda.toggle', $item) }}', 'POST').then(() => { completed = !completed; })"
+                            class="mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center"
+                            :class="completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 dark:border-gray-500 hover:border-primary-500'">
+                        <svg x-show="completed" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </button>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-start justify-between">
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white {{ $item->is_completed ? 'line-through text-gray-400' : '' }}">
+                                <p class="font-medium text-gray-900 dark:text-white"
+                                   :class="completed ? 'line-through text-gray-400' : ''">
                                     {{ $item->title }}
                                 </p>
                                 @if($item->description)
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $item->description }}</p>
                                 @endif
                             </div>
-                            <form method="POST" action="{{ route('meetings.agenda.destroy', $item) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_plan_item') }}')" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="p-1 text-gray-400 hover:text-red-500">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </form>
+                            <button type="button" @click="ajaxDelete('{{ route('meetings.agenda.destroy', $item) }}', '{{ __('messages.confirm_delete_plan_item') }}', () => $el.closest('.group').remove())"
+                                    class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
                         </div>
                         <div class="flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
                             @if($item->duration_minutes)
@@ -237,13 +233,14 @@
             @endif
 
             <!-- Add Agenda Form -->
-            <div x-show="showAddAgenda" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-                <form method="POST" action="{{ route('meetings.agenda.store', [$ministry, $meeting]) }}">
-                    @csrf
+            <div x-show="showAddAgenda" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800"
+                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.agenda.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }">
+                <form @submit.prevent="submit($refs.agendaForm)" x-ref="agendaForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <input type="text" name="title" required placeholder="Назва пункту *"
                                    class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                            <template x-if="errors.title"><p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p></template>
                         </div>
                         <div class="md:col-span-2">
                             <textarea name="description" rows="2" placeholder="Опис (необов'язково)"
@@ -264,7 +261,10 @@
                     </div>
                     <div class="flex justify-end gap-2 mt-4">
                         <button type="button" @click="showAddAgenda = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">Скасувати</button>
-                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">Додати</button>
+                        <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50">
+                            <span x-show="!saving">Додати</span>
+                            <span x-show="saving" x-cloak>Додавання...</span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -307,28 +307,26 @@
                         <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ $material->content }}</p>
                         @endif
                     </div>
-                    <form method="POST" action="{{ route('meetings.materials.destroy', $material) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_material') }}')" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="p-1 text-gray-400 hover:text-red-500">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                        </button>
-                    </form>
+                    <button type="button" @click="ajaxDelete('{{ route('meetings.materials.destroy', $material) }}', '{{ __('messages.confirm_delete_material') }}', () => $el.closest('.group').remove())"
+                            class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
                 </div>
                 @endforeach
             </div>
             @endif
 
             <!-- Add Material Form -->
-            <div x-show="showAddMaterial" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-                <form method="POST" action="{{ route('meetings.materials.store', [$ministry, $meeting]) }}">
-                    @csrf
+            <div x-show="showAddMaterial" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800"
+                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.materials.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }">
+                <form @submit.prevent="submit($refs.materialForm)" x-ref="materialForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <input type="text" name="title" required placeholder="Назва матеріалу *"
                                    class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                            <template x-if="errors.title"><p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p></template>
                         </div>
                         <div>
                             <select name="type" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
@@ -342,6 +340,7 @@
                         <div class="md:col-span-2">
                             <textarea name="content" rows="3" required placeholder="URL посилання або текст нотатки *"
                                       class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"></textarea>
+                            <template x-if="errors.content"><p class="mt-1 text-sm text-red-500" x-text="errors.content[0]"></p></template>
                         </div>
                         <div class="md:col-span-2">
                             <input type="text" name="description" placeholder="Опис (необов'язково)"
@@ -350,7 +349,10 @@
                     </div>
                     <div class="flex justify-end gap-2 mt-4">
                         <button type="button" @click="showAddMaterial = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">Скасувати</button>
-                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">Додати</button>
+                        <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50">
+                            <span x-show="!saving">Додати</span>
+                            <span x-show="saving" x-cloak>Додавання...</span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -362,12 +364,10 @@
                 <h3 class="font-semibold text-gray-900 dark:text-white">Учасники</h3>
                 <div class="flex items-center gap-2">
                     @if($meeting->attendees->isNotEmpty())
-                    <form method="POST" action="{{ route('meetings.attendees.mark-all', [$ministry, $meeting]) }}">
-                        @csrf
-                        <button type="submit" class="px-3 py-1.5 text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors">
-                            Всі присутні
-                        </button>
-                    </form>
+                    <button type="button" @click="ajaxAction('{{ route('meetings.attendees.mark-all', [$ministry, $meeting]) }}', 'POST').then(() => setTimeout(() => window.location.reload(), 600))"
+                            class="px-3 py-1.5 text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors">
+                        Всі присутні
+                    </button>
                     @endif
                     @if($availableMembers->isNotEmpty())
                     <button @click="showAddAttendee = true" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
@@ -406,31 +406,27 @@
                             <p class="font-medium text-gray-900 dark:text-white">{{ $attendee->person->full_name }}</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <form method="POST" action="{{ route('meetings.attendees.update', $attendee) }}" class="flex gap-1">
-                            @csrf
-                            @method('PUT')
-                            <select name="status" onchange="this.form.submit()"
-                                    class="text-xs px-2 py-1 rounded-lg border-0 bg-transparent
-                                    {{ $attendee->status === 'attended' ? 'text-green-600 dark:text-green-400' : '' }}
-                                    {{ $attendee->status === 'absent' ? 'text-red-600 dark:text-red-400' : '' }}
-                                    {{ $attendee->status === 'confirmed' ? 'text-blue-600 dark:text-blue-400' : '' }}
-                                    {{ $attendee->status === 'invited' ? 'text-gray-600 dark:text-gray-400' : '' }}">
-                                <option value="invited" {{ $attendee->status === 'invited' ? 'selected' : '' }}>Запрошено</option>
-                                <option value="confirmed" {{ $attendee->status === 'confirmed' ? 'selected' : '' }}>Підтверджено</option>
-                                <option value="attended" {{ $attendee->status === 'attended' ? 'selected' : '' }}>Був присутній</option>
-                                <option value="absent" {{ $attendee->status === 'absent' ? 'selected' : '' }}>Був відсутній</option>
-                            </select>
-                        </form>
-                        <form method="POST" action="{{ route('meetings.attendees.destroy', $attendee) }}" onsubmit="return confirm('{{ __('messages.confirm_remove_member') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="p-1 text-gray-400 hover:text-red-500">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </form>
+                    <div class="flex items-center gap-2" x-data="{ currentStatus: '{{ $attendee->status }}' }">
+                        <select x-model="currentStatus"
+                                @change="ajaxAction('{{ route('meetings.attendees.update', $attendee) }}', 'PUT', { status: currentStatus }).catch(() => {})"
+                                class="text-xs px-2 py-1 rounded-lg border-0 bg-transparent"
+                                :class="{
+                                    'text-green-600 dark:text-green-400': currentStatus === 'attended',
+                                    'text-red-600 dark:text-red-400': currentStatus === 'absent',
+                                    'text-blue-600 dark:text-blue-400': currentStatus === 'confirmed',
+                                    'text-gray-600 dark:text-gray-400': currentStatus === 'invited'
+                                }">
+                            <option value="invited">Запрошено</option>
+                            <option value="confirmed">Підтверджено</option>
+                            <option value="attended">Був присутній</option>
+                            <option value="absent">Був відсутній</option>
+                        </select>
+                        <button type="button" @click="ajaxDelete('{{ route('meetings.attendees.destroy', $attendee) }}', '{{ __('messages.confirm_remove_member') }}', () => $el.closest('.rounded-xl').remove())"
+                                class="p-1 text-gray-400 hover:text-red-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 @endif
@@ -439,28 +435,31 @@
             @endif
 
             <!-- Add Attendee Form -->
-            <div x-show="showAddAttendee" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-                <form method="POST" action="{{ route('meetings.attendees.store', [$ministry, $meeting]) }}">
-                    @csrf
+            <div x-show="showAddAttendee" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800"
+                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.attendees.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }">
+                <form @submit.prevent="submit($refs.attendeeForm)" x-ref="attendeeForm">
                     <select name="person_id" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                         <option value="">Оберіть учасника...</option>
                         @foreach($availableMembers as $member)
                         <option value="{{ $member->id }}">{{ $member->full_name }}</option>
                         @endforeach
                     </select>
+                    <template x-if="errors.person_id"><p class="mt-1 text-sm text-red-500" x-text="errors.person_id[0]"></p></template>
                     <div class="flex justify-end gap-2 mt-4">
                         <button type="button" @click="showAddAttendee = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">Скасувати</button>
-                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">Додати</button>
+                        <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50">
+                            <span x-show="!saving">Додати</span>
+                            <span x-show="saving" x-cloak>Додавання...</span>
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
 
         <!-- Notes Tab -->
-        <div x-show="activeTab === 'notes'" x-cloak class="p-4">
-            <form method="POST" action="{{ route('meetings.update', [$ministry, $meeting]) }}" class="space-y-4">
-                @csrf
-                @method('PUT')
+        <div x-show="activeTab === 'notes'" x-cloak class="p-4"
+             x-data="{ ...ajaxForm({ url: '{{ route('meetings.update', [$ministry, $meeting]) }}', method: 'PUT', stayOnPage: true }) }">
+            <form @submit.prevent="submit($refs.notesForm)" x-ref="notesForm" class="space-y-4">
                 <input type="hidden" name="title" value="{{ $meeting->title }}">
                 <input type="hidden" name="date" value="{{ $meeting->date->format('Y-m-d') }}">
                 <input type="hidden" name="status" value="{{ $meeting->status }}">
@@ -478,8 +477,9 @@
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
-                        Зберегти
+                    <button type="submit" :disabled="saving" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
+                        <span x-show="!saving">Зберегти</span>
+                        <span x-show="saving" x-cloak>Збереження...</span>
                     </button>
                 </div>
             </form>

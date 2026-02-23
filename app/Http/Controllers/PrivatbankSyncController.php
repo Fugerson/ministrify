@@ -178,27 +178,28 @@ class PrivatbankSyncController extends Controller
         $validation = $service->validateCredentials();
 
         if (!$validation) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Невірні дані або помилка з\'єднання з ПриватБанком', 'errors' => ['merchant_id' => ['Невірні дані або помилка з\'єднання з ПриватБанком']]], 422);
+            }
             return back()->withErrors(['merchant_id' => 'Невірні дані або помилка з\'єднання з ПриватБанком']);
         }
 
         // Save credentials
         $service->saveCredentials($church, $request->merchant_id, $request->password, $request->card_number);
 
-        return redirect()->route('finances.privatbank.index')
-            ->with('success', "ПриватБанк підключено! Картка: {$validation['card']}");
+        return $this->successResponse($request, "ПриватБанк підключено! Картка: {$validation['card']}", 'finances.privatbank.index');
     }
 
     /**
      * Disconnect PrivatBank
      */
-    public function disconnect()
+    public function disconnect(Request $request)
     {
         $church = $this->getCurrentChurch();
         $service = new PrivatbankService();
         $service->disconnect($church);
 
-        return redirect()->route('finances.privatbank.index')
-            ->with('success', 'ПриватБанк відключено');
+        return $this->successResponse($request, 'ПриватБанк відключено', 'finances.privatbank.index');
     }
 
     /**
@@ -213,7 +214,7 @@ class PrivatbankSyncController extends Controller
         $result = $service->syncTransactions($days);
 
         if ($result['error']) {
-            return back()->with('error', $result['error']);
+            return $this->errorResponse($request, $result['error']);
         }
 
         $message = "Синхронізовано: {$result['imported']} нових транзакцій";
@@ -221,7 +222,7 @@ class PrivatbankSyncController extends Controller
             $message .= " ({$result['skipped']} вже існували)";
         }
 
-        return back()->with('success', $message);
+        return $this->successResponse($request, $message);
     }
 
     /**
@@ -275,16 +276,16 @@ class PrivatbankSyncController extends Controller
         });
 
         if (!$transaction) {
-            return back()->with('error', 'Транзакція вже оброблена');
+            return $this->errorResponse($request, 'Транзакція вже оброблена');
         }
 
-        return back()->with('success', 'Транзакцію імпортовано');
+        return $this->successResponse($request, 'Транзакцію імпортовано');
     }
 
     /**
      * Ignore transaction
      */
-    public function ignore(PrivatbankTransaction $privatTransaction)
+    public function ignore(Request $request, PrivatbankTransaction $privatTransaction)
     {
         $church = $this->getCurrentChurch();
 
@@ -294,13 +295,13 @@ class PrivatbankSyncController extends Controller
 
         $privatTransaction->update(['is_ignored' => true]);
 
-        return back()->with('success', 'Транзакцію приховано');
+        return $this->successResponse($request, 'Транзакцію приховано');
     }
 
     /**
      * Restore ignored transaction
      */
-    public function restore(PrivatbankTransaction $privatTransaction)
+    public function restore(Request $request, PrivatbankTransaction $privatTransaction)
     {
         $church = $this->getCurrentChurch();
 
@@ -310,7 +311,7 @@ class PrivatbankSyncController extends Controller
 
         $privatTransaction->update(['is_ignored' => false]);
 
-        return back()->with('success', 'Транзакцію відновлено');
+        return $this->successResponse($request, 'Транзакцію відновлено');
     }
 
     /**
@@ -361,7 +362,7 @@ class PrivatbankSyncController extends Controller
             });
         }
 
-        return back()->with('success', "Імпортовано {$imported} транзакцій");
+        return $this->successResponse($request, "Імпортовано {$imported} транзакцій");
     }
 
     /**
@@ -381,7 +382,7 @@ class PrivatbankSyncController extends Controller
             ->where('is_processed', false)
             ->update(['is_ignored' => true]);
 
-        return back()->with('success', "Приховано {$count} транзакцій");
+        return $this->successResponse($request, "Приховано {$count} транзакцій");
     }
 
     /**
@@ -393,6 +394,6 @@ class PrivatbankSyncController extends Controller
         $church->update(['privatbank_auto_sync' => !$church->privatbank_auto_sync]);
 
         $status = $church->privatbank_auto_sync ? 'увімкнено' : 'вимкнено';
-        return back()->with('success', "Автосинхронізацію {$status}");
+        return $this->successResponse($request, "Автосинхронізацію {$status}");
     }
 }

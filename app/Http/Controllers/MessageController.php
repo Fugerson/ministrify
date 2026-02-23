@@ -72,11 +72,11 @@ class MessageController extends Controller
         $recipients = $this->getRecipients($request, $churchId);
 
         if ($recipients->isEmpty()) {
-            return back()->with('error', 'Немає отримувачів з Telegram');
+            return $this->errorResponse($request, 'Немає отримувачів з Telegram');
         }
 
         if (!config('services.telegram.bot_token')) {
-            return back()->with('error', 'Telegram бот не налаштовано. Перейдіть в Налаштування → Інтеграції.');
+            return $this->errorResponse($request, 'Telegram бот не налаштовано. Перейдіть в Налаштування → Інтеграції.');
         }
 
         $telegram = TelegramService::make();
@@ -109,8 +109,7 @@ class MessageController extends Controller
             'failed_count' => $failed,
         ]);
 
-        return redirect()->route('messages.index')
-            ->with('success', "Надіслано: {$sent}, помилок: {$failed}");
+        return $this->successResponse($request, "Надіслано: {$sent}, помилок: {$failed}", 'messages.index');
     }
 
     public function storeTemplate(Request $request)
@@ -127,10 +126,10 @@ class MessageController extends Controller
             'type' => 'telegram',
         ]);
 
-        return back()->with('success', 'Шаблон збережено');
+        return $this->successResponse($request, 'Шаблон збережено');
     }
 
-    public function destroyTemplate(MessageTemplate $template)
+    public function destroyTemplate(Request $request, MessageTemplate $template)
     {
         if ($template->church_id !== $this->getCurrentChurch()->id) {
             abort(403);
@@ -138,7 +137,7 @@ class MessageController extends Controller
 
         $template->delete();
 
-        return back()->with('success', 'Шаблон видалено');
+        return $this->successResponse($request, 'Шаблон видалено');
     }
 
     private function getRecipients(Request $request, int $churchId)

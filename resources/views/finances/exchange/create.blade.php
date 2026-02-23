@@ -17,7 +17,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Зареєструйте обмін валюти</p>
         </div>
 
-        <form action="{{ route('finances.exchange.store') }}" method="POST" class="p-6 space-y-6"
+        <form @submit.prevent="submit($refs.exchangeForm)" x-ref="exchangeForm" class="p-6 space-y-6"
               x-data="{
                   fromCurrency: 'USD',
                   toCurrency: 'UAH',
@@ -25,6 +25,7 @@
                   toAmount: '',
                   rate: {{ $exchangeRates['USD'] ?? 41 }},
                   nbuRates: @json($exchangeRates),
+                  ...ajaxForm({ url: '{{ route('finances.exchange.store') }}', method: 'POST' }),
                   init() {
                       this.updateDefaultRate();
                   },
@@ -61,7 +62,6 @@
                       }
                   }
               }">
-            @csrf
 
             <!-- From Currency -->
             <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
@@ -162,9 +162,10 @@
                    class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                     Скасувати
                 </a>
-                <button type="submit" x-bind:disabled="fromCurrency === toCurrency"
+                <button type="submit" x-bind:disabled="fromCurrency === toCurrency || saving"
                         class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    Зареєструвати обмін
+                    <span x-show="!saving">Зареєструвати обмін</span>
+                    <span x-show="saving">Збереження...</span>
                 </button>
             </div>
         </form>

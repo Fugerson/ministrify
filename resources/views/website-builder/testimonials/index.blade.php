@@ -25,11 +25,6 @@
         </button>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if($testimonials->isEmpty())
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
@@ -77,15 +72,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
                             </button>
-                            <form action="{{ route('website-builder.testimonials.destroy', $testimonial) }}" method="POST" onsubmit="return confirm('{{ __('messages.confirm_delete_testimony') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </form>
+                            <button type="button" @click="ajaxDelete('{{ route('website-builder.testimonials.destroy', $testimonial) }}', '{{ __('messages.confirm_delete_testimony') }}', () => $el.closest('.bg-white, .dark\\:bg-gray-800').remove())" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -97,13 +88,25 @@
     <div x-show="showModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showModal = false">
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="fixed inset-0 bg-black/50" @click="showModal = false"></div>
-            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6">
+            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6"
+                 x-data="{ saving: false, errors: {},
+                     async submitTestimonial(formEl) {
+                         if (this.saving) return;
+                         this.saving = true; this.errors = {};
+                         const url = editingTestimonial ? '{{ url('website-builder/testimonials') }}/' + editingTestimonial.id : '{{ route('website-builder.testimonials.store') }}';
+                         const formData = new FormData(formEl);
+                         if (editingTestimonial) formData.append('_method', 'PUT');
+                         try {
+                             const resp = await fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' }, body: formData });
+                             const data = await resp.json().catch(() => ({}));
+                             if (!resp.ok) { if (resp.status === 422 && data.errors) this.errors = data.errors; showToast('error', data.message || 'Помилка.'); this.saving = false; return; }
+                             showToast('success', data.message || 'Збережено!');
+                             setTimeout(() => location.reload(), 600);
+                         } catch(e) { showToast('error', \"Помилка з'єднання.\"); this.saving = false; }
+                     }
+                 }">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="editingTestimonial ? 'Редагувати свідчення' : 'Додати свідчення'"></h3>
-                <form :action="editingTestimonial ? '{{ url('website-builder/testimonials') }}/' + editingTestimonial.id : '{{ route('website-builder.testimonials.store') }}'" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <template x-if="editingTestimonial">
-                        <input type="hidden" name="_method" value="PUT">
-                    </template>
+                <form @submit.prevent="submitTestimonial($refs.testimonialForm)" x-ref="testimonialForm">
 
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
@@ -153,7 +156,7 @@
                         <button type="button" @click="showModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
                             Скасувати
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                        <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                             Зберегти
                         </button>
                     </div>

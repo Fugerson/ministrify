@@ -76,15 +76,12 @@
                             <p class="font-medium text-gray-900 dark:text-white">{{ $template->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{{ Str::limit($template->content, 100) }}</p>
                         </div>
-                        <form method="POST" action="{{ route('messages.templates.destroy', $template) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_short') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="ml-2 p-1 text-gray-400 hover:text-red-500">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
-                        </form>
+                        <button @click="ajaxDelete('{{ route('messages.templates.destroy', $template) }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('.p-4').remove())"
+                                class="ml-2 p-1 text-gray-400 hover:text-red-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 @empty
@@ -136,19 +133,25 @@
         <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('templateModal').classList.add('hidden')"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Новий шаблон</h3>
-            <form method="POST" action="{{ route('messages.templates.store') }}">
-                @csrf
+            <form @submit.prevent="submit($refs.templateForm)" x-ref="templateForm"
+                  x-data="{ ...ajaxForm({ url: '{{ route('messages.templates.store') }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); } }) }">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва</label>
                         <input type="text" name="name" required placeholder="Привітання з днем народження"
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
+                        <template x-if="errors.name">
+                            <p class="text-red-500 text-sm mt-1" x-text="errors.name[0]"></p>
+                        </template>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст повідомлення</label>
                         <textarea name="content" rows="4" required placeholder="Привіт, {first_name}!..."
                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white"></textarea>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Змінні: {first_name}, {last_name}, {full_name}</p>
+                        <template x-if="errors.content">
+                            <p class="text-red-500 text-sm mt-1" x-text="errors.content[0]"></p>
+                        </template>
                     </div>
                 </div>
                 <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
@@ -156,7 +159,7 @@
                             class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300">
                         Скасувати
                     </button>
-                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                    <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
                         Зберегти
                     </button>
                 </div>

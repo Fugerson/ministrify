@@ -16,15 +16,16 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Редагувати зустріч</h2>
 
-        <form method="POST" action="{{ route('meetings.update', [$ministry, $meeting]) }}" class="space-y-6">
-            @csrf
-            @method('PUT')
+        <form @submit.prevent="submit($refs.f)" x-ref="f"
+              x-data="{ ...ajaxForm({ url: '{{ route('meetings.update', [$ministry, $meeting]) }}', method: 'PUT' }) }"
+              class="space-y-6">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="md:col-span-2">
                     <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва зустрічі *</label>
                     <input type="text" name="title" id="title" value="{{ old('title', $meeting->title) }}" required
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                    <template x-if="errors.title"><p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p></template>
                 </div>
 
                 <div>
@@ -89,7 +90,7 @@
 
             <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button type="button"
-                        onclick="if(confirm('{{ __('messages.confirm_delete_meeting') }}')) { document.getElementById('delete-meeting-form').submit(); }"
+                        @click="ajaxDelete('{{ route('meetings.destroy', [$ministry, $meeting]) }}', '{{ __('messages.confirm_delete_meeting') }}', null, '{{ route('meetings.index', $ministry) }}')"
                         class="text-red-600 hover:text-red-700 text-sm font-medium">
                     Видалити зустріч
                 </button>
@@ -98,16 +99,12 @@
                     <a href="{{ route('meetings.show', [$ministry, $meeting]) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                         Скасувати
                     </a>
-                    <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
-                        Зберегти
+                    <button type="submit" :disabled="saving" class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
+                        <span x-show="!saving">Зберегти</span>
+                        <span x-show="saving" x-cloak>Збереження...</span>
                     </button>
                 </div>
             </div>
-        </form>
-
-        <form id="delete-meeting-form" method="POST" action="{{ route('meetings.destroy', [$ministry, $meeting]) }}" class="hidden">
-            @csrf
-            @method('DELETE')
         </form>
     </div>
 </div>

@@ -10,25 +10,13 @@
         <p class="text-gray-600 dark:text-gray-400 mt-1">Надішліть повідомлення в Telegram</p>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
-            {{ session('error') }}
-        </div>
-    @endif
-
     @if(!$hasBot)
         <div class="bg-amber-100 dark:bg-amber-900/30 border border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-lg">
             Telegram бот не налаштований. <a href="{{ route('settings.index') }}" class="underline">Налаштувати</a>
         </div>
     @else
-        <form method="POST" action="{{ route('telegram.broadcast.send') }}" class="space-y-6">
-            @csrf
+        <form @submit.prevent="submit($refs.broadcastForm)" x-ref="broadcastForm" class="space-y-6"
+              x-data="{ ...ajaxForm({ url: '{{ route('telegram.broadcast.send') }}', method: 'POST', stayOnPage: true }) }">
 
             <!-- Message -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -44,9 +32,9 @@
 *жирний текст*
 _курсив_
 `код`">{{ old('message') }}</textarea>
-                    @error('message')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.message">
+                        <p class="text-red-500 text-sm mt-1" x-text="errors.message[0]"></p>
+                    </template>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
                         Підтримується Markdown: *жирний*, _курсив_, `код`
                     </p>
@@ -89,9 +77,9 @@ _курсив_
                                 </label>
                             @endforeach
                         </div>
-                        @error('recipients')
-                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-                        @enderror
+                        <template x-if="errors.recipients">
+                            <p class="text-red-500 text-sm mt-2" x-text="errors.recipients[0]"></p>
+                        </template>
                     @else
                         <div class="text-center py-8">
                             <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
@@ -111,11 +99,11 @@ _курсив_
 
             @if($recipients->count() > 0)
                 <div class="flex justify-end">
-                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                    <button type="submit" :disabled="saving" class="inline-flex items-center gap-2 px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>
-                        Надіслати
+                        <span x-text="saving ? 'Надсилання...' : 'Надіслати'"></span>
                     </button>
                 </div>
             @endif

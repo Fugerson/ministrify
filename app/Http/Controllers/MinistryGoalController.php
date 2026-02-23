@@ -36,7 +36,7 @@ class MinistryGoalController extends Controller
 
         MinistryGoal::create($validated);
 
-        return back()->with('success', 'Ціль додано');
+        return $this->successResponse($request, 'Ціль додано');
     }
 
     public function updateGoal(Request $request, Ministry $ministry, MinistryGoal $goal)
@@ -60,7 +60,7 @@ class MinistryGoalController extends Controller
 
         $goal->update($validated);
 
-        return back()->with('success', 'Ціль оновлено');
+        return $this->successResponse($request, 'Ціль оновлено');
     }
 
     public function destroyGoal(Ministry $ministry, MinistryGoal $goal)
@@ -70,7 +70,7 @@ class MinistryGoalController extends Controller
 
         $goal->delete();
 
-        return back()->with('success', 'Ціль видалено');
+        return $this->successResponse(request(), 'Ціль видалено');
     }
 
     public function storeTask(Request $request, Ministry $ministry)
@@ -94,7 +94,7 @@ class MinistryGoalController extends Controller
 
         MinistryTask::create($validated);
 
-        return back()->with('success', 'Задачу додано');
+        return $this->successResponse($request, 'Задачу додано');
     }
 
     public function updateTask(Request $request, Ministry $ministry, MinistryTask $task)
@@ -120,7 +120,7 @@ class MinistryGoalController extends Controller
             $task->goal->updateProgressFromTasks();
         }
 
-        return back()->with('success', 'Задачу оновлено');
+        return $this->successResponse($request, 'Задачу оновлено');
     }
 
     public function toggleTask(Ministry $ministry, MinistryTask $task)
@@ -130,7 +130,7 @@ class MinistryGoalController extends Controller
 
         $task->toggle();
 
-        return back()->with('success', 'Статус задачі оновлено');
+        return $this->successResponse(request(), 'Статус задачі оновлено');
     }
 
     public function updateTaskStatus(Request $request, Ministry $ministry, MinistryTask $task)
@@ -155,7 +155,7 @@ class MinistryGoalController extends Controller
             }
         }
 
-        return back()->with('success', 'Статус задачі оновлено');
+        return $this->successResponse($request, 'Статус задачі оновлено');
     }
 
     public function destroyTask(Ministry $ministry, MinistryTask $task)
@@ -171,7 +171,7 @@ class MinistryGoalController extends Controller
             $goal->updateProgressFromTasks();
         }
 
-        return back()->with('success', 'Задачу видалено');
+        return $this->successResponse(request(), 'Задачу видалено');
     }
 
     public function updateVision(Request $request, Ministry $ministry)
@@ -184,7 +184,7 @@ class MinistryGoalController extends Controller
 
         $ministry->update($validated);
 
-        return back()->with('success', 'Бачення оновлено');
+        return $this->successResponse($request, 'Бачення оновлено');
     }
 
     private function authorizeMinistry(Ministry $ministry): void

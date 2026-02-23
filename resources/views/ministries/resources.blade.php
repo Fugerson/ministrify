@@ -229,8 +229,8 @@
             <div class="fixed inset-0 bg-black/50" @click="showCreateFolder = false"></div>
             <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова папка</h3>
-                <form method="POST" action="{{ route('ministries.resources.folder.create', $ministry) }}">
-                    @csrf
+                <form @submit.prevent="submit($refs.createFolderForm)" x-ref="createFolderForm"
+                      x-data="{ ...ajaxForm({ url: '{{ route('ministries.resources.folder.create', $ministry) }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); } }) }">
                     <input type="hidden" name="parent_id" value="{{ $folder?->id }}">
 
                     <div class="space-y-4">
@@ -239,6 +239,9 @@
                             <input type="text" name="name" required autofocus
                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
                                    placeholder="Назва папки...">
+                            <template x-if="errors.name">
+                                <p class="text-red-500 text-sm mt-1" x-text="errors.name[0]"></p>
+                            </template>
                         </div>
                     </div>
 
@@ -247,7 +250,7 @@
                                 class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
                             Скасувати
                         </button>
-                        <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
+                        <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
                             Створити
                         </button>
                     </div>
@@ -366,17 +369,6 @@
         </div>
     </div>
 
-    <!-- Hidden forms for actions -->
-    <form id="renameForm" method="POST" class="hidden">
-        @csrf
-        @method('PUT')
-        <input type="hidden" name="name" id="renameInput">
-    </form>
-
-    <form id="deleteForm" method="POST" class="hidden">
-        @csrf
-        @method('DELETE')
-    </form>
 </div>
 
 @push('scripts')
@@ -409,12 +401,12 @@ function ministryResourcesManager() {
             this.$nextTick(() => this.$refs.renameInput.focus());
         },
 
-        submitRename() {
+        async submitRename() {
             if (!this.renameName.trim()) return;
-            const form = document.getElementById('renameForm');
-            form.action = `/resources/${this.selectedId}/rename`;
-            document.getElementById('renameInput').value = this.renameName;
-            form.submit();
+            try {
+                await ajaxAction(`/resources/${this.selectedId}/rename`, 'PUT', { name: this.renameName });
+                window.location.reload();
+            } catch (e) {}
         },
 
         showPreview(file) {
@@ -453,11 +445,7 @@ function ministryResourcesManager() {
 
         deleteItem() {
             this.menuOpen = false;
-            if (!confirm('{{ __('messages.confirm_delete_item') }}')) return;
-
-            const form = document.getElementById('deleteForm');
-            form.action = `/resources/${this.selectedId}`;
-            form.submit();
+            ajaxDelete(`/resources/${this.selectedId}`, '{{ __('messages.confirm_delete_item') }}', () => window.location.reload());
         }
     }
 }

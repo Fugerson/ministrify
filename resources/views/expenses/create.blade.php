@@ -11,8 +11,9 @@
         {{ __('Назад') }}
     </a>
 
-    <form method="POST" action="{{ route('finances.expenses.store') }}" enctype="multipart/form-data" class="space-y-6">
-        @csrf
+    <form @submit.prevent="submit($refs.expenseForm)" x-ref="expenseForm"
+          x-data="{ ...ajaxForm({ url: '{{ route('finances.expenses.store') }}', method: 'POST' }) }"
+          enctype="multipart/form-data" class="space-y-6">
 
         {{-- Budget exceeded warning --}}
         @if(session('budget_exceeded'))
@@ -52,9 +53,7 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('ministry_id')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.ministry_id"><p class="mt-1 text-sm text-red-500" x-text="errors.ministry_id[0]"></p></template>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -66,18 +65,14 @@
                                    placeholder="0.00">
                             <span class="absolute right-3 top-2 text-gray-500 dark:text-gray-400">₴</span>
                         </div>
-                        @error('amount')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
+                        <template x-if="errors.amount"><p class="mt-1 text-sm text-red-500" x-text="errors.amount[0]"></p></template>
                     </div>
 
                     <div>
                         <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} <span class="text-red-500">*</span></label>
                         <input type="date" name="date" id="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('date')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
+                        <template x-if="errors.date"><p class="mt-1 text-sm text-red-500" x-text="errors.date[0]"></p></template>
                     </div>
                 </div>
 
@@ -86,9 +81,7 @@
                     <input type="text" name="description" id="description" value="{{ old('description') }}" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                            placeholder="{{ __('Струни для гітари') }}">
-                    @error('description')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.description"><p class="mt-1 text-sm text-red-500" x-text="errors.description[0]"></p></template>
                 </div>
 
                 <div>
@@ -133,8 +126,9 @@
             <a href="{{ route('finances.expenses.index') }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 {{ __('Скасувати') }}
             </a>
-            <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
-                {{ __('Зберегти') }}
+            <button type="submit" :disabled="saving" class="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                <span x-show="!saving">{{ __('Зберегти') }}</span>
+                <span x-show="saving">{{ __('Збереження...') }}</span>
             </button>
         </div>
     </form>

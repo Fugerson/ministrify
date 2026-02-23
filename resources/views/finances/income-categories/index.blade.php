@@ -19,13 +19,17 @@
 
         <div class="p-6">
             <!-- Add new category form -->
-            <form action="{{ route('settings.income-categories.store') }}" method="POST" class="mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                @csrf
+            <form @submit.prevent="submit($refs.addForm)" x-ref="addForm"
+                  x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.store') }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess() { window.location.reload(); } }) }"
+                  class="mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                 <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Додати категорію</h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <input type="text" name="name" placeholder="Назва категорії" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                        <template x-if="errors.name">
+                            <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
+                        </template>
                     </div>
                     <div>
                         <input type="text" name="icon" placeholder="Емодзі" maxlength="10"
@@ -36,7 +40,7 @@
                                class="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
                     </div>
                     <div>
-                        <button type="submit" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                        <button type="submit" :disabled="saving" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                             Додати
                         </button>
                     </div>
@@ -46,7 +50,7 @@
             <!-- Categories list -->
             <div class="space-y-3">
                 @forelse($categories as $category)
-                    <div x-data="{ editing: false }" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div x-data="{ editing: false }" data-category class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div x-show="!editing" class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background-color: {{ $category->color }}20">
@@ -64,24 +68,21 @@
                                     </svg>
                                 </button>
                                 @if($category->incomes_count == 0)
-                                    <form action="{{ route('settings.income-categories.destroy', $category) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('{{ __('messages.confirm_delete_category') }}')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-400 hover:text-red-600">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                            @click="ajaxDelete('{{ route('settings.income-categories.destroy', $category) }}', '{{ __('messages.confirm_delete_category') }}', () => $el.closest('[data-category]').remove())"
+                                            class="text-red-400 hover:text-red-600">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 @endif
                             </div>
                         </div>
 
                         <!-- Edit form -->
-                        <form x-show="editing" action="{{ route('settings.income-categories.update', $category) }}" method="POST">
-                            @csrf
-                            @method('PUT')
+                        <form x-show="editing"
+                              @submit.prevent="submit($refs.editForm{{ $category->id }})" x-ref="editForm{{ $category->id }}"
+                              x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess() { window.location.reload(); } }) }">
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <input type="text" name="name" value="{{ $category->name }}" required
@@ -96,7 +97,7 @@
                                            class="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
                                 </div>
                                 <div class="flex items-center space-x-2">
-                                    <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                                    <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                                         Зберегти
                                     </button>
                                     <button type="button" @click="editing = false" class="px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">

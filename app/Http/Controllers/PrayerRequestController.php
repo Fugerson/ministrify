@@ -70,16 +70,7 @@ class PrayerRequestController extends Controller
             'is_urgent' => $request->boolean('is_urgent'),
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Молитовний запит створено!',
-                'redirect_url' => route('prayer-requests.index'),
-            ]);
-        }
-
-        return redirect()->route('prayer-requests.index')
-            ->with('success', 'Молитовне прохання додано.');
+        return $this->successResponse($request, 'Молитовне прохання додано.', 'prayer-requests.index');
     }
 
     public function show(PrayerRequest $prayerRequest)
@@ -131,35 +122,26 @@ class PrayerRequestController extends Controller
             'is_urgent' => $request->boolean('is_urgent'),
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Молитовний запит оновлено!',
-            ]);
-        }
-
-        return redirect()->route('prayer-requests.show', $prayerRequest)
-            ->with('success', 'Прохання оновлено.');
+        return $this->successResponse($request, 'Прохання оновлено.', 'prayer-requests.show', [$prayerRequest]);
     }
 
-    public function destroy(PrayerRequest $prayerRequest)
+    public function destroy(Request $request, PrayerRequest $prayerRequest)
     {
         $this->authorizeChurch($prayerRequest);
         $this->authorizeOwner($prayerRequest);
 
         $prayerRequest->delete();
 
-        return redirect()->route('prayer-requests.index')
-            ->with('success', 'Прохання видалено.');
+        return $this->successResponse($request, 'Прохання видалено.', 'prayer-requests.index');
     }
 
-    public function pray(PrayerRequest $prayerRequest)
+    public function pray(Request $request, PrayerRequest $prayerRequest)
     {
         $this->authorizeChurch($prayerRequest);
 
         $prayerRequest->markAsPrayed(auth()->user());
 
-        return back()->with('success', 'Дякуємо за молитву! 🙏');
+        return $this->successResponse($request, 'Дякуємо за молитву! 🙏');
     }
 
     public function markAnswered(Request $request, PrayerRequest $prayerRequest)
@@ -173,7 +155,7 @@ class PrayerRequestController extends Controller
 
         $prayerRequest->markAsAnswered($validated['answer_testimony'] ?? null);
 
-        return back()->with('success', 'Слава Богу! Прохання відмічено як відповідь отримано.');
+        return $this->successResponse($request, 'Слава Богу! Прохання відмічено як відповідь отримано.');
     }
 
     public function wall()

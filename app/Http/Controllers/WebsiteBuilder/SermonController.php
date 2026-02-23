@@ -67,7 +67,7 @@ class SermonController extends Controller
 
         Sermon::create($validated);
 
-        return redirect()->route('website-builder.sermons.index')->with('success', 'Проповідь додано');
+        return $this->successResponse($request, 'Проповідь додано', 'website-builder.sermons.index');
     }
 
     public function edit(Sermon $sermon)
@@ -119,10 +119,10 @@ class SermonController extends Controller
 
         $sermon->update($validated);
 
-        return redirect()->route('website-builder.sermons.index')->with('success', 'Проповідь оновлено');
+        return $this->successResponse($request, 'Проповідь оновлено', 'website-builder.sermons.index');
     }
 
-    public function destroy(Sermon $sermon)
+    public function destroy(Request $request, Sermon $sermon)
     {
         $this->authorize('delete', $sermon);
 
@@ -135,7 +135,7 @@ class SermonController extends Controller
 
         $sermon->delete();
 
-        return redirect()->route('website-builder.sermons.index')->with('success', 'Проповідь видалено');
+        return $this->successResponse($request, 'Проповідь видалено', 'website-builder.sermons.index');
     }
 
     // Series management

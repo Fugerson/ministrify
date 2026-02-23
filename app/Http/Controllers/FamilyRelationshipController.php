@@ -35,10 +35,7 @@ class FamilyRelationshipController extends Controller
 
         // Prevent self-relationship
         if ($person->id === $relatedPerson->id) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'error' => 'Не можна створити зв\'язок з самим собою'], 422);
-            }
-            return back()->with('error', 'Не можна створити зв\'язок з самим собою');
+            return $this->errorResponse($request, 'Не можна створити зв\'язок з самим собою');
         }
 
         // Check if relationship already exists (in either direction)
@@ -58,10 +55,7 @@ class FamilyRelationshipController extends Controller
             ->exists();
 
         if ($existingRelationship) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'error' => 'Цей зв\'язок вже існує'], 422);
-            }
-            return back()->with('error', 'Цей зв\'язок вже існує');
+            return $this->errorResponse($request, 'Цей зв\'язок вже існує');
         }
 
         // Prevent contradictory relationships (e.g., A is parent of B AND B is parent of A)
@@ -79,11 +73,7 @@ class FamilyRelationshipController extends Controller
             ->exists();
 
         if ($contradictory) {
-            $error = 'Між цими людьми вже існує інший зв\'язок';
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'error' => $error], 422);
-            }
-            return back()->with('error', $error);
+            return $this->errorResponse($request, 'Між цими людьми вже існує інший зв\'язок');
         }
 
         // For spouse relationship, check if either person already has a spouse
@@ -105,19 +95,11 @@ class FamilyRelationshipController extends Controller
                 ->exists();
 
             if ($personHasSpouse) {
-                $error = $person->full_name . ' вже має чоловіка/дружину';
-                if ($request->wantsJson()) {
-                    return response()->json(['success' => false, 'error' => $error], 422);
-                }
-                return back()->with('error', $error);
+                return $this->errorResponse($request, $person->full_name . ' вже має чоловіка/дружину');
             }
 
             if ($relatedHasSpouse) {
-                $error = $relatedPerson->full_name . ' вже має чоловіка/дружину';
-                if ($request->wantsJson()) {
-                    return response()->json(['success' => false, 'error' => $error], 422);
-                }
-                return back()->with('error', $error);
+                return $this->errorResponse($request, $relatedPerson->full_name . ' вже має чоловіка/дружину');
             }
         }
 
@@ -128,21 +110,16 @@ class FamilyRelationshipController extends Controller
             'relationship_type' => $validated['relationship_type'],
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'member' => [
-                    'relationship_id' => $relationship->id,
-                    'person_id' => $relatedPerson->id,
-                    'full_name' => $relatedPerson->full_name,
-                    'first_name' => $relatedPerson->first_name,
-                    'photo' => $relatedPerson->photo ? Storage::url($relatedPerson->photo) : null,
-                    'relationship_label' => FamilyRelationship::getTypes()[$validated['relationship_type']] ?? $validated['relationship_type'],
-                ],
-            ]);
-        }
-
-        return back()->with('success', 'Зв\'язок успішно створено');
+        return $this->successResponse($request, 'Зв\'язок успішно створено', null, [], [
+            'member' => [
+                'relationship_id' => $relationship->id,
+                'person_id' => $relatedPerson->id,
+                'full_name' => $relatedPerson->full_name,
+                'first_name' => $relatedPerson->first_name,
+                'photo' => $relatedPerson->photo ? Storage::url($relatedPerson->photo) : null,
+                'relationship_label' => FamilyRelationship::getTypes()[$validated['relationship_type']] ?? $validated['relationship_type'],
+            ],
+        ]);
     }
 
     /**
@@ -160,11 +137,7 @@ class FamilyRelationshipController extends Controller
 
         $familyRelationship->delete();
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Зв\'язок успішно видалено');
+        return $this->successResponse($request, 'Зв\'язок успішно видалено');
     }
 
     /**

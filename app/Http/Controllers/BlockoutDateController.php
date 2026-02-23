@@ -13,13 +13,12 @@ class BlockoutDateController extends Controller
     /**
      * Display user's blockout dates (My Profile section)
      */
-    public function index()
+    public function index(Request $request)
     {
         $person = auth()->user()->person;
 
         if (!$person) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Профіль не знайдено');
+            return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
         $blockouts = $person->blockoutDates()
@@ -35,13 +34,12 @@ class BlockoutDateController extends Controller
     /**
      * Show form for creating new blockout
      */
-    public function create()
+    public function create(Request $request)
     {
         $person = auth()->user()->person;
 
         if (!$person) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Профіль не знайдено');
+            return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
         $ministries = $person->ministries;
@@ -57,7 +55,7 @@ class BlockoutDateController extends Controller
         $person = auth()->user()->person;
 
         if (!$person) {
-            return back()->with('error', 'Профіль не знайдено');
+            return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
         $validated = $request->validate([
@@ -99,16 +97,7 @@ class BlockoutDateController extends Controller
         // Auto-decline pending assignments that conflict
         $this->handleConflictingAssignments($person, $blockout);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Блокування створено!',
-                'redirect_url' => route('blockouts.index'),
-            ]);
-        }
-
-        return redirect()->route('blockouts.index')
-            ->with('success', 'Період недоступності додано');
+        return $this->successResponse($request, 'Період недоступності додано', 'blockouts.index');
     }
 
     /**
@@ -173,21 +162,13 @@ class BlockoutDateController extends Controller
             $blockout->ministries()->detach();
         }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Блокування оновлено!',
-            ]);
-        }
-
-        return redirect()->route('blockouts.index')
-            ->with('success', 'Період недоступності оновлено');
+        return $this->successResponse($request, 'Період недоступності оновлено', 'blockouts.index');
     }
 
     /**
      * Delete blockout date
      */
-    public function destroy(BlockoutDate $blockout)
+    public function destroy(Request $request, BlockoutDate $blockout)
     {
         $person = auth()->user()->person;
 
@@ -197,14 +178,13 @@ class BlockoutDateController extends Controller
 
         $blockout->delete();
 
-        return redirect()->route('blockouts.index')
-            ->with('success', 'Період недоступності видалено');
+        return $this->successResponse($request, 'Період недоступності видалено', 'blockouts.index');
     }
 
     /**
      * Cancel a blockout (mark as cancelled instead of deleting)
      */
-    public function cancel(BlockoutDate $blockout)
+    public function cancel(Request $request, BlockoutDate $blockout)
     {
         $person = auth()->user()->person;
 
@@ -214,7 +194,7 @@ class BlockoutDateController extends Controller
 
         $blockout->update(['status' => 'cancelled']);
 
-        return back()->with('success', 'Період недоступності скасовано');
+        return $this->successResponse($request, 'Період недоступності скасовано');
     }
 
     /**

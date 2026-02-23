@@ -39,18 +39,16 @@
                 </ol>
             </div>
 
-            <form action="{{ route('finances.monobank.connect') }}" method="POST" class="max-w-md mx-auto">
-                @csrf
+            <form @submit.prevent="submit($refs.connectForm)" x-ref="connectForm" x-data="{ ...ajaxForm({url:'{{ route('finances.monobank.connect') }}', method:'POST', redirect:'{{ route('finances.monobank.index') }}'}) }" class="max-w-md mx-auto">
                 <div class="mb-4">
                     <input type="text" name="token" placeholder="Вставте токен сюди..."
                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                            required>
-                    @error('token')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.token"><p class="mt-1 text-sm text-red-500" x-text="errors.token[0]"></p></template>
                 </div>
-                <button type="submit" class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                    Підключити Monobank
+                <button type="submit" :disabled="saving" class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                    <span x-show="!saving">Підключити Monobank</span>
+                    <span x-show="saving">Підключення...</span>
                 </button>
             </form>
         </div>
@@ -81,13 +79,9 @@
 
                 <div class="flex items-center gap-2">
                     {{-- Sync buttons --}}
-                    <form action="{{ route('finances.monobank.sync') }}" method="POST" class="inline">
-                        @csrf
-                        <input type="hidden" name="days" value="7">
-                        <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                            Синхронізувати
-                        </button>
-                    </form>
+                    <button type="button" @click="ajaxAction('{{ route('finances.monobank.sync') }}', 'POST', {days: 7})" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                        Синхронізувати
+                    </button>
 
                     {{-- Settings dropdown --}}
                     <div class="relative" x-data="{ open: false }">
@@ -98,36 +92,20 @@
                         </button>
                         <div x-show="open" @click.away="open = false" x-cloak
                              class="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                            <form action="{{ route('finances.monobank.sync') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="days" value="14">
-                                <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    Синхронізувати 14 днів
-                                </button>
-                            </form>
-                            <form action="{{ route('finances.monobank.sync') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="days" value="30">
-                                <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    Синхронізувати 30 днів
-                                </button>
-                            </form>
+                            <button type="button" @click="ajaxAction('{{ route('finances.monobank.sync') }}', 'POST', {days: 14}); open = false" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                Синхронізувати 14 днів
+                            </button>
+                            <button type="button" @click="ajaxAction('{{ route('finances.monobank.sync') }}', 'POST', {days: 30}); open = false" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                Синхронізувати 30 днів
+                            </button>
                             <hr class="border-gray-200 dark:border-gray-700">
-                            <form action="{{ route('finances.monobank.toggle-auto-sync') }}" method="POST">
-                                @csrf
-                                <button type="submit" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    {{ $church->monobank_auto_sync ? 'Вимкнути' : 'Увімкнути' }} автосинхронізацію
-                                </button>
-                            </form>
+                            <button type="button" @click="ajaxAction('{{ route('finances.monobank.toggle-auto-sync') }}', 'POST'); open = false" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                {{ $church->monobank_auto_sync ? 'Вимкнути' : 'Увімкнути' }} автосинхронізацію
+                            </button>
                             <hr class="border-gray-200 dark:border-gray-700">
-                            <form action="{{ route('finances.monobank.disconnect') }}" method="POST"
-                                  onsubmit="return confirm('{{ __('messages.confirm_disconnect_monobank') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                    Відключити Monobank
-                                </button>
-                            </form>
+                            <button type="button" @click="ajaxDelete('{{ route('finances.monobank.disconnect') }}', '{{ __('messages.confirm_disconnect_monobank') }}', null, '{{ route('finances.monobank.index') }}')" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                Відключити Monobank
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -136,10 +114,9 @@
             {{-- Account selector if multiple --}}
             @if(count($accounts) > 1)
                 <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <form action="{{ route('finances.monobank.select-account') }}" method="POST" class="flex items-center gap-3">
-                        @csrf
+                    <div class="flex items-center gap-3">
                         <label class="text-sm text-gray-600 dark:text-gray-400">Рахунок:</label>
-                        <select name="account_id" onchange="this.form.submit()"
+                        <select @change="ajaxAction('{{ route('finances.monobank.select-account') }}', 'POST', {account_id: $event.target.value})"
                                 class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             @foreach($accounts as $account)
                                 <option value="{{ $account['id'] }}" {{ $church->monobank_account_id == $account['id'] ? 'selected' : '' }}>
@@ -147,7 +124,7 @@
                                 </option>
                             @endforeach
                         </select>
-                    </form>
+                    </div>
                 </div>
             @endif
         </div>
@@ -208,32 +185,20 @@
                         <span class="text-sm text-primary-700 dark:text-primary-300">
                             Обрано: <strong x-text="selectedIds.length"></strong>
                         </span>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <form action="{{ route('finances.monobank.bulk-import') }}" method="POST" class="flex items-center gap-2">
-                                @csrf
-                                <template x-for="id in selectedIds">
-                                    <input type="hidden" name="transaction_ids[]" :value="id">
-                                </template>
-                                <select name="category_id" required class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg">
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" {{ $donationCategory && $donationCategory->id == $category->id ? 'selected' : '' }}>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg">
-                                    Імпортувати
-                                </button>
-                            </form>
-                            <form action="{{ route('finances.monobank.bulk-ignore') }}" method="POST">
-                                @csrf
-                                <template x-for="id in selectedIds">
-                                    <input type="hidden" name="transaction_ids[]" :value="id">
-                                </template>
-                                <button type="submit" class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded-lg">
-                                    Приховати
-                                </button>
-                            </form>
+                        <div class="flex flex-wrap items-center gap-2" x-data="{ bulkCategoryId: '{{ $donationCategory?->id }}' }">
+                            <select x-model="bulkCategoryId" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg">
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ $donationCategory && $donationCategory->id == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <button type="button" @click="ajaxAction('{{ route('finances.monobank.bulk-import') }}', 'POST', {transaction_ids: selectedIds, category_id: bulkCategoryId})" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg">
+                                Імпортувати
+                            </button>
+                            <button type="button" @click="ajaxAction('{{ route('finances.monobank.bulk-ignore') }}', 'POST', {transaction_ids: selectedIds})" class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded-lg">
+                                Приховати
+                            </button>
                             <button @click="selectedIds = []" class="px-3 py-1.5 text-gray-600 hover:text-gray-800 text-sm">
                                 Скасувати
                             </button>
@@ -437,21 +402,15 @@
                                             <button @click="showImport = !showImport" class="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded">
                                                 Імпорт
                                             </button>
-                                            <form action="{{ route('finances.monobank.ignore', $tx) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="p-1 text-gray-400 hover:text-gray-600" title="Приховати">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                                                    </svg>
-                                                </button>
-                                            </form>
+                                            <button type="button" @click="ajaxAction('{{ route('finances.monobank.ignore', $tx) }}', 'POST')" class="p-1 text-gray-400 hover:text-gray-600" title="Приховати">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                                                </svg>
+                                            </button>
                                         @elseif($tx->is_ignored)
-                                            <form action="{{ route('finances.monobank.restore', $tx) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="px-2 py-1 text-xs bg-gray-500 hover:bg-gray-600 text-white rounded">
-                                                    Відновити
-                                                </button>
-                                            </form>
+                                            <button type="button" @click="ajaxAction('{{ route('finances.monobank.restore', $tx) }}', 'POST')" class="px-2 py-1 text-xs bg-gray-500 hover:bg-gray-600 text-white rounded">
+                                                Відновити
+                                            </button>
                                         @else
                                             <span class="text-xs text-gray-400">—</span>
                                         @endif
@@ -461,9 +420,8 @@
                             {{-- Import form row --}}
                             <tr x-show="showImport" x-collapse x-cloak>
                                 <td colspan="{{ $tab === 'new' ? 8 : 7 }}" class="px-3 py-4 bg-gray-50 dark:bg-gray-800/50">
-                                    <form action="{{ route('finances.monobank.import', $tx) }}" method="POST"
-                                          x-data="importForm({{ $tx->id }}, '{{ $donationCategory?->id }}')" x-init="loadSuggestions()">
-                                        @csrf
+                                    <form @submit.prevent="submit($refs['importForm{{ $tx->id }}'])" x-ref="importForm{{ $tx->id }}"
+                                          x-data="{ ...ajaxForm({url:'{{ route('finances.monobank.import', $tx) }}', method:'POST'}), ...importForm({{ $tx->id }}, '{{ $donationCategory?->id }}') }" x-init="loadSuggestions()">
                                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                             <div>
                                                 <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
@@ -500,7 +458,7 @@
                                                         Зберегти IBAN
                                                     </label>
                                                 @endif
-                                                <button type="submit" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded">
+                                                <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded disabled:opacity-50">
                                                     Імпортувати
                                                 </button>
                                                 <button type="button" @click="showImport = false" class="px-3 py-1.5 text-gray-600 hover:text-gray-800 text-sm">

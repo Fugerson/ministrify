@@ -32,14 +32,16 @@
                                 {{ $request->author_name }} • {{ $request->created_at->diffForHumans() }}
                             </p>
                         </div>
-                        <form action="{{ route('prayer-requests.pray', $request) }}" method="POST" class="ml-4">
-                            @csrf
-                            <button type="submit"
-                                    class="flex flex-col items-center px-3 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg transition-colors">
+                        <div class="ml-4" x-data="{ prayed: false, prayerCount: {{ $request->prayer_count }} }">
+                            <button type="button"
+                                    @click="if(!prayed) { ajaxAction('{{ route('prayer-requests.pray', $request) }}', 'POST').then(() => { prayed = true; prayerCount++; }).catch(() => {}) }"
+                                    :disabled="prayed"
+                                    class="flex flex-col items-center px-3 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg transition-colors"
+                                    :class="{ 'opacity-50': prayed }">
                                 <span class="text-2xl">🙏</span>
-                                <span class="text-xs font-medium">{{ $request->prayer_count }}</span>
+                                <span class="text-xs font-medium" x-text="prayerCount"></span>
                             </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             @empty

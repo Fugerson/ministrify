@@ -80,12 +80,12 @@
 
     @if(!in_array($ticket->status, ['closed', 'resolved']))
         <!-- Reply Form -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" x-data="{ files: [] }">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
+             x-data="{ ...ajaxForm({ url: '{{ route('support.reply', $ticket) }}', method: 'POST', stayOnPage: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }), files: [] }">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Відповісти</h2>
             </div>
-            <form action="{{ route('support.reply', $ticket) }}" method="POST" enctype="multipart/form-data" class="p-6">
-                @csrf
+            <form @submit.prevent="submit($refs.replyForm)" x-ref="replyForm" class="p-6">
                 <textarea name="message" rows="4" required
                           placeholder="Напишіть вашу відповідь..."
                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mb-4"></textarea>
@@ -107,16 +107,14 @@
                 </div>
 
                 <div class="flex items-center justify-between">
-                    <button type="button" onclick="document.getElementById('close-ticket-form').submit()" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    <button type="button" @click="ajaxAction('{{ route('support.close', $ticket) }}', 'POST').then(() => setTimeout(() => window.location.href = '{{ route('support.index') }}', 600))" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                         Закрити запит
                     </button>
-                    <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                        Надіслати
+                    <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                        <span x-show="!saving">Надіслати</span>
+                        <span x-show="saving" x-cloak>Надсилання...</span>
                     </button>
                 </div>
-            </form>
-            <form id="close-ticket-form" action="{{ route('support.close', $ticket) }}" method="POST" class="hidden">
-                @csrf
             </form>
         </div>
     @else

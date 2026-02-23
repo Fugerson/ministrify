@@ -641,11 +641,10 @@
             {{-- Simple responsibility form for non-service events --}}
             <div x-show="!$store.event.isService" x-cloak class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Відповідальності</h2>
-                <form method="POST" action="{{ route('events.responsibilities.store', $event) }}" class="flex gap-2">
-                    @csrf
+                <form @submit.prevent="submit($refs.respForm)" x-ref="respForm" x-data="{ ...ajaxForm({ url: '{{ route('events.responsibilities.store', $event) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }" class="flex gap-2">
                     <input type="text" name="name" required placeholder="Нова відповідальність"
                            class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                    <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg">
+                    <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white text-sm rounded-lg">
                         Додати
                     </button>
                 </form>
@@ -981,28 +980,20 @@
 
                                                 <div class="mt-6 space-y-3">
                                                     <!-- Delete only this event -->
-                                                    <form method="POST" action="{{ route('events.destroy', $event) }}">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <input type="hidden" name="delete_series" value="0">
-                                                        <button type="submit"
-                                                                class="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
-                                                            <div class="font-medium">Тільки цю подію</div>
-                                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Інші події серії залишаться</div>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                            @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 0 }).then(() => setTimeout(() => window.location.href = '{{ route('schedule') }}', 600))"
+                                                            class="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
+                                                        <div class="font-medium">Тільки цю подію</div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Інші події серії залишаться</div>
+                                                    </button>
 
                                                     <!-- Delete all in series -->
-                                                    <form method="POST" action="{{ route('events.destroy', $event) }}">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <input type="hidden" name="delete_series" value="1">
-                                                        <button type="submit"
-                                                                class="w-full px-4 py-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-left">
-                                                            <div class="font-medium">Всю серію ({{ $relatedCount }} подій)</div>
-                                                            <div class="text-xs text-red-200 mt-0.5">Видалити всі пов'язані події</div>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                            @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 1 }).then(() => setTimeout(() => window.location.href = '{{ route('schedule') }}', 600))"
+                                                            class="w-full px-4 py-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-left">
+                                                        <div class="font-medium">Всю серію ({{ $relatedCount }} подій)</div>
+                                                        <div class="text-xs text-red-200 mt-0.5">Видалити всі пов'язані події</div>
+                                                    </button>
                                                 </div>
 
                                                 <div class="mt-4">
@@ -1021,14 +1012,11 @@
                                                             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
                                                         Скасувати
                                                     </button>
-                                                    <form method="POST" action="{{ route('events.destroy', $event) }}" class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                                                            Видалити
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                            @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE').then(() => setTimeout(() => window.location.href = '{{ route('schedule') }}', 600))"
+                                                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                                                        Видалити
+                                                    </button>
                                                 </div>
                                             @endif
                                         </div>

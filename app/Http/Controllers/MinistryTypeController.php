@@ -83,7 +83,7 @@ class MinistryTypeController extends Controller
         return back()->with('success', 'Тип служіння оновлено.');
     }
 
-    public function destroyMinistry(Ministry $ministry)
+    public function destroyMinistry(Request $request, Ministry $ministry)
     {
         // Validate church ownership
         if ($ministry->church_id !== $this->getCurrentChurch()->id) {
@@ -92,6 +92,6 @@ class MinistryTypeController extends Controller
 
         $ministry->delete();
 
-        return back()->with('success', 'Служіння видалено.');
+        return $this->successResponse($request, 'Служіння видалено.');
     }
 }

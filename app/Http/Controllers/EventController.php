@@ -21,7 +21,7 @@ class EventController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('events')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();
@@ -42,7 +42,7 @@ class EventController extends Controller
     public function schedule(Request $request)
     {
         if (!auth()->user()->canView('events')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();
@@ -296,16 +296,7 @@ class EventController extends Controller
             );
         }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Подію створено!',
-                'redirect_url' => route('events.show', $event),
-            ]);
-        }
-
-        return redirect()->route('events.show', $event)
-            ->with('success', 'Подію створено.');
+        return $this->successResponse($request, 'Подію створено.', 'events.show', ['event' => $event]);
     }
 
     public function show(Event $event)
@@ -508,27 +499,20 @@ class EventController extends Controller
 
         $event->update($validated);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Подію оновлено',
-                'event' => [
-                    'id' => $event->id,
-                    'title' => $event->title,
-                    'date' => $event->date?->format('Y-m-d'),
-                    'time' => $event->time?->format('H:i'),
-                    'notes' => $event->notes,
-                    'ministry_id' => $event->ministry_id,
-                    'ministry_name' => $event->ministry?->name,
-                    'ministry_color' => $event->ministry?->color,
-                    'is_service' => $event->is_service,
-                    'track_attendance' => $event->track_attendance,
-                ],
-            ]);
-        }
-
-        return redirect()->route('events.show', $event)
-            ->with('success', 'Подію оновлено.');
+        return $this->successResponse($request, 'Подію оновлено.', 'events.show', ['event' => $event], [
+            'event' => [
+                'id' => $event->id,
+                'title' => $event->title,
+                'date' => $event->date?->format('Y-m-d'),
+                'time' => $event->time?->format('H:i'),
+                'notes' => $event->notes,
+                'ministry_id' => $event->ministry_id,
+                'ministry_name' => $event->ministry?->name,
+                'ministry_color' => $event->ministry?->color,
+                'is_service' => $event->is_service,
+                'track_attendance' => $event->track_attendance,
+            ],
+        ]);
     }
 
     public function destroy(Request $request, Event $event)
@@ -556,7 +540,7 @@ class EventController extends Controller
                 $seriesEvent->delete();
             }
 
-            return redirect()->route('schedule')->with('success', 'Серію подій видалено.');
+            return $this->successResponse($request, 'Серію подій видалено.', 'schedule');
         }
 
         if ($event->google_event_id) {
@@ -565,7 +549,7 @@ class EventController extends Controller
 
         $event->delete();
 
-        return redirect()->route('schedule')->with('success', 'Подію видалено.');
+        return $this->successResponse($request, 'Подію видалено.', 'schedule');
     }
 
     public function saveAttendance(Request $request, Event $event)
@@ -636,13 +620,12 @@ class EventController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function mySchedule()
+    public function mySchedule(Request $request)
     {
         $user = auth()->user();
 
         if (!$user->person) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Ваш профіль не знайдено.');
+            return $this->errorResponse($request, 'Ваш профіль не знайдено.');
         }
 
         $responsibilities = $user->person->responsibilities()
@@ -839,9 +822,7 @@ class EventController extends Controller
             $message .= ", помилок: {$result['total_errors']}";
         }
 
-        return redirect()->route('schedule')
-            ->with('success', $message)
-            ->with('import_details', $result);
+        return $this->successResponse($request, $message, 'schedule');
     }
 
     /**

@@ -29,7 +29,7 @@
     <!-- Archived Boards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($boards as $board)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden opacity-75 hover:opacity-100 transition-opacity">
+            <div data-board class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden opacity-75 hover:opacity-100 transition-opacity">
                 <div class="h-2" style="background-color: {{ $board->color }}"></div>
 
                 <div class="p-5">
@@ -45,22 +45,16 @@
                     </div>
 
                     <div class="mt-4 flex items-center gap-3">
-                        <form method="POST" action="{{ route('boards.restore', $board) }}">
-                            @csrf
-                            <button type="submit"
-                                    class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                {{ __('Відновити') }}
-                            </button>
-                        </form>
-                        <form method="POST" action="{{ route('boards.destroy', $board) }}"
-                              onsubmit="return confirm('{{ __('Видалити назавжди?') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="px-3 py-1.5 text-red-600 hover:text-red-700 text-sm font-medium">
-                                {{ __('Видалити') }}
-                            </button>
-                        </form>
+                        <button type="button"
+                                @click="ajaxAction('{{ route('boards.restore', $board) }}', 'POST').then(() => $el.closest('[data-board]').remove())"
+                                class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                            {{ __('Відновити') }}
+                        </button>
+                        <button type="button"
+                                @click="ajaxDelete('{{ route('boards.destroy', $board) }}', '{{ __('Видалити назавжди?') }}', () => $el.closest('[data-board]').remove())"
+                                class="px-3 py-1.5 text-red-600 hover:text-red-700 text-sm font-medium">
+                            {{ __('Видалити') }}
+                        </button>
                     </div>
                 </div>
             </div>

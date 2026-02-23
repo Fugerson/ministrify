@@ -14,9 +14,7 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Редагувати: {{ $staffMember->name }}</h1>
     </div>
 
-    <form method="POST" action="{{ route('website-builder.team.update', $staffMember) }}" enctype="multipart/form-data" class="space-y-6">
-        @csrf
-        @method('PUT')
+    <form @submit.prevent="submit($refs.teamEditForm)" x-ref="teamEditForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.team.update', $staffMember) }}', method: 'PUT' }) }" class="space-y-6">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -123,7 +121,7 @@
             <a href="{{ route('website-builder.team.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 Скасувати
             </a>
-            <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+            <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                 Зберегти
             </button>
         </div>

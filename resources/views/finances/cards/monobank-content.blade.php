@@ -37,18 +37,16 @@
             </ol>
         </div>
 
-        <form action="{{ route('finances.monobank.connect') }}" method="POST" class="max-w-md mx-auto">
-            @csrf
+        <form @submit.prevent="submit($refs.monoForm)" x-ref="monoForm" x-data="{ ...ajaxForm({ url: '{{ route('finances.monobank.connect') }}', method: 'POST' }) }" class="max-w-md mx-auto">
             <div class="mb-4">
                 <input type="text" name="token" placeholder="Вставте токен сюди..."
                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                        required>
-                @error('token')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.token"><p class="mt-1 text-sm text-red-500" x-text="errors.token[0]"></p></template>
             </div>
-            <button type="submit" class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                Підключити Monobank
+            <button type="submit" :disabled="saving" class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                <span x-show="!saving">Підключити Monobank</span>
+                <span x-show="saving">Підключення...</span>
             </button>
         </form>
     </div>

@@ -21,7 +21,7 @@ class ExpenseCategoryController extends Controller
         $validated['church_id'] = $this->getCurrentChurch()->id;
         ExpenseCategory::create($validated);
 
-        return back()->with('success', 'Категорію створено.');
+        return $this->successResponse($request, 'Категорію створено.');
     }
 
     public function update(Request $request, ExpenseCategory $expenseCategory)
@@ -34,16 +34,16 @@ class ExpenseCategoryController extends Controller
 
         $expenseCategory->update($validated);
 
-        return back()->with('success', 'Категорію оновлено.');
+        return $this->successResponse($request, 'Категорію оновлено.');
     }
 
-    public function destroy(ExpenseCategory $expenseCategory)
+    public function destroy(Request $request, ExpenseCategory $expenseCategory)
     {
         $this->authorizeChurch($expenseCategory);
 
         $expenseCategory->delete();
 
-        return back()->with('success', 'Категорію видалено.');
+        return $this->successResponse($request, 'Категорію видалено.');
     }
 
     protected function authorizeChurch($model): void

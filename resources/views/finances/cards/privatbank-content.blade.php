@@ -37,34 +37,28 @@
             </ol>
         </div>
 
-        <form action="{{ route('finances.privatbank.connect') }}" method="POST" class="max-w-md mx-auto space-y-4" autocomplete="off">
-            @csrf
+        <form @submit.prevent="submit($refs.pbForm)" x-ref="pbForm" x-data="{ ...ajaxForm({ url: '{{ route('finances.privatbank.connect') }}', method: 'POST' }) }" class="max-w-md mx-auto space-y-4" autocomplete="off">
             <div>
                 <input type="text" name="merchant_id" placeholder="Merchant ID" autocomplete="off"
                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                        required>
-                @error('merchant_id')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.merchant_id"><p class="mt-1 text-sm text-red-500" x-text="errors.merchant_id[0]"></p></template>
             </div>
             <div>
                 <input type="text" name="password" placeholder="Пароль Merchant" autocomplete="new-password"
                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                        required>
-                @error('password')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.password"><p class="mt-1 text-sm text-red-500" x-text="errors.password[0]"></p></template>
             </div>
             <div>
                 <input type="text" name="card_number" placeholder="Номер картки (останні 4 цифри)" autocomplete="off"
                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                        required>
-                @error('card_number')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.card_number"><p class="mt-1 text-sm text-red-500" x-text="errors.card_number[0]"></p></template>
             </div>
-            <button type="submit" class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
-                Підключити PrivatBank
+            <button type="submit" :disabled="saving" class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                <span x-show="!saving">Підключити PrivatBank</span>
+                <span x-show="saving">Підключення...</span>
             </button>
         </form>
     </div>

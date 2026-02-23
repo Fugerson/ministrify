@@ -58,14 +58,11 @@
         <a href="{{ route('attendance.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
             &larr; {{ __('Назад') }}
         </a>
-        <form method="POST" action="{{ route('attendance.destroy', $attendance) }}"
-              onsubmit="return confirm('{{ __('Видалити цей запис?') }}')">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="text-red-600 hover:text-red-800">
-                {{ __('Видалити') }}
-            </button>
-        </form>
+        <button type="button"
+                @click="ajaxDelete('{{ route('attendance.destroy', $attendance) }}', '{{ __('Видалити цей запис?') }}', null, '{{ route('attendance.index') }}')"
+                class="text-red-600 hover:text-red-800">
+            {{ __('Видалити') }}
+        </button>
     </div>
 </div>
 @endsection

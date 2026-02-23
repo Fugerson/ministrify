@@ -17,15 +17,7 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <form method="POST" action="{{ route('website-builder.about.update') }}" class="space-y-6">
-        @csrf
-        @method('PUT')
+    <form @submit.prevent="submit($refs.aboutForm)" x-ref="aboutForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.about.update') }}', method: 'PUT', stayOnPage: true }) }" class="space-y-6">
 
         <!-- Mission -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -103,7 +95,7 @@
         </div>
 
         <div class="flex justify-end">
-            <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+            <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                 Зберегти
             </button>
         </div>

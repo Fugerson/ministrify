@@ -38,7 +38,7 @@ class FaqController extends Controller
 
         Faq::create($validated);
 
-        return back()->with('success', 'FAQ додано');
+        return $this->successResponse($request, 'FAQ додано');
     }
 
     public function update(Request $request, Faq $faq)
@@ -54,15 +54,15 @@ class FaqController extends Controller
 
         $faq->update($validated);
 
-        return back()->with('success', 'FAQ оновлено');
+        return $this->successResponse($request, 'FAQ оновлено');
     }
 
-    public function destroy(Faq $faq)
+    public function destroy(Request $request, Faq $faq)
     {
         $this->authorize('delete', $faq);
         $faq->delete();
 
-        return back()->with('success', 'FAQ видалено');
+        return $this->successResponse($request, 'FAQ видалено');
     }
 
     public function reorder(Request $request)

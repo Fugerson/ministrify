@@ -17,8 +17,9 @@
         <!-- Profile info -->
         <div class="lg:col-span-2 space-y-6">
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <form action="{{ route('my-profile.update') }}" method="POST" class="space-y-4"
+                <form @submit.prevent="submit($refs.profileForm)" x-ref="profileForm" class="space-y-4"
                       x-data="{
+                          ...ajaxForm({ url: '{{ route('my-profile.update') }}', method: 'PUT', stayOnPage: true }),
                           photoUrl: {{ $person->photo ? "'" . Storage::url($person->photo) . "'" : 'null' }},
                           uploading: false,
                           async uploadPhoto(event) {
@@ -30,7 +31,7 @@
                               try {
                                   const res = await fetch('{{ route('my-profile.photo') }}', {
                                       method: 'POST',
-                                      headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                                      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
                                       body: formData
                                   });
                                   const data = await res.json();
@@ -44,7 +45,7 @@
                               try {
                                   const res = await fetch('{{ route('my-profile.photo') }}', {
                                       method: 'POST',
-                                      headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                                      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' },
                                       body: JSON.stringify({ remove: '1' })
                                   });
                                   if (res.ok) this.photoUrl = null;
@@ -52,24 +53,22 @@
                               this.uploading = false;
                           }
                       }">
-                    @csrf
-                    @method('PUT')
                     <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" class="hidden" x-ref="photoInput" @change="uploadPhoto($event)">
 
-                    @if($errors->any())
+                    <template x-if="Object.keys(errors).length > 0">
                         <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                             <div class="flex items-center gap-2 text-red-600 dark:text-red-400">
                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                                 </svg>
                                 <ul class="text-sm">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <template x-for="(msgs, field) in errors" :key="field">
+                                        <li x-text="msgs[0]"></li>
+                                    </template>
                                 </ul>
                             </div>
                         </div>
-                    @endif
+                    </template>
 
                     <div class="flex items-center space-x-4 mb-6">
                         <!-- Editable avatar -->
@@ -147,7 +146,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="px-4 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-medium transition-colors">
+                        <button type="submit" :disabled="saving" class="px-4 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-medium transition-colors disabled:opacity-50">
                             {{ __('app.save') }}
                         </button>
                     </div>
@@ -228,14 +227,11 @@
                         </ul>
                     </div>
 
-                    <form method="POST" action="{{ route('my-profile.telegram.unlink') }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" onclick="return confirm('{{ __('app.confirm_disconnect_telegram') }}')"
-                                class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
-                            {{ __('app.disconnect_telegram') }}
-                        </button>
-                    </form>
+                    <button type="button"
+                            @click="ajaxDelete('{{ route('my-profile.telegram.unlink') }}', '{{ __('app.confirm_disconnect_telegram') }}', () => { setTimeout(() => window.location.reload(), 600); })"
+                            class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
+                        {{ __('app.disconnect_telegram') }}
+                    </button>
                 @else
                     <!-- Not connected state -->
                     <div class="space-y-4">

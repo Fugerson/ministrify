@@ -86,12 +86,12 @@
         </div>
 
         @can('contribute-ministry', $ministry)
-        <form x-show="editingVision" method="POST" action="{{ route('ministries.vision.update', $ministry) }}" class="space-y-3">
-            @csrf
+        <form x-show="editingVision" @submit.prevent="submitVision($refs.visionForm)" x-ref="visionForm" class="space-y-3">
             <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Опишіть бачення вашого служіння...">{{ $ministry->vision }}</textarea>
             <div class="flex justify-end">
-                <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">
-                    Зберегти
+                <button type="submit" :disabled="savingVision" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg disabled:opacity-50">
+                    <span x-show="!savingVision">Зберегти</span>
+                    <span x-show="savingVision">Збереження...</span>
                 </button>
             </div>
         </form>
@@ -196,15 +196,11 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                             </svg>
                                         </button>
-                                        <form method="POST" action="{{ route('ministries.goals.destroy', [$ministry, $goal]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_goal') }}')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        <button type="button" @click="ajaxDelete('{{ route('ministries.goals.destroy', [$ministry, $goal]) }}', '{{ __('messages.confirm_delete_goal') }}', () => location.reload())" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
                                     </div>
                                     @endcan
                                 </div>
@@ -216,18 +212,15 @@
                                     @foreach($goal->tasks as $task)
                                         <div class="p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                             @can('contribute-ministry', $ministry)
-                                            <form method="POST" action="{{ route('ministries.tasks.toggle', [$ministry, $task]) }}">
-                                                @csrf
-                                                <button type="submit" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
-                                                    @if($task->is_done) border-green-500 bg-green-500
-                                                    @else border-gray-300 dark:border-gray-600 hover:border-primary-500 @endif">
-                                                    @if($task->is_done)
-                                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                                        </svg>
-                                                    @endif
-                                                </button>
-                                            </form>
+                                            <button type="button" @click="ajaxAction('{{ route('ministries.tasks.toggle', [$ministry, $task]) }}', 'POST').then(() => location.reload())" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
+                                                @if($task->is_done) border-green-500 bg-green-500
+                                                @else border-gray-300 dark:border-gray-600 hover:border-primary-500 @endif">
+                                                @if($task->is_done)
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                @endif
+                                            </button>
                                             @else
                                             <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center
                                                 @if($task->is_done) border-green-500 bg-green-500
@@ -279,15 +272,11 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                                     </svg>
                                                 </button>
-                                                <form method="POST" action="{{ route('ministries.tasks.destroy', [$ministry, $task]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_task') }}')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                        </svg>
-                                                    </button>
-                                                </form>
+                                                <button type="button" @click="ajaxDelete('{{ route('ministries.tasks.destroy', [$ministry, $task]) }}', '{{ __('messages.confirm_delete_task') }}', () => location.reload())" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
                                             </div>
                                             @endcan
                                         </div>
@@ -343,14 +332,11 @@
                     </svg>
                 </button>
             </div>
-            <form :action="editingGoalId ? '{{ route('ministries.goals.update', [$ministry, ':id']) }}'.replace(':id', editingGoalId) : '{{ route('ministries.goals.store', $ministry) }}'" method="POST" class="p-6 space-y-4">
-                @csrf
-                <template x-if="editingGoalId">
-                    <input type="hidden" name="_method" value="PUT">
-                </template>
+            <form @submit.prevent="submitGoal($refs.goalForm)" x-ref="goalForm" class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
                     <input type="text" name="title" x-model="goalForm.title" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    <template x-if="goalErrors.title"><p class="mt-1 text-sm text-red-500" x-text="goalErrors.title[0]"></p></template>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
@@ -398,8 +384,9 @@
                     <button type="button" @click="showGoalModal = false" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
                         Скасувати
                     </button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl">
-                        <span x-text="editingGoalId ? 'Зберегти' : 'Створити'"></span>
+                    <button type="submit" :disabled="savingGoal" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl disabled:opacity-50">
+                        <span x-show="!savingGoal" x-text="editingGoalId ? 'Зберегти' : 'Створити'"></span>
+                        <span x-show="savingGoal">Збереження...</span>
                     </button>
                 </div>
             </form>
@@ -420,14 +407,11 @@
                     </svg>
                 </button>
             </div>
-            <form :action="editingTaskId ? '{{ route('ministries.tasks.update', [$ministry, ':id']) }}'.replace(':id', editingTaskId) : '{{ route('ministries.tasks.store', $ministry) }}'" method="POST" class="p-6 space-y-4">
-                @csrf
-                <template x-if="editingTaskId">
-                    <input type="hidden" name="_method" value="PUT">
-                </template>
+            <form @submit.prevent="submitTask($refs.taskForm)" x-ref="taskForm" class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
                     <input type="text" name="title" x-model="taskForm.title" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    <template x-if="taskErrors.title"><p class="mt-1 text-sm text-red-500" x-text="taskErrors.title[0]"></p></template>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
@@ -479,8 +463,9 @@
                     <button type="button" @click="showTaskModal = false" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
                         Скасувати
                     </button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl">
-                        <span x-text="editingTaskId ? 'Зберегти' : 'Створити'"></span>
+                    <button type="submit" :disabled="savingTask" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl disabled:opacity-50">
+                        <span x-show="!savingTask" x-text="editingTaskId ? 'Зберегти' : 'Створити'"></span>
+                        <span x-show="savingTask">Збереження...</span>
                     </button>
                 </div>
             </form>
@@ -492,12 +477,40 @@
 @push('scripts')
 <script>
 function goalsManager() {
+    const goalStoreUrl = '{{ route('ministries.goals.store', $ministry) }}';
+    const goalUpdateUrlTemplate = '{{ route('ministries.goals.update', [$ministry, ':id']) }}';
+    const taskStoreUrl = '{{ route('ministries.tasks.store', $ministry) }}';
+    const taskUpdateUrlTemplate = '{{ route('ministries.tasks.update', [$ministry, ':id']) }}';
+    const visionUrl = '{{ route('ministries.vision.update', $ministry) }}';
+
+    async function ajaxSubmit(url, method, formEl) {
+        const formData = new FormData(formEl);
+        if (['PUT', 'PATCH', 'DELETE'].includes(method)) {
+            formData.append('_method', method);
+        }
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: formData
+        });
+        const data = await response.json().catch(() => ({}));
+        return { response, data };
+    }
+
     return {
         editingVision: false,
+        savingVision: false,
         showGoalModal: false,
         showTaskModal: false,
         editingGoalId: null,
         editingTaskId: null,
+        savingGoal: false,
+        savingTask: false,
+        goalErrors: {},
+        taskErrors: {},
         goalForm: {
             title: '',
             description: '',
@@ -517,6 +530,7 @@ function goalsManager() {
         },
         resetGoalForm() {
             this.editingGoalId = null;
+            this.goalErrors = {};
             this.goalForm = {
                 title: '',
                 description: '',
@@ -528,6 +542,7 @@ function goalsManager() {
         },
         resetTaskForm() {
             this.editingTaskId = null;
+            this.taskErrors = {};
             this.taskForm = {
                 title: '',
                 description: '',
@@ -540,13 +555,89 @@ function goalsManager() {
         },
         editGoal(id, data) {
             this.editingGoalId = id;
+            this.goalErrors = {};
             this.goalForm = { ...data };
             this.showGoalModal = true;
         },
         editTask(id, data) {
             this.editingTaskId = id;
+            this.taskErrors = {};
             this.taskForm = { ...data };
             this.showTaskModal = true;
+        },
+        async submitVision(formEl) {
+            if (this.savingVision) return;
+            this.savingVision = true;
+            try {
+                const { response, data } = await ajaxSubmit(visionUrl, 'POST', formEl);
+                if (!response.ok) {
+                    showToast('error', data.message || 'Помилка збереження.');
+                    this.savingVision = false;
+                    return;
+                }
+                showToast('success', data.message || 'Збережено!');
+                this.editingVision = false;
+                this.savingVision = false;
+            } catch (e) {
+                showToast('error', "Помилка з'єднання з сервером.");
+                this.savingVision = false;
+            }
+        },
+        async submitGoal(formEl) {
+            if (this.savingGoal) return;
+            this.savingGoal = true;
+            this.goalErrors = {};
+            const url = this.editingGoalId
+                ? goalUpdateUrlTemplate.replace(':id', this.editingGoalId)
+                : goalStoreUrl;
+            const method = this.editingGoalId ? 'PUT' : 'POST';
+            try {
+                const { response, data } = await ajaxSubmit(url, method, formEl);
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.goalErrors = data.errors;
+                        showToast('error', data.message || 'Перевірте правильність заповнення.');
+                    } else {
+                        showToast('error', data.message || 'Помилка збереження.');
+                    }
+                    this.savingGoal = false;
+                    return;
+                }
+                showToast('success', data.message || 'Збережено!');
+                this.showGoalModal = false;
+                setTimeout(() => location.reload(), 600);
+            } catch (e) {
+                showToast('error', "Помилка з'єднання з сервером.");
+                this.savingGoal = false;
+            }
+        },
+        async submitTask(formEl) {
+            if (this.savingTask) return;
+            this.savingTask = true;
+            this.taskErrors = {};
+            const url = this.editingTaskId
+                ? taskUpdateUrlTemplate.replace(':id', this.editingTaskId)
+                : taskStoreUrl;
+            const method = this.editingTaskId ? 'PUT' : 'POST';
+            try {
+                const { response, data } = await ajaxSubmit(url, method, formEl);
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.taskErrors = data.errors;
+                        showToast('error', data.message || 'Перевірте правильність заповнення.');
+                    } else {
+                        showToast('error', data.message || 'Помилка збереження.');
+                    }
+                    this.savingTask = false;
+                    return;
+                }
+                showToast('success', data.message || 'Збережено!');
+                this.showTaskModal = false;
+                setTimeout(() => location.reload(), 600);
+            } catch (e) {
+                showToast('error', "Помилка з'єднання з сервером.");
+                this.savingTask = false;
+            }
         }
     }
 }

@@ -58,7 +58,7 @@ class TeamController extends Controller
 
         StaffMember::create($validated);
 
-        return redirect()->route('website-builder.team.index')->with('success', 'Члена команди додано');
+        return $this->successResponse($request, 'Члена команди додано', 'website-builder.team.index');
     }
 
     public function edit(StaffMember $staffMember)
@@ -98,10 +98,10 @@ class TeamController extends Controller
 
         $staffMember->update($validated);
 
-        return redirect()->route('website-builder.team.index')->with('success', 'Дані оновлено');
+        return $this->successResponse($request, 'Дані оновлено', 'website-builder.team.index');
     }
 
-    public function destroy(StaffMember $staffMember)
+    public function destroy(Request $request, StaffMember $staffMember)
     {
         $this->authorize('delete', $staffMember);
 
@@ -111,7 +111,7 @@ class TeamController extends Controller
 
         $staffMember->delete();
 
-        return redirect()->route('website-builder.team.index')->with('success', 'Члена команди видалено');
+        return $this->successResponse($request, 'Члена команди видалено', 'website-builder.team.index');
     }
 
     public function reorder(Request $request)

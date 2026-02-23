@@ -17,12 +17,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <!-- Tabs -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
         <div class="flex overflow-x-auto gap-1 no-scrollbar">
@@ -51,8 +45,7 @@
 
     <!-- Colors Tab -->
     <div x-show="activeTab === 'colors'" x-cloak class="space-y-6">
-        <form method="POST" action="{{ route('website-builder.design.colors') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
+        <form @submit.prevent="submit($refs.colorsForm)" x-ref="colorsForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.design.colors') }}', method: 'POST', stayOnPage: true }) }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Кольорова схема</h2>
             </div>
@@ -124,7 +117,7 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     Зберегти кольори
                 </button>
             </div>
@@ -133,8 +126,7 @@
 
     <!-- Fonts Tab -->
     <div x-show="activeTab === 'fonts'" x-cloak class="space-y-6">
-        <form method="POST" action="{{ route('website-builder.design.fonts') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
+        <form @submit.prevent="submit($refs.fontsForm)" x-ref="fontsForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.design.fonts') }}', method: 'POST', stayOnPage: true }) }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Шрифти</h2>
             </div>
@@ -177,7 +169,7 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     Зберегти шрифти
                 </button>
             </div>
@@ -186,8 +178,7 @@
 
     <!-- Hero Tab -->
     <div x-show="activeTab === 'hero'" x-cloak class="space-y-6">
-        <form method="POST" action="{{ route('website-builder.design.hero') }}" enctype="multipart/form-data" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
+        <form @submit.prevent="submit($refs.heroForm)" x-ref="heroForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.design.hero') }}', method: 'POST', stayOnPage: true }) }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Hero секція</h2>
             </div>
@@ -265,15 +256,14 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     Зберегти налаштування Hero
                 </button>
             </div>
         </form>
 
         <!-- Hero Image Upload -->
-        <form method="POST" action="{{ route('website-builder.design.hero.image') }}" enctype="multipart/form-data" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
+        <form @submit.prevent="submit($refs.heroImageForm)" x-ref="heroImageForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.design.hero.image') }}', method: 'POST', stayOnPage: true }) }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Фонове зображення Hero</h2>
             </div>
@@ -301,7 +291,7 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     Завантажити зображення
                 </button>
             </div>
@@ -310,8 +300,7 @@
 
     <!-- Navigation Tab -->
     <div x-show="activeTab === 'navigation'" x-cloak class="space-y-6">
-        <form method="POST" action="{{ route('website-builder.design.navigation') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
+        <form @submit.prevent="submit($refs.navForm)" x-ref="navForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.design.navigation') }}', method: 'POST', stayOnPage: true }) }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Стиль навігації</h2>
             </div>
@@ -348,15 +337,14 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     Зберегти навігацію
                 </button>
             </div>
         </form>
 
         <!-- Footer Settings -->
-        <form method="POST" action="{{ route('website-builder.design.footer') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
+        <form @submit.prevent="submit($refs.footerForm)" x-ref="footerForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.design.footer') }}', method: 'POST', stayOnPage: true }) }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Футер</h2>
             </div>
@@ -389,7 +377,7 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     Зберегти футер
                 </button>
             </div>
@@ -398,8 +386,7 @@
 
     <!-- Custom CSS Tab -->
     <div x-show="activeTab === 'css'" x-cloak class="space-y-6">
-        <form method="POST" action="{{ route('website-builder.design.css') }}" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            @csrf
+        <form @submit.prevent="submit($refs.cssForm)" x-ref="cssForm" x-data="{ ...ajaxForm({ url: '{{ route('website-builder.design.css') }}', method: 'POST', stayOnPage: true }) }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Кастомний CSS</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Додайте власні стилі для публічного сайту</p>
@@ -416,14 +403,14 @@
                         </svg>
                         <div class="text-sm text-yellow-700 dark:text-yellow-300">
                             <p class="font-medium">Увага</p>
-                            <p class="mt-1">@import та javascript: заборонені з міркувань безпеки. Неправильний CSS може порушити відображення сайту.</p>
+                            <p class="mt-1">&#64;import та javascript: заборонені з міркувань безпеки. Неправильний CSS може порушити відображення сайту.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     Зберегти CSS
                 </button>
             </div>

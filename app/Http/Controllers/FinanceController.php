@@ -24,7 +24,7 @@ class FinanceController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();
@@ -298,7 +298,7 @@ class FinanceController extends Controller
     public function journal(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();
@@ -473,7 +473,7 @@ class FinanceController extends Controller
     public function incomes(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();
@@ -533,10 +533,10 @@ class FinanceController extends Controller
         return view('finances.incomes.index', compact('incomes', 'incomesJson', 'categories', 'totals', 'enabledCurrencies', 'exchangeRates'));
     }
 
-    public function createIncome()
+    public function createIncome(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            return redirect()->route('finances.index')->with('error', 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
         }
 
         $church = $this->getCurrentChurch();
@@ -553,10 +553,7 @@ class FinanceController extends Controller
     public function storeIncome(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'У вас немає прав для створення записів.'], 403);
-            }
-            abort(403, 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для створення записів.', 403);
         }
 
         $validated = $request->validate([
@@ -601,28 +598,17 @@ class FinanceController extends Controller
             'recorded_by' => auth()->id(),
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Надходження додано!',
-                'transaction' => $transaction->load('category'),
-                'redirect_url' => route('finances.incomes'),
-            ]);
-        }
-
-        return redirect()->route('finances.incomes')
-            ->with('success', 'Надходження додано.');
+        return $this->successResponse($request, 'Надходження додано.', 'finances.incomes', [], [
+            'transaction' => $transaction->load('category'),
+        ]);
     }
 
-    public function editIncome(Transaction $transaction)
+    public function editIncome(Request $request, Transaction $transaction)
     {
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canEdit('finances')) {
-            if (request()->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'У вас немає прав для редагування записів.'], 403);
-            }
-            return redirect()->route('finances.incomes')->with('error', 'У вас немає прав для редагування записів.');
+            return $this->errorResponse($request, 'У вас немає прав для редагування записів.', 403);
         }
 
         $church = $this->getCurrentChurch();
@@ -634,7 +620,7 @@ class FinanceController extends Controller
         $exchangeRates = ExchangeRate::getLatestRates();
         $income = $transaction;
 
-        if (request()->wantsJson()) {
+        if ($request->wantsJson()) {
             return response()->json([
                 'transaction' => $transaction,
                 'categories' => $categories,
@@ -651,10 +637,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canEdit('finances')) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'У вас немає прав для редагування записів.'], 403);
-            }
-            abort(403, 'У вас немає прав для редагування записів.');
+            return $this->errorResponse($request, 'У вас немає прав для редагування записів.', 403);
         }
 
         $validated = $request->validate([
@@ -677,16 +660,9 @@ class FinanceController extends Controller
 
         $transaction->update($validated);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Надходження оновлено!',
-                'transaction' => $transaction->fresh()->load('category'),
-            ]);
-        }
-
-        return redirect()->route('finances.incomes')
-            ->with('success', 'Надходження оновлено.');
+        return $this->successResponse($request, 'Надходження оновлено.', 'finances.incomes', [], [
+            'transaction' => $transaction->fresh()->load('category'),
+        ]);
     }
 
     public function destroyIncome(Request $request, Transaction $transaction)
@@ -694,29 +670,19 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canDelete('finances')) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'У вас немає прав для видалення записів.'], 403);
-            }
-            abort(403, 'У вас немає прав для видалення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для видалення записів.', 403);
         }
 
         $transaction->delete();
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Надходження видалено!',
-            ]);
-        }
-
-        return redirect()->route('finances.incomes')->with('success', 'Надходження видалено.');
+        return $this->successResponse($request, 'Надходження видалено.', 'finances.incomes');
     }
 
     // Expenses
     public function expenses(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();
@@ -784,7 +750,7 @@ class FinanceController extends Controller
     public function createExpense(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            return redirect()->route('finances.expenses.index')->with('error', 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
         }
 
         $church = $this->getCurrentChurch();
@@ -803,10 +769,7 @@ class FinanceController extends Controller
     public function storeExpense(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'У вас немає прав для створення записів.'], 403);
-            }
-            abort(403, 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для створення записів.', 403);
         }
 
         $validated = $request->validate([
@@ -898,41 +861,23 @@ class FinanceController extends Controller
             $message .= ' ' . $budgetWarning;
         }
 
-        if ($request->wantsJson()) {
-            $redirectUrl = route('finances.expenses.index');
-            if (!empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry') {
-                $redirectUrl = route('ministries.show', ['ministry' => $validated['ministry_id'], 'tab' => 'expenses']);
-            }
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'transaction' => $transaction->load(['category', 'ministry']),
-                'budget_warning' => $budgetWarning,
-                'redirect_url' => $redirectUrl,
-            ]);
-        }
+        // Determine redirect target
+        $redirectToMinistry = !empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry';
+        $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.expenses.index';
+        $routeParams = $redirectToMinistry ? ['ministry' => $validated['ministry_id'], 'tab' => 'expenses'] : [];
 
-        // Redirect back to ministry page if came from there
-        if (!empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry') {
-            return redirect()->route('ministries.show', ['ministry' => $validated['ministry_id'], 'tab' => 'expenses'])
-                ->with('success', $message)
-                ->with('budget_warning', $budgetWarning);
-        }
-
-        return redirect()->route('finances.expenses.index')
-            ->with('success', $message)
-            ->with('budget_warning', $budgetWarning);
+        return $this->successResponse($request, $message, $routeName, $routeParams, [
+            'transaction' => $transaction->load(['category', 'ministry']),
+            'budget_warning' => $budgetWarning,
+        ]);
     }
 
-    public function editExpense(Transaction $transaction)
+    public function editExpense(Request $request, Transaction $transaction)
     {
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canEdit('finances')) {
-            if (request()->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'У вас немає прав для редагування записів.'], 403);
-            }
-            return redirect()->route('finances.expenses.index')->with('error', 'У вас немає прав для редагування записів.');
+            return $this->errorResponse($request, 'У вас немає прав для редагування записів.', 403);
         }
 
         $church = $this->getCurrentChurch();
@@ -947,7 +892,7 @@ class FinanceController extends Controller
         $transaction->load('attachments');
         $expense = $transaction;
 
-        if (request()->wantsJson()) {
+        if ($request->wantsJson()) {
             return response()->json([
                 'transaction' => $transaction,
                 'categories' => $categories,
@@ -965,10 +910,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canEdit('finances')) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'У вас немає прав для редагування записів.'], 403);
-            }
-            abort(403, 'У вас немає прав для редагування записів.');
+            return $this->errorResponse($request, 'У вас немає прав для редагування записів.', 403);
         }
 
         $validated = $request->validate([
@@ -1065,23 +1007,15 @@ class FinanceController extends Controller
             $message .= ' ' . $budgetWarning;
         }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'transaction' => $transaction->fresh()->load(['category', 'ministry', 'attachments']),
-                'budget_warning' => $budgetWarning,
-            ]);
-        }
+        // Determine redirect target
+        $redirectToMinistry = $request->input('redirect_to') === 'ministry' && $request->input('redirect_ministry_id');
+        $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.expenses.index';
+        $routeParams = $redirectToMinistry ? ['ministry' => $request->input('redirect_ministry_id'), 'tab' => 'expenses'] : [];
 
-        // Redirect back to ministry page if requested
-        if ($request->input('redirect_to') === 'ministry' && $request->input('redirect_ministry_id')) {
-            return redirect()->route('ministries.show', ['ministry' => $request->input('redirect_ministry_id'), 'tab' => 'expenses'])
-                ->with('success', $message);
-        }
-
-        return redirect()->route('finances.expenses.index')
-            ->with('success', $message);
+        return $this->successResponse($request, $message, $routeName, $routeParams, [
+            'transaction' => $transaction->fresh()->load(['category', 'ministry', 'attachments']),
+            'budget_warning' => $budgetWarning,
+        ]);
     }
 
     public function destroyExpense(Request $request, Transaction $transaction)
@@ -1089,35 +1023,24 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canDelete('finances')) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'У вас немає прав для видалення записів.'], 403);
-            }
-            abort(403, 'У вас немає прав для видалення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для видалення записів.', 403);
         }
         $ministryId = $transaction->ministry_id;
         $transaction->delete();
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Витрату видалено!',
-            ]);
-        }
-
-        // Redirect back to ministry page if requested
+        // Determine redirect target
         if ($request->input('redirect_to') === 'ministry' && $ministryId) {
-            return redirect()->route('ministries.show', ['ministry' => $ministryId, 'tab' => 'expenses'])
-                ->with('success', 'Витрату видалено.');
+            return $this->successResponse($request, 'Витрату видалено.', 'ministries.show', ['ministry' => $ministryId, 'tab' => 'expenses']);
         }
 
-        return back()->with('success', 'Витрату видалено.');
+        return $this->successResponse($request, 'Витрату видалено.');
     }
 
     // Currency Exchange
-    public function createExchange()
+    public function createExchange(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            return redirect()->route('finances.index')->with('error', 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
         }
 
         $church = $this->getCurrentChurch();
@@ -1179,14 +1102,7 @@ class FinanceController extends Controller
             $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
         });
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Обмін валюти зареєстровано!',
-            ]);
-        }
-
-        return redirect()->route('finances.index')->with('success', 'Обмін валюти зареєстровано.');
+        return $this->successResponse($request, 'Обмін валюти зареєстровано.', 'finances.index');
     }
 
     // Categories (unified)
@@ -1220,7 +1136,7 @@ class FinanceController extends Controller
 
         TransactionCategory::create($validated);
 
-        return back()->with('success', 'Категорію додано.');
+        return $this->successResponse($request, 'Категорію додано.');
     }
 
     public function updateCategory(Request $request, TransactionCategory $category)
@@ -1244,10 +1160,10 @@ class FinanceController extends Controller
 
         $category->update($validated);
 
-        return back()->with('success', 'Категорію оновлено.');
+        return $this->successResponse($request, 'Категорію оновлено.');
     }
 
-    public function destroyCategory(TransactionCategory $category)
+    public function destroyCategory(Request $request, TransactionCategory $category)
     {
         if (!auth()->user()->canDelete('finances')) {
             abort(403, 'У вас немає прав для видалення категорій.');
@@ -1258,19 +1174,19 @@ class FinanceController extends Controller
         }
 
         if ($category->transactions()->count() > 0) {
-            return back()->with('error', 'Неможливо видалити категорію з транзакціями.');
+            return $this->errorResponse($request, 'Неможливо видалити категорію з транзакціями.');
         }
 
         $category->delete();
 
-        return back()->with('success', 'Категорію видалено.');
+        return $this->successResponse($request, 'Категорію видалено.');
     }
 
     // Team Budgets
     public function budgets(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();
@@ -1389,7 +1305,7 @@ class FinanceController extends Controller
             'monthly_budget' => $oldBudget,
         ]);
 
-        return back()->with('success', "Бюджет для \"{$ministry->name}\" оновлено.");
+        return $this->successResponse($request, "Бюджет для \"{$ministry->name}\" оновлено.");
     }
 
     // Analytics API
@@ -1661,10 +1577,10 @@ class FinanceController extends Controller
     /**
      * Unified bank cards page with Monobank and PrivatBank tabs
      */
-    public function cards()
+    public function cards(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $church = $this->getCurrentChurch();

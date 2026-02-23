@@ -52,18 +52,20 @@
             </p>
         </div>
 
-        <form method="POST" action="{{ route('meetings.copy.store', [$ministry, $meeting]) }}" class="space-y-6">
-            @csrf
+        <form @submit.prevent="submit($refs.f)" x-ref="f"
+              x-data="{ ...ajaxForm({ url: '{{ route('meetings.copy.store', [$ministry, $meeting]) }}', method: 'POST' }) }"
+              class="space-y-6">
 
             <div>
                 <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дата нової зустрічі *</label>
                 <input type="date" name="date" id="date" value="{{ old('date', now()->addWeek()->format('Y-m-d')) }}" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                <template x-if="errors.date"><p class="mt-1 text-sm text-red-500" x-text="errors.date[0]"></p></template>
             </div>
 
             <div>
                 <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва (залиште пустим щоб зберегти оригінальну)</label>
-                <input type="text" name="title" id="title" value="{{ old('title') }}"
+                <input type="text" name="title" id="title"
                        placeholder="{{ $meeting->title }}"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
             </div>
@@ -72,8 +74,9 @@
                 <a href="{{ route('meetings.show', [$ministry, $meeting]) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                     Скасувати
                 </a>
-                <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
-                    Створити копію
+                <button type="submit" :disabled="saving" class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
+                    <span x-show="!saving">Створити копію</span>
+                    <span x-show="saving" x-cloak>Створення...</span>
                 </button>
             </div>
         </form>

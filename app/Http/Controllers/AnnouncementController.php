@@ -89,16 +89,7 @@ class AnnouncementController extends Controller
             'expires_at' => $validated['expires_at'] ?? null,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Оголошення створено!',
-                'redirect_url' => route('announcements.index'),
-            ]);
-        }
-
-        return redirect()->route('announcements.index')
-            ->with('success', 'Оголошення опубліковано');
+        return $this->successResponse($request, 'Оголошення опубліковано', 'announcements.index');
     }
 
     /**
@@ -134,29 +125,20 @@ class AnnouncementController extends Controller
             'expires_at' => $validated['expires_at'] ?? null,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Оголошення оновлено!',
-            ]);
-        }
-
-        return redirect()->route('announcements.index')
-            ->with('success', 'Оголошення оновлено');
+        return $this->successResponse($request, 'Оголошення оновлено', 'announcements.index');
     }
 
     /**
      * Delete announcement
      */
-    public function destroy(Announcement $announcement)
+    public function destroy(Request $request, Announcement $announcement)
     {
         $this->authorizeChurch($announcement);
         $this->authorizeAuthorOrPermission($announcement, 'delete');
 
         $announcement->delete();
 
-        return redirect()->route('announcements.index')
-            ->with('success', 'Оголошення видалено');
+        return $this->successResponse($request, 'Оголошення видалено', 'announcements.index');
     }
 
     /**
@@ -186,13 +168,13 @@ class AnnouncementController extends Controller
         }
     }
 
-    public function togglePin(Announcement $announcement)
+    public function togglePin(Request $request, Announcement $announcement)
     {
         $this->authorizeChurch($announcement);
         $this->authorizeAuthorOrPermission($announcement, 'edit');
 
         $announcement->update(['is_pinned' => !$announcement->is_pinned]);
 
-        return back()->with('success', $announcement->is_pinned ? 'Оголошення закріплено' : 'Оголошення відкріплено');
+        return $this->successResponse($request, $announcement->is_pinned ? 'Оголошення закріплено' : 'Оголошення відкріплено');
     }
 }

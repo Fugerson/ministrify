@@ -16,8 +16,8 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Нове повідомлення</h1>
 
-        <form action="{{ route('pm.store') }}" method="POST" class="space-y-6">
-            @csrf
+        <form @submit.prevent="submit($refs.pmForm)" x-ref="pmForm" class="space-y-6"
+              x-data="{ ...ajaxForm({ url: '{{ route('pm.store') }}', method: 'POST' }) }">
 
             <!-- Recipient -->
             <div x-data="{ search: '', open: false, selected: null }">
@@ -67,9 +67,9 @@
                         @endforeach
                     </div>
                 </div>
-                @error('recipient_id')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.recipient_id">
+                    <p class="mt-1 text-sm text-red-600" x-text="errors.recipient_id[0]"></p>
+                </template>
             </div>
 
             <!-- Message -->
@@ -80,9 +80,9 @@
                           required
                           placeholder="Напишіть ваше повідомлення..."
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none">{{ old('message') }}</textarea>
-                @error('message')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.message">
+                    <p class="mt-1 text-sm text-red-600" x-text="errors.message[0]"></p>
+                </template>
             </div>
 
             <div class="flex justify-end gap-3">
@@ -90,9 +90,9 @@
                    class="px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
                     Скасувати
                 </a>
-                <button type="submit"
+                <button type="submit" :disabled="saving"
                         class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl">
-                    Надіслати
+                    <span x-text="saving ? 'Надсилання...' : 'Надіслати'"></span>
                 </button>
             </div>
         </form>

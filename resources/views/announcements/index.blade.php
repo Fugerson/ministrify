@@ -73,25 +73,19 @@
 
                 @if(auth()->user()->canEdit('announcements'))
                 <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
-                    <form action="{{ route('announcements.pin', $announcement) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="text-sm text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400">
-                            {{ $announcement->is_pinned ? 'Відкріпити' : 'Закріпити' }}
-                        </button>
-                    </form>
+                    <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => window.location.reload())"
+                            class="text-sm text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400">
+                        {{ $announcement->is_pinned ? 'Відкріпити' : 'Закріпити' }}
+                    </button>
                     <span class="text-gray-300 dark:text-gray-600">|</span>
                     <a href="{{ route('announcements.edit', $announcement) }}" class="text-sm text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
                         Редагувати
                     </a>
                     <span class="text-gray-300 dark:text-gray-600">|</span>
-                    <form action="{{ route('announcements.destroy', $announcement) }}" method="POST" class="inline"
-                          onsubmit="return confirm('{{ __('messages.confirm_delete_announcement') }}')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400">
-                            Видалити
-                        </button>
-                    </form>
+                    <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', '{{ __('messages.confirm_delete_announcement') }}', () => $el.closest('.rounded-2xl').remove())"
+                            class="text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400">
+                        Видалити
+                    </button>
                 </div>
                 @endif
             </div>

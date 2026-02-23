@@ -213,9 +213,8 @@
         </div>
     </a>
 
-    <form method="POST" action="{{ route('settings.public-site') }}" enctype="multipart/form-data" class="space-y-6" autocomplete="off">
-        @csrf
-        @method('PUT')
+    <form @submit.prevent="submit($refs.publicSiteForm)" x-ref="publicSiteForm" class="space-y-6" autocomplete="off"
+          x-data="{ ...ajaxForm({ url: '{{ route('settings.public-site') }}', method: 'PUT', stayOnPage: true }) }">
 
         <!-- Enable/Disable & URL -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -392,8 +391,9 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
-                <button type="submit" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                    Зберегти налаштування сайту
+                <button type="submit" :disabled="saving" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                    <span x-show="!saving">Зберегти налаштування сайту</span>
+                    <span x-show="saving" x-cloak>Збереження...</span>
                 </button>
             </div>
         </div>
@@ -404,9 +404,8 @@
         $paymentSettings = $church->payment_settings ?? [];
     @endphp
 
-    <form method="POST" action="{{ route('settings.payments') }}" class="space-y-6" autocomplete="off">
-        @csrf
-        @method('PUT')
+    <form @submit.prevent="submit($refs.paymentForm)" x-ref="paymentForm" class="space-y-6" autocomplete="off"
+          x-data="{ ...ajaxForm({ url: '{{ route('settings.payments') }}', method: 'PUT', stayOnPage: true }) }">
 
         <!-- LiqPay -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -499,8 +498,9 @@
             </div>
         </div>
 
-        <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-            Зберегти налаштування платежів
+        <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+            <span x-show="!saving">Зберегти налаштування платежів</span>
+            <span x-show="saving" x-cloak>Збереження...</span>
         </button>
     </form>
     </div>
@@ -833,13 +833,10 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400">
                             Підключено {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
                         </span>
-                        <form action="{{ route('settings.google-calendar.disconnect') }}" method="POST" class="inline"
-                              onsubmit="return confirm({{ Js::from(__('messages.confirm_disconnect_google')) }})">
-                            @csrf
-                            <button type="submit" class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
-                                Відключити
-                            </button>
-                        </form>
+                        <button @click="if (confirm({{ Js::from(__('messages.confirm_disconnect_google')) }})) { ajaxAction('{{ route('settings.google-calendar.disconnect') }}', 'POST').then(() => location.reload()) }"
+                                class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                            Відключити
+                        </button>
                     </div>
 
                     <!-- Auto-sync info -->
@@ -1283,14 +1280,10 @@
                             @endif
                             <span class="text-gray-900 dark:text-white">{{ $ministry->name }}</span>
                         </a>
-                        <form method="POST" action="{{ route('settings.ministries.destroy', $ministry) }}"
-                              onsubmit="return confirm({{ Js::from(__('messages.confirm_delete_category')) }})">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
-                                Видалити
-                            </button>
-                        </form>
+                        <button @click="ajaxDelete('{{ route('settings.ministries.destroy', $ministry) }}', {{ Js::from(__('messages.confirm_delete_category')) }}, () => $el.closest('.flex.items-center.justify-between.p-3').remove())"
+                                class="text-red-600 hover:text-red-800 text-sm">
+                            Видалити
+                        </button>
                     </div>
                 @empty
                     <p class="text-gray-500 dark:text-gray-400 text-sm">Команд ще немає</p>
@@ -1323,8 +1316,8 @@
 
         <!-- Add/Edit Form -->
         <div x-show="showForm" x-cloak class="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-            <form action="{{ route('settings.transaction-categories.store') }}" method="POST">
-                @csrf
+            <form @submit.prevent="submit($refs.catCreateForm)" x-ref="catCreateForm"
+                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.store') }}', method: 'POST', onSuccess: () => location.reload() }) }">
                 <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
                     <div>
                         <input type="text" name="name" placeholder="Назва" required
@@ -1346,8 +1339,9 @@
                                class="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
                     </div>
                     <div class="flex gap-2">
-                        <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm transition-colors">
-                            Додати
+                        <button type="submit" :disabled="saving" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50">
+                            <span x-show="!saving">Додати</span>
+                            <span x-show="saving" x-cloak>...</span>
                         </button>
                         <button type="button" @click="showForm = false" class="px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1383,27 +1377,22 @@
                                     </svg>
                                 </button>
                                 @if($category->transactions_count == 0)
-                                    <form action="{{ route('settings.transaction-categories.destroy', $category) }}" method="POST" class="inline"
-                                          onsubmit="return confirm({{ Js::from(__('messages.confirm_delete_category')) }})">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-400 hover:text-red-600">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button @click="ajaxDelete('{{ route('settings.transaction-categories.destroy', $category) }}', {{ Js::from(__('messages.confirm_delete_category')) }}, () => $el.closest('.flex.items-center.justify-between.p-3').remove())"
+                                            class="text-red-400 hover:text-red-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 @endif
                             </div>
                             <!-- Edit form -->
-                            <form x-show="editing" action="{{ route('settings.transaction-categories.update', $category) }}" method="POST" class="flex-1 flex items-center gap-2">
-                                @csrf
-                                @method('PUT')
+                            <form x-show="editing" @submit.prevent="submit($refs.editCatForm{{ $category->id }})" x-ref="editCatForm{{ $category->id }}" class="flex-1 flex items-center gap-2"
+                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess: () => location.reload() }) }">
                                 <input type="text" name="name" value="{{ $category->name }}" required
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
                                        class="w-10 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer">
-                                <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm">Зберегти</button>
+                                <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm disabled:opacity-50">Зберегти</button>
                                 <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">Скасувати</button>
                             </form>
                         </div>
@@ -1437,27 +1426,22 @@
                                     </svg>
                                 </button>
                                 @if($category->transactions_count == 0)
-                                    <form action="{{ route('settings.transaction-categories.destroy', $category) }}" method="POST" class="inline"
-                                          onsubmit="return confirm({{ Js::from(__('messages.confirm_delete_category')) }})">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-400 hover:text-red-600">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button @click="ajaxDelete('{{ route('settings.transaction-categories.destroy', $category) }}', {{ Js::from(__('messages.confirm_delete_category')) }}, () => $el.closest('.flex.items-center.justify-between.p-3').remove())"
+                                            class="text-red-400 hover:text-red-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 @endif
                             </div>
                             <!-- Edit form -->
-                            <form x-show="editing" action="{{ route('settings.transaction-categories.update', $category) }}" method="POST" class="flex-1 flex items-center gap-2">
-                                @csrf
-                                @method('PUT')
+                            <form x-show="editing" @submit.prevent="submit($refs.editCatForm{{ $category->id }})" x-ref="editCatForm{{ $category->id }}" class="flex-1 flex items-center gap-2"
+                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess: () => location.reload() }) }">
                                 <input type="text" name="name" value="{{ $category->name }}" required
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
                                        class="w-10 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer">
-                                <button type="submit" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm">Зберегти</button>
+                                <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm disabled:opacity-50">Зберегти</button>
                                 <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">Скасувати</button>
                             </form>
                         </div>
@@ -1585,26 +1569,23 @@
                             <span class="w-4 h-4 rounded-full mr-2" style="background-color: {{ $tag->color }}"></span>
                             <span class="text-gray-900 dark:text-white">{{ $tag->name }}</span>
                         </div>
-                        <form method="POST" action="{{ route('tags.destroy', $tag) }}"
-                              onsubmit="return confirm({{ Js::from(__('messages.confirm_delete_tag')) }})">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
-                                Видалити
-                            </button>
-                        </form>
+                        <button @click="ajaxDelete('{{ route('tags.destroy', $tag) }}', {{ Js::from(__('messages.confirm_delete_tag')) }}, () => $el.closest('.flex.items-center.justify-between.p-3').remove())"
+                                class="text-red-600 hover:text-red-800 text-sm">
+                            Видалити
+                        </button>
                     </div>
                 @endforeach
             </div>
 
-            <form method="POST" action="{{ route('tags.store') }}" class="flex gap-2">
-                @csrf
+            <form @submit.prevent="submit($refs.tagCreateForm)" x-ref="tagCreateForm" class="flex gap-2"
+                  x-data="{ ...ajaxForm({ url: '{{ route('tags.store') }}', method: 'POST', onSuccess: () => location.reload() }) }">
                 <input type="text" name="name" placeholder="Новий тег" required
                        class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <input type="color" name="color" value="#3b82f6"
                        class="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded-lg">
-                <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">
-                    Додати
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg disabled:opacity-50">
+                    <span x-show="!saving">Додати</span>
+                    <span x-show="saving" x-cloak>...</span>
                 </button>
             </form>
         </div>
@@ -2143,15 +2124,12 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </a>
-                                <form action="{{ route('settings.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm({{ Js::from(__('messages.are_you_sure')) }})">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-2 inline-flex text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <button @click="ajaxDelete('{{ route('settings.users.destroy', $user) }}', {{ Js::from(__('messages.are_you_sure')) }}, () => $el.closest('tr').remove())"
+                                        class="p-2 inline-flex text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
                                 @else
                                 <span class="text-gray-400 dark:text-gray-500 text-xs">Це ви</span>
                                 @endif

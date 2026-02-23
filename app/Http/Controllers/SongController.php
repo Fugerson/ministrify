@@ -117,6 +117,8 @@ class SongController extends Controller
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
+                'message' => 'Пісню додано до бібліотеки.',
+                'redirect_url' => route('songs.index'),
                 'song' => [
                     'id' => $song->id,
                     'title' => $song->title,
@@ -137,8 +139,7 @@ class SongController extends Controller
             ]);
         }
 
-        return redirect()->route('songs.index')
-            ->with('success', 'Пісню додано до бібліотеки.');
+        return $this->successResponse($request, 'Пісню додано до бібліотеки.', 'songs.index');
     }
 
     public function show(Song $song)
@@ -235,6 +236,8 @@ class SongController extends Controller
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
+                'message' => 'Пісню оновлено.',
+                'redirect_url' => route('songs.show', $song),
                 'song' => [
                     'id' => $song->id,
                     'title' => $song->title,
@@ -255,8 +258,7 @@ class SongController extends Controller
             ]);
         }
 
-        return redirect()->route('songs.show', $song)
-            ->with('success', 'Пісню оновлено.');
+        return $this->successResponse($request, 'Пісню оновлено.', 'songs.show', [$song]);
     }
 
     public function destroy(Request $request, Song $song)
@@ -268,12 +270,7 @@ class SongController extends Controller
 
         $song->delete();
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-
-        return redirect()->route('songs.index')
-            ->with('success', 'Пісню видалено.');
+        return $this->successResponse($request, 'Пісню видалено.', 'songs.index');
     }
 
     // Add song to event setlist
@@ -299,11 +296,7 @@ class SongController extends Controller
 
         $song->incrementUsage();
 
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json(['success' => true, 'order' => $maxOrder + 1]);
-        }
-
-        return back()->with('success', 'Пісню додано до події.');
+        return $this->successResponse($request, 'Пісню додано до події.', data: ['order' => $maxOrder + 1]);
     }
 
     // Event setlist management
@@ -343,11 +336,7 @@ class SongController extends Controller
 
         $event->songs()->detach($song->id);
 
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json(['success' => true]);
-        }
-
-        return back()->with('success', 'Пісню видалено з події.');
+        return $this->successResponse($request, 'Пісню видалено з події.');
     }
 
     public function importPage()

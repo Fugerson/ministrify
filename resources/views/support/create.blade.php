@@ -16,44 +16,37 @@
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">Новий запит до підтримки</h1>
         </div>
 
-        <form action="{{ route('support.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
-            @csrf
+        <form @submit.prevent="submit($refs.f)" x-ref="f" x-data="{ ...ajaxForm({ url: '{{ route('support.store') }}', method: 'POST' }), files: [] }" class="p-6 space-y-6">
 
             <div>
                 <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Тип запиту</label>
                 <select name="category" id="category" required
                         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                    <option value="question" {{ old('category') === 'question' ? 'selected' : '' }}>Питання</option>
-                    <option value="bug" {{ old('category') === 'bug' ? 'selected' : '' }}>Повідомити про помилку</option>
-                    <option value="feature" {{ old('category') === 'feature' ? 'selected' : '' }}>Пропозиція</option>
-                    <option value="other" {{ old('category') === 'other' ? 'selected' : '' }}>Інше</option>
+                    <option value="question">Питання</option>
+                    <option value="bug">Повідомити про помилку</option>
+                    <option value="feature">Пропозиція</option>
+                    <option value="other">Інше</option>
                 </select>
-                @error('category')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.category"><p class="mt-1 text-sm text-red-500" x-text="errors.category[0]"></p></template>
             </div>
 
             <div>
                 <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Тема</label>
-                <input type="text" name="subject" id="subject" value="{{ old('subject') }}" required
+                <input type="text" name="subject" id="subject" required
                        placeholder="Коротко опишіть проблему або питання"
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                @error('subject')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
+                <template x-if="errors.subject"><p class="mt-1 text-sm text-red-500" x-text="errors.subject[0]"></p></template>
             </div>
 
             <div>
                 <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
                 <textarea name="message" id="message" rows="6" required
                           placeholder="Детально опишіть вашу проблему або питання. Чим більше деталей, тим швидше ми зможемо допомогти."
-                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('message') }}</textarea>
-                @error('message')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"></textarea>
+                <template x-if="errors.message"><p class="mt-1 text-sm text-red-500" x-text="errors.message[0]"></p></template>
             </div>
 
-            <div x-data="{ files: [] }">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Скріншоти (необов'язково)</label>
                 <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 transition-colors">
                     <input type="file" name="attachments[]" multiple accept="image/*,.heic,.heif,.pdf"
@@ -80,14 +73,13 @@
                         </template>
                     </div>
                 </template>
-                @error('attachments.*')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
+                <template x-if="errors['attachments.0']"><p class="mt-1 text-sm text-red-500" x-text="errors['attachments.0'][0]"></p></template>
             </div>
 
             <div class="flex justify-end">
-                <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                    Надіслати
+                <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                    <span x-show="!saving">Надіслати</span>
+                    <span x-show="saving" x-cloak>Надсилання...</span>
                 </button>
             </div>
         </form>

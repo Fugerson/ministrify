@@ -25,12 +25,12 @@ class TemplateController extends Controller
         $templates = config('public_site_templates.templates', []);
 
         if (!isset($templates[$template])) {
-            return back()->with('error', 'Невідомий шаблон');
+            return $this->errorResponse($request, 'Невідомий шаблон');
         }
 
         $church->public_template = $template;
         $church->save();
 
-        return back()->with('success', "Шаблон \"{$templates[$template]['name']}\" застосовано!");
+        return $this->successResponse($request, "Шаблон \"{$templates[$template]['name']}\" застосовано!");
     }
 }

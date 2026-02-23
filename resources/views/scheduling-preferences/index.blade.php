@@ -18,9 +18,7 @@
     </div>
 
     <!-- General Preferences -->
-    <form action="{{ route('scheduling-preferences.update') }}" method="POST" class="space-y-6">
-        @csrf
-        @method('PUT')
+    <form @submit.prevent="submit($refs.f)" x-ref="f" x-data="{ ...ajaxForm({ url: '{{ route('scheduling-preferences.update') }}', method: 'PUT', stayOnPage: true }) }" class="space-y-6">
 
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -42,6 +40,7 @@
                                value="{{ old('max_times_per_month', $preference->max_times_per_month) }}"
                                min="1" max="30" placeholder="Без обмежень"
                                class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">
+                        <template x-if="errors.max_times_per_month"><p class="mt-1 text-sm text-red-500" x-text="errors.max_times_per_month[0]"></p></template>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Залиште порожнім, якщо без обмежень</p>
                     </div>
 
@@ -53,6 +52,7 @@
                                value="{{ old('preferred_times_per_month', $preference->preferred_times_per_month) }}"
                                min="0" max="30" placeholder="Не вказано"
                                class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">
+                        <template x-if="errors.preferred_times_per_month"><p class="mt-1 text-sm text-red-500" x-text="errors.preferred_times_per_month[0]"></p></template>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Ідеальна кількість подій</p>
                     </div>
                 </div>
@@ -72,6 +72,7 @@
                             </option>
                         @endforeach
                     </select>
+                    <template x-if="errors.prefer_with_person_id"><p class="mt-1 text-sm text-red-500" x-text="errors.prefer_with_person_id[0]"></p></template>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Виберіть особу, з якою бажаєте служити разом</p>
                 </div>
 
@@ -90,6 +91,7 @@
                         </label>
                         @endforeach
                     </div>
+                    <template x-if="errors.household_preference"><p class="mt-1 text-sm text-red-500" x-text="errors.household_preference[0]"></p></template>
                 </div>
 
                 <!-- Notes -->
@@ -99,15 +101,17 @@
                     </label>
                     <textarea name="scheduling_notes" id="scheduling_notes" rows="3"
                               class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">{{ old('scheduling_notes', $preference->scheduling_notes) }}</textarea>
+                    <template x-if="errors.scheduling_notes"><p class="mt-1 text-sm text-red-500" x-text="errors.scheduling_notes[0]"></p></template>
                 </div>
             </div>
         </div>
 
         <!-- Submit -->
         <div class="flex justify-end">
-            <button type="submit"
-                    class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                Зберегти налаштування
+            <button type="submit" :disabled="saving"
+                    class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
+                <span x-show="!saving">Зберегти налаштування</span>
+                <span x-show="saving">Збереження...</span>
             </button>
         </div>
     </form>

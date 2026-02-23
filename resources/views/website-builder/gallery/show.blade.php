@@ -32,11 +32,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if($gallery->description)
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
@@ -46,11 +41,9 @@
 
     <!-- Upload photos -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
-         x-data="{ uploading: false }">
+         x-data="{ ...ajaxForm({ url: '{{ route('website-builder.gallery.photos.upload', $gallery) }}', method: 'POST', onSuccess() { setTimeout(() => location.reload(), 600); } }) }">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Завантажити фото</h3>
-        <form action="{{ route('website-builder.gallery.photos.upload', $gallery) }}" method="POST" enctype="multipart/form-data"
-              @submit="uploading = true">
-            @csrf
+        <form @submit.prevent="submit($refs.uploadForm)" x-ref="uploadForm">
             <div class="flex items-center gap-4">
                 <label class="flex-1 flex items-center justify-center px-4 py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 transition-colors">
                     <div class="text-center">
@@ -63,17 +56,13 @@
                     <input type="file" name="photos[]" multiple accept="image/*,.heic,.heif" class="hidden">
                 </label>
             </div>
-            @error('photos')
-                <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-            @enderror
-            @error('photos.*')
-                <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-            @enderror
+            <template x-if="errors.photos"><p class="text-red-500 text-sm mt-2" x-text="errors.photos[0]"></p></template>
+            <template x-if="errors['photos.0']"><p class="text-red-500 text-sm mt-2" x-text="errors['photos.0'][0]"></p></template>
             <div class="mt-4 flex justify-end">
                 <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
-                        :disabled="uploading">
-                    <span x-show="!uploading">Завантажити</span>
-                    <span x-show="uploading" class="flex items-center gap-2">
+                        :disabled="saving">
+                    <span x-show="!saving">Завантажити</span>
+                    <span x-show="saving" class="flex items-center gap-2">
                         <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
@@ -108,16 +97,11 @@
                              loading="lazy">
                     </div>
                     <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                        <form action="{{ route('website-builder.gallery.photos.delete', $photo) }}" method="POST"
-                              onsubmit="return confirm('{{ __('messages.confirm_delete_photo') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-lg transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
-                        </form>
+                        <button type="button" @click="ajaxDelete('{{ route('website-builder.gallery.photos.delete', $photo) }}', '{{ __('messages.confirm_delete_photo') }}', () => $el.closest('.group').remove())" class="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-lg transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
                     </div>
                     @if($photo->caption)
                         <div class="p-2">

@@ -13,38 +13,15 @@
 
         @if($isConnected)
             <div class="flex items-center gap-3">
-                <form action="{{ route('finances.privatbank.sync') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        Синхронізувати
-                    </button>
-                </form>
+                <button type="button" @click="ajaxAction('{{ route('finances.privatbank.sync') }}', 'POST')" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Синхронізувати
+                </button>
             </div>
         @endif
     </div>
-
-    @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <p class="text-green-800 dark:text-green-200">{{ session('success') }}</p>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p class="text-red-800 dark:text-red-200">{{ session('error') }}</p>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            @foreach($errors->all() as $error)
-                <p class="text-red-800 dark:text-red-200">{{ $error }}</p>
-            @endforeach
-        </div>
-    @endif
 
     @if(!$isConnected)
         <!-- Setup Form -->
@@ -62,14 +39,15 @@
                     </div>
                 </div>
 
-                <form action="{{ route('finances.privatbank.connect') }}" method="POST" class="space-y-4">
-                    @csrf
+                <form @submit.prevent="submit($refs.connectForm)" x-ref="connectForm"
+                      x-data="{ ...ajaxForm({url:'{{ route('finances.privatbank.connect') }}', method:'POST', redirect:'{{ route('finances.privatbank.index') }}'}) }" class="space-y-4">
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Merchant ID</label>
                         <input type="text" name="merchant_id" value="{{ old('merchant_id') }}" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                placeholder="12345">
+                        <template x-if="errors.merchant_id"><p class="mt-1 text-sm text-red-500" x-text="errors.merchant_id[0]"></p></template>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Отримайте на api.privatbank.ua</p>
                     </div>
 
@@ -78,6 +56,7 @@
                         <input type="password" name="password" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                placeholder="password">
+                        <template x-if="errors.password"><p class="mt-1 text-sm text-red-500" x-text="errors.password[0]"></p></template>
                     </div>
 
                     <div>
@@ -86,11 +65,13 @@
                                maxlength="16" pattern="[0-9]{16}"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
                                placeholder="4149XXXXXXXXXXXX">
+                        <template x-if="errors.card_number"><p class="mt-1 text-sm text-red-500" x-text="errors.card_number[0]"></p></template>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">16 цифр без пробілів</p>
                     </div>
 
-                    <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
-                        Підключити
+                    <button type="submit" :disabled="saving" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                        <span x-show="!saving">Підключити</span>
+                        <span x-show="saving">Підключення...</span>
                     </button>
                 </form>
 
@@ -175,28 +156,21 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <form action="{{ route('finances.privatbank.toggle-auto-sync') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="flex items-center gap-2 text-sm {{ $church->privatbank_auto_sync ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                @if($church->privatbank_auto_sync)
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                @else
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                @endif
-                            </svg>
-                            Автосинхронізація {{ $church->privatbank_auto_sync ? 'увімкнена' : 'вимкнена' }}
-                        </button>
-                    </form>
+                    <button type="button" @click="ajaxAction('{{ route('finances.privatbank.toggle-auto-sync') }}', 'POST')" class="flex items-center gap-2 text-sm {{ $church->privatbank_auto_sync ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            @if($church->privatbank_auto_sync)
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            @else
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            @endif
+                        </svg>
+                        Автосинхронізація {{ $church->privatbank_auto_sync ? 'увімкнена' : 'вимкнена' }}
+                    </button>
                 </div>
 
-                <form action="{{ route('finances.privatbank.disconnect') }}" method="POST" onsubmit="return confirm('{{ __('messages.confirm_disconnect_privatbank') }}')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
-                        Відключити ПриватБанк
-                    </button>
-                </form>
+                <button type="button" @click="ajaxDelete('{{ route('finances.privatbank.disconnect') }}', '{{ __('messages.confirm_disconnect_privatbank') }}', null, '{{ route('finances.privatbank.index') }}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                    Відключити ПриватБанк
+                </button>
             </div>
         </div>
 
@@ -235,12 +209,9 @@
                     </svg>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">Немає транзакцій</p>
                     @if($tab === 'new')
-                        <form action="{{ route('finances.privatbank.sync') }}" method="POST" class="mt-4">
-                            @csrf
-                            <button type="submit" class="text-green-600 dark:text-green-400 hover:underline">
-                                Синхронізувати зараз
-                            </button>
-                        </form>
+                        <button type="button" @click="ajaxAction('{{ route('finances.privatbank.sync') }}', 'POST').then(() => location.reload())" class="mt-4 text-green-600 dark:text-green-400 hover:underline">
+                            Синхронізувати зараз
+                        </button>
                     @endif
                 </div>
             @else
@@ -280,19 +251,13 @@
                                                     class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 text-sm">
                                                 Імпорт
                                             </button>
-                                            <form action="{{ route('finances.privatbank.ignore', $tx) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm">
-                                                    Приховати
-                                                </button>
-                                            </form>
+                                            <button type="button" @click="ajaxAction('{{ route('finances.privatbank.ignore', $tx) }}', 'POST').then(() => $el.closest('tr').remove())" class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm">
+                                                Приховати
+                                            </button>
                                         @elseif($tx->is_ignored)
-                                            <form action="{{ route('finances.privatbank.restore', $tx) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">
-                                                    Відновити
-                                                </button>
-                                            </form>
+                                            <button type="button" @click="ajaxAction('{{ route('finances.privatbank.restore', $tx) }}', 'POST').then(() => $el.closest('tr').remove())" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">
+                                                Відновити
+                                            </button>
                                         @elseif($tx->is_processed)
                                             <span class="text-xs text-gray-500 dark:text-gray-400">Оброблено</span>
                                         @else
@@ -314,19 +279,19 @@
 </div>
 
 <!-- Import Modal -->
-<div id="importModal" class="fixed inset-0 z-50 hidden overflow-y-auto" x-data="{ open: false }">
+<div id="importModal" class="fixed inset-0 z-50 hidden overflow-y-auto"
+     x-data="importModal()">
     <div class="flex items-center justify-center min-h-screen px-4">
         <div class="fixed inset-0 bg-black/50" onclick="closeImportModal()"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Імпортувати транзакцію</h3>
 
-            <form id="importForm" method="POST" class="space-y-4">
-                @csrf
+            <form @submit.prevent="submitImport($refs.importForm)" x-ref="importForm" class="space-y-4">
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Відправник</label>
-                    <p id="importSender" class="text-gray-900 dark:text-white font-medium"></p>
-                    <p id="importAmount" class="text-sm text-green-600 dark:text-green-400"></p>
+                    <p class="text-gray-900 dark:text-white font-medium" x-text="sender"></p>
+                    <p class="text-sm text-green-600 dark:text-green-400" x-text="amount"></p>
                 </div>
 
                 <div>
@@ -366,8 +331,9 @@
                     <button type="button" onclick="closeImportModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300">
                         Скасувати
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg">
-                        Імпортувати
+                    <button type="submit" :disabled="saving" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50">
+                        <span x-show="!saving">Імпортувати</span>
+                        <span x-show="saving">Імпорт...</span>
                     </button>
                 </div>
             </form>
@@ -376,11 +342,57 @@
 </div>
 
 <script>
+function importModal() {
+    return {
+        importUrl: '',
+        sender: '',
+        amount: '',
+        saving: false,
+        errors: {},
+        async submitImport(formEl) {
+            if (this.saving) return;
+            this.saving = true;
+            this.errors = {};
+            try {
+                const response = await fetch(this.importUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: new FormData(formEl)
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.errors = data.errors;
+                        showToast('error', data.message || 'Перевірте правильність заповнення форми.');
+                    } else {
+                        showToast('error', data.message || 'Помилка імпорту.');
+                    }
+                    this.saving = false;
+                    return;
+                }
+                showToast('success', data.message || 'Імпортовано!');
+                closeImportModal();
+                setTimeout(() => location.reload(), 600);
+            } catch (e) {
+                showToast('error', "Помилка з'єднання з сервером.");
+                this.saving = false;
+            }
+        }
+    };
+}
+
 function openImportModal(id, sender, amount) {
-    document.getElementById('importModal').classList.remove('hidden');
-    document.getElementById('importForm').action = '/finances/privatbank/' + id + '/import';
-    document.getElementById('importSender').textContent = sender;
-    document.getElementById('importAmount').textContent = '+' + amount.toFixed(2) + ' UAH';
+    const modal = document.getElementById('importModal');
+    modal.classList.remove('hidden');
+    const alpine = Alpine.$data(modal);
+    alpine.importUrl = '/finances/privatbank/' + id + '/import';
+    alpine.sender = sender;
+    alpine.amount = '+' + amount.toFixed(2) + ' UAH';
+    alpine.errors = {};
+    alpine.saving = false;
 }
 
 function closeImportModal() {

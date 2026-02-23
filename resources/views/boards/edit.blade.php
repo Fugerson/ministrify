@@ -4,9 +4,7 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto space-y-6">
-    <form method="POST" action="{{ route('boards.update', $board) }}" class="space-y-6">
-        @csrf
-        @method('PUT')
+    <form @submit.prevent="submit($refs.f)" x-ref="f" x-data="{ ...ajaxForm({ url: '{{ route('boards.update', $board) }}', method: 'PUT' }), color: '{{ old('color', $board->color) }}' }" class="space-y-6">
 
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Інформація про дошку') }}</h2>
@@ -16,9 +14,9 @@
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Назва') }} *</label>
                     <input type="text" name="name" id="name" required value="{{ old('name', $board->name) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                    @error('name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.name">
+                        <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
+                    </template>
                 </div>
 
                 <div>
@@ -27,7 +25,7 @@
                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ old('description', $board->description) }}</textarea>
                 </div>
 
-                <div x-data="{ color: '{{ old('color', $board->color) }}' }">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Колір') }}</label>
                     <div class="flex items-center gap-3">
                         @php
@@ -50,12 +48,12 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <button type="button"
-                        onclick="document.getElementById('archive-board-form').submit()"
+                        @click="ajaxAction('{{ route('boards.archive', $board) }}', 'POST').then(() => setTimeout(() => window.location.href = '{{ route('boards.index') }}', 600))"
                         class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 text-sm font-medium">
                     {{ __('Архівувати') }}
                 </button>
                 <button type="button"
-                        onclick="if(confirm('{{ __('Видалити цю дошку? Всі картки будуть втрачені.') }}')) { document.getElementById('delete-board-form').submit(); }"
+                        @click="ajaxDelete('{{ route('boards.destroy', $board) }}', '{{ __('Видалити цю дошку? Всі картки будуть втрачені.') }}', null, '{{ route('boards.index') }}')"
                         class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
                     {{ __('Видалити') }}
                 </button>
@@ -66,20 +64,12 @@
                    class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
                     {{ __('Скасувати') }}
                 </a>
-                <button type="submit"
-                        class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                <button type="submit" :disabled="saving"
+                        class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
                     {{ __('Зберегти') }}
                 </button>
             </div>
         </div>
-    </form>
-
-    <form id="archive-board-form" method="POST" action="{{ route('boards.archive', $board) }}" class="hidden">
-        @csrf
-    </form>
-    <form id="delete-board-form" method="POST" action="{{ route('boards.destroy', $board) }}" class="hidden">
-        @csrf
-        @method('DELETE')
     </form>
 </div>
 @endsection

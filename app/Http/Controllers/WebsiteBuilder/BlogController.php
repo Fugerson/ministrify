@@ -89,7 +89,7 @@ class BlogController extends Controller
 
         BlogPost::create($validated);
 
-        return redirect()->route('website-builder.blog.index')->with('success', 'Статтю створено');
+        return $this->successResponse($request, 'Статтю створено', 'website-builder.blog.index');
     }
 
     public function edit(BlogPost $blogPost)
@@ -139,10 +139,10 @@ class BlogController extends Controller
 
         $blogPost->update($validated);
 
-        return redirect()->route('website-builder.blog.index')->with('success', 'Статтю оновлено');
+        return $this->successResponse($request, 'Статтю оновлено', 'website-builder.blog.index');
     }
 
-    public function destroy(BlogPost $blogPost)
+    public function destroy(Request $request, BlogPost $blogPost)
     {
         $this->authorize('delete', $blogPost);
 
@@ -152,15 +152,15 @@ class BlogController extends Controller
 
         $blogPost->delete();
 
-        return redirect()->route('website-builder.blog.index')->with('success', 'Статтю видалено');
+        return $this->successResponse($request, 'Статтю видалено', 'website-builder.blog.index');
     }
 
-    public function publish(BlogPost $blogPost)
+    public function publish(Request $request, BlogPost $blogPost)
     {
         $this->authorize('update', $blogPost);
         $blogPost->publish();
 
-        return back()->with('success', 'Статтю опубліковано');
+        return $this->successResponse($request, 'Статтю опубліковано');
     }
 
     // Categories
@@ -188,7 +188,7 @@ class BlogController extends Controller
 
         BlogCategory::create($validated);
 
-        return back()->with('success', 'Категорію створено');
+        return $this->successResponse($request, 'Категорію створено');
     }
 
     public function categoryUpdate(Request $request, BlogCategory $category)
@@ -204,10 +204,10 @@ class BlogController extends Controller
 
         $category->update($validated);
 
-        return back()->with('success', 'Категорію оновлено');
+        return $this->successResponse($request, 'Категорію оновлено');
     }
 
-    public function categoryDestroy(BlogCategory $category)
+    public function categoryDestroy(Request $request, BlogCategory $category)
     {
         $this->authorize('delete', $category);
 
@@ -215,6 +215,6 @@ class BlogController extends Controller
         $category->posts()->update(['blog_category_id' => null]);
         $category->delete();
 
-        return back()->with('success', 'Категорію видалено');
+        return $this->successResponse($request, 'Категорію видалено');
     }
 }

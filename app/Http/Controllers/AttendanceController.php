@@ -109,8 +109,7 @@ class AttendanceController extends Controller
             }
         }
 
-        return redirect()->route('attendance.show', $attendance)
-            ->with('success', 'Відвідуваність збережено.');
+        return $this->successResponse($request, 'Відвідуваність збережено.', 'attendance.show', ['attendance' => $attendance->id]);
     }
 
     public function show(Attendance $attendance)
@@ -180,11 +179,10 @@ class AttendanceController extends Controller
             }
         });
 
-        return redirect()->route('attendance.show', $attendance)
-            ->with('success', 'Відвідуваність оновлено.');
+        return $this->successResponse($request, 'Відвідуваність оновлено.', 'attendance.show', ['attendance' => $attendance->id]);
     }
 
-    public function destroy(Attendance $attendance)
+    public function destroy(Request $request, Attendance $attendance)
     {
         $this->checkAttendanceEnabled();
         $this->authorizeChurch($attendance);
@@ -192,7 +190,7 @@ class AttendanceController extends Controller
 
         $attendance->delete();
 
-        return back()->with('success', 'Запис видалено.');
+        return $this->successResponse($request, 'Запис видалено.');
     }
 
     public function toggleFeature(Request $request)

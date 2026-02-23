@@ -19,11 +19,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
 
     <!-- Templates Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -71,12 +66,11 @@
                     <!-- Actions -->
                     <div class="flex gap-2 mt-4">
                         @if($currentTemplate !== $key)
-                            <form action="{{ route('website-builder.templates.apply', $key) }}" method="POST" class="flex-1">
-                                @csrf
-                                <button type="submit" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                            <div class="flex-1">
+                                <button type="button" @click="ajaxAction('{{ route('website-builder.templates.apply', $key) }}', 'POST').then(() => setTimeout(() => location.reload(), 600))" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                                     Застосувати
                                 </button>
-                            </form>
+                            </div>
                         @else
                             <button disabled class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium rounded-lg cursor-not-allowed">
                                 Активний

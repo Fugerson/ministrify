@@ -18,8 +18,7 @@ class SchedulingPreferenceController extends Controller
         $person = auth()->user()->person;
 
         if (!$person) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Профіль не знайдено');
+            return $this->errorResponse(request(), 'Профіль не знайдено');
         }
 
         $preference = $person->getOrCreateSchedulingPreference();
@@ -45,7 +44,7 @@ class SchedulingPreferenceController extends Controller
         $person = auth()->user()->person;
 
         if (!$person) {
-            return back()->with('error', 'Профіль не знайдено');
+            return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
         $validated = $request->validate([
@@ -59,7 +58,7 @@ class SchedulingPreferenceController extends Controller
         $preference = $person->getOrCreateSchedulingPreference();
         $preference->update($validated);
 
-        return back()->with('success', 'Налаштування збережено');
+        return $this->successResponse($request, 'Налаштування збережено');
     }
 
     /**

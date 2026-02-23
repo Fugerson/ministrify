@@ -84,16 +84,15 @@
                     <span>{{ $prayerRequest->prayer_count }} {{ trans_choice('людина молиться|людини моляться|людей моляться', $prayerRequest->prayer_count) }}</span>
                 </div>
 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3" x-data="{ prayed: {{ $hasPrayed ? 'true' : 'false' }}, prayerCount: {{ $prayerRequest->prayer_count }} }">
                     @if($prayerRequest->status === 'active')
-                        <form action="{{ route('prayer-requests.pray', $prayerRequest) }}" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium text-sm transition-colors {{ $hasPrayed ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                    {{ $hasPrayed ? 'disabled' : '' }}>
-                                🙏 {{ $hasPrayed ? 'Ви вже помолилися' : 'Молюсь за це' }}
-                            </button>
-                        </form>
+                        <button type="button"
+                                @click="if(!prayed) { ajaxAction('{{ route('prayer-requests.pray', $prayerRequest) }}', 'POST').then(() => { prayed = true; prayerCount++; }).catch(() => {}) }"
+                                :disabled="prayed"
+                                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium text-sm transition-colors"
+                                :class="{ 'opacity-50 cursor-not-allowed': prayed }">
+                            🙏 <span x-text="prayed ? 'Ви вже помолилися' : 'Молюсь за це'"></span>
+                        </button>
 
                         @if($prayerRequest->user_id === auth()->id() || auth()->user()->hasRole(['admin', 'leader']))
                             <button type="button"
@@ -110,10 +109,10 @@
 </div>
 
 <!-- Answer Modal -->
-<div id="answerModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+<div id="answerModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+     x-data="{ ...ajaxForm({ url: '{{ route('prayer-requests.mark-answered', $prayerRequest) }}', method: 'POST', onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full mx-4">
-        <form action="{{ route('prayer-requests.mark-answered', $prayerRequest) }}" method="POST">
-            @csrf
+        <form @submit.prevent="submit($refs.answerForm)" x-ref="answerForm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Слава Богу!</h3>
             </div>
@@ -130,7 +129,7 @@
                         class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                     Скасувати
                 </button>
-                <button type="submit"
+                <button type="submit" :disabled="saving"
                         class="w-full sm:w-auto px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
                     Підтвердити
                 </button>

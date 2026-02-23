@@ -45,7 +45,7 @@ class DesignController extends Controller
 
         $church->setPublicSiteSetting('colors', array_filter($validated));
 
-        return back()->with('success', 'Кольори оновлено');
+        return $this->successResponse($request, 'Кольори оновлено');
     }
 
     public function updateFonts(Request $request)
@@ -60,7 +60,7 @@ class DesignController extends Controller
 
         $church->setPublicSiteSetting('fonts', array_filter($validated));
 
-        return back()->with('success', 'Шрифти оновлено');
+        return $this->successResponse($request, 'Шрифти оновлено');
     }
 
     public function updateHero(Request $request)
@@ -84,7 +84,7 @@ class DesignController extends Controller
 
         $church->setPublicSiteSetting('hero', $heroSettings);
 
-        return back()->with('success', 'Hero секцію оновлено');
+        return $this->successResponse($request, 'Hero секцію оновлено');
     }
 
     public function updateNavigation(Request $request)
@@ -100,7 +100,7 @@ class DesignController extends Controller
 
         $church->setPublicSiteSetting('navigation', $validated);
 
-        return back()->with('success', 'Навігацію оновлено');
+        return $this->successResponse($request, 'Навігацію оновлено');
     }
 
     public function updateFooter(Request $request)
@@ -116,7 +116,7 @@ class DesignController extends Controller
 
         $church->setPublicSiteSetting('footer', $validated);
 
-        return back()->with('success', 'Футер оновлено');
+        return $this->successResponse($request, 'Футер оновлено');
     }
 
     public function updateCustomCss(Request $request)
@@ -137,7 +137,7 @@ class DesignController extends Controller
 
         $church->setPublicSiteSetting('custom_css', $css);
 
-        return back()->with('success', 'Кастомний CSS збережено');
+        return $this->successResponse($request, 'Кастомний CSS збережено');
     }
 
     public function uploadHeroImage(Request $request)
@@ -153,7 +153,7 @@ class DesignController extends Controller
         $heroSettings['image'] = $stored['path'];
         $church->setPublicSiteSetting('hero', $heroSettings);
 
-        return back()->with('success', 'Hero зображення завантажено');
+        return $this->successResponse($request, 'Hero зображення завантажено');
     }
 
     public function uploadHeroSlide(Request $request)
@@ -171,7 +171,7 @@ class DesignController extends Controller
         $heroSettings['slides'] = $slides;
         $church->setPublicSiteSetting('hero', $heroSettings);
 
-        return back()->with('success', 'Слайд додано');
+        return $this->successResponse($request, 'Слайд додано');
     }
 
     public function deleteHeroSlide(Request $request, int $index)
@@ -189,6 +189,6 @@ class DesignController extends Controller
             $church->setPublicSiteSetting('hero', $heroSettings);
         }
 
-        return back()->with('success', 'Слайд видалено');
+        return $this->successResponse($request, 'Слайд видалено');
     }
 }

@@ -160,16 +160,7 @@ class UserController extends Controller
                 'updated_at' => now(),
             ]);
 
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Користувача додано!',
-                    'redirect_url' => route('settings.users.index'),
-                ]);
-            }
-
-            return redirect()->route('settings.users.index')
-                ->with('success', 'Користувача додано до церкви.');
+            return $this->successResponse($request, 'Користувача додано до церкви.', 'settings.users.index');
         }
 
         // Generate secure random password (user will reset via email)
@@ -269,16 +260,7 @@ class UserController extends Controller
             $message .= ' Налаштуйте пароль вручну або надішліть запрошення пізніше.';
         }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Користувача додано!',
-                'redirect_url' => route('settings.users.index'),
-            ]);
-        }
-
-        return redirect()->route('settings.users.index')
-            ->with('success', $message);
+        return $this->successResponse($request, $message, 'settings.users.index');
     }
 
     public function edit(User $user)
@@ -488,21 +470,16 @@ class UserController extends Controller
             }
         }
 
-        if ($request->expectsJson()) {
-            return response()->json(['message' => 'Користувача оновлено.']);
-        }
-
-        return redirect()->route('settings.users.index')
-            ->with('success', 'Користувача оновлено.');
+        return $this->successResponse($request, 'Користувача оновлено.', 'settings.users.index');
     }
 
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
         $this->authorizeChurch($user);
 
         // Prevent deleting yourself
         if ($user->id === auth()->id()) {
-            return back()->with('error', 'Ви не можете видалити свій акаунт.');
+            return $this->errorResponse($request, 'Ви не можете видалити свій акаунт.');
         }
 
         $church = $this->getCurrentChurch();
@@ -530,20 +507,20 @@ class UserController extends Controller
             $user->delete();
         }
 
-        return redirect()->route('settings.users.index')->with('success', 'Користувача видалено.');
+        return $this->successResponse($request, 'Користувача видалено.', 'settings.users.index');
     }
 
-    public function sendInvite(User $user)
+    public function sendInvite(Request $request, User $user)
     {
         $this->authorizeChurch($user);
 
         try {
             $status = Password::sendResetLink(['email' => $user->email]);
             if ($status !== Password::RESET_LINK_SENT) {
-                return back()->with('error', 'Не вдалося надіслати запрошення.');
+                return $this->errorResponse($request, 'Не вдалося надіслати запрошення.');
             }
         } catch (\Exception $e) {
-            return back()->with('error', 'Помилка надсилання: ' . $e->getMessage());
+            return $this->errorResponse($request, 'Помилка надсилання: ' . $e->getMessage());
         }
 
         // Log invite sent
@@ -552,7 +529,7 @@ class UserController extends Controller
             'email' => $user->email,
         ]);
 
-        return back()->with('success', 'Запрошення надіслано на ' . $user->email);
+        return $this->successResponse($request, 'Запрошення надіслано на ' . $user->email);
     }
 
     public function getPermissions(User $user)

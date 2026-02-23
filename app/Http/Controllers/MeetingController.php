@@ -76,16 +76,7 @@ class MeetingController extends Controller
             ]);
         }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Зустріч створено!',
-                'redirect_url' => route('meetings.show', [$ministry, $meeting]),
-            ]);
-        }
-
-        return redirect()->route('meetings.show', [$ministry, $meeting])
-            ->with('success', 'Зустріч створено');
+        return $this->successResponse($request, 'Зустріч створено', 'meetings.show', [$ministry, $meeting]);
     }
 
     public function show(Ministry $ministry, MinistryMeeting $meeting)
@@ -133,26 +124,17 @@ class MeetingController extends Controller
 
         $meeting->update($validated);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Зустріч оновлено!',
-            ]);
-        }
-
-        return redirect()->route('meetings.show', [$ministry, $meeting])
-            ->with('success', 'Зустріч оновлено');
+        return $this->successResponse($request, 'Зустріч оновлено', 'meetings.show', [$ministry, $meeting]);
     }
 
-    public function destroy(Ministry $ministry, MinistryMeeting $meeting)
+    public function destroy(Request $request, Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
         abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $meeting->delete();
 
-        return redirect()->route('meetings.index', $ministry)
-            ->with('success', 'Зустріч видалено');
+        return $this->successResponse($request, 'Зустріч видалено', 'meetings.index', [$ministry]);
     }
 
     public function copy(Ministry $ministry, MinistryMeeting $meeting)
@@ -178,8 +160,7 @@ class MeetingController extends Controller
             $newMeeting->update(['title' => $validated['title']]);
         }
 
-        return redirect()->route('meetings.show', [$ministry, $newMeeting])
-            ->with('success', 'Зустріч скопійовано');
+        return $this->successResponse($request, 'Зустріч скопійовано', 'meetings.show', [$ministry, $newMeeting]);
     }
 
     // Agenda Items
@@ -199,7 +180,7 @@ class MeetingController extends Controller
 
         MeetingAgendaItem::create($validated);
 
-        return back()->with('success', 'Пункт додано');
+        return $this->successResponse($request, 'Пункт додано');
     }
 
     public function updateAgendaItem(Request $request, MeetingAgendaItem $item)
@@ -215,23 +196,23 @@ class MeetingController extends Controller
 
         $item->update($validated);
 
-        return back()->with('success', 'Пункт оновлено');
+        return $this->successResponse($request, 'Пункт оновлено');
     }
 
-    public function toggleAgendaItem(MeetingAgendaItem $item)
+    public function toggleAgendaItem(Request $request, MeetingAgendaItem $item)
     {
         $this->authorizeAgendaItem($item);
         $item->update(['is_completed' => !$item->is_completed]);
 
-        return back();
+        return $this->successResponse($request, $item->is_completed ? 'Пункт виконано' : 'Пункт не виконано');
     }
 
-    public function destroyAgendaItem(MeetingAgendaItem $item)
+    public function destroyAgendaItem(Request $request, MeetingAgendaItem $item)
     {
         $this->authorizeAgendaItem($item);
         $item->delete();
 
-        return back()->with('success', 'Пункт видалено');
+        return $this->successResponse($request, 'Пункт видалено');
     }
 
     public function reorderAgendaItems(Request $request, MinistryMeeting $meeting)
@@ -270,17 +251,17 @@ class MeetingController extends Controller
 
         MeetingMaterial::create($validated);
 
-        return back()->with('success', 'Матеріал додано');
+        return $this->successResponse($request, 'Матеріал додано');
     }
 
-    public function destroyMaterial(MeetingMaterial $material)
+    public function destroyMaterial(Request $request, MeetingMaterial $material)
     {
         $meeting = $material->meeting;
         abort_unless($meeting?->ministry, 404);
         $this->authorizeMinistry($meeting->ministry);
         $material->delete();
 
-        return back()->with('success', 'Матеріал видалено');
+        return $this->successResponse($request, 'Матеріал видалено');
     }
 
     // Attendees
@@ -300,7 +281,7 @@ class MeetingController extends Controller
             ['status' => 'invited']
         );
 
-        return back()->with('success', 'Учасника додано');
+        return $this->successResponse($request, 'Учасника додано');
     }
 
     public function updateAttendee(Request $request, MeetingAttendee $attendee)
@@ -313,25 +294,25 @@ class MeetingController extends Controller
 
         $attendee->update($validated);
 
-        return back();
+        return $this->successResponse($request, 'Статус оновлено');
     }
 
-    public function destroyAttendee(MeetingAttendee $attendee)
+    public function destroyAttendee(Request $request, MeetingAttendee $attendee)
     {
         $this->authorizeAttendee($attendee);
         $attendee->delete();
 
-        return back()->with('success', 'Учасника видалено');
+        return $this->successResponse($request, 'Учасника видалено');
     }
 
-    public function markAllAttended(Ministry $ministry, MinistryMeeting $meeting)
+    public function markAllAttended(Request $request, Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
         abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $meeting->attendees()->where('status', '!=', 'absent')->update(['status' => 'attended']);
 
-        return back()->with('success', 'Всіх відмічено як присутніх');
+        return $this->successResponse($request, 'Всіх відмічено як присутніх');
     }
 
     private function authorizeMinistry(Ministry $ministry): void

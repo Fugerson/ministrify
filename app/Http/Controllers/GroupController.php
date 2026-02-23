@@ -9,10 +9,10 @@ use Illuminate\Http\Request;
 
 class GroupController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!auth()->user()->canView('groups')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
         }
 
         $groups = Group::where('church_id', $this->getCurrentChurch()->id)
@@ -59,16 +59,7 @@ class GroupController extends Controller
             ]);
         }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Групу створено!',
-                'redirect_url' => route('groups.show', $group),
-            ]);
-        }
-
-        return redirect()->route('groups.show', $group)
-            ->with('success', 'Групу створено');
+        return $this->successResponse($request, 'Групу створено!', 'groups.show', [$group]);
     }
 
     public function show(Group $group)
@@ -117,24 +108,16 @@ class GroupController extends Controller
 
         $group->update($validated);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Групу оновлено!',
-            ]);
-        }
-
-        return redirect()->route('groups.show', $group)
-            ->with('success', 'Групу оновлено');
+        return $this->successResponse($request, 'Групу оновлено!', 'groups.show', [$group]);
     }
 
-    public function destroy(Group $group)
+    public function destroy(Request $request, Group $group)
     {
         $this->authorize('delete', $group);
 
         $group->delete();
 
-        return redirect()->route('groups.index')->with('success', 'Групу видалено.');
+        return $this->successResponse($request, 'Групу видалено.', 'groups.index');
     }
 
     public function addMember(Request $request, Group $group)
@@ -147,7 +130,7 @@ class GroupController extends Controller
         ]);
 
         if ($group->members()->where('people.id', $validated['person_id'])->exists()) {
-            return back()->with('error', 'Ця людина вже є учасником групи.');
+            return $this->errorResponse($request, 'Ця людина вже є учасником групи.');
         }
 
         $group->members()->attach($validated['person_id'], [
@@ -163,10 +146,10 @@ class GroupController extends Controller
             'role' => $validated['role'] ?? 'member',
         ]);
 
-        return back()->with('success', 'Учасника додано');
+        return $this->successResponse($request, 'Учасника додано');
     }
 
-    public function removeMember(Group $group, Person $person)
+    public function removeMember(Request $request, Group $group, Person $person)
     {
         $this->authorize('update', $group);
         abort_unless($person->church_id === auth()->user()->church_id, 404);
@@ -184,7 +167,7 @@ class GroupController extends Controller
             'person_name' => $person->full_name,
         ]);
 
-        return back()->with('success', 'Учасника видалено');
+        return $this->successResponse($request, 'Учасника видалено');
     }
 
     public function updateMemberRole(Request $request, Group $group, Person $person)
@@ -221,6 +204,6 @@ class GroupController extends Controller
         ]);
 
         $roleLabel = Group::ROLES[$validated['role']] ?? $validated['role'];
-        return back()->with('success', "Роль змінено на: {$roleLabel}");
+        return $this->successResponse($request, "Роль змінено на: {$roleLabel}");
     }
 }

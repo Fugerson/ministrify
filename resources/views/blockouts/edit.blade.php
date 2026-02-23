@@ -17,9 +17,7 @@
         </div>
     </div>
 
-    <form action="{{ route('blockouts.update', $blockout) }}" method="POST" class="space-y-6">
-        @csrf
-        @method('PUT')
+    <form @submit.prevent="submit($refs.f)" x-ref="f" x-data="{ ...ajaxForm({url:'{{ route("blockouts.update", $blockout) }}', method:'PUT'}) }" class="space-y-6">
 
         <!-- Date Range Card -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -39,9 +37,9 @@
                            value="{{ old('start_date', $blockout->start_date->format('Y-m-d')) }}"
                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500"
                            required>
-                    @error('start_date')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.start_date">
+                        <p class="mt-1 text-sm text-red-600" x-text="errors.start_date[0]"></p>
+                    </template>
                 </div>
 
                 <div>
@@ -52,9 +50,9 @@
                            value="{{ old('end_date', $blockout->end_date->format('Y-m-d')) }}"
                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500"
                            required>
-                    @error('end_date')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <template x-if="errors.end_date">
+                        <p class="mt-1 text-sm text-red-600" x-text="errors.end_date[0]"></p>
+                    </template>
                 </div>
             </div>
 
@@ -128,9 +126,9 @@
                 </label>
                 @endforeach
             </div>
-            @error('reason')
-                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-            @enderror
+            <template x-if="errors.reason">
+                <p class="mt-2 text-sm text-red-600" x-text="errors.reason[0]"></p>
+            </template>
 
             <div class="mt-4">
                 <label for="reason_note" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -236,7 +234,7 @@
 
         <!-- Actions -->
         <div class="flex items-center justify-between">
-            <button type="button" onclick="confirmDelete()"
+            <button type="button" @click="ajaxDelete('{{ route("blockouts.destroy", $blockout) }}', '{{ __("messages.confirm_delete_blockout") }}', null, '{{ route("blockouts.index") }}')"
                     class="px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors">
                 Видалити
             </button>
@@ -245,18 +243,16 @@
                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
                     Скасувати
                 </a>
-                <button type="submit"
-                        class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                    Зберегти
+                <button type="submit" :disabled="saving"
+                        class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
+                    <span x-show="!saving">Зберегти</span>
+                    <span x-show="saving" class="flex items-center gap-2">
+                        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        Збереження...
+                    </span>
                 </button>
             </div>
         </div>
-    </form>
-
-    <!-- Delete Form (hidden) -->
-    <form id="delete-form" action="{{ route('blockouts.destroy', $blockout) }}" method="POST" class="hidden">
-        @csrf
-        @method('DELETE')
     </form>
 </div>
 
@@ -306,12 +302,6 @@ function updateReasonSelection() {
             checkIcon.classList.add('hidden');
         }
     });
-}
-
-function confirmDelete() {
-    if (confirm('{{ __('messages.confirm_delete_blockout') }}')) {
-        document.getElementById('delete-form').submit();
-    }
 }
 
 // Initialize on page load

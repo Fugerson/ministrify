@@ -7,9 +7,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Редагувати запис</h2>
 
-        <form method="POST" action="{{ route('groups.attendance.update', [$group, $attendance]) }}" class="space-y-6">
-            @csrf
-            @method('PUT')
+        <form @submit.prevent="submit($refs.grpAttEditForm)" x-ref="grpAttEditForm" x-data="{ ...ajaxForm({ url: '{{ route('groups.attendance.update', [$group, $attendance]) }}', method: 'PUT' }) }" class="space-y-6">
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -70,22 +68,20 @@
                     <a href="{{ route('groups.attendance.show', [$group, $attendance]) }}" class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 font-medium">
                         Скасувати
                     </a>
-                    <button type="submit" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors">
-                        Зберегти
+                    <button type="submit" :disabled="saving" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
+                        <span x-text="saving ? 'Збереження...' : 'Зберегти'"></span>
                     </button>
                 </div>
             </div>
         </form>
 
-        <!-- Delete form outside main form -->
+        <!-- Delete button -->
         <div class="mt-4 text-center">
-            <form method="POST" action="{{ route('groups.attendance.destroy', [$group, $attendance]) }}" onsubmit="return confirm('{{ __('messages.confirm_delete_record') }}')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-red-600 hover:text-red-700 text-sm font-medium hover:underline">
-                    Видалити запис
-                </button>
-            </form>
+            <button type="button"
+                    @click="ajaxDelete('{{ route('groups.attendance.destroy', [$group, $attendance]) }}', '{{ __('messages.confirm_delete_record') }}', null, '{{ route('groups.show', $group) }}')"
+                    class="text-red-600 hover:text-red-700 text-sm font-medium hover:underline">
+                Видалити запис
+            </button>
         </div>
     </div>
 </div>

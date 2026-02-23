@@ -85,11 +85,11 @@ class TelegramChatController extends Controller
         }
 
         if (empty(config('services.telegram.bot_token'))) {
-            return back()->with('error', 'Telegram бот не налаштований');
+            return $this->errorResponse($request, 'Telegram бот не налаштований');
         }
 
         if (empty($person->telegram_chat_id)) {
-            return back()->with('error', 'Людина не підключена до Telegram');
+            return $this->errorResponse($request, 'Людина не підключена до Telegram');
         }
 
         try {
@@ -105,9 +105,9 @@ class TelegramChatController extends Controller
                 'is_read' => true,
             ]);
 
-            return back();
+            return $this->successResponse($request, 'Надіслано');
         } catch (\Exception $e) {
-            return back()->with('error', 'Помилка надсилання: ' . $e->getMessage());
+            return $this->errorResponse($request, 'Помилка надсилання: ' . $e->getMessage());
         }
     }
 }

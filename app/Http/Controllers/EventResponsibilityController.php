@@ -26,7 +26,7 @@ class EventResponsibilityController extends Controller
             'status' => EventResponsibility::STATUS_OPEN,
         ]);
 
-        return back()->with('success', 'Відповідальність додано.');
+        return $this->successResponse($request, 'Відповідальність додано.');
     }
 
     public function assign(Request $request, EventResponsibility $responsibility)
@@ -53,10 +53,10 @@ class EventResponsibilityController extends Controller
         // Send Telegram notification
         $this->sendNotification($responsibility);
 
-        return back()->with('success', "Призначено {$person->first_name}. Сповіщення надіслано.");
+        return $this->successResponse($request, "Призначено {$person->first_name}. Сповіщення надіслано.");
     }
 
-    public function unassign(EventResponsibility $responsibility)
+    public function unassign(Request $request, EventResponsibility $responsibility)
     {
         $event = $responsibility->event;
         $this->authorizeChurch($event);
@@ -68,7 +68,7 @@ class EventResponsibilityController extends Controller
             'responded_at' => null,
         ]);
 
-        return back()->with('success', 'Призначення знято.');
+        return $this->successResponse($request, 'Призначення знято.');
     }
 
     public function update(Request $request, EventResponsibility $responsibility)
@@ -83,20 +83,20 @@ class EventResponsibilityController extends Controller
 
         $responsibility->update($validated);
 
-        return back()->with('success', 'Відповідальність оновлено.');
+        return $this->successResponse($request, 'Відповідальність оновлено.');
     }
 
-    public function destroy(EventResponsibility $responsibility)
+    public function destroy(Request $request, EventResponsibility $responsibility)
     {
         $event = $responsibility->event;
         $this->authorizeChurch($event);
 
         $responsibility->delete();
 
-        return back()->with('success', 'Відповідальність видалено.');
+        return $this->successResponse($request, 'Відповідальність видалено.');
     }
 
-    public function confirm(EventResponsibility $responsibility)
+    public function confirm(Request $request, EventResponsibility $responsibility)
     {
         $user = auth()->user();
         $church = $this->getCurrentChurch();
@@ -105,17 +105,17 @@ class EventResponsibilityController extends Controller
         if ($user->person && $user->person->id === $responsibility->person_id
             && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->confirm();
-            return back()->with('success', 'Ви підтвердили участь.');
+            return $this->successResponse($request, 'Ви підтвердили участь.');
         }
 
         // Or admin
         $this->authorizeChurch($responsibility->event);
         $responsibility->confirm();
 
-        return back()->with('success', 'Підтверджено.');
+        return $this->successResponse($request, 'Підтверджено.');
     }
 
-    public function decline(EventResponsibility $responsibility)
+    public function decline(Request $request, EventResponsibility $responsibility)
     {
         $user = auth()->user();
         $church = $this->getCurrentChurch();
@@ -124,23 +124,23 @@ class EventResponsibilityController extends Controller
         if ($user->person && $user->person->id === $responsibility->person_id
             && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->decline();
-            return back()->with('success', 'Ви відхилили участь.');
+            return $this->successResponse($request, 'Ви відхилили участь.');
         }
 
         // Or admin
         $this->authorizeChurch($responsibility->event);
         $responsibility->decline();
 
-        return back()->with('success', 'Відхилено.');
+        return $this->successResponse($request, 'Відхилено.');
     }
 
-    public function resend(EventResponsibility $responsibility)
+    public function resend(Request $request, EventResponsibility $responsibility)
     {
         $event = $responsibility->event;
         $this->authorizeChurch($event);
 
         if (!$responsibility->person_id) {
-            return back()->with('error', 'Немає призначеної людини.');
+            return $this->errorResponse($request, 'Немає призначеної людини.');
         }
 
         // Reset status to pending
@@ -151,7 +151,7 @@ class EventResponsibilityController extends Controller
 
         $this->sendNotification($responsibility);
 
-        return back()->with('success', 'Сповіщення надіслано повторно.');
+        return $this->successResponse($request, 'Сповіщення надіслано повторно.');
     }
 
     /**
