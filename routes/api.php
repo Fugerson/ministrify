@@ -55,7 +55,7 @@ Route::prefix('calendar')->name('api.calendar.')->middleware('throttle:60,1')->g
 // Push notifications API
 Route::prefix('push')->name('api.push.')->group(function () {
     Route::get('public-key', [PushSubscriptionController::class, 'getPublicKey'])->name('public-key');
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['web', 'auth'])->group(function () {
         Route::post('subscribe', [PushSubscriptionController::class, 'store'])->name('subscribe');
         Route::delete('unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('unsubscribe');
         Route::get('status', [PushSubscriptionController::class, 'status'])->name('status');
