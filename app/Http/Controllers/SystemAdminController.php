@@ -95,9 +95,9 @@ class SystemAdminController extends Controller
      */
     public function showChurch(Church $church)
     {
-        $church->loadCount(['users', 'people', 'events', 'ministries', 'groups', 'boards']);
+        $church->loadCount(['members', 'people', 'events', 'ministries', 'groups', 'boards']);
 
-        $users = $church->users()->with('person')->get();
+        $users = $church->members()->with('person')->get();
         $recentEvents = $church->events()->latest()->take(10)->get();
         $auditLogs = AuditLog::with('user')->where('church_id', $church->id)->latest()->take(20)->get();
 

@@ -60,7 +60,7 @@ class OnboardingController extends Controller
                 'peopleCount' => $church->people()->count(),
             ],
             'set_roles' => [
-                'users' => $church->users()->get(),
+                'users' => $church->members()->get(),
             ],
             default => [],
         };

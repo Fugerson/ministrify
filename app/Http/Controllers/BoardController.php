@@ -534,7 +534,7 @@ class BoardController extends Controller
 
     public function showCard(BoardCard $card, Request $request)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         $card->load([
             'column.board.columns',
@@ -642,7 +642,7 @@ class BoardController extends Controller
 
     public function updateCard(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -709,7 +709,7 @@ class BoardController extends Controller
 
     public function destroyCard(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
         $board = $card->column->board;
         $card->delete();
 
@@ -718,7 +718,7 @@ class BoardController extends Controller
 
     public function moveCard(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         $validated = $request->validate([
             'column_id' => 'required|exists:board_columns,id',
@@ -781,7 +781,7 @@ class BoardController extends Controller
 
     public function toggleCardComplete(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         if ($card->is_completed) {
             $card->markAsIncomplete();
@@ -797,7 +797,7 @@ class BoardController extends Controller
     // Duplicate card
     public function duplicateCard(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         // Create duplicate
         $newCard = $card->replicate(['is_completed', 'completed_at']);
@@ -828,7 +828,7 @@ class BoardController extends Controller
     // Card Comments
     public function storeComment(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         $validated = $request->validate([
             'content' => 'nullable|string',
@@ -887,7 +887,7 @@ class BoardController extends Controller
 
     public function destroyComment(Request $request, BoardCardComment $comment)
     {
-        $this->authorizeBoard($comment->card->column->board);
+        $this->authorizeCardAccess($comment->card);
 
         if ($comment->user_id !== auth()->id()) {
             abort(403);
@@ -906,7 +906,7 @@ class BoardController extends Controller
     // Card Checklist
     public function storeChecklistItem(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -931,7 +931,7 @@ class BoardController extends Controller
 
     public function toggleChecklistItem(Request $request, BoardCardChecklistItem $item)
     {
-        $this->authorizeBoard($item->card->column->board);
+        $this->authorizeCardAccess($item->card);
         $wasCompleted = $item->is_completed;
         $item->toggle();
 
@@ -944,7 +944,7 @@ class BoardController extends Controller
 
     public function destroyChecklistItem(Request $request, BoardCardChecklistItem $item)
     {
-        $this->authorizeBoard($item->card->column->board);
+        $this->authorizeCardAccess($item->card);
         $card = $item->card;
         $title = $item->title;
         $item->delete();
@@ -958,7 +958,7 @@ class BoardController extends Controller
     // Update comment
     public function updateComment(Request $request, BoardCardComment $comment)
     {
-        $this->authorizeBoard($comment->card->column->board);
+        $this->authorizeCardAccess($comment->card);
 
         if ($comment->user_id !== auth()->id()) {
             abort(403);
@@ -1017,7 +1017,7 @@ class BoardController extends Controller
     // Delete a single attachment from a comment
     public function deleteCommentAttachment(Request $request, BoardCardComment $comment, int $index)
     {
-        $this->authorizeBoard($comment->card->column->board);
+        $this->authorizeCardAccess($comment->card);
 
         if ($comment->user_id !== auth()->id()) {
             abort(403);
@@ -1053,7 +1053,7 @@ class BoardController extends Controller
     // Attachments
     public function storeAttachment(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         $request->validate([
             'file' => 'required|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip,csv', // 10MB max
@@ -1089,7 +1089,7 @@ class BoardController extends Controller
 
     public function destroyAttachment(Request $request, \App\Models\BoardCardAttachment $attachment)
     {
-        $this->authorizeBoard($attachment->card->column->board);
+        $this->authorizeCardAccess($attachment->card);
 
         $card = $attachment->card;
         $fileName = $attachment->name;
@@ -1106,7 +1106,7 @@ class BoardController extends Controller
     // Related cards
     public function addRelatedCard(Request $request, BoardCard $card)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         $validated = $request->validate([
             'related_card_id' => 'required|exists:board_cards,id',
@@ -1146,7 +1146,7 @@ class BoardController extends Controller
 
     public function removeRelatedCard(Request $request, BoardCard $card, BoardCard $relatedCard)
     {
-        $this->authorizeBoard($card->column->board);
+        $this->authorizeCardAccess($card);
 
         $relatedTitle = $relatedCard->title;
         $card->relatedCards()->detach($relatedCard->id);
@@ -1162,6 +1162,29 @@ class BoardController extends Controller
     {
         if ($board->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
+        }
+
+        if (!$board->canAccess(auth()->user())) {
+            abort(403);
+        }
+    }
+
+    /**
+     * Authorize access to a card — allows access for show_in_general cards
+     * even if user doesn't have access to the ministry board directly.
+     */
+    private function authorizeCardAccess(BoardCard $card): void
+    {
+        $board = $card->column->board;
+        $churchId = $this->getCurrentChurch()->id;
+
+        if ($board->church_id !== $churchId) {
+            abort(404);
+        }
+
+        // Cards visible on the main board (show_in_general) are accessible to anyone in the church
+        if ($card->show_in_general || ($card->epic_id && $card->epic?->show_in_general)) {
+            return;
         }
 
         if (!$board->canAccess(auth()->user())) {

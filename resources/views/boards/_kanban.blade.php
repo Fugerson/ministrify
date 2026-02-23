@@ -483,7 +483,8 @@ function churchBoard() {
             open: false,
             loading: false,
             data: null,
-            cardId: null
+            cardId: null,
+            error: null
         },
         addCardModal: {
             open: false,
@@ -899,27 +900,37 @@ function churchBoard() {
             this.cardPanel.open = true;
             this.cardPanel.loading = true;
             this.cardPanel.cardId = cardId;
+            this.cardPanel.error = null;
             this.resetCommentForm();
 
             try {
                 const response = await fetch(`/boards/cards/${cardId}`, {
                     headers: { 'Accept': 'application/json' }
                 });
-                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    this.cardPanel.error = response.status === 403
+                        ? 'У вас немає доступу до цього завдання'
+                        : 'Помилка завантаження завдання';
+                    return;
+                }
+
+                const data = await response.json();
 
                 // Fix due_date: ISO timestamp → YYYY-MM-DD for <input type="date">
-                if (data.card.due_date) {
+                if (data.card && data.card.due_date) {
                     data.card.due_date = data.card.due_date.substring(0, 10);
                 }
 
                 // Normalize null epic_id to empty string for <select> matching
-                if (data.card.epic_id == null) {
+                if (data.card && data.card.epic_id == null) {
                     data.card.epic_id = '';
                 }
 
                 this.cardPanel.data = data;
             } catch (e) {
                 console.error('Error loading card:', e);
+                this.cardPanel.error = 'Помилка завантаження завдання';
             } finally {
                 this.cardPanel.loading = false;
 
@@ -936,6 +947,7 @@ function churchBoard() {
             this.cardPanel.open = false;
             this.cardPanel.data = null;
             this.cardPanel.cardId = null;
+            this.cardPanel.error = null;
             this.resetCommentForm();
         },
 

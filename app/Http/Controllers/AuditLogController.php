@@ -50,7 +50,7 @@ class AuditLogController extends Controller
         $logs = $query->paginate(50)->withQueryString();
 
         // Get filter options
-        $users = $church->users()->select('id', 'name')->get();
+        $users = $church->members()->select('users.id', 'users.name')->get();
         $actions = ['created', 'updated', 'deleted', 'restored', 'login', 'logout'];
         $models = [
             'Person', 'User', 'Event', 'Ministry', 'Group',

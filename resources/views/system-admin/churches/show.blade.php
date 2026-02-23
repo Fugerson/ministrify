@@ -48,7 +48,7 @@
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $church->users_count }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $church->members_count }}</p>
             <p class="text-gray-500 dark:text-gray-400 text-sm">Користувачів</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">

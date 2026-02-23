@@ -26,7 +26,21 @@
                     </div>
                 </template>
 
-                <template x-if="!cardPanel.loading && cardPanel.data">
+                <template x-if="!cardPanel.loading && cardPanel.error">
+                    <div class="flex-1 flex items-center justify-center">
+                        <div class="text-center px-6">
+                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v.01M12 12v-4m0 12a9 9 0 100-18 9 9 0 000 18z"/>
+                            </svg>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm" x-text="cardPanel.error"></p>
+                            <button @click="closePanel()" class="mt-4 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg">
+                                Закрити
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="!cardPanel.loading && !cardPanel.error && cardPanel.data">
                     <div class="flex-1 flex flex-col overflow-hidden">
                         <!-- Header -->
                         <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">

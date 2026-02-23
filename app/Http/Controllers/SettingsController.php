@@ -26,7 +26,6 @@ class SettingsController extends Controller
     {
         $church = $this->getCurrentChurch();
         $tags = $church->tags;
-        $users = $church->users()->with(['person', 'churchRole.permissions'])->get();
         $ministries = $church->ministries()->orderBy('name')->get();
 
         // Transaction categories (unified)
@@ -43,12 +42,42 @@ class SettingsController extends Controller
             ->limit(100)
             ->get();
 
-        // Church roles with permissions
+        // Church roles with permissions (loaded before $users — needed for pivot resolution)
         $churchRoles = ChurchRole::where('church_id', $church->id)
             ->withCount(['users as people_count'])
             ->with('permissions')
             ->orderBy('sort_order')
             ->get();
+        $churchRolesById = $churchRoles->keyBy('id');
+
+        // Load users via pivot table for multi-church support
+        $users = $church->members()
+            ->orderBy('name')
+            ->get();
+
+        // Bulk load persons for this church
+        $personsByUserId = Person::where('church_id', $church->id)
+            ->whereIn('user_id', $users->pluck('id'))
+            ->get()
+            ->keyBy('user_id');
+
+        $users->each(function ($user) use ($churchRolesById, $personsByUserId) {
+            // Set person for this specific church from pivot
+            $user->setRelation('person', $personsByUserId->get($user->id));
+            // Set church_role_id from pivot (not from user's active church)
+            $pivotRoleId = $user->pivot->church_role_id;
+            $user->church_role_id = $pivotRoleId;
+            $user->setRelation('churchRole',
+                $pivotRoleId ? ($churchRolesById[$pivotRoleId] ?? null) : null
+            );
+            // Load permission overrides from pivot for this church
+            $pivotOverrides = $user->pivot->permission_overrides;
+            if ($pivotOverrides) {
+                $user->permission_overrides = is_string($pivotOverrides)
+                    ? json_decode($pivotOverrides, true)
+                    : $pivotOverrides;
+            }
+        });
 
         $rolesJson = $churchRoles->map(fn($role) => [
             'id' => $role->id,
