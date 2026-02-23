@@ -106,14 +106,14 @@ class VisitorFollowupService
         // Find guests added more than 3 days ago who haven't been contacted
         $needsFollowup = Person::where('church_id', $churchId)
             ->where('membership_status', Person::STATUS_GUEST)
-            ->where('created_at', '<=', $threeDaysAgo)
+            ->whereRaw('COALESCE(first_visit_date, created_at) <= ?', [$threeDaysAgo])
             ->whereNull('last_contact_date')
             ->get();
 
         // Find guests who visited once but haven't returned
         $noReturn = Person::where('church_id', $churchId)
             ->where('membership_status', Person::STATUS_GUEST)
-            ->where('created_at', '<=', $oneWeekAgo)
+            ->whereRaw('COALESCE(first_visit_date, created_at) <= ?', [$oneWeekAgo])
             ->whereHas('attendanceRecords')
             ->whereDoesntHave('attendanceRecords', function ($q) use ($oneWeekAgo) {
                 $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $oneWeekAgo));
@@ -149,11 +149,12 @@ class VisitorFollowupService
         return [
             'guests_this_month' => Person::where('church_id', $churchId)
                 ->where('membership_status', Person::STATUS_GUEST)
-                ->where('created_at', '>=', $thisMonth)
+                ->whereRaw('COALESCE(first_visit_date, created_at) >= ?', [$thisMonth])
                 ->count(),
             'guests_last_month' => Person::where('church_id', $churchId)
                 ->where('membership_status', Person::STATUS_GUEST)
-                ->whereBetween('created_at', [$lastMonth, $thisMonth])
+                ->whereRaw('COALESCE(first_visit_date, created_at) >= ?', [$lastMonth])
+                ->whereRaw('COALESCE(first_visit_date, created_at) < ?', [$thisMonth])
                 ->count(),
             'total_guests' => Person::where('church_id', $churchId)
                 ->where('membership_status', Person::STATUS_GUEST)

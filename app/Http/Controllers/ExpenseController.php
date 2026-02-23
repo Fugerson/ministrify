@@ -207,7 +207,7 @@ class ExpenseController extends Controller
                     ->where('direction', Transaction::DIRECTION_OUT)
                     ->forMonth($year, $month)
                     ->completed()
-                    ->sum('amount');
+                    ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
                 $percentage = $m->monthly_budget > 0
                     ? round(($spent / $m->monthly_budget) * 100, 1)
                     : 0;
@@ -231,7 +231,7 @@ class ExpenseController extends Controller
                     ->where('direction', Transaction::DIRECTION_OUT)
                     ->forMonth($year, $month)
                     ->completed()
-                    ->sum('amount');
+                    ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
                 return $cat;
             });
 
@@ -240,7 +240,7 @@ class ExpenseController extends Controller
             ->where('direction', Transaction::DIRECTION_OUT)
             ->forMonth($year, $month)
             ->completed()
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
 
         $totalBudget = Ministry::where('church_id', $church->id)
             ->sum('monthly_budget');
@@ -288,6 +288,6 @@ class ExpenseController extends Controller
             ->where('direction', Transaction::DIRECTION_OUT)
             ->thisMonth()
             ->completed()
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
     }
 }
