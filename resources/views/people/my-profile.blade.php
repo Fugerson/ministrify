@@ -228,7 +228,7 @@
                     </div>
 
                     <button type="button"
-                            @click="ajaxDelete('{{ route('my-profile.telegram.unlink') }}', '{{ __('app.confirm_disconnect_telegram') }}', () => { setTimeout(() => window.location.reload(), 600); })"
+                            @click="ajaxDelete('{{ route('my-profile.telegram.unlink') }}', '{{ __('app.confirm_disconnect_telegram') }}', () => { var s = $el.closest('.rounded-2xl'); if (s) { var inner = s.querySelector('.p-6') || s.querySelector('.px-6'); if (inner) inner.innerHTML = '\x3Cdiv class=&quot;text-center py-4&quot;>\x3Cp class=&quot;text-gray-600 dark:text-gray-400&quot;>{{ __("app.connect_telegram_desc") }}\x3C/p>\x3C/div>'; } })"
                             class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
                         {{ __('app.disconnect_telegram') }}
                     </button>

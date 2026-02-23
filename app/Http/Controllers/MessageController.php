@@ -119,14 +119,14 @@ class MessageController extends Controller
             'content' => 'required|string|max:4000',
         ]);
 
-        MessageTemplate::create([
+        $template = MessageTemplate::create([
             'church_id' => $this->getCurrentChurch()->id,
             'name' => $validated['name'],
             'content' => $validated['content'],
             'type' => 'telegram',
         ]);
 
-        return $this->successResponse($request, 'Шаблон збережено');
+        return $this->successResponse($request, 'Шаблон збережено', null, [], ['id' => $template->id]);
     }
 
     public function destroyTemplate(Request $request, MessageTemplate $template)

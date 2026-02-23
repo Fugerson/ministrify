@@ -20,7 +20,7 @@
         <div class="p-6">
             <!-- Add new category form -->
             <form @submit.prevent="submit($refs.addForm)" x-ref="addForm"
-                  x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.store') }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess() { window.location.reload(); } }) }"
+                  x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.store') }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess() { _addIncomeCategory(this); } }) }"
                   class="mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                 <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Додати категорію</h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -48,7 +48,7 @@
             </form>
 
             <!-- Categories list -->
-            <div class="space-y-3">
+            <div id="categories-list" class="space-y-3">
                 @forelse($categories as $category)
                     <div x-data="{ editing: false }" data-category class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div x-show="!editing" class="flex items-center justify-between">
@@ -82,7 +82,7 @@
                         <!-- Edit form -->
                         <form x-show="editing"
                               @submit.prevent="submit($refs.editForm{{ $category->id }})" x-ref="editForm{{ $category->id }}"
-                              x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess() { window.location.reload(); } }) }">
+                              x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess() { _updateIncomeCategory(this); } }) }">
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <input type="text" name="name" value="{{ $category->name }}" required
@@ -114,4 +114,38 @@
         </div>
     </div>
 </div>
+<script>
+function _addIncomeCategory(ctx) {
+    var form = ctx.$refs.addForm;
+    var name = form.querySelector('[name="name"]').value;
+    var icon = form.querySelector('[name="icon"]').value || '';
+    var color = form.querySelector('[name="color"]').value || '#3B82F6';
+    var list = document.getElementById('categories-list');
+    if (!list) { window.location.reload(); return; }
+    var empty = list.querySelector('.text-center.text-gray-500');
+    if (empty) empty.remove();
+    var safeName = name.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var safeIcon = icon.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var el = document.createElement('div');
+    el.setAttribute('data-category', '');
+    el.className = 'border border-gray-200 dark:border-gray-700 rounded-lg p-4';
+    el.innerHTML = '\x3Cdiv class="flex items-center justify-between">\x3Cdiv class="flex items-center space-x-4">\x3Cdiv class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background-color: ' + color + '20">' + safeIcon + '\x3C/div>\x3Cdiv>\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400 mt-1">0 записів\x3C/p>\x3C/div>\x3C/div>\x3C/div>';
+    list.appendChild(el);
+}
+
+function _updateIncomeCategory(ctx) {
+    var cat = ctx.$el.closest('[data-category]');
+    if (!cat) return;
+    var form = ctx.$el;
+    var name = form.querySelector('[name="name"]').value;
+    var icon = form.querySelector('[name="icon"]').value || '';
+    var color = form.querySelector('[name="color"]').value || '#3B82F6';
+    var nameEl = cat.querySelector('.font-medium.text-gray-900');
+    if (nameEl) nameEl.textContent = name;
+    var iconEl = cat.querySelector('.w-10.h-10');
+    if (iconEl) { iconEl.textContent = icon; iconEl.style.backgroundColor = color + '20'; }
+    var editing = cat.__x ? cat.__x.$data : (cat._x_dataStack ? cat._x_dataStack[0] : null);
+    if (editing) editing.editing = false;
+}
+</script>
 @endsection

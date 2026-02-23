@@ -50,7 +50,7 @@
         <!-- Input -->
         @if($hasBot)
             <form @submit.prevent="submit($refs.chatForm)" x-ref="chatForm"
-                  x-data="{ ...ajaxForm({ url: '{{ route('telegram.chat.send', $person) }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); } }) }"
+                  x-data="{ ...ajaxForm({ url: '{{ route('telegram.chat.send', $person) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { _chatAddMessage(this); } }) }"
                   class="border-t border-gray-200 dark:border-gray-700 p-4">
                 <div class="flex gap-3">
                     <textarea name="message" rows="1" required
@@ -78,5 +78,20 @@ onPageReady(function() {
     const messages = document.getElementById('messages');
     messages.scrollTop = messages.scrollHeight;
 });
+
+function _chatAddMessage(ctx) {
+    var msg = ctx.$refs.chatForm.querySelector('textarea').value;
+    var container = document.getElementById('messages');
+    var empty = container.querySelector('.h-full.flex.items-center');
+    if (empty) empty.remove();
+    var now = new Date();
+    var time = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    var safe = msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var el = document.createElement('div');
+    el.className = 'flex justify-end';
+    el.innerHTML = '<div class="max-w-[75%] bg-primary-600 text-white rounded-2xl px-4 py-2 rounded-br-md"><p class="text-sm whitespace-pre-wrap break-words">' + safe + '</p><p class="text-xs text-primary-200 mt-1">' + time + '</p></div>';
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+}
 </script>
 @endsection

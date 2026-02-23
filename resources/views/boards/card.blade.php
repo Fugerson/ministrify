@@ -25,9 +25,10 @@
                         </h1>
                     </div>
 
-                    <button type="button"
-                            @click="ajaxAction('{{ route('boards.cards.toggle', $card) }}', 'POST').then(() => window.location.reload())"
-                            class="p-2 rounded-lg transition-colors {{ $card->is_completed ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-700 hover:bg-green-100 hover:text-green-600' }}">
+                    <button type="button" x-data="{ done: {{ $card->is_completed ? 'true' : 'false' }} }"
+                            @click="ajaxAction('{{ route('boards.cards.toggle', $card) }}', 'POST').then(() => { done = !done; $el.closest('.flex').querySelector('h1').classList.toggle('line-through'); $el.closest('.flex').querySelector('h1').classList.toggle('text-gray-400'); })"
+                            class="p-2 rounded-lg transition-colors"
+                            :class="done ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-700 hover:bg-green-100 hover:text-green-600'">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -82,7 +83,7 @@
                     </div>
 
                     @if($card->checklistItems->count() > 0)
-                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                        <span class="text-sm text-gray-500 dark:text-gray-400" data-progress-counter>
                             {{ $card->checklistItems->where('is_completed', true)->count() }}/{{ $card->checklistItems->count() }}
                         </span>
                     @endif
@@ -90,25 +91,23 @@
 
                 @if($card->checklistItems->count() > 0)
                     <div class="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
-                        <div class="h-full bg-green-500 rounded-full transition-all duration-300"
+                        <div class="h-full bg-green-500 rounded-full transition-all duration-300" data-progress-bar
                              style="width: {{ $card->checklist_progress }}%"></div>
                     </div>
                 @endif
 
                 <div class="space-y-2">
                     @foreach($card->checklistItems as $item)
-                        <div class="flex items-center gap-3 group" data-checklist-item>
+                        <div class="flex items-center gap-3 group" data-checklist-item x-data="{ checked: {{ $item->is_completed ? 'true' : 'false' }} }">
                             <button type="button"
-                                    @click="ajaxAction('{{ route('boards.cards.checklist.toggle', $item) }}', 'POST').then(() => window.location.reload())"
-                                    class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors
-                                    {{ $item->is_completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 dark:border-gray-600 hover:border-green-500' }}">
-                                @if($item->is_completed)
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                @endif
+                                    @click="ajaxAction('{{ route('boards.cards.checklist.toggle', $item) }}', 'POST').then(() => { checked = !checked; /* update progress */ const items = document.querySelectorAll('[data-checklist-item]'); const total = items.length; let done = 0; items.forEach(i => { if (i.__x && i.__x.$data.checked) done++; else if (i._x_dataStack && i._x_dataStack[0].checked) done++; }); const pct = total ? Math.round(done/total*100) : 0; const bar = document.querySelector('[data-progress-bar]'); if (bar) bar.style.width = pct + '%'; const counter = document.querySelector('[data-progress-counter]'); if (counter) counter.textContent = done + '/' + total; })"
+                                    class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
+                                    :class="checked ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 dark:border-gray-600 hover:border-green-500'">
+                                <svg x-show="checked" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                </svg>
                             </button>
-                            <span class="flex-1 text-gray-700 dark:text-gray-300 {{ $item->is_completed ? 'line-through text-gray-400 dark:text-gray-500' : '' }}">
+                            <span class="flex-1 text-gray-700 dark:text-gray-300" :class="checked && 'line-through text-gray-400 dark:text-gray-500'">
                                 {{ $item->title }}
                             </span>
                             <button type="button"
@@ -123,7 +122,7 @@
                 </div>
 
                 <!-- Add item -->
-                <div class="mt-4" x-data="{ adding: false, ...ajaxForm({ url: '{{ route('boards.cards.checklist.store', $card) }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); } }) }">
+                <div class="mt-4" x-data="{ adding: false, ...ajaxForm({ url: '{{ route('boards.cards.checklist.store', $card) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _cardAddChecklistItem(this); } }) }">
                     <template x-if="!adding">
                         <button type="button" @click="adding = true"
                                 class="text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 font-medium flex items-center gap-1">
@@ -163,7 +162,7 @@
 
                 <!-- Add comment -->
                 <form @submit.prevent="submit($refs.commentForm)" x-ref="commentForm"
-                      x-data="{ ...ajaxForm({ url: '{{ route('boards.cards.comments.store', $card) }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess() { window.location.reload(); } }) }"
+                      x-data="{ ...ajaxForm({ url: '{{ route('boards.cards.comments.store', $card) }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess() { _cardAddComment(this); } }) }"
                       class="mb-4">
                     <textarea name="content" rows="2" required placeholder="{{ __('Написати коментар...') }}"
                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"></textarea>
@@ -318,3 +317,36 @@
     </div>
 </div>
 @endsection
+
+<script>
+function _cardAddChecklistItem(ctx) {
+    var title = ctx.$refs.checklistForm.querySelector('input[name=title]').value;
+    var list = document.querySelector('.space-y-2');
+    if (list) {
+        var item = document.createElement('div');
+        item.className = 'flex items-center gap-3 group';
+        item.setAttribute('data-checklist-item', '');
+        var safe = title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        item.innerHTML = '<button type="button" class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors border-gray-300 dark:border-gray-600 hover:border-green-500"></button><span class="flex-1 text-gray-700 dark:text-gray-300">' + safe + '</span>';
+        list.appendChild(item);
+    }
+    ctx.adding = false;
+    var items = document.querySelectorAll('[data-checklist-item]');
+    var counter = document.querySelector('[data-progress-counter]');
+    if (counter) counter.textContent = '0/' + items.length;
+}
+
+function _cardAddComment(ctx) {
+    var ta = ctx.$refs.commentForm.querySelector('textarea');
+    var text = ta.value;
+    var list = document.querySelector('.space-y-4');
+    if (list) {
+        var safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        var el = document.createElement('div');
+        el.className = 'flex gap-3 group';
+        el.setAttribute('data-comment', '');
+        el.innerHTML = '<div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0"><span class="text-primary-600 dark:text-primary-400 text-sm font-medium">{{ mb_substr(auth()->user()->name, 0, 1) }}</span></div><div class="flex-1"><div class="flex items-center gap-2"><span class="font-medium text-gray-900 dark:text-white text-sm">{{ auth()->user()->name }}</span><span class="text-xs text-gray-500 dark:text-gray-400">щойно</span></div><p class="text-gray-600 dark:text-gray-300 text-sm mt-1">' + safe + '</p></div>';
+        list.appendChild(el);
+    }
+}
+</script>

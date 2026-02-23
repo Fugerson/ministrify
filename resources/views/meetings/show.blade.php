@@ -171,7 +171,7 @@
                 </button>
             </div>
             @else
-            <div class="space-y-2">
+            <div id="agenda-list" class="space-y-2">
                 @foreach($meeting->agendaItems as $item)
                 <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl group"
                      x-data="{ completed: {{ $item->is_completed ? 'true' : 'false' }} }">
@@ -234,7 +234,7 @@
 
             <!-- Add Agenda Form -->
             <div x-show="showAddAgenda" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800"
-                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.agenda.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }">
+                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.agenda.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _meetingAddAgenda(this, data); } }) }">
                 <form @submit.prevent="submit($refs.agendaForm)" x-ref="agendaForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
@@ -290,7 +290,7 @@
                 <p>Немає матеріалів</p>
             </div>
             @else
-            <div class="grid gap-3">
+            <div id="materials-list" class="grid gap-3">
                 @foreach($meeting->materials as $material)
                 <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl group">
                     <span class="text-2xl">{{ $material->type_icon }}</span>
@@ -320,7 +320,7 @@
 
             <!-- Add Material Form -->
             <div x-show="showAddMaterial" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800"
-                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.materials.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }">
+                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.materials.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _meetingAddMaterial(this, data); } }) }">
                 <form @submit.prevent="submit($refs.materialForm)" x-ref="materialForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -364,7 +364,7 @@
                 <h3 class="font-semibold text-gray-900 dark:text-white">Учасники</h3>
                 <div class="flex items-center gap-2">
                     @if($meeting->attendees->isNotEmpty())
-                    <button type="button" @click="ajaxAction('{{ route('meetings.attendees.mark-all', [$ministry, $meeting]) }}', 'POST').then(() => setTimeout(() => window.location.reload(), 600))"
+                    <button type="button" @click="ajaxAction('{{ route('meetings.attendees.mark-all', [$ministry, $meeting]) }}', 'POST').then(() => { document.querySelectorAll('[x-data*=currentStatus]').forEach(function(el) { if (el._x_dataStack) el._x_dataStack[0].currentStatus = 'attended'; }); })"
                             class="px-3 py-1.5 text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors">
                         Всі присутні
                     </button>
@@ -385,7 +385,7 @@
                 <p>Учасники будуть додані автоматично при створенні зустрічі</p>
             </div>
             @else
-            <div class="grid gap-2">
+            <div id="attendees-list" class="grid gap-2">
                 @foreach($meeting->attendees as $attendee)
                 @if($attendee->person)
                 <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
@@ -436,7 +436,7 @@
 
             <!-- Add Attendee Form -->
             <div x-show="showAddAttendee" x-cloak class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800"
-                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.attendees.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }">
+                 x-data="{ ...ajaxForm({ url: '{{ route('meetings.attendees.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _meetingAddAttendee(this, data); } }) }">
                 <form @submit.prevent="submit($refs.attendeeForm)" x-ref="attendeeForm">
                     <select name="person_id" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                         <option value="">Оберіть учасника...</option>
@@ -486,4 +486,109 @@
         </div>
     </div>
 </div>
+
+<script>
+function _meetingAddAgenda(ctx, data) {
+    var form = ctx.$refs.agendaForm;
+    var title = form.querySelector('[name="title"]').value;
+    var desc = form.querySelector('[name="description"]').value;
+    var dur = form.querySelector('[name="duration_minutes"]').value;
+    var respSel = form.querySelector('[name="responsible_id"]');
+    var respName = respSel && respSel.value ? respSel.options[respSel.selectedIndex].text : '';
+    var list = document.getElementById('agenda-list');
+    if (!list) {
+        var empty = document.querySelector('.text-center.py-8');
+        if (empty && empty.closest('[x-show*="agenda"]')) {
+            var container = document.createElement('div');
+            container.id = 'agenda-list';
+            container.className = 'space-y-2';
+            empty.replaceWith(container);
+            list = container;
+        } else { window.location.reload(); return; }
+    }
+    var safeTitle = title.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var safeDesc = desc ? desc.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;') : '';
+    var el = document.createElement('div');
+    el.className = 'flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl group';
+    var html = '\x3Cdiv class="mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 border-gray-300 dark:border-gray-500">\x3C/div>';
+    html += '\x3Cdiv class="flex-1 min-w-0">\x3Cdiv class="flex items-start justify-between">\x3Cdiv>\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeTitle + '\x3C/p>';
+    if (safeDesc) html += '\x3Cp class="text-sm text-gray-500 dark:text-gray-400 mt-1">' + safeDesc + '\x3C/p>';
+    html += '\x3C/div>\x3C/div>';
+    if (dur || respName) {
+        html += '\x3Cdiv class="flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">';
+        if (dur) html += '\x3Cspan>' + dur + ' хв\x3C/span>';
+        if (respName) html += '\x3Cspan>' + respName + '\x3C/span>';
+        html += '\x3C/div>';
+    }
+    html += '\x3C/div>';
+    el.innerHTML = html;
+    list.appendChild(el);
+}
+
+function _meetingAddMaterial(ctx, data) {
+    var form = ctx.$refs.materialForm;
+    var title = form.querySelector('[name="title"]').value;
+    var type = form.querySelector('[name="type"]').value;
+    var content = form.querySelector('[name="content"]').value;
+    var desc = form.querySelector('[name="description"]').value;
+    var list = document.getElementById('materials-list');
+    if (!list) {
+        var empties = document.querySelectorAll('.text-center.py-8');
+        var empty = null;
+        empties.forEach(function(e) { if (e.closest('[x-show*="materials"]')) empty = e; });
+        if (empty) {
+            var container = document.createElement('div');
+            container.id = 'materials-list';
+            container.className = 'grid gap-3';
+            empty.replaceWith(container);
+            list = container;
+        } else { window.location.reload(); return; }
+    }
+    var icons = { link: '\uD83D\uDD17', note: '\uD83D\uDCDD', video: '\uD83C\uDFA5', audio: '\uD83C\uDFB5', document: '\uD83D\uDCC4', file: '\uD83D\uDCC1' };
+    var safeTitle = title.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var el = document.createElement('div');
+    el.className = 'flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl group';
+    var html = '\x3Cspan class="text-2xl">' + (icons[type] || '\uD83D\uDCC4') + '\x3C/span>';
+    html += '\x3Cdiv class="flex-1 min-w-0">\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeTitle + '\x3C/p>';
+    if (desc) html += '\x3Cp class="text-sm text-gray-500 dark:text-gray-400">' + desc.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;') + '\x3C/p>';
+    html += '\x3C/div>';
+    el.innerHTML = html;
+    list.appendChild(el);
+}
+
+function _meetingAddAttendee(ctx, data) {
+    var form = ctx.$refs.attendeeForm;
+    var select = form.querySelector('[name="person_id"]');
+    var personName = data.person_name || (select ? select.options[select.selectedIndex].text : '');
+    var initials = data.person_initials || '';
+    var list = document.getElementById('attendees-list');
+    if (!list) {
+        var empties = document.querySelectorAll('.text-center.py-8');
+        var empty = null;
+        empties.forEach(function(e) { if (e.closest('[x-show*="attendees"]')) empty = e; });
+        if (empty) {
+            var container = document.createElement('div');
+            container.id = 'attendees-list';
+            container.className = 'grid gap-2';
+            empty.replaceWith(container);
+            list = container;
+        } else { window.location.reload(); return; }
+    }
+    var safeName = personName.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var safeInitials = initials.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var el = document.createElement('div');
+    el.className = 'flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl';
+    var html = '\x3Cdiv class="flex items-center gap-3">';
+    html += '\x3Cdiv class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">\x3Cspan class="text-sm font-medium text-primary-600 dark:text-primary-400">' + safeInitials + '\x3C/span>\x3C/div>';
+    html += '\x3Cdiv>\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3C/div>';
+    html += '\x3C/div>';
+    html += '\x3Cspan class="text-xs text-gray-600 dark:text-gray-400">Запрошено\x3C/span>';
+    el.innerHTML = html;
+    list.appendChild(el);
+    if (select) {
+        var opt = select.querySelector('option[value="' + select.value + '"]');
+        if (opt) opt.remove();
+    }
+}
+</script>
 @endsection

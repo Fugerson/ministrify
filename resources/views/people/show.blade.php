@@ -435,7 +435,7 @@
                                     </template>
                                 </div>
                             @else
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Немає доступу до системи</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" id="no-access-text">Немає доступу до системи</p>
                             @endif
                         </div>
                     </div>
@@ -471,7 +471,7 @@
                         </div>
                     @else
                         <!-- Create Account Button -->
-                        <button type="button" @click="showCreateModal = true"
+                        <button type="button" @click="showCreateModal = true" id="create-account-btn"
                                 class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
@@ -1114,6 +1114,18 @@
 
 @push('scripts')
 <script>
+function _accountCreatedUI(email) {
+    var noAccess = document.getElementById('no-access-text');
+    if (noAccess) {
+        noAccess.textContent = email;
+        noAccess.className = 'text-sm text-green-600 dark:text-green-400 font-medium';
+    }
+    var btn = document.getElementById('create-account-btn');
+    if (btn) {
+        btn.outerHTML = '\x3Cspan class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>\x3C/svg>Доступ надано\x3C/span>';
+    }
+}
+
 function personProfile() {
     return {
         saveStatus: 'idle',
@@ -1332,7 +1344,7 @@ function userRoleManager() {
         closePasswordModal() {
             this.showPasswordModal = false;
             this.generatedPassword = '';
-            window.location.reload();
+            _accountCreatedUI(this.userEmail);
         }
     }
 }

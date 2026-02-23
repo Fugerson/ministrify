@@ -641,7 +641,23 @@
             {{-- Simple responsibility form for non-service events --}}
             <div x-show="!$store.event.isService" x-cloak class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Відповідальності</h2>
-                <form @submit.prevent="submit($refs.respForm)" x-ref="respForm" x-data="{ ...ajaxForm({ url: '{{ route('events.responsibilities.store', $event) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }" class="flex gap-2">
+                @if($event->responsibilities->count() > 0)
+                <div id="simple-resp-list" class="space-y-2 mb-3">
+                    @foreach($event->responsibilities as $resp)
+                    <div class="flex items-center justify-between py-1.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg" data-resp>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ $resp->name }}</span>
+                        <button type="button"
+                                @click="ajaxDelete('/responsibilities/{{ $resp->id }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('[data-resp]').remove())"
+                                class="p-1 text-gray-400 hover:text-red-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+                <form @submit.prevent="submit($refs.respForm)" x-ref="respForm" x-data="{ ...ajaxForm({ url: '{{ route('events.responsibilities.store', $event) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _addSimpleResp(this, data); } }) }" class="flex gap-2">
                     <input type="text" name="name" required placeholder="Нова відповідальність"
                            class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                     <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white text-sm rounded-lg">
@@ -2527,6 +2543,27 @@ function reminderManager() {
             }
         }
     };
+}
+
+function _addSimpleResp(ctx, data) {
+    var list = document.getElementById('simple-resp-list');
+    if (!list) {
+        list = document.createElement('div');
+        list.id = 'simple-resp-list';
+        list.className = 'space-y-2 mb-3';
+        var form = ctx.$refs.respForm;
+        form.parentElement.insertBefore(list, form);
+    }
+    var form = ctx.$refs.respForm;
+    var name = form.querySelector('[name="name"]').value;
+    var safeName = name.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var el = document.createElement('div');
+    el.className = 'flex items-center justify-between py-1.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg';
+    el.setAttribute('data-resp', '');
+    el.setAttribute('x-data', '');
+    el.innerHTML = '\x3Cspan class="text-sm text-gray-900 dark:text-white">' + safeName + '\x3C/span>\x3Cbutton type="button" @click="ajaxDelete(\'/responsibilities/' + data.id + '\', \'Видалити?\', () => $el.closest(\'[data-resp]\').remove())" class="p-1 text-gray-400 hover:text-red-500">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>\x3C/svg>\x3C/button>';
+    list.appendChild(el);
+    Alpine.initTree(el);
 }
 </script>
 @endpush

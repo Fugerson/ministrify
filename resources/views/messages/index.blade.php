@@ -68,7 +68,7 @@
                     + Новий
                 </button>
             </div>
-            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            <div id="templates-list" class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($templates as $template)
                 <div class="p-4">
                     <div class="flex items-start justify-between">
@@ -134,7 +134,7 @@
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Новий шаблон</h3>
             <form @submit.prevent="submit($refs.templateForm)" x-ref="templateForm"
-                  x-data="{ ...ajaxForm({ url: '{{ route('messages.templates.store') }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); } }) }">
+                  x-data="{ ...ajaxForm({ url: '{{ route('messages.templates.store') }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _addTemplate(this, data); } }) }">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва</label>
@@ -167,4 +167,24 @@
         </div>
     </div>
 </div>
+
+<script>
+function _addTemplate(ctx, data) {
+    document.getElementById('templateModal').classList.add('hidden');
+    var list = document.getElementById('templates-list');
+    if (!list) return;
+    var empty = list.querySelector('.p-8.text-center');
+    if (empty) empty.remove();
+    var form = ctx.$refs.templateForm;
+    var name = form.querySelector('[name="name"]').value;
+    var content = form.querySelector('[name="content"]').value;
+    var safeName = name.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var safeContent = content.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    if (safeContent.length > 100) safeContent = safeContent.substring(0, 100) + '...';
+    var el = document.createElement('div');
+    el.className = 'p-4';
+    el.innerHTML = '\x3Cdiv class="flex items-start justify-between">\x3Cdiv class="flex-1">\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">' + safeContent + '\x3C/p>\x3C/div>\x3Cbutton onclick="ajaxDelete(\'/messages/templates/' + data.id + '\', \'Видалити?\', function() { this.closest(\'.p-4\').remove(); }.bind(this))" class="ml-2 p-1 text-gray-400 hover:text-red-500">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>\x3C/svg>\x3C/button>\x3C/div>';
+    list.appendChild(el);
+}
+</script>
 @endsection

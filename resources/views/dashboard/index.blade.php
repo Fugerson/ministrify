@@ -316,8 +316,6 @@ function dashboardBuilder() {
             }
             this.editMode = false;
             this.destroySortable();
-            // Reload to restore original DOM state
-            window.location.reload();
         },
 
         async saveLayout() {
@@ -334,7 +332,17 @@ function dashboardBuilder() {
                 });
 
                 if (response.ok) {
-                    window.location.reload();
+                    var _nr = false;
+                    this.widgets.forEach(function(w) {
+                        var el = document.querySelector('[data-widget-id="' + w.id + '"]');
+                        if (el) el.style.display = w.enabled ? '' : 'none';
+                        else if (w.enabled) _nr = true;
+                    });
+                    if (_nr) { window.location.reload(); return; }
+                    this.originalWidgets = JSON.parse(JSON.stringify(this.widgets));
+                    this.editMode = false;
+                    this.destroySortable();
+                    if (window.showGlobalToast) showGlobalToast('Збережено', 'success');
                 } else {
                     const err = await response.json().catch(() => ({}));
                     alert('{{ __('Помилка збереження:') }} ' + (err.message || '{{ __('Невідома помилка') }}'));

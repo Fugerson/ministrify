@@ -68,12 +68,12 @@
                 </svg>
                 Редагувати
             </a>
-            <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => window.location.reload())"
+            <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => { const s = $el.querySelector('span'); const t = s.textContent.trim(); s.textContent = t === 'Відкріпити' ? ' Закріпити' : ' Відкріпити'; })"
                     class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-medium rounded-xl">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a1 1 0 011 1v1.323l3.954.99a1 1 0 01.756.97v.01a1 1 0 01-.756.97L11 8.253V17a1 1 0 11-2 0V8.253L5.046 7.263a1 1 0 010-1.94L9 4.323V3a1 1 0 011-1z"/>
                 </svg>
-                {{ $announcement->is_pinned ? 'Відкріпити' : 'Закріпити' }}
+                <span>{{ $announcement->is_pinned ? 'Відкріпити' : 'Закріпити' }}</span>
             </button>
             <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', '{{ __('messages.confirm_delete_announcement') }}', null, '{{ route('announcements.index') }}')"
                     class="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 font-medium rounded-xl ml-auto">

@@ -155,27 +155,24 @@
                     <button type="button" onclick="document.getElementById('newCampaignModal').classList.remove('hidden')"
                         class="text-sm text-primary-600 hover:text-primary-700 font-medium">+ Нова</button>
                 </div>
-                <div class="p-6 space-y-4">
+                <div id="campaigns-list" class="p-6 space-y-4">
                     @forelse($campaigns as $campaign)
                         <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
                             <div class="flex justify-between items-start mb-2">
                                 <h4 class="font-medium text-gray-900 dark:text-white">{{ $campaign->name }}</h4>
                                 <div class="flex gap-1">
-                                    <button type="button"
-                                            @click="ajaxAction('{{ route('donations.campaigns.toggle', $campaign) }}', 'POST').then(() => window.location.reload())"
-                                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ $campaign->is_active ? 'Призупинити' : 'Активувати' }}">
-                                        @if($campaign->is_active)
-                                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                        @else
-                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                        @endif
+                                    <button type="button" x-data="{ active: {{ $campaign->is_active ? 'true' : 'false' }} }"
+                                            @click="ajaxAction('{{ route('donations.campaigns.toggle', $campaign) }}', 'POST').then(() => { active = !active; })"
+                                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" :title="active ? 'Призупинити' : 'Активувати'">
+                                        <svg x-show="active" class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <svg x-show="!active" x-cloak class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
                                     </button>
                                     <button type="button"
-                                            @click="ajaxDelete('{{ route('donations.campaigns.destroy', $campaign) }}', '{{ __('messages.confirm_delete_campaign') }}', () => window.location.reload())"
+                                            @click="ajaxDelete('{{ route('donations.campaigns.destroy', $campaign) }}', '{{ __('messages.confirm_delete_campaign') }}', () => $el.closest('.border.border-gray-200').remove())"
                                             class="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
                                         <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -239,7 +236,7 @@
         <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова кампанія збору</h3>
             <form @submit.prevent="submit($refs.campaignForm)" x-ref="campaignForm"
-                  x-data="{ ...ajaxForm({ url: '{{ route('donations.campaigns.store') }}', method: 'POST', onSuccess() { window.location.reload(); } }) }">
+                  x-data="{ ...ajaxForm({ url: '{{ route('donations.campaigns.store') }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess(data) { _addCampaign(this, data); } }) }">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
@@ -276,6 +273,38 @@
     </div>
 </div>
 
+<script>
+function _addCampaign(ctx, data) {
+    document.getElementById('newCampaignModal').classList.add('hidden');
+    var list = document.getElementById('campaigns-list');
+    if (!list) return;
+    var empty = list.querySelector('.text-center.text-gray-500');
+    if (empty) empty.remove();
+    var form = ctx.$refs.campaignForm;
+    var name = form.querySelector('[name="name"]').value;
+    var goal = form.querySelector('[name="goal_amount"]').value;
+    var endDate = form.querySelector('[name="end_date"]').value;
+    var safeName = name.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var id = data.id;
+    var dateText = 'Безстрокова';
+    if (endDate) {
+        var d = new Date(endDate);
+        var now = new Date();
+        var diff = Math.ceil((d - now) / 86400000);
+        dateText = diff > 0 ? 'Залишилось ' + diff + ' днів' : 'Завершено';
+    }
+    var goalHtml = '';
+    if (goal && parseFloat(goal) > 0) {
+        goalHtml = '\x3Cdiv class="mb-2">\x3Cdiv class="flex justify-between text-xs mb-1">\x3Cspan class="text-gray-500 dark:text-gray-400">0 ₴\x3C/span>\x3Cspan class="font-medium text-gray-700 dark:text-gray-300">0%\x3C/span>\x3C/div>\x3Cdiv class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">\x3Cdiv class="h-full bg-primary-500 rounded-full" style="width:0%">\x3C/div>\x3C/div>\x3C/div>';
+    }
+    var el = document.createElement('div');
+    el.className = 'border border-gray-200 dark:border-gray-700 rounded-xl p-4';
+    el.setAttribute('x-data', '');
+    el.innerHTML = '\x3Cdiv class="flex justify-between items-start mb-2">\x3Ch4 class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/h4>\x3Cdiv class="flex gap-1">\x3Cbutton type="button" x-data="{ active: true }" @click="ajaxAction(\'/donations/campaigns/' + id + '/toggle\', \'POST\').then(() => { active = !active; })" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" :title="active ? \'Призупинити\' : \'Активувати\'">\x3Csvg x-show="active" class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>\x3C/svg>\x3Csvg x-show="!active" x-cloak class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>\x3C/svg>\x3C/button>\x3Cbutton type="button" @click="ajaxDelete(\'/donations/campaigns/' + id + '\', \'Видалити кампанію?\', () => $el.closest(\'.border.border-gray-200\').remove())" class="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">\x3Csvg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>\x3C/svg>\x3C/button>\x3C/div>\x3C/div>' + goalHtml + '\x3Cp class="text-xs text-gray-500 dark:text-gray-400">' + dateText + '\x3C/p>';
+    list.appendChild(el);
+    Alpine.initTree(el);
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 function donationChart(data) {

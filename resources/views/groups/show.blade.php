@@ -187,26 +187,26 @@
                             <div x-show="open" @click.away="open = false" x-cloak
                                  class="absolute right-0 mt-1 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10">
                                 @if($member->pivot->role !== 'leader')
-                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'leader'}).then(() => window.location.reload())"
+                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'leader'}).then(() => { open = false; _updateGroupRole($el, 'leader'); })"
                                         class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                                     {{ __('app.make_leader') }}
                                 </button>
                                 @endif
                                 @if($member->pivot->role !== 'assistant')
-                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'assistant'}).then(() => window.location.reload())"
+                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'assistant'}).then(() => { open = false; _updateGroupRole($el, 'assistant'); })"
                                         class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                                     {{ __('app.make_assistant') }}
                                 </button>
                                 @endif
                                 @if($member->pivot->role !== 'member')
-                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'member'}).then(() => window.location.reload())"
+                                <button @click="ajaxAction('{{ route('groups.members.role', [$group, $member]) }}', 'PUT', {role: 'member'}).then(() => { open = false; _updateGroupRole($el, 'member'); })"
                                         class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                                     {{ __('app.make_member') }}
                                 </button>
                                 @endif
                                 @if($member->pivot->role !== 'leader')
                                 <hr class="my-1 border-gray-200 dark:border-gray-700">
-                                <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', '{{ __('messages.confirm_remove_member') }}', () => window.location.reload())"
+                                <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', '{{ __('messages.confirm_remove_member') }}', () => { $el.closest('.p-4.flex.items-center').remove(); })"
                                         class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
                                     {{ __('app.remove_from_group') }}
                                 </button>
@@ -330,4 +330,21 @@
     </div>
 </div>
 @endcan
+
+<script>
+function _updateGroupRole(el, role) {
+    var row = el.closest('.p-4.flex.items-center');
+    if (!row) return;
+    var roleEl = row.querySelector('p.text-sm');
+    if (!roleEl) return;
+    var labels = { leader: '{{ __("app.leader") }}', assistant: '{{ __("app.assistant_role") }}', member: '{{ __("app.member_role") }}' };
+    if (role === 'leader') {
+        roleEl.innerHTML = '\x3Cspan class="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium">\x3Csvg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>\x3C/svg>' + labels[role] + '\x3C/span>';
+    } else if (role === 'assistant') {
+        roleEl.innerHTML = '\x3Cspan class="text-amber-600 dark:text-amber-400 font-medium">' + labels[role] + '\x3C/span>';
+    } else {
+        roleEl.innerHTML = '\x3Cspan class="text-gray-500 dark:text-gray-400">' + labels[role] + '\x3C/span>';
+    }
+}
+</script>
 @endsection

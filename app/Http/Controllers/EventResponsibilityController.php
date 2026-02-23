@@ -20,13 +20,13 @@ class EventResponsibilityController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $event->responsibilities()->create([
+        $responsibility = $event->responsibilities()->create([
             'name' => $validated['name'],
             'notes' => $validated['notes'] ?? null,
             'status' => EventResponsibility::STATUS_OPEN,
         ]);
 
-        return $this->successResponse($request, 'Відповідальність додано.');
+        return $this->successResponse($request, 'Відповідальність додано.', null, [], ['id' => $responsibility->id, 'name' => $responsibility->name]);
     }
 
     public function assign(Request $request, EventResponsibility $responsibility)

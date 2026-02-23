@@ -1982,7 +1982,16 @@
                                                 body: JSON.stringify(body),
                                             });
                                             if (res.ok) {
-                                                window.location.reload();
+                                                const data = await res.json().catch(() => ({}));
+                                                showToast('success', data.message || 'Збережено!');
+                                                const sel = this.$el.querySelector('select');
+                                                const roleName = sel.options[sel.selectedIndex].text;
+                                                const badge = this.$el.querySelector('[x-show="!editing"] button, [x-show="!editing"] span');
+                                                if (badge) {
+                                                    const svg = badge.querySelector('svg')?.outerHTML || '';
+                                                    badge.innerHTML = roleName + ' ' + svg;
+                                                }
+                                                this.editing = false;
                                             } else {
                                                 const data = await res.json();
                                                 alert(data.message || 'Помилка');

@@ -181,7 +181,17 @@
                                             }),
                                         });
                                         if (res.ok || res.status === 302) {
-                                            window.location.reload();
+                                            const data = await res.json().catch(() => ({}));
+                                            showToast('success', data.message || 'Збережено!');
+                                            // Update displayed role name
+                                            const sel = this.$el.querySelector('select');
+                                            const roleName = sel.options[sel.selectedIndex].text;
+                                            const badge = this.$el.querySelector('[x-show="!editing"] button, [x-show="!editing"] span');
+                                            if (badge) {
+                                                const svg = badge.querySelector('svg')?.outerHTML || '';
+                                                badge.innerHTML = roleName + ' ' + svg;
+                                            }
+                                            this.editing = false;
                                         }
                                     } catch (e) {
                                         console.error(e);

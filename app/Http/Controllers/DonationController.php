@@ -294,7 +294,7 @@ class DonationController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        DonationCampaign::create([
+        $campaign = DonationCampaign::create([
             'church_id' => $church->id,
             'name' => $validated['name'],
             'description' => $validated['description'],
@@ -304,7 +304,7 @@ class DonationController extends Controller
             'is_active' => true,
         ]);
 
-        return $this->successResponse($request, 'Кампанію створено!');
+        return $this->successResponse($request, 'Кампанію створено!', null, [], ['id' => $campaign->id]);
     }
 
     /**

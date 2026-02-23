@@ -178,9 +178,9 @@ class MeetingController extends Controller
         $validated['meeting_id'] = $meeting->id;
         $validated['sort_order'] = $meeting->agendaItems()->max('sort_order') + 1;
 
-        MeetingAgendaItem::create($validated);
+        $item = MeetingAgendaItem::create($validated);
 
-        return $this->successResponse($request, 'Пункт додано');
+        return $this->successResponse($request, 'Пункт додано', null, [], ['id' => $item->id]);
     }
 
     public function updateAgendaItem(Request $request, MeetingAgendaItem $item)
@@ -249,9 +249,9 @@ class MeetingController extends Controller
         $validated['meeting_id'] = $meeting->id;
         $validated['sort_order'] = $meeting->materials()->max('sort_order') + 1;
 
-        MeetingMaterial::create($validated);
+        $material = MeetingMaterial::create($validated);
 
-        return $this->successResponse($request, 'Матеріал додано');
+        return $this->successResponse($request, 'Матеріал додано', null, [], ['id' => $material->id]);
     }
 
     public function destroyMaterial(Request $request, MeetingMaterial $material)
@@ -273,7 +273,7 @@ class MeetingController extends Controller
             'person_id' => ['required', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
-        MeetingAttendee::updateOrCreate(
+        $attendee = MeetingAttendee::updateOrCreate(
             [
                 'meeting_id' => $meeting->id,
                 'person_id' => $validated['person_id'],
@@ -281,7 +281,13 @@ class MeetingController extends Controller
             ['status' => 'invited']
         );
 
-        return $this->successResponse($request, 'Учасника додано');
+        $person = \App\Models\Person::find($validated['person_id']);
+
+        return $this->successResponse($request, 'Учасника додано', null, [], [
+            'id' => $attendee->id,
+            'person_name' => $person?->full_name ?? '',
+            'person_initials' => mb_substr($person?->first_name ?? '', 0, 1) . mb_substr($person?->last_name ?? '', 0, 1),
+        ]);
     }
 
     public function updateAttendee(Request $request, MeetingAttendee $attendee)

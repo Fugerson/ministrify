@@ -77,7 +77,7 @@ class ResourceController extends Controller
                 ->firstOrFail();
         }
 
-        Resource::create([
+        $resource = Resource::create([
             'church_id' => $churchId,
             'parent_id' => $validated['parent_id'] ?? null,
             'created_by' => auth()->id(),
@@ -86,7 +86,7 @@ class ResourceController extends Controller
             'icon' => $validated['icon'] ?? null,
         ]);
 
-        return $this->successResponse($request, 'Папку створено');
+        return $this->successResponse($request, 'Папку створено', null, [], ['id' => $resource->id, 'name' => $resource->name]);
     }
 
     /**
@@ -346,7 +346,7 @@ class ResourceController extends Controller
                 ->firstOrFail();
         }
 
-        Resource::create([
+        $resource = Resource::create([
             'church_id' => $churchId,
             'ministry_id' => $ministry->id,
             'parent_id' => $validated['parent_id'] ?? null,
@@ -356,7 +356,7 @@ class ResourceController extends Controller
             'icon' => $validated['icon'] ?? null,
         ]);
 
-        return $this->successResponse($request, 'Папку створено');
+        return $this->successResponse($request, 'Папку створено', null, [], ['id' => $resource->id, 'name' => $resource->name]);
     }
 
     /**

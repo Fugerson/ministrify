@@ -27,7 +27,7 @@
                                 🔒 Приватне
                             </span>
                         @endif
-                        <span class="px-2 py-1 bg-{{ $prayerRequest->status_color }}-100 text-{{ $prayerRequest->status_color }}-700 dark:bg-{{ $prayerRequest->status_color }}-900/30 dark:text-{{ $prayerRequest->status_color }}-400 text-xs font-medium rounded-full">
+                        <span id="prayer-status-badge" class="px-2 py-1 bg-{{ $prayerRequest->status_color }}-100 text-{{ $prayerRequest->status_color }}-700 dark:bg-{{ $prayerRequest->status_color }}-900/30 dark:text-{{ $prayerRequest->status_color }}-400 text-xs font-medium rounded-full">
                             {{ $prayerRequest->status_label }}
                         </span>
                     </div>
@@ -84,7 +84,7 @@
                     <span>{{ $prayerRequest->prayer_count }} {{ trans_choice('людина молиться|людини моляться|людей моляться', $prayerRequest->prayer_count) }}</span>
                 </div>
 
-                <div class="flex items-center space-x-3" x-data="{ prayed: {{ $hasPrayed ? 'true' : 'false' }}, prayerCount: {{ $prayerRequest->prayer_count }} }">
+                <div id="prayer-actions" class="flex items-center space-x-3" x-data="{ prayed: {{ $hasPrayed ? 'true' : 'false' }}, prayerCount: {{ $prayerRequest->prayer_count }} }">
                     @if($prayerRequest->status === 'active')
                         <button type="button"
                                 @click="if(!prayed) { ajaxAction('{{ route('prayer-requests.pray', $prayerRequest) }}', 'POST').then(() => { prayed = true; prayerCount++; }).catch(() => {}) }"
@@ -110,7 +110,7 @@
 
 <!-- Answer Modal -->
 <div id="answerModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-     x-data="{ ...ajaxForm({ url: '{{ route('prayer-requests.mark-answered', $prayerRequest) }}', method: 'POST', onSuccess() { setTimeout(() => window.location.reload(), 600); } }) }">
+     x-data="{ ...ajaxForm({ url: '{{ route('prayer-requests.mark-answered', $prayerRequest) }}', method: 'POST', onSuccess() { _markPrayerAnswered(this); } }) }">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full mx-4">
         <form @submit.prevent="submit($refs.answerForm)" x-ref="answerForm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -137,4 +137,27 @@
         </form>
     </div>
 </div>
+<script>
+function _markPrayerAnswered(ctx) {
+    document.getElementById('answerModal').classList.add('hidden');
+    var badge = document.getElementById('prayer-status-badge');
+    if (badge) {
+        badge.className = 'px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium rounded-full';
+        badge.textContent = 'Відповідь отримано';
+    }
+    var actions = document.getElementById('prayer-actions');
+    if (actions) actions.innerHTML = '';
+    var testimony = ctx.$refs.answerForm ? ctx.$refs.answerForm.querySelector('textarea') : null;
+    if (testimony && testimony.value.trim()) {
+        var section = document.createElement('div');
+        section.className = 'px-6 py-4 bg-green-50 dark:bg-green-900/20 border-t border-green-200 dark:border-green-800';
+        var now = new Date();
+        var dd = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0') + '.' + now.getFullYear();
+        var safe = testimony.value.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
+        section.innerHTML = '\x3Ch3 class="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">\x3Csvg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>\x3C/svg>Свідчення відповіді\x3C/h3>\x3Cp class="text-green-700 dark:text-green-400 whitespace-pre-wrap">' + safe + '\x3C/p>\x3Cp class="text-sm text-green-600 dark:text-green-500 mt-2">' + dd + '\x3C/p>';
+        var content = document.querySelector('.bg-white.dark\\:bg-gray-800.rounded-xl');
+        if (content) content.appendChild(section);
+    }
+}
+</script>
 @endsection

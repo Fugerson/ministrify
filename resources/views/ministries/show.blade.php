@@ -16,7 +16,7 @@
                 @endif
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
+                        <h1 id="ministry-name" class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
                         @php $visibility = $ministry->visibility ?? 'public'; @endphp
                         @if($visibility !== 'public')
                             @php
@@ -1661,7 +1661,7 @@
 
                                     {{-- Remove button --}}
                                     @can('contribute-ministry', $ministry)
-                                    <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', '{{ __('messages.confirm_remove_team_member') }}', () => window.location.reload())"
+                                    <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', '{{ __('messages.confirm_remove_team_member') }}', () => $el.closest('.group').remove())"
                                             class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
@@ -1941,7 +1941,7 @@
                         elseif (str_contains($mime, 'excel') || str_contains($mime, 'spreadsheet')) { $iconBg = 'bg-emerald-100 dark:bg-emerald-900/30'; $iconColor = 'text-emerald-600 dark:text-emerald-400'; }
                         else { $iconBg = 'bg-gray-100 dark:bg-gray-700'; $iconColor = 'text-gray-500 dark:text-gray-400'; }
                     @endphp
-                    <div class="group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                    <div class="group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors" data-resource-id="{{ $resource->id }}"
                          @if($isFolder)
                          @click="window.location.href='{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'resources', 'folder' => $resource->id]) }}'"
                          @elseif($isDoc)
@@ -2011,7 +2011,7 @@
                         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова папка</h3>
                             <form @submit.prevent="submit($refs.createFolderForm)" x-ref="createFolderForm"
-                                  x-data="{ ...ajaxForm({ url: '{{ route('ministries.resources.folder.create', $ministry) }}', method: 'POST', onSuccess: () => window.location.reload(), stayOnPage: true }) }">
+                                  x-data="{ ...ajaxForm({ url: '{{ route('ministries.resources.folder.create', $ministry) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _addMinistryResourceFolder(this, data); } }) }">
                                 <input type="hidden" name="parent_id" value="{{ $currentFolder?->id }}">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва</label>
@@ -2303,7 +2303,7 @@
                     </div>
                     @can('contribute-ministry', $ministry)
                     <form x-show="editingVision" @submit.prevent="submit($refs.visionForm)" x-ref="visionForm"
-                          x-data="{ ...ajaxForm({ url: '{{ route('ministries.vision.update', $ministry) }}', method: 'POST', onSuccess: () => window.location.reload(), stayOnPage: true }) }"
+                          x-data="{ ...ajaxForm({ url: '{{ route('ministries.vision.update', $ministry) }}', method: 'POST', stayOnPage: true, onSuccess() { const ta = this.$refs.visionForm.querySelector('textarea'); const txt = ta.value; const display = this.$refs.visionForm.previousElementSibling; if (display) { const p = display.querySelector('p'); if (p) { p.textContent = txt || 'Бачення ще не визначено.'; p.className = txt ? 'text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed' : 'text-gray-500 dark:text-gray-400 italic'; } } this.editingVision = false; } }) }"
                           class="space-y-3">
                         <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500" placeholder="Опишіть бачення вашого служіння...">{{ $ministry->vision }}</textarea>
                         <div class="flex justify-end">
@@ -2376,7 +2376,7 @@
                                             <button @click="editGoal({{ $goal->id }}, {{ json_encode(['title' => $goal->title, 'description' => $goal->description, 'period' => $goal->period, 'due_date' => $goal->due_date?->format('Y-m-d'), 'priority' => $goal->priority, 'status' => $goal->status]) }})" class="p-1.5 text-gray-400 hover:text-gray-600">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                             </button>
-                                            <button @click="ajaxDelete('{{ route('ministries.goals.destroy', [$ministry, $goal]) }}', '{{ __('messages.confirm_delete_short') }}', () => window.location.reload())"
+                                            <button @click="ajaxDelete('{{ route('ministries.goals.destroy', [$ministry, $goal]) }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('.border.border-gray-200').remove())"
                                                     class="p-1.5 text-gray-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                         </div>
                                         @endcan
@@ -2385,19 +2385,21 @@
                                 @if($goal->tasks->count() > 0)
                                     <div class="divide-y divide-gray-200 dark:divide-gray-700">
                                         @foreach($goal->tasks as $task)
-                                            <div class="p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                            <div class="p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30" x-data="{ done: {{ $task->is_done ? 'true' : 'false' }} }">
                                                 @can('contribute-ministry', $ministry)
-                                                <button @click="ajaxAction('{{ route('ministries.tasks.toggle', [$ministry, $task]) }}', 'POST').then(() => window.location.reload())"
-                                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center @if($task->is_done) border-green-500 bg-green-500 @else border-gray-300 hover:border-primary-500 @endif">
-                                                    @if($task->is_done)<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>@endif
+                                                <button @click="ajaxAction('{{ route('ministries.tasks.toggle', [$ministry, $task]) }}', 'POST').then(() => { done = !done; })"
+                                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                                        :class="done ? 'border-green-500 bg-green-500' : 'border-gray-300 hover:border-primary-500'">
+                                                    <svg x-show="done" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                                 </button>
                                                 @else
-                                                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 @if($task->is_done) border-green-500 bg-green-500 @else border-gray-300 @endif">
-                                                    @if($task->is_done)<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>@endif
+                                                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                                                     :class="done ? 'border-green-500 bg-green-500' : 'border-gray-300'">
+                                                    <svg x-show="done" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                                 </div>
                                                 @endcan
                                                 <div class="flex-1 min-w-0">
-                                                    <p class="text-sm text-gray-900 dark:text-white @if($task->is_done) line-through text-gray-500 @endif">{{ $task->title }}</p>
+                                                    <p class="text-sm text-gray-900 dark:text-white" :class="done && 'line-through text-gray-500'">{{ $task->title }}</p>
                                                     <div class="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
                                                         @if($task->assignee)<span>{{ $task->assignee->full_name }}</span>@endif
                                                         @if($task->due_date)<span class="@if($task->is_overdue) text-red-600 @endif">{{ $task->due_date->format('d.m') }}</span>@endif
@@ -2406,7 +2408,7 @@
                                                 @can('contribute-ministry', $ministry)
                                                 <div class="flex items-center gap-1">
                                                     <button @click="editTask({{ $task->id }}, {{ json_encode(['title' => $task->title, 'description' => $task->description, 'goal_id' => $task->goal_id, 'assigned_to' => $task->assigned_to, 'due_date' => $task->due_date?->format('Y-m-d'), 'priority' => $task->priority, 'status' => $task->status]) }})" class="p-1 text-gray-400 hover:text-gray-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
-                                                    <button @click="ajaxDelete('{{ route('ministries.tasks.destroy', [$ministry, $task]) }}', '{{ __('messages.confirm_delete_short') }}', () => window.location.reload())" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                                    <button @click="ajaxDelete('{{ route('ministries.tasks.destroy', [$ministry, $task]) }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('.p-3.flex.items-center').remove())" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                                 </div>
                                                 @endcan
                                             </div>
@@ -3097,7 +3099,7 @@
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Загальні налаштування</h3>
                         <form @submit.prevent="submit($refs.settingsForm)" x-ref="settingsForm"
-                              x-data="{ ...ajaxForm({ url: '{{ route('ministries.update', $ministry) }}', method: 'PUT', onSuccess: () => window.location.reload(), stayOnPage: true }) }"
+                              x-data="{ ...ajaxForm({ url: '{{ route('ministries.update', $ministry) }}', method: 'PUT', stayOnPage: true, onSuccess() { _updateMinistryHeader(this); } }) }"
                               class="space-y-4">
 
                             <div>
@@ -3473,6 +3475,50 @@
 
 @push('scripts')
 <script>
+function _addMinistryResourceFolder(ctx, data) {
+    ctx.showCreateFolder = false;
+    var container = ctx.$el ? ctx.$el.closest('[x-data]') : document;
+    var tbody = container ? container.querySelector('table tbody') : document.querySelector('[x-show*="resources"] table tbody');
+    if (!tbody) { window.location.reload(); return; }
+    var name = ctx.$refs.createFolderForm.querySelector('[name="name"]').value;
+    var safeName = name.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';
+    tr.setAttribute('data-resource-id', data.id);
+    tr.onclick = function() { window.location.href = '/ministries/{{ $ministry->id }}/resources/folder/' + data.id; };
+    var today = new Date();
+    var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
+    tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\u2014\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
+    tbody.insertBefore(tr, tbody.firstChild);
+    if (window.showGlobalToast) showGlobalToast('Папку створено', 'success');
+}
+
+function _addMinistryResourceFile(tbody, fileName) {
+    var safeName = fileName.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';
+    var today = new Date();
+    var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
+    tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
+    tbody.insertBefore(tr, tbody.firstChild);
+}
+
+function _updateMinistryHeader(ctx) {
+    var form = ctx.$refs.settingsForm;
+    if (!form) return;
+    var name = form.querySelector('[name="name"]');
+    var color = form.querySelector('[name="color"]');
+    if (name) {
+        var h = document.getElementById('ministry-name');
+        if (h) h.textContent = name.value;
+        document.title = name.value + ' | Ministrify';
+    }
+    if (color) {
+        var dot = document.querySelector('.w-4.h-4.rounded-full[style*="background-color"]');
+        if (dot) dot.style.backgroundColor = color.value;
+    }
+}
+
 /* === Custom Document Editor (zero dependencies) === */
 function docExec(cmd, val) { document.execCommand(cmd, false, val || null); document.getElementById('doc-editable')?.focus(); }
 function docExecBlock(tag) { if (!tag) return; document.execCommand('formatBlock', false, tag); document.getElementById('doc-editable')?.focus(); }
@@ -3550,7 +3596,9 @@ function resourcesManager() {
                 });
                 if (response.ok) {
                     this.showRename = false;
-                    window.location.reload();
+                    showToast('success', 'Перейменовано!');
+                    const row = this.$el.querySelector(`[data-resource-id="${this.selectedId}"] .text-sm.font-medium`);
+                    if (row) row.textContent = this.renameName;
                 } else {
                     const err = await response.json().catch(() => ({}));
                     alert(err.message || 'Помилка перейменування');
@@ -3592,12 +3640,24 @@ function resourcesManager() {
 
             event.target.value = '';
             this.uploading = false;
-            if (!this.uploadError) window.location.reload();
+            if (!this.uploadError) {
+                // Add uploaded files to table or reload if no table
+                var tbody = this.$el.querySelector('table tbody');
+                if (!tbody) { window.location.reload(); return; }
+                for (var i = 0; i < files.length; i++) {
+                    _addMinistryResourceFile(tbody, files[i].name);
+                }
+                if (window.showGlobalToast) showGlobalToast('Файл завантажено', 'success');
+            }
         },
 
         deleteItem() {
             this.menuOpen = false;
-            ajaxDelete(`/resources/${this.selectedId}`, '{{ __('messages.confirm_delete_item') }}', () => window.location.reload());
+            const id = this.selectedId;
+            ajaxDelete(`/resources/${id}`, '{{ __('messages.confirm_delete_item') }}', () => {
+                const row = this.$el.querySelector(`[data-resource-id="${id}"]`);
+                if (row) row.remove();
+            });
         },
 
         async createAndOpenDocument() {
@@ -3688,10 +3748,35 @@ function resourcesManager() {
             if (editable) editable.innerHTML = '';
             document.body.style.overflow = '';
             this.showDocEditor = false;
-            if (this._docCreated) {
+            if (this._docCreated && this.docId) {
                 this._docCreated = false;
-                window.location.reload();
+                this._addDocToList(this.docId, this.docName);
             }
+        },
+
+        _addDocToList(id, name) {
+            const list = this.$el.querySelector('.space-y-1\\.5');
+            if (!list) {
+                window.location.reload();
+                return;
+            }
+            const self = this;
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            const el = document.createElement('div');
+            el.className = 'group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors';
+            el.onclick = () => self.openDocument({ id, name, content: '' });
+            el.innerHTML = `
+                <div class="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">${name}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Документ <span class="mx-1">&middot;</span> ${dd}.${mm}.${yyyy}</p>
+                </div>`;
+            list.prepend(el);
         }
     }
 }

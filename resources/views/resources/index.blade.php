@@ -108,7 +108,7 @@
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($resources as $resource)
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group" data-resource-id="{{ $resource->id }}"
                     @if($resource->isFolder())
                     @click="window.location.href='{{ route('resources.folder', $resource) }}'"
                     @else
@@ -151,7 +151,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                             @endif
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $resource->name }}</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white resource-name">{{ $resource->name }}</span>
                         </div>
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
@@ -183,7 +183,7 @@
             <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова папка</h3>
                 <form @submit.prevent="submit($refs.createFolderForm)" x-ref="createFolderForm"
-                      x-data="{ ...ajaxForm({ url: '{{ route('resources.folder.create') }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); } }) }">
+                      x-data="{ ...ajaxForm({ url: '{{ route('resources.folder.create') }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _addResourceFolder(this, data); } }) }">
                     <input type="hidden" name="parent_id" value="{{ $folder?->id }}">
 
                     <div class="space-y-4">
@@ -325,6 +325,43 @@
 
 @push('scripts')
 <script>
+function _addResourceFolder(ctx, data) {
+    ctx.showCreateFolder = false;
+    var tbody = document.querySelector('table tbody');
+    if (!tbody) {
+        // Empty state — need to reload to get the table
+        window.location.reload();
+        return;
+    }
+    var name = ctx.$refs.createFolderForm.querySelector('[name="name"]').value;
+    var safeName = name.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';
+    tr.setAttribute('data-resource-id', data.id);
+    tr.onclick = function() { window.location.href = '/resources/folder/' + data.id; };
+    var today = new Date();
+    var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
+    tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white resource-name">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\u2014\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
+    tbody.insertBefore(tr, tbody.firstChild);
+    if (window.showGlobalToast) showGlobalToast('Папку створено', 'success');
+}
+
+function _addResourceFile(fileName) {
+    var tbody = document.querySelector('table tbody');
+    if (!tbody) {
+        window.location.reload();
+        return;
+    }
+    var safeName = fileName.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
+    var tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';
+    var today = new Date();
+    var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
+    tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white resource-name">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
+    tbody.insertBefore(tr, tbody.firstChild);
+    if (window.showGlobalToast) showGlobalToast('Файл завантажено', 'success');
+}
+
 function resourcesManager() {
     return {
         showCreateFolder: false,
@@ -357,7 +394,9 @@ function resourcesManager() {
             if (!this.renameName.trim()) return;
             try {
                 await ajaxAction(`/resources/${this.selectedId}/rename`, 'PUT', { name: this.renameName });
-                window.location.reload();
+                const row = document.querySelector(`[data-resource-id="${this.selectedId}"] .resource-name`);
+                if (row) row.textContent = this.renameName;
+                this.showRename = false;
             } catch (e) {}
         },
 
@@ -382,7 +421,7 @@ function resourcesManager() {
                     });
 
                     if (response.ok) {
-                        window.location.reload();
+                        _addResourceFile(file.name);
                     } else {
                         const data = await response.json().catch(() => ({}));
                         alert(data.message || 'Помилка завантаження');
@@ -397,7 +436,11 @@ function resourcesManager() {
 
         deleteItem() {
             this.menuOpen = false;
-            ajaxDelete(`/resources/${this.selectedId}`, '{{ __('messages.confirm_delete_item') }}', () => window.location.reload());
+            const id = this.selectedId;
+            ajaxDelete(`/resources/${id}`, '{{ __('messages.confirm_delete_item') }}', () => {
+                const row = document.querySelector(`[data-resource-id="${id}"]`);
+                if (row) row.remove();
+            });
         }
     }
 }

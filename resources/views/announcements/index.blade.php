@@ -73,7 +73,7 @@
 
                 @if(auth()->user()->canEdit('announcements'))
                 <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
-                    <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => window.location.reload())"
+                    <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => { const t = $el.textContent.trim(); $el.textContent = t === 'Відкріпити' ? 'Закріпити' : 'Відкріпити'; })"
                             class="text-sm text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400">
                         {{ $announcement->is_pinned ? 'Відкріпити' : 'Закріпити' }}
                     </button>

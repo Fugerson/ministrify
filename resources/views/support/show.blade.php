@@ -81,7 +81,7 @@
     @if(!in_array($ticket->status, ['closed', 'resolved']))
         <!-- Reply Form -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
-             x-data="{ ...ajaxForm({ url: '{{ route('support.reply', $ticket) }}', method: 'POST', stayOnPage: true, onSuccess() { setTimeout(() => window.location.reload(), 600); } }), files: [] }">
+             x-data="{ ...ajaxForm({ url: '{{ route('support.reply', $ticket) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { _supportAddReply(this); } }), files: [] }">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="font-semibold text-gray-900 dark:text-white">Відповісти</h2>
             </div>
@@ -123,4 +123,22 @@
         </div>
     @endif
 </div>
+
+<script>
+function _supportAddReply(ctx) {
+    var ta = ctx.$refs.replyForm.querySelector('textarea');
+    var msg = ta.value;
+    var container = document.querySelector('.divide-y.divide-gray-200');
+    if (container) {
+        var now = new Date();
+        var d = String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+        var safe = msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        var el = document.createElement('div');
+        el.className = 'p-6';
+        el.innerHTML = '<div class="flex items-start gap-4"><div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-700"><span class="text-lg">{{ mb_substr(auth()->user()->name, 0, 1) }}</span></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-2"><span class="font-medium text-gray-900 dark:text-white">{{ auth()->user()->name }}</span><span class="text-sm text-gray-500 dark:text-gray-400">' + d + '</span></div><div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">' + safe + '</div></div></div>';
+        container.appendChild(el);
+    }
+    ctx.files = [];
+}
+</script>
 @endsection
