@@ -1422,7 +1422,7 @@ class FinanceController extends Controller
         $monthlyRaw = Transaction::where('church_id', $churchId)
             ->completed()
             ->whereYear('date', $year)
-            ->selectRaw('MONTH(date) as month, direction, SUM(amount) as total')
+            ->selectRaw('MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('month', 'direction')
             ->get();
 
@@ -1452,7 +1452,7 @@ class FinanceController extends Controller
             ->completed()
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
-            ->selectRaw('DAY(date) as day, direction, SUM(amount) as total')
+            ->selectRaw('DAY(date) as day, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('day', 'direction')
             ->get();
 
@@ -1484,7 +1484,7 @@ class FinanceController extends Controller
             ->completed()
             ->whereYear('date', $year)
             ->whereRaw('MONTH(date) BETWEEN ? AND ?', [$startMonth, $endMonth])
-            ->selectRaw('MONTH(date) as month, direction, SUM(amount) as total')
+            ->selectRaw('MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('month', 'direction')
             ->get();
 
@@ -1510,7 +1510,7 @@ class FinanceController extends Controller
     {
         $yearlyRaw = Transaction::where('church_id', $churchId)
             ->completed()
-            ->selectRaw('YEAR(date) as year, direction, SUM(amount) as total')
+            ->selectRaw('YEAR(date) as year, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('year', 'direction')
             ->get();
 
@@ -1590,11 +1590,11 @@ class FinanceController extends Controller
             ->where('direction', Transaction::DIRECTION_IN)
             ->where('status', Transaction::STATUS_COMPLETED)
             ->selectRaw("
-                SUM(CASE WHEN date >= ? THEN amount ELSE 0 END) as this_week_income,
-                SUM(CASE WHEN date >= ? AND date <= ? THEN amount ELSE 0 END) as last_week_income,
-                SUM(CASE WHEN date >= ? THEN amount ELSE 0 END) as this_month_total,
+                SUM(CASE WHEN date >= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as this_week_income,
+                SUM(CASE WHEN date >= ? AND date <= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as last_week_income,
+                SUM(CASE WHEN date >= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as this_month_total,
                 COUNT(CASE WHEN date >= ? THEN 1 END) as this_month_count,
-                SUM(CASE WHEN date >= ? AND date <= ? THEN amount ELSE 0 END) as last_month_total,
+                SUM(CASE WHEN date >= ? AND date <= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as last_month_total,
                 COUNT(CASE WHEN date >= ? AND date <= ? THEN 1 END) as last_month_count,
                 COUNT(DISTINCT CASE WHEN date >= ? AND person_id IS NOT NULL THEN person_id END) as this_month_donors,
                 COUNT(DISTINCT CASE WHEN date >= ? AND date <= ? AND person_id IS NOT NULL THEN person_id END) as last_month_donors

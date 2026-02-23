@@ -60,9 +60,9 @@ class DashboardStatisticsService
         $peopleTrend = Person::where('church_id', $church->id)
             ->where('created_at', '>=', $threeMonthsAgo)->count();
 
-        $volunteersThreeMonthsAgo = DB::table('ministry_person')
+        $newVolunteers = DB::table('ministry_person')
             ->whereIn('ministry_id', $ministryIds)
-            ->where('created_at', '<', $threeMonthsAgo)
+            ->where('created_at', '>=', $threeMonthsAgo)
             ->distinct('person_id')->count('person_id');
 
         return [
@@ -71,7 +71,7 @@ class DashboardStatisticsService
             'volunteers' => $volunteersCount,
             'new_this_month' => $newThisMonth,
             'trend' => $peopleTrend,
-            'volunteers_trend' => $volunteersCount - $volunteersThreeMonthsAgo,
+            'volunteers_trend' => $newVolunteers,
         ];
     }
 

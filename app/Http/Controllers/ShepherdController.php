@@ -106,6 +106,7 @@ class ShepherdController extends Controller
      */
     public function destroy(Person $person)
     {
+        abort_unless(auth()->user()->hasPermission('settings', 'edit'), 403);
         $this->authorizeChurch($person);
 
         // Remove all sheep assignments before removing shepherd status

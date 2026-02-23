@@ -99,9 +99,11 @@ class EventResponsibilityController extends Controller
     public function confirm(EventResponsibility $responsibility)
     {
         $user = auth()->user();
+        $church = $this->getCurrentChurch();
 
-        // Check if this is the assigned person
-        if ($user->person && $user->person->id === $responsibility->person_id) {
+        // Check if this is the assigned person (must be same church)
+        if ($user->person && $user->person->id === $responsibility->person_id
+            && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->confirm();
             return back()->with('success', 'Ви підтвердили участь.');
         }
@@ -116,9 +118,11 @@ class EventResponsibilityController extends Controller
     public function decline(EventResponsibility $responsibility)
     {
         $user = auth()->user();
+        $church = $this->getCurrentChurch();
 
-        // Check if this is the assigned person
-        if ($user->person && $user->person->id === $responsibility->person_id) {
+        // Check if this is the assigned person (must be same church)
+        if ($user->person && $user->person->id === $responsibility->person_id
+            && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->decline();
             return back()->with('success', 'Ви відхилили участь.');
         }

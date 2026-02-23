@@ -570,98 +570,108 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::resource('attendance', AttendanceController::class);
     Route::get('attendance-stats', [AttendanceController::class, 'stats'])->name('attendance.stats');
 
-    // Settings
+    // Settings (view permission for GET routes, edit permission for mutations)
     Route::middleware('permission:settings')->prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
-        Route::put('church', [SettingsController::class, 'updateChurch'])->name('church');
-        Route::put('telegram', [SettingsController::class, 'updateTelegram'])->name('telegram');
-        Route::post('telegram/test', [SettingsController::class, 'testTelegram'])->name('telegram.test');
-        Route::post('telegram/webhook', [SettingsController::class, 'setupWebhook'])->name('telegram.webhook');
         Route::get('telegram/status', [SettingsController::class, 'getTelegramStatus'])->name('telegram.status');
-        Route::put('notifications', [SettingsController::class, 'updateNotifications'])->name('notifications');
-        Route::put('self-registration', [SettingsController::class, 'updateSelfRegistration'])->name('self-registration');
-        Route::put('public-site', [SettingsController::class, 'updatePublicSite'])->name('public-site');
-        Route::put('payments', [SettingsController::class, 'updatePaymentSettings'])->name('payments');
-        Route::put('theme-color', [SettingsController::class, 'updateThemeColor'])->name('theme-color');
-        Route::put('design-theme', [SettingsController::class, 'updateDesignTheme'])->name('design-theme');
-        Route::put('menu-position', [SettingsController::class, 'updateMenuPosition'])->name('menu-position');
-        Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
-        Route::put('currencies', [SettingsController::class, 'updateCurrencies'])->name('currencies');
+
+        // All mutation routes require settings,edit permission
+        Route::middleware('permission:settings,edit')->group(function () {
+            Route::put('church', [SettingsController::class, 'updateChurch'])->name('church');
+            Route::put('telegram', [SettingsController::class, 'updateTelegram'])->name('telegram');
+            Route::post('telegram/test', [SettingsController::class, 'testTelegram'])->name('telegram.test');
+            Route::post('telegram/webhook', [SettingsController::class, 'setupWebhook'])->name('telegram.webhook');
+            Route::put('notifications', [SettingsController::class, 'updateNotifications'])->name('notifications');
+            Route::put('self-registration', [SettingsController::class, 'updateSelfRegistration'])->name('self-registration');
+            Route::put('public-site', [SettingsController::class, 'updatePublicSite'])->name('public-site');
+            Route::put('payments', [SettingsController::class, 'updatePaymentSettings'])->name('payments');
+            Route::put('theme-color', [SettingsController::class, 'updateThemeColor'])->name('theme-color');
+            Route::put('design-theme', [SettingsController::class, 'updateDesignTheme'])->name('design-theme');
+            Route::put('menu-position', [SettingsController::class, 'updateMenuPosition'])->name('menu-position');
+            Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
+            Route::put('currencies', [SettingsController::class, 'updateCurrencies'])->name('currencies');
+        });
 
         // Role permissions management (inline in settings page)
         Route::get('permissions', fn() => redirect()->route('settings.index', ['tab' => 'permissions']))->name('permissions.index');
-        Route::put('permissions', [\App\Http\Controllers\RolePermissionController::class, 'update'])->name('permissions.update');
-        Route::post('permissions/reset', [\App\Http\Controllers\RolePermissionController::class, 'reset'])->name('permissions.reset');
+        Route::put('permissions', [\App\Http\Controllers\RolePermissionController::class, 'update'])->name('permissions.update')->middleware('permission:settings,edit');
+        Route::post('permissions/reset', [\App\Http\Controllers\RolePermissionController::class, 'reset'])->name('permissions.reset')->middleware('permission:settings,edit');
 
         // Servant/role approval management
         Route::get('servant-approvals', [ServantApprovalController::class, 'index'])->name('servant-approvals.index');
-        Route::post('servant-approvals/{user}/approve', [ServantApprovalController::class, 'approve'])->name('servant-approvals.approve');
-        Route::post('servant-approvals/{user}/reject', [ServantApprovalController::class, 'reject'])->name('servant-approvals.reject');
+        Route::post('servant-approvals/{user}/approve', [ServantApprovalController::class, 'approve'])->name('servant-approvals.approve')->middleware('permission:settings,edit');
+        Route::post('servant-approvals/{user}/reject', [ServantApprovalController::class, 'reject'])->name('servant-approvals.reject')->middleware('permission:settings,edit');
 
         // Google Calendar integration
         Route::get('google-calendar/redirect', [\App\Http\Controllers\GoogleCalendarController::class, 'redirect'])->name('google-calendar.redirect');
         Route::get('google-calendar/callback', [\App\Http\Controllers\GoogleCalendarController::class, 'callback'])->name('google-calendar.callback');
-        Route::post('google-calendar/disconnect', [\App\Http\Controllers\GoogleCalendarController::class, 'disconnect'])->name('google-calendar.disconnect');
         Route::get('google-calendar/calendars', [\App\Http\Controllers\GoogleCalendarController::class, 'calendars'])->name('google-calendar.calendars');
-        Route::post('google-calendar/sync', [\App\Http\Controllers\GoogleCalendarController::class, 'sync'])->name('google-calendar.sync');
-        Route::post('google-calendar/full-sync', [\App\Http\Controllers\GoogleCalendarController::class, 'fullSync'])->name('google-calendar.full-sync');
-        Route::post('google-calendar/full-sync-all', [\App\Http\Controllers\GoogleCalendarController::class, 'fullSyncAll'])->name('google-calendar.full-sync-all');
-        Route::post('google-calendar/calendars/save', [\App\Http\Controllers\GoogleCalendarController::class, 'saveCalendars'])->name('google-calendar.calendars.save');
-        Route::post('google-calendar/unlink-events', [\App\Http\Controllers\GoogleCalendarController::class, 'unlinkGoogleEvents'])->name('google-calendar.unlink-events');
-        Route::post('google-calendar/import', [\App\Http\Controllers\GoogleCalendarController::class, 'importFromGoogle'])->name('google-calendar.import');
-        Route::post('google-calendar/preview-import', [\App\Http\Controllers\GoogleCalendarController::class, 'previewImport'])->name('google-calendar.preview-import');
-        Route::post('google-calendar/import-with-resolution', [\App\Http\Controllers\GoogleCalendarController::class, 'importWithResolution'])->name('google-calendar.import-with-resolution');
-        Route::post('google-calendar/delete-events', [\App\Http\Controllers\GoogleCalendarController::class, 'deleteEvents'])->name('google-calendar.delete-events');
+        Route::middleware('permission:settings,edit')->group(function () {
+            Route::post('google-calendar/disconnect', [\App\Http\Controllers\GoogleCalendarController::class, 'disconnect'])->name('google-calendar.disconnect');
+            Route::post('google-calendar/sync', [\App\Http\Controllers\GoogleCalendarController::class, 'sync'])->name('google-calendar.sync');
+            Route::post('google-calendar/full-sync', [\App\Http\Controllers\GoogleCalendarController::class, 'fullSync'])->name('google-calendar.full-sync');
+            Route::post('google-calendar/full-sync-all', [\App\Http\Controllers\GoogleCalendarController::class, 'fullSyncAll'])->name('google-calendar.full-sync-all');
+            Route::post('google-calendar/calendars/save', [\App\Http\Controllers\GoogleCalendarController::class, 'saveCalendars'])->name('google-calendar.calendars.save');
+            Route::post('google-calendar/unlink-events', [\App\Http\Controllers\GoogleCalendarController::class, 'unlinkGoogleEvents'])->name('google-calendar.unlink-events');
+            Route::post('google-calendar/import', [\App\Http\Controllers\GoogleCalendarController::class, 'importFromGoogle'])->name('google-calendar.import');
+            Route::post('google-calendar/preview-import', [\App\Http\Controllers\GoogleCalendarController::class, 'previewImport'])->name('google-calendar.preview-import');
+            Route::post('google-calendar/import-with-resolution', [\App\Http\Controllers\GoogleCalendarController::class, 'importWithResolution'])->name('google-calendar.import-with-resolution');
+            Route::post('google-calendar/delete-events', [\App\Http\Controllers\GoogleCalendarController::class, 'deleteEvents'])->name('google-calendar.delete-events');
+        });
 
         // Expense categories
-        Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
-
-        // Income categories removed -- replaced by unified transaction categories (see transaction-categories routes below)
+        Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('permission:settings,edit');
 
         // Transaction categories (unified)
-        Route::post('transaction-categories', [SettingsController::class, 'storeTransactionCategory'])->name('transaction-categories.store');
-        Route::put('transaction-categories/{category}', [SettingsController::class, 'updateTransactionCategory'])->name('transaction-categories.update');
-        Route::delete('transaction-categories/{category}', [SettingsController::class, 'destroyTransactionCategory'])->name('transaction-categories.destroy');
+        Route::middleware('permission:settings,edit')->group(function () {
+            Route::post('transaction-categories', [SettingsController::class, 'storeTransactionCategory'])->name('transaction-categories.store');
+            Route::put('transaction-categories/{category}', [SettingsController::class, 'updateTransactionCategory'])->name('transaction-categories.update');
+            Route::delete('transaction-categories/{category}', [SettingsController::class, 'destroyTransactionCategory'])->name('transaction-categories.destroy');
 
-        // Ministry types
-        Route::post('ministry-types', [\App\Http\Controllers\MinistryTypeController::class, 'store'])->name('ministry-types.store');
-        Route::put('ministry-types/{ministryType}', [\App\Http\Controllers\MinistryTypeController::class, 'update'])->name('ministry-types.update');
-        Route::delete('ministry-types/{ministryType}', [\App\Http\Controllers\MinistryTypeController::class, 'destroy'])->name('ministry-types.destroy');
+            // Ministry types
+            Route::post('ministry-types', [\App\Http\Controllers\MinistryTypeController::class, 'store'])->name('ministry-types.store');
+            Route::put('ministry-types/{ministryType}', [\App\Http\Controllers\MinistryTypeController::class, 'update'])->name('ministry-types.update');
+            Route::delete('ministry-types/{ministryType}', [\App\Http\Controllers\MinistryTypeController::class, 'destroy'])->name('ministry-types.destroy');
 
-        // Ministries management from settings
-        Route::put('ministries/{ministry}/type', [\App\Http\Controllers\MinistryTypeController::class, 'updateMinistryType'])->name('ministries.update-type');
-        Route::delete('ministries/{ministry}', [\App\Http\Controllers\MinistryTypeController::class, 'destroyMinistry'])->name('ministries.destroy');
+            // Ministries management from settings
+            Route::put('ministries/{ministry}/type', [\App\Http\Controllers\MinistryTypeController::class, 'updateMinistryType'])->name('ministries.update-type');
+            Route::delete('ministries/{ministry}', [\App\Http\Controllers\MinistryTypeController::class, 'destroyMinistry'])->name('ministries.destroy');
+        });
 
         // Users management
-        Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show']);
-        Route::post('users/{user}/invite', [\App\Http\Controllers\UserController::class, 'sendInvite'])->name('users.invite');
+        Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show'])->middleware('permission:settings,edit');
+        Route::post('users/{user}/invite', [\App\Http\Controllers\UserController::class, 'sendInvite'])->name('users.invite')->middleware('permission:settings,edit');
         Route::get('users/{user}/permissions', [\App\Http\Controllers\UserController::class, 'getPermissions'])->name('users.permissions');
-        Route::put('users/{user}/permissions', [\App\Http\Controllers\UserController::class, 'updatePermissions'])->name('users.permissions.update');
+        Route::put('users/{user}/permissions', [\App\Http\Controllers\UserController::class, 'updatePermissions'])->name('users.permissions.update')->middleware('permission:settings,edit');
 
-        // Audit Logs
+        // Audit Logs (view only)
         Route::get('audit-logs', [\App\Http\Controllers\AuditLogController::class, 'index'])->name('audit-logs.index');
         Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\AuditLogController::class, 'show'])->name('audit-logs.show');
 
         // Church Roles
         Route::get('church-roles', [\App\Http\Controllers\ChurchRoleController::class, 'index'])->name('church-roles.index');
-        Route::post('church-roles', [\App\Http\Controllers\ChurchRoleController::class, 'store'])->name('church-roles.store');
-        Route::put('church-roles/{churchRole}', [\App\Http\Controllers\ChurchRoleController::class, 'update'])->name('church-roles.update');
-        Route::delete('church-roles/{churchRole}', [\App\Http\Controllers\ChurchRoleController::class, 'destroy'])->name('church-roles.destroy');
-        Route::post('church-roles/{churchRole}/set-default', [\App\Http\Controllers\ChurchRoleController::class, 'setDefault'])->name('church-roles.set-default');
-        Route::post('church-roles/{churchRole}/toggle-admin', [\App\Http\Controllers\ChurchRoleController::class, 'toggleAdmin'])->name('church-roles.toggle-admin');
         Route::get('church-roles/{churchRole}/permissions', [\App\Http\Controllers\ChurchRolePermissionController::class, 'getPermissions'])->name('church-roles.permissions');
-        Route::put('church-roles/{churchRole}/permissions', [\App\Http\Controllers\ChurchRolePermissionController::class, 'update'])->name('church-roles.permissions.update');
-        Route::post('church-roles/reorder', [\App\Http\Controllers\ChurchRoleController::class, 'reorder'])->name('church-roles.reorder');
-        Route::post('church-roles/reset', [\App\Http\Controllers\ChurchRoleController::class, 'resetToDefaults'])->name('church-roles.reset');
+        Route::middleware('permission:settings,edit')->group(function () {
+            Route::post('church-roles', [\App\Http\Controllers\ChurchRoleController::class, 'store'])->name('church-roles.store');
+            Route::put('church-roles/{churchRole}', [\App\Http\Controllers\ChurchRoleController::class, 'update'])->name('church-roles.update');
+            Route::delete('church-roles/{churchRole}', [\App\Http\Controllers\ChurchRoleController::class, 'destroy'])->name('church-roles.destroy');
+            Route::post('church-roles/{churchRole}/set-default', [\App\Http\Controllers\ChurchRoleController::class, 'setDefault'])->name('church-roles.set-default');
+            Route::post('church-roles/{churchRole}/toggle-admin', [\App\Http\Controllers\ChurchRoleController::class, 'toggleAdmin'])->name('church-roles.toggle-admin');
+            Route::put('church-roles/{churchRole}/permissions', [\App\Http\Controllers\ChurchRolePermissionController::class, 'update'])->name('church-roles.permissions.update');
+            Route::post('church-roles/reorder', [\App\Http\Controllers\ChurchRoleController::class, 'reorder'])->name('church-roles.reorder');
+            Route::post('church-roles/reset', [\App\Http\Controllers\ChurchRoleController::class, 'resetToDefaults'])->name('church-roles.reset');
+        });
 
         // Shepherds
         Route::get('shepherds', [\App\Http\Controllers\ShepherdController::class, 'index'])->name('shepherds.index');
-        Route::post('shepherds', [\App\Http\Controllers\ShepherdController::class, 'store'])->name('shepherds.store');
-        Route::delete('shepherds/{person}', [\App\Http\Controllers\ShepherdController::class, 'destroy'])->name('shepherds.destroy');
-        Route::post('shepherds/toggle-feature', [\App\Http\Controllers\ShepherdController::class, 'toggleFeature'])->name('shepherds.toggle-feature');
+        Route::middleware('permission:settings,edit')->group(function () {
+            Route::post('shepherds', [\App\Http\Controllers\ShepherdController::class, 'store'])->name('shepherds.store');
+            Route::delete('shepherds/{person}', [\App\Http\Controllers\ShepherdController::class, 'destroy'])->name('shepherds.destroy');
+            Route::post('shepherds/toggle-feature', [\App\Http\Controllers\ShepherdController::class, 'toggleFeature'])->name('shepherds.toggle-feature');
+        });
 
         // Attendance
-        Route::post('attendance/toggle-feature', [\App\Http\Controllers\AttendanceController::class, 'toggleFeature'])->name('attendance.toggle-feature');
+        Route::post('attendance/toggle-feature', [\App\Http\Controllers\AttendanceController::class, 'toggleFeature'])->name('attendance.toggle-feature')->middleware('permission:settings,edit');
     });
 
     // Telegram (admin only)

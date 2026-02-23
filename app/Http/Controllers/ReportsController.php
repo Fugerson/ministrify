@@ -167,8 +167,8 @@ class ReportsController extends Controller
             ->completed()
             ->whereYear('date', $year)
             ->selectRaw("
-                SUM(CASE WHEN direction = 'in' THEN amount ELSE 0 END) as income,
-                SUM(CASE WHEN direction = 'out' THEN amount ELSE 0 END) as expense
+                SUM(CASE WHEN direction = 'in' THEN COALESCE(amount_uah, amount) ELSE 0 END) as income,
+                SUM(CASE WHEN direction = 'out' THEN COALESCE(amount_uah, amount) ELSE 0 END) as expense
             ")
             ->first();
 
@@ -176,8 +176,8 @@ class ReportsController extends Controller
             ->completed()
             ->whereYear('date', $year - 1)
             ->selectRaw("
-                SUM(CASE WHEN direction = 'in' THEN amount ELSE 0 END) as income,
-                SUM(CASE WHEN direction = 'out' THEN amount ELSE 0 END) as expense
+                SUM(CASE WHEN direction = 'in' THEN COALESCE(amount_uah, amount) ELSE 0 END) as income,
+                SUM(CASE WHEN direction = 'out' THEN COALESCE(amount_uah, amount) ELSE 0 END) as expense
             ")
             ->first();
 
@@ -198,7 +198,7 @@ class ReportsController extends Controller
             ->completed()
             ->whereYear('date', $year)
             ->with('category')
-            ->selectRaw('category_id, SUM(amount) as total')
+            ->selectRaw('category_id, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('category_id')
             ->orderByDesc('total')
             ->get();
@@ -209,7 +209,7 @@ class ReportsController extends Controller
             ->completed()
             ->whereYear('date', $year)
             ->with('ministry')
-            ->selectRaw('ministry_id, SUM(amount) as total')
+            ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('ministry_id')
             ->orderByDesc('total')
             ->get();
