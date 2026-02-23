@@ -1924,7 +1924,7 @@
 
                 <!-- Resources list -->
                 @if($resources->count() > 0)
-                <div class="space-y-1.5">
+                <div id="ministry-resources-list" class="space-y-1.5">
                     @foreach($resources as $resource)
                     @php
                         $isFolder = $resource->isFolder();
@@ -1998,7 +1998,7 @@
                     @endforeach
                 </div>
                 @else
-                <p class="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
+                <p id="ministry-resources-empty" class="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
                     {{ count($breadcrumbs) > 0 ? 'Папка порожня' : 'Немає ресурсів' }}
                 </p>
                 @endif
@@ -3475,32 +3475,48 @@
 
 @push('scripts')
 <script>
+function _getOrCreateResourceList() {
+    var list = document.getElementById('ministry-resources-list');
+    if (!list) {
+        var empty = document.getElementById('ministry-resources-empty');
+        list = document.createElement('div');
+        list.id = 'ministry-resources-list';
+        list.className = 'space-y-1.5';
+        if (empty) {
+            empty.parentNode.insertBefore(list, empty);
+            empty.remove();
+        } else {
+            return null;
+        }
+    }
+    return list;
+}
+
 function _addMinistryResourceFolder(ctx, data) {
     ctx.showCreateFolder = false;
-    var container = ctx.$el ? ctx.$el.closest('[x-data]') : document;
-    var tbody = container ? container.querySelector('table tbody') : document.querySelector('[x-show*="resources"] table tbody');
-    if (!tbody) { window.location.reload(); return; }
+    var list = _getOrCreateResourceList();
+    if (!list) { window.location.reload(); return; }
     var name = ctx.$refs.createFolderForm.querySelector('[name="name"]').value;
     var safeName = name.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
-    var tr = document.createElement('tr');
-    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';
-    tr.setAttribute('data-resource-id', data.id);
-    tr.onclick = function() { window.location.href = '/ministries/{{ $ministry->id }}/resources/folder/' + data.id; };
     var today = new Date();
     var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
-    tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\u2014\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
-    tbody.insertBefore(tr, tbody.firstChild);
+    var el = document.createElement('div');
+    el.className = 'group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors';
+    el.setAttribute('data-resource-id', data.id);
+    el.onclick = function() { window.location.href = '/ministries/{{ $ministry->id }}/resources/folder/' + data.id; };
+    el.innerHTML = '\x3Cdiv class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">\x3Csvg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3C/div>\x3Cdiv class="flex-1 min-w-0">\x3Cp class="text-sm font-medium text-gray-900 dark:text-white truncate">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400">Папка \x3Cspan class="mx-1">\x26middot;\x3C/span> ' + dateStr + '\x3C/p>\x3C/div>';
+    list.prepend(el);
     if (window.showGlobalToast) showGlobalToast('Папку створено', 'success');
 }
 
-function _addMinistryResourceFile(tbody, fileName) {
+function _addMinistryResourceFile(list, fileName) {
     var safeName = fileName.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
-    var tr = document.createElement('tr');
-    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';
     var today = new Date();
     var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
-    tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
-    tbody.insertBefore(tr, tbody.firstChild);
+    var el = document.createElement('div');
+    el.className = 'group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors';
+    el.innerHTML = '\x3Cdiv class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">\x3Csvg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>\x3C/svg>\x3C/div>\x3Cdiv class="flex-1 min-w-0">\x3Cp class="text-sm font-medium text-gray-900 dark:text-white truncate">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400">' + dateStr + '\x3C/p>\x3C/div>';
+    list.appendChild(el);
 }
 
 function _updateMinistryHeader(ctx) {
@@ -3641,11 +3657,10 @@ function resourcesManager() {
             event.target.value = '';
             this.uploading = false;
             if (!this.uploadError) {
-                // Add uploaded files to table or reload if no table
-                var tbody = this.$el.querySelector('table tbody');
-                if (!tbody) { window.location.reload(); return; }
+                var list = _getOrCreateResourceList();
+                if (!list) { window.location.reload(); return; }
                 for (var i = 0; i < files.length; i++) {
-                    _addMinistryResourceFile(tbody, files[i].name);
+                    _addMinistryResourceFile(list, files[i].name);
                 }
                 if (window.showGlobalToast) showGlobalToast('Файл завантажено', 'success');
             }
@@ -3755,10 +3770,10 @@ function resourcesManager() {
         },
 
         _addDocToList(id, name) {
-            const list = this.$el.querySelector('.space-y-1\\.5');
+            let list = document.getElementById('ministry-resources-list');
             if (!list) {
-                window.location.reload();
-                return;
+                list = _getOrCreateResourceList();
+                if (!list) return;
             }
             const self = this;
             const today = new Date();
