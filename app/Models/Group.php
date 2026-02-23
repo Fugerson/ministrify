@@ -254,6 +254,7 @@ class Group extends Model
             'total_count' => $data['total_count'] ?? 0,
             'members_present' => $data['members_present'] ?? 0,
             'guests_count' => $data['guests_count'] ?? 0,
+            'total_members' => $this->members()->count(),
             'recorded_by' => $data['recorded_by'] ?? auth()->id(),
             'notes' => $data['notes'] ?? null,
         ]);

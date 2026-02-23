@@ -404,6 +404,7 @@ class DashboardController extends Controller
 
             $eventStatsRaw = DB::table('events')
                 ->where('church_id', $church->id)
+                ->whereNull('deleted_at')
                 ->whereMonth('date', now()->month)
                 ->whereYear('date', now()->year)
                 ->selectRaw("
@@ -465,7 +466,7 @@ class DashboardController extends Controller
         $fourWeeksAgo = now()->subWeeks(3)->startOfWeek(Carbon::SUNDAY);
         $attendanceRaw = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $fourWeeksAgo)
-            ->selectRaw('YEARWEEK(date, 1) as week_key, MIN(date) as week_start, SUM(total_count) as total')
+            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(total_count) as total')
             ->groupBy('week_key')
             ->orderBy('week_key')
             ->get()
@@ -505,6 +506,7 @@ class DashboardController extends Controller
             $threeWeeksAgo = now()->subWeeks(3);
 
             return Person::where('church_id', $church->id)
+                ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
                 ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
                     $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
                       ->where('present', true);
@@ -566,7 +568,7 @@ class DashboardController extends Controller
         $financialRaw = Transaction::where('church_id', $church->id)
             ->completed()
             ->where('date', '>=', $sixMonthsAgo)
-            ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(amount) as total')
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('year', 'month', 'direction')
             ->orderBy('year')
             ->orderBy('month')
@@ -600,14 +602,14 @@ class DashboardController extends Controller
             ->outgoing()
             ->completed()
             ->thisMonth()
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
 
         $data['expensesByCategory'] = Transaction::where('transactions.church_id', $church->id)
             ->outgoing()
             ->completed()
             ->thisMonth()
             ->leftJoin('transaction_categories', 'transactions.category_id', '=', 'transaction_categories.id')
-            ->selectRaw('transaction_categories.name as category_name, SUM(transactions.amount) as total_amount, COUNT(*) as transaction_count')
+            ->selectRaw('transaction_categories.name as category_name, SUM(COALESCE(transactions.amount_uah, transactions.amount)) as total_amount, COUNT(*) as transaction_count')
             ->groupBy('transactions.category_id', 'transaction_categories.name')
             ->orderByDesc('total_amount')
             ->get()
@@ -776,7 +778,7 @@ class DashboardController extends Controller
             $attendanceData = Attendance::where('attendable_type', Group::class)
                 ->whereIn('attendable_id', $groupIds)
                 ->where('date', '>=', $eightWeeksAgo)
-                ->select('attendable_id', 'date', 'total_count')
+                ->select('attendable_id', 'date', 'members_present', 'total_members')
                 ->orderByDesc('date')
                 ->get()
                 ->groupBy('attendable_id');
@@ -785,8 +787,8 @@ class DashboardController extends Controller
                 $groupAttendance = $attendanceData->get($group->id, collect());
 
                 $lastAttendance = $groupAttendance->first();
-                $avgAttendance = $groupAttendance->avg('total_count') ?? 0;
-                $recentCounts = $groupAttendance->take(4)->pluck('total_count')->reverse()->values()->toArray();
+                $avgAttendance = $groupAttendance->avg('members_present') ?? 0;
+                $recentCounts = $groupAttendance->take(4)->pluck('members_present')->reverse()->values()->toArray();
 
                 $trend = 'stable';
                 if (count($recentCounts) >= 2) {
@@ -821,7 +823,7 @@ class DashboardController extends Controller
                 ->incoming()
                 ->completed()
                 ->where('date', '>=', $sixMonthsAgo)
-                ->selectRaw("YEAR(date) as year, MONTH(date) as month, source_type, SUM(amount) as total")
+                ->selectRaw("YEAR(date) as year, MONTH(date) as month, source_type, SUM(COALESCE(amount_uah, amount)) as total")
                 ->groupBy('year', 'month', 'source_type')
                 ->get()
                 ->groupBy(fn($item) => $item->year . '-' . $item->month);
@@ -992,8 +994,22 @@ class DashboardController extends Controller
             ->distinct('person_id')
             ->count('person_id');
 
-        // Estimate families (unique parent-child clusters)
-        $totalFamilies = $marriedCouples > 0 ? $marriedCouples : 0;
+        // Count unique parents (people who have children in the church)
+        $uniqueParents = FamilyRelationship::where('relationship_type', 'parent')
+            ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
+            ->distinct('person_id')
+            ->count('person_id');
+
+        // Single parents = parents who are not in a spouse relationship
+        $parentsWithSpouse = FamilyRelationship::where('relationship_type', 'parent')
+            ->whereHas('person', fn($q) => $q->where('church_id', $church->id)
+                ->whereHas('familyRelationships', fn($r) => $r->where('relationship_type', 'spouse')))
+            ->distinct('person_id')
+            ->count('person_id');
+        $singleParents = $uniqueParents - $parentsWithSpouse;
+
+        // Total families = married couples + single parents
+        $totalFamilies = $marriedCouples + max(0, $singleParents);
         $avgFamilySize = $totalFamilies > 0 ? round($peopleWithFamily / $totalFamilies, 1) : 0;
 
         return [
@@ -1080,7 +1096,7 @@ class DashboardController extends Controller
         $attendanceData = Attendance::where('attendable_type', Group::class)
             ->whereIn('attendable_id', $groupIds)
             ->where('date', '>=', $fourWeeksAgo)
-            ->select('attendable_id', 'date', 'total_count')
+            ->select('attendable_id', 'date', 'members_present', 'total_members')
             ->orderBy('date')
             ->get()
             ->groupBy('attendable_id');
@@ -1088,12 +1104,12 @@ class DashboardController extends Controller
         return $groups->map(function ($group) use ($attendanceData) {
                 $groupAttendance = $attendanceData->get($group->id, collect());
 
-                $avgAttendance = $groupAttendance->avg('total_count') ?? 0;
+                $avgAttendance = $groupAttendance->avg('members_present') ?? 0;
                 $attendanceRate = $group->members_count > 0
                     ? round($avgAttendance / $group->members_count * 100)
                     : 0;
 
-                $last4 = $groupAttendance->sortBy('date')->take(-4)->pluck('total_count')->toArray();
+                $last4 = $groupAttendance->sortBy('date')->take(-4)->pluck('members_present')->toArray();
                 while (count($last4) < 4) {
                     array_unshift($last4, 0);
                 }
@@ -1308,7 +1324,7 @@ class DashboardController extends Controller
         $financialRaw = Transaction::where('church_id', $church->id)
             ->completed()
             ->where('date', '>=', $twelveMonthsAgo)
-            ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(amount) as total')
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('year', 'month', 'direction')
             ->get()
             ->groupBy(fn($item) => $item->year . '-' . $item->month);

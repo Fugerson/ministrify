@@ -39,6 +39,7 @@ class Attendance extends Model
         'members_present',
         'guests_count',
         'recorded_by',
+        'total_members',
         'notes',
     ];
 
@@ -148,11 +149,12 @@ class Attendance extends Model
 
     public function getAttendanceRateAttribute(): float
     {
-        if (!$this->attendable || $this->type !== self::TYPE_GROUP) {
+        if ($this->type !== self::TYPE_GROUP) {
             return 0;
         }
 
-        $totalMembers = $this->attendable->members()->count();
+        // Use stored total_members (snapshot at time of recording) for stable history
+        $totalMembers = $this->total_members ?? ($this->attendable ? $this->attendable->members()->count() : 0);
         if ($totalMembers === 0) {
             return 0;
         }

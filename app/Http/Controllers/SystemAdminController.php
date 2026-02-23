@@ -40,8 +40,8 @@ class SystemAdminController extends Controller
 
         // Financial summary (using unified Transaction model)
         $finances = [
-            'total_income' => Transaction::incoming()->completed()->sum('amount'),
-            'total_expenses' => Transaction::outgoing()->completed()->sum('amount'),
+            'total_income' => Transaction::incoming()->completed()->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
+            'total_expenses' => Transaction::outgoing()->completed()->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
         ];
 
         // Recent churches
@@ -103,8 +103,8 @@ class SystemAdminController extends Controller
 
         // Church finances (using unified Transaction model)
         $finances = [
-            'income' => Transaction::where('church_id', $church->id)->incoming()->completed()->sum('amount'),
-            'expenses' => Transaction::where('church_id', $church->id)->outgoing()->completed()->sum('amount'),
+            'income' => Transaction::where('church_id', $church->id)->incoming()->completed()->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
+            'expenses' => Transaction::where('church_id', $church->id)->outgoing()->completed()->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
         ];
 
         return view('system-admin.churches.show', compact('church', 'users', 'recentEvents', 'auditLogs', 'finances'));

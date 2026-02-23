@@ -89,12 +89,12 @@ class MinistryBudget extends Model
      */
     public function getActualSpending(): float
     {
-        return Transaction::where('church_id', $this->church_id)
+        return (float) (Transaction::where('church_id', $this->church_id)
             ->where('ministry_id', $this->ministry_id)
             ->where('direction', Transaction::DIRECTION_OUT)
             ->whereYear('date', $this->year)
             ->whereMonth('date', $this->month)
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
     }
 
     /**

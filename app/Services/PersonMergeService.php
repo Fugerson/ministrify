@@ -215,6 +215,32 @@ class PersonMergeService
                 DB::table('family_relationships')
                     ->where('related_person_id', $secondary->id)
                     ->update(['related_person_id' => $primary->id]);
+
+                // Clean up self-referential relationships (if merged persons were related to each other)
+                DB::table('family_relationships')
+                    ->where('person_id', $primary->id)
+                    ->where('related_person_id', $primary->id)
+                    ->delete();
+
+                // Clean up duplicate relationships created by merge
+                $familyDuplicates = DB::table('family_relationships')
+                    ->where(function ($q) use ($primary) {
+                        $q->where('person_id', $primary->id)
+                            ->orWhere('related_person_id', $primary->id);
+                    })
+                    ->select('person_id', 'related_person_id', 'relationship_type', DB::raw('MIN(id) as keep_id'), DB::raw('COUNT(*) as cnt'))
+                    ->groupBy('person_id', 'related_person_id', 'relationship_type')
+                    ->havingRaw('COUNT(*) > 1')
+                    ->get();
+
+                foreach ($familyDuplicates as $dup) {
+                    DB::table('family_relationships')
+                        ->where('person_id', $dup->person_id)
+                        ->where('related_person_id', $dup->related_person_id)
+                        ->where('relationship_type', $dup->relationship_type)
+                        ->where('id', '!=', $dup->keep_id)
+                        ->delete();
+                }
             }
 
             // kanban cards
@@ -253,8 +279,17 @@ class PersonMergeService
             }
 
             // 5. Transfer shepherd relationships
-            // People who had secondary as shepherd → now primary
+            // Handle case where primary's shepherd was the secondary person
+            if ($primary->shepherd_id === $secondary->id) {
+                $fallbackShepherd = ($secondary->shepherd_id && $secondary->shepherd_id !== $primary->id)
+                    ? $secondary->shepherd_id
+                    : null;
+                $primary->update(['shepherd_id' => $fallbackShepherd]);
+            }
+
+            // People who had secondary as shepherd → now primary (exclude primary to prevent self-shepherding)
             Person::where('shepherd_id', $secondary->id)
+                ->where('id', '!=', $primary->id)
                 ->update(['shepherd_id' => $primary->id]);
 
             // If secondary had a shepherd but primary doesn't
@@ -419,6 +454,32 @@ class PersonMergeService
                 DB::table('family_relationships')
                     ->where('related_person_id', $personB->id)
                     ->update(['related_person_id' => $personA->id]);
+
+                // Clean up self-referential relationships (if merged persons were related to each other)
+                DB::table('family_relationships')
+                    ->where('person_id', $personA->id)
+                    ->where('related_person_id', $personA->id)
+                    ->delete();
+
+                // Clean up duplicate relationships created by merge
+                $familyDuplicates = DB::table('family_relationships')
+                    ->where(function ($q) use ($personA) {
+                        $q->where('person_id', $personA->id)
+                            ->orWhere('related_person_id', $personA->id);
+                    })
+                    ->select('person_id', 'related_person_id', 'relationship_type', DB::raw('MIN(id) as keep_id'), DB::raw('COUNT(*) as cnt'))
+                    ->groupBy('person_id', 'related_person_id', 'relationship_type')
+                    ->havingRaw('COUNT(*) > 1')
+                    ->get();
+
+                foreach ($familyDuplicates as $dup) {
+                    DB::table('family_relationships')
+                        ->where('person_id', $dup->person_id)
+                        ->where('related_person_id', $dup->related_person_id)
+                        ->where('relationship_type', $dup->relationship_type)
+                        ->where('id', '!=', $dup->keep_id)
+                        ->delete();
+                }
             }
 
             if (\Schema::hasTable('kanban_cards') && \Schema::hasColumn('kanban_cards', 'person_id')) {
@@ -452,9 +513,20 @@ class PersonMergeService
             }
 
             // 5. Transfer shepherd relationships
+            // Handle case where primary's shepherd was the secondary person
+            if ($personA->shepherd_id === $personB->id) {
+                $fallbackShepherd = ($personB->shepherd_id && $personB->shepherd_id !== $personA->id)
+                    ? $personB->shepherd_id
+                    : null;
+                $personA->update(['shepherd_id' => $fallbackShepherd]);
+            }
+
+            // People who had secondary as shepherd → now primary (exclude primary to prevent self-shepherding)
             Person::where('shepherd_id', $personB->id)
+                ->where('id', '!=', $personA->id)
                 ->update(['shepherd_id' => $personA->id]);
 
+            // If secondary had a shepherd but primary doesn't
             if (!$personA->shepherd_id && $personB->shepherd_id && $personB->shepherd_id !== $personA->id) {
                 $personA->update(['shepherd_id' => $personB->shepherd_id]);
             }

@@ -86,11 +86,7 @@ function birthdayWidget() {
         loading: false,
 
         get sortedPeople() {
-            return [...this.people].sort((a, b) => {
-                if (a.is_today && !b.is_today) return -1;
-                if (!a.is_today && b.is_today) return 1;
-                return 0;
-            });
+            return [...this.people].sort((a, b) => parseInt(a.day) - parseInt(b.day));
         },
 
         get monthName() {

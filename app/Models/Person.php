@@ -626,11 +626,12 @@ class Person extends Model
      */
     public function getTotalGivingThisYearAttribute(): float
     {
-        return $this->transactions()
+        return (float) ($this->transactions()
             ->incoming()
             ->completed()
             ->thisYear()
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0);
     }
 
     /**

@@ -730,19 +730,22 @@ class PersonController extends Controller
                 ->incoming()
                 ->completed()
                 ->whereYear('date', now()->year)
-                ->sum('amount'),
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0,
             'total_this_month' => \App\Models\Transaction::where('church_id', $church->id)
                 ->where('person_id', $person->id)
                 ->incoming()
                 ->completed()
                 ->whereYear('date', now()->year)
                 ->whereMonth('date', now()->month)
-                ->sum('amount'),
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0,
             'total_lifetime' => \App\Models\Transaction::where('church_id', $church->id)
                 ->where('person_id', $person->id)
                 ->incoming()
                 ->completed()
-                ->sum('amount'),
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0,
             'donations_count' => \App\Models\Transaction::where('church_id', $church->id)
                 ->where('person_id', $person->id)
                 ->incoming()

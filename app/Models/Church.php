@@ -461,10 +461,11 @@ class Church extends Model
      */
     public function getTotalIncomeAttribute(): float
     {
-        return (float) Transaction::where('church_id', $this->id)
+        return (float) (Transaction::where('church_id', $this->id)
             ->incoming()
             ->completed()
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0);
     }
 
     /**
@@ -472,10 +473,11 @@ class Church extends Model
      */
     public function getTotalExpenseAttribute(): float
     {
-        return (float) Transaction::where('church_id', $this->id)
+        return (float) (Transaction::where('church_id', $this->id)
             ->outgoing()
             ->completed()
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0);
     }
 
     /**

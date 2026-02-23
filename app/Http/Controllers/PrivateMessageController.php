@@ -164,6 +164,10 @@ class PrivateMessageController extends Controller
         $currentUser = auth()->user();
         $church = $this->getChurchOrFail();
 
+        if (!$user->belongsToChurch($church->id)) {
+            abort(404);
+        }
+
         $lastId = $request->input('last_id', 0);
 
         $messages = PrivateMessage::conversation($church->id, $currentUser->id, $user->id)

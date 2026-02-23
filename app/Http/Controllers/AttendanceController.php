@@ -240,9 +240,10 @@ class AttendanceController extends Controller
             ];
         }
 
-        // People needing attention (not attended for 3+ weeks)
+        // People needing attention: previously attended but not in last 3+ weeks
         $threeWeeksAgo = now()->subWeeks(3);
         $needAttention = Person::where('church_id', $church->id)
+            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
             ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
                 $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
                   ->where('present', true);

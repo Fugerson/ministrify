@@ -65,7 +65,7 @@ class FinanceController extends Controller
             if ($currency === 'UAH') {
                 $initialBalance += $amount;
             } else {
-                $initialBalance += ExchangeRate::toUah($amount, $currency);
+                $initialBalance += ExchangeRate::toUah($amount, $currency, $initialBalanceDate);
             }
         }
         $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()
@@ -246,7 +246,7 @@ class FinanceController extends Controller
         }
 
         $paymentMethods = $paymentMethodsQuery
-            ->selectRaw('payment_method, COUNT(*) as count, SUM(amount) as total')
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('payment_method')
             ->orderByDesc('total')
             ->get()
@@ -1289,7 +1289,7 @@ class FinanceController extends Controller
                     ->where('direction', Transaction::DIRECTION_OUT)
                     ->forMonth($year, $month)
                     ->completed()
-                    ->sum('amount');
+                    ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
 
                 return [
                     'ministry' => $ministry,
@@ -1542,14 +1542,14 @@ class FinanceController extends Controller
     private function getYearComparison(int $churchId, int $year): array
     {
         $currentYear = [
-            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->forYear($year)->sum('amount'),
-            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->forYear($year)->sum('amount'),
+            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->forYear($year)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
+            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->forYear($year)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
         ];
         $currentYear['balance'] = $currentYear['income'] - $currentYear['expense'];
 
         $prevYear = [
-            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->forYear($year - 1)->sum('amount'),
-            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->forYear($year - 1)->sum('amount'),
+            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->forYear($year - 1)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
+            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->forYear($year - 1)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
         ];
         $prevYear['balance'] = $prevYear['income'] - $prevYear['expense'];
 

@@ -114,8 +114,9 @@ class VisitorFollowupService
         $noReturn = Person::where('church_id', $churchId)
             ->where('membership_status', Person::STATUS_GUEST)
             ->where('created_at', '<=', $oneWeekAgo)
+            ->whereHas('attendanceRecords')
             ->whereDoesntHave('attendanceRecords', function ($q) use ($oneWeekAgo) {
-                $q->where('created_at', '>=', $oneWeekAgo);
+                $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $oneWeekAgo));
             })
             ->get();
 

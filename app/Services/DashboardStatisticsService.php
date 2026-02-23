@@ -200,14 +200,14 @@ class DashboardStatisticsService
             ->outgoing()
             ->completed()
             ->thisMonth()
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
 
         $byCategory = Transaction::where('transactions.church_id', $church->id)
             ->outgoing()
             ->completed()
             ->thisMonth()
             ->leftJoin('transaction_categories', 'transactions.category_id', '=', 'transaction_categories.id')
-            ->selectRaw('transaction_categories.name as category_name, SUM(transactions.amount) as total_amount, COUNT(*) as count')
+            ->selectRaw('transaction_categories.name as category_name, SUM(COALESCE(transactions.amount_uah, transactions.amount)) as total_amount, COUNT(*) as count')
             ->groupBy('transactions.category_id', 'transaction_categories.name')
             ->orderByDesc('total_amount')
             ->get()
@@ -232,7 +232,7 @@ class DashboardStatisticsService
 
         $data = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $startDate)
-            ->selectRaw('CONCAT(YEAR(date), LPAD(WEEK(date, 1), 2, "0")) as week_key, MIN(date) as week_start, SUM(total_count) as total')
+            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(total_count) as total')
             ->groupBy('week_key')
             ->orderBy('week_key')
             ->get()
@@ -242,7 +242,7 @@ class DashboardStatisticsService
         $currentWeek = $startDate->copy();
 
         for ($i = 0; $i < $weeks; $i++) {
-            $weekKey = $currentWeek->year . str_pad($currentWeek->weekOfYear, 2, '0', STR_PAD_LEFT);
+            $weekKey = $currentWeek->format('oW');
             $chartData[] = [
                 'label' => $currentWeek->format('d.m'),
                 'value' => (int) ($data[$weekKey]->total ?? 0),
@@ -261,6 +261,7 @@ class DashboardStatisticsService
         $cutoffDate = now()->subWeeks($weeks);
 
         return Person::where('church_id', $church->id)
+            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
             ->whereDoesntHave('attendanceRecords', function ($q) use ($cutoffDate) {
                 $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $cutoffDate))
                     ->where('present', true);

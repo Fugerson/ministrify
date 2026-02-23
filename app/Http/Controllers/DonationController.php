@@ -231,12 +231,14 @@ class DonationController extends Controller
                 ->where('status', Transaction::STATUS_COMPLETED)
                 ->whereMonth('date', now()->month)
                 ->whereYear('date', now()->year)
-                ->sum('amount'),
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0,
             'total_year' => Transaction::where('church_id', $church->id)
                 ->where('source_type', Transaction::SOURCE_DONATION)
                 ->where('status', Transaction::STATUS_COMPLETED)
                 ->whereYear('date', now()->year)
-                ->sum('amount'),
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0,
             'transactions_count' => Transaction::where('church_id', $church->id)
                 ->where('source_type', Transaction::SOURCE_DONATION)
                 ->where('status', Transaction::STATUS_COMPLETED)
@@ -255,7 +257,8 @@ class DonationController extends Controller
                     ->where('status', Transaction::STATUS_COMPLETED)
                     ->whereMonth('date', $date->month)
                     ->whereYear('date', $date->year)
-                    ->sum('amount'),
+                    ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                    ->value('total') ?? 0,
             ];
         }
 
@@ -264,7 +267,7 @@ class DonationController extends Controller
             ->where('source_type', Transaction::SOURCE_DONATION)
             ->where('status', Transaction::STATUS_COMPLETED)
             ->whereYear('date', now()->year)
-            ->selectRaw('purpose, SUM(amount) as total_amount')
+            ->selectRaw('purpose, SUM(COALESCE(amount_uah, amount)) as total_amount')
             ->groupBy('purpose')
             ->orderByDesc('total_amount')
             ->get();

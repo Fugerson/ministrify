@@ -30,7 +30,8 @@ class ReportsController extends Controller
         $stats = [
             'total_members' => Person::where('church_id', $church->id)->count(),
             'active_members' => Person::where('church_id', $church->id)
-                ->whereHas('attendanceRecords', fn($q) => $q->where('created_at', '>=', now()->subMonths(3)))
+                ->whereHas('attendanceRecords', fn($q) => $q->where('present', true)
+                    ->whereHas('attendance', fn($aq) => $aq->where('date', '>=', now()->subMonths(3))))
                 ->count(),
             'total_events' => Event::where('church_id', $church->id)->where('date', '>=', now()->startOfYear())->count(),
             'total_volunteers' => Person::where('church_id', $church->id)
@@ -98,16 +99,20 @@ class ReportsController extends Controller
 
         // People who stopped attending (haven't attended in 3+ months but attended before)
         $inactiveMembers = Person::where('church_id', $church->id)
-            ->whereHas('attendanceRecords', fn($q) => $q->where('created_at', '<', now()->subMonths(3)))
-            ->whereDoesntHave('attendanceRecords', fn($q) => $q->where('created_at', '>=', now()->subMonths(3)))
+            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true)
+                ->whereHas('attendance', fn($aq) => $aq->where('date', '<', now()->subMonths(3))))
+            ->whereDoesntHave('attendanceRecords', fn($q) => $q->where('present', true)
+                ->whereHas('attendance', fn($aq) => $aq->where('date', '>=', now()->subMonths(3))))
             ->with(['attendanceRecords' => fn($q) => $q->latest()->limit(1)])
             ->take(20)
             ->get();
 
         // Top attendees
         $topAttendees = Person::where('church_id', $church->id)
-            ->whereHas('attendanceRecords', fn($q) => $q->whereYear('created_at', $year))
-            ->withCount(['attendanceRecords' => fn($q) => $q->whereYear('created_at', $year)])
+            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true)
+                ->whereHas('attendance', fn($aq) => $aq->whereYear('date', $year)))
+            ->withCount(['attendanceRecords' => fn($q) => $q->where('present', true)
+                ->whereHas('attendance', fn($aq) => $aq->whereYear('date', $year))])
             ->orderByDesc('attendance_records_count')
             ->take(10)
             ->get();
@@ -135,14 +140,16 @@ class ReportsController extends Controller
                 ->completed()
                 ->whereYear('date', $year)
                 ->whereMonth('date', $m)
-                ->sum('amount');
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0;
 
             $expense = Transaction::where('church_id', $church->id)
                 ->outgoing()
                 ->completed()
                 ->whereYear('date', $year)
                 ->whereMonth('date', $m)
-                ->sum('amount');
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0;
 
             $cumulativeBalance += ($income - $expense);
 

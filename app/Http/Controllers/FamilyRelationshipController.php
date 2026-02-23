@@ -64,6 +64,28 @@ class FamilyRelationshipController extends Controller
             return back()->with('error', 'Цей зв\'язок вже існує');
         }
 
+        // Prevent contradictory relationships (e.g., A is parent of B AND B is parent of A)
+        $contradictory = FamilyRelationship::where('church_id', $church->id)
+            ->where(function ($query) use ($person, $relatedPerson) {
+                // Check if inverse pair exists with ANY parent/child type
+                $query->where(function ($q) use ($person, $relatedPerson) {
+                    $q->where('person_id', $relatedPerson->id)
+                      ->where('related_person_id', $person->id);
+                })->orWhere(function ($q) use ($person, $relatedPerson) {
+                    $q->where('person_id', $person->id)
+                      ->where('related_person_id', $relatedPerson->id);
+                });
+            })
+            ->exists();
+
+        if ($contradictory) {
+            $error = 'Між цими людьми вже існує інший зв\'язок';
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => $error], 422);
+            }
+            return back()->with('error', $error);
+        }
+
         // For spouse relationship, check if either person already has a spouse
         if ($validated['relationship_type'] === FamilyRelationship::TYPE_SPOUSE) {
             $personHasSpouse = FamilyRelationship::where('church_id', $church->id)

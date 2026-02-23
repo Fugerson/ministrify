@@ -30,7 +30,7 @@
             <div class="flex items-end gap-3">
                 <p class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
                     {{ number_format($onlineDonations['total_this_month'] ?? 0, 0, ',', ' ') }}
-                    <span class="text-lg font-normal text-gray-400">{{ $onlineDonations['recent']->first()->currency ?? '₴' }}</span>
+                    <span class="text-lg font-normal text-gray-400">{{ $onlineDonations['recent']->first()?->currency ?? '₴' }}</span>
                 </p>
                 @if(isset($onlineDonations['change_percent']) && $onlineDonations['change_percent'] != 0)
                     <span class="mb-1 text-sm font-medium px-2 py-0.5 rounded-lg flex items-center gap-1

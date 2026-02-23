@@ -83,10 +83,11 @@ class TransactionCategory extends Model
 
     public function getTotalThisMonthAttribute(): float
     {
-        return $this->transactions()
+        return (float) ($this->transactions()
             ->completed()
             ->thisMonth()
-            ->sum('amount');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0);
     }
 
     public static function createDefaults(Church $church): void
