@@ -97,24 +97,28 @@ document.addEventListener('DOMContentLoaded', function() {
     content: '';
     position: absolute;
     inset: 0;
-    border: 2px solid transparent;
+    border: 2px dashed transparent;
     pointer-events: none;
     z-index: 50;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background 0.2s;
 }
-.section-wrapper:hover::before {
-    border-color: rgba(59, 130, 246, 0.5);
-    border-style: dashed;
+/* Borders only visible in edit mode */
+#sections-container.edit-active .section-wrapper::before {
+    border-color: rgba(59, 130, 246, 0.25);
+}
+#sections-container.edit-active .section-wrapper:hover::before {
+    border-color: rgba(59, 130, 246, 0.6);
 }
 .section-wrapper.sortable-chosen::before {
-    border-color: rgba(59, 130, 246, 0.8);
-    border-style: solid;
+    border-color: rgba(59, 130, 246, 0.8) !important;
+    border-style: solid !important;
     background: rgba(59, 130, 246, 0.05);
 }
 .section-wrapper.sortable-ghost {
     opacity: 0.4;
 }
 
+/* Toolbar hidden by default, shown on hover only in edit mode */
 .section-admin-toolbar {
     position: absolute;
     top: 8px;
@@ -125,8 +129,8 @@ document.addEventListener('DOMContentLoaded', function() {
     pointer-events: none;
     transition: opacity 0.2s;
 }
-.section-wrapper:hover .section-admin-toolbar,
-.section-admin-toolbar:focus-within {
+#sections-container.edit-active .section-wrapper:hover .section-admin-toolbar,
+#sections-container.edit-active .section-admin-toolbar:focus-within {
     opacity: 1;
     pointer-events: auto;
 }

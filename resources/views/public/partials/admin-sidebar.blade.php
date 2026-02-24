@@ -54,20 +54,63 @@
 @endphp
 
 <div x-data="adminSidebar()" x-cloak>
-    {{-- FAB Button --}}
-    <button
-        x-show="!open"
-        x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 scale-75"
-        x-transition:enter-end="opacity-100 scale-100"
-        @click="open = true"
-        class="fixed bottom-6 left-6 z-[60] w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-200 group"
-        title="Редактор сайту"
-    >
-        <svg class="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-        </svg>
-    </button>
+    {{-- Floating Admin Bar --}}
+    <div x-show="!open" class="fixed bottom-6 left-6 z-[60] flex flex-col items-start gap-3">
+        {{-- Edit Mode Toolbar (shown when editing) --}}
+        <div x-show="editMode"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-2"
+             class="bg-gray-900/95 backdrop-blur-md text-white rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-3 max-w-[90vw]">
+            <div class="text-sm text-white/70 hidden sm:block">
+                Перетягуйте секції для зміни порядку
+            </div>
+            <button @click="saveEditMode()" :disabled="saving"
+                    class="px-4 py-2 text-sm font-medium bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-xl transition-colors flex items-center gap-1.5 flex-shrink-0">
+                <template x-if="saving">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                </template>
+                <template x-if="!saving">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </template>
+                <span x-text="saving ? 'Збереження...' : 'Зберегти'"></span>
+            </button>
+            <button @click="cancelEditMode()"
+                    class="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors flex-shrink-0">
+                Скасувати
+            </button>
+        </div>
+
+        {{-- Main Buttons Row --}}
+        <div class="flex items-center gap-2">
+            <button @click="toggleEditMode()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl shadow-lg transition-all duration-200"
+                    :class="editMode
+                        ? 'bg-primary-600 text-white shadow-primary-500/25'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span x-text="editMode ? 'Редагування...' : 'Редагувати сайт'"></span>
+            </button>
+            <button x-show="!editMode" @click="open = true"
+                    class="w-10 h-10 bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-xl shadow-lg flex items-center justify-center transition-all"
+                    title="Налаштування сайту">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
 
     {{-- Overlay --}}
     <div
@@ -335,10 +378,12 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('adminSidebar', () => ({
         open: false,
+        editMode: false,
         activeTab: 'design',
         saving: false,
         sortableInstance: null,
         pageSortableInstance: null,
+        originalPageOrder: null,
         toast: { show: false, message: '', type: 'success' },
 
         accordion: {
@@ -388,6 +433,11 @@ document.addEventListener('alpine:init', () => {
                 sessionStorage.removeItem('adminSidebarOpen');
                 sessionStorage.removeItem('adminSidebarTab');
             }
+            // Restore edit mode if was active before reload
+            if (sessionStorage.getItem('adminEditMode')) {
+                sessionStorage.removeItem('adminEditMode');
+                this.$nextTick(() => this.toggleEditMode());
+            }
             if (this.activeTab === 'sections') {
                 this.$nextTick(() => this.initSortable());
             }
@@ -397,9 +447,6 @@ document.addEventListener('alpine:init', () => {
                 }
             });
 
-            // Initialize page-level drag-and-drop
-            this.$nextTick(() => this.initPageSortable());
-
             // Expose helper for global toolbar functions
             window.__adminSidebar = this;
         },
@@ -407,6 +454,94 @@ document.addEventListener('alpine:init', () => {
         toggleSection(btnEl) {
             const row = btnEl.closest('[data-id]');
             row.dataset.enabled = row.dataset.enabled === '1' ? '0' : '1';
+        },
+
+        toggleEditMode() {
+            this.editMode = !this.editMode;
+            const container = document.getElementById('sections-container');
+            if (!container) return;
+
+            if (this.editMode) {
+                // Save original order for cancel
+                this.originalPageOrder = [...container.querySelectorAll('.section-wrapper')].map(el => el.dataset.sectionId);
+                container.classList.add('edit-active');
+                this.$nextTick(() => this.initPageSortable());
+            } else {
+                container.classList.remove('edit-active');
+                this.destroyPageSortable();
+                this.originalPageOrder = null;
+            }
+        },
+
+        async saveEditMode() {
+            this.saving = true;
+            try {
+                // Build sections data from page DOM order
+                const container = document.getElementById('sections-container');
+                const sidebarList = this.$refs.sectionsList;
+                let sectionsData = [];
+
+                if (container) {
+                    const pageIds = [...container.querySelectorAll('.section-wrapper')].map(el => el.dataset.sectionId);
+                    // Get all sections from sidebar (includes disabled ones)
+                    if (sidebarList) {
+                        const allSidebarItems = [...sidebarList.querySelectorAll('[data-id]')];
+                        const enabledSet = new Set(pageIds);
+                        let order = 0;
+                        // First add enabled sections in page order
+                        pageIds.forEach(id => {
+                            sectionsData.push({ id, enabled: true, order: order++ });
+                        });
+                        // Then add disabled sections
+                        allSidebarItems.forEach(item => {
+                            if (!enabledSet.has(item.dataset.id)) {
+                                sectionsData.push({ id: item.dataset.id, enabled: item.dataset.enabled === '1', order: order++ });
+                            }
+                        });
+                    }
+                }
+
+                if (sectionsData.length > 0) {
+                    await this.postData(@json(route('website-builder.sections.update')), { sections: sectionsData });
+                }
+
+                // Exit edit mode and reload
+                this.editMode = false;
+                const containerEl = document.getElementById('sections-container');
+                if (containerEl) containerEl.classList.remove('edit-active');
+                this.destroyPageSortable();
+
+                sessionStorage.setItem('adminEditMode', '1');
+                window.location.reload();
+            } catch (e) {
+                this.showPageToast('Помилка: ' + e.message);
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        cancelEditMode() {
+            const container = document.getElementById('sections-container');
+            if (container && this.originalPageOrder) {
+                // Restore original DOM order
+                this.originalPageOrder.forEach(id => {
+                    const el = container.querySelector('[data-section-id="' + id + '"]');
+                    if (el) container.appendChild(el);
+                });
+                // Sync sidebar back
+                this.syncSidebarFromPage();
+            }
+            this.editMode = false;
+            if (container) container.classList.remove('edit-active');
+            this.destroyPageSortable();
+            this.originalPageOrder = null;
+        },
+
+        destroyPageSortable() {
+            if (this.pageSortableInstance) {
+                this.pageSortableInstance.destroy();
+                this.pageSortableInstance = null;
+            }
         },
 
         initSortable() {
