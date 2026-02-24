@@ -403,6 +403,7 @@ class DashboardController extends Controller
                     ->join('people', 'group_person.person_id', '=', 'people.id')
                     ->where('groups.church_id', $church->id)
                     ->where('groups.status', 'active')
+                    ->whereNull('groups.deleted_at')
                     ->whereNull('people.deleted_at')
                     ->distinct('group_person.person_id')
                     ->count('group_person.person_id')

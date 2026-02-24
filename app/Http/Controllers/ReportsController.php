@@ -262,6 +262,8 @@ class ReportsController extends Controller
         )
         ->join('events', 'assignments.event_id', '=', 'events.id')
         ->join('ministries', 'events.ministry_id', '=', 'ministries.id')
+        ->whereNull('events.deleted_at')
+        ->whereNull('ministries.deleted_at')
         ->selectRaw('ministries.name, ministries.color, COUNT(*) as count')
         ->groupBy('ministries.id', 'ministries.name', 'ministries.color')
         ->orderByDesc('count')

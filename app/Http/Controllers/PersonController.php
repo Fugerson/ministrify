@@ -736,7 +736,7 @@ class PersonController extends Controller
             ->incoming()
             ->completed()
             ->whereYear('date', now()->year)
-            ->selectRaw('MONTH(date) as month, SUM(amount) as total')
+            ->selectRaw('MONTH(date) as month, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
