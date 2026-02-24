@@ -383,6 +383,12 @@ document.addEventListener('alpine:init', () => {
         sectionItems: @json($sections),
 
         init() {
+            if (sessionStorage.getItem('adminSidebarOpen')) {
+                this.open = true;
+                this.activeTab = sessionStorage.getItem('adminSidebarTab') || 'design';
+                sessionStorage.removeItem('adminSidebarOpen');
+                sessionStorage.removeItem('adminSidebarTab');
+            }
             this.$watch('activeTab', (val) => {
                 if (val === 'sections') {
                     this.$nextTick(() => this.initSortable());
@@ -625,6 +631,8 @@ document.addEventListener('alpine:init', () => {
             if (errors.length > 0) {
                 this.showToast(errors[0], 'error');
             } else {
+                sessionStorage.setItem('adminSidebarOpen', '1');
+                sessionStorage.setItem('adminSidebarTab', this.activeTab);
                 window.location.reload();
             }
         },
