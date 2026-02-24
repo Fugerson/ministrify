@@ -27,7 +27,7 @@ class PublicSiteController extends Controller
         $isPreview = $request->boolean('preview');
         if ($isPreview) {
             $user = auth()->user();
-            if (!$user || !$user->church_id === $church->id) {
+            if (!$user || $user->church_id !== $church->id) {
                 abort(404);
             }
         } elseif (!$church->public_site_enabled) {

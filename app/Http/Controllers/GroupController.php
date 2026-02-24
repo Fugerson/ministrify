@@ -152,7 +152,7 @@ class GroupController extends Controller
     public function removeMember(Request $request, Group $group, Person $person)
     {
         $this->authorize('update', $group);
-        abort_unless($person->church_id === auth()->user()->church_id, 404);
+        abort_unless($person->church_id === $this->getCurrentChurch()->id, 404);
 
         // Clear leader_id if removing the current leader
         if ($group->leader_id === $person->id) {
@@ -173,7 +173,7 @@ class GroupController extends Controller
     public function updateMemberRole(Request $request, Group $group, Person $person)
     {
         $this->authorize('update', $group);
-        abort_unless($person->church_id === auth()->user()->church_id, 404);
+        abort_unless($person->church_id === $this->getCurrentChurch()->id, 404);
 
         $validated = $request->validate([
             'role' => 'required|in:leader,assistant,member',

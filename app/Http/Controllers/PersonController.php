@@ -138,14 +138,16 @@ class PersonController extends Controller
 
         // Ministry stats - single query
         $servingCount = \DB::table('ministry_person')
+            ->join('people', 'ministry_person.person_id', '=', 'people.id')
+            ->whereNull('people.deleted_at')
             ->whereIn('ministry_id', $ministries->pluck('id'))
             ->distinct('person_id')
             ->count('person_id');
 
         // New this month - single query
         $newThisMonth = (clone $statsQuery)
-            ->whereMonth('created_at', $today->month)
-            ->whereYear('created_at', $today->year)
+            ->whereRaw('MONTH(COALESCE(first_visit_date, people.created_at)) = ?', [$today->month])
+            ->whereRaw('YEAR(COALESCE(first_visit_date, people.created_at)) = ?', [$today->year])
             ->count();
 
         $stats = [

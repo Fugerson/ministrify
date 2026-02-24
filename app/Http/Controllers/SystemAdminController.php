@@ -469,8 +469,8 @@ class SystemAdminController extends Controller
                 'users' => User::whereYear('created_at', $date->year)
                     ->whereMonth('created_at', $date->month)
                     ->count(),
-                'people' => Person::whereYear('created_at', $date->year)
-                    ->whereMonth('created_at', $date->month)
+                'people' => Person::whereRaw('YEAR(COALESCE(joined_date, first_visit_date, created_at)) = ?', [$date->year])
+                    ->whereRaw('MONTH(COALESCE(joined_date, first_visit_date, created_at)) = ?', [$date->month])
                     ->count(),
             ];
         }

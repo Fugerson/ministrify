@@ -53,16 +53,18 @@ class DashboardStatisticsService
         $volunteersCount = (clone $query)->whereHas('ministries')->count();
 
         $newThisMonth = (clone $query)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+            ->whereRaw('MONTH(COALESCE(first_visit_date, people.created_at)) = ?', [now()->month])
+            ->whereRaw('YEAR(COALESCE(first_visit_date, people.created_at)) = ?', [now()->year])
             ->count();
 
         $peopleTrend = Person::where('church_id', $church->id)
-            ->where('created_at', '>=', $threeMonthsAgo)->count();
+            ->whereRaw('COALESCE(first_visit_date, created_at) >= ?', [$threeMonthsAgo])->count();
 
         $newVolunteers = DB::table('ministry_person')
+            ->join('people', 'ministry_person.person_id', '=', 'people.id')
+            ->whereNull('people.deleted_at')
             ->whereIn('ministry_id', $ministryIds)
-            ->where('created_at', '>=', $threeMonthsAgo)
+            ->where('ministry_person.created_at', '>=', $threeMonthsAgo)
             ->distinct('person_id')->count('person_id');
 
         return [
@@ -117,6 +119,8 @@ class DashboardStatisticsService
             ->get();
 
         $activeVolunteers = DB::table('ministry_person')
+            ->join('people', 'ministry_person.person_id', '=', 'people.id')
+            ->whereNull('people.deleted_at')
             ->whereIn('ministry_id', $ministryIds)
             ->distinct('person_id')
             ->count('person_id');
@@ -152,9 +156,11 @@ class DashboardStatisticsService
         $totalMembers = ($stats->active ?? 0) > 0
             ? DB::table('group_person')
                 ->join('groups', 'group_person.group_id', '=', 'groups.id')
+                ->join('people', 'group_person.person_id', '=', 'people.id')
                 ->where('groups.church_id', $church->id)
                 ->where('groups.status', 'active')
                 ->whereNull('groups.deleted_at')
+                ->whereNull('people.deleted_at')
                 ->distinct('group_person.person_id')
                 ->count('group_person.person_id')
             : 0;

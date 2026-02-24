@@ -68,7 +68,7 @@ class BlockoutDateController extends Controller
             'reason_note' => 'nullable|string|max:255',
             'applies_to_all' => 'boolean',
             'ministry_ids' => 'nullable|array',
-            'ministry_ids.*' => [Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
+            'ministry_ids.*' => [Rule::exists('ministries', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'recurrence' => 'required|in:none,weekly,biweekly,monthly,custom',
             'recurrence_end_date' => 'nullable|date|after:end_date',
         ]);
@@ -137,7 +137,7 @@ class BlockoutDateController extends Controller
             'reason_note' => 'nullable|string|max:255',
             'applies_to_all' => 'boolean',
             'ministry_ids' => 'nullable|array',
-            'ministry_ids.*' => [Rule::exists('ministries', 'id')->where('church_id', auth()->user()->church_id)],
+            'ministry_ids.*' => [Rule::exists('ministries', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'recurrence' => 'required|in:none,weekly,biweekly,monthly,custom',
             'recurrence_end_date' => 'nullable|date|after:end_date',
         ]);

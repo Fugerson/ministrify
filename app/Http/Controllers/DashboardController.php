@@ -338,8 +338,8 @@ class DashboardController extends Controller
                 })->count();
             $volunteersCount = (clone $peopleQuery)->whereHas('ministries')->count();
             $newThisMonth = (clone $peopleQuery)
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
+                ->whereRaw('MONTH(COALESCE(first_visit_date, people.created_at)) = ?', [now()->month])
+                ->whereRaw('YEAR(COALESCE(first_visit_date, people.created_at)) = ?', [now()->year])
                 ->count();
 
             $ageStatsRaw = DB::table('people')
@@ -364,14 +364,18 @@ class DashboardController extends Controller
             ];
 
             $peopleTrend = Person::where('church_id', $church->id)
-                ->where('created_at', '>=', $threeMonthsAgo)->count();
+                ->whereRaw('COALESCE(first_visit_date, created_at) >= ?', [$threeMonthsAgo])->count();
             $volunteersThreeMonthsAgo = DB::table('ministry_person')
+                ->join('people', 'ministry_person.person_id', '=', 'people.id')
+                ->whereNull('people.deleted_at')
                 ->whereIn('ministry_id', $ministryIds)
-                ->where('created_at', '<', $threeMonthsAgo)
+                ->where('ministry_person.created_at', '<', $threeMonthsAgo)
                 ->distinct('person_id')->count('person_id');
 
             $ministriesList = $church->ministries()->withCount('members')->orderByDesc('members_count')->get();
             $activeVolunteers = DB::table('ministry_person')
+                ->join('people', 'ministry_person.person_id', '=', 'people.id')
+                ->whereNull('people.deleted_at')
                 ->whereIn('ministry_id', $ministryIds)
                 ->distinct('person_id')->count('person_id');
             $ministriesWithEvents = $church->ministries()
@@ -396,8 +400,10 @@ class DashboardController extends Controller
             $totalGroupMembers = $activeGroups > 0
                 ? DB::table('group_person')
                     ->join('groups', 'group_person.group_id', '=', 'groups.id')
+                    ->join('people', 'group_person.person_id', '=', 'people.id')
                     ->where('groups.church_id', $church->id)
                     ->where('groups.status', 'active')
+                    ->whereNull('people.deleted_at')
                     ->distinct('group_person.person_id')
                     ->count('group_person.person_id')
                 : 0;
@@ -625,8 +631,8 @@ class DashboardController extends Controller
         return $this->cacheService->remember('growth', $church, function () use ($church) {
             $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
             $growthRaw = Person::where('church_id', $church->id)
-                ->where('joined_date', '>=', $sixMonthsAgo)
-                ->selectRaw('YEAR(joined_date) as year, MONTH(joined_date) as month, COUNT(*) as count')
+                ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$sixMonthsAgo])
+                ->selectRaw('YEAR(COALESCE(joined_date, first_visit_date, created_at)) as year, MONTH(COALESCE(joined_date, first_visit_date, created_at)) as month, COUNT(*) as count')
                 ->groupBy('year', 'month')
                 ->orderBy('year')
                 ->orderBy('month')

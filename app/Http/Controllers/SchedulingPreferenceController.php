@@ -50,7 +50,7 @@ class SchedulingPreferenceController extends Controller
         $validated = $request->validate([
             'max_times_per_month' => 'nullable|integer|min:1|max:30',
             'preferred_times_per_month' => 'nullable|integer|min:0|max:30',
-            'prefer_with_person_id' => ['nullable', Rule::exists('people', 'id')->where('church_id', auth()->user()->church_id)],
+            'prefer_with_person_id' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'household_preference' => 'required|in:none,together,separate',
             'scheduling_notes' => 'nullable|string|max:500',
         ]);
