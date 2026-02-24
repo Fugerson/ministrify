@@ -11,7 +11,7 @@
             <p class="text-gray-600 dark:text-gray-400 mt-1">Налаштуйте публічний сайт вашої церкви</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('public.church', $church->slug) }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ route('public.church', $church->slug) }}" onclick="event.preventDefault(); window.open(this.href, '_blank')"
                class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -43,7 +43,7 @@
                     <h3 class="font-semibold text-gray-900 dark:text-white">Статус сайту</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         @if($church->public_site_enabled)
-                            Сайт доступний за адресою: <a href="{{ route('public.church', $church->slug) }}" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:underline">{{ route('public.church', $church->slug) }}</a>
+                            Сайт доступний за адресою: <a href="{{ route('public.church', $church->slug) }}" onclick="event.preventDefault(); window.open(this.href, '_blank')" class="text-primary-600 hover:underline">{{ route('public.church', $church->slug) }}</a>
                         @else
                             Публічний сайт вимкнено
                         @endif
