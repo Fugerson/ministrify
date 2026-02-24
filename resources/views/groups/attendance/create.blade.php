@@ -12,9 +12,11 @@
             </svg>
             <div>
                 <p class="text-amber-800 dark:text-amber-200 font-medium">Сьогодні вже є запис</p>
+                @can('update', $group)
                 <p class="text-amber-700 dark:text-amber-300 text-sm mt-1">
                     <a href="{{ route('groups.attendance.edit', [$group, $existingToday]) }}" class="underline hover:no-underline">Редагувати запис за сьогодні</a>
                 </p>
+                @endcan
             </div>
         </div>
     </div>

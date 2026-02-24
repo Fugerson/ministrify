@@ -76,6 +76,7 @@
         </form>
 
         <!-- Delete button -->
+        @can('update', $group)
         <div class="mt-4 text-center">
             <button type="button"
                     @click="ajaxDelete('{{ route('groups.attendance.destroy', [$group, $attendance]) }}', '{{ __('messages.confirm_delete_record') }}', null, '{{ route('groups.show', $group) }}')"
@@ -83,6 +84,7 @@
                 Видалити запис
             </button>
         </div>
+        @endcan
     </div>
 </div>
 @endsection

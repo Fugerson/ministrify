@@ -3,10 +3,12 @@
 @section('title', __('Відвідуваність') . ': ' . $attendance->date->format('d.m.Y'))
 
 @section('actions')
+@can('update', $attendance)
 <a href="{{ route('attendance.edit', $attendance) }}"
    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
     {{ __('Редагувати') }}
 </a>
+@endcan
 @endsection
 
 @section('content')
@@ -58,11 +60,13 @@
         <a href="{{ route('attendance.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
             &larr; {{ __('Назад') }}
         </a>
+        @can('delete', $attendance)
         <button type="button"
                 @click="ajaxDelete('{{ route('attendance.destroy', $attendance) }}', '{{ __('Видалити цей запис?') }}', null, '{{ route('attendance.index') }}')"
                 class="text-red-600 hover:text-red-800">
             {{ __('Видалити') }}
         </button>
+        @endcan
     </div>
 </div>
 @endsection

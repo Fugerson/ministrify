@@ -75,9 +75,11 @@
         @empty
             <div class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                 <p>{{ __('Немає записів за цей місяць') }}</p>
+                @can('create', \App\Models\Attendance::class)
                 <a href="{{ route('attendance.create') }}" class="mt-2 inline-block text-primary-600 hover:text-primary-500">
                     {{ __('Створити check-in') }}
                 </a>
+                @endcan
             </div>
         @endforelse
     </div>
