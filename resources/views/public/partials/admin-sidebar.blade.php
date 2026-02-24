@@ -625,7 +625,7 @@ document.addEventListener('alpine:init', () => {
             if (errors.length > 0) {
                 this.showToast(errors[0], 'error');
             } else {
-                this.showToast('Зміни збережено!');
+                window.location.reload();
             }
         },
     }));
