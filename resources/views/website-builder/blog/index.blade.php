@@ -17,6 +17,7 @@
                 <p class="text-gray-600 dark:text-gray-400">Публікуйте новини та статті</p>
             </div>
         </div>
+        @if(auth()->user()->canEdit('website'))
         <div class="flex gap-2">
             <a href="{{ route('website-builder.blog.categories.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 Категорії
@@ -28,6 +29,7 @@
                 Нова стаття
             </a>
         </div>
+        @endif
     </div>
 
 
@@ -58,9 +60,11 @@
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Статей ще немає</h3>
             <p class="text-gray-500 dark:text-gray-400 mt-1">Напишіть першу публікацію</p>
+            @if(auth()->user()->canEdit('website'))
             <a href="{{ route('website-builder.blog.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors mt-4">
                 Написати статтю
             </a>
+            @endif
         </div>
     @else
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
@@ -102,6 +106,7 @@
                     </span>
 
                     <!-- Actions -->
+                    @if(auth()->user()->canEdit('website'))
                     <div class="flex gap-1">
                         @if($post->status === 'draft')
                             <button type="button" @click="ajaxAction('{{ route('website-builder.blog.publish', $post) }}', 'POST').then(() => setTimeout(() => location.reload(), 600))" class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors" title="Опублікувати">
@@ -121,6 +126,7 @@
                             </svg>
                         </button>
                     </div>
+                    @endif
                 </div>
             @endforeach
         </div>

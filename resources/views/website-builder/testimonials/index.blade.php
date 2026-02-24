@@ -17,12 +17,14 @@
                 <p class="text-gray-600 dark:text-gray-400">Історії членів церкви</p>
             </div>
         </div>
+        @if(auth()->user()->canEdit('website'))
         <button @click="showModal = true; editingTestimonial = null" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
             Додати свідчення
         </button>
+        @endif
     </div>
 
 
@@ -66,6 +68,7 @@
                         <span class="px-2 py-1 text-xs font-medium rounded-full {{ $testimonial->is_public ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
                             {{ $testimonial->is_public ? 'Публічне' : 'Приховане' }}
                         </span>
+                        @if(auth()->user()->canEdit('website'))
                         <div class="flex gap-1">
                             <button type="button" @click="editingTestimonial = @json($testimonial); showModal = true" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,6 +81,7 @@
                                 </svg>
                             </button>
                         </div>
+                        @endif
                     </div>
                 </div>
             @endforeach

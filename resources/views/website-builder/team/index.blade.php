@@ -17,12 +17,14 @@
                 <p class="text-gray-600 dark:text-gray-400">Керуйте публічним профілем вашої команди</p>
             </div>
         </div>
+        @if(auth()->user()->canEdit('website'))
         <a href="{{ route('website-builder.team.create') }}" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
             Додати члена
         </a>
+        @endif
     </div>
 
 
@@ -35,12 +37,14 @@
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Команду ще не додано</h3>
             <p class="text-gray-500 dark:text-gray-400 mt-1">Додайте пасторів та лідерів вашої церкви</p>
+            @if(auth()->user()->canEdit('website'))
             <a href="{{ route('website-builder.team.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors mt-4">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 Додати першого
             </a>
+            @endif
         </div>
     @else
         <!-- Team List -->
@@ -81,6 +85,7 @@
                             </span>
 
                             <!-- Actions -->
+                            @if(auth()->user()->canEdit('website'))
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('website-builder.team.edit', $member) }}" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,6 +98,7 @@
                                     </svg>
                                 </button>
                             </div>
+                            @endif
                         </div>
                     </li>
                 @endforeach

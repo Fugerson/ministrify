@@ -32,6 +32,7 @@
             </nav>
         </div>
 
+        @if(auth()->user()->canCreate('resources'))
         <div class="flex items-center gap-2">
             <!-- Create folder button -->
             <button @click="showCreateFolder = true"
@@ -51,6 +52,7 @@
                 <input type="file" class="hidden" @change="uploadFile($event)" multiple>
             </label>
         </div>
+        @endif
     </div>
 
     <!-- Storage warning (only show when approaching limit) -->
@@ -84,6 +86,7 @@
             </div>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Папка порожня</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-4">Створіть папку або завантажте файли</p>
+            @if(auth()->user()->canCreate('resources'))
             <div class="flex items-center justify-center gap-3">
                 <button @click="showCreateFolder = true"
                         class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
@@ -94,6 +97,7 @@
                     <input type="file" class="hidden" @change="uploadFile($event)" multiple>
                 </label>
             </div>
+            @endif
         </div>
         @else
         <div class="overflow-x-auto">
@@ -217,18 +221,22 @@
          :style="`top: ${menuY}px; left: ${menuX}px`"
          @click.away="menuOpen = false"
          class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-48">
+        @if(auth()->user()->canEdit('resources'))
         <button @click="showRenameModal()" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
             Перейменувати
         </button>
+        @endif
+        @if(auth()->user()->canDelete('resources'))
         <button @click="deleteItem()" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
             </svg>
             Видалити
         </button>
+        @endif
     </div>
 
     <!-- Rename modal -->
