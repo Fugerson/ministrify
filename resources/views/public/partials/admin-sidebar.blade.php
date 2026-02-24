@@ -338,6 +338,7 @@ document.addEventListener('alpine:init', () => {
         activeTab: 'design',
         saving: false,
         sortableInstance: null,
+        pageSortableInstance: null,
         toast: { show: false, message: '', type: 'success' },
 
         accordion: {
@@ -395,6 +396,12 @@ document.addEventListener('alpine:init', () => {
                     this.$nextTick(() => this.initSortable());
                 }
             });
+
+            // Initialize page-level drag-and-drop
+            this.$nextTick(() => this.initPageSortable());
+
+            // Expose helper for global toolbar functions
+            window.__adminSidebar = this;
         },
 
         toggleSection(btnEl) {
@@ -410,7 +417,140 @@ document.addEventListener('alpine:init', () => {
                 animation: 150,
                 handle: '.drag-handle',
                 ghostClass: 'opacity-50',
+                onEnd: () => {
+                    this.syncPageFromSidebar();
+                },
             });
+        },
+
+        // Page-level SortableJS on actual sections
+        initPageSortable() {
+            const container = document.getElementById('sections-container');
+            if (!container) return;
+            if (this.pageSortableInstance) this.pageSortableInstance.destroy();
+            this.pageSortableInstance = new Sortable(container, {
+                animation: 250,
+                handle: '.section-drag-handle',
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                dragClass: 'sortable-drag',
+                scroll: true,
+                scrollSensitivity: 80,
+                scrollSpeed: 15,
+                onEnd: () => {
+                    this.syncSidebarFromPage();
+                    this.showPageToast('Порядок змінено. Натисніть "Зберегти" щоб застосувати.');
+                },
+            });
+        },
+
+        // Sync sidebar list order to match page sections order
+        syncSidebarFromPage() {
+            const container = document.getElementById('sections-container');
+            const sidebarList = this.$refs.sectionsList;
+            if (!container || !sidebarList) return;
+            const pageOrder = [...container.querySelectorAll('.section-wrapper')].map(el => el.dataset.sectionId);
+            pageOrder.forEach(id => {
+                const sidebarItem = sidebarList.querySelector('[data-id="' + id + '"]');
+                if (sidebarItem) sidebarList.appendChild(sidebarItem);
+            });
+        },
+
+        // Sync page sections order to match sidebar list
+        syncPageFromSidebar() {
+            const container = document.getElementById('sections-container');
+            const sidebarList = this.$refs.sectionsList;
+            if (!container || !sidebarList) return;
+            const sidebarOrder = [...sidebarList.querySelectorAll('[data-id]')].map(el => el.dataset.id);
+            sidebarOrder.forEach(id => {
+                const pageItem = container.querySelector('[data-section-id="' + id + '"]');
+                if (pageItem) container.appendChild(pageItem);
+            });
+        },
+
+        // Show a floating toast on the page (not in sidebar)
+        showPageToast(message) {
+            let toast = document.getElementById('page-section-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'page-section-toast';
+                toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(17,24,39,0.9);color:white;padding:10px 20px;border-radius:12px;font-size:14px;backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:opacity 0.3s;pointer-events:none;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+        },
+
+        // Move section on page
+        movePageSection(sectionId, direction) {
+            const container = document.getElementById('sections-container');
+            if (!container) return;
+            const wrapper = container.querySelector('[data-section-id="' + sectionId + '"]');
+            if (!wrapper) return;
+            if (direction === 'up' && wrapper.previousElementSibling) {
+                container.insertBefore(wrapper, wrapper.previousElementSibling);
+            } else if (direction === 'down' && wrapper.nextElementSibling) {
+                container.insertBefore(wrapper.nextElementSibling, wrapper);
+            }
+            this.syncSidebarFromPage();
+            this.showPageToast('Порядок змінено. Натисніть "Зберегти" щоб застосувати.');
+        },
+
+        // Save per-section background color
+        async saveSectionBgColor(sectionId, color) {
+            try {
+                await this.postData(@json(route('website-builder.sections.settings')), {
+                    section_id: sectionId,
+                    settings: { bg_color: color },
+                });
+                this.showPageToast('Колір фону збережено');
+            } catch (e) {
+                this.showPageToast('Помилка: ' + e.message);
+            }
+        },
+
+        // Reset section bg color
+        async resetSectionBgColor(sectionId) {
+            try {
+                await this.postData(@json(route('website-builder.sections.settings')), {
+                    section_id: sectionId,
+                    settings: { bg_color: null },
+                });
+                // Remove inline bg from section
+                const wrapper = document.querySelector('[data-section-id="' + sectionId + '"]');
+                if (wrapper) {
+                    const section = wrapper.querySelector('section');
+                    if (section) section.style.backgroundColor = '';
+                }
+                this.showPageToast('Колір фону скинуто');
+            } catch (e) {
+                this.showPageToast('Помилка: ' + e.message);
+            }
+        },
+
+        // Open sidebar to edit a specific section
+        openSectionEditor(sectionId) {
+            this.open = true;
+            // Map section IDs to the best sidebar tab/accordion
+            const heroSections = ['hero'];
+            if (heroSections.includes(sectionId)) {
+                this.activeTab = 'design';
+                this.$nextTick(() => { this.accordion.hero = true; });
+            } else {
+                this.activeTab = 'sections';
+                this.$nextTick(() => {
+                    this.initSortable();
+                    // Highlight the section in sidebar
+                    const item = this.$refs.sectionsList?.querySelector('[data-id="' + sectionId + '"]');
+                    if (item) {
+                        item.style.background = '#dbeafe';
+                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => { item.style.background = ''; }, 2000);
+                    }
+                });
+            }
         },
 
         getSectionsFromDom() {
@@ -639,4 +779,46 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+// --- Global toolbar functions (called from section toolbars on the page) ---
+
+window.__sectionMoveUp = function(btn) {
+    const wrapper = btn.closest('.section-wrapper');
+    if (!wrapper) return;
+    const sidebar = window.__adminSidebar;
+    if (sidebar) sidebar.movePageSection(wrapper.dataset.sectionId, 'up');
+};
+
+window.__sectionMoveDown = function(btn) {
+    const wrapper = btn.closest('.section-wrapper');
+    if (!wrapper) return;
+    const sidebar = window.__adminSidebar;
+    if (sidebar) sidebar.movePageSection(wrapper.dataset.sectionId, 'down');
+};
+
+window.__sectionChangeBg = function(input) {
+    const wrapper = input.closest('.section-wrapper');
+    if (!wrapper) return;
+    const sectionId = wrapper.dataset.sectionId;
+    const color = input.value;
+    // Apply color to the section element inside the wrapper
+    const section = wrapper.querySelector('section');
+    if (section) section.style.backgroundColor = color;
+    // Save to backend
+    const sidebar = window.__adminSidebar;
+    if (sidebar) sidebar.saveSectionBgColor(sectionId, color);
+};
+
+window.__sectionResetBg = function(btn) {
+    const wrapper = btn.closest('.section-wrapper');
+    if (!wrapper) return;
+    const sectionId = wrapper.dataset.sectionId;
+    const sidebar = window.__adminSidebar;
+    if (sidebar) sidebar.resetSectionBgColor(sectionId);
+};
+
+window.__sectionEdit = function(sectionId) {
+    const sidebar = window.__adminSidebar;
+    if (sidebar) sidebar.openSectionEditor(sectionId);
+};
 </script>
