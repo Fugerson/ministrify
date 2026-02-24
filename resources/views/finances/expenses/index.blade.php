@@ -645,8 +645,8 @@ window.expensesManager = function() {
 
                     <!-- Data rows -->
                     <template x-for="expense in paginatedExpenses" :key="expense.id">
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
-                            @click="$dispatch('expense-edit', expense.id)"
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ auth()->user()->canEdit('finances') ? 'cursor-pointer' : '' }}"
+                            @if(auth()->user()->canEdit('finances')) @click="$dispatch('expense-edit', expense.id)" @endif
                             :data-expense-id="expense.id">
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" x-text="expense.date">
                             </td>

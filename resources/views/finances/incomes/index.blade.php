@@ -509,8 +509,8 @@ window.incomesManager = function() {
 
                     <!-- Data rows (paginated) -->
                     <template x-for="income in paginatedIncomes" :key="income.id">
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
-                            @click="$dispatch('income-edit', income.id)"
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ auth()->user()->canEdit('finances') ? 'cursor-pointer' : '' }}"
+                            @if(auth()->user()->canEdit('finances')) @click="$dispatch('income-edit', income.id)" @endif
                             :data-income-id="income.id">
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900 dark:text-white" x-text="income.date"></div>

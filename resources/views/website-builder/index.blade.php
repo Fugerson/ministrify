@@ -18,6 +18,7 @@
                 </svg>
                 Переглянути сайт
             </a>
+            @if(auth()->user()->canEdit('website'))
             <a href="{{ route('website-builder.editor') }}"
                class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,6 +26,7 @@
                 </svg>
                 Відкрити редактор
             </a>
+            @endif
         </div>
     </div>
 
@@ -55,6 +57,7 @@
     </div>
 
     <!-- Quick Actions Grid -->
+    @if(auth()->user()->canEdit('website'))
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- Templates -->
         <a href="{{ route('website-builder.templates.index') }}" class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all">
@@ -95,6 +98,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">Налаштуйте дизайн</p>
         </a>
     </div>
+    @endif
 
     <!-- Content Management -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -104,6 +108,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
             <!-- About -->
+            @if(auth()->user()->canEdit('website'))
             <a href="{{ route('website-builder.about.edit') }}" class="flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
                     <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,6 +120,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400">Місія, візія</p>
                 </div>
             </a>
+            @endif
 
             <!-- Team -->
             <a href="{{ route('website-builder.team.index') }}" class="flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">

@@ -12,10 +12,6 @@ class WebsiteBuilderController extends Controller
 
     public function index()
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         $church = $this->getChurchOrFail();
 
         $stats = [
@@ -38,7 +34,7 @@ class WebsiteBuilderController extends Controller
 
     public function editor()
     {
-        if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->canEdit('website')) {
             abort(403);
         }
 
@@ -76,7 +72,7 @@ class WebsiteBuilderController extends Controller
 
     public function preview()
     {
-        if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->canEdit('website')) {
             abort(403);
         }
 
