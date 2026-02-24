@@ -194,6 +194,7 @@
                             <h2 class="font-semibold text-gray-900 dark:text-white">План події</h2>
                         </div>
                         <div class="flex items-center gap-2" x-data="planTemplatesManager()">
+                            @if($canEdit)
                             {{-- Apply Template Dropdown --}}
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open" type="button"
@@ -235,6 +236,7 @@
                                     class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Зберегти як шаблон">
                                 💾 Зберегти
                             </button>
+                            @endif
 
                             <a href="{{ route('events.plan.print', $event) }}" target="_blank"
                                class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Друк">
@@ -543,6 +545,7 @@
                 </div>
 
                 {{-- Add new row --}}
+                @if($canEdit)
                 <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
                     <form @submit.prevent="addItem()" class="flex items-center gap-2">
                         <input type="time" x-model="newItem.start_time"
@@ -629,6 +632,7 @@
                         </button>
                     </form>
                 </div>
+                @endif
 
                 {{-- Status message --}}
                 <div x-show="message" x-cloak x-transition
@@ -646,6 +650,7 @@
                     @foreach($event->responsibilities as $resp)
                     <div class="flex items-center justify-between py-1.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg" data-resp>
                         <span class="text-sm text-gray-900 dark:text-white">{{ $resp->name }}</span>
+                        @if($canEdit)
                         <button type="button"
                                 @click="ajaxDelete('/responsibilities/{{ $resp->id }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('[data-resp]').remove())"
                                 class="p-1 text-gray-400 hover:text-red-500">
@@ -653,10 +658,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
+                        @endif
                     </div>
                     @endforeach
                 </div>
                 @endif
+                @if($canEdit)
                 <form @submit.prevent="submit($refs.respForm)" x-ref="respForm" x-data="{ ...ajaxForm({ url: '{{ route('events.responsibilities.store', $event) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _addSimpleResp(this, data); } }) }" class="flex gap-2">
                     <input type="text" name="name" required placeholder="Нова відповідальність"
                            class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
@@ -664,6 +671,7 @@
                         Додати
                     </button>
                 </form>
+                @endif
             </div>
 
             <!-- Attendance Section -->
@@ -717,6 +725,7 @@
                                 </div>
                                 <span class="text-sm text-gray-900 dark:text-white">{{ $person->full_name }}</span>
                             </div>
+                            @if($canEdit || auth()->user()->canEdit('attendance'))
                             <button type="button"
                                     @click="toggleAttendance({{ $person->id }})"
                                     :class="attending.includes({{ $person->id }}) ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'"
@@ -725,11 +734,20 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
                             </button>
+                            @else
+                            <span :class="attending.includes({{ $person->id }}) ? 'text-green-500' : 'text-gray-300 dark:text-gray-600'"
+                                  class="p-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </span>
+                            @endif
                         </div>
                         @endforeach
                     </div>
 
                     <!-- Guests count -->
+                    @if($canEdit || auth()->user()->canEdit('attendance'))
                     <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between">
                             <label class="text-sm text-gray-700 dark:text-gray-300">Гості</label>
@@ -738,6 +756,7 @@
                                    class="w-20 px-2 py-1 text-sm text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
                     </div>
+                    @endif
 
                     <!-- Total -->
                     <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
