@@ -166,6 +166,24 @@ class Church extends Model
     }
 
     /**
+     * Get decrypted LiqPay private key from payment_settings
+     */
+    public function getLiqpayPrivateKey(): ?string
+    {
+        $encrypted = data_get($this->payment_settings, 'liqpay_private_key');
+        if (empty($encrypted)) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($encrypted);
+        } catch (DecryptException $e) {
+            // Not encrypted (legacy plain text) — return as-is
+            return $encrypted;
+        }
+    }
+
+    /**
      * Fields that should be hidden from serialization
      */
     protected $hidden = [
@@ -374,6 +392,20 @@ class Church extends Model
     public function getThemeColorsAttribute(): array
     {
         $color = $this->primary_color ?? '#3b82f6';
+        return $this->buildColorPalette($color);
+    }
+
+    /**
+     * Color palette for the public site (uses site_colors, independent from dashboard)
+     */
+    public function getSiteThemeColorsAttribute(): array
+    {
+        $color = $this->site_colors['primary'] ?? $this->primary_color ?? '#3b82f6';
+        return $this->buildColorPalette($color);
+    }
+
+    private function buildColorPalette(string $color): array
+    {
         return [
             '50' => $this->adjustBrightness($color, 0.95),
             '100' => $this->adjustBrightness($color, 0.9),

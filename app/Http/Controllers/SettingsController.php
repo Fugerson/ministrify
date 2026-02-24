@@ -11,6 +11,7 @@ use App\Services\ImageService;
 use App\Services\NbuExchangeRateService;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -317,17 +318,34 @@ class SettingsController extends Controller
 
         $validated = $request->validate([
             'liqpay_enabled' => 'boolean',
-            'liqpay_public_key' => 'nullable|string|max:255',
+            'liqpay_public_key' => 'required_if:liqpay_enabled,1|nullable|string|max:255',
             'liqpay_private_key' => 'nullable|string|max:255',
             'monobank_enabled' => 'boolean',
-            'monobank_jar_id' => 'nullable|string|max:255',
+            'monobank_jar_id' => 'required_if:monobank_enabled,1|nullable|string|max:255',
         ]);
+
+        $currentSettings = $church->payment_settings ?? [];
+
+        // Handle private key: if placeholder sent, keep existing encrypted value
+        $privateKey = $validated['liqpay_private_key'] ?? null;
+        if ($privateKey === '********') {
+            // User didn't change the key — keep existing
+            $privateKey = $currentSettings['liqpay_private_key'] ?? null;
+        } elseif ($privateKey) {
+            // New key provided — encrypt it
+            $privateKey = Crypt::encryptString($privateKey);
+        }
+
+        // Validate private key is required when enabling LiqPay
+        if (($validated['liqpay_enabled'] ?? false) && !$privateKey && !($currentSettings['liqpay_private_key'] ?? null)) {
+            return back()->withErrors(['liqpay_private_key' => __('validation.required_if', ['attribute' => 'Private Key', 'other' => 'LiqPay', 'value' => 'увімкнено'])]);
+        }
 
         $church->update([
             'payment_settings' => [
                 'liqpay_enabled' => $validated['liqpay_enabled'] ?? false,
                 'liqpay_public_key' => $validated['liqpay_public_key'] ?? null,
-                'liqpay_private_key' => $validated['liqpay_private_key'] ?? null,
+                'liqpay_private_key' => $privateKey,
                 'monobank_enabled' => $validated['monobank_enabled'] ?? false,
                 'monobank_jar_id' => $validated['monobank_jar_id'] ?? null,
             ],

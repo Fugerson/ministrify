@@ -38,11 +38,6 @@ class DesignController extends Controller
             'heading' => 'nullable|string|max:7',
         ]);
 
-        // Also update main primary_color
-        if (!empty($validated['primary'])) {
-            $church->primary_color = $validated['primary'];
-        }
-
         $church->setPublicSiteSetting('colors', array_filter($validated));
 
         return $this->successResponse($request, 'Кольори оновлено');
@@ -80,7 +75,19 @@ class DesignController extends Controller
         ]);
 
         $heroSettings = $church->getPublicSiteSetting('hero', []);
-        $heroSettings = array_merge($heroSettings, array_filter($validated, fn($v) => $v !== null));
+
+        // Fields that can be explicitly cleared (set to empty string)
+        // ConvertEmptyStringsToNull converts "" to null, so we check $request->has()
+        $clearableFields = ['title', 'subtitle', 'cta_text', 'cta_url', 'video_url'];
+
+        foreach ($validated as $key => $value) {
+            if ($value !== null) {
+                $heroSettings[$key] = $value;
+            } elseif (in_array($key, $clearableFields) && $request->has($key)) {
+                // Field was explicitly sent but empty — clear it
+                $heroSettings[$key] = '';
+            }
+        }
 
         $church->setPublicSiteSetting('hero', $heroSettings);
 

@@ -450,10 +450,12 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Private Key</label>
                     <input type="password" name="liqpay_private_key"
-                           value="{{ old('liqpay_private_key', $paymentSettings['liqpay_private_key'] ?? '') }}"
+                           value="{{ !empty($paymentSettings['liqpay_private_key']) ? '********' : old('liqpay_private_key', '') }}"
                            autocomplete="new-password"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
-                           placeholder="sandbox_XXXXXXXXXXXX">
+                           placeholder="sandbox_XXXXXXXXXXXX"
+                           onfocus="if(this.value==='********')this.value='';"
+                           onblur="if(this.value==='')this.value='{{ !empty($paymentSettings['liqpay_private_key']) ? '********' : '' }}';">
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Зберігається в зашифрованому вигляді</p>
                 </div>
             </div>
@@ -632,9 +634,14 @@
             },
             saving: false,
             saved: false,
+            _saveTimer: null,
             toggle(key) {
                 this.settings[key] = !this.settings[key];
-                this.save();
+                this.debounceSave();
+            },
+            debounceSave() {
+                clearTimeout(this._saveTimer);
+                this._saveTimer = setTimeout(() => this.save(), 400);
             },
             save() {
                 this.saving = true;
@@ -1826,6 +1833,7 @@
              x-data="{
                  enabled: {{ $church->getSetting('self_registration_enabled') !== false ? 'true' : 'false' }},
                  saving: false,
+                 saved: false,
                  toggle() {
                      this.enabled = !this.enabled;
                      this.saving = true;
@@ -1842,11 +1850,11 @@
                          })
                      }).then(r => r.json()).then(() => {
                          this.saving = false;
-                         showGlobalToast(this.enabled ? 'Самореєстрацію увімкнено' : 'Самореєстрацію вимкнено', 'success');
+                         this.saved = true;
+                         setTimeout(() => this.saved = false, 2000);
                      }).catch(() => {
                          this.enabled = !this.enabled;
                          this.saving = false;
-                         showGlobalToast('Помилка збереження', 'error');
                      });
                  }
              }">
@@ -1855,13 +1863,19 @@
                     <h3 class="text-sm font-medium text-gray-900 dark:text-white">Самореєстрація учасників</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Дозволити людям самостійно реєструватися у вашій церкві</p>
                 </div>
-                <button @click="toggle()" :disabled="saving"
-                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                        :class="enabled ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-600'"
-                        role="switch" :aria-checked="enabled">
-                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                          :class="enabled ? 'translate-x-5' : 'translate-x-0'"></span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <span x-show="saved" x-cloak x-transition.opacity class="text-xs text-green-600 dark:text-green-400">Збережено</span>
+                    <span x-show="saving" x-cloak class="text-xs text-gray-400">
+                        <svg class="animate-spin h-4 w-4 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
+                    <button @click="toggle()" :disabled="saving"
+                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                            :class="enabled ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-600'"
+                            role="switch" :aria-checked="enabled">
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                              :class="enabled ? 'translate-x-5' : 'translate-x-0'"></span>
+                    </button>
+                </div>
             </div>
             <div x-show="enabled" x-collapse class="px-4 md:px-6 pb-4 pt-0">
                 <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-300">

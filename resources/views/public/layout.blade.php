@@ -46,16 +46,16 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '{{ $church->theme_colors["50"] }}',
-                            100: '{{ $church->theme_colors["100"] }}',
-                            200: '{{ $church->theme_colors["200"] }}',
-                            300: '{{ $church->theme_colors["300"] }}',
-                            400: '{{ $church->theme_colors["400"] }}',
-                            500: '{{ $church->theme_colors["500"] }}',
-                            600: '{{ $church->theme_colors["600"] }}',
-                            700: '{{ $church->theme_colors["700"] }}',
-                            800: '{{ $church->theme_colors["800"] }}',
-                            900: '{{ $church->theme_colors["900"] }}',
+                            50: '{{ $church->site_theme_colors["50"] }}',
+                            100: '{{ $church->site_theme_colors["100"] }}',
+                            200: '{{ $church->site_theme_colors["200"] }}',
+                            300: '{{ $church->site_theme_colors["300"] }}',
+                            400: '{{ $church->site_theme_colors["400"] }}',
+                            500: '{{ $church->site_theme_colors["500"] }}',
+                            600: '{{ $church->site_theme_colors["600"] }}',
+                            700: '{{ $church->site_theme_colors["700"] }}',
+                            800: '{{ $church->site_theme_colors["800"] }}',
+                            900: '{{ $church->site_theme_colors["900"] }}',
                         }
                     },
                     fontFamily: {
@@ -74,8 +74,8 @@
             background-clip: text;
         }
         :root {
-            --primary-color: {{ $church->primary_color ?? '#3b82f6' }};
-            --primary-dark: {{ $church->theme_colors["700"] }};
+            --primary-color: {{ $church->site_colors['primary'] ?? '#3b82f6' }};
+            --primary-dark: {{ $church->site_theme_colors["700"] }};
         }
 
         /* Custom Scrollbars - Theme colored */

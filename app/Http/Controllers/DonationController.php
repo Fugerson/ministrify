@@ -68,12 +68,13 @@ class DonationController extends Controller
      */
     private function processLiqPay(Request $request, Church $church, Transaction $transaction, array $settings)
     {
-        if (empty($settings['liqpay_public_key']) || empty($settings['liqpay_private_key'])) {
+        $privateKey = $church->getLiqpayPrivateKey();
+        if (empty($settings['liqpay_public_key']) || empty($privateKey)) {
             $transaction->update(['status' => Transaction::STATUS_FAILED, 'notes' => 'LiqPay не налаштовано']);
             return $this->errorResponse($request, 'LiqPay не налаштовано для цієї церкви');
         }
 
-        $liqpay = new LiqPayService($settings['liqpay_public_key'], $settings['liqpay_private_key']);
+        $liqpay = new LiqPayService($settings['liqpay_public_key'], $privateKey);
 
         $callbackUrl = route('donations.callback', ['slug' => $church->slug]);
         $resultUrl = route('public.donate.thanks', ['slug' => $church->slug, 'transaction' => $transaction->id]);
@@ -138,7 +139,7 @@ class DonationController extends Controller
 
         $liqpay = new LiqPayService(
             $paymentSettings['liqpay_public_key'] ?? '',
-            $paymentSettings['liqpay_private_key'] ?? ''
+            $church->getLiqpayPrivateKey() ?? ''
         );
 
         if (!$liqpay->verifySignature($data, $signature)) {
