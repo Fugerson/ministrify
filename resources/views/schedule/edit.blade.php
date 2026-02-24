@@ -272,11 +272,15 @@
         @endif
 
         <div class="flex items-center justify-between">
+            @if(auth()->user()->canDelete('events'))
             <button type="button"
                     @click="ajaxDelete('{{ route('events.destroy', $event) }}', '{{ __('messages.confirm_delete_event') }}', null, '{{ route('schedule') }}')"
                     class="text-red-600 hover:text-red-800 text-sm font-medium">
                 Видалити подію
             </button>
+            @else
+            <div></div>
+            @endif
 
             <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <a href="{{ route('events.show', $event) }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">

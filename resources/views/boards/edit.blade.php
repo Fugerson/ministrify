@@ -47,6 +47,7 @@
         <!-- Actions -->
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
+                @if(auth()->user()->canDelete('boards'))
                 <button type="button"
                         @click="ajaxAction('{{ route('boards.archive', $board) }}', 'POST').then(() => setTimeout(() => window.location.href = '{{ route('boards.index') }}', 600))"
                         class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 text-sm font-medium">
@@ -57,6 +58,7 @@
                         class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
                     {{ __('Видалити') }}
                 </button>
+                @endif
             </div>
 
             <div class="flex items-center gap-3">
