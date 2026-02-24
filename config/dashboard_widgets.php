@@ -46,6 +46,7 @@ return [
             'default_cols' => 4,
             'min_cols' => 4,
             'admin_only' => false,
+            'requires_permission' => 'attendance',
             'partial' => 'dashboard.widgets.attendance-chart',
         ],
         'analytics_charts' => [
