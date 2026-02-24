@@ -1961,6 +1961,11 @@
                                     clearPerson() { this.linkedPersonId = null; this.linkedPersonName = ''; },
                                     async saveRole() {
                                         this.saving = true;
+                                        // Capture DOM refs BEFORE async call (Alpine $el may lose context after await)
+                                        const rootEl = this.$el;
+                                        const sel = rootEl?.querySelector('select');
+                                        const roleName = sel ? sel.options[sel.selectedIndex]?.text : '';
+                                        const badge = rootEl?.querySelector('[x-show]')?.querySelector('button, span');
                                         try {
                                             const body = {
                                                 _method: 'PUT',
@@ -1984,10 +1989,7 @@
                                             if (res.ok) {
                                                 const data = await res.json().catch(() => ({}));
                                                 showToast('success', data.message || 'Збережено!');
-                                                const sel = this.$el.querySelector('select');
-                                                const roleName = sel.options[sel.selectedIndex].text;
-                                                const badge = this.$el.querySelector('[x-show=&quot;!editing&quot;] button, [x-show=&quot;!editing&quot;] span');
-                                                if (badge) {
+                                                if (roleName && badge) {
                                                     const svg = badge.querySelector('svg')?.outerHTML || '';
                                                     badge.innerHTML = roleName + ' ' + svg;
                                                 }

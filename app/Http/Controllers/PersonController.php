@@ -310,6 +310,7 @@ class PersonController extends Controller
     public function show(Person $person)
     {
         $this->authorizeChurch($person);
+        $this->authorize('view', $person);
 
         // Allow viewing own profile without permission
         $isOwnProfile = auth()->user()->person && auth()->user()->person->id === $person->id;
@@ -1393,6 +1394,11 @@ class PersonController extends Controller
             return response()->json(['success' => false, 'message' => 'Доступ заборонено'], 403);
         }
 
+        // Check edit permission (own profile or canEdit('people'))
+        if (!auth()->user()->can('update', $person)) {
+            return response()->json(['success' => false, 'message' => 'Недостатньо прав'], 403);
+        }
+
         $request->validate([
             'photo' => 'required|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120', // 5MB max
         ]);
@@ -1440,6 +1446,11 @@ class PersonController extends Controller
 
         if ($person->church_id !== $church->id) {
             return response()->json(['success' => false, 'message' => 'Доступ заборонено'], 403);
+        }
+
+        // Check edit permission (own profile or canEdit('people'))
+        if (!auth()->user()->can('update', $person)) {
+            return response()->json(['success' => false, 'message' => 'Недостатньо прав'], 403);
         }
 
         if ($person->photo) {

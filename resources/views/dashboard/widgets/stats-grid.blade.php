@@ -1,6 +1,7 @@
 {{-- Stats Grid Widget - 4 KPI Cards --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
     <!-- People Stats -->
+    @can('viewAny', \App\Models\Person::class)
     <a href="{{ route('people.index') }}" id="stat-people" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
         <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -58,6 +59,7 @@
             @endif
         </div>
     </a>
+    @endcan
 
     <!-- Ministries Stats -->
     <a href="{{ route('ministries.index') }}" id="stat-ministries" class="stagger-item card-hover bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5 hover:border-green-200 dark:hover:border-green-800 transition-all group">
