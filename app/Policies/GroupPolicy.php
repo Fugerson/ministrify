@@ -38,6 +38,14 @@ class GroupPolicy
             return true;
         }
 
+        // Group assistant can update their own group
+        if ($user->person && $group->members()
+            ->where('person_id', $user->person->id)
+            ->wherePivot('role', Group::ROLE_ASSISTANT)
+            ->exists()) {
+            return true;
+        }
+
         return false;
     }
 
