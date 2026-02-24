@@ -282,15 +282,15 @@
             <div x-show="activeTab === 'sections'" class="p-4">
                 <p class="text-xs text-gray-500 mb-3">Перетягуйте для зміни порядку. Зміни застосуються після збереження та перезавантаження.</p>
                 <div x-ref="sectionsList" class="space-y-2">
-                    <template x-for="(section, index) in sectionItems" :key="section.id">
-                        <div :data-id="section.id" class="flex items-center gap-3 px-3 py-2.5 bg-gray-50 rounded-lg border border-gray-200 cursor-grab active:cursor-grabbing group">
-                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
-                            <span class="flex-1 text-sm text-gray-700" x-text="section.label"></span>
-                            <button @click="section.enabled = !section.enabled" :class="section.enabled ? 'bg-primary-600' : 'bg-gray-300'" class="relative w-9 h-5 rounded-full transition-colors flex-shrink-0">
-                                <span :class="section.enabled ? 'translate-x-4' : 'translate-x-0.5'" class="absolute top-0.5 left-0 w-4 h-4 bg-white rounded-full shadow transition-transform"></span>
+                    @foreach($sections as $section)
+                        <div data-id="{{ $section['id'] }}" data-enabled="{{ $section['enabled'] ? '1' : '0' }}" class="flex items-center gap-3 px-3 py-2.5 bg-gray-50 rounded-lg border border-gray-200 group">
+                            <svg class="drag-handle w-4 h-4 text-gray-400 flex-shrink-0 cursor-grab active:cursor-grabbing" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                            <span class="flex-1 text-sm text-gray-700">{{ $section['label'] }}</span>
+                            <button @click="toggleSection($el)" :class="$el.parentElement.dataset.enabled === '1' ? 'bg-primary-600' : 'bg-gray-300'" class="relative w-9 h-5 rounded-full transition-colors flex-shrink-0">
+                                <span :class="$el.parentElement.dataset.enabled === '1' ? 'translate-x-4' : 'translate-x-0.5'" class="absolute top-0.5 left-0 w-4 h-4 bg-white rounded-full shadow transition-transform"></span>
                             </button>
                         </div>
-                    </template>
+                    @endforeach
                 </div>
             </div>
 
@@ -380,14 +380,15 @@ document.addEventListener('alpine:init', () => {
             copyright_text: @json($footer['copyright_text'] ?? ''),
         },
 
-        sectionItems: @json($sections),
-
         init() {
             if (sessionStorage.getItem('adminSidebarOpen')) {
                 this.open = true;
                 this.activeTab = sessionStorage.getItem('adminSidebarTab') || 'design';
                 sessionStorage.removeItem('adminSidebarOpen');
                 sessionStorage.removeItem('adminSidebarTab');
+            }
+            if (this.activeTab === 'sections') {
+                this.$nextTick(() => this.initSortable());
             }
             this.$watch('activeTab', (val) => {
                 if (val === 'sections') {
@@ -396,26 +397,30 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
+        toggleSection(btnEl) {
+            const row = btnEl.closest('[data-id]');
+            row.dataset.enabled = row.dataset.enabled === '1' ? '0' : '1';
+        },
+
         initSortable() {
             if (this.sortableInstance) this.sortableInstance.destroy();
             const el = this.$refs.sectionsList;
             if (!el) return;
             this.sortableInstance = new Sortable(el, {
                 animation: 150,
-                handle: '.cursor-grab',
+                handle: '.drag-handle',
                 ghostClass: 'opacity-50',
-                onEnd: (evt) => {
-                    const items = [...el.querySelectorAll('[data-id]')].map(el => el.dataset.id);
-                    const reordered = [];
-                    items.forEach((id, i) => {
-                        const item = this.sectionItems.find(s => s.id === id);
-                        if (item) {
-                            reordered.push({ ...item, order: i });
-                        }
-                    });
-                    this.sectionItems = reordered;
-                },
             });
+        },
+
+        getSectionsFromDom() {
+            const el = this.$refs.sectionsList;
+            if (!el) return [];
+            return [...el.querySelectorAll('[data-id]')].map((row, i) => ({
+                id: row.dataset.id,
+                enabled: row.dataset.enabled === '1',
+                order: i,
+            }));
         },
 
         // --- Live Preview ---
@@ -618,11 +623,7 @@ document.addEventListener('alpine:init', () => {
             } catch (e) { errors.push('Футер: ' + e.message); }
 
             try {
-                const sectionsData = this.sectionItems.map((s, i) => ({
-                    id: s.id,
-                    enabled: s.enabled,
-                    order: i,
-                }));
+                const sectionsData = this.getSectionsFromDom();
                 await this.postData(@json(route('website-builder.sections.update')), { sections: sectionsData });
             } catch (e) { errors.push('Секції: ' + e.message); }
 
