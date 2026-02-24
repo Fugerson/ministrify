@@ -61,7 +61,7 @@
         x-transition:enter-start="opacity-0 scale-75"
         x-transition:enter-end="opacity-100 scale-100"
         @click="open = true"
-        class="fixed bottom-6 right-6 z-[60] w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-200 group"
+        class="fixed bottom-6 left-6 z-[60] w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-200 group"
         title="Редактор сайту"
     >
         <svg class="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,12 +86,12 @@
     <div
         x-show="open"
         x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="translate-x-full"
+        x-transition:enter-start="-translate-x-full"
         x-transition:enter-end="translate-x-0"
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="translate-x-full"
-        class="fixed top-0 right-0 bottom-0 w-[380px] max-w-[90vw] bg-white shadow-2xl z-[55] flex flex-col"
+        x-transition:leave-end="-translate-x-full"
+        class="fixed top-0 left-0 bottom-0 w-[380px] max-w-[90vw] bg-white shadow-2xl z-[55] flex flex-col"
     >
         {{-- Header --}}
         <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
