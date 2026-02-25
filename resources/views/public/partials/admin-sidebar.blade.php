@@ -198,6 +198,37 @@
             {{-- ========== DESIGN TAB ========== --}}
             <div x-show="activeTab === 'design'" class="p-4 space-y-3">
 
+                {{-- Templates Accordion --}}
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button @click="accordion.templates = !accordion.templates" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
+                        <span class="text-sm font-medium text-gray-900">Готові шаблони</span>
+                        <svg :class="accordion.templates && 'rotate-180'" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="accordion.templates" x-transition class="px-4 py-3">
+                        <p class="text-xs text-gray-500 mb-3">Оберіть шаблон для миттєвого попереднього перегляду. Збережіть щоб застосувати.</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <template x-for="tpl in templates" :key="tpl.id">
+                                <button @click="applyTemplate(tpl)"
+                                        class="group relative flex flex-col items-start p-3 rounded-lg border-2 transition-all text-left hover:shadow-md"
+                                        :class="activeTemplate === tpl.id ? 'border-primary-500 bg-primary-50 ring-1 ring-primary-200' : 'border-gray-200 hover:border-gray-300 bg-white'">
+                                    {{-- Color swatches --}}
+                                    <div class="flex gap-1 mb-2">
+                                        <span class="w-5 h-5 rounded-full border border-gray-200 shadow-sm" :style="'background:' + tpl.colors.primary"></span>
+                                        <span class="w-5 h-5 rounded-full border border-gray-200 shadow-sm" :style="'background:' + tpl.colors.secondary"></span>
+                                        <span class="w-5 h-5 rounded-full border border-gray-200 shadow-sm" :style="'background:' + tpl.colors.accent"></span>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900 leading-tight" x-text="tpl.name"></span>
+                                    <span class="text-[11px] text-gray-400 mt-0.5" x-text="tpl.fonts.heading + ' / ' + tpl.fonts.body"></span>
+                                    {{-- Active checkmark --}}
+                                    <div x-show="activeTemplate === tpl.id" class="absolute top-1.5 right-1.5">
+                                        <svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                    </div>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Colors Accordion --}}
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button @click="accordion.colors = !accordion.colors" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
@@ -326,9 +357,12 @@
                 <p class="text-xs text-gray-500 mb-3">Перетягуйте для зміни порядку. Зміни застосуються після збереження та перезавантаження.</p>
                 <div x-ref="sectionsList" class="space-y-2">
                     @foreach($sections as $section)
-                        <div data-id="{{ $section['id'] }}" data-enabled="{{ $section['enabled'] ? '1' : '0' }}" class="flex items-center gap-3 px-3 py-2.5 bg-gray-50 rounded-lg border border-gray-200 group">
+                        <div data-id="{{ $section['id'] }}" data-enabled="{{ $section['enabled'] ? '1' : '0' }}" data-layout="{{ $section['layout'] ?? 'full' }}" class="flex items-center gap-3 px-3 py-2.5 bg-gray-50 rounded-lg border border-gray-200 group">
                             <svg class="drag-handle w-4 h-4 text-gray-400 flex-shrink-0 cursor-grab active:cursor-grabbing" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
                             <span class="flex-1 text-sm text-gray-700">{{ $section['label'] }}</span>
+                            @if(($section['layout'] ?? 'full') === 'half')
+                                <span class="text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-200 rounded" title="Половина ширини">½</span>
+                            @endif
                             <button @click="toggleSection($el)" :class="$el.parentElement.dataset.enabled === '1' ? 'bg-primary-600' : 'bg-gray-300'" class="relative w-9 h-5 rounded-full transition-colors flex-shrink-0">
                                 <span :class="$el.parentElement.dataset.enabled === '1' ? 'translate-x-4' : 'translate-x-0.5'" class="absolute top-0.5 left-0 w-4 h-4 bg-white rounded-full shadow transition-transform"></span>
                             </button>
@@ -386,7 +420,61 @@ document.addEventListener('alpine:init', () => {
         originalPageOrder: null,
         toast: { show: false, message: '', type: 'success' },
 
+        activeTemplate: null,
+
+        templates: [
+            {
+                id: 'classic',
+                name: 'Класичний',
+                colors: { primary: '#3b82f6', secondary: '#10b981', accent: '#f59e0b', background: '#ffffff', text: '#1f2937', heading: '#111827' },
+                fonts: { heading: 'Inter', body: 'Inter' },
+            },
+            {
+                id: 'warm',
+                name: 'Теплий',
+                colors: { primary: '#ea580c', secondary: '#d97706', accent: '#dc2626', background: '#fffbeb', text: '#44403c', heading: '#1c1917' },
+                fonts: { heading: 'Playfair Display', body: 'Lato' },
+            },
+            {
+                id: 'nature',
+                name: 'Природа',
+                colors: { primary: '#059669', secondary: '#0d9488', accent: '#ca8a04', background: '#f0fdf4', text: '#1e3a2f', heading: '#064e3b' },
+                fonts: { heading: 'Merriweather', body: 'Open Sans' },
+            },
+            {
+                id: 'elegant',
+                name: 'Елегантний',
+                colors: { primary: '#7c3aed', secondary: '#6366f1', accent: '#ec4899', background: '#faf5ff', text: '#374151', heading: '#1e1b4b' },
+                fonts: { heading: 'Playfair Display', body: 'DM Sans' },
+            },
+            {
+                id: 'minimal',
+                name: 'Мінімалізм',
+                colors: { primary: '#374151', secondary: '#6b7280', accent: '#3b82f6', background: '#ffffff', text: '#4b5563', heading: '#111827' },
+                fonts: { heading: 'Space Grotesk', body: 'Inter' },
+            },
+            {
+                id: 'modern',
+                name: 'Сучасний',
+                colors: { primary: '#e11d48', secondary: '#0ea5e9', accent: '#f59e0b', background: '#ffffff', text: '#334155', heading: '#0f172a' },
+                fonts: { heading: 'Montserrat', body: 'Nunito' },
+            },
+            {
+                id: 'ocean',
+                name: 'Океан',
+                colors: { primary: '#0284c7', secondary: '#0891b2', accent: '#06b6d4', background: '#f0f9ff', text: '#1e3a5f', heading: '#0c4a6e' },
+                fonts: { heading: 'Poppins', body: 'Open Sans' },
+            },
+            {
+                id: 'sunset',
+                name: 'Захід сонця',
+                colors: { primary: '#db2777', secondary: '#e11d48', accent: '#f97316', background: '#fff1f2', text: '#4c1d4e', heading: '#3b0764' },
+                fonts: { heading: 'Oswald', body: 'Lato' },
+            },
+        ],
+
         accordion: {
+            templates: false,
             colors: true,
             fonts: false,
             hero: false,
@@ -462,8 +550,11 @@ document.addEventListener('alpine:init', () => {
             if (!container) return;
 
             if (this.editMode) {
-                // Save original order for cancel
-                this.originalPageOrder = [...container.querySelectorAll('.section-wrapper')].map(el => el.dataset.sectionId);
+                // Save original order + layout for cancel
+                this.originalPageOrder = [...container.querySelectorAll('.section-wrapper')].map(el => ({
+                    id: el.dataset.sectionId,
+                    layout: el.dataset.layout || 'full',
+                }));
                 container.classList.add('edit-active');
                 this.$nextTick(() => this.initPageSortable());
             } else {
@@ -482,7 +573,11 @@ document.addEventListener('alpine:init', () => {
                 let sectionsData = [];
 
                 if (container) {
-                    const pageIds = [...container.querySelectorAll('.section-wrapper')].map(el => el.dataset.sectionId);
+                    const pageWrappers = [...container.querySelectorAll('.section-wrapper')];
+                    const pageIds = pageWrappers.map(el => el.dataset.sectionId);
+                    // Build a map of layout values from page wrappers
+                    const layoutMap = {};
+                    pageWrappers.forEach(el => { layoutMap[el.dataset.sectionId] = el.dataset.layout || 'full'; });
                     // Get all sections from sidebar (includes disabled ones)
                     if (sidebarList) {
                         const allSidebarItems = [...sidebarList.querySelectorAll('[data-id]')];
@@ -490,12 +585,12 @@ document.addEventListener('alpine:init', () => {
                         let order = 0;
                         // First add enabled sections in page order
                         pageIds.forEach(id => {
-                            sectionsData.push({ id, enabled: true, order: order++ });
+                            sectionsData.push({ id, enabled: true, order: order++, layout: layoutMap[id] || 'full' });
                         });
                         // Then add disabled sections
                         allSidebarItems.forEach(item => {
                             if (!enabledSet.has(item.dataset.id)) {
-                                sectionsData.push({ id: item.dataset.id, enabled: item.dataset.enabled === '1', order: order++ });
+                                sectionsData.push({ id: item.dataset.id, enabled: item.dataset.enabled === '1', order: order++, layout: item.dataset.layout || 'full' });
                             }
                         });
                     }
@@ -523,10 +618,15 @@ document.addEventListener('alpine:init', () => {
         cancelEditMode() {
             const container = document.getElementById('sections-container');
             if (container && this.originalPageOrder) {
-                // Restore original DOM order
-                this.originalPageOrder.forEach(id => {
-                    const el = container.querySelector('[data-section-id="' + id + '"]');
-                    if (el) container.appendChild(el);
+                // Restore original DOM order + layout
+                this.originalPageOrder.forEach(item => {
+                    const el = container.querySelector('[data-section-id="' + item.id + '"]');
+                    if (el) {
+                        el.dataset.layout = item.layout;
+                        el.classList.remove('md:w-1/2');
+                        if (item.layout === 'half') el.classList.add('md:w-1/2');
+                        container.appendChild(el);
+                    }
                 });
                 // Sync sidebar back
                 this.syncSidebarFromPage();
@@ -579,27 +679,38 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        // Sync sidebar list order to match page sections order
+        // Sync sidebar list order + layout to match page sections
         syncSidebarFromPage() {
             const container = document.getElementById('sections-container');
             const sidebarList = this.$refs.sectionsList;
             if (!container || !sidebarList) return;
-            const pageOrder = [...container.querySelectorAll('.section-wrapper')].map(el => el.dataset.sectionId);
-            pageOrder.forEach(id => {
+            const pageWrappers = [...container.querySelectorAll('.section-wrapper')];
+            pageWrappers.forEach(el => {
+                const id = el.dataset.sectionId;
                 const sidebarItem = sidebarList.querySelector('[data-id="' + id + '"]');
-                if (sidebarItem) sidebarList.appendChild(sidebarItem);
+                if (sidebarItem) {
+                    sidebarItem.dataset.layout = el.dataset.layout || 'full';
+                    sidebarList.appendChild(sidebarItem);
+                }
             });
         },
 
-        // Sync page sections order to match sidebar list
+        // Sync page sections order + layout to match sidebar list
         syncPageFromSidebar() {
             const container = document.getElementById('sections-container');
             const sidebarList = this.$refs.sectionsList;
             if (!container || !sidebarList) return;
-            const sidebarOrder = [...sidebarList.querySelectorAll('[data-id]')].map(el => el.dataset.id);
-            sidebarOrder.forEach(id => {
+            const sidebarItems = [...sidebarList.querySelectorAll('[data-id]')];
+            sidebarItems.forEach(sidebarEl => {
+                const id = sidebarEl.dataset.id;
+                const layout = sidebarEl.dataset.layout || 'full';
                 const pageItem = container.querySelector('[data-section-id="' + id + '"]');
-                if (pageItem) container.appendChild(pageItem);
+                if (pageItem) {
+                    pageItem.dataset.layout = layout;
+                    pageItem.classList.remove('md:w-1/2');
+                    if (layout === 'half') pageItem.classList.add('md:w-1/2');
+                    container.appendChild(pageItem);
+                }
             });
         },
 
@@ -695,6 +806,7 @@ document.addEventListener('alpine:init', () => {
                 id: row.dataset.id,
                 enabled: row.dataset.enabled === '1',
                 order: i,
+                layout: row.dataset.layout || 'full',
             }));
         },
 
@@ -813,6 +925,19 @@ document.addEventListener('alpine:init', () => {
                 const opacity = this.heroValues.overlay_opacity / 100;
                 overlayEl.style.background = 'linear-gradient(to right, rgba(17,24,39,' + opacity + '), rgba(17,24,39,' + (opacity * 0.78) + '))';
             }
+        },
+
+        // --- Templates ---
+
+        applyTemplate(tpl) {
+            this.activeTemplate = tpl.id;
+            // Apply colors
+            this.colorValues = { ...tpl.colors };
+            this.previewColors();
+            // Apply fonts
+            this.fontValues = { ...tpl.fonts };
+            this.previewFonts();
+            this.showToast('Шаблон "' + tpl.name + '" застосовано для перегляду. Збережіть щоб зафіксувати.', 'success');
         },
 
         // --- Save ---

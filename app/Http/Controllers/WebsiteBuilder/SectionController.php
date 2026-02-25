@@ -37,6 +37,7 @@ class SectionController extends Controller
             'sections.*.id' => 'required|string',
             'sections.*.enabled' => 'boolean',
             'sections.*.order' => 'integer',
+            'sections.*.layout' => 'nullable|string|in:full,half',
         ]);
 
         $sections = collect($validated['sections'])
@@ -45,6 +46,7 @@ class SectionController extends Controller
                     'id' => $section['id'],
                     'enabled' => $section['enabled'] ?? false,
                     'order' => $section['order'] ?? $index,
+                    'layout' => $section['layout'] ?? 'full',
                 ];
             })
             ->sortBy('order')

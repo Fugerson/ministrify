@@ -656,21 +656,21 @@ class Church extends Model
     public function getDefaultSections(): array
     {
         return [
-            ['id' => 'hero', 'enabled' => true, 'order' => 0],
-            ['id' => 'service_times', 'enabled' => true, 'order' => 1],
-            ['id' => 'about', 'enabled' => false, 'order' => 2],
-            ['id' => 'pastor_message', 'enabled' => true, 'order' => 3],
-            ['id' => 'leadership', 'enabled' => false, 'order' => 4],
-            ['id' => 'events', 'enabled' => true, 'order' => 5],
-            ['id' => 'sermons', 'enabled' => false, 'order' => 6],
-            ['id' => 'ministries', 'enabled' => true, 'order' => 7],
-            ['id' => 'groups', 'enabled' => true, 'order' => 8],
-            ['id' => 'gallery', 'enabled' => false, 'order' => 9],
-            ['id' => 'testimonials', 'enabled' => false, 'order' => 10],
-            ['id' => 'blog', 'enabled' => false, 'order' => 11],
-            ['id' => 'faq', 'enabled' => false, 'order' => 12],
-            ['id' => 'donations', 'enabled' => true, 'order' => 13],
-            ['id' => 'contact', 'enabled' => true, 'order' => 14],
+            ['id' => 'hero', 'enabled' => true, 'order' => 0, 'layout' => 'full'],
+            ['id' => 'service_times', 'enabled' => true, 'order' => 1, 'layout' => 'full'],
+            ['id' => 'about', 'enabled' => false, 'order' => 2, 'layout' => 'full'],
+            ['id' => 'pastor_message', 'enabled' => true, 'order' => 3, 'layout' => 'full'],
+            ['id' => 'leadership', 'enabled' => false, 'order' => 4, 'layout' => 'full'],
+            ['id' => 'events', 'enabled' => true, 'order' => 5, 'layout' => 'full'],
+            ['id' => 'sermons', 'enabled' => false, 'order' => 6, 'layout' => 'full'],
+            ['id' => 'ministries', 'enabled' => true, 'order' => 7, 'layout' => 'full'],
+            ['id' => 'groups', 'enabled' => true, 'order' => 8, 'layout' => 'full'],
+            ['id' => 'gallery', 'enabled' => false, 'order' => 9, 'layout' => 'full'],
+            ['id' => 'testimonials', 'enabled' => false, 'order' => 10, 'layout' => 'full'],
+            ['id' => 'blog', 'enabled' => false, 'order' => 11, 'layout' => 'full'],
+            ['id' => 'faq', 'enabled' => false, 'order' => 12, 'layout' => 'full'],
+            ['id' => 'donations', 'enabled' => true, 'order' => 13, 'layout' => 'full'],
+            ['id' => 'contact', 'enabled' => true, 'order' => 14, 'layout' => 'full'],
         ];
     }
 

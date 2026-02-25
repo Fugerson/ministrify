@@ -25,12 +25,18 @@
     $sectionSettings = ($church->public_site_settings ?? [])['section_settings'] ?? [];
 @endphp
 
-@if($isAdmin)<div id="sections-container">@endif
+@php $sectionsContainerId = $isAdmin ? 'id="sections-container"' : ''; @endphp
+<div {!! $sectionsContainerId !!} class="flex flex-wrap items-stretch">
 
 @foreach($enabledSections as $section)
+    @php
+        $secLayout = $section['layout'] ?? 'full';
+        $widthClass = $secLayout === 'half' ? 'w-full md:w-1/2' : 'w-full';
+    @endphp
+
     @if($isAdmin)
     @php $secBg = $sectionSettings[$section['id']]['bg_color'] ?? ''; @endphp
-    <div class="section-wrapper" data-section-id="{{ $section['id'] }}">
+    <div class="section-wrapper {{ $widthClass }}" data-section-id="{{ $section['id'] }}" data-layout="{{ $secLayout }}">
         {{-- Admin toolbar --}}
         <div class="section-admin-toolbar">
             <div class="section-toolbar-pill">
@@ -48,6 +54,15 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <span class="section-toolbar-sep"></span>
+                <button onclick="window.__sectionToggleLayout(this)" class="section-toolbar-btn" title="Ширина секції">
+                    @if($secLayout === 'half')
+                    {{-- Currently half → show "expand to full" icon --}}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                    @else
+                    {{-- Currently full → show "split to half" icon --}}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                    @endif
+                </button>
                 <label class="section-toolbar-btn section-color-label" title="Колір фону секції">
                     <input type="color" value="{{ $secBg ?: '#ffffff' }}" onchange="window.__sectionChangeBg(this)" class="section-color-input">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
@@ -62,22 +77,54 @@
                 </button>
             </div>
         </div>
+    @else
+    <div class="{{ $widthClass }}">
     @endif
 
     @include('public.sections.' . Str::replace('_', '-', $section['id']), ['church' => $church])
 
-    @if($isAdmin)
     </div>
-    @endif
 @endforeach
 
-@if($isAdmin)</div>@endif
+</div>
 
 @include('public.sections.cta', ['church' => $church])
 
 @if($isAdmin)
 <script>
-// Apply saved section background colors on load
+// Toggle section layout between full and half width
+window.__sectionToggleLayout = function(btn) {
+    const wrapper = btn.closest('.section-wrapper');
+    if (!wrapper) return;
+    const current = wrapper.dataset.layout || 'full';
+    const next = current === 'full' ? 'half' : 'full';
+    wrapper.dataset.layout = next;
+
+    // Update width class
+    wrapper.classList.remove('w-full', 'md:w-1/2');
+    if (next === 'half') {
+        wrapper.classList.add('w-full', 'md:w-1/2');
+    } else {
+        wrapper.classList.add('w-full');
+    }
+
+    // Update the icon inside the button
+    if (next === 'half') {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+        btn.title = 'На всю ширину';
+    } else {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>';
+        btn.title = 'Половина ширини';
+    }
+
+    // Show toast
+    const sidebar = window.__adminSidebar;
+    if (sidebar) {
+        sidebar.showPageToast(next === 'half' ? 'Секція: половина ширини. Натисніть "Зберегти".' : 'Секція: повна ширина. Натисніть "Зберегти".');
+    }
+};
+
+// Apply saved section background colors + detect empty sections
 document.addEventListener('DOMContentLoaded', function() {
     const bgColors = @json(collect($sectionSettings)->mapWithKeys(fn($s, $id) => [$id => $s['bg_color'] ?? null])->filter());
     Object.entries(bgColors).forEach(function([id, color]) {
@@ -85,6 +132,39 @@ document.addEventListener('DOMContentLoaded', function() {
         if (wrapper) {
             const section = wrapper.querySelector('section');
             if (section) section.style.backgroundColor = color;
+        }
+    });
+
+    // Mark empty sections + add placeholder for admin
+    const sectionHints = {
+        hero: "Завжди відображається",
+        service_times: "Заповніть розклад служінь у налаштуваннях церкви",
+        about: "Додайте місію, візію або цінності",
+        pastor_message: "Заповніть дані пастора у налаштуваннях",
+        leadership: "Додайте команду: Конструктор сайту \u2192 Команда",
+        events: "Створіть публічні події в розділі Події",
+        sermons: "Додайте проповіді: Конструктор сайту \u2192 Проповіді",
+        ministries: "Створіть публічні служіння в розділі Служіння",
+        groups: "Створіть публічні малі групи в розділі Групи",
+        gallery: "Додайте фото: Конструктор сайту \u2192 Галерея",
+        testimonials: "Додайте свідчення: Конструктор сайту \u2192 Свідчення",
+        blog: "Додайте пости: Конструктор сайту \u2192 Блог",
+        faq: "Додайте питання: Конструктор сайту \u2192 FAQ",
+        donations: "Створіть активні кампанії пожертв",
+        contact: "Заповніть контактні дані у налаштуваннях церкви"
+    };
+    document.querySelectorAll('.section-wrapper').forEach(function(wrapper) {
+        const section = wrapper.querySelector('section');
+        const contentHeight = section ? section.offsetHeight : 0;
+        if (contentHeight < 10) {
+            wrapper.classList.add('section-empty');
+            const sectionId = wrapper.dataset.sectionId;
+            const hint = sectionHints[sectionId] || 'Додайте контент для цієї секції';
+            const placeholder = document.createElement('div');
+            placeholder.className = 'section-empty-placeholder';
+            placeholder.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>'
+                + '<span>' + hint + '</span>';
+            wrapper.appendChild(placeholder);
         }
     });
 });
@@ -102,12 +182,44 @@ document.addEventListener('DOMContentLoaded', function() {
     z-index: 50;
     transition: border-color 0.2s, background 0.2s;
 }
-/* Borders only visible in edit mode */
+/* In edit mode: min height for empty sections + visible borders */
+#sections-container.edit-active .section-wrapper {
+    min-height: 56px;
+}
 #sections-container.edit-active .section-wrapper::before {
     border-color: rgba(59, 130, 246, 0.25);
 }
 #sections-container.edit-active .section-wrapper:hover::before {
     border-color: rgba(59, 130, 246, 0.6);
+}
+/* Empty sections (no visible content): always show toolbar + placeholder */
+#sections-container.edit-active .section-wrapper.section-empty .section-admin-toolbar {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    display: flex;
+    justify-content: center;
+    padding: 12px 0 4px;
+}
+.section-empty-placeholder {
+    display: none;
+}
+#sections-container.edit-active .section-empty-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px 16px;
+    color: #9ca3af;
+    font-size: 13px;
+}
+#sections-container.edit-active .section-empty-placeholder svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 .section-wrapper.sortable-chosen::before {
     border-color: rgba(59, 130, 246, 0.8) !important;
