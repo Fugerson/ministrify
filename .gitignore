@@ -27,3 +27,18 @@ yarn-error.log
 /storage/logs/
 !/storage/logs/.gitkeep
 .github/
+
+# Capacitor / Android
+/android/app/src/main/assets/public/
+/android/.gradle/
+/android/app/build/
+/android/build/
+/android/capacitor-cordova-android-plugins/build/
+/android/.idea/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Assets source (used for icon generation)
+/assets/

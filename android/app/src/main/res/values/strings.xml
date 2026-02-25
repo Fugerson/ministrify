@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ministrify</string>
+    <string name="title_activity_main">Ministrify</string>
+    <string name="package_name">app.ministrify.church</string>
+    <string name="custom_url_scheme">app.ministrify.church</string>
+</resources>

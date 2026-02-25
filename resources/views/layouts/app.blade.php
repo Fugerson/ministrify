@@ -102,6 +102,15 @@
     <meta name="msapplication-TileColor" content="#3b82f6">
     <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
 
+    <!-- Capacitor native app detection -->
+    <meta name="capacitor" content="true">
+    <script>
+        window.isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+        if (window.isCapacitor) {
+            document.documentElement.classList.add('capacitor-native');
+        }
+    </script>
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
 
