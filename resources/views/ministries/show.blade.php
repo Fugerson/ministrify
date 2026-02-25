@@ -1752,15 +1752,15 @@
                      }
                  }">
                 {{-- Budget Items Section --}}
-                @if($budgetData['has_items'] || $budgetData['effective_budget'] > 0)
                 <div x-data="budgetItemsManager()" class="mb-6 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <div class="px-4 py-3 {{ $budgetData['has_items'] ? 'border-b border-gray-200 dark:border-gray-700' : '' }} flex items-center justify-between">
                         <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                             <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                             </svg>
                             Бюджет
                         </h3>
+                        @if($budgetData['has_items'] || $budgetData['effective_budget'] > 0)
                         <div class="flex items-center gap-3">
                             @php
                                 $budgetPct = $budgetData['effective_budget'] > 0
@@ -1775,6 +1775,7 @@
                                 ({{ $budgetRemaining >= 0 ? '+' : '' }}{{ number_format($budgetRemaining, 0, ',', ' ') }} ₴)
                             </span>
                         </div>
+                        @endif
                     </div>
 
                     {{-- Progress bar --}}
@@ -1964,7 +1965,6 @@
                         </div>
                     </div>
                 </div>
-                @endif
 
                 <!-- Period selector -->
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
