@@ -87,6 +87,7 @@ class Transaction extends Model
         'person_id',
         'ministry_id',
         'campaign_id',
+        'budget_item_id',
         'donor_name',
         'donor_email',
         'donor_phone',
@@ -191,6 +192,11 @@ class Transaction extends Model
     public function campaign(): BelongsTo
     {
         return $this->belongsTo(DonationCampaign::class, 'campaign_id');
+    }
+
+    public function budgetItem(): BelongsTo
+    {
+        return $this->belongsTo(BudgetItem::class);
     }
 
     public function recorder(): BelongsTo

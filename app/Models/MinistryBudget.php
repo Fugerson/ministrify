@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MinistryBudget extends Model
 {
@@ -38,6 +39,11 @@ class MinistryBudget extends Model
     public function ministry(): BelongsTo
     {
         return $this->belongsTo(Ministry::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(BudgetItem::class)->orderBy('sort_order');
     }
 
     // ==================
@@ -83,6 +89,18 @@ class MinistryBudget extends Model
     // ==================
     // Methods
     // ==================
+
+    /**
+     * Get effective budget: SUM of items if any, otherwise monthly_budget
+     */
+    public function getEffectiveBudget(): float
+    {
+        if ($this->items->isNotEmpty()) {
+            return (float) $this->items->sum('planned_amount');
+        }
+
+        return (float) $this->monthly_budget;
+    }
 
     /**
      * Get actual spending for this budget period

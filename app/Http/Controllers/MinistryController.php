@@ -460,6 +460,22 @@ class MinistryController extends Controller
         return $this->successResponse($request, 'Служіння видалено.', 'ministries.index');
     }
 
+    public function membersJson(Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+
+        $members = $ministry->members()
+            ->select('people.id', 'people.first_name', 'people.last_name')
+            ->orderBy('people.first_name')
+            ->get()
+            ->map(fn($p) => [
+                'id' => $p->id,
+                'name' => $p->full_name ?? ($p->first_name . ' ' . $p->last_name),
+            ]);
+
+        return response()->json(['members' => $members]);
+    }
+
     public function addMember(Request $request, Ministry $ministry)
     {
         $this->authorizeChurch($ministry);

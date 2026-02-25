@@ -297,6 +297,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
 
     // Ministries
     Route::resource('ministries', MinistryController::class);
+    Route::get('ministries/{ministry}/members-json', [MinistryController::class, 'membersJson'])->name('ministries.members.json');
     Route::post('ministries/{ministry}/members', [MinistryController::class, 'addMember'])->name('ministries.members.add');
     Route::delete('ministries/{ministry}/members/{person}', [MinistryController::class, 'removeMember'])->name('ministries.members.remove');
     Route::put('ministries/{ministry}/members/{person}', [MinistryController::class, 'updateMemberPositions'])->name('ministries.members.update');
@@ -522,6 +523,12 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         // Team Budgets
         Route::get('budgets', [FinanceController::class, 'budgets'])->name('budgets');
         Route::post('budgets/{ministry}', [FinanceController::class, 'updateBudget'])->name('budgets.update');
+
+        // Budget Items
+        Route::post('budgets/{ministryBudget}/items', [FinanceController::class, 'storeBudgetItem'])->name('budgets.items.store');
+        Route::put('budgets/items/{budgetItem}', [FinanceController::class, 'updateBudgetItem'])->name('budgets.items.update');
+        Route::delete('budgets/items/{budgetItem}', [FinanceController::class, 'destroyBudgetItem'])->name('budgets.items.destroy');
+        Route::get('budgets/items/{budgetItem}/transactions', [FinanceController::class, 'budgetItemTransactions'])->name('budgets.items.transactions');
 
         // Unified Cards Page
         Route::get('cards', [FinanceController::class, 'cards'])->name('cards');
