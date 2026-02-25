@@ -1679,22 +1679,14 @@
                 @endif
             </div>
 
-            @php
-                $allTransactions = \App\Models\Transaction::where('church_id', $ministry->church_id)
-                    ->where('ministry_id', $ministry->id)
-                    ->where('direction', 'out')
-                    ->with(['category', 'attachments'])
-                    ->orderByDesc('date')
-                    ->get();
-            @endphp
             <div x-show="activeTab === 'expenses'"{{ $tab !== 'expenses' ? ' style="display:none"' : '' }}
                  x-data="{
                      search: '',
                      sortBy: 'date_desc',
                      filterPeriod: 'month',
-                     currentMonth: {{ now()->month }},
-                     currentYear: {{ now()->year }},
-                     allTransactions: {{ Js::from($allTransactions->map(fn($t) => [
+                     currentMonth: {{ $budgetData['month'] }},
+                     currentYear: {{ $budgetData['year'] }},
+                     allTransactions: {{ Js::from($ministry->transactions->map(fn($t) => [
                          'id' => $t->id,
                          'amount' => $t->amount,
                          'currency' => $t->currency ?? '₴',
@@ -1759,6 +1751,221 @@
                          }
                      }
                  }">
+                {{-- Budget Items Section --}}
+                @if($budgetData['has_items'] || $budgetData['effective_budget'] > 0)
+                <div x-data="budgetItemsManager()" class="mb-6 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                        <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            Бюджет
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            @php
+                                $budgetPct = $budgetData['effective_budget'] > 0
+                                    ? round(($budgetData['total_spent'] / $budgetData['effective_budget']) * 100, 1)
+                                    : 0;
+                                $budgetRemaining = $budgetData['effective_budget'] - $budgetData['total_spent'];
+                            @endphp
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ number_format($budgetData['total_spent'], 0, ',', ' ') }} / {{ number_format($budgetData['effective_budget'], 0, ',', ' ') }} ₴
+                            </span>
+                            <span class="text-sm font-medium {{ $budgetRemaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                ({{ $budgetRemaining >= 0 ? '+' : '' }}{{ number_format($budgetRemaining, 0, ',', ' ') }} ₴)
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Progress bar --}}
+                    @if($budgetData['effective_budget'] > 0)
+                    <div class="px-4 pt-3">
+                        @php
+                            $barPct = min(100, $budgetPct);
+                            $barColor = $budgetPct > 100 ? 'bg-red-500' : ($budgetPct > 80 ? 'bg-orange-500' : 'bg-green-500');
+                        @endphp
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                            <div class="{{ $barColor }} h-2 rounded-full transition-all" style="width: {{ $barPct }}%"></div>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($budgetData['has_items'])
+                    <div class="px-4 py-3">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                                        <th class="px-2 py-1.5 text-left">Стаття</th>
+                                        <th class="px-2 py-1.5 text-right">План</th>
+                                        <th class="px-2 py-1.5 text-right">Факт</th>
+                                        <th class="px-2 py-1.5 text-right">Різниця</th>
+                                        <th class="px-2 py-1.5 text-left">Відповідальні</th>
+                                        @can('contribute-ministry', $ministry)
+                                        <th class="px-2 py-1.5 text-center w-16">Дії</th>
+                                        @endcan
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    @foreach($budgetData['items'] as $bi)
+                                    <tr class="hover:bg-white dark:hover:bg-gray-700/30">
+                                        <td class="px-2 py-2">
+                                            <div class="font-medium text-gray-900 dark:text-white">{{ $bi['name'] }}</div>
+                                            @if($bi['category'])
+                                                <div class="text-xs text-gray-500">{{ $bi['category']->name }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="px-2 py-2 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
+                                            {{ number_format($bi['planned_amount'], 0, ',', ' ') }} ₴
+                                        </td>
+                                        <td class="px-2 py-2 text-right whitespace-nowrap text-red-600 dark:text-red-400">
+                                            {{ number_format($bi['actual'], 0, ',', ' ') }} ₴
+                                        </td>
+                                        <td class="px-2 py-2 text-right whitespace-nowrap font-medium {{ $bi['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                            {{ $bi['difference'] >= 0 ? '+' : '' }}{{ number_format($bi['difference'], 0, ',', ' ') }} ₴
+                                        </td>
+                                        <td class="px-2 py-2">
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach($bi['responsible'] as $person)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                                    {{ $person->short_name ?? $person->first_name }}
+                                                </span>
+                                                @endforeach
+                                            </div>
+                                        </td>
+                                        @can('contribute-ministry', $ministry)
+                                        <td class="px-2 py-2 text-center">
+                                            <div class="flex items-center justify-center gap-0.5">
+                                                <button @click="openItemModal('edit', {{ json_encode([
+                                                    'id' => $bi['id'],
+                                                    'name' => $bi['name'],
+                                                    'planned_amount' => $bi['planned_amount'],
+                                                    'category_id' => $bi['category_id'],
+                                                    'notes' => $bi['notes'] ?? '',
+                                                    'person_ids' => $bi['responsible']->pluck('id')->toArray(),
+                                                ]) }})"
+                                                        class="p-1 text-gray-400 hover:text-primary-600 rounded" title="Редагувати">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                </button>
+                                                <button @click="deleteItem({{ $bi['id'] }}, '{{ addslashes($bi['name']) }}')"
+                                                        class="p-1 text-gray-400 hover:text-red-600 rounded" title="Видалити">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        @endcan
+                                    </tr>
+                                    @endforeach
+
+                                    @if($budgetData['unmatched_spent'] > 0)
+                                    <tr class="bg-orange-50/50 dark:bg-orange-900/10">
+                                        <td class="px-2 py-2 text-gray-500 italic">Інші витрати</td>
+                                        <td class="px-2 py-2 text-right text-gray-400">-</td>
+                                        <td class="px-2 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($budgetData['unmatched_spent'], 0, ',', ' ') }} ₴</td>
+                                        <td class="px-2 py-2"></td>
+                                        <td class="px-2 py-2"></td>
+                                        @can('contribute-ministry', $ministry)<td></td>@endcan
+                                    </tr>
+                                    @endif
+
+                                    <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold text-sm">
+                                        <td class="px-2 py-2 text-gray-900 dark:text-white">Всього</td>
+                                        <td class="px-2 py-2 text-right text-gray-900 dark:text-white">{{ number_format(collect($budgetData['items'])->sum('planned_amount'), 0, ',', ' ') }} ₴</td>
+                                        <td class="px-2 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($budgetData['total_spent'], 0, ',', ' ') }} ₴</td>
+                                        <td class="px-2 py-2 text-right {{ $budgetRemaining >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            {{ $budgetRemaining >= 0 ? '+' : '' }}{{ number_format($budgetRemaining, 0, ',', ' ') }} ₴
+                                        </td>
+                                        <td class="px-2 py-2"></td>
+                                        @can('contribute-ministry', $ministry)<td></td>@endcan
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @endif
+
+                    @can('contribute-ministry', $ministry)
+                    <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700">
+                        <button @click="openItemModal('create')"
+                                class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Додати статтю бюджету
+                        </button>
+                    </div>
+                    @endcan
+
+                    {{-- Budget Item Modal --}}
+                    <div x-show="showItemModal" x-cloak
+                         class="fixed inset-0 z-50 overflow-y-auto"
+                         x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                         x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                        <div class="flex items-center justify-center min-h-screen p-4">
+                            <div class="fixed inset-0 bg-black/50" @click="showItemModal = false"></div>
+                            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6"
+                                 x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                 @click.stop>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="itemModalTitle"></h3>
+                                <form @submit.prevent="saveItem()" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                                        <input type="text" x-model="itemForm.name" required maxlength="255"
+                                               placeholder="Оренда, Перекуси, Матеріали..."
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Запланована сума (₴) *</label>
+                                        <input type="number" x-model="itemForm.planned_amount" required min="0" step="0.01"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія витрат</label>
+                                        <select x-model="itemForm.category_id"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                            <option value="">Без категорії</option>
+                                            @foreach($expenseCategories as $cat)
+                                                <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <p class="text-xs text-gray-500 mt-1">Для автоматичного збору витрат за категорією</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Відповідальні</label>
+                                        <div class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 max-h-32 overflow-y-auto p-2 space-y-1">
+                                            @foreach($ministry->members as $member)
+                                            <label class="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
+                                                <input type="checkbox" value="{{ $member->id }}" x-model="itemForm.person_ids"
+                                                       class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $member->full_name }}</span>
+                                            </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                                        <textarea x-model="itemForm.notes" rows="2" maxlength="500"
+                                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
+                                    </div>
+                                    <div class="flex justify-end gap-3 pt-2">
+                                        <button type="button" @click="showItemModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300">Скасувати</button>
+                                        <button type="submit" :disabled="itemSaving"
+                                                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg disabled:opacity-50">
+                                            <span x-show="!itemSaving" x-text="itemMode === 'create' ? 'Додати' : 'Зберегти'"></span>
+                                            <span x-show="itemSaving">Збереження...</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Period selector -->
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <div class="flex items-center gap-2">
@@ -4286,6 +4493,139 @@ function settingsTab() {
                 }
             } catch (error) {
                 console.error('Error saving visibility:', error);
+            }
+        }
+    }
+}
+
+function budgetItemsManager() {
+    return {
+        showItemModal: false,
+        itemMode: 'create',
+        itemModalTitle: '',
+        itemEditId: null,
+        itemSaving: false,
+        budgetId: {{ $budgetData['budget']?->id ?? 'null' }},
+        ministryId: {{ $ministry->id }},
+        itemForm: {
+            name: '',
+            planned_amount: '',
+            category_id: '',
+            notes: '',
+            person_ids: [],
+        },
+
+        async ensureBudget() {
+            if (this.budgetId) return true;
+            try {
+                const res = await fetch('/finances/budgets/' + this.ministryId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        monthly_budget: 0,
+                        year: {{ $budgetData['year'] }},
+                        month: {{ $budgetData['month'] }},
+                        notes: '',
+                    }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    // Reload to get the budget_id
+                    location.reload();
+                    return false;
+                }
+            } catch (e) {}
+            return false;
+        },
+
+        async openItemModal(mode, itemData) {
+            this.itemMode = mode;
+            this.itemModalTitle = mode === 'create' ? 'Нова стаття бюджету' : 'Редагувати статтю';
+
+            if (mode === 'edit' && itemData) {
+                this.itemEditId = itemData.id;
+                this.itemForm = {
+                    name: itemData.name,
+                    planned_amount: itemData.planned_amount,
+                    category_id: itemData.category_id || '',
+                    notes: itemData.notes || '',
+                    person_ids: (itemData.person_ids || []).map(String),
+                };
+            } else {
+                this.itemEditId = null;
+                this.itemForm = { name: '', planned_amount: '', category_id: '', notes: '', person_ids: [] };
+            }
+
+            if (mode === 'create' && !this.budgetId) {
+                const ok = await this.ensureBudget();
+                if (!ok) return;
+            }
+
+            this.showItemModal = true;
+        },
+
+        async saveItem() {
+            this.itemSaving = true;
+            try {
+                const url = this.itemMode === 'create'
+                    ? `/finances/budgets/${this.budgetId}/items`
+                    : `/finances/budgets/items/${this.itemEditId}`;
+                const method = this.itemMode === 'create' ? 'POST' : 'PUT';
+
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: this.itemForm.name,
+                        planned_amount: this.itemForm.planned_amount,
+                        category_id: this.itemForm.category_id || null,
+                        notes: this.itemForm.notes || null,
+                        person_ids: this.itemForm.person_ids.map(Number),
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.showItemModal = false;
+                    if (typeof showToast === 'function') showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                } else if (res.status === 422) {
+                    const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
+                    if (typeof showToast === 'function') showToast('error', msgs[0]);
+                } else {
+                    if (typeof showToast === 'function') showToast('error', data.message || 'Помилка');
+                }
+            } catch (e) {
+                if (typeof showToast === 'function') showToast('error', 'Помилка збереження');
+            } finally {
+                this.itemSaving = false;
+            }
+        },
+
+        async deleteItem(itemId, itemName) {
+            if (!confirm(`Видалити статтю "${itemName}"?`)) return;
+            try {
+                const res = await fetch(`/finances/budgets/items/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    if (typeof showToast === 'function') showToast('success', data.message);
+                    setTimeout(() => location.reload(), 500);
+                }
+            } catch (e) {
+                if (typeof showToast === 'function') showToast('error', 'Помилка видалення');
             }
         }
     }

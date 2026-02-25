@@ -7,11 +7,15 @@ use App\Models\BoardCard;
 use App\Models\Event;
 use App\Models\EventMinistryTeam;
 use App\Models\EventSong;
+use App\Models\BudgetItem;
 use App\Models\Ministry;
+use App\Models\MinistryBudget;
 use App\Models\MinistryRole;
 use App\Models\Person;
 use App\Models\Resource;
 use App\Models\Song;
+use App\Models\Transaction;
+use App\Models\TransactionCategory;
 use App\Models\WorshipRole;
 use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
@@ -104,7 +108,7 @@ class MinistryController extends Controller
             'positions',
             'members',
             'events' => fn($q) => $q->orderBy('date')->orderBy('time')->with(['ministry.positions', 'assignments']),
-            'transactions' => fn($q) => $q->where('direction', 'out')->whereMonth('date', now()->month)->whereYear('date', now()->year)->with(['category', 'attachments'])->orderByDesc('date'),
+            'transactions' => fn($q) => $q->where('direction', 'out')->completed()->with(['category', 'attachments'])->orderByDesc('date'),
             'goals' => fn($q) => $q->with(['tasks.assignee', 'creator'])->orderByDesc('created_at'),
         ]);
 
@@ -280,7 +284,81 @@ class MinistryController extends Controller
             ];
         });
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics'));
+        // Budget items for expenses tab
+        $budgetYear = (int) request('budget_year', now()->year);
+        $budgetMonth = (int) request('budget_month', now()->month);
+
+        $ministryBudget = MinistryBudget::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('year', $budgetYear)
+            ->where('month', $budgetMonth)
+            ->with(['items.responsiblePeople', 'items.category'])
+            ->first();
+
+        // Spending by budget_item_id and category for this ministry/period
+        $spendingRaw = Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
+            ->completed()
+            ->whereYear('date', $budgetYear)
+            ->whereMonth('date', $budgetMonth)
+            ->selectRaw('category_id, budget_item_id, SUM(COALESCE(amount_uah, amount)) as total')
+            ->groupBy('category_id', 'budget_item_id')
+            ->get();
+
+        $spendingByItem = [];
+        $spendingByCategoryUnlinked = [];
+        $totalSpent = 0;
+        foreach ($spendingRaw as $row) {
+            $totalSpent += $row->total;
+            if ($row->budget_item_id) {
+                $spendingByItem[$row->budget_item_id] = ($spendingByItem[$row->budget_item_id] ?? 0) + $row->total;
+            } else {
+                $catKey = $row->category_id ?: 0;
+                $spendingByCategoryUnlinked[$catKey] = ($spendingByCategoryUnlinked[$catKey] ?? 0) + $row->total;
+            }
+        }
+
+        $budgetItems = [];
+        $itemsSpentTotal = 0;
+        if ($ministryBudget && $ministryBudget->items->isNotEmpty()) {
+            foreach ($ministryBudget->items as $item) {
+                $directSpent = $spendingByItem[$item->id] ?? 0;
+                $autoMatched = $item->category_id ? ($spendingByCategoryUnlinked[$item->category_id] ?? 0) : 0;
+                $itemSpent = $directSpent + $autoMatched;
+                $itemsSpentTotal += $itemSpent;
+                $budgetItems[] = [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'category' => $item->category,
+                    'category_id' => $item->category_id,
+                    'planned_amount' => (float) $item->planned_amount,
+                    'actual' => $itemSpent,
+                    'difference' => (float) $item->planned_amount - $itemSpent,
+                    'responsible' => $item->responsiblePeople,
+                    'notes' => $item->notes,
+                    'sort_order' => $item->sort_order,
+                ];
+            }
+        }
+
+        $budgetData = [
+            'budget' => $ministryBudget,
+            'items' => $budgetItems,
+            'has_items' => !empty($budgetItems),
+            'effective_budget' => $ministryBudget ? $ministryBudget->getEffectiveBudget() : ($ministry->monthly_budget ?? 0),
+            'total_spent' => $totalSpent,
+            'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
+            'year' => $budgetYear,
+            'month' => $budgetMonth,
+        ];
+
+        $expenseCategories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics', 'budgetData', 'expenseCategories'));
     }
 
     public function scheduleGridData(Request $request, Ministry $ministry)
