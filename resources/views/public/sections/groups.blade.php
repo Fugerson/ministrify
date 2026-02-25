@@ -45,4 +45,37 @@
         </div>
     </div>
 </section>
+@else
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900">Малі групи</h2>
+            <p class="text-gray-600 mt-2">Спільнота, яка росте разом</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach([
+                ['name' => 'Сімейна група', 'schedule' => 'Субота, 17:00', 'color' => '#6366f1', 'count' => 10],
+                ['name' => 'Молодіжна група', 'schedule' => "П'ятниця, 19:00", 'color' => '#10b981', 'count' => 14],
+                ['name' => 'Жіноча група', 'schedule' => 'Четвер, 11:00', 'color' => '#ec4899', 'count' => 8],
+            ] as $group)
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary-200 transition-all duration-300">
+                    <div class="h-40 flex items-center justify-center" style="background: linear-gradient(135deg, {{ $group['color'] }} 0%, {{ $group['color'] }}99 100%);">
+                        <svg class="w-12 h-12 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-semibold text-gray-900">{{ $group['name'] }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ $group['schedule'] }}</p>
+                        <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                            <span class="text-xs text-gray-400">{{ $group['count'] }} учасників</span>
+                            <span class="text-xs text-primary-600 font-medium">Приєднатися</span>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
 @endif
