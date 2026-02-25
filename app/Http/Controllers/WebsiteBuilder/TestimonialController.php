@@ -13,10 +13,14 @@ class TestimonialController extends Controller
 {
     use RequiresChurch;
 
-    public function index()
+    public function index(Request $request)
     {
         $church = $this->getChurchOrFail();
         $testimonials = $church->testimonials()->orderBy('sort_order')->get();
+
+        if ($request->wantsJson()) {
+            return response()->json(['items' => $testimonials]);
+        }
 
         return view('website-builder.testimonials.index', compact('church', 'testimonials'));
     }

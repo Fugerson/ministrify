@@ -13,10 +13,15 @@ class TeamController extends Controller
 {
     use RequiresChurch;
 
-    public function index()
+    public function index(Request $request)
     {
         $church = $this->getChurchOrFail();
         $staffMembers = $church->staffMembers()->orderBy('sort_order')->get();
+
+        if ($request->wantsJson()) {
+            return response()->json(['items' => $staffMembers]);
+        }
+
         $roleCategories = StaffMember::CATEGORIES;
 
         return view('website-builder.team.index', compact('church', 'staffMembers', 'roleCategories'));

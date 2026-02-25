@@ -42,7 +42,7 @@
 
             {{-- Description --}}
             <p class="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                {{ $exception->getMessage() ?: 'Сторінка, яку ви шукаєте, не існує або була переміщена.' }}
+                Сторінка, яку ви шукаєте, не існує або була переміщена.
             </p>
 
             {{-- Actions --}}

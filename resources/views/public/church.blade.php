@@ -54,7 +54,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <span class="section-toolbar-sep"></span>
-                <button onclick="window.__sectionToggleLayout(this)" class="section-toolbar-btn" title="Ширина секції">
+                <button onclick="window.__sectionToggleLayout(this)" class="section-toolbar-btn" title="{{ $secLayout === 'half' ? 'На всю ширину' : 'Половина ширини' }}">
                     @if($secLayout === 'half')
                     {{-- Currently half → show "expand to full" icon --}}
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>

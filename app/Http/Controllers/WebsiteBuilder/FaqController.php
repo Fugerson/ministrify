@@ -11,10 +11,14 @@ class FaqController extends Controller
 {
     use RequiresChurch;
 
-    public function index()
+    public function index(Request $request)
     {
         $church = $this->getChurchOrFail();
         $faqs = $church->faqs()->orderBy('category')->orderBy('sort_order')->get();
+
+        if ($request->wantsJson()) {
+            return response()->json(['items' => $faqs]);
+        }
 
         // Group by category
         $faqsByCategory = $faqs->groupBy('category');

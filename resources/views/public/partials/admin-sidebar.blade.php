@@ -7,6 +7,7 @@
     $navigation = $settings['navigation'] ?? [];
     $footer = $settings['footer'] ?? [];
     $sections = $settings['sections'] ?? [];
+    $aboutData = $church->about_content;
 
     $defaultColors = [
         'primary' => '#3b82f6',
@@ -372,30 +373,58 @@
             </div>
 
             {{-- ========== CONTENT TAB ========== --}}
-            <div x-show="activeTab === 'content'" class="p-4">
-                <p class="text-xs text-gray-500 mb-3">Редагуйте контент через адмін-панель. Посилання відкриються у новій вкладці.</p>
-                <div class="space-y-2">
-                    @php
-                        $contentLinks = [
-                            ['label' => 'Про нас', 'url' => route('website-builder.about.edit')],
-                            ['label' => 'Команда', 'url' => route('website-builder.team.index')],
-                            ['label' => 'Проповіді', 'url' => route('website-builder.sermons.index')],
-                            ['label' => 'Галерея', 'url' => route('website-builder.gallery.index')],
-                            ['label' => 'Блог', 'url' => route('website-builder.blog.index')],
-                            ['label' => 'FAQ', 'url' => route('website-builder.faq.index')],
-                            ['label' => 'Свідчення', 'url' => route('website-builder.testimonials.index')],
-                            ['label' => 'Події', 'url' => route('events.index')],
-                        ];
-                    @endphp
-                    @foreach($contentLinks as $link)
-                        <a href="{{ $link['url'] }}" target="_blank" rel="noopener noreferrer"
-                           class="flex items-center justify-between px-3 py-2.5 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors group">
-                            <span class="text-sm text-gray-700">{{ $link['label'] }}</span>
-                            <svg class="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                        </a>
-                    @endforeach
+            <div x-show="activeTab === 'content'" class="p-4 space-y-1.5">
+
+                @php
+                    $contentPanels = [
+                        ['key' => 'about', 'label' => 'Про нас', 'partial' => 'public.partials.admin-sidebar.content-about'],
+                        ['key' => 'team', 'label' => 'Команда', 'partial' => 'public.partials.admin-sidebar.content-team', 'cnt' => true],
+                        ['key' => 'sermons', 'label' => 'Проповіді', 'partial' => 'public.partials.admin-sidebar.content-sermons', 'cnt' => true],
+                        ['key' => 'gallery', 'label' => 'Галерея', 'partial' => 'public.partials.admin-sidebar.content-gallery', 'cnt' => true],
+                        ['key' => 'faq', 'label' => 'FAQ', 'partial' => 'public.partials.admin-sidebar.content-faq', 'cnt' => true],
+                        ['key' => 'testimonials', 'label' => 'Свідчення', 'partial' => 'public.partials.admin-sidebar.content-testimonials', 'cnt' => true],
+                    ];
+                @endphp
+
+                @foreach($contentPanels as $panel)
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button x-on:click="toggleContentPanel('{{ $panel['key'] }}')"
+                            class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">{{ $panel['label'] }}</span>
+                            @if(isset($panel['cnt']) && $panel['cnt'])
+                            <span x-show="cnt.{{ $panel['key'] }}.loaded" x-text="cnt.{{ $panel['key'] }}.items.length"
+                                  class="text-[10px] bg-gray-200 text-gray-600 rounded-full px-1.5 py-0.5 leading-none"></span>
+                            @endif
+                        </div>
+                        <svg :class="contentPanel === '{{ $panel['key'] }}' && 'rotate-180'" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="contentPanel === '{{ $panel['key'] }}'" x-transition class="border-t border-gray-200">
+                        <div class="p-3">
+                            @include($panel['partial'])
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+
+                {{-- Blog & Events as links --}}
+                <div class="pt-2 space-y-1.5">
+                    <a href="{{ route('website-builder.blog.index') }}" target="_blank" rel="noopener noreferrer"
+                       class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors group">
+                        <span class="text-sm text-gray-700">Блог</span>
+                        <svg class="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </a>
+                    <a href="{{ route('events.index') }}" target="_blank" rel="noopener noreferrer"
+                       class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors group">
+                        <span class="text-sm text-gray-700">Події</span>
+                        <svg class="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </a>
                 </div>
             </div>
 
@@ -514,12 +543,49 @@ document.addEventListener('alpine:init', () => {
             copyright_text: @json($footer['copyright_text'] ?? ''),
         },
 
+        // Content tab
+        contentPanel: null,
+        contentSaving: false,
+
+        contentRoutes: {
+            faq: @json(route('website-builder.faq.index')),
+            team: @json(route('website-builder.team.index')),
+            testimonials: @json(route('website-builder.testimonials.index')),
+            sermons: @json(route('website-builder.sermons.index')),
+            gallery: @json(route('website-builder.gallery.index')),
+            about: @json(route('website-builder.about.update')),
+        },
+
+        aboutForm: {
+            mission: @json($aboutData['mission'] ?? ''),
+            vision: @json($aboutData['vision'] ?? ''),
+            values: @json($aboutData['values'] ?? []),
+            history: @json($aboutData['history'] ?? ''),
+            beliefs: @json($aboutData['beliefs'] ?? ''),
+        },
+
+        cnt: {
+            faq:          { loaded: false, loading: false, items: [], editing: null, form: {} },
+            team:         { loaded: false, loading: false, items: [], editing: null, form: {} },
+            testimonials: { loaded: false, loading: false, items: [], editing: null, form: {} },
+            sermons:      { loaded: false, loading: false, items: [], editing: null, form: {} },
+            gallery:      { loaded: false, loading: false, items: [], editing: null, form: {} },
+        },
+
         init() {
             if (sessionStorage.getItem('adminSidebarOpen')) {
                 this.open = true;
                 this.activeTab = sessionStorage.getItem('adminSidebarTab') || 'design';
                 sessionStorage.removeItem('adminSidebarOpen');
                 sessionStorage.removeItem('adminSidebarTab');
+            }
+            // Restore content panel if was active before reload
+            const savedPanel = sessionStorage.getItem('adminContentPanel');
+            if (savedPanel) {
+                sessionStorage.removeItem('adminContentPanel');
+                if (this.activeTab === 'content') {
+                    this.$nextTick(() => this.toggleContentPanel(savedPanel));
+                }
             }
             // Restore edit mode if was active before reload
             if (sessionStorage.getItem('adminEditMode')) {
@@ -779,16 +845,26 @@ document.addEventListener('alpine:init', () => {
         // Open sidebar to edit a specific section
         openSectionEditor(sectionId) {
             this.open = true;
-            // Map section IDs to the best sidebar tab/accordion
             const heroSections = ['hero'];
+            const contentMap = {
+                'about': 'about',
+                'leadership': 'team',
+                'faq': 'faq',
+                'testimonials': 'testimonials',
+                'sermons': 'sermons',
+                'gallery': 'gallery',
+            };
+
             if (heroSections.includes(sectionId)) {
                 this.activeTab = 'design';
                 this.$nextTick(() => { this.accordion.hero = true; });
+            } else if (contentMap[sectionId]) {
+                this.activeTab = 'content';
+                this.$nextTick(() => { this.toggleContentPanel(contentMap[sectionId]); });
             } else {
                 this.activeTab = 'sections';
                 this.$nextTick(() => {
                     this.initSortable();
-                    // Highlight the section in sidebar
                     const item = this.$refs.sectionsList?.querySelector('[data-id="' + sectionId + '"]');
                     if (item) {
                         item.style.background = '#dbeafe';
@@ -797,6 +873,152 @@ document.addEventListener('alpine:init', () => {
                     }
                 });
             }
+        },
+
+        // --- Content Tab Methods ---
+
+        toggleContentPanel(panel) {
+            if (this.contentPanel === panel) {
+                this.contentPanel = null;
+                return;
+            }
+            this.contentPanel = panel;
+            if (this.cnt[panel] && !this.cnt[panel].loaded && !this.cnt[panel].loading) {
+                this.loadContent(panel);
+            }
+        },
+
+        async loadContent(section) {
+            const s = this.cnt[section];
+            if (!s) return;
+            s.loading = true;
+            try {
+                const res = await fetch(this.contentRoutes[section], {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                s.items = json.items || [];
+                s.loaded = true;
+            } catch (e) {
+                this.showToast('Помилка завантаження: ' + e.message, 'error');
+            } finally {
+                s.loading = false;
+            }
+        },
+
+        contentNew(section, defaults) {
+            this.cnt[section].editing = 'new';
+            this.cnt[section].form = { ...defaults };
+        },
+
+        contentEdit(section, item, fields) {
+            this.cnt[section].editing = item.id;
+            const form = {};
+            fields.forEach(f => { form[f] = item[f] ?? ''; });
+            this.cnt[section].form = form;
+        },
+
+        contentCancel(section) {
+            this.cnt[section].editing = null;
+            this.cnt[section].form = {};
+        },
+
+        async contentSaveItem(section, hasFiles = false) {
+            const s = this.cnt[section];
+            const isNew = s.editing === 'new';
+            const url = isNew ? this.contentRoutes[section] : this.contentRoutes[section] + '/' + s.editing;
+            const method = isNew ? 'POST' : 'PUT';
+
+            this.contentSaving = true;
+            try {
+                await this.cntFetch(url, method, s.form, hasFiles);
+                this.showToast(isNew ? 'Додано' : 'Оновлено', 'success');
+                s.editing = null;
+                s.form = {};
+                s.loaded = false;
+                await this.loadContent(section);
+            } catch (e) {
+                this.showToast('Помилка: ' + e.message, 'error');
+            } finally {
+                this.contentSaving = false;
+            }
+        },
+
+        async contentDeleteItem(section, id) {
+            if (!confirm('Видалити цей елемент?')) return;
+            try {
+                await this.cntFetch(this.contentRoutes[section] + '/' + id, 'DELETE');
+                this.showToast('Видалено', 'success');
+                this.cnt[section].items = this.cnt[section].items.filter(i => i.id !== id);
+            } catch (e) {
+                this.showToast('Помилка: ' + e.message, 'error');
+            }
+        },
+
+        async cntFetch(url, method, data = {}, hasFiles = false) {
+            const headers = {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            };
+
+            if (method === 'DELETE') {
+                const res = await fetch(url, { method, headers });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.message || 'Помилка видалення');
+                }
+                return res.json();
+            }
+
+            let body;
+            let sendMethod = method;
+
+            if (hasFiles) {
+                body = new FormData();
+                if (method !== 'POST') body.append('_method', method);
+                for (const [key, val] of Object.entries(data)) {
+                    if (key.startsWith('_')) continue;
+                    if (val instanceof File) body.append(key, val);
+                    else if (Array.isArray(val)) val.forEach((v, i) => body.append(key + '[' + i + ']', v ?? ''));
+                    else if (val === true) body.append(key, '1');
+                    else if (val === false) body.append(key, '0');
+                    else if (val !== null && val !== undefined) body.append(key, String(val));
+                }
+                sendMethod = 'POST';
+            } else {
+                headers['Content-Type'] = 'application/json';
+                body = JSON.stringify(data);
+            }
+
+            const res = await fetch(url, { method: sendMethod, headers, body });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || 'Помилка збереження');
+            }
+            return res.json();
+        },
+
+        async saveAbout() {
+            this.contentSaving = true;
+            try {
+                const data = { ...this.aboutForm };
+                data.values = (data.values || []).filter(v => v && v.trim());
+                await this.cntFetch(this.contentRoutes.about, 'PUT', data);
+                this.showToast('Розділ "Про нас" збережено', 'success');
+            } catch (e) {
+                this.showToast('Помилка: ' + e.message, 'error');
+            } finally {
+                this.contentSaving = false;
+            }
+        },
+
+        addAboutValue() {
+            this.aboutForm.values.push('');
+        },
+
+        removeAboutValue(index) {
+            this.aboutForm.values.splice(index, 1);
         },
 
         getSectionsFromDom() {
@@ -1034,6 +1256,7 @@ document.addEventListener('alpine:init', () => {
             } else {
                 sessionStorage.setItem('adminSidebarOpen', '1');
                 sessionStorage.setItem('adminSidebarTab', this.activeTab);
+                if (this.contentPanel) sessionStorage.setItem('adminContentPanel', this.contentPanel);
                 window.location.reload();
             }
         },

@@ -15,9 +15,15 @@ class SermonController extends Controller
 {
     use RequiresChurch;
 
-    public function index()
+    public function index(Request $request)
     {
         $church = $this->getChurchOrFail();
+
+        if ($request->wantsJson()) {
+            $sermons = $church->sermons()->with('series', 'speaker')->latest('sermon_date')->limit(50)->get();
+            return response()->json(['items' => $sermons]);
+        }
+
         $sermons = $church->sermons()->with('series', 'speaker')->latest('sermon_date')->paginate(20);
         $series = $church->sermonSeries()->orderBy('sort_order')->get();
 

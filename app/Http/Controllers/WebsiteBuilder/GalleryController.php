@@ -14,10 +14,14 @@ class GalleryController extends Controller
 {
     use RequiresChurch;
 
-    public function index()
+    public function index(Request $request)
     {
         $church = $this->getChurchOrFail();
         $galleries = $church->galleries()->withCount('photos')->orderBy('sort_order')->get();
+
+        if ($request->wantsJson()) {
+            return response()->json(['items' => $galleries]);
+        }
 
         return view('website-builder.gallery.index', compact('church', 'galleries'));
     }
@@ -49,6 +53,10 @@ class GalleryController extends Controller
         $validated['sort_order'] = $church->galleries()->max('sort_order') + 1;
 
         $gallery = Gallery::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Альбом створено', 'item' => $gallery]);
+        }
 
         return redirect()->route('website-builder.gallery.show', $gallery)->with('success', 'Альбом створено');
     }
@@ -93,10 +101,14 @@ class GalleryController extends Controller
 
         $gallery->update($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Альбом оновлено']);
+        }
+
         return redirect()->route('website-builder.gallery.show', $gallery)->with('success', 'Альбом оновлено');
     }
 
-    public function destroy(Gallery $gallery)
+    public function destroy(Request $request, Gallery $gallery)
     {
         $this->authorize('delete', $gallery);
 
@@ -116,6 +128,10 @@ class GalleryController extends Controller
 
         $gallery->photos()->delete();
         $gallery->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Альбом видалено']);
+        }
 
         return redirect()->route('website-builder.gallery.index')->with('success', 'Альбом видалено');
     }

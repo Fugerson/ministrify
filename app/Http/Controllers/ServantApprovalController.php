@@ -121,15 +121,43 @@ class ServantApprovalController extends Controller
             'servant_approved_at' => now(),
         ]);
 
+        // Ensure pivot has person_id (may be NULL if created by old code)
+        $pivot = DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+
+        $pivotUpdate = [
+            'church_role_id' => $roleId,
+            'role_approval_status' => 'approved',
+            'updated_at' => now(),
+        ];
+
+        if ($pivot && !$pivot->person_id) {
+            $person = Person::where('user_id', $user->id)
+                ->where('church_id', $church->id)
+                ->first();
+
+            if (!$person) {
+                $nameParts = explode(' ', $user->name, 2);
+                $person = Person::create([
+                    'church_id' => $church->id,
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $user->email,
+                    'membership_status' => 'newcomer',
+                ]);
+            }
+
+            $pivotUpdate['person_id'] = $person->id;
+        }
+
         // Update pivot records
         DB::table('church_user')
             ->where('user_id', $user->id)
             ->where('church_id', $church->id)
-            ->update([
-                'church_role_id' => $roleId,
-                'role_approval_status' => 'approved',
-                'updated_at' => now(),
-            ]);
+            ->update($pivotUpdate);
 
         // Log approval
         Log::channel('security')->info('Servant/role approved', [
