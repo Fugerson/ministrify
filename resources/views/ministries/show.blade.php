@@ -1704,18 +1704,24 @@
                                     </button>
                                 </div>
                             </div>
-                            {{-- Summary line (visible when has items) --}}
-                            <div x-show="budget.has_items" class="mt-2 flex flex-wrap items-center gap-3 text-sm">
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    Витрачено <span x-text="fmt(budget.total_spent)"></span>
-                                    з <span x-text="fmt(budget.effective_budget)"></span> ₴
+                            {{-- Summary line --}}
+                            <div x-show="budget.total_income > 0 || budget.total_spent > 0 || budget.has_items" class="mt-2 flex flex-wrap items-center gap-3 text-sm">
+                                <span class="text-green-600 dark:text-green-400 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+                                    Отримано <span x-text="fmt(budget.total_income) + ' ₴'"></span>
                                 </span>
+                                <span class="text-gray-300 dark:text-gray-600">|</span>
+                                <span class="text-red-500 dark:text-red-400 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
+                                    Витрачено <span x-text="fmt(budget.total_spent) + ' ₴'"></span>
+                                </span>
+                                <span class="text-gray-300 dark:text-gray-600">|</span>
                                 <span class="font-medium px-2 py-0.5 rounded-full text-xs"
-                                      :class="budgetRemaining >= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
-                                    <span x-text="(budgetRemaining >= 0 ? 'Залишок ' : 'Перевитрата ') + fmt(Math.abs(budgetRemaining)) + ' ₴'"></span>
+                                      :class="balance >= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
+                                    <span x-text="'Баланс ' + (balance >= 0 ? '+' : '') + fmt(balance) + ' ₴'"></span>
                                 </span>
                                 @can('contribute-ministry', $ministry)
-                                <button @click="copyBudget()" class="ml-auto text-xs text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1" title="Копіювати на наступний місяць">
+                                <button x-show="budget.has_items" @click="copyBudget()" class="ml-auto text-xs text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1" title="Копіювати на наступний місяць">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                     Копіювати на наст. місяць
                                 </button>
@@ -1941,6 +1947,115 @@
                     </div>
                 </div>
 
+                {{-- ===== INCOME SECTION ===== --}}
+                <div class="mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                            </svg>
+                            Надходження
+                            <span class="text-xs font-normal text-gray-400" x-text="monthNames[currentMonth] + ' ' + currentYear"></span>
+                        </h3>
+                        <span class="text-sm font-semibold text-green-600 dark:text-green-400" x-text="fmt(totalIncome) + ' ₴'"></span>
+                    </div>
+
+                    {{-- Income list --}}
+                    <div x-show="filteredIncome.length > 0" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-3">
+                        <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <template x-for="inc in filteredIncome" :key="inc.id">
+                                <div class="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold text-green-600 dark:text-green-400 whitespace-nowrap" x-text="'+' + new Intl.NumberFormat('uk-UA').format(inc.amount) + ' ' + inc.currency"></span>
+                                            <span class="text-sm text-gray-900 dark:text-white truncate" x-text="inc.description"></span>
+                                        </div>
+                                        <div class="flex items-center gap-2 mt-0.5">
+                                            <span class="text-xs text-gray-400" x-text="inc.date_formatted"></span>
+                                            <span x-show="inc.notes" class="text-xs text-gray-400 italic truncate" x-text="inc.notes"></span>
+                                        </div>
+                                    </div>
+                                    @can('contribute-ministry', $ministry)
+                                    <button @click="deleteIncome(inc.id)"
+                                            class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0" title="Видалити">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                    @endcan
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <p x-show="filteredIncome.length === 0" class="text-center text-gray-400 dark:text-gray-500 py-4 text-sm">Немає надходжень за цей період</p>
+
+                    @can('contribute-ministry', $ministry)
+                    <button @click="openIncomeModal()"
+                            class="inline-flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400 hover:text-green-500 font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Додати надходження
+                    </button>
+                    @endcan
+                </div>
+
+                {{-- ===== INCOME MODAL ===== --}}
+                <div x-show="showIncomeModal" x-cloak
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                     x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                    <div class="flex items-center justify-center min-h-screen p-4">
+                        <div class="fixed inset-0 bg-black/50" @click="showIncomeModal = false"></div>
+                        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6"
+                             x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                             @click.stop>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нове надходження</h3>
+                            <form @submit.prevent="saveIncome()" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума *</label>
+                                    <div class="flex gap-2">
+                                        <input type="number" x-model="incomeForm.amount" required min="0.01" step="0.01"
+                                               placeholder="0.00"
+                                               class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
+                                        <select x-model="incomeForm.currency"
+                                                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
+                                            @foreach($enabledCurrencies as $cur)
+                                            <option value="{{ $cur }}">{{ $cur }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
+                                    <input type="date" x-model="incomeForm.date" required
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис *</label>
+                                    <input type="text" x-model="incomeForm.description" required maxlength="255"
+                                           placeholder="Місячне фінансування, пожертва..."
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Примітка</label>
+                                    <textarea x-model="incomeForm.notes" rows="2" maxlength="500"
+                                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"></textarea>
+                                </div>
+                                <div class="flex justify-end gap-3 pt-2">
+                                    <button type="button" @click="showIncomeModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Скасувати</button>
+                                    <button type="submit" :disabled="incomeSaving"
+                                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50">
+                                        <span x-show="!incomeSaving">Додати</span>
+                                        <span x-show="incomeSaving">Збереження...</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- ===== EXPENSES LIST SECTION ===== --}}
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
@@ -2030,8 +2145,7 @@
                         </tbody>
                     </table>
                 </div>
-                <p x-show="allTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-6">Немає витрат</p>
-                <p x-show="allTransactions.length > 0 && filteredTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-6">Немає витрат за цей період</p>
+                <p x-show="filteredTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-6">Немає витрат за цей період</p>
 
                 @can('contribute-ministry', $ministry)
                 <div class="mt-3">
@@ -4644,6 +4758,7 @@ function budgetPage() {
             has_items: false,
             effective_budget: 0,
             total_spent: 0,
+            total_income: {{ $budgetData['total_income'] ?? 0 }},
             unmatched_spent: 0,
         },
         budgetLoading: false,
@@ -4655,6 +4770,7 @@ function budgetPage() {
             'id' => $t->id,
             'amount' => $t->amount,
             'currency' => $t->currency ?? 'UAH',
+            'direction' => $t->direction,
             'description' => $t->description,
             'date' => $t->date->format('Y-m-d'),
             'month' => (int)$t->date->format('m'),
@@ -4698,9 +4814,14 @@ function budgetPage() {
         existingAttachments: [],
         deleteAttachmentIds: [],
 
+        // Income modal
+        showIncomeModal: false,
+        incomeSaving: false,
+        incomeForm: { amount: '', currency: 'UAH', date: '', description: '', notes: '' },
+
         // Computed
         get filteredTransactions() {
-            let result = this.allTransactions.filter(t => t.month === this.currentMonth && t.year === this.currentYear);
+            let result = this.allTransactions.filter(t => t.direction === 'out' && t.month === this.currentMonth && t.year === this.currentYear);
             if (this.search) {
                 const s = this.search.toLowerCase();
                 result = result.filter(t =>
@@ -4717,6 +4838,17 @@ function budgetPage() {
                 return 0;
             });
             return result;
+        },
+        get filteredIncome() {
+            return this.allTransactions
+                .filter(t => t.direction === 'in' && t.month === this.currentMonth && t.year === this.currentYear)
+                .sort((a, b) => b.date.localeCompare(a.date));
+        },
+        get totalIncome() {
+            return this.filteredIncome.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        },
+        get balance() {
+            return this.budget.total_income - this.budget.total_spent;
         },
         get totalSum() {
             return this.filteredTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
@@ -4765,6 +4897,7 @@ function budgetPage() {
                         has_items: data.has_items,
                         effective_budget: data.effective_budget,
                         total_spent: data.total_spent,
+                        total_income: data.total_income || 0,
                         unmatched_spent: data.unmatched_spent,
                     };
                 }
@@ -5084,6 +5217,73 @@ function budgetPage() {
             if (!confirm('Видалити цю витрату?')) return;
             try {
                 const res = await fetch(`/ministries/expenses/${transactionId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.allTransactions = this.allTransactions.filter(t => t.id !== transactionId);
+                    if (typeof showToast === 'function') showToast('success', data.message);
+                    await this.loadBudget();
+                }
+            } catch (e) {
+                if (typeof showToast === 'function') showToast('error', 'Помилка видалення');
+            }
+        },
+
+        // ==================
+        // Income Methods
+        // ==================
+
+        openIncomeModal() {
+            this.incomeForm = {
+                amount: '',
+                currency: 'UAH',
+                date: new Date().toISOString().slice(0, 10),
+                description: '',
+                notes: '',
+            };
+            this.showIncomeModal = true;
+        },
+
+        async saveIncome() {
+            this.incomeSaving = true;
+            try {
+                const res = await fetch(`/ministries/${this.ministryId}/income`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(this.incomeForm),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.showIncomeModal = false;
+                    if (typeof showToast === 'function') showToast('success', data.message);
+                    this.allTransactions.push(data.transaction);
+                    await this.loadBudget();
+                } else if (res.status === 422) {
+                    const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
+                    if (typeof showToast === 'function') showToast('error', msgs[0]);
+                } else {
+                    if (typeof showToast === 'function') showToast('error', data.message || 'Помилка');
+                }
+            } catch (e) {
+                if (typeof showToast === 'function') showToast('error', 'Помилка збереження');
+            } finally {
+                this.incomeSaving = false;
+            }
+        },
+
+        async deleteIncome(transactionId) {
+            if (!confirm('Видалити це надходження?')) return;
+            try {
+                const res = await fetch(`/ministries/income/${transactionId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

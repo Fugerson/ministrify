@@ -110,7 +110,7 @@ class MinistryController extends Controller
             'positions',
             'members',
             'events' => fn($q) => $q->orderBy('date')->orderBy('time')->with(['ministry.positions', 'assignments']),
-            'transactions' => fn($q) => $q->where('direction', 'out')->completed()->with(['category', 'attachments'])->orderByDesc('date'),
+            'transactions' => fn($q) => $q->completed()->with(['category', 'attachments'])->orderByDesc('date'),
             'goals' => fn($q) => $q->with(['tasks.assignee', 'creator'])->orderByDesc('created_at'),
         ]);
 
@@ -345,6 +345,15 @@ class MinistryController extends Controller
             }
         }
 
+        // Income for this ministry/period
+        $totalIncome = Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->completed()
+            ->whereYear('date', $budgetYear)
+            ->whereMonth('date', $budgetMonth)
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+
         $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
         $budgetData = [
             'budget' => $ministryBudget,
@@ -352,6 +361,7 @@ class MinistryController extends Controller
             'has_items' => !empty($budgetItems),
             'effective_budget' => $ministryBudget ? $ministryBudget->getEffectiveBudget() : ($ministry->monthly_budget ?? 0),
             'total_spent' => $totalSpent,
+            'total_income' => (float) $totalIncome,
             'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
             'year' => $budgetYear,
             'month' => $budgetMonth,
@@ -441,6 +451,15 @@ class MinistryController extends Controller
 
         $effectiveBudget = $ministryBudget ? $ministryBudget->getEffectiveBudget() : 0;
 
+        // Income for this ministry/period
+        $totalIncome = Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->completed()
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+
         return response()->json([
             'success' => true,
             'budget_id' => $ministryBudget?->id,
@@ -448,6 +467,7 @@ class MinistryController extends Controller
             'has_items' => !empty($budgetItems),
             'effective_budget' => $effectiveBudget,
             'total_spent' => $totalSpent,
+            'total_income' => (float) $totalIncome,
             'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
             'year' => $year,
             'month' => $month,
@@ -743,6 +763,7 @@ class MinistryController extends Controller
                 'id' => $transaction->id,
                 'amount' => $transaction->amount,
                 'currency' => $transaction->currency ?? 'UAH',
+                'direction' => $transaction->direction,
                 'description' => $transaction->description,
                 'date' => $transaction->date->format('Y-m-d'),
                 'month' => (int) $transaction->date->format('m'),
@@ -868,6 +889,7 @@ class MinistryController extends Controller
                 'id' => $transaction->id,
                 'amount' => $transaction->amount,
                 'currency' => $transaction->currency ?? 'UAH',
+                'direction' => $transaction->direction,
                 'description' => $transaction->description,
                 'date' => $transaction->date->format('Y-m-d'),
                 'month' => (int) $transaction->date->format('m'),
@@ -903,6 +925,73 @@ class MinistryController extends Controller
         $transaction->delete();
 
         return response()->json(['success' => true, 'message' => 'Витрату видалено.']);
+    }
+
+    /**
+     * Store a new income transaction for a ministry (JSON API)
+     */
+    public function storeIncome(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|in:UAH,USD,EUR',
+            'date' => 'required|date',
+            'description' => 'required|string|max:255',
+            'notes' => 'nullable|string',
+        ]);
+
+        $transaction = Transaction::create([
+            'church_id' => $church->id,
+            'ministry_id' => $ministry->id,
+            'direction' => Transaction::DIRECTION_IN,
+            'source_type' => Transaction::SOURCE_INCOME,
+            'amount' => $validated['amount'],
+            'currency' => $validated['currency'] ?? 'UAH',
+            'date' => $validated['date'],
+            'description' => $validated['description'],
+            'notes' => $validated['notes'] ?? null,
+            'status' => Transaction::STATUS_COMPLETED,
+            'recorded_by' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Надходження додано.',
+            'transaction' => [
+                'id' => $transaction->id,
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency ?? 'UAH',
+                'description' => $transaction->description,
+                'date' => $transaction->date->format('Y-m-d'),
+                'month' => (int) $transaction->date->format('m'),
+                'year' => (int) $transaction->date->format('Y'),
+                'date_formatted' => $transaction->date->format('d.m.Y'),
+                'direction' => 'in',
+                'notes' => $transaction->notes,
+            ],
+        ]);
+    }
+
+    /**
+     * Delete an income transaction (JSON API)
+     */
+    public function deleteIncome(Transaction $transaction)
+    {
+        $church = $this->getCurrentChurch();
+        if ($transaction->church_id !== $church->id) abort(404);
+        if ($transaction->direction !== Transaction::DIRECTION_IN) abort(404);
+
+        $ministry = Ministry::findOrFail($transaction->ministry_id);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $transaction->delete();
+
+        return response()->json(['success' => true, 'message' => 'Надходження видалено.']);
     }
 
     public function scheduleGridData(Request $request, Ministry $ministry)

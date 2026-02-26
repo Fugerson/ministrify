@@ -308,6 +308,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('ministries/expenses/{transaction}/edit-data', [MinistryController::class, 'editExpenseData'])->name('ministries.expenses.edit-data');
     Route::put('ministries/expenses/{transaction}', [MinistryController::class, 'updateExpense'])->name('ministries.expenses.update');
     Route::delete('ministries/expenses/{transaction}', [MinistryController::class, 'destroyExpense'])->name('ministries.expenses.destroy');
+    Route::post('ministries/{ministry}/income', [MinistryController::class, 'storeIncome'])->name('ministries.income.store');
+    Route::delete('ministries/income/{transaction}', [MinistryController::class, 'deleteIncome'])->name('ministries.income.destroy');
     Route::post('ministries/{ministry}/members', [MinistryController::class, 'addMember'])->name('ministries.members.add');
     Route::delete('ministries/{ministry}/members/{person}', [MinistryController::class, 'removeMember'])->name('ministries.members.remove');
     Route::put('ministries/{ministry}/members/{person}', [MinistryController::class, 'updateMemberPositions'])->name('ministries.members.update');
