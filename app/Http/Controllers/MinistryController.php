@@ -369,7 +369,7 @@ class MinistryController extends Controller
             'budget' => $ministryBudget,
             'items' => $budgetItems,
             'has_items' => !empty($budgetItems),
-            'effective_budget' => $ministryBudget ? $ministryBudget->getEffectiveBudget() : ($ministry->monthly_budget ?? 0),
+            'effective_budget' => $ministryBudget ? $ministryBudget->getEffectiveBudget() : 0,
             'total_spent' => $totalSpent,
             'total_income' => (float) $totalIncome,
             'total_allocated' => $totalAllocated,

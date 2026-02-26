@@ -1246,7 +1246,7 @@ class FinanceController extends Controller
             $budget = $ministry->budgets->first();
             $spent = $spendingByMinistry[$ministry->id] ?? 0;
             $allocated = (float) ($allocationsByMinistry[$ministry->id] ?? ($budget?->allocated_budget ?? 0));
-            $effectiveBudget = $budget ? $budget->getEffectiveBudget() : ($ministry->monthly_budget ?? 0);
+            $effectiveBudget = $budget ? $budget->getEffectiveBudget() : 0;
 
             // Compute per-item spending
             $items = [];
