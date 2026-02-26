@@ -342,6 +342,7 @@ class MinistryController extends Controller
             }
         }
 
+        $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
         $budgetData = [
             'budget' => $ministryBudget,
             'items' => $budgetItems,
@@ -351,6 +352,7 @@ class MinistryController extends Controller
             'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
             'year' => $budgetYear,
             'month' => $budgetMonth,
+            'month_name' => $monthNames[$budgetMonth] . ' ' . $budgetYear,
         ];
 
         $expenseCategories = TransactionCategory::where('church_id', $church->id)

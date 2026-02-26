@@ -84,7 +84,7 @@
                 <button @click="setTab('expenses')" type="button"
                    :class="activeTab === 'expenses' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
-                    Витрати
+                    Бюджет
                 </button>
                 <button @click="setTab('board')" type="button"
                    :class="activeTab === 'board' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -1751,155 +1751,191 @@
                          }
                      }
                  }">
-                {{-- Budget Items Section --}}
-                <div x-data="budgetItemsManager()" class="mb-6 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="px-4 py-3 {{ $budgetData['has_items'] ? 'border-b border-gray-200 dark:border-gray-700' : '' }} flex items-center justify-between">
-                        <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                            </svg>
-                            Бюджет
-                        </h3>
-                        @if($budgetData['has_items'] || $budgetData['effective_budget'] > 0)
-                        <div class="flex items-center gap-3">
+                {{-- ===== BUDGET PLANNING SECTION ===== --}}
+                <div x-data="budgetItemsManager()" class="mb-6">
+                    @if($budgetData['has_items'])
+                    {{-- Has budget items — show full table --}}
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        {{-- Header with summary --}}
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-2">
+                            <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                                Планування бюджету
+                                <span class="text-xs font-normal text-gray-400 dark:text-gray-500">{{ $budgetData['month_name'] }}</span>
+                            </h3>
                             @php
                                 $budgetPct = $budgetData['effective_budget'] > 0
                                     ? round(($budgetData['total_spent'] / $budgetData['effective_budget']) * 100, 1)
                                     : 0;
                                 $budgetRemaining = $budgetData['effective_budget'] - $budgetData['total_spent'];
                             @endphp
-                            <span class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ number_format($budgetData['total_spent'], 0, ',', ' ') }} / {{ number_format($budgetData['effective_budget'], 0, ',', ' ') }} ₴
-                            </span>
-                            <span class="text-sm font-medium {{ $budgetRemaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                ({{ $budgetRemaining >= 0 ? '+' : '' }}{{ number_format($budgetRemaining, 0, ',', ' ') }} ₴)
-                            </span>
+                            <div class="flex items-center gap-3 text-sm">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    Витрачено {{ number_format($budgetData['total_spent'], 0, ',', ' ') }}
+                                    з {{ number_format($budgetData['effective_budget'], 0, ',', ' ') }} ₴
+                                </span>
+                                <span class="font-medium px-2 py-0.5 rounded-full text-xs {{ $budgetRemaining >= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' }}">
+                                    {{ $budgetRemaining >= 0 ? 'Залишок ' : 'Перевитрата ' }}{{ number_format(abs($budgetRemaining), 0, ',', ' ') }} ₴
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Progress bar --}}
+                        @if($budgetData['effective_budget'] > 0)
+                        <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700/20">
+                            @php
+                                $barPct = min(100, $budgetPct);
+                                $barColor = $budgetPct > 100 ? 'bg-red-500' : ($budgetPct > 80 ? 'bg-orange-500' : 'bg-green-500');
+                            @endphp
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                                    <div class="{{ $barColor }} h-2.5 rounded-full transition-all" style="width: {{ $barPct }}%"></div>
+                                </div>
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $budgetPct }}%</span>
+                            </div>
                         </div>
                         @endif
-                    </div>
 
-                    {{-- Progress bar --}}
-                    @if($budgetData['effective_budget'] > 0)
-                    <div class="px-4 pt-3">
-                        @php
-                            $barPct = min(100, $budgetPct);
-                            $barColor = $budgetPct > 100 ? 'bg-red-500' : ($budgetPct > 80 ? 'bg-orange-500' : 'bg-green-500');
-                        @endphp
-                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                            <div class="{{ $barColor }} h-2 rounded-full transition-all" style="width: {{ $barPct }}%"></div>
-                        </div>
-                    </div>
-                    @endif
-
-                    @if($budgetData['has_items'])
-                    <div class="px-4 py-3">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
-                                <thead>
-                                    <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase">
-                                        <th class="px-2 py-1.5 text-left">Стаття</th>
-                                        <th class="px-2 py-1.5 text-right">План</th>
-                                        <th class="px-2 py-1.5 text-right">Факт</th>
-                                        <th class="px-2 py-1.5 text-right">Різниця</th>
-                                        <th class="px-2 py-1.5 text-left">Відповідальні</th>
-                                        @can('contribute-ministry', $ministry)
-                                        <th class="px-2 py-1.5 text-center w-16">Дії</th>
-                                        @endcan
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                                    @foreach($budgetData['items'] as $bi)
-                                    <tr class="hover:bg-white dark:hover:bg-gray-700/30">
-                                        <td class="px-2 py-2">
-                                            <div class="font-medium text-gray-900 dark:text-white">{{ $bi['name'] }}</div>
-                                            @if($bi['category'])
-                                                <div class="text-xs text-gray-500">{{ $bi['category']->name }}</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-2 py-2 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
-                                            {{ number_format($bi['planned_amount'], 0, ',', ' ') }} ₴
-                                        </td>
-                                        <td class="px-2 py-2 text-right whitespace-nowrap text-red-600 dark:text-red-400">
-                                            {{ number_format($bi['actual'], 0, ',', ' ') }} ₴
-                                        </td>
-                                        <td class="px-2 py-2 text-right whitespace-nowrap font-medium {{ $bi['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                            {{ $bi['difference'] >= 0 ? '+' : '' }}{{ number_format($bi['difference'], 0, ',', ' ') }} ₴
-                                        </td>
-                                        <td class="px-2 py-2">
-                                            <div class="flex flex-wrap gap-1">
-                                                @foreach($bi['responsible'] as $person)
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                                                    {{ $person->short_name ?? $person->first_name }}
+                        {{-- Items table --}}
+                        <div class="px-4 py-3">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase border-b border-gray-200 dark:border-gray-600">
+                                            <th class="px-2 py-2 text-left">Стаття</th>
+                                            <th class="px-2 py-2 text-right">План</th>
+                                            <th class="px-2 py-2 text-right">Факт</th>
+                                            <th class="px-2 py-2 text-right">Різниця</th>
+                                            <th class="px-2 py-2 text-left hidden sm:table-cell">Відповідальні</th>
+                                            @can('contribute-ministry', $ministry)
+                                            <th class="px-2 py-2 text-center w-16"></th>
+                                            @endcan
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                        @foreach($budgetData['items'] as $bi)
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
+                                            <td class="px-2 py-2.5">
+                                                <div class="font-medium text-gray-900 dark:text-white">{{ $bi['name'] }}</div>
+                                                @if($bi['category'])
+                                                    <div class="text-xs text-gray-400">{{ $bi['category']->icon ?? '' }} {{ $bi['category']->name }}</div>
+                                                @endif
+                                            </td>
+                                            <td class="px-2 py-2.5 text-right whitespace-nowrap text-gray-600 dark:text-gray-300">
+                                                {{ number_format($bi['planned_amount'], 0, ',', ' ') }} ₴
+                                            </td>
+                                            <td class="px-2 py-2.5 text-right whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                {{ number_format($bi['actual'], 0, ',', ' ') }} ₴
+                                            </td>
+                                            <td class="px-2 py-2.5 text-right whitespace-nowrap">
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $bi['difference'] >= 0 ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20' }}">
+                                                    {{ $bi['difference'] >= 0 ? '+' : '' }}{{ number_format($bi['difference'], 0, ',', ' ') }} ₴
                                                 </span>
-                                                @endforeach
-                                            </div>
-                                        </td>
-                                        @can('contribute-ministry', $ministry)
-                                        <td class="px-2 py-2 text-center">
-                                            <div class="flex items-center justify-center gap-0.5">
-                                                <button @click="openItemModal('edit', {{ json_encode([
-                                                    'id' => $bi['id'],
-                                                    'name' => $bi['name'],
-                                                    'planned_amount' => $bi['planned_amount'],
-                                                    'category_id' => $bi['category_id'],
-                                                    'notes' => $bi['notes'] ?? '',
-                                                    'person_ids' => $bi['responsible']->pluck('id')->toArray(),
-                                                ]) }})"
-                                                        class="p-1 text-gray-400 hover:text-primary-600 rounded" title="Редагувати">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                    </svg>
-                                                </button>
-                                                <button @click="deleteItem({{ $bi['id'] }}, '{{ addslashes($bi['name']) }}')"
-                                                        class="p-1 text-gray-400 hover:text-red-600 rounded" title="Видалити">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                        @endcan
-                                    </tr>
-                                    @endforeach
+                                            </td>
+                                            <td class="px-2 py-2.5 hidden sm:table-cell">
+                                                <div class="flex flex-wrap gap-1">
+                                                    @foreach($bi['responsible'] as $person)
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                                                        {{ $person->short_name ?? $person->first_name }}
+                                                    </span>
+                                                    @endforeach
+                                                </div>
+                                            </td>
+                                            @can('contribute-ministry', $ministry)
+                                            <td class="px-2 py-2.5 text-center">
+                                                <div class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button @click="openItemModal('edit', {{ json_encode([
+                                                        'id' => $bi['id'],
+                                                        'name' => $bi['name'],
+                                                        'planned_amount' => $bi['planned_amount'],
+                                                        'category_id' => $bi['category_id'],
+                                                        'notes' => $bi['notes'] ?? '',
+                                                        'person_ids' => $bi['responsible']->pluck('id')->toArray(),
+                                                    ]) }})"
+                                                            class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg" title="Редагувати">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                        </svg>
+                                                    </button>
+                                                    <button @click="deleteItem({{ $bi['id'] }}, '{{ addslashes($bi['name']) }}')"
+                                                            class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            @endcan
+                                        </tr>
+                                        @endforeach
 
-                                    @if($budgetData['unmatched_spent'] > 0)
-                                    <tr class="bg-orange-50/50 dark:bg-orange-900/10">
-                                        <td class="px-2 py-2 text-gray-500 italic">Інші витрати</td>
-                                        <td class="px-2 py-2 text-right text-gray-400">-</td>
-                                        <td class="px-2 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($budgetData['unmatched_spent'], 0, ',', ' ') }} ₴</td>
-                                        <td class="px-2 py-2"></td>
-                                        <td class="px-2 py-2"></td>
-                                        @can('contribute-ministry', $ministry)<td></td>@endcan
-                                    </tr>
-                                    @endif
-
-                                    <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold text-sm">
-                                        <td class="px-2 py-2 text-gray-900 dark:text-white">Всього</td>
-                                        <td class="px-2 py-2 text-right text-gray-900 dark:text-white">{{ number_format(collect($budgetData['items'])->sum('planned_amount'), 0, ',', ' ') }} ₴</td>
-                                        <td class="px-2 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($budgetData['total_spent'], 0, ',', ' ') }} ₴</td>
-                                        <td class="px-2 py-2 text-right {{ $budgetRemaining >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $budgetRemaining >= 0 ? '+' : '' }}{{ number_format($budgetRemaining, 0, ',', ' ') }} ₴
-                                        </td>
-                                        <td class="px-2 py-2"></td>
-                                        @can('contribute-ministry', $ministry)<td></td>@endcan
-                                    </tr>
-                                </tbody>
-                            </table>
+                                        @if($budgetData['unmatched_spent'] > 0)
+                                        <tr class="bg-orange-50/50 dark:bg-orange-900/10">
+                                            <td class="px-2 py-2.5 text-gray-500 italic">Інші витрати</td>
+                                            <td class="px-2 py-2.5 text-right text-gray-400">—</td>
+                                            <td class="px-2 py-2.5 text-right font-medium text-gray-900 dark:text-white">{{ number_format($budgetData['unmatched_spent'], 0, ',', ' ') }} ₴</td>
+                                            <td class="px-2 py-2.5"></td>
+                                            <td class="px-2 py-2.5 hidden sm:table-cell"></td>
+                                            @can('contribute-ministry', $ministry)<td></td>@endcan
+                                        </tr>
+                                        @endif
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="border-t-2 border-gray-200 dark:border-gray-600 font-semibold text-sm">
+                                            <td class="px-2 py-2.5 text-gray-900 dark:text-white">Всього</td>
+                                            <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white">{{ number_format(collect($budgetData['items'])->sum('planned_amount'), 0, ',', ' ') }} ₴</td>
+                                            <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white">{{ number_format($budgetData['total_spent'], 0, ',', ' ') }} ₴</td>
+                                            <td class="px-2 py-2.5 text-right">
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold {{ $budgetRemaining >= 0 ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20' }}">
+                                                    {{ $budgetRemaining >= 0 ? '+' : '' }}{{ number_format($budgetRemaining, 0, ',', ' ') }} ₴
+                                                </span>
+                                            </td>
+                                            <td class="px-2 py-2.5 hidden sm:table-cell"></td>
+                                            @can('contribute-ministry', $ministry)<td></td>@endcan
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                    @endif
 
-                    @can('contribute-ministry', $ministry)
-                    <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700">
+                        @can('contribute-ministry', $ministry)
+                        <div class="px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/20">
+                            <button @click="openItemModal('create')"
+                                    class="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Додати статтю
+                            </button>
+                        </div>
+                        @endcan
+                    </div>
+
+                    @else
+                    {{-- No budget items — empty state --}}
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-6 text-center">
+                        <div class="mx-auto w-12 h-12 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center mb-3">
+                            <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">Бюджет не сплановано</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-sm mx-auto">
+                            Розбийте бюджет на статті — оренда, перекуси, матеріали — щоб бачити план, факт та залишок по кожній.
+                        </p>
+                        @can('contribute-ministry', $ministry)
                         <button @click="openItemModal('create')"
-                                class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                             </svg>
-                            Додати статтю бюджету
+                            Додати першу статтю
                         </button>
+                        @endcan
                     </div>
-                    @endcan
+                    @endif
 
                     {{-- Budget Item Modal --}}
                     <div x-show="showItemModal" x-cloak
@@ -1933,7 +1969,7 @@
                                                 <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
                                             @endforeach
                                         </select>
-                                        <p class="text-xs text-gray-500 mt-1">Для автоматичного збору витрат за категорією</p>
+                                        <p class="text-xs text-gray-500 mt-1">Витрати з цією категорією автоматично враховуються у факті</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Відповідальні</label>
@@ -1953,7 +1989,7 @@
                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
                                     </div>
                                     <div class="flex justify-end gap-3 pt-2">
-                                        <button type="button" @click="showItemModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300">Скасувати</button>
+                                        <button type="button" @click="showItemModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Скасувати</button>
                                         <button type="submit" :disabled="itemSaving"
                                                 class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg disabled:opacity-50">
                                             <span x-show="!itemSaving" x-text="itemMode === 'create' ? 'Додати' : 'Зберегти'"></span>
@@ -1966,29 +2002,32 @@
                     </div>
                 </div>
 
-                <!-- Period selector -->
+                {{-- ===== EXPENSES LIST SECTION ===== --}}
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        Витрати
+                    </h3>
                     <div class="flex items-center gap-2">
-                        <button @click="prevPeriod()" class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <button @click="prevPeriod()" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </button>
-                        <span class="font-medium text-gray-900 dark:text-white min-w-[100px] sm:min-w-[140px] text-center" x-text="filterPeriod === 'month' ? monthNames[currentMonth] + ' ' + currentYear : currentYear"></span>
-                        <button @click="nextPeriod()" class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[100px] sm:min-w-[130px] text-center" x-text="filterPeriod === 'month' ? monthNames[currentMonth] + ' ' + currentYear : (filterPeriod === 'year' ? currentYear : 'Всі')"></span>
+                        <button @click="nextPeriod()" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
-                        <select x-model="filterPeriod" class="ml-2 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <select x-model="filterPeriod" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                             <option value="month">Місяць</option>
                             <option value="year">Рік</option>
                             <option value="all">Всі</option>
                         </select>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Всього:</span>
-                        <span class="ml-1 font-semibold text-gray-900 dark:text-white" x-text="new Intl.NumberFormat('uk-UA').format(totalSum) + ' ₴'"></span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="new Intl.NumberFormat('uk-UA').format(totalSum) + ' ₴'"></span>
                     </div>
                 </div>
 
-                <!-- Filters -->
+                <!-- Search & Sort -->
                 <div x-show="allTransactions.length > 0" class="flex flex-col sm:flex-row gap-3 mb-4">
                     <div class="flex-1">
                         <input type="text" x-model="search" placeholder="Пошук..."
@@ -2002,7 +2041,7 @@
                     </select>
                 </div>
 
-                <!-- Expenses List -->
+                <!-- Expenses Table -->
                 <div class="overflow-x-auto" x-show="filteredTransactions.length > 0">
                     <table class="w-full text-sm">
                         <thead>
@@ -2065,14 +2104,14 @@
                         </tbody>
                     </table>
                 </div>
-                <p x-show="allTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-8">Немає витрат</p>
-                <p x-show="allTransactions.length > 0 && filteredTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-8">Немає витрат за цей період</p>
+                <p x-show="allTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-6">Немає витрат</p>
+                <p x-show="allTransactions.length > 0 && filteredTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-6">Немає витрат за цей період</p>
 
                 @can('contribute-ministry', $ministry)
-                <div class="mt-4">
+                <div class="mt-3">
                     <a href="{{ route('finances.expenses.create', ['ministry' => $ministry->id, 'redirect_to' => 'ministry']) }}"
-                       class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
                         Додати витрату
