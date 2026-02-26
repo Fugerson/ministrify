@@ -1750,6 +1750,7 @@
                                     <thead>
                                         <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase border-b border-gray-200 dark:border-gray-600">
                                             <th class="px-2 py-2 text-left">Стаття</th>
+                                            <th class="px-2 py-2 text-center hidden sm:table-cell">Дата</th>
                                             <th class="px-2 py-2 text-right">План</th>
                                             <th class="px-2 py-2 text-right">Факт</th>
                                             <th class="px-2 py-2 text-right">Різниця</th>
@@ -1765,6 +1766,9 @@
                                                 <td class="px-2 py-2.5">
                                                     <div class="font-medium text-gray-900 dark:text-white" x-text="bi.name"></div>
                                                     <div x-show="bi.category_name" class="text-xs text-gray-400" x-text="(bi.category_icon || '') + ' ' + (bi.category_name || '')"></div>
+                                                </td>
+                                                <td class="px-2 py-2.5 text-center hidden sm:table-cell whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                                                    <span x-show="bi.planned_date" x-text="bi.planned_date ? new Date(bi.planned_date).toLocaleDateString('uk-UA', {day: '2-digit', month: '2-digit'}) : ''"></span>
                                                 </td>
                                                 <td class="px-2 py-2.5 text-right whitespace-nowrap text-gray-600 dark:text-gray-300" x-text="fmt(bi.planned_amount) + ' ₴'"></td>
                                                 <td class="px-2 py-2.5 text-right whitespace-nowrap font-medium text-gray-900 dark:text-white" x-text="fmt(bi.actual) + ' ₴'"></td>
@@ -1803,6 +1807,7 @@
 
                                         <tr x-show="budget.unmatched_spent > 0" class="bg-orange-50/50 dark:bg-orange-900/10">
                                             <td class="px-2 py-2.5 text-gray-500 italic">Інші витрати</td>
+                                            <td class="px-2 py-2.5 hidden sm:table-cell"></td>
                                             <td class="px-2 py-2.5 text-right text-gray-400">—</td>
                                             <td class="px-2 py-2.5 text-right font-medium text-gray-900 dark:text-white" x-text="fmt(budget.unmatched_spent) + ' ₴'"></td>
                                             <td class="px-2 py-2.5"></td>
@@ -1813,6 +1818,7 @@
                                     <tfoot>
                                         <tr class="border-t-2 border-gray-200 dark:border-gray-600 font-semibold text-sm">
                                             <td class="px-2 py-2.5 text-gray-900 dark:text-white">Всього</td>
+                                            <td class="px-2 py-2.5 hidden sm:table-cell"></td>
                                             <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white" x-text="fmt(totalPlanned) + ' ₴'"></td>
                                             <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white" x-text="fmt(budget.total_spent) + ' ₴'"></td>
                                             <td class="px-2 py-2.5 text-right">
@@ -1886,6 +1892,12 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Запланована сума (₴) *</label>
                                         <input type="number" x-model="itemForm.planned_amount" required min="0" step="0.01"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Планова дата</label>
+                                        <input type="date" x-model="itemForm.planned_date"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        <p class="text-xs text-gray-500 mt-1">Коли очікується ця витрата</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія витрат</label>
@@ -1997,14 +2009,14 @@
                                     @can('contribute-ministry', $ministry)
                                     <td class="py-2 pl-3">
                                         <div class="flex items-center gap-1">
-                                            <a :href="'/finances/expenses/' + t.id + '/edit?redirect_to=ministry&ministry={{ $ministry->id }}'"
-                                               class="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded"
-                                               title="Редагувати">
+                                            <button @click="openExpenseModal('edit', t)"
+                                                    class="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded"
+                                                    title="Редагувати">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
-                                            </a>
-                                            <button @click="ajaxDelete('/finances/expenses/' + t.id, '{{ __('messages.confirm_delete_expense') }}', () => { allTransactions = allTransactions.filter(tr => tr.id !== t.id); })"
+                                            </button>
+                                            <button @click="deleteExpense(t.id)"
                                                     class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded" title="Видалити">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -2023,15 +2035,181 @@
 
                 @can('contribute-ministry', $ministry)
                 <div class="mt-3">
-                    <a href="{{ route('finances.expenses.create', ['ministry' => $ministry->id, 'redirect_to' => 'ministry']) }}"
-                       class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 font-medium">
+                    <button @click="openExpenseModal('create')"
+                            class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 font-medium">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
                         Додати витрату
-                    </a>
+                    </button>
                 </div>
                 @endcan
+
+                {{-- ===== EXPENSE MODAL ===== --}}
+                <div x-show="showExpenseModal" x-cloak
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                     x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                    <div class="flex items-start justify-center min-h-screen p-4 pt-16">
+                        <div class="fixed inset-0 bg-black/50" @click="showExpenseModal = false"></div>
+                        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto"
+                             x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                             @click.stop>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="expenseModalTitle"></h3>
+                            <form @submit.prevent="saveExpense()" class="space-y-4">
+                                {{-- Amount + Currency --}}
+                                <div class="flex gap-3">
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума *</label>
+                                        <input type="number" x-model="expenseForm.amount" required min="0.01" step="0.01"
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="w-28">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Валюта</label>
+                                        <select x-model="expenseForm.currency"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                            @foreach($enabledCurrencies as $cur)
+                                                <option value="{{ $cur }}">{{ $cur }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {{-- Date --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
+                                    <input type="date" x-model="expenseForm.date" required
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                </div>
+
+                                {{-- Description --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис *</label>
+                                    <input type="text" x-model="expenseForm.description" required maxlength="255"
+                                           placeholder="Опис витрати..."
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                </div>
+
+                                {{-- Category --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                                    <select x-model="expenseForm.category_id"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Без категорії</option>
+                                        @foreach($expenseCategories as $cat)
+                                            <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Two columns: Expense type + Payment method --}}
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип витрати</label>
+                                        <select x-model="expenseForm.expense_type"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                            <option value="">—</option>
+                                            <option value="one_time">Разова</option>
+                                            <option value="recurring">Регулярна</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати</label>
+                                        <select x-model="expenseForm.payment_method"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                            <option value="">—</option>
+                                            <option value="cash">Готівка</option>
+                                            <option value="card">Картка</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {{-- Budget Item --}}
+                                <div x-show="budget.has_items">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Стаття бюджету</label>
+                                    <select x-model="expenseForm.budget_item_id"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Без прив'язки</option>
+                                        <template x-for="bi in budget.items" :key="bi.id">
+                                            <option :value="bi.id" x-text="bi.name + ' (' + fmt(bi.planned_amount) + ' ₴)'"></option>
+                                        </template>
+                                    </select>
+                                </div>
+
+                                {{-- Notes --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                                    <textarea x-model="expenseForm.notes" rows="2"
+                                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
+                                </div>
+
+                                {{-- Existing Attachments (edit mode) --}}
+                                <div x-show="existingAttachments.length > 0">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Існуючі чеки</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <template x-for="att in existingAttachments" :key="att.id">
+                                            <div x-show="!deleteAttachmentIds.includes(att.id)" class="relative group">
+                                                <template x-if="att.is_image">
+                                                    <img :src="att.url" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600">
+                                                </template>
+                                                <template x-if="!att.is_image">
+                                                    <div class="w-16 h-16 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                    </div>
+                                                </template>
+                                                <button type="button" @click="removeExistingAttachment(att.id)"
+                                                        class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                {{-- New Receipts --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Чеки</label>
+                                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-primary-400 transition-colors"
+                                         @click="$refs.expenseFileInput.click()"
+                                         @dragover.prevent="$el.classList.add('border-primary-400')"
+                                         @dragleave.prevent="$el.classList.remove('border-primary-400')"
+                                         @drop.prevent="$el.classList.remove('border-primary-400'); addExpenseFiles({target: {files: $event.dataTransfer.files, value: ''}})">
+                                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <p class="text-sm text-gray-500">Натисніть або перетягніть файли</p>
+                                        <p class="text-xs text-gray-400 mt-1">JPG, PNG, PDF — до 10 МБ</p>
+                                    </div>
+                                    <input type="file" x-ref="expenseFileInput" multiple accept="image/*,.pdf" class="hidden" @change="addExpenseFiles($event)">
+
+                                    {{-- File previews --}}
+                                    <div x-show="expensePreviews.length > 0" class="flex flex-wrap gap-2 mt-2">
+                                        <template x-for="(preview, idx) in expensePreviews" :key="idx">
+                                            <div class="relative group">
+                                                <template x-if="preview.url">
+                                                    <img :src="preview.url" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600">
+                                                </template>
+                                                <template x-if="!preview.url">
+                                                    <div class="w-16 h-16 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-xs text-gray-500 p-1 text-center" x-text="preview.name"></div>
+                                                </template>
+                                                <button type="button" @click="removeExpenseFile(idx)"
+                                                        class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                {{-- Buttons --}}
+                                <div class="flex justify-end gap-3 pt-2">
+                                    <button type="button" @click="showExpenseModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Скасувати</button>
+                                    <button type="submit" :disabled="expenseSaving"
+                                            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg disabled:opacity-50">
+                                        <span x-show="!expenseSaving" x-text="expenseMode === 'create' ? 'Додати' : 'Зберегти'"></span>
+                                        <span x-show="expenseSaving">Збереження...</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div x-show="activeTab === 'resources'"{{ $tab !== 'resources' ? ' style="display:none"' : '' }}
@@ -4476,18 +4654,23 @@ function budgetPage() {
         allTransactions: {!! Js::from($ministry->transactions->map(fn($t) => [
             'id' => $t->id,
             'amount' => $t->amount,
-            'currency' => $t->currency ?? '₴',
+            'currency' => $t->currency ?? 'UAH',
             'description' => $t->description,
             'date' => $t->date->format('Y-m-d'),
             'month' => (int)$t->date->format('m'),
             'year' => (int)$t->date->format('Y'),
             'date_formatted' => $t->date->format('d.m.Y'),
             'category' => $t->category?->name,
+            'category_id' => $t->category_id,
+            'expense_type' => $t->expense_type,
             'payment_method' => $t->payment_method,
+            'budget_item_id' => $t->budget_item_id,
             'notes' => $t->notes,
             'attachments' => $t->attachments->map(fn($a) => [
+                'id' => $a->id,
                 'url' => Storage::url($a->path),
-                'is_image' => str_starts_with($a->mime_type, 'image/')
+                'is_image' => str_starts_with($a->mime_type, 'image/'),
+                'original_name' => $a->original_name,
             ])
         ])) !!},
 
@@ -4497,7 +4680,23 @@ function budgetPage() {
         itemModalTitle: '',
         itemEditId: null,
         itemSaving: false,
-        itemForm: { name: '', planned_amount: '', category_id: '', notes: '', person_ids: [] },
+        itemForm: { name: '', planned_amount: '', planned_date: '', category_id: '', notes: '', person_ids: [] },
+
+        // Expense modal
+        showExpenseModal: false,
+        expenseMode: 'create',
+        expenseModalTitle: '',
+        expenseEditId: null,
+        expenseSaving: false,
+        expenseForm: {
+            amount: '', currency: 'UAH', date: '', description: '',
+            category_id: '', expense_type: '', payment_method: '',
+            budget_item_id: '', notes: '',
+        },
+        expenseFiles: [],
+        expensePreviews: [],
+        existingAttachments: [],
+        deleteAttachmentIds: [],
 
         // Computed
         get filteredTransactions() {
@@ -4611,13 +4810,14 @@ function budgetPage() {
                 this.itemForm = {
                     name: itemData.name,
                     planned_amount: itemData.planned_amount,
+                    planned_date: itemData.planned_date || '',
                     category_id: itemData.category_id || '',
                     notes: itemData.notes || '',
                     person_ids: (itemData.person_ids || []).map(String),
                 };
             } else {
                 this.itemEditId = null;
-                this.itemForm = { name: '', planned_amount: '', category_id: '', notes: '', person_ids: [] };
+                this.itemForm = { name: '', planned_amount: '', planned_date: '', category_id: '', notes: '', person_ids: [] };
             }
 
             if (mode === 'create' && !this.budget.budget_id) {
@@ -4640,6 +4840,7 @@ function budgetPage() {
                 const payload = {
                     name: this.itemForm.name,
                     planned_amount: this.itemForm.planned_amount,
+                    planned_date: this.itemForm.planned_date || null,
                     category_id: this.itemForm.category_id || null,
                     notes: this.itemForm.notes || null,
                     person_ids: this.itemForm.person_ids.map(Number),
@@ -4729,6 +4930,174 @@ function budgetPage() {
                 }
             } catch (e) {
                 if (typeof showToast === 'function') showToast('error', 'Помилка копіювання');
+            }
+        },
+
+        // ==================
+        // Expense Modal Methods
+        // ==================
+
+        async openExpenseModal(mode, transactionData) {
+            this.expenseMode = mode;
+            this.expenseModalTitle = mode === 'create' ? 'Нова витрата' : 'Редагувати витрату';
+            this.expenseFiles = [];
+            this.expensePreviews = [];
+            this.deleteAttachmentIds = [];
+
+            if (mode === 'edit' && transactionData) {
+                this.expenseEditId = transactionData.id;
+                // Fetch fresh data from server
+                try {
+                    const res = await fetch(`/ministries/expenses/${transactionData.id}/edit-data`, {
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const t = data.transaction;
+                        this.expenseForm = {
+                            amount: t.amount,
+                            currency: t.currency || 'UAH',
+                            date: t.date,
+                            description: t.description,
+                            category_id: t.category_id || '',
+                            expense_type: t.expense_type || '',
+                            payment_method: t.payment_method || '',
+                            budget_item_id: t.budget_item_id || '',
+                            notes: t.notes || '',
+                        };
+                        this.existingAttachments = t.attachments || [];
+                    }
+                } catch (e) {
+                    if (typeof showToast === 'function') showToast('error', 'Помилка завантаження даних');
+                    return;
+                }
+            } else {
+                this.expenseEditId = null;
+                this.expenseForm = {
+                    amount: '', currency: 'UAH', date: new Date().toISOString().slice(0, 10),
+                    description: '', category_id: '', expense_type: '', payment_method: '',
+                    budget_item_id: '', notes: '',
+                };
+                this.existingAttachments = [];
+            }
+
+            this.showExpenseModal = true;
+        },
+
+        addExpenseFiles(event) {
+            const files = Array.from(event.target.files);
+            for (const file of files) {
+                if (this.expenseFiles.length + this.existingAttachments.length - this.deleteAttachmentIds.length >= 10) break;
+                this.expenseFiles.push(file);
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => this.expensePreviews.push({ name: file.name, url: e.target.result });
+                    reader.readAsDataURL(file);
+                } else {
+                    this.expensePreviews.push({ name: file.name, url: null });
+                }
+            }
+            event.target.value = '';
+        },
+
+        removeExpenseFile(index) {
+            this.expenseFiles.splice(index, 1);
+            this.expensePreviews.splice(index, 1);
+        },
+
+        removeExistingAttachment(attId) {
+            this.deleteAttachmentIds.push(attId);
+        },
+
+        async saveExpense() {
+            this.expenseSaving = true;
+            try {
+                const formData = new FormData();
+                formData.append('amount', this.expenseForm.amount);
+                formData.append('currency', this.expenseForm.currency);
+                formData.append('date', this.expenseForm.date);
+                formData.append('description', this.expenseForm.description);
+                if (this.expenseForm.category_id) formData.append('category_id', this.expenseForm.category_id);
+                if (this.expenseForm.expense_type) formData.append('expense_type', this.expenseForm.expense_type);
+                if (this.expenseForm.payment_method) formData.append('payment_method', this.expenseForm.payment_method);
+                if (this.expenseForm.budget_item_id) formData.append('budget_item_id', this.expenseForm.budget_item_id);
+                if (this.expenseForm.notes) formData.append('notes', this.expenseForm.notes);
+
+                for (const file of this.expenseFiles) {
+                    formData.append('receipts[]', file);
+                }
+
+                let url, method;
+                if (this.expenseMode === 'create') {
+                    url = `/ministries/${this.ministryId}/expenses`;
+                    method = 'POST';
+                } else {
+                    url = `/ministries/expenses/${this.expenseEditId}`;
+                    method = 'POST';
+                    formData.append('_method', 'PUT');
+                    for (const id of this.deleteAttachmentIds) {
+                        formData.append('delete_attachments[]', id);
+                    }
+                }
+
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.showExpenseModal = false;
+                    if (typeof showToast === 'function') showToast('success', data.message);
+
+                    // Update allTransactions inline
+                    if (this.expenseMode === 'create') {
+                        this.allTransactions.push(data.transaction);
+                    } else {
+                        const idx = this.allTransactions.findIndex(t => t.id === data.transaction.id);
+                        if (idx !== -1) {
+                            this.allTransactions[idx] = data.transaction;
+                        }
+                    }
+
+                    // Refresh budget to update actual amounts
+                    await this.loadBudget();
+                } else if (res.status === 422) {
+                    const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
+                    if (typeof showToast === 'function') showToast('error', msgs[0]);
+                } else {
+                    if (typeof showToast === 'function') showToast('error', data.message || 'Помилка');
+                }
+            } catch (e) {
+                console.error('Expense save error:', e);
+                if (typeof showToast === 'function') showToast('error', 'Помилка збереження');
+            } finally {
+                this.expenseSaving = false;
+            }
+        },
+
+        async deleteExpense(transactionId) {
+            if (!confirm('Видалити цю витрату?')) return;
+            try {
+                const res = await fetch(`/ministries/expenses/${transactionId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.allTransactions = this.allTransactions.filter(t => t.id !== transactionId);
+                    if (typeof showToast === 'function') showToast('success', data.message);
+                    await this.loadBudget();
+                }
+            } catch (e) {
+                if (typeof showToast === 'function') showToast('error', 'Помилка видалення');
             }
         },
     }

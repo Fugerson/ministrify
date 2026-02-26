@@ -17,7 +17,9 @@ use App\Models\Song;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\WorshipRole;
+use App\Helpers\CurrencyHelper;
 use App\Rules\BelongsToChurch;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -333,6 +335,7 @@ class MinistryController extends Controller
                     'category' => $item->category,
                     'category_id' => $item->category_id,
                     'planned_amount' => (float) $item->planned_amount,
+                    'planned_date' => $item->planned_date?->format('Y-m-d'),
                     'actual' => $itemSpent,
                     'difference' => (float) $item->planned_amount - $itemSpent,
                     'responsible' => $item->responsiblePeople,
@@ -360,7 +363,9 @@ class MinistryController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics', 'budgetData', 'expenseCategories'));
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics', 'budgetData', 'expenseCategories', 'enabledCurrencies'));
     }
 
     /**
@@ -420,6 +425,7 @@ class MinistryController extends Controller
                     'category_icon' => $item->category?->icon,
                     'category_id' => $item->category_id,
                     'planned_amount' => (float) $item->planned_amount,
+                    'planned_date' => $item->planned_date?->format('Y-m-d'),
                     'actual' => $itemSpent,
                     'difference' => (float) $item->planned_amount - $itemSpent,
                     'responsible' => $item->responsiblePeople->map(fn($p) => [
@@ -496,13 +502,24 @@ class MinistryController extends Controller
             ]);
         }
 
+        // Calculate month difference for shifting planned_date
+        $sourceDate = \Carbon\Carbon::create($validated['from_year'], $validated['from_month'], 1);
+        $targetDate = \Carbon\Carbon::create($validated['to_year'], $validated['to_month'], 1);
+        $monthDiff = $sourceDate->diffInMonths($targetDate, false);
+
         foreach ($sourceBudget->items as $item) {
+            $newPlannedDate = null;
+            if ($item->planned_date) {
+                $newPlannedDate = $item->planned_date->copy()->addMonths($monthDiff);
+            }
+
             $newItem = BudgetItem::create([
                 'church_id' => $church->id,
                 'ministry_budget_id' => $targetBudget->id,
                 'category_id' => $item->category_id,
                 'name' => $item->name,
                 'planned_amount' => $item->planned_amount,
+                'planned_date' => $newPlannedDate,
                 'notes' => $item->notes,
                 'sort_order' => $item->sort_order,
             ]);
@@ -556,6 +573,7 @@ class MinistryController extends Controller
             'budget_id' => 'required|integer',
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
+            'planned_date' => 'nullable|date',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
@@ -584,6 +602,7 @@ class MinistryController extends Controller
             'category_id' => $validated['category_id'] ?? null,
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
+            'planned_date' => $validated['planned_date'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'sort_order' => $maxSort + 1,
         ]);
@@ -609,6 +628,7 @@ class MinistryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
+            'planned_date' => 'nullable|date',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
@@ -628,6 +648,7 @@ class MinistryController extends Controller
         $budgetItem->update([
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
+            'planned_date' => $validated['planned_date'] ?? null,
             'category_id' => $validated['category_id'] ?? null,
             'notes' => $validated['notes'] ?? null,
         ]);
@@ -652,6 +673,236 @@ class MinistryController extends Controller
         $budgetItem->delete();
 
         return response()->json(['success' => true, 'message' => 'Статтю бюджету видалено.']);
+    }
+
+    // ==================
+    // Ministry Expenses (via modal)
+    // ==================
+
+    /**
+     * Store a new expense for a ministry (JSON API)
+     */
+    public function storeExpense(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|in:UAH,USD,EUR',
+            'date' => 'required|date',
+            'description' => 'required|string|max:255',
+            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'expense_type' => 'nullable|in:recurring,one_time',
+            'payment_method' => 'nullable|in:cash,card',
+            'budget_item_id' => 'nullable|integer|exists:budget_items,id',
+            'notes' => 'nullable|string',
+            'receipts' => 'nullable|array|max:10',
+            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
+        ]);
+
+        $transaction = Transaction::create([
+            'church_id' => $church->id,
+            'ministry_id' => $ministry->id,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'expense_type' => $validated['expense_type'] ?? null,
+            'amount' => $validated['amount'],
+            'currency' => $validated['currency'] ?? 'UAH',
+            'date' => $validated['date'],
+            'category_id' => $validated['category_id'] ?? null,
+            'payment_method' => $validated['payment_method'] ?? null,
+            'budget_item_id' => $validated['budget_item_id'] ?? null,
+            'description' => $validated['description'],
+            'notes' => $validated['notes'] ?? null,
+            'status' => Transaction::STATUS_COMPLETED,
+            'recorded_by' => auth()->id(),
+        ]);
+
+        if ($request->hasFile('receipts')) {
+            foreach ($request->file('receipts') as $file) {
+                $stored = ImageService::storeWithHeicConversion($file, "receipts/{$church->id}");
+                $transaction->attachments()->create([
+                    'filename' => $stored['filename'],
+                    'original_name' => $file->getClientOriginalName(),
+                    'path' => $stored['path'],
+                    'mime_type' => $stored['mime_type'],
+                    'size' => $stored['size'],
+                ]);
+            }
+        }
+
+        $transaction->load(['category', 'attachments']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Витрату додано.',
+            'transaction' => [
+                'id' => $transaction->id,
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency ?? 'UAH',
+                'description' => $transaction->description,
+                'date' => $transaction->date->format('Y-m-d'),
+                'month' => (int) $transaction->date->format('m'),
+                'year' => (int) $transaction->date->format('Y'),
+                'date_formatted' => $transaction->date->format('d.m.Y'),
+                'category' => $transaction->category?->name,
+                'category_id' => $transaction->category_id,
+                'expense_type' => $transaction->expense_type,
+                'payment_method' => $transaction->payment_method,
+                'budget_item_id' => $transaction->budget_item_id,
+                'notes' => $transaction->notes,
+                'attachments' => $transaction->attachments->map(fn($a) => [
+                    'id' => $a->id,
+                    'url' => \Storage::url($a->path),
+                    'is_image' => str_starts_with($a->mime_type, 'image/'),
+                    'original_name' => $a->original_name,
+                ]),
+            ],
+        ]);
+    }
+
+    /**
+     * Get expense data for editing (JSON)
+     */
+    public function editExpenseData(Transaction $transaction)
+    {
+        $church = $this->getCurrentChurch();
+        if ($transaction->church_id !== $church->id) abort(404);
+
+        $ministry = Ministry::findOrFail($transaction->ministry_id);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $transaction->load('attachments');
+
+        return response()->json([
+            'success' => true,
+            'transaction' => [
+                'id' => $transaction->id,
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency ?? 'UAH',
+                'description' => $transaction->description,
+                'date' => $transaction->date->format('Y-m-d'),
+                'category_id' => $transaction->category_id,
+                'expense_type' => $transaction->expense_type,
+                'payment_method' => $transaction->payment_method,
+                'budget_item_id' => $transaction->budget_item_id,
+                'notes' => $transaction->notes,
+                'attachments' => $transaction->attachments->map(fn($a) => [
+                    'id' => $a->id,
+                    'url' => \Storage::url($a->path),
+                    'is_image' => str_starts_with($a->mime_type, 'image/'),
+                    'original_name' => $a->original_name,
+                ]),
+            ],
+        ]);
+    }
+
+    /**
+     * Update an expense (JSON API, multipart for receipts)
+     */
+    public function updateExpense(Request $request, Transaction $transaction)
+    {
+        $church = $this->getCurrentChurch();
+        if ($transaction->church_id !== $church->id) abort(404);
+
+        $ministry = Ministry::findOrFail($transaction->ministry_id);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|in:UAH,USD,EUR',
+            'date' => 'required|date',
+            'description' => 'required|string|max:255',
+            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'expense_type' => 'nullable|in:recurring,one_time',
+            'payment_method' => 'nullable|in:cash,card',
+            'budget_item_id' => 'nullable|integer|exists:budget_items,id',
+            'notes' => 'nullable|string',
+            'receipts' => 'nullable|array|max:10',
+            'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
+            'delete_attachments' => 'nullable|array',
+            'delete_attachments.*' => 'integer|exists:transaction_attachments,id',
+        ]);
+
+        $transaction->update([
+            'amount' => $validated['amount'],
+            'currency' => $validated['currency'] ?? 'UAH',
+            'date' => $validated['date'],
+            'description' => $validated['description'],
+            'category_id' => $validated['category_id'] ?? null,
+            'expense_type' => $validated['expense_type'] ?? null,
+            'payment_method' => $validated['payment_method'] ?? null,
+            'budget_item_id' => $validated['budget_item_id'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        if (!empty($validated['delete_attachments'])) {
+            $transaction->attachments()
+                ->whereIn('id', $validated['delete_attachments'])
+                ->get()
+                ->each(fn($att) => $att->delete());
+        }
+
+        if ($request->hasFile('receipts')) {
+            foreach ($request->file('receipts') as $file) {
+                $stored = ImageService::storeWithHeicConversion($file, "receipts/{$church->id}");
+                $transaction->attachments()->create([
+                    'filename' => $stored['filename'],
+                    'original_name' => $file->getClientOriginalName(),
+                    'path' => $stored['path'],
+                    'mime_type' => $stored['mime_type'],
+                    'size' => $stored['size'],
+                ]);
+            }
+        }
+
+        $transaction->refresh()->load(['category', 'attachments']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Витрату оновлено.',
+            'transaction' => [
+                'id' => $transaction->id,
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency ?? 'UAH',
+                'description' => $transaction->description,
+                'date' => $transaction->date->format('Y-m-d'),
+                'month' => (int) $transaction->date->format('m'),
+                'year' => (int) $transaction->date->format('Y'),
+                'date_formatted' => $transaction->date->format('d.m.Y'),
+                'category' => $transaction->category?->name,
+                'category_id' => $transaction->category_id,
+                'expense_type' => $transaction->expense_type,
+                'payment_method' => $transaction->payment_method,
+                'budget_item_id' => $transaction->budget_item_id,
+                'notes' => $transaction->notes,
+                'attachments' => $transaction->attachments->map(fn($a) => [
+                    'id' => $a->id,
+                    'url' => \Storage::url($a->path),
+                    'is_image' => str_starts_with($a->mime_type, 'image/'),
+                    'original_name' => $a->original_name,
+                ]),
+            ],
+        ]);
+    }
+
+    /**
+     * Delete an expense (JSON API)
+     */
+    public function destroyExpense(Transaction $transaction)
+    {
+        $church = $this->getCurrentChurch();
+        if ($transaction->church_id !== $church->id) abort(404);
+
+        $ministry = Ministry::findOrFail($transaction->ministry_id);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $transaction->delete();
+
+        return response()->json(['success' => true, 'message' => 'Витрату видалено.']);
     }
 
     public function scheduleGridData(Request $request, Ministry $ministry)

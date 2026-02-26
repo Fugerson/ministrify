@@ -15,12 +15,14 @@ class BudgetItem extends Model
         'category_id',
         'name',
         'planned_amount',
+        'planned_date',
         'notes',
         'sort_order',
     ];
 
     protected $casts = [
         'planned_amount' => 'decimal:2',
+        'planned_date' => 'date',
         'sort_order' => 'integer',
     ];
 
