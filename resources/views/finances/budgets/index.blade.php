@@ -34,7 +34,23 @@
     </div>
 
     {{-- Summary Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Виділено</p>
+                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
+                        {{ number_format($totals['allocated'], 0, ',', ' ') }} <span class="text-lg">₴</span>
+                    </p>
+                </div>
+                <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
@@ -117,6 +133,9 @@
                             Команда
                         </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Виділено
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Бюджет
                         </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -128,7 +147,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
                             Прогрес
                         </th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
                             Дії
                         </th>
                     </tr>
@@ -156,6 +175,15 @@
                                     @endif
                                 </div>
                             </div>
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            @if($item['allocated'] > 0)
+                            <span class="text-green-600 dark:text-green-400 font-medium">
+                                {{ number_format($item['allocated'], 0, ',', ' ') }} ₴
+                            </span>
+                            @else
+                            <span class="text-gray-400 dark:text-gray-500">—</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap">
                             <span class="font-medium text-gray-900 dark:text-white">
@@ -190,13 +218,22 @@
                         </td>
                         <td class="px-6 py-4 text-center" @click.stop>
                             @if(auth()->user()->canEdit('finances'))
-                            <button @click="openBudgetModal({{ $item['ministry']->id }}, '{{ addslashes($item['ministry']->name) }}', {{ $item['budget']?->monthly_budget ?? $item['ministry']->monthly_budget ?? 0 }}, '{{ addslashes($item['budget']?->notes ?? '') }}', {{ $item['has_items'] ? 'true' : 'false' }})"
-                                    class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    title="Редагувати бюджет">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                            </button>
+                            <div class="flex items-center justify-center gap-1">
+                                <button @click="openAllocateModal({{ $item['ministry']->id }}, '{{ addslashes($item['ministry']->name) }}')"
+                                        class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        title="Виділити бюджет">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </button>
+                                <button @click="openBudgetModal({{ $item['ministry']->id }}, '{{ addslashes($item['ministry']->name) }}', {{ $item['budget']?->monthly_budget ?? $item['ministry']->monthly_budget ?? 0 }}, '{{ addslashes($item['budget']?->notes ?? '') }}', {{ $item['has_items'] ? 'true' : 'false' }})"
+                                        class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        title="Редагувати бюджет">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                            </div>
                             @endif
                         </td>
                     </tr>
@@ -208,7 +245,7 @@
                         x-transition:enter-start="opacity-0"
                         x-transition:enter-end="opacity-100"
                         x-cloak>
-                        <td colspan="6" class="px-0 py-0 bg-gray-50 dark:bg-gray-750">
+                        <td colspan="7" class="px-0 py-0 bg-gray-50 dark:bg-gray-750">
                             <div class="px-8 py-4">
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-sm">
@@ -335,7 +372,7 @@
 
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                             Немає команд
                         </td>
                     </tr>
@@ -430,6 +467,90 @@
                                 class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                             <span x-show="!budgetSaving">Зберегти</span>
                             <span x-show="budgetSaving">Збереження...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Allocate Budget Modal --}}
+    <div x-show="showAllocateModal"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="fixed inset-0 bg-black/50" @click="showAllocateModal = false"></div>
+
+            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 @click.stop>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Виділити бюджет: <span x-text="allocateMinistryName"></span>
+                </h3>
+
+                <form @submit.prevent="submitAllocation()" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Сума *
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="number" x-model="allocateForm.amount" required min="0.01" step="0.01"
+                                   placeholder="0.00"
+                                   class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
+                            <select x-model="allocateForm.currency"
+                                    class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
+                                @foreach($enabledCurrencies as $code => $label)
+                                    <option value="{{ $code }}">{{ $code }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Спосіб оплати
+                        </label>
+                        <select x-model="allocateForm.payment_method"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
+                            <option value="">Не вказано</option>
+                            <option value="cash">Готівка</option>
+                            <option value="card">Картка</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Дата *
+                        </label>
+                        <input type="date" x-model="allocateForm.date" required
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Нотатки
+                        </label>
+                        <textarea x-model="allocateForm.notes" rows="2" maxlength="500"
+                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" @click="showAllocateModal = false"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                            Скасувати
+                        </button>
+                        <button type="submit" :disabled="allocateSaving"
+                                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                            <span x-show="!allocateSaving">Виділити</span>
+                            <span x-show="allocateSaving">Збереження...</span>
                         </button>
                     </div>
                 </form>
@@ -625,6 +746,19 @@ function budgetsPage() {
         budgetSaving: false,
         budgetHasItems: false,
 
+        // Allocate modal
+        showAllocateModal: false,
+        allocateMinistryId: null,
+        allocateMinistryName: '',
+        allocateSaving: false,
+        allocateForm: {
+            amount: '',
+            currency: 'UAH',
+            payment_method: '',
+            date: new Date().toISOString().split('T')[0],
+            notes: '',
+        },
+
         // Budget item modal
         showItemModal: false,
         itemModalMode: 'create',
@@ -670,6 +804,57 @@ function budgetsPage() {
             this.budgetNotes = notes;
             this.budgetHasItems = hasItems;
             this.showBudgetModal = true;
+        },
+
+        openAllocateModal(ministryId, ministryName) {
+            this.allocateMinistryId = ministryId;
+            this.allocateMinistryName = ministryName;
+            this.allocateForm = {
+                amount: '',
+                currency: 'UAH',
+                payment_method: '',
+                date: new Date().toISOString().split('T')[0],
+                notes: '',
+            };
+            this.showAllocateModal = true;
+        },
+
+        async submitAllocation() {
+            this.allocateSaving = true;
+            try {
+                const res = await fetch('/finances/budgets/' + this.allocateMinistryId + '/allocate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: this.allocateForm.amount,
+                        currency: this.allocateForm.currency,
+                        payment_method: this.allocateForm.payment_method || null,
+                        date: this.allocateForm.date,
+                        year: this.year,
+                        month: this.month,
+                        notes: this.allocateForm.notes || null,
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.showAllocateModal = false;
+                    showToast('success', data.message || 'Бюджет виділено');
+                    setTimeout(() => location.reload(), 600);
+                } else if (res.status === 422 && data.errors) {
+                    const msgs = Object.values(data.errors).flat();
+                    showToast('error', msgs[0] || 'Помилка валідації');
+                } else {
+                    showToast('error', data.message || 'Помилка виділення бюджету');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка виділення бюджету');
+            } finally {
+                this.allocateSaving = false;
+            }
         },
 
         async saveBudget() {

@@ -26,6 +26,7 @@ class Transaction extends Model
     public const SOURCE_EXPENSE = 'expense';
     public const SOURCE_TRANSFER = 'transfer';
     public const SOURCE_EXCHANGE = 'exchange';
+    public const SOURCE_ALLOCATION = 'allocation';
 
     public const SOURCE_TYPES = [
         self::SOURCE_TITHE => 'Десятина',
@@ -35,6 +36,7 @@ class Transaction extends Model
         self::SOURCE_EXPENSE => 'Витрата',
         self::SOURCE_TRANSFER => 'Переказ',
         self::SOURCE_EXCHANGE => 'Обмін валюти',
+        self::SOURCE_ALLOCATION => 'Виділення бюджету',
     ];
 
     // Statuses
@@ -298,6 +300,11 @@ class Transaction extends Model
     public function scopeExpenses($query)
     {
         return $query->where('direction', self::DIRECTION_OUT);
+    }
+
+    public function scopeAllocations($query)
+    {
+        return $query->where('source_type', self::SOURCE_ALLOCATION);
     }
 
     // ==================

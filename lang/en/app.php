@@ -138,6 +138,9 @@ return [
     'budgets' => 'Budgets',
     'budget_spent' => 'Spent',
     'budget_remaining' => 'Remaining',
+    'allocate_budget' => 'Allocate Budget',
+    'allocated' => 'Allocated',
+    'budget_allocation' => 'Budget Allocation',
 
     // Settings
     'settings' => 'Settings',

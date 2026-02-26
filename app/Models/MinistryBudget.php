@@ -16,6 +16,7 @@ class MinistryBudget extends Model
         'church_id',
         'ministry_id',
         'monthly_budget',
+        'allocated_budget',
         'year',
         'month',
         'notes',
@@ -23,6 +24,7 @@ class MinistryBudget extends Model
 
     protected $casts = [
         'monthly_budget' => 'decimal:2',
+        'allocated_budget' => 'decimal:2',
         'year' => 'integer',
         'month' => 'integer',
     ];
@@ -141,6 +143,21 @@ class MinistryBudget extends Model
     public function isExceeded(): bool
     {
         return $this->getActualSpending() > $this->monthly_budget;
+    }
+
+    /**
+     * Get total allocated from real allocation transactions (IN direction)
+     */
+    public function getTotalAllocated(): float
+    {
+        return (float) (Transaction::where('church_id', $this->church_id)
+            ->where('ministry_id', $this->ministry_id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->where('source_type', Transaction::SOURCE_ALLOCATION)
+            ->completed()
+            ->whereYear('date', $this->year)
+            ->whereMonth('date', $this->month)
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
     }
 
     /**

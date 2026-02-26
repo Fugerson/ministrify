@@ -535,6 +535,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         // Team Budgets
         Route::get('budgets', [FinanceController::class, 'budgets'])->name('budgets');
         Route::post('budgets/{ministry}', [FinanceController::class, 'updateBudget'])->name('budgets.update');
+        Route::post('budgets/{ministry}/allocate', [FinanceController::class, 'allocateBudget'])->name('budgets.allocate');
 
         // Budget Items
         Route::post('budgets/{ministryBudget}/items', [FinanceController::class, 'storeBudgetItem'])->name('budgets.items.store');

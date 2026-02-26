@@ -1705,7 +1705,12 @@
                                 </div>
                             </div>
                             {{-- Summary line --}}
-                            <div x-show="budget.total_income > 0 || budget.total_spent > 0 || budget.has_items" class="mt-2 flex flex-wrap items-center gap-3 text-sm">
+                            <div x-show="budget.total_allocated > 0 || budget.total_income > 0 || budget.total_spent > 0 || budget.has_items" class="mt-2 flex flex-wrap items-center gap-3 text-sm">
+                                <span x-show="budget.total_allocated > 0" class="text-green-600 dark:text-green-400 flex items-center gap-1 font-medium">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Виділено <span x-text="fmt(budget.total_allocated) + ' ₴'"></span>
+                                </span>
+                                <span x-show="budget.total_allocated > 0" class="text-gray-300 dark:text-gray-600">|</span>
                                 <span class="text-green-600 dark:text-green-400 flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
                                     Отримано <span x-text="fmt(budget.total_income) + ' ₴'"></span>
@@ -4759,6 +4764,7 @@ function budgetPage() {
             effective_budget: 0,
             total_spent: 0,
             total_income: {{ $budgetData['total_income'] ?? 0 }},
+            total_allocated: {{ $budgetData['total_allocated'] ?? 0 }},
             unmatched_spent: 0,
         },
         budgetLoading: false,
@@ -4898,6 +4904,7 @@ function budgetPage() {
                         effective_budget: data.effective_budget,
                         total_spent: data.total_spent,
                         total_income: data.total_income || 0,
+                        total_allocated: data.total_allocated || 0,
                         unmatched_spent: data.unmatched_spent,
                     };
                 }

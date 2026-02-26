@@ -1231,9 +1231,21 @@ class FinanceController extends Controller
             }
         }
 
-        $ministries = $ministries->map(function ($ministry) use ($year, $month, $spendingByMinistry, $spendingByBudgetItem, $spendingByCategoryUnlinked) {
+        // Batch query: allocations grouped by ministry_id
+        $allocationsByMinistry = Transaction::where('church_id', $church->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->where('source_type', Transaction::SOURCE_ALLOCATION)
+            ->completed()
+            ->forMonth($year, $month)
+            ->whereNotNull('ministry_id')
+            ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
+            ->groupBy('ministry_id')
+            ->pluck('total', 'ministry_id');
+
+        $ministries = $ministries->map(function ($ministry) use ($year, $month, $spendingByMinistry, $spendingByBudgetItem, $spendingByCategoryUnlinked, $allocationsByMinistry) {
             $budget = $ministry->budgets->first();
             $spent = $spendingByMinistry[$ministry->id] ?? 0;
+            $allocated = (float) ($allocationsByMinistry[$ministry->id] ?? ($budget?->allocated_budget ?? 0));
             $effectiveBudget = $budget ? $budget->getEffectiveBudget() : ($ministry->monthly_budget ?? 0);
 
             // Compute per-item spending
@@ -1270,6 +1282,7 @@ class FinanceController extends Controller
                 'ministry' => $ministry,
                 'budget' => $budget,
                 'monthly_budget' => $effectiveBudget,
+                'allocated' => $allocated,
                 'spent' => $spent,
                 'remaining' => $effectiveBudget - $spent,
                 'percentage' => $effectiveBudget > 0
@@ -1283,6 +1296,7 @@ class FinanceController extends Controller
 
         $totals = [
             'budget' => $ministries->sum('monthly_budget'),
+            'allocated' => $ministries->sum('allocated'),
             'spent' => $ministries->sum('spent'),
             'remaining' => $ministries->sum('remaining'),
         ];
@@ -1368,6 +1382,90 @@ class FinanceController extends Controller
         ]);
 
         return $this->successResponse($request, "Бюджет для \"{$ministry->name}\" оновлено.");
+    }
+
+    public function allocateBudget(Request $request, Ministry $ministry)
+    {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403, 'У вас немає прав для виділення бюджету.');
+        }
+
+        $church = $this->getCurrentChurch();
+
+        if ($ministry->church_id !== $church->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'required|string|max:3',
+            'payment_method' => 'nullable|string|max:50',
+            'date' => 'required|date',
+            'year' => 'required|integer|min:2020|max:2100',
+            'month' => 'required|integer|min:1|max:12',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $description = "Виділення бюджету: {$ministry->name}";
+
+        DB::beginTransaction();
+        try {
+            // OUT transaction: from church general fund
+            $outTransaction = Transaction::create([
+                'church_id' => $church->id,
+                'direction' => Transaction::DIRECTION_OUT,
+                'source_type' => Transaction::SOURCE_ALLOCATION,
+                'amount' => $validated['amount'],
+                'currency' => $validated['currency'],
+                'date' => $validated['date'],
+                'description' => $description,
+                'ministry_id' => $ministry->id,
+                'payment_method' => $validated['payment_method'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'status' => Transaction::STATUS_COMPLETED,
+            ]);
+
+            // IN transaction: into ministry budget
+            $inTransaction = Transaction::create([
+                'church_id' => $church->id,
+                'direction' => Transaction::DIRECTION_IN,
+                'source_type' => Transaction::SOURCE_ALLOCATION,
+                'amount' => $validated['amount'],
+                'currency' => $validated['currency'],
+                'date' => $validated['date'],
+                'description' => $description,
+                'ministry_id' => $ministry->id,
+                'payment_method' => $validated['payment_method'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'status' => Transaction::STATUS_COMPLETED,
+                'related_transaction_id' => $outTransaction->id,
+            ]);
+
+            // Link OUT → IN
+            $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
+
+            // Update ministry budget allocated amount (use amount_uah computed by model)
+            $budget = MinistryBudget::getOrCreate(
+                $church->id,
+                $ministry->id,
+                $validated['year'],
+                $validated['month']
+            );
+
+            $budget->increment('allocated_budget', $inTransaction->amount_uah);
+
+            // If monthly_budget is 0 and no items, auto-set it to allocated
+            if ($budget->monthly_budget == 0 && $budget->items()->count() === 0) {
+                $budget->update(['monthly_budget' => $budget->allocated_budget]);
+            }
+
+            DB::commit();
+
+            return $this->successResponse($request, "Виділено " . number_format($validated['amount'], 0, ',', ' ') . " {$validated['currency']} для \"{$ministry->name}\".");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Помилка виділення бюджету: ' . $e->getMessage()], 500);
+        }
     }
 
     // Budget Items CRUD

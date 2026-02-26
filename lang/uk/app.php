@@ -136,6 +136,9 @@ return [
     'budgets' => 'Бюджети',
     'budget_spent' => 'Витрачено',
     'budget_remaining' => 'Залишилось',
+    'allocate_budget' => 'Виділити бюджет',
+    'allocated' => 'Виділено',
+    'budget_allocation' => 'Виділення бюджету',
 
     // Settings
     'settings' => 'Параметри',

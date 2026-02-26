@@ -354,6 +354,16 @@ class MinistryController extends Controller
             ->whereMonth('date', $budgetMonth)
             ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
 
+        // Allocation IN transactions for this ministry/period
+        $totalAllocated = (float) Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->where('source_type', Transaction::SOURCE_ALLOCATION)
+            ->completed()
+            ->whereYear('date', $budgetYear)
+            ->whereMonth('date', $budgetMonth)
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+
         $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
         $budgetData = [
             'budget' => $ministryBudget,
@@ -362,6 +372,7 @@ class MinistryController extends Controller
             'effective_budget' => $ministryBudget ? $ministryBudget->getEffectiveBudget() : ($ministry->monthly_budget ?? 0),
             'total_spent' => $totalSpent,
             'total_income' => (float) $totalIncome,
+            'total_allocated' => $totalAllocated,
             'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
             'year' => $budgetYear,
             'month' => $budgetMonth,
@@ -460,6 +471,16 @@ class MinistryController extends Controller
             ->whereMonth('date', $month)
             ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
 
+        // Allocation IN transactions for this ministry/period
+        $totalAllocated = (float) Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->where('source_type', Transaction::SOURCE_ALLOCATION)
+            ->completed()
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+
         return response()->json([
             'success' => true,
             'budget_id' => $ministryBudget?->id,
@@ -468,6 +489,7 @@ class MinistryController extends Controller
             'effective_budget' => $effectiveBudget,
             'total_spent' => $totalSpent,
             'total_income' => (float) $totalIncome,
+            'total_allocated' => $totalAllocated,
             'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
             'year' => $year,
             'month' => $month,
