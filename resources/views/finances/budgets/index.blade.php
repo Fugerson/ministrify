@@ -245,7 +245,7 @@
                         x-transition:enter-start="opacity-0"
                         x-transition:enter-end="opacity-100"
                         x-cloak>
-                        <td colspan="7" class="px-0 py-0 bg-gray-50 dark:bg-gray-750">
+                        <td colspan="7" class="px-0 py-0 bg-gray-50 dark:bg-gray-800/80">
                             <div class="px-8 py-4">
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-sm">
@@ -262,7 +262,7 @@
                                         </thead>
                                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                             @foreach($item['items'] as $bi)
-                                            <tr class="hover:bg-white dark:hover:bg-gray-700/30">
+                                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-700/30">
                                                 <td class="px-3 py-2.5">
                                                     <div class="font-medium text-gray-900 dark:text-white">{{ $bi['name'] }}</div>
                                                     @if($bi['category'])
