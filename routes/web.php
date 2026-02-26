@@ -298,6 +298,12 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     // Ministries
     Route::resource('ministries', MinistryController::class);
     Route::get('ministries/{ministry}/members-json', [MinistryController::class, 'membersJson'])->name('ministries.members.json');
+    Route::get('ministries/{ministry}/budget-data', [MinistryController::class, 'budgetData'])->name('ministries.budget-data');
+    Route::post('ministries/{ministry}/budget-copy', [MinistryController::class, 'copyBudget'])->name('ministries.budget-copy');
+    Route::post('ministries/{ministry}/budget-items', [MinistryController::class, 'storeBudgetItem'])->name('ministries.budget-items.store');
+    Route::put('ministries/budget-items/{budgetItem}', [MinistryController::class, 'updateBudgetItem'])->name('ministries.budget-items.update');
+    Route::delete('ministries/budget-items/{budgetItem}', [MinistryController::class, 'destroyBudgetItem'])->name('ministries.budget-items.destroy');
+    Route::post('ministries/{ministry}/ensure-budget', [MinistryController::class, 'ensureBudget'])->name('ministries.ensure-budget');
     Route::post('ministries/{ministry}/members', [MinistryController::class, 'addMember'])->name('ministries.members.add');
     Route::delete('ministries/{ministry}/members/{person}', [MinistryController::class, 'removeMember'])->name('ministries.members.remove');
     Route::put('ministries/{ministry}/members/{person}', [MinistryController::class, 'updateMemberPositions'])->name('ministries.members.update');

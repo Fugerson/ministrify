@@ -363,6 +363,297 @@ class MinistryController extends Controller
         return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics', 'budgetData', 'expenseCategories'));
     }
 
+    /**
+     * API: Budget data for a ministry/month (JSON) — used by Alpine.js
+     */
+    public function budgetData(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('view-ministry', $ministry);
+
+        $church = $this->getCurrentChurch();
+        $year = $request->integer('year', now()->year);
+        $month = $request->integer('month', now()->month);
+
+        $ministryBudget = MinistryBudget::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('year', $year)
+            ->where('month', $month)
+            ->with(['items.responsiblePeople', 'items.category'])
+            ->first();
+
+        $spendingRaw = Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
+            ->completed()
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->selectRaw('category_id, budget_item_id, SUM(COALESCE(amount_uah, amount)) as total')
+            ->groupBy('category_id', 'budget_item_id')
+            ->get();
+
+        $spendingByItem = [];
+        $spendingByCategoryUnlinked = [];
+        $totalSpent = 0;
+        foreach ($spendingRaw as $row) {
+            $totalSpent += $row->total;
+            if ($row->budget_item_id) {
+                $spendingByItem[$row->budget_item_id] = ($spendingByItem[$row->budget_item_id] ?? 0) + $row->total;
+            } else {
+                $catKey = $row->category_id ?: 0;
+                $spendingByCategoryUnlinked[$catKey] = ($spendingByCategoryUnlinked[$catKey] ?? 0) + $row->total;
+            }
+        }
+
+        $budgetItems = [];
+        $itemsSpentTotal = 0;
+        if ($ministryBudget && $ministryBudget->items->isNotEmpty()) {
+            foreach ($ministryBudget->items as $item) {
+                $directSpent = $spendingByItem[$item->id] ?? 0;
+                $autoMatched = $item->category_id ? ($spendingByCategoryUnlinked[$item->category_id] ?? 0) : 0;
+                $itemSpent = $directSpent + $autoMatched;
+                $itemsSpentTotal += $itemSpent;
+                $budgetItems[] = [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'category_name' => $item->category?->name,
+                    'category_icon' => $item->category?->icon,
+                    'category_id' => $item->category_id,
+                    'planned_amount' => (float) $item->planned_amount,
+                    'actual' => $itemSpent,
+                    'difference' => (float) $item->planned_amount - $itemSpent,
+                    'responsible' => $item->responsiblePeople->map(fn($p) => [
+                        'id' => $p->id,
+                        'name' => $p->short_name ?? $p->first_name,
+                    ]),
+                    'notes' => $item->notes,
+                    'sort_order' => $item->sort_order,
+                    'person_ids' => $item->responsiblePeople->pluck('id'),
+                ];
+            }
+        }
+
+        $effectiveBudget = $ministryBudget ? $ministryBudget->getEffectiveBudget() : 0;
+
+        return response()->json([
+            'success' => true,
+            'budget_id' => $ministryBudget?->id,
+            'items' => $budgetItems,
+            'has_items' => !empty($budgetItems),
+            'effective_budget' => $effectiveBudget,
+            'total_spent' => $totalSpent,
+            'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
+            'year' => $year,
+            'month' => $month,
+        ]);
+    }
+
+    /**
+     * Copy budget items from current month to next month
+     */
+    public function copyBudget(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'from_year' => 'required|integer',
+            'from_month' => 'required|integer|min:1|max:12',
+            'to_year' => 'required|integer',
+            'to_month' => 'required|integer|min:1|max:12',
+        ]);
+
+        $sourceBudget = MinistryBudget::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('year', $validated['from_year'])
+            ->where('month', $validated['from_month'])
+            ->with('items.responsiblePeople')
+            ->first();
+
+        if (!$sourceBudget || $sourceBudget->items->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Немає статей для копіювання.'], 422);
+        }
+
+        $targetBudget = MinistryBudget::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('year', $validated['to_year'])
+            ->where('month', $validated['to_month'])
+            ->first();
+
+        if ($targetBudget && $targetBudget->items()->count() > 0) {
+            return response()->json(['success' => false, 'message' => 'Цільовий місяць вже має статті бюджету.'], 422);
+        }
+
+        if (!$targetBudget) {
+            $targetBudget = MinistryBudget::create([
+                'church_id' => $church->id,
+                'ministry_id' => $ministry->id,
+                'year' => $validated['to_year'],
+                'month' => $validated['to_month'],
+                'monthly_budget' => 0,
+            ]);
+        }
+
+        foreach ($sourceBudget->items as $item) {
+            $newItem = BudgetItem::create([
+                'church_id' => $church->id,
+                'ministry_budget_id' => $targetBudget->id,
+                'category_id' => $item->category_id,
+                'name' => $item->name,
+                'planned_amount' => $item->planned_amount,
+                'notes' => $item->notes,
+                'sort_order' => $item->sort_order,
+            ]);
+            if ($item->responsiblePeople->isNotEmpty()) {
+                $newItem->responsiblePeople()->attach($item->responsiblePeople->pluck('id'));
+            }
+        }
+
+        $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Бюджет скопійовано на ' . $monthNames[$validated['to_month']] . ' ' . $validated['to_year'],
+            'budget_id' => $targetBudget->id,
+        ]);
+    }
+
+    /**
+     * Ensure a MinistryBudget exists for ministry/month, create if needed
+     */
+    public function ensureBudget(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $church = $this->getCurrentChurch();
+        $validated = $request->validate([
+            'year' => 'required|integer',
+            'month' => 'required|integer|min:1|max:12',
+        ]);
+
+        $budget = MinistryBudget::firstOrCreate(
+            ['church_id' => $church->id, 'ministry_id' => $ministry->id, 'year' => $validated['year'], 'month' => $validated['month']],
+            ['monthly_budget' => 0]
+        );
+
+        return response()->json(['success' => true, 'budget_id' => $budget->id]);
+    }
+
+    /**
+     * Store a new budget item for a ministry
+     */
+    public function storeBudgetItem(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'budget_id' => 'required|integer',
+            'name' => 'required|string|max:255',
+            'planned_amount' => 'required|numeric|min:0',
+            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'notes' => 'nullable|string|max:500',
+            'person_ids' => 'nullable|array',
+            'person_ids.*' => 'integer|exists:people,id',
+        ]);
+
+        $ministryBudget = MinistryBudget::where('id', $validated['budget_id'])
+            ->where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->firstOrFail();
+
+        if (!empty($validated['category_id'])) {
+            $exists = BudgetItem::where('ministry_budget_id', $ministryBudget->id)
+                ->where('category_id', $validated['category_id'])
+                ->exists();
+            if ($exists) {
+                return response()->json(['success' => false, 'message' => 'Ця категорія вже використовується в іншій статті бюджету.'], 422);
+            }
+        }
+
+        $maxSort = BudgetItem::where('ministry_budget_id', $ministryBudget->id)->max('sort_order') ?? 0;
+
+        $item = BudgetItem::create([
+            'church_id' => $church->id,
+            'ministry_budget_id' => $ministryBudget->id,
+            'category_id' => $validated['category_id'] ?? null,
+            'name' => $validated['name'],
+            'planned_amount' => $validated['planned_amount'],
+            'notes' => $validated['notes'] ?? null,
+            'sort_order' => $maxSort + 1,
+        ]);
+
+        if (!empty($validated['person_ids'])) {
+            $item->responsiblePeople()->attach($validated['person_ids']);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Статтю бюджету додано.', 'item' => $item->load('responsiblePeople', 'category')]);
+    }
+
+    /**
+     * Update a budget item
+     */
+    public function updateBudgetItem(Request $request, BudgetItem $budgetItem)
+    {
+        $church = $this->getCurrentChurch();
+        if ($budgetItem->church_id !== $church->id) abort(404);
+
+        $ministry = $budgetItem->ministryBudget->ministry;
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'planned_amount' => 'required|numeric|min:0',
+            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'notes' => 'nullable|string|max:500',
+            'person_ids' => 'nullable|array',
+            'person_ids.*' => 'integer|exists:people,id',
+        ]);
+
+        if (!empty($validated['category_id'])) {
+            $exists = BudgetItem::where('ministry_budget_id', $budgetItem->ministry_budget_id)
+                ->where('category_id', $validated['category_id'])
+                ->where('id', '!=', $budgetItem->id)
+                ->exists();
+            if ($exists) {
+                return response()->json(['success' => false, 'message' => 'Ця категорія вже використовується в іншій статті бюджету.'], 422);
+            }
+        }
+
+        $budgetItem->update([
+            'name' => $validated['name'],
+            'planned_amount' => $validated['planned_amount'],
+            'category_id' => $validated['category_id'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        $budgetItem->responsiblePeople()->sync($validated['person_ids'] ?? []);
+
+        return response()->json(['success' => true, 'message' => 'Статтю бюджету оновлено.', 'item' => $budgetItem->load('responsiblePeople', 'category')]);
+    }
+
+    /**
+     * Delete a budget item
+     */
+    public function destroyBudgetItem(Request $request, BudgetItem $budgetItem)
+    {
+        $church = $this->getCurrentChurch();
+        if ($budgetItem->church_id !== $church->id) abort(404);
+
+        $ministry = $budgetItem->ministryBudget->ministry;
+        Gate::authorize('contribute-ministry', $ministry);
+
+        Transaction::where('budget_item_id', $budgetItem->id)->update(['budget_item_id' => null]);
+        $budgetItem->delete();
+
+        return response()->json(['success' => true, 'message' => 'Статтю бюджету видалено.']);
+    }
+
     public function scheduleGridData(Request $request, Ministry $ministry)
     {
         $this->authorizeChurch($ministry);

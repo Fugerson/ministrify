@@ -1680,126 +1680,71 @@
             </div>
 
             <div x-show="activeTab === 'expenses'"{{ $tab !== 'expenses' ? ' style="display:none"' : '' }}
-                 x-data="{
-                     search: '',
-                     sortBy: 'date_desc',
-                     filterPeriod: 'month',
-                     currentMonth: {{ $budgetData['month'] }},
-                     currentYear: {{ $budgetData['year'] }},
-                     allTransactions: {{ Js::from($ministry->transactions->map(fn($t) => [
-                         'id' => $t->id,
-                         'amount' => $t->amount,
-                         'currency' => $t->currency ?? '₴',
-                         'description' => $t->description,
-                         'date' => $t->date->format('Y-m-d'),
-                         'month' => (int)$t->date->format('m'),
-                         'year' => (int)$t->date->format('Y'),
-                         'date_formatted' => $t->date->format('d.m.Y'),
-                         'category' => $t->category?->name,
-                         'payment_method' => $t->payment_method,
-                         'notes' => $t->notes,
-                         'attachments' => $t->attachments->map(fn($a) => [
-                             'url' => Storage::url($a->path),
-                             'is_image' => str_starts_with($a->mime_type, 'image/')
-                         ])
-                     ])) }},
-                     get filteredTransactions() {
-                         let result = this.allTransactions;
-                         // Filter by period
-                         if (this.filterPeriod === 'month') {
-                             result = result.filter(t => t.month === this.currentMonth && t.year === this.currentYear);
-                         } else if (this.filterPeriod === 'year') {
-                             result = result.filter(t => t.year === this.currentYear);
-                         }
-                         // Filter by search
-                         if (this.search) {
-                             const s = this.search.toLowerCase();
-                             result = result.filter(t =>
-                                 t.description?.toLowerCase().includes(s) ||
-                                 t.category?.toLowerCase().includes(s) ||
-                                 t.notes?.toLowerCase().includes(s)
-                             );
-                         }
-                         // Sort
-                         result = [...result].sort((a, b) => {
-                             if (this.sortBy === 'date_desc') return b.date.localeCompare(a.date);
-                             if (this.sortBy === 'date_asc') return a.date.localeCompare(b.date);
-                             if (this.sortBy === 'amount_desc') return b.amount - a.amount;
-                             if (this.sortBy === 'amount_asc') return a.amount - b.amount;
-                             return 0;
-                         });
-                         return result;
-                     },
-                     get totalSum() {
-                         return this.filteredTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-                     },
-                     monthNames: ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
-                     prevPeriod() {
-                         if (this.filterPeriod === 'month') {
-                             this.currentMonth--;
-                             if (this.currentMonth < 1) { this.currentMonth = 12; this.currentYear--; }
-                         } else {
-                             this.currentYear--;
-                         }
-                     },
-                     nextPeriod() {
-                         if (this.filterPeriod === 'month') {
-                             this.currentMonth++;
-                             if (this.currentMonth > 12) { this.currentMonth = 1; this.currentYear++; }
-                         } else {
-                             this.currentYear++;
-                         }
-                     }
-                 }">
-                {{-- ===== BUDGET PLANNING SECTION ===== --}}
-                <div x-data="budgetItemsManager()" class="mb-6">
-                    @if($budgetData['has_items'])
-                    {{-- Has budget items — show full table --}}
+                 x-data="budgetPage()"
+                 x-init="loadBudget()">
+                {{-- ===== BUDGET PLANNING SECTION (fully dynamic via Alpine.js) ===== --}}
+                <div class="mb-6">
+                    {{-- Budget header with unified month navigation --}}
                     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        {{-- Header with summary --}}
-                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-2">
-                            <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                                Планування бюджету
-                                <span class="text-xs font-normal text-gray-400 dark:text-gray-500">{{ $budgetData['month_name'] }}</span>
-                            </h3>
-                            @php
-                                $budgetPct = $budgetData['effective_budget'] > 0
-                                    ? round(($budgetData['total_spent'] / $budgetData['effective_budget']) * 100, 1)
-                                    : 0;
-                                $budgetRemaining = $budgetData['effective_budget'] - $budgetData['total_spent'];
-                            @endphp
-                            <div class="flex items-center gap-3 text-sm">
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                    Бюджет
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    <button @click="prevMonth()" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                    </button>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px] text-center" x-text="monthNames[currentMonth] + ' ' + currentYear"></span>
+                                    <button @click="nextMonth()" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            {{-- Summary line (visible when has items) --}}
+                            <div x-show="budget.has_items" class="mt-2 flex flex-wrap items-center gap-3 text-sm">
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    Витрачено {{ number_format($budgetData['total_spent'], 0, ',', ' ') }}
-                                    з {{ number_format($budgetData['effective_budget'], 0, ',', ' ') }} ₴
+                                    Витрачено <span x-text="fmt(budget.total_spent)"></span>
+                                    з <span x-text="fmt(budget.effective_budget)"></span> ₴
                                 </span>
-                                <span class="font-medium px-2 py-0.5 rounded-full text-xs {{ $budgetRemaining >= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' }}">
-                                    {{ $budgetRemaining >= 0 ? 'Залишок ' : 'Перевитрата ' }}{{ number_format(abs($budgetRemaining), 0, ',', ' ') }} ₴
+                                <span class="font-medium px-2 py-0.5 rounded-full text-xs"
+                                      :class="budgetRemaining >= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
+                                    <span x-text="(budgetRemaining >= 0 ? 'Залишок ' : 'Перевитрата ') + fmt(Math.abs(budgetRemaining)) + ' ₴'"></span>
                                 </span>
+                                @can('contribute-ministry', $ministry)
+                                <button @click="copyBudget()" class="ml-auto text-xs text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1" title="Копіювати на наступний місяць">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                    Копіювати на наст. місяць
+                                </button>
+                                @endcan
                             </div>
                         </div>
 
                         {{-- Progress bar --}}
-                        @if($budgetData['effective_budget'] > 0)
-                        <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700/20">
-                            @php
-                                $barPct = min(100, $budgetPct);
-                                $barColor = $budgetPct > 100 ? 'bg-red-500' : ($budgetPct > 80 ? 'bg-orange-500' : 'bg-green-500');
-                            @endphp
+                        <div x-show="budget.has_items && budget.effective_budget > 0" class="px-4 py-2 bg-gray-50 dark:bg-gray-700/20">
                             <div class="flex items-center gap-3">
                                 <div class="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
-                                    <div class="{{ $barColor }} h-2.5 rounded-full transition-all" style="width: {{ $barPct }}%"></div>
+                                    <div class="h-2.5 rounded-full transition-all"
+                                         :class="budgetPct > 100 ? 'bg-red-500' : (budgetPct > 80 ? 'bg-orange-500' : 'bg-green-500')"
+                                         :style="'width: ' + Math.min(100, budgetPct) + '%'"></div>
                                 </div>
-                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $budgetPct }}%</span>
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap" x-text="budgetPct + '%'"></span>
                             </div>
                         </div>
-                        @endif
 
-                        {{-- Items table --}}
-                        <div class="px-4 py-3">
+                        {{-- Loading state --}}
+                        <div x-show="budgetLoading" class="px-4 py-8 text-center">
+                            <svg class="animate-spin h-6 w-6 text-primary-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+
+                        {{-- Items table (dynamic) --}}
+                        <div x-show="budget.has_items && !budgetLoading" class="px-4 py-3">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm">
                                     <thead>
@@ -1815,82 +1760,65 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                                        @foreach($budgetData['items'] as $bi)
-                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
-                                            <td class="px-2 py-2.5">
-                                                <div class="font-medium text-gray-900 dark:text-white">{{ $bi['name'] }}</div>
-                                                @if($bi['category'])
-                                                    <div class="text-xs text-gray-400">{{ $bi['category']->icon ?? '' }} {{ $bi['category']->name }}</div>
-                                                @endif
-                                            </td>
-                                            <td class="px-2 py-2.5 text-right whitespace-nowrap text-gray-600 dark:text-gray-300">
-                                                {{ number_format($bi['planned_amount'], 0, ',', ' ') }} ₴
-                                            </td>
-                                            <td class="px-2 py-2.5 text-right whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                                {{ number_format($bi['actual'], 0, ',', ' ') }} ₴
-                                            </td>
-                                            <td class="px-2 py-2.5 text-right whitespace-nowrap">
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $bi['difference'] >= 0 ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20' }}">
-                                                    {{ $bi['difference'] >= 0 ? '+' : '' }}{{ number_format($bi['difference'], 0, ',', ' ') }} ₴
-                                                </span>
-                                            </td>
-                                            <td class="px-2 py-2.5 hidden sm:table-cell">
-                                                <div class="flex flex-wrap gap-1">
-                                                    @foreach($bi['responsible'] as $person)
-                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                                                        {{ $person->short_name ?? $person->first_name }}
-                                                    </span>
-                                                    @endforeach
-                                                </div>
-                                            </td>
-                                            @can('contribute-ministry', $ministry)
-                                            <td class="px-2 py-2.5 text-center">
-                                                <div class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button @click="openItemModal('edit', {{ json_encode([
-                                                        'id' => $bi['id'],
-                                                        'name' => $bi['name'],
-                                                        'planned_amount' => $bi['planned_amount'],
-                                                        'category_id' => $bi['category_id'],
-                                                        'notes' => $bi['notes'] ?? '',
-                                                        'person_ids' => $bi['responsible']->pluck('id')->toArray(),
-                                                    ]) }})"
-                                                            class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg" title="Редагувати">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                        </svg>
-                                                    </button>
-                                                    <button @click="deleteItem({{ $bi['id'] }}, '{{ addslashes($bi['name']) }}')"
-                                                            class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            @endcan
-                                        </tr>
-                                        @endforeach
+                                        <template x-for="bi in budget.items" :key="bi.id">
+                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
+                                                <td class="px-2 py-2.5">
+                                                    <div class="font-medium text-gray-900 dark:text-white" x-text="bi.name"></div>
+                                                    <div x-show="bi.category_name" class="text-xs text-gray-400" x-text="(bi.category_icon || '') + ' ' + (bi.category_name || '')"></div>
+                                                </td>
+                                                <td class="px-2 py-2.5 text-right whitespace-nowrap text-gray-600 dark:text-gray-300" x-text="fmt(bi.planned_amount) + ' ₴'"></td>
+                                                <td class="px-2 py-2.5 text-right whitespace-nowrap font-medium text-gray-900 dark:text-white" x-text="fmt(bi.actual) + ' ₴'"></td>
+                                                <td class="px-2 py-2.5 text-right whitespace-nowrap">
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
+                                                          :class="bi.difference >= 0 ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20'"
+                                                          x-text="(bi.difference >= 0 ? '+' : '') + fmt(bi.difference) + ' ₴'"></span>
+                                                </td>
+                                                <td class="px-2 py-2.5 hidden sm:table-cell">
+                                                    <div class="flex flex-wrap gap-1">
+                                                        <template x-for="person in bi.responsible" :key="person.id">
+                                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" x-text="person.name"></span>
+                                                        </template>
+                                                    </div>
+                                                </td>
+                                                @can('contribute-ministry', $ministry)
+                                                <td class="px-2 py-2.5 text-center">
+                                                    <div class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button @click="openItemModal('edit', bi)"
+                                                                class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg" title="Редагувати">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                            </svg>
+                                                        </button>
+                                                        <button @click="deleteItem(bi.id, bi.name)"
+                                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                @endcan
+                                            </tr>
+                                        </template>
 
-                                        @if($budgetData['unmatched_spent'] > 0)
-                                        <tr class="bg-orange-50/50 dark:bg-orange-900/10">
+                                        <tr x-show="budget.unmatched_spent > 0" class="bg-orange-50/50 dark:bg-orange-900/10">
                                             <td class="px-2 py-2.5 text-gray-500 italic">Інші витрати</td>
                                             <td class="px-2 py-2.5 text-right text-gray-400">—</td>
-                                            <td class="px-2 py-2.5 text-right font-medium text-gray-900 dark:text-white">{{ number_format($budgetData['unmatched_spent'], 0, ',', ' ') }} ₴</td>
+                                            <td class="px-2 py-2.5 text-right font-medium text-gray-900 dark:text-white" x-text="fmt(budget.unmatched_spent) + ' ₴'"></td>
                                             <td class="px-2 py-2.5"></td>
                                             <td class="px-2 py-2.5 hidden sm:table-cell"></td>
                                             @can('contribute-ministry', $ministry)<td></td>@endcan
                                         </tr>
-                                        @endif
                                     </tbody>
                                     <tfoot>
                                         <tr class="border-t-2 border-gray-200 dark:border-gray-600 font-semibold text-sm">
                                             <td class="px-2 py-2.5 text-gray-900 dark:text-white">Всього</td>
-                                            <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white">{{ number_format(collect($budgetData['items'])->sum('planned_amount'), 0, ',', ' ') }} ₴</td>
-                                            <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white">{{ number_format($budgetData['total_spent'], 0, ',', ' ') }} ₴</td>
+                                            <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white" x-text="fmt(totalPlanned) + ' ₴'"></td>
+                                            <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white" x-text="fmt(budget.total_spent) + ' ₴'"></td>
                                             <td class="px-2 py-2.5 text-right">
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold {{ $budgetRemaining >= 0 ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20' }}">
-                                                    {{ $budgetRemaining >= 0 ? '+' : '' }}{{ number_format($budgetRemaining, 0, ',', ' ') }} ₴
-                                                </span>
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold"
+                                                      :class="budgetRemaining >= 0 ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20'"
+                                                      x-text="(budgetRemaining >= 0 ? '+' : '') + fmt(budgetRemaining) + ' ₴'"></span>
                                             </td>
                                             <td class="px-2 py-2.5 hidden sm:table-cell"></td>
                                             @can('contribute-ministry', $ministry)<td></td>@endcan
@@ -1900,8 +1828,31 @@
                             </div>
                         </div>
 
+                        {{-- Empty state --}}
+                        <div x-show="!budget.has_items && !budgetLoading" class="p-6 text-center">
+                            <div class="mx-auto w-12 h-12 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center mb-3">
+                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">Бюджет не сплановано</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-sm mx-auto">
+                                Розбийте бюджет на статті — оренда, перекуси, матеріали — щоб бачити план, факт та залишок по кожній.
+                            </p>
+                            @can('contribute-ministry', $ministry)
+                            <button @click="openItemModal('create')"
+                                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Додати першу статтю
+                            </button>
+                            @endcan
+                        </div>
+
+                        {{-- Add item button (when items exist) --}}
                         @can('contribute-ministry', $ministry)
-                        <div class="px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/20">
+                        <div x-show="budget.has_items && !budgetLoading" class="px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/20">
                             <button @click="openItemModal('create')"
                                     class="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1912,30 +1863,6 @@
                         </div>
                         @endcan
                     </div>
-
-                    @else
-                    {{-- No budget items — empty state --}}
-                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-6 text-center">
-                        <div class="mx-auto w-12 h-12 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center mb-3">
-                            <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">Бюджет не сплановано</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-sm mx-auto">
-                            Розбийте бюджет на статті — оренда, перекуси, матеріали — щоб бачити план, факт та залишок по кожній.
-                        </p>
-                        @can('contribute-ministry', $ministry)
-                        <button @click="openItemModal('create')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                            </svg>
-                            Додати першу статтю
-                        </button>
-                        @endcan
-                    </div>
-                    @endif
 
                     {{-- Budget Item Modal --}}
                     <div x-show="showItemModal" x-cloak
@@ -2009,22 +1936,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
                         Витрати
+                        <span class="text-xs font-normal text-gray-400" x-text="monthNames[currentMonth] + ' ' + currentYear"></span>
                     </h3>
-                    <div class="flex items-center gap-2">
-                        <button @click="prevPeriod()" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                        </button>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[100px] sm:min-w-[130px] text-center" x-text="filterPeriod === 'month' ? monthNames[currentMonth] + ' ' + currentYear : (filterPeriod === 'year' ? currentYear : 'Всі')"></span>
-                        <button @click="nextPeriod()" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </button>
-                        <select x-model="filterPeriod" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                            <option value="month">Місяць</option>
-                            <option value="year">Рік</option>
-                            <option value="all">Всі</option>
-                        </select>
-                        <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="new Intl.NumberFormat('uk-UA').format(totalSum) + ' ₴'"></span>
-                    </div>
+                    <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="fmt(totalSum) + ' ₴'"></span>
                 </div>
 
                 <!-- Search & Sort -->
@@ -4537,27 +4451,136 @@ function settingsTab() {
     }
 }
 
-function budgetItemsManager() {
+function budgetPage() {
     return {
+        // Shared state
+        currentMonth: {{ $budgetData['month'] }},
+        currentYear: {{ $budgetData['year'] }},
+        ministryId: {{ $ministry->id }},
+        monthNames: ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
+
+        // Budget data (loaded via AJAX)
+        budget: {
+            budget_id: {{ $budgetData['budget']?->id ?? 'null' }},
+            items: [],
+            has_items: false,
+            effective_budget: 0,
+            total_spent: 0,
+            unmatched_spent: 0,
+        },
+        budgetLoading: false,
+
+        // Expenses data
+        search: '',
+        sortBy: 'date_desc',
+        allTransactions: {!! Js::from($ministry->transactions->map(fn($t) => [
+            'id' => $t->id,
+            'amount' => $t->amount,
+            'currency' => $t->currency ?? '₴',
+            'description' => $t->description,
+            'date' => $t->date->format('Y-m-d'),
+            'month' => (int)$t->date->format('m'),
+            'year' => (int)$t->date->format('Y'),
+            'date_formatted' => $t->date->format('d.m.Y'),
+            'category' => $t->category?->name,
+            'payment_method' => $t->payment_method,
+            'notes' => $t->notes,
+            'attachments' => $t->attachments->map(fn($a) => [
+                'url' => Storage::url($a->path),
+                'is_image' => str_starts_with($a->mime_type, 'image/')
+            ])
+        ])) !!},
+
+        // Budget item modal
         showItemModal: false,
         itemMode: 'create',
         itemModalTitle: '',
         itemEditId: null,
         itemSaving: false,
-        budgetId: {{ $budgetData['budget']?->id ?? 'null' }},
-        ministryId: {{ $ministry->id }},
-        itemForm: {
-            name: '',
-            planned_amount: '',
-            category_id: '',
-            notes: '',
-            person_ids: [],
+        itemForm: { name: '', planned_amount: '', category_id: '', notes: '', person_ids: [] },
+
+        // Computed
+        get filteredTransactions() {
+            let result = this.allTransactions.filter(t => t.month === this.currentMonth && t.year === this.currentYear);
+            if (this.search) {
+                const s = this.search.toLowerCase();
+                result = result.filter(t =>
+                    t.description?.toLowerCase().includes(s) ||
+                    t.category?.toLowerCase().includes(s) ||
+                    t.notes?.toLowerCase().includes(s)
+                );
+            }
+            result = [...result].sort((a, b) => {
+                if (this.sortBy === 'date_desc') return b.date.localeCompare(a.date);
+                if (this.sortBy === 'date_asc') return a.date.localeCompare(b.date);
+                if (this.sortBy === 'amount_desc') return b.amount - a.amount;
+                if (this.sortBy === 'amount_asc') return a.amount - b.amount;
+                return 0;
+            });
+            return result;
+        },
+        get totalSum() {
+            return this.filteredTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        },
+        get totalPlanned() {
+            return this.budget.items.reduce((sum, i) => sum + i.planned_amount, 0);
+        },
+        get budgetRemaining() {
+            return this.budget.effective_budget - this.budget.total_spent;
+        },
+        get budgetPct() {
+            return this.budget.effective_budget > 0
+                ? Math.round((this.budget.total_spent / this.budget.effective_budget) * 1000) / 10
+                : 0;
         },
 
-        async ensureBudget() {
-            if (this.budgetId) return true;
+        // Format number
+        fmt(n) {
+            return new Intl.NumberFormat('uk-UA').format(Math.round(n));
+        },
+
+        // Month navigation (unified for budget + expenses)
+        prevMonth() {
+            this.currentMonth--;
+            if (this.currentMonth < 1) { this.currentMonth = 12; this.currentYear--; }
+            this.loadBudget();
+        },
+        nextMonth() {
+            this.currentMonth++;
+            if (this.currentMonth > 12) { this.currentMonth = 1; this.currentYear++; }
+            this.loadBudget();
+        },
+
+        // Load budget data from API
+        async loadBudget() {
+            this.budgetLoading = true;
             try {
-                const res = await fetch('/finances/budgets/' + this.ministryId, {
+                const res = await fetch(`/ministries/${this.ministryId}/budget-data?year=${this.currentYear}&month=${this.currentMonth}`, {
+                    headers: { 'Accept': 'application/json' },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    this.budget = {
+                        budget_id: data.budget_id,
+                        items: data.items || [],
+                        has_items: data.has_items,
+                        effective_budget: data.effective_budget,
+                        total_spent: data.total_spent,
+                        unmatched_spent: data.unmatched_spent,
+                    };
+                }
+            } catch (e) {
+                console.error('Failed to load budget:', e);
+            } finally {
+                this.budgetLoading = false;
+            }
+        },
+
+        // Ensure budget exists for current month
+        async ensureBudget() {
+            if (this.budget.budget_id) return true;
+            try {
+                const res = await fetch(`/ministries/${this.ministryId}/ensure-budget`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -4565,22 +4588,20 @@ function budgetItemsManager() {
                         'Accept': 'application/json',
                     },
                     body: JSON.stringify({
-                        monthly_budget: 0,
-                        year: {{ $budgetData['year'] }},
-                        month: {{ $budgetData['month'] }},
-                        notes: '',
+                        year: this.currentYear,
+                        month: this.currentMonth,
                     }),
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    // Reload to get the budget_id
-                    location.reload();
-                    return false;
+                    await this.loadBudget();
+                    return !!this.budget.budget_id;
                 }
             } catch (e) {}
             return false;
         },
 
+        // Open modal
         async openItemModal(mode, itemData) {
             this.itemMode = mode;
             this.itemModalTitle = mode === 'create' ? 'Нова стаття бюджету' : 'Редагувати статтю';
@@ -4599,7 +4620,7 @@ function budgetItemsManager() {
                 this.itemForm = { name: '', planned_amount: '', category_id: '', notes: '', person_ids: [] };
             }
 
-            if (mode === 'create' && !this.budgetId) {
+            if (mode === 'create' && !this.budget.budget_id) {
                 const ok = await this.ensureBudget();
                 if (!ok) return;
             }
@@ -4607,13 +4628,23 @@ function budgetItemsManager() {
             this.showItemModal = true;
         },
 
+        // Save item (create/update) — inline refresh, no reload
         async saveItem() {
             this.itemSaving = true;
             try {
                 const url = this.itemMode === 'create'
-                    ? `/finances/budgets/${this.budgetId}/items`
-                    : `/finances/budgets/items/${this.itemEditId}`;
+                    ? `/ministries/${this.ministryId}/budget-items`
+                    : `/ministries/budget-items/${this.itemEditId}`;
                 const method = this.itemMode === 'create' ? 'POST' : 'PUT';
+
+                const payload = {
+                    name: this.itemForm.name,
+                    planned_amount: this.itemForm.planned_amount,
+                    category_id: this.itemForm.category_id || null,
+                    notes: this.itemForm.notes || null,
+                    person_ids: this.itemForm.person_ids.map(Number),
+                };
+                if (this.itemMode === 'create') payload.budget_id = this.budget.budget_id;
 
                 const res = await fetch(url, {
                     method,
@@ -4622,19 +4653,13 @@ function budgetItemsManager() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({
-                        name: this.itemForm.name,
-                        planned_amount: this.itemForm.planned_amount,
-                        category_id: this.itemForm.category_id || null,
-                        notes: this.itemForm.notes || null,
-                        person_ids: this.itemForm.person_ids.map(Number),
-                    }),
+                    body: JSON.stringify(payload),
                 });
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     this.showItemModal = false;
                     if (typeof showToast === 'function') showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
+                    await this.loadBudget();
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
                     if (typeof showToast === 'function') showToast('error', msgs[0]);
@@ -4648,10 +4673,11 @@ function budgetItemsManager() {
             }
         },
 
+        // Delete item — inline refresh, no reload
         async deleteItem(itemId, itemName) {
             if (!confirm(`Видалити статтю "${itemName}"?`)) return;
             try {
-                const res = await fetch(`/finances/budgets/items/${itemId}`, {
+                const res = await fetch(`/ministries/budget-items/${itemId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -4661,12 +4687,50 @@ function budgetItemsManager() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     if (typeof showToast === 'function') showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
+                    await this.loadBudget();
                 }
             } catch (e) {
                 if (typeof showToast === 'function') showToast('error', 'Помилка видалення');
             }
-        }
+        },
+
+        // Copy budget to next month
+        async copyBudget() {
+            let toMonth = this.currentMonth + 1;
+            let toYear = this.currentYear;
+            if (toMonth > 12) { toMonth = 1; toYear++; }
+
+            if (!confirm(`Копіювати бюджет на ${this.monthNames[toMonth]} ${toYear}?`)) return;
+
+            try {
+                const res = await fetch(`/ministries/${this.ministryId}/budget-copy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        from_year: this.currentYear,
+                        from_month: this.currentMonth,
+                        to_year: toYear,
+                        to_month: toMonth,
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    if (typeof showToast === 'function') showToast('success', data.message);
+                    // Navigate to the copied month
+                    this.currentMonth = toMonth;
+                    this.currentYear = toYear;
+                    await this.loadBudget();
+                } else {
+                    if (typeof showToast === 'function') showToast('error', data.message || 'Помилка копіювання');
+                }
+            } catch (e) {
+                if (typeof showToast === 'function') showToast('error', 'Помилка копіювання');
+            }
+        },
     }
 }
 </script>
