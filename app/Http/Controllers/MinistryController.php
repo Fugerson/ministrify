@@ -741,6 +741,7 @@ class MinistryController extends Controller
             'date' => 'required|date',
             'description' => 'required|string|max:255',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_name' => 'nullable|string|max:100',
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
             'budget_item_id' => 'nullable|integer|exists:budget_items,id',
@@ -748,6 +749,19 @@ class MinistryController extends Controller
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
         ]);
+
+        // If custom category name provided, find or create
+        $categoryId = $validated['category_id'] ?? null;
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $category = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'expense',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $categoryId = $category->id;
+        }
 
         $transaction = Transaction::create([
             'church_id' => $church->id,
@@ -758,7 +772,7 @@ class MinistryController extends Controller
             'amount' => $validated['amount'],
             'currency' => $validated['currency'] ?? 'UAH',
             'date' => $validated['date'],
-            'category_id' => $validated['category_id'] ?? null,
+            'category_id' => $categoryId,
             'payment_method' => $validated['payment_method'] ?? null,
             'budget_item_id' => $validated['budget_item_id'] ?? null,
             'description' => $validated['description'],
@@ -864,6 +878,7 @@ class MinistryController extends Controller
             'date' => 'required|date',
             'description' => 'required|string|max:255',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_name' => 'nullable|string|max:100',
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
             'budget_item_id' => 'nullable|integer|exists:budget_items,id',
@@ -874,12 +889,25 @@ class MinistryController extends Controller
             'delete_attachments.*' => 'integer|exists:transaction_attachments,id',
         ]);
 
+        // If custom category name provided, find or create
+        $categoryId = $validated['category_id'] ?? null;
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $category = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'expense',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $categoryId = $category->id;
+        }
+
         $transaction->update([
             'amount' => $validated['amount'],
             'currency' => $validated['currency'] ?? 'UAH',
             'date' => $validated['date'],
             'description' => $validated['description'],
-            'category_id' => $validated['category_id'] ?? null,
+            'category_id' => $categoryId,
             'expense_type' => $validated['expense_type'] ?? null,
             'payment_method' => $validated['payment_method'] ?? null,
             'budget_item_id' => $validated['budget_item_id'] ?? null,

@@ -2213,12 +2213,22 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
                                     <select x-model="expenseForm.category_id"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                                            :class="{ 'hidden': expenseForm.category_id === '__custom__' }">
                                         <option value="">Без категорії</option>
                                         @foreach($expenseCategories as $cat)
                                             <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
                                         @endforeach
+                                        <option value="__custom__">Інше (ввести вручну)...</option>
                                     </select>
+                                    <div x-show="expenseForm.category_id === '__custom__'" class="flex gap-2">
+                                        <input type="text" x-model="expenseForm.category_name" placeholder="Назва категорії..."
+                                               class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        <button type="button" @click="expenseForm.category_id = ''; expenseForm.category_name = ''"
+                                                class="px-3 py-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="Назад до списку">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {{-- Two columns: Expense type + Payment method --}}
@@ -4813,7 +4823,7 @@ function budgetPage() {
         expenseSaving: false,
         expenseForm: {
             amount: '', currency: 'UAH', date: '', description: '',
-            category_id: '', expense_type: '', payment_method: '',
+            category_id: '', category_name: '', expense_type: '', payment_method: '',
             budget_item_id: '', notes: '',
         },
         expenseFiles: [],
@@ -5101,6 +5111,7 @@ function budgetPage() {
                             date: t.date,
                             description: t.description,
                             category_id: t.category_id || '',
+                            category_name: '',
                             expense_type: t.expense_type || '',
                             payment_method: t.payment_method || '',
                             budget_item_id: t.budget_item_id || '',
@@ -5116,7 +5127,7 @@ function budgetPage() {
                 this.expenseEditId = null;
                 this.expenseForm = {
                     amount: '', currency: 'UAH', date: new Date().toISOString().slice(0, 10),
-                    description: '', category_id: '', expense_type: '', payment_method: '',
+                    description: '', category_id: '', category_name: '', expense_type: '', payment_method: '',
                     budget_item_id: '', notes: '',
                 };
                 this.existingAttachments = [];
@@ -5158,7 +5169,8 @@ function budgetPage() {
                 formData.append('currency', this.expenseForm.currency);
                 formData.append('date', this.expenseForm.date);
                 formData.append('description', this.expenseForm.description);
-                if (this.expenseForm.category_id) formData.append('category_id', this.expenseForm.category_id);
+                if (this.expenseForm.category_id && this.expenseForm.category_id !== '__custom__') formData.append('category_id', this.expenseForm.category_id);
+                if (this.expenseForm.category_id === '__custom__' && this.expenseForm.category_name) formData.append('category_name', this.expenseForm.category_name);
                 if (this.expenseForm.expense_type) formData.append('expense_type', this.expenseForm.expense_type);
                 if (this.expenseForm.payment_method) formData.append('payment_method', this.expenseForm.payment_method);
                 if (this.expenseForm.budget_item_id) formData.append('budget_item_id', this.expenseForm.budget_item_id);
