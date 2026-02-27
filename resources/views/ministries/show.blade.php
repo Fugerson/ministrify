@@ -4865,7 +4865,7 @@ function budgetPage() {
             return this.filteredIncome.reduce((sum, t) => sum + parseFloat(t.amount), 0);
         },
         get balance() {
-            return this.budget.total_income - this.budget.total_spent;
+            return (this.budget.total_allocated || 0) + (this.budget.total_income || 0) - this.budget.total_spent;
         },
         get totalSum() {
             return this.filteredTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
