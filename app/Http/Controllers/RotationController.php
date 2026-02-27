@@ -265,6 +265,7 @@ class RotationController extends Controller
      */
     public function assignPosition(Request $request, Event $event)
     {
+        abort_unless(auth()->user()->canView('ministries'), 403);
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
@@ -304,6 +305,8 @@ class RotationController extends Controller
      */
     public function removeAssignment(Request $request, Assignment $assignment)
     {
+        abort_unless(auth()->user()->canView('ministries'), 403);
+
         $church = $this->getCurrentChurch();
         $event = $assignment->event;
 

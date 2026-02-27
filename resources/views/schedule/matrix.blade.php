@@ -18,18 +18,18 @@
 <div x-data="matrixView()" x-init="loadData()" class="space-y-4">
     {{-- View Toggle & Filters --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             {{-- View Toggle --}}
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 sm:gap-2">
                 <a href="{{ route('events.index') }}"
-                   class="px-4 py-2 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                   class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                     {{ __('Список') }}
                 </a>
                 <a href="{{ route('schedule') }}"
-                   class="px-4 py-2 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                   class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                     {{ __('Календар') }}
                 </a>
-                <span class="px-4 py-2 text-sm font-medium rounded-xl bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
+                <span class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
                     {{ __('Матриця') }}
                 </span>
             </div>
@@ -37,14 +37,14 @@
             {{-- Filters --}}
             <div class="flex flex-wrap items-center gap-2">
                 <select x-model="serviceType" @change="loadData()"
-                        class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm py-2">
+                        class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm py-2">
                     @foreach($serviceTypes as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
 
                 <select x-model="weeks" @change="loadData()"
-                        class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm py-2">
+                        class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm py-2">
                     <option value="4">4 {{ __('тижні') }}</option>
                     <option value="8">8 {{ __('тижнів') }}</option>
                     <option value="12">12 {{ __('тижнів') }}</option>
@@ -58,7 +58,7 @@
                         </svg>
                     </button>
                     <button @click="goToday()" type="button"
-                        class="px-3 py-1.5 text-xs font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
+                        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
                         {{ __('Сьогодні') }}
                     </button>
                     <button @click="nextPeriod()" type="button"
@@ -69,7 +69,7 @@
                     </button>
                 </div>
 
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="periodLabel"></span>
+                <span class="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300" x-text="periodLabel"></span>
             </div>
         </div>
     </div>
@@ -108,13 +108,13 @@
                 <table class="w-full border-collapse min-w-[600px]">
                     {{-- Header: event dates --}}
                     <thead>
-                        <tr class="bg-gray-50 dark:bg-gray-750">
-                            <th class="sticky left-0 z-20 bg-gray-50 dark:bg-gray-700/60 px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-r border-gray-200 dark:border-gray-600 w-[200px] min-w-[200px]">
+                        <tr class="bg-gray-50 dark:bg-gray-700">
+                            <th class="sticky left-0 z-20 bg-gray-50 dark:bg-gray-700 px-3 sm:px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-r border-gray-200 dark:border-gray-600 w-[160px] sm:w-[200px] min-w-[160px] sm:min-w-[200px]">
                                 {{ __('Команда / Роль') }}
                             </th>
                             <template x-for="event in events" :key="event.id">
                                 <th class="px-2 py-3 text-center border-b border-gray-200 dark:border-gray-600 min-w-[140px]"
-                                    :class="isNearestEvent(event) ? 'bg-primary-50/60 dark:bg-primary-900/20' : 'bg-gray-50 dark:bg-gray-700/60'">
+                                    :class="isNearestEvent(event) ? 'bg-primary-50 dark:bg-primary-900/30' : 'bg-gray-50 dark:bg-gray-700'">
                                     <a :href="'/events/' + event.id"
                                        class="block hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                                         <div class="text-[10px] font-medium uppercase tracking-wide"
@@ -141,7 +141,7 @@
                                 <tr class="border-b border-gray-100 dark:border-gray-700/50 group/row hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors"
                                     :class="roleIdx === 0 ? (mIdx > 0 ? 'border-t-2 border-gray-200 dark:border-gray-600' : 'border-t border-gray-200 dark:border-gray-600') : ''">
                                     {{-- Role label (with ministry header on first role) --}}
-                                    <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 group-hover/row:bg-gray-50 dark:group-hover/row:bg-gray-700/40 px-4 border-r border-gray-200 dark:border-gray-600 transition-colors"
+                                    <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 group-hover/row:bg-gray-50 dark:group-hover/row:bg-gray-700 px-3 sm:px-4 border-r border-gray-200 dark:border-gray-600 transition-colors"
                                         :class="roleIdx === 0 ? 'pt-3 pb-2.5' : 'py-2.5'">
                                         <template x-if="roleIdx === 0">
                                             <div class="flex items-center gap-2 mb-1.5 pb-1 border-b"
@@ -181,7 +181,7 @@
                                                 {{-- Empty cell --}}
                                                 <template x-if="getCellPersons(ministry.id, role, event.id).length === 0">
                                                     <div class="flex items-center justify-center w-full h-full">
-                                                        <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover/row:text-gray-400 dark:group-hover/row:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover/row:text-primary-400 dark:group-hover/row:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                         </svg>
                                                     </div>
@@ -267,7 +267,7 @@
                                   x-text="statusLabel(person.status)"></span>
                         </div>
                         <div class="flex items-center gap-0.5 flex-shrink-0 ml-2">
-                            <template x-if="person.has_telegram">
+                            <template x-if="person.has_telegram && person.source !== 'assignment'">
                                 <button @click.stop="notifyPerson(person)"
                                     class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                     :title="'{{ __('Надіслати в Telegram') }}'">
@@ -293,7 +293,7 @@
         <div class="p-2">
             <input type="text" x-model="dropdown.search" x-ref="dropdownSearch"
                    placeholder="{{ __('Пошук учасника...') }}"
-                   class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
+                   class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500"
                    @keydown.escape="dropdown.open = false">
         </div>
         <div class="overflow-y-auto max-h-44 pb-1">
@@ -351,6 +351,8 @@ function matrixView() {
             type: 'success',
             timer: null,
         },
+
+        busy: false,
 
         init() {
             const now = new Date();
@@ -563,7 +565,8 @@ function matrixView() {
 
         async assignPerson(member) {
             const { ministry, role, event } = this.dropdown;
-            if (!ministry || !role || !event) return;
+            if (!ministry || !role || !event || this.busy) return;
+            this.busy = true;
 
             const mKey = String(ministry.id);
             const rKey = this.getRoleKey(role);
@@ -608,7 +611,7 @@ function matrixView() {
                         id: data.id,
                         person_id: member.id,
                         person_name: member.short_name || member.name,
-                        status: null,
+                        status: data.status || 'pending',
                         has_telegram: member.has_telegram,
                         source: role.type === 'ministry_role' ? 'ministry_team' : 'assignment',
                     });
@@ -627,12 +630,15 @@ function matrixView() {
             } catch (e) {
                 console.error('Assign error:', e);
                 this.showToast('{{ __("Помилка при призначенні") }}', 'error');
+            } finally {
+                this.busy = false;
             }
         },
 
         async removePerson(person) {
             const { ministry, role, event } = this.dropdown;
-            if (!ministry || !role || !event) return;
+            if (!ministry || !role || !event || this.busy) return;
+            this.busy = true;
 
             const mKey = String(ministry.id);
             const rKey = this.getRoleKey(role);
@@ -670,6 +676,8 @@ function matrixView() {
             } catch (e) {
                 console.error('Remove error:', e);
                 this.showToast('{{ __("Помилка") }}', 'error');
+            } finally {
+                this.busy = false;
             }
         },
 

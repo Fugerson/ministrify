@@ -34,19 +34,19 @@
 <div class="space-y-4" x-data="calendarNavigator({{ json_encode(['view' => $view, 'year' => $year, 'month' => $month, 'week' => $currentWeek ?? null]) }})">
     <!-- View Toggle & Navigation -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <!-- View Toggle -->
             <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 sm:gap-2">
                     <a href="{{ route('events.index') }}"
-                       class="px-3 py-1.5 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                       class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                         {{ __('Список') }}
                     </a>
-                    <span class="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
+                    <span class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
                         {{ __('Календар') }}
                     </span>
                     <a href="{{ route('schedule.matrix') }}"
-                       class="px-3 py-1.5 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                       class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                         {{ __('Матриця') }}
                     </a>
                 </div>
