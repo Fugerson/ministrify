@@ -66,8 +66,8 @@ class MinistryController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'color' => 'nullable|string|max:7',
+            'description' => 'nullable|string|max:2000',
+            'color' => ['nullable', 'string', 'max:7', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'monthly_budget' => 'nullable|numeric|min:0',
         ]);
@@ -75,6 +75,14 @@ class MinistryController extends Controller
         $church = $this->getCurrentChurch();
         $validated['church_id'] = $church->id;
         $ministry = Ministry::create($validated);
+
+        // Add leader as member
+        if ($ministry->leader_id && !$ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
+            $ministry->members()->attach($ministry->leader_id, [
+                'role' => 'leader',
+                'joined_at' => now(),
+            ]);
+        }
 
         // Create default positions if provided
         if ($request->has('positions')) {
@@ -774,7 +782,7 @@ class MinistryController extends Controller
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
             'budget_item_id' => 'nullable|integer|exists:budget_items,id',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
         ]);
@@ -911,7 +919,7 @@ class MinistryController extends Controller
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
             'budget_item_id' => 'nullable|integer|exists:budget_items,id',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
             'delete_attachments' => 'nullable|array',
@@ -1025,7 +1033,7 @@ class MinistryController extends Controller
             'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
             'description' => 'required|string|max:255',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
         ]);
 
         $transaction = Transaction::create([
@@ -1223,8 +1231,8 @@ class MinistryController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'color' => 'nullable|string|max:7',
+            'description' => 'nullable|string|max:2000',
+            'color' => ['nullable', 'string', 'max:7', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'monthly_budget' => 'nullable|numeric|min:0',
             'is_worship_ministry' => 'boolean',
@@ -1235,6 +1243,14 @@ class MinistryController extends Controller
         $validated['is_sunday_service_part'] = $request->boolean('is_sunday_service_part');
 
         $ministry->update($validated);
+
+        // Ensure new leader is a member
+        if ($ministry->leader_id && !$ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
+            $ministry->members()->attach($ministry->leader_id, [
+                'role' => 'leader',
+                'joined_at' => now(),
+            ]);
+        }
 
         \App\Models\Church::clearMinistriesCache($ministry->church_id);
 

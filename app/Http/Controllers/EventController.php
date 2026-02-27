@@ -241,7 +241,7 @@ class EventController extends Controller
             'date' => 'required|date',
             'time' => 'nullable|date_format:H:i',
             'end_date' => 'nullable|date|after_or_equal:date',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'recurrence_rule' => 'nullable|array',
             'recurrence_rule.frequency' => 'required_with:recurrence_rule|string',
             'recurrence_rule.days' => 'nullable|array',
@@ -288,7 +288,7 @@ class EventController extends Controller
 
         // If ministry selected, authorize
         if (!empty($validated['ministry_id'])) {
-            $ministry = Ministry::findOrFail($validated['ministry_id']);
+            $ministry = Ministry::where('church_id', $church->id)->findOrFail($validated['ministry_id']);
             Gate::authorize('contribute-ministry', $ministry);
         }
 
@@ -435,7 +435,7 @@ class EventController extends Controller
             'date' => 'sometimes|date',
             'time' => 'sometimes|date_format:H:i',
             'end_date' => 'nullable|date|after_or_equal:date',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'is_service' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
             'track_attendance' => 'nullable|boolean',
@@ -803,11 +803,7 @@ class EventController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
-        $ministry = Ministry::findOrFail($request->ministry_id);
-
-        if ($ministry->church_id !== $church->id) {
-            abort(404);
-        }
+        $ministry = Ministry::where('church_id', $church->id)->findOrFail($request->ministry_id);
 
         Gate::authorize('contribute-ministry', $ministry);
 

@@ -73,11 +73,7 @@ class ShepherdController extends Controller
             return response()->json(['message' => 'Функція опікунів вимкнена'], 400);
         }
 
-        $person = Person::findOrFail($validated['person_id']);
-
-        if ($person->church_id !== $church->id) {
-            abort(404);
-        }
+        $person = Person::where('church_id', $church->id)->findOrFail($validated['person_id']);
 
         $person->update(['is_shepherd' => true]);
 

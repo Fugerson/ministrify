@@ -41,7 +41,7 @@ class GroupController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'status' => 'nullable|in:active,paused,vacation',
         ]);
@@ -101,12 +101,20 @@ class GroupController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'status' => 'nullable|in:active,paused,vacation',
         ]);
 
         $group->update($validated);
+
+        // Ensure new leader is a member
+        if ($group->leader_id && !$group->members()->where('people.id', $group->leader_id)->exists()) {
+            $group->members()->attach($group->leader_id, [
+                'role' => 'leader',
+                'joined_at' => now(),
+            ]);
+        }
 
         return $this->successResponse($request, 'Групу оновлено!', 'groups.show', [$group]);
     }

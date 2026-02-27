@@ -25,7 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role',
+        'role', // Note: only set server-side, never from user input
         'google_id',
         'church_role_id',
         'requested_church_role_id',

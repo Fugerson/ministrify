@@ -25,7 +25,7 @@ class AssignmentService
         $people = Person::where('church_id', $event->church_id)
             ->whereHas('ministries', function ($q) use ($ministryId, $position) {
                 $q->where('ministries.id', $ministryId)
-                    ->whereJsonContains('ministry_person.position_ids', (string) $position->id);
+                    ->whereJsonContains('ministry_person.position_ids', (int) $position->id);
             })
             ->with(['unavailableDates', 'assignments' => function ($q) use ($eventDate) {
                 $q->whereHas('event', fn($eq) => $eq->whereDate('date', $eventDate));

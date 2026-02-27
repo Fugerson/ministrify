@@ -341,16 +341,16 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('ministries/{ministry}/worship-stats', [WorshipTeamController::class, 'stats'])->name('ministries.worship-stats');
     Route::get('ministries/{ministry}/worship-events/{event}', [WorshipTeamController::class, 'eventShow'])->name('ministries.worship-events.show');
     Route::get('ministries/{ministry}/worship-events/{event}/data', [WorshipTeamController::class, 'eventData'])->name('ministries.worship-events.data');
-    Route::post('events/{event}/songs', [WorshipTeamController::class, 'addSong'])->name('events.songs.add')->middleware('permission:events,view');
-    Route::delete('events/{event}/songs/{song}', [WorshipTeamController::class, 'removeSong'])->name('events.songs.remove')->middleware('permission:events,view');
-    Route::post('events/{event}/songs/reorder', [WorshipTeamController::class, 'reorderSongs'])->name('events.songs.reorder')->middleware('permission:events,view');
-    Route::post('events/{event}/worship-team', [WorshipTeamController::class, 'addTeamMember'])->name('events.worship-team.add')->middleware('permission:events,view');
-    Route::delete('events/{event}/worship-team/{member}', [WorshipTeamController::class, 'removeTeamMember'])->name('events.worship-team.remove')->middleware('permission:events,view');
+    Route::post('events/{event}/songs', [WorshipTeamController::class, 'addSong'])->name('events.songs.add')->middleware('permission:events,edit');
+    Route::delete('events/{event}/songs/{song}', [WorshipTeamController::class, 'removeSong'])->name('events.songs.remove')->middleware('permission:events,edit');
+    Route::post('events/{event}/songs/reorder', [WorshipTeamController::class, 'reorderSongs'])->name('events.songs.reorder')->middleware('permission:events,edit');
+    Route::post('events/{event}/worship-team', [WorshipTeamController::class, 'addTeamMember'])->name('events.worship-team.add')->middleware('permission:events,edit');
+    Route::delete('events/{event}/worship-team/{member}', [WorshipTeamController::class, 'removeTeamMember'])->name('events.worship-team.remove')->middleware('permission:events,edit');
 
     // Service Team (for ministries with is_sunday_service_part or is_worship_ministry)
-    Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add')->middleware('permission:events,view');
-    Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove')->middleware('permission:events,view');
-    Route::post('events/{event}/ministry-team/{member}/notify', [ServiceTeamController::class, 'sendNotification'])->name('events.ministry-team.notify')->middleware('permission:events,view');
+    Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add')->middleware('permission:events,edit');
+    Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove')->middleware('permission:events,edit');
+    Route::post('events/{event}/ministry-team/{member}/notify', [ServiceTeamController::class, 'sendNotification'])->name('events.ministry-team.notify')->middleware('permission:events,edit');
 
 
     // Person worship skills

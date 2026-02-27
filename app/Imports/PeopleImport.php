@@ -48,21 +48,32 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvent
 
     public function model(array $row)
     {
+        $firstName = $row['imia'] ?? $row["im'ia"] ?? $row['first_name'] ?? '';
+        $lastName = $row['prizvyshche'] ?? $row['last_name'] ?? '';
+
+        // Skip rows with empty names
+        if (empty(trim($firstName)) && empty(trim($lastName))) {
+            return null;
+        }
+
+        // Build update data — only set non-null values to avoid overwriting existing data
+        $updateData = array_filter([
+            'phone' => $row['telefon'] ?? $row['phone'] ?? null,
+            'email' => $row['email'] ?? null,
+            'telegram_username' => $row['telegram'] ?? null,
+            'address' => $row['adresa'] ?? $row['address'] ?? null,
+            'birth_date' => $this->parseDate($row['data_narodzhennia'] ?? $row['birth_date'] ?? null),
+            'joined_date' => $this->parseDate($row['v_tserkvi_z'] ?? $row['joined_date'] ?? null),
+            'notes' => $row['notatky'] ?? $row['notes'] ?? null,
+        ], fn($v) => $v !== null && $v !== '');
+
         $person = Person::updateOrCreate(
             [
                 'church_id' => $this->churchId,
-                'first_name' => $row['imia'] ?? $row["im'ia"] ?? $row['first_name'] ?? '',
-                'last_name' => $row['prizvyshche'] ?? $row['last_name'] ?? '',
+                'first_name' => $firstName,
+                'last_name' => $lastName,
             ],
-            [
-                'phone' => $row['telefon'] ?? $row['phone'] ?? null,
-                'email' => $row['email'] ?? null,
-                'telegram_username' => $row['telegram'] ?? null,
-                'address' => $row['adresa'] ?? $row['address'] ?? null,
-                'birth_date' => $this->parseDate($row['data_narodzhennia'] ?? $row['birth_date'] ?? null),
-                'joined_date' => $this->parseDate($row['v_tserkvi_z'] ?? $row['joined_date'] ?? null),
-                'notes' => $row['notatky'] ?? $row['notes'] ?? null,
-            ]
+            $updateData
         );
 
         // Track household for family relationships
@@ -84,7 +95,9 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvent
                     $tagIds[] = $this->tagCache[$tagName];
                 }
             }
-            $person->tags()->sync($tagIds);
+            if (!empty($tagIds)) {
+                $person->tags()->syncWithoutDetaching($tagIds);
+            }
         }
 
         // Sync ministries

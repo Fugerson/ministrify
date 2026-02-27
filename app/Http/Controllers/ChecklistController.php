@@ -40,10 +40,10 @@ class ChecklistController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'items' => 'required|array|min:1',
             'items.*.title' => 'required|string|max:255',
-            'items.*.description' => 'nullable|string',
+            'items.*.description' => 'nullable|string|max:1000',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -80,11 +80,11 @@ class ChecklistController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'items' => 'required|array|min:1',
             'items.*.id' => 'nullable|integer',
             'items.*.title' => 'required|string|max:255',
-            'items.*.description' => 'nullable|string',
+            'items.*.description' => 'nullable|string|max:1000',
         ]);
 
         $template->update([
@@ -196,7 +196,7 @@ class ChecklistController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'assigned_to' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
@@ -248,7 +248,7 @@ class ChecklistController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'assigned_to' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 

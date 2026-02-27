@@ -20,13 +20,13 @@ class ServicePlanController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'type' => 'nullable|string|in:' . implode(',', array_keys(ServicePlanItem::typeLabels())),
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'responsible_names' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'song_id' => 'nullable|exists:songs,id',
         ]);
 
@@ -62,13 +62,13 @@ class ServicePlanController extends Controller
         // Support partial updates - all fields optional
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'type' => 'nullable|string|in:' . implode(',', array_keys(ServicePlanItem::typeLabels())),
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'responsible_names' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'status' => 'nullable|string|in:planned,confirmed,declined,completed',
             'song_id' => 'nullable|exists:songs,id',
         ]);

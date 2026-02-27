@@ -98,9 +98,13 @@ class WorshipTeamController extends Controller
             ->limit(10)
             ->get();
 
+        // Preload people to avoid N+1
+        $personIds = $topParticipants->pluck('person_id')->toArray();
+        $people = Person::whereIn('id', $personIds)->get()->keyBy('id');
+
         // Load person and roles for each participant
         foreach ($topParticipants as $participant) {
-            $participant->person = Person::find($participant->person_id);
+            $participant->person = $people[$participant->person_id] ?? null;
             $participant->roles = MinistryRole::whereIn('id', function($q) use ($participant, $eventIds, $ministry) {
                 $q->select('ministry_role_id')
                     ->from('event_ministry_team')

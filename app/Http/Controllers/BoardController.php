@@ -193,7 +193,7 @@ class BoardController extends Controller
         abort_unless(auth()->user()->canCreate('boards'), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'color' => 'required|string|max:7',
         ]);
 
@@ -229,7 +229,7 @@ class BoardController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'color' => 'required|string|max:7',
         ]);
 
@@ -347,7 +347,7 @@ class BoardController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
@@ -646,7 +646,7 @@ class BoardController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
@@ -831,7 +831,7 @@ class BoardController extends Controller
         $this->authorizeCardAccess($card);
 
         $validated = $request->validate([
-            'content' => 'nullable|string',
+            'content' => 'nullable|string|max:10000',
             'files.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip,csv',
         ]);
 
@@ -965,7 +965,7 @@ class BoardController extends Controller
         }
 
         $validated = $request->validate([
-            'content' => 'nullable|string',
+            'content' => 'nullable|string|max:10000',
             'files.*' => 'file|max:10240',
         ]);
 
@@ -1215,7 +1215,7 @@ class BoardController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|max:7',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'show_in_general' => 'nullable|boolean',
         ]);
 
@@ -1234,7 +1234,7 @@ class BoardController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|max:7',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'show_in_general' => 'nullable|boolean',
         ]);
 

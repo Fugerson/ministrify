@@ -206,7 +206,7 @@ class PersonController extends Controller
             'joined_date' => 'nullable|date',
             'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
             'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'tags' => 'nullable|array',
             'ministries' => 'nullable|array',
@@ -332,7 +332,7 @@ class PersonController extends Controller
             'services_total' => $person->assignments()
                 ->where('status', 'confirmed')
                 ->count(),
-            'attendance_30_days' => $person->attendanceRecords()
+            'attendance_3_months' => $person->attendanceRecords()
                 ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
                 ->where('present', true)
                 ->count(),
@@ -357,7 +357,7 @@ class PersonController extends Controller
             ->get()
             ->map(fn($r) => [
                 'type' => 'attendance',
-                'date' => $r->attendance->date,
+                'date' => $r->attendance?->date,
                 'title' => $r->present ? 'Відвідав(ла) служіння' : 'Пропустив(ла) служіння',
                 'icon' => $r->present ? '✅' : '❌',
                 'color' => $r->present ? 'green' : 'red',
@@ -496,7 +496,7 @@ class PersonController extends Controller
                 'joined_date' => 'nullable|date',
                 'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
                 'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
-                'notes' => 'nullable|string',
+                'notes' => 'nullable|string|max:5000',
                 'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
                 'tags' => 'nullable|array',
                 'ministries' => 'nullable|array',
@@ -1005,10 +1005,7 @@ class PersonController extends Controller
 
         // Verify church role belongs to this church
         $church = $this->getCurrentChurch();
-        $churchRole = ChurchRole::findOrFail($validated['church_role_id']);
-        if ($churchRole->church_id !== $church->id) {
-            return response()->json(['message' => 'Невірна роль'], 400);
-        }
+        $churchRole = ChurchRole::where('church_id', $church->id)->findOrFail($validated['church_role_id']);
 
         if ($person->user) {
             return response()->json(['message' => 'Користувач вже має обліковий запис'], 400);
@@ -1230,7 +1227,7 @@ class PersonController extends Controller
      */
     public function quickSave(Request $request)
     {
-        if (!auth()->user()->canManage('people')) {
+        if (!auth()->user()->canEdit('people')) {
             abort(403);
         }
 
@@ -1368,12 +1365,14 @@ class PersonController extends Controller
             $stats['updated']++;
         }
 
-        // Delete people
-        foreach ($validated['delete'] ?? [] as $id) {
-            $person = Person::where('church_id', $church->id)->find($id);
-            if ($person) {
-                $person->delete();
-                $stats['deleted']++;
+        // Delete people (requires delete permission)
+        if (!empty($validated['delete']) && auth()->user()->canDelete('people')) {
+            foreach ($validated['delete'] as $id) {
+                $person = Person::where('church_id', $church->id)->find($id);
+                if ($person) {
+                    $person->delete();
+                    $stats['deleted']++;
+                }
             }
         }
 

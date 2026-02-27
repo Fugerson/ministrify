@@ -30,8 +30,8 @@ class FinanceController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        $year = $request->get('year', now()->year);
-        $month = $request->get('month', now()->month);
+        $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
+        $month = $request->input('month') !== null ? max(0, min(12, (int) $request->get('month'))) : (int) now()->month;
 
         // Calculate totals using Transaction model
         $incomeQuery = Transaction::where('church_id', $church->id)->incoming()->completed();
@@ -493,8 +493,8 @@ class FinanceController extends Controller
             $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
             $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
         } else {
-            $year = $request->get('year', now()->year);
-            $month = $request->get('month', now()->month);
+            $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
+            $month = max(1, min(12, (int) $request->get('month', now()->month)));
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
             $endDate = Carbon::create($year, $month, 1)->endOfMonth();
         }
@@ -576,7 +576,7 @@ class FinanceController extends Controller
             'description' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cash,card',
             'is_anonymous' => 'boolean',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -680,7 +680,7 @@ class FinanceController extends Controller
             'description' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cash,card',
             'is_anonymous' => 'boolean',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
         ]);
 
         // Resolve category: existing ID or create from custom name
@@ -743,8 +743,8 @@ class FinanceController extends Controller
             $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
             $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
         } else {
-            $year = $request->get('year', now()->year);
-            $month = $request->get('month', now()->month);
+            $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
+            $month = max(1, min(12, (int) $request->get('month', now()->month)));
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
             $endDate = Carbon::create($year, $month, 1)->endOfMonth();
         }
@@ -833,7 +833,7 @@ class FinanceController extends Controller
             'description' => 'required|string|max:255',
             'payment_method' => 'nullable|in:cash,card',
             'expense_type' => 'nullable|in:recurring,one_time',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'force_over_budget' => 'boolean',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
@@ -987,7 +987,7 @@ class FinanceController extends Controller
             'description' => 'required|string|max:255',
             'payment_method' => 'nullable|in:cash,card',
             'expense_type' => 'nullable|in:recurring,one_time',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
             'force_over_budget' => 'boolean',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
@@ -1268,8 +1268,8 @@ class FinanceController extends Controller
         }
 
         $church = $this->getCurrentChurch();
-        $year = $request->get('year', now()->year);
-        $month = $request->get('month', now()->month);
+        $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
+        $month = max(1, min(12, (int) $request->get('month', now()->month)));
 
         $ministries = Ministry::where('church_id', $church->id)
             ->with(['leader', 'budgets' => function ($q) use ($year, $month) {

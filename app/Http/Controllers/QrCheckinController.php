@@ -134,18 +134,9 @@ class QrCheckinController extends Controller
             'person_id' => 'required|exists:people,id',
         ]);
 
-        $event = Event::findOrFail($request->event_id);
-        $person = Person::findOrFail($request->person_id);
-
-        // Verify user has access to this church
-        $user = auth()->user();
         $churchId = $this->getCurrentChurch()->id;
-        if ($event->church_id !== $churchId || $person->church_id !== $churchId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Доступ заборонено',
-            ], 403);
-        }
+        $event = Event::where('church_id', $churchId)->findOrFail($request->event_id);
+        $person = Person::where('church_id', $churchId)->findOrFail($request->person_id);
 
         // Get or create attendance
         $attendance = Attendance::firstOrCreate(

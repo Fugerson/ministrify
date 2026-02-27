@@ -79,10 +79,12 @@ class CalendarService
             return $this->eventToVdayEvent($event, $church);
         }
 
-        // Use end_time if available, otherwise assume 1 hour duration
+        // Use end_date/end_time if available, otherwise assume 1 hour duration
         if ($event->end_time) {
             $endDate = $event->end_date ?? $event->date;
             $endTime = Carbon::parse($endDate->format('Y-m-d') . ' ' . $event->end_time->format('H:i'));
+        } elseif ($event->end_date) {
+            $endTime = Carbon::parse($event->end_date->format('Y-m-d') . ' ' . $event->time->format('H:i'));
         } else {
             $endTime = Carbon::parse($event->date->format('Y-m-d') . ' ' . $event->time->format('H:i'))
                 ->addHour();
@@ -141,7 +143,8 @@ class CalendarService
         $vevent = "BEGIN:VEVENT\r\n";
         $vevent .= "UID:{$uid}\r\n";
         $vevent .= "DTSTART;VALUE=DATE:" . $event->date->format('Ymd') . "\r\n";
-        $vevent .= "DTEND;VALUE=DATE:" . $event->date->copy()->addDay()->format('Ymd') . "\r\n";
+        $endDate = $event->end_date ?? $event->date;
+        $vevent .= "DTEND;VALUE=DATE:" . $endDate->copy()->addDay()->format('Ymd') . "\r\n";
         $vevent .= "SUMMARY:" . $this->escapeIcalText($event->title) . "\r\n";
 
         if ($description) {

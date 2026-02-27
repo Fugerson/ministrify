@@ -23,7 +23,7 @@ class MinistryGoalController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'period' => 'nullable|string|max:50',
             'due_date' => 'nullable|date',
             'priority' => 'nullable|in:low,medium,high',
@@ -46,7 +46,7 @@ class MinistryGoalController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'period' => 'nullable|string|max:50',
             'due_date' => 'nullable|date',
             'priority' => 'nullable|in:low,medium,high',
@@ -79,7 +79,7 @@ class MinistryGoalController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'goal_id' => ['nullable', Rule::exists('ministry_goals', 'id')->where('ministry_id', $ministry->id)],
             'assigned_to' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'due_date' => 'nullable|date',
@@ -104,7 +104,7 @@ class MinistryGoalController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'goal_id' => ['nullable', Rule::exists('ministry_goals', 'id')->where('ministry_id', $ministry->id)],
             'assigned_to' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'due_date' => 'nullable|date',

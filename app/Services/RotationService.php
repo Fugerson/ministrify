@@ -10,6 +10,7 @@ use App\Models\Person;
 use App\Models\Position;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @deprecated Use SchedulingService instead. This service will be removed in a future version.
@@ -36,7 +37,17 @@ class RotationService
      */
     public function setConfig(array $config): self
     {
-        $this->config = array_merge($this->config, $config);
+        $allowed = ['min_rest_days', 'max_assignments_per_month', 'balance_weight', 'skill_weight', 'availability_weight'];
+        $filtered = array_intersect_key($config, array_flip($allowed));
+
+        // Ensure numeric values are positive to prevent division by zero
+        foreach ($filtered as $key => $value) {
+            if (!is_numeric($value) || $value < 0) {
+                unset($filtered[$key]);
+            }
+        }
+
+        $this->config = array_merge($this->config, $filtered);
         return $this;
     }
 
@@ -45,6 +56,7 @@ class RotationService
      */
     public function autoAssignEvent(Event $event): array
     {
+        return DB::transaction(function () use ($event) {
         $results = [
             'assigned' => [],
             'unassigned' => [],
@@ -113,6 +125,7 @@ class RotationService
         }
 
         return $results;
+        }); // end DB::transaction
     }
 
     /**
@@ -149,7 +162,7 @@ class RotationService
 
         // Get members who can serve in this position (position_ids is JSON in pivot)
         $members = $ministry->members()
-            ->whereJsonContains('ministry_person.position_ids', (string) $position->id)
+            ->whereJsonContains('ministry_person.position_ids', (int) $position->id)
             ->get();
 
         return $members->map(function ($person) use ($event, $position) {

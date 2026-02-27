@@ -265,7 +265,7 @@ class RotationController extends Controller
      */
     public function assignPosition(Request $request, Event $event)
     {
-        abort_unless(auth()->user()->canView('ministries'), 403);
+        abort_unless(auth()->user()->canEdit('ministries'), 403);
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
@@ -274,11 +274,8 @@ class RotationController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
-        $position = Position::findOrFail($validated['position_id']);
-        $person = Person::findOrFail($validated['person_id']);
-
-        abort_unless($position->ministry && $position->ministry->church_id === $church->id, 404);
-        abort_unless($person->church_id === $church->id, 404);
+        $position = Position::whereHas('ministry', fn($q) => $q->where('church_id', $church->id))->findOrFail($validated['position_id']);
+        $person = Person::where('church_id', $church->id)->findOrFail($validated['person_id']);
 
         // Check duplicate
         $exists = Assignment::where('event_id', $event->id)
@@ -305,7 +302,7 @@ class RotationController extends Controller
      */
     public function removeAssignment(Request $request, Assignment $assignment)
     {
-        abort_unless(auth()->user()->canView('ministries'), 403);
+        abort_unless(auth()->user()->canEdit('ministries'), 403);
 
         $church = $this->getCurrentChurch();
         $event = $assignment->event;

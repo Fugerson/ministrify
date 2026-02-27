@@ -70,7 +70,7 @@ class AttendanceController extends Controller
             'date' => 'required|date',
             'event_id' => 'nullable|exists:events,id',
             'total_count' => 'required|integer|min:0',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:2000',
             'present' => 'nullable|array',
         ]);
 
@@ -78,10 +78,7 @@ class AttendanceController extends Controller
 
         // Check if event belongs to church
         if (!empty($validated['event_id'])) {
-            $event = Event::findOrFail($validated['event_id']);
-            if ($event->church_id !== $church->id) {
-                abort(404);
-            }
+            Event::where('church_id', $church->id)->findOrFail($validated['event_id']);
         }
 
         $attendance = Attendance::create([
@@ -108,6 +105,8 @@ class AttendanceController extends Controller
                 ]);
             }
         }
+
+        $attendance->recalculateCounts();
 
         return $this->successResponse($request, 'Відвідуваність збережено.', 'attendance.show', ['attendance' => $attendance->id]);
     }
@@ -149,7 +148,7 @@ class AttendanceController extends Controller
 
         $validated = $request->validate([
             'total_count' => 'required|integer|min:0',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:2000',
             'present' => 'nullable|array',
         ]);
 
@@ -178,6 +177,8 @@ class AttendanceController extends Controller
                 }
             }
         });
+
+        $attendance->recalculateCounts();
 
         return $this->successResponse($request, 'Відвідуваність оновлено.', 'attendance.show', ['attendance' => $attendance->id]);
     }

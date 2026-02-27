@@ -283,8 +283,7 @@ class SongController extends Controller
             'key' => 'nullable|string|max:10',
         ]);
 
-        $event = Event::findOrFail($validated['event_id']);
-        $this->authorizeChurch($event);
+        $event = Event::where('church_id', $this->getCurrentChurch()->id)->findOrFail($validated['event_id']);
 
         // Get max order
         $maxOrder = $event->songs()->max('order') ?? 0;

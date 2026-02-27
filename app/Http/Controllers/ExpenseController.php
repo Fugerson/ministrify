@@ -86,11 +86,11 @@ class ExpenseController extends Controller
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'date' => 'required|date',
             'receipt_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
         ]);
 
         $church = $this->getCurrentChurch();
-        $ministry = Ministry::findOrFail($validated['ministry_id']);
+        $ministry = Ministry::where('church_id', $church->id)->findOrFail($validated['ministry_id']);
 
         Gate::authorize('contribute-ministry', $ministry);
 
@@ -149,7 +149,7 @@ class ExpenseController extends Controller
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
             'date' => 'required|date',
             'receipt_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
         ]);
 
         // Handle receipt upload

@@ -39,7 +39,7 @@ class MeetingController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'date' => 'required|date',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
@@ -111,15 +111,15 @@ class MeetingController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'date' => 'required|date',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'location' => 'nullable|string|max:255',
             'theme' => 'nullable|string|max:255',
             'status' => 'required|in:planned,in_progress,completed,cancelled',
-            'notes' => 'nullable|string',
-            'summary' => 'nullable|string',
+            'notes' => 'nullable|string|max:5000',
+            'summary' => 'nullable|string|max:10000',
         ]);
 
         $meeting->update($validated);
@@ -170,7 +170,7 @@ class MeetingController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'duration_minutes' => 'nullable|integer|min:1',
             'responsible_id' => ['nullable', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
@@ -189,7 +189,7 @@ class MeetingController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'duration_minutes' => 'nullable|integer|min:1',
             'responsible_id' => ['nullable', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
@@ -242,8 +242,8 @@ class MeetingController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'type' => 'required|in:link,file,note,video,audio,document',
-            'content' => 'required|string',
-            'description' => 'nullable|string',
+            'content' => 'required|string|max:10000',
+            'description' => 'nullable|string|max:2000',
         ]);
 
         $validated['meeting_id'] = $meeting->id;

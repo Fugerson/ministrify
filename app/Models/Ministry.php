@@ -150,6 +150,7 @@ class Ministry extends Model
     {
         return (float) ($this->transactions()
             ->where('direction', Transaction::DIRECTION_OUT)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
             ->completed()
             ->forMonth($year, $month)
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
