@@ -52,6 +52,9 @@ class EventController extends Controller
         $month = (int) $request->get('month', now()->month);
         $week = $request->get('week');
 
+        $gridStart = null;
+        $gridEnd = null;
+
         if ($view === 'week') {
             if ($week) {
                 $startDate = Carbon::create($year)->setISODate($year, $week)->startOfWeek(Carbon::MONDAY);
@@ -64,18 +67,27 @@ class EventController extends Controller
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
             $endDate = $startDate->copy()->endOfMonth();
             $currentWeek = null;
+
+            // Extend date range to cover the full visible calendar grid
+            // (includes days from prev/next month visible in the grid)
+            $gridStart = $startDate->copy()->startOfWeek(Carbon::MONDAY);
+            $gridEnd = $endDate->copy()->endOfWeek(Carbon::SUNDAY);
         }
+
+        // For month view, use full grid range (includes neighboring month days visible in calendar)
+        $queryStart = $gridStart ?? $startDate;
+        $queryEnd = $gridEnd ?? $endDate;
 
         // Include events that span into this date range (multi-day events)
         $events = Event::where('church_id', $church->id)
-            ->where(function ($q) use ($startDate, $endDate) {
+            ->where(function ($q) use ($queryStart, $queryEnd) {
                 // Events starting in range
-                $q->whereBetween('date', [$startDate, $endDate])
+                $q->whereBetween('date', [$queryStart, $queryEnd])
                     // OR events that started before but end in/after range
-                    ->orWhere(function ($q2) use ($startDate, $endDate) {
-                        $q2->where('date', '<', $startDate)
+                    ->orWhere(function ($q2) use ($queryStart, $queryEnd) {
+                        $q2->where('date', '<', $queryStart)
                            ->whereNotNull('end_date')
-                           ->where('end_date', '>=', $startDate);
+                           ->where('end_date', '>=', $queryStart);
                     });
             })
             ->with(['ministry', 'responsibilities.person'])
@@ -85,7 +97,7 @@ class EventController extends Controller
 
         // Get ministry meetings for the same period
         $meetings = MinistryMeeting::whereHas('ministry', fn($q) => $q->where('church_id', $church->id))
-            ->whereBetween('date', [$startDate, $endDate])
+            ->whereBetween('date', [$queryStart, $queryEnd])
             ->with('ministry')
             ->orderBy('date')
             ->orderBy('start_time')
@@ -100,8 +112,8 @@ class EventController extends Controller
             $eventEnd = $event->end_date ? Carbon::parse($event->end_date) : $eventStart;
 
             // Clip to view range
-            $displayStart = $eventStart->max($startDate);
-            $displayEnd = $eventEnd->min($endDate);
+            $displayStart = $eventStart->max($queryStart);
+            $displayEnd = $eventEnd->min($queryEnd);
 
             $currentDate = $displayStart->copy();
             while ($currentDate <= $displayEnd) {
