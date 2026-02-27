@@ -62,6 +62,13 @@
 
     <!-- General Tab -->
     <div x-show="activeTab === 'general'" x-cloak class="space-y-6">
+
+    <!-- Group: Church Identity -->
+    <div class="flex items-center gap-3 pl-1">
+        <div class="w-1 h-6 bg-primary-500 rounded-full"></div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.basic_info') }}</h3>
+    </div>
+
     <!-- Church settings -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
          x-data="{

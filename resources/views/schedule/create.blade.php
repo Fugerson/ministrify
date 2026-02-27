@@ -25,7 +25,7 @@
                     <template x-if="errors.title"><p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p></template>
                 </div>
 
-                <div x-data="{ allDay: {{ old('all_day') ? 'true' : 'false' }}, multiDay: {{ old('end_date') ? 'true' : 'false' }} }">
+                <div x-data="{ allDay: {{ old('all_day') ? 'true' : 'false' }}, multiDay: {{ old('end_date') || $errors->has('end_date') ? 'true' : 'false' }} }">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
                             <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>

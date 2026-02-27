@@ -33,9 +33,16 @@
 
                 <div>
                     <label for="total_count" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Загальна кількість') }} *</label>
-                    <input type="number" name="total_count" id="total_count"
-                           value="{{ old('total_count', 0) }}" required min="0"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                    <div class="flex gap-2">
+                        <input type="number" name="total_count" id="total_count"
+                               value="{{ old('total_count', 0) }}" required min="0"
+                               class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <button type="button" id="fill-from-selected"
+                                class="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+                                title="{{ __('Встановити із обраних') }}">
+                            ← {{ __('Із обраних') }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -109,6 +116,11 @@ window.selectAll = function() {
     });
     updateCount();
 }
+
+document.getElementById('fill-from-selected').addEventListener('click', function() {
+    const count = document.querySelectorAll('input[name="present[]"]:checked').length;
+    document.getElementById('total_count').value = count;
+});
 });
 </script>
 @endpush

@@ -205,7 +205,7 @@
             </div>
 
             <!-- Contact Info -->
-            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 @if($canEdit)
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Телефон</p>

@@ -1764,8 +1764,8 @@ function churchBoard() {
 
 <style>
 .kanban-card { position: relative; }
-.kanban-card.sortable-ghost { opacity: 0.4; }
-.kanban-card.sortable-chosen { transform: rotate(2deg); }
+.kanban-card.sortable-ghost { opacity: 0.25; border: 2px dashed rgba(99, 102, 241, 0.5) !important; background: rgba(99, 102, 241, 0.05); }
+.kanban-card.sortable-chosen { transform: rotate(2deg) scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }

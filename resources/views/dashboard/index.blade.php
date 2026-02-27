@@ -61,7 +61,8 @@
                                 <template x-for="widget in getDisabledWidgets()" :key="widget.id">
                                     <button
                                         @click="addWidget(widget.id); addOpen = false"
-                                        class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                        :disabled="saving"
+                                        class="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
                                     >
                                         <div class="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
                                             <svg class="w-4 h-4 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -305,6 +306,7 @@ function dashboardBuilder() {
             const widget = this.widgets.find(w => w.id === widgetId);
             if (widget) {
                 widget.enabled = true;
+                this.saving = true;
                 // Need to save + reload since we need server-rendered content
                 this.saveLayout();
             }
