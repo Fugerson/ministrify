@@ -929,8 +929,10 @@ function quickEdit() {
             this.resizeStartX = event.pageX;
             this.resizeStartWidth = parseInt(this.columns[colIndex].width);
 
-            document.addEventListener('mousemove', this.doResize.bind(this));
-            document.addEventListener('mouseup', this.stopResize.bind(this));
+            this._boundDoResize = this.doResize.bind(this);
+            this._boundStopResize = this.stopResize.bind(this);
+            document.addEventListener('mousemove', this._boundDoResize);
+            document.addEventListener('mouseup', this._boundStopResize);
         },
 
         doResize(event) {
@@ -942,8 +944,8 @@ function quickEdit() {
 
         stopResize() {
             this.resizing = false;
-            document.removeEventListener('mousemove', this.doResize);
-            document.removeEventListener('mouseup', this.stopResize);
+            document.removeEventListener('mousemove', this._boundDoResize);
+            document.removeEventListener('mouseup', this._boundStopResize);
         },
 
         toast(message) {

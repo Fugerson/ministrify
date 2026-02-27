@@ -288,7 +288,9 @@ class BlockoutDateController extends Controller
                     $q->whereIn('ministry_id', $ministryIds);
                 }
             })
-            ->get();
+            ->with('event')
+            ->get()
+            ->filter(fn($a) => $blockout->coversDateTime($a->event->date, $a->event->time));
 
         // Auto-decline these assignments
         foreach ($conflicting as $assignment) {

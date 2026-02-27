@@ -380,7 +380,15 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canManageMinistry(Ministry $ministry): bool
     {
-        if ($this->isAdmin()) {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->church_id !== $ministry->church_id) {
+            return false;
+        }
+
+        if ($this->churchRole?->is_admin_role) {
             return true;
         }
 
@@ -393,7 +401,15 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canContributeToMinistry(Ministry $ministry): bool
     {
-        if ($this->isAdmin()) {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->church_id !== $ministry->church_id) {
+            return false;
+        }
+
+        if ($this->churchRole?->is_admin_role) {
             return true;
         }
 

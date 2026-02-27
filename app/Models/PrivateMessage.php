@@ -70,21 +70,24 @@ class PrivateMessage extends Model
      */
     public static function conversationsForUser(int $churchId, int $userId)
     {
-        return static::where('church_id', $churchId)
+        // Get only the latest message ID per conversation partner (efficient SQL)
+        $latestIds = static::where('church_id', $churchId)
             ->where(function ($query) use ($userId) {
                 $query->where('sender_id', $userId)
                     ->orWhere('recipient_id', $userId);
             })
+            ->selectRaw('MAX(id) as id')
+            ->groupByRaw('LEAST(sender_id, recipient_id), GREATEST(sender_id, recipient_id)')
+            ->pluck('id');
+
+        return static::whereIn('id', $latestIds)
             ->with(['sender', 'recipient'])
             ->orderByDesc('created_at')
             ->get()
-            ->groupBy(function ($message) use ($userId) {
+            ->keyBy(function ($message) use ($userId) {
                 return $message->sender_id === $userId
                     ? $message->recipient_id
                     : $message->sender_id;
-            })
-            ->map(function ($messages) {
-                return $messages->first();
             });
     }
 

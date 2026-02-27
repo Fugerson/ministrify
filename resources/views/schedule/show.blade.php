@@ -1332,8 +1332,8 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
             html = html.replace(/\[song-(\d+)\]/g, (match, songId) => {
                 const song = SONGS_DATA.find(s => s.id == songId);
                 if (song) {
-                    const keyBadge = song.key ? `<span class="ml-1 px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${song.key}</span>` : '';
-                    return `<a href="/songs/${song.id}" class="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline font-medium whitespace-nowrap" onclick="event.stopPropagation()"><span>🎵</span><span>${song.title}</span>${keyBadge}</a>`;
+                    const keyBadge = song.key ? `<span class="ml-1 px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${escapeHtml(song.key)}</span>` : '';
+                    return `<a href="/songs/${song.id}" class="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline font-medium whitespace-nowrap" onclick="event.stopPropagation()"><span>🎵</span><span>${escapeHtml(song.title)}</span>${keyBadge}</a>`;
                 }
                 return `<span class="text-red-500">[пісня не знайдена]</span>`;
             });

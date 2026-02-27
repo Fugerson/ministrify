@@ -351,7 +351,7 @@ class BoardController extends Controller
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
-            'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->where('board_id', $column->board_id)],
+            'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->whereIn('board_id', Board::where('church_id', $this->getCurrentChurch()->id)->pluck('id'))],
             'event_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Event::class)],
             'ministry_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Ministry::class)],
             'group_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Group::class)],
@@ -981,7 +981,7 @@ class BoardController extends Controller
                     'name' => $file->getClientOriginalName(),
                     'path' => $path,
                     'size' => $file->getSize(),
-                    'mime' => $file->getMimeType(),
+                    'mime_type' => $file->getMimeType(),
                 ];
             }
         }
