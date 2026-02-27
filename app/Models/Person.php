@@ -745,7 +745,7 @@ class Person extends Model
                 ];
             });
 
-        return $this->computedCache['family_members'] = $directRelations->concat($inverseRelations)->unique(fn($item) => $item->person->id);
+        return $this->computedCache['family_members'] = $directRelations->concat($inverseRelations)->filter(fn($item) => $item->person !== null)->unique(fn($item) => $item->person->id);
     }
 
     /**
@@ -795,7 +795,7 @@ class Person extends Model
             ->get()
             ->pluck('person');
 
-        return $this->computedCache['children'] = $directChildren->concat($inverseChildren)->unique('id');
+        return $this->computedCache['children'] = $directChildren->concat($inverseChildren)->filter()->unique('id');
     }
 
     /**
@@ -819,7 +819,7 @@ class Person extends Model
             ->get()
             ->pluck('person');
 
-        return $this->computedCache['parents'] = $directParents->concat($inverseParents)->unique('id');
+        return $this->computedCache['parents'] = $directParents->concat($inverseParents)->filter()->unique('id');
     }
 
     /**
@@ -843,7 +843,7 @@ class Person extends Model
             ->get()
             ->pluck('person');
 
-        return $this->computedCache['siblings'] = $directSiblings->concat($inverseSiblings)->unique('id');
+        return $this->computedCache['siblings'] = $directSiblings->concat($inverseSiblings)->filter()->unique('id');
     }
 
     /**

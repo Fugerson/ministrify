@@ -331,7 +331,12 @@ class PublicSiteController extends Controller
                     'signature' => $paymentData['signature'],
                 ]);
             } catch (\Exception $e) {
-                return back()->with('error', 'Помилка при створенні платежу: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('LiqPay payment creation failed', [
+                    'church_id' => $church->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                return back()->with('error', 'Помилка при створенні платежу. Спробуйте пізніше.');
             }
         }
 

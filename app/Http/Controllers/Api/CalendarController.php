@@ -30,7 +30,7 @@ class CalendarController extends Controller
 
         $ministryId = $request->get('ministry');
 
-        $icalContent = $calendarService->exportToIcal($church, $ministryId);
+        $icalContent = $calendarService->exportToIcal($church, $ministryId, null, null, true);
 
         return response($icalContent)
             ->header('Content-Type', 'text/calendar; charset=utf-8')
@@ -57,6 +57,7 @@ class CalendarController extends Controller
         }
 
         $query = Event::where('church_id', $church->id)
+            ->where('is_public', true)
             ->with(['ministry:id,name,color']);
 
         // Filter by ministry
@@ -125,6 +126,7 @@ class CalendarController extends Controller
 
         $event = Event::where('church_id', $church->id)
             ->where('id', $id)
+            ->where('is_public', true)
             ->with(['ministry:id,name,color'])
             ->first();
 

@@ -317,9 +317,11 @@ class PersonController extends Controller
 
         $person->load(['tags', 'ministries.positions', 'groups', 'user', 'churchRoleRelation', 'shepherd', 'sheep', 'assignments' => function ($q) {
             $q->whereHas('event', fn($eq) => $eq->where('date', '>=', now()->subMonths(3)))
-              ->with(['event.ministry', 'position'])
-              ->orderByDesc('created_at');
+              ->with(['event.ministry', 'position']);
         }]);
+
+        // Sort assignments by event date descending (not by created_at)
+        $person->setRelation('assignments', $person->assignments->sortByDesc(fn($a) => $a->event?->date)->values());
 
         // Stats
         $stats = [
@@ -339,7 +341,8 @@ class PersonController extends Controller
                 ->whereHas('attendance')
                 ->where('present', true)
                 ->with('attendance')
-                ->orderByDesc('created_at')
+                ->get()
+                ->sortByDesc(fn($r) => $r->attendance?->date)
                 ->first()?->attendance?->date,
             'membership_days' => $person->joined_date ? now()->diffInDays($person->joined_date) : null,
         ];
@@ -659,8 +662,9 @@ class PersonController extends Controller
         $upcomingAssignments = $person->assignments()
             ->with(['event.ministry', 'position'])
             ->whereHas('event', fn($q) => $q->where('date', '>=', now()))
-            ->orderBy('created_at')
-            ->get();
+            ->get()
+            ->sortBy(fn($a) => $a->event?->date)
+            ->values();
 
         return view('people.my-profile', compact('person', 'upcomingAssignments'));
     }
@@ -1281,6 +1285,8 @@ class PersonController extends Controller
                 $data['membership_status'] = 'guest';
             }
 
+            $isDuplicate = false;
+
             // Check for duplicate by email in same church
             $email = $data['email'] ?? null;
             if ($email) {
@@ -1289,6 +1295,7 @@ class PersonController extends Controller
                     ->first();
                 if ($existing) {
                     $person = $existing;
+                    $isDuplicate = true;
                     $stats['updated']++;
                     goto skip_create;
                 }
@@ -1300,6 +1307,7 @@ class PersonController extends Controller
                 $existingByPhone = Person::findByPhoneInChurch($phone, $church->id, false);
                 if ($existingByPhone) {
                     $person = $existingByPhone;
+                    $isDuplicate = true;
                     $stats['updated']++;
                     goto skip_create;
                 }
@@ -1315,6 +1323,7 @@ class PersonController extends Controller
                     ->first();
                 if ($existingByName) {
                     $person = $existingByName;
+                    $isDuplicate = true;
                     $stats['updated']++;
                     goto skip_create;
                 }
@@ -1328,11 +1337,13 @@ class PersonController extends Controller
             skip_create:
 
             if ($ministryId) {
-                $person->ministries()->attach($ministryId);
+                $person->ministries()->syncWithoutDetaching([$ministryId]);
             }
 
             $created[] = ['id' => $person->id];
-            $stats['created']++;
+            if (!$isDuplicate) {
+                $stats['created']++;
+            }
         }
 
         // Update existing people

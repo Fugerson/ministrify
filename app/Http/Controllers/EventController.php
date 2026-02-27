@@ -240,7 +240,11 @@ class EventController extends Controller
             'time' => 'nullable|date_format:H:i',
             'end_date' => 'nullable|date|after_or_equal:date',
             'notes' => 'nullable|string',
-            'recurrence_rule' => 'nullable|string',
+            'recurrence_rule' => 'nullable|array',
+            'recurrence_rule.frequency' => 'required_with:recurrence_rule|string',
+            'recurrence_rule.days' => 'nullable|array',
+            'recurrence_rule.day_of_month' => 'nullable|integer',
+            'recurrence_rule.interval' => 'nullable|integer|min:1',
             'recurrence_end_type' => 'nullable|string|in:count,date',
             'recurrence_end_count' => 'nullable|integer|min:2|max:365',
             'recurrence_end_date' => 'nullable|date',
@@ -657,20 +661,27 @@ class EventController extends Controller
 
     private function generateRecurringEvents(
         Event $parentEvent,
-        string $rule,
+        array $rule,
         string $endType = 'count',
         int $endCount = 12,
         ?string $endDate = null
     ): void {
         $dates = $this->calculateRecurringDates($parentEvent->date, $rule, $endType, $endCount, $endDate);
 
+        // Calculate duration in days for multi-day events
+        $durationDays = null;
+        if ($parentEvent->end_date) {
+            $durationDays = Carbon::parse($parentEvent->date)->diffInDays(Carbon::parse($parentEvent->end_date));
+        }
+
         foreach ($dates as $date) {
-            Event::create([
+            $eventData = [
                 'church_id' => $parentEvent->church_id,
                 'ministry_id' => $parentEvent->ministry_id,
                 'title' => $parentEvent->title,
                 'date' => $date,
                 'time' => $parentEvent->time,
+                'end_time' => $parentEvent->end_time,
                 'notes' => $parentEvent->notes,
                 'is_service' => $parentEvent->is_service,
                 'service_type' => $parentEvent->service_type,
@@ -678,13 +689,19 @@ class EventController extends Controller
                 'reminder_settings' => $parentEvent->reminder_settings,
                 'google_calendar_id' => $parentEvent->google_calendar_id,
                 'parent_event_id' => $parentEvent->id,
-            ]);
+            ];
+
+            if ($durationDays !== null) {
+                $eventData['end_date'] = $date->copy()->addDays($durationDays);
+            }
+
+            Event::create($eventData);
         }
     }
 
     private function calculateRecurringDates(
         Carbon $startDate,
-        string $rule,
+        array $rule,
         string $endType,
         int $endCount,
         ?string $endDate
@@ -695,54 +712,31 @@ class EventController extends Controller
         $count = 0;
         $maxIterations = $endType === 'count' ? $endCount - 1 : 365; // -1 because first event already created
 
-        // Parse custom rule
-        $interval = 1;
-        $frequency = 'week';
-        if (str_starts_with($rule, 'custom:')) {
-            $parts = explode(':', $rule);
-            $interval = (int) ($parts[1] ?? 1);
-            $frequency = $parts[2] ?? 'week';
-            $rule = 'custom';
-        }
+        $frequency = $rule['frequency'] ?? 'weekly';
+        $interval = $rule['interval'] ?? 1;
 
         while ($count < $maxIterations) {
-            // Calculate next date based on rule
-            switch ($rule) {
+            // Calculate next date based on frequency
+            switch ($frequency) {
                 case 'daily':
-                    $currentDate->addDay();
+                    $currentDate->addDays($interval);
                     break;
                 case 'weekly':
-                    $currentDate->addWeek();
+                    $currentDate->addWeeks($interval);
                     break;
                 case 'biweekly':
                     $currentDate->addWeeks(2);
                     break;
                 case 'monthly':
-                    $currentDate->addMonth();
+                    $currentDate->addMonths($interval);
                     break;
                 case 'yearly':
-                    $currentDate->addYear();
+                    $currentDate->addYears($interval);
                     break;
                 case 'weekdays':
                     do {
                         $currentDate->addDay();
                     } while ($currentDate->isWeekend());
-                    break;
-                case 'custom':
-                    switch ($frequency) {
-                        case 'day':
-                            $currentDate->addDays($interval);
-                            break;
-                        case 'week':
-                            $currentDate->addWeeks($interval);
-                            break;
-                        case 'month':
-                            $currentDate->addMonths($interval);
-                            break;
-                        case 'year':
-                            $currentDate->addYears($interval);
-                            break;
-                    }
                     break;
                 default:
                     return $dates;

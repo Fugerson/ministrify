@@ -29,11 +29,13 @@ class GroupAttendanceController extends Controller
             ->orderByDesc('date')
             ->paginate(20);
 
-        // Stats for charts
+        // Stats for charts — get newest 12 records, then reverse for chronological display
         $chartData = $group->attendances()
-            ->orderBy('date')
+            ->orderByDesc('date')
             ->take(12)
             ->get()
+            ->reverse()
+            ->values()
             ->map(fn($a) => [
                 'date' => $a->date->format('d.m'),
                 'members' => $a->members_present,

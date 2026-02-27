@@ -113,6 +113,7 @@ class MinistryBudget extends Model
             ->where('ministry_id', $this->ministry_id)
             ->where('direction', Transaction::DIRECTION_OUT)
             ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
+            ->completed()
             ->whereYear('date', $this->year)
             ->whereMonth('date', $this->month)
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
@@ -123,7 +124,7 @@ class MinistryBudget extends Model
      */
     public function getRemainingBudget(): float
     {
-        return (float) $this->monthly_budget - $this->getActualSpending();
+        return (float) $this->getEffectiveBudget() - $this->getActualSpending();
     }
 
     /**
@@ -131,11 +132,12 @@ class MinistryBudget extends Model
      */
     public function getSpendingPercentage(): float
     {
-        if ($this->monthly_budget <= 0) {
+        $budget = $this->getEffectiveBudget();
+        if ($budget <= 0) {
             return 0;
         }
 
-        return min(100, ($this->getActualSpending() / $this->monthly_budget) * 100);
+        return min(100, ($this->getActualSpending() / $budget) * 100);
     }
 
     /**
@@ -143,7 +145,7 @@ class MinistryBudget extends Model
      */
     public function isExceeded(): bool
     {
-        return $this->getActualSpending() > $this->monthly_budget;
+        return $this->getActualSpending() > $this->getEffectiveBudget();
     }
 
     /**

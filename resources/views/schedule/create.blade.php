@@ -133,7 +133,12 @@
                     </div>
 
                     <!-- Hidden inputs for form submission -->
-                    <input type="hidden" name="recurrence_rule" :value="getRecurrenceRule()">
+                    <template x-if="recurrenceType">
+                        <div>
+                            <input type="hidden" name="recurrence_rule[frequency]" :value="getRecurrenceFrequency()">
+                            <input type="hidden" name="recurrence_rule[interval]" :value="getRecurrenceInterval()">
+                        </div>
+                    </template>
                     <input type="hidden" name="recurrence_end_type" :value="endType">
                     <input type="hidden" name="recurrence_end_count" :value="endCount">
                     <input type="hidden" name="recurrence_end_date" :value="endDate">
@@ -479,6 +484,28 @@ function recurrenceSettings() {
                 return `custom:${this.customInterval}:${this.customFrequency}`;
             }
             return this.recurrenceType;
+        },
+
+        getRecurrenceFrequency() {
+            if (!this.recurrenceType) return '';
+            if (this.recurrenceType === 'custom') {
+                // Map custom frequency names to standard ones
+                const map = { 'day': 'daily', 'week': 'weekly', 'month': 'monthly', 'year': 'yearly' };
+                return map[this.customFrequency] || this.customFrequency;
+            }
+            if (this.recurrenceType === 'biweekly') return 'weekly';
+            return this.recurrenceType;
+        },
+
+        getRecurrenceInterval() {
+            if (!this.recurrenceType) return 1;
+            if (this.recurrenceType === 'custom') {
+                return this.customInterval;
+            }
+            if (this.recurrenceType === 'biweekly') {
+                return 2;
+            }
+            return 1;
         }
     }
 }

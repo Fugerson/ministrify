@@ -217,6 +217,8 @@ class DonationController extends Controller
      */
     public function index()
     {
+        abort_unless(auth()->user()->canView('finances'), 403);
+
         $church = $this->getCurrentChurch();
 
         $donations = Transaction::where('church_id', $church->id)

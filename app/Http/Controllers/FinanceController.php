@@ -312,8 +312,17 @@ class FinanceController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Balance before all transactions = church initial balance
-        $balanceBeforeYear = (float) ($church->initial_balance ?? 0);
+        // Balance before all transactions = church initial balance (multi-currency, converted to UAH)
+        $initialBalanceDate = $church->initial_balance_date;
+        $allInitialBalances = $church->getAllInitialBalances();
+        $balanceBeforeYear = 0;
+        foreach ($allInitialBalances as $currency => $amount) {
+            if ($currency === 'UAH') {
+                $balanceBeforeYear += $amount;
+            } else {
+                $balanceBeforeYear += ExchangeRate::toUah($amount, $currency, $initialBalanceDate);
+            }
+        }
 
         // Get filter options
         $categories = TransactionCategory::where('church_id', $church->id)->orderBy('name')->get();
@@ -324,7 +333,7 @@ class FinanceController extends Controller
             ->get();
 
         // Current balance (all time) - in UAH
-        $currentBalance = (float) $church->initial_balance
+        $currentBalance = $balanceBeforeYear
             + (Transaction::where('church_id', $church->id)->incoming()->completed()
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0)
             - (Transaction::where('church_id', $church->id)->outgoing()->completed()
@@ -854,7 +863,7 @@ class FinanceController extends Controller
                 if ($currency !== 'UAH') {
                     $expenseAmountUah = ExchangeRate::toUah($expenseAmountUah, $currency, $validated['date'] ?? now()->toDateString());
                 }
-                $budgetCheck = $ministry->canAddExpense($expenseAmountUah);
+                $budgetCheck = $ministry->canAddExpense($expenseAmountUah, $validated['date'] ?? null);
 
                 if (!$budgetCheck['allowed'] && !$request->boolean('force_over_budget')) {
                     if ($request->wantsJson()) {
@@ -1021,7 +1030,7 @@ class FinanceController extends Controller
                     : $newAmountUah;  // New ministry - check full amount
 
                 if ($checkAmount > 0) {
-                    $budgetCheck = $ministry->canAddExpense($checkAmount);
+                    $budgetCheck = $ministry->canAddExpense($checkAmount, $validated['date'] ?? null);
 
                     if (!$budgetCheck['allowed'] && !$request->boolean('force_over_budget')) {
                         if ($request->wantsJson()) {
@@ -1924,6 +1933,7 @@ class FinanceController extends Controller
         // Single optimized query for all income stats
         $stats = DB::table('transactions')
             ->where('church_id', $churchId)
+            ->whereNull('deleted_at')
             ->where('direction', Transaction::DIRECTION_IN)
             ->where('status', Transaction::STATUS_COMPLETED)
             ->selectRaw("
@@ -1950,6 +1960,7 @@ class FinanceController extends Controller
         // Total transactions this month (includes both income and expense)
         $totalTransactions = DB::table('transactions')
             ->where('church_id', $churchId)
+            ->whereNull('deleted_at')
             ->where('status', Transaction::STATUS_COMPLETED)
             ->where('date', '>=', $thisMonthStart)
             ->count();

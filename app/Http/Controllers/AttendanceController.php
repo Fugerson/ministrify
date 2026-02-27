@@ -220,7 +220,8 @@ class AttendanceController extends Controller
         // Average attendance this month
         $monthlyAttendance = Attendance::where('church_id', $church->id)
             ->forMonth($year, $month)
-            ->avg('total_count');
+            ->selectRaw('AVG(COALESCE(members_present, total_count)) as avg')
+            ->value('avg');
 
         // Chart data (last 12 weeks)
         $chartData = [];
@@ -230,7 +231,8 @@ class AttendanceController extends Controller
 
             $count = Attendance::where('church_id', $church->id)
                 ->whereBetween('date', [$weekStart, $weekEnd])
-                ->avg('total_count') ?? 0;
+                ->selectRaw('AVG(COALESCE(members_present, total_count)) as avg')
+                ->value('avg') ?? 0;
 
             $chartData[] = [
                 'date' => $weekStart->format('d.m'),

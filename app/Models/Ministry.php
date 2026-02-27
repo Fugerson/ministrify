@@ -140,10 +140,18 @@ class Ministry extends Model
 
     public function getSpentThisMonthAttribute(): float
     {
+        return $this->getSpentForMonth(now()->year, now()->month);
+    }
+
+    /**
+     * Get total spending for a specific month
+     */
+    public function getSpentForMonth(int $year, int $month): float
+    {
         return (float) ($this->transactions()
             ->where('direction', Transaction::DIRECTION_OUT)
             ->completed()
-            ->forMonth(now()->year, now()->month)
+            ->forMonth($year, $month)
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
     }
 
@@ -179,14 +187,22 @@ class Ministry extends Model
 
     /**
      * Check if expense can be added within budget
+     * @param float $amount Amount in UAH
+     * @param string|null $date Transaction date (Y-m-d) to check the correct month's budget
      */
-    public function canAddExpense(float $amount): array
+    public function canAddExpense(float $amount, ?string $date = null): array
     {
         if (!$this->monthly_budget || $this->monthly_budget <= 0) {
             return ['allowed' => true, 'warning' => null];
         }
 
-        $newTotal = $this->spent_this_month + $amount;
+        $carbonDate = $date ? \Carbon\Carbon::parse($date) : now();
+        $year = $carbonDate->year;
+        $month = $carbonDate->month;
+
+        $spentForMonth = $this->getSpentForMonth($year, $month);
+        $remainingForMonth = max(0, $this->monthly_budget - $spentForMonth);
+        $newTotal = $spentForMonth + $amount;
         $newPercentage = ($newTotal / $this->monthly_budget) * 100;
 
         if ($newTotal > $this->monthly_budget) {
@@ -196,7 +212,7 @@ class Ministry extends Model
                 'message' => sprintf(
                     'Ця витрата перевищить бюджет на %.2f грн. Залишок: %.2f грн.',
                     $newTotal - $this->monthly_budget,
-                    $this->remaining_budget
+                    $remainingForMonth
                 ),
             ];
         }

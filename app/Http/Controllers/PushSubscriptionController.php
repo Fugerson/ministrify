@@ -42,9 +42,8 @@ class PushSubscriptionController extends Controller
 
         // Atomic upsert to prevent race conditions
         $subscription = PushSubscription::updateOrCreate(
-            ['endpoint' => $validated['endpoint']],
+            ['endpoint' => $validated['endpoint'], 'user_id' => $user->id],
             [
-                'user_id' => $user->id,
                 'p256dh_key' => $validated['keys']['p256dh'],
                 'auth_key' => $validated['keys']['auth'],
                 'user_agent' => $request->userAgent(),

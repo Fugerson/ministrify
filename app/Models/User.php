@@ -38,11 +38,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'onboarding_state',
         'onboarding_started_at',
         'onboarding_completed_at',
-        'permission_overrides',
-    ];
-
-    protected $guarded = [
-        'is_super_admin',
     ];
 
     protected $hidden = [
@@ -124,11 +119,11 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
-        $this->update([
+        $this->forceFill([
             'church_id' => $churchId,
             'church_role_id' => $pivot->church_role_id,
             'permission_overrides' => $pivot->permission_overrides ? json_decode($pivot->permission_overrides, true) : null,
-        ]);
+        ])->save(); // forceFill needed because permission_overrides is not in $fillable
 
         return true;
     }
@@ -380,7 +375,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function setPermissionOverrides(array $overrides): void
     {
-        $this->update(['permission_overrides' => $overrides ?: null]);
+        $this->forceFill(['permission_overrides' => $overrides ?: null])->save();
     }
 
     public function canManageMinistry(Ministry $ministry): bool

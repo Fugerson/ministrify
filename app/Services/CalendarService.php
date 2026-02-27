@@ -15,10 +15,14 @@ class CalendarService
     /**
      * Export events to iCal format (.ics)
      */
-    public function exportToIcal(Church $church, ?int $ministryId = null, ?Carbon $startDate = null, ?Carbon $endDate = null): string
+    public function exportToIcal(Church $church, ?int $ministryId = null, ?Carbon $startDate = null, ?Carbon $endDate = null, bool $publicOnly = false): string
     {
         $query = Event::where('church_id', $church->id)
             ->with('ministry');
+
+        if ($publicOnly) {
+            $query->where('is_public', true);
+        }
 
         if ($ministryId) {
             $query->where('ministry_id', $ministryId);

@@ -473,7 +473,7 @@ class DashboardController extends Controller
         $fourWeeksAgo = now()->subWeeks(3)->startOfWeek(Carbon::SUNDAY);
         $attendanceRaw = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $fourWeeksAgo)
-            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(total_count) as total')
+            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(COALESCE(members_present, total_count)) as total')
             ->groupBy('week_key')
             ->orderBy('week_key')
             ->get()
@@ -513,6 +513,7 @@ class DashboardController extends Controller
             $threeWeeksAgo = now()->subWeeks(3);
 
             return Person::where('church_id', $church->id)
+                ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_ACTIVE])
                 ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
                 ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
                     $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
@@ -760,7 +761,7 @@ class DashboardController extends Controller
     private function loadNewMembers($church)
     {
         return Person::where('church_id', $church->id)
-            ->orderByDesc('created_at')
+            ->orderByDesc(DB::raw('COALESCE(joined_date, first_visit_date, created_at)'))
             ->limit(8)
             ->get();
     }
@@ -1275,7 +1276,7 @@ class DashboardController extends Controller
         $twelveMonthsAgo = now()->subMonths(11)->startOfMonth();
         $attendanceRaw = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $twelveMonthsAgo)
-            ->selectRaw('YEAR(date) as year, MONTH(date) as month, AVG(total_count) as avg_count')
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, AVG(COALESCE(members_present, total_count)) as avg_count')
             ->groupBy('year', 'month')
             ->get()
             ->keyBy(fn($item) => $item->year . '-' . $item->month);
@@ -1297,12 +1298,12 @@ class DashboardController extends Controller
         $twelveMonthsAgo = now()->subMonths(11)->startOfMonth();
 
         $cumulative = Person::where('church_id', $church->id)
-            ->where('joined_date', '<', $twelveMonthsAgo)
+            ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) < ?', [$twelveMonthsAgo])
             ->count();
 
         $growthRaw = Person::where('church_id', $church->id)
-            ->where('joined_date', '>=', $twelveMonthsAgo)
-            ->selectRaw('YEAR(joined_date) as year, MONTH(joined_date) as month, COUNT(*) as count')
+            ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$twelveMonthsAgo])
+            ->selectRaw('YEAR(COALESCE(joined_date, first_visit_date, created_at)) as year, MONTH(COALESCE(joined_date, first_visit_date, created_at)) as month, COUNT(*) as count')
             ->groupBy('year', 'month')
             ->get()
             ->keyBy(fn($item) => $item->year . '-' . $item->month);
