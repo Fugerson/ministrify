@@ -1202,8 +1202,10 @@ class FinanceController extends Controller
             ->get();
 
         // Batch query: spending grouped by (ministry_id, category_id, budget_item_id)
+        // Exclude allocation transactions — they are transfers, not real expenses
         $spendingRaw = Transaction::where('church_id', $church->id)
             ->where('direction', Transaction::DIRECTION_OUT)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
             ->completed()
             ->forMonth($year, $month)
             ->whereNotNull('ministry_id')

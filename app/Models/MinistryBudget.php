@@ -112,6 +112,7 @@ class MinistryBudget extends Model
         return (float) (Transaction::where('church_id', $this->church_id)
             ->where('ministry_id', $this->ministry_id)
             ->where('direction', Transaction::DIRECTION_OUT)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
             ->whereYear('date', $this->year)
             ->whereMonth('date', $this->month)
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);

@@ -4777,6 +4777,7 @@ function budgetPage() {
             'amount' => $t->amount,
             'currency' => $t->currency ?? 'UAH',
             'direction' => $t->direction,
+            'source_type' => $t->source_type,
             'description' => $t->description,
             'date' => $t->date->format('Y-m-d'),
             'month' => (int)$t->date->format('m'),
@@ -4827,7 +4828,7 @@ function budgetPage() {
 
         // Computed
         get filteredTransactions() {
-            let result = this.allTransactions.filter(t => t.direction === 'out' && t.month === this.currentMonth && t.year === this.currentYear);
+            let result = this.allTransactions.filter(t => t.direction === 'out' && t.source_type !== 'allocation' && t.month === this.currentMonth && t.year === this.currentYear);
             if (this.search) {
                 const s = this.search.toLowerCase();
                 result = result.filter(t =>
@@ -4847,7 +4848,7 @@ function budgetPage() {
         },
         get filteredIncome() {
             return this.allTransactions
-                .filter(t => t.direction === 'in' && t.month === this.currentMonth && t.year === this.currentYear)
+                .filter(t => t.direction === 'in' && t.source_type !== 'allocation' && t.month === this.currentMonth && t.year === this.currentYear)
                 .sort((a, b) => b.date.localeCompare(a.date));
         },
         get totalIncome() {

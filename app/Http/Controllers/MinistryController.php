@@ -297,10 +297,11 @@ class MinistryController extends Controller
             ->with(['items.responsiblePeople', 'items.category'])
             ->first();
 
-        // Spending by budget_item_id and category for this ministry/period
+        // Spending by budget_item_id and category for this ministry/period (exclude allocations)
         $spendingRaw = Transaction::where('church_id', $church->id)
             ->where('ministry_id', $ministry->id)
             ->where('direction', Transaction::DIRECTION_OUT)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
             ->completed()
             ->whereYear('date', $budgetYear)
             ->whereMonth('date', $budgetMonth)
@@ -345,10 +346,11 @@ class MinistryController extends Controller
             }
         }
 
-        // Income for this ministry/period
+        // Income for this ministry/period (exclude allocations — they are shown separately)
         $totalIncome = Transaction::where('church_id', $church->id)
             ->where('ministry_id', $ministry->id)
             ->where('direction', Transaction::DIRECTION_IN)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
             ->completed()
             ->whereYear('date', $budgetYear)
             ->whereMonth('date', $budgetMonth)
@@ -411,6 +413,7 @@ class MinistryController extends Controller
         $spendingRaw = Transaction::where('church_id', $church->id)
             ->where('ministry_id', $ministry->id)
             ->where('direction', Transaction::DIRECTION_OUT)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
             ->completed()
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
@@ -462,10 +465,11 @@ class MinistryController extends Controller
 
         $effectiveBudget = $ministryBudget ? $ministryBudget->getEffectiveBudget() : 0;
 
-        // Income for this ministry/period
+        // Income for this ministry/period (exclude allocations — shown separately)
         $totalIncome = Transaction::where('church_id', $church->id)
             ->where('ministry_id', $ministry->id)
             ->where('direction', Transaction::DIRECTION_IN)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
             ->completed()
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
