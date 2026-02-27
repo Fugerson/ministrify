@@ -2120,10 +2120,10 @@
                                     <td class="py-2 px-3 text-gray-500 dark:text-gray-400 text-xs italic max-w-[100px] sm:max-w-[150px] truncate" x-text="t.notes" :title="t.notes"></td>
                                     <td class="py-2 px-3">
                                         <template x-if="t.attachments.length > 0">
-                                            <a :href="t.attachments[0].url" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline text-xs flex items-center gap-1">
+                                            <button @click="t.attachments[0].is_image ? $dispatch('open-lightbox', t.attachments[0].url) : window.open(t.attachments[0].url, '_blank')" class="text-primary-600 dark:text-primary-400 hover:underline text-xs flex items-center gap-1 cursor-pointer">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                                                 <span x-text="t.attachments.length"></span>
-                                            </a>
+                                            </button>
                                         </template>
                                     </td>
                                     @can('contribute-ministry', $ministry)
@@ -2279,12 +2279,12 @@
                                         <template x-for="att in existingAttachments" :key="att.id">
                                             <div x-show="!deleteAttachmentIds.includes(att.id)" class="relative group">
                                                 <template x-if="att.is_image">
-                                                    <img :src="att.url" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600">
+                                                    <img :src="att.url" @click.stop="$dispatch('open-lightbox', att.url)" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:opacity-80 transition-opacity">
                                                 </template>
                                                 <template x-if="!att.is_image">
-                                                    <div class="w-16 h-16 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                                                    <a :href="att.url" target="_blank" @click.stop class="w-16 h-16 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                                         <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                                    </div>
+                                                    </a>
                                                 </template>
                                                 <button type="button" @click="removeExistingAttachment(att.id)"
                                                         class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
@@ -2314,7 +2314,7 @@
                                         <template x-for="(preview, idx) in expensePreviews" :key="idx">
                                             <div class="relative group">
                                                 <template x-if="preview.url">
-                                                    <img :src="preview.url" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600">
+                                                    <img :src="preview.url" @click.stop="$dispatch('open-lightbox', preview.url)" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:opacity-80 transition-opacity">
                                                 </template>
                                                 <template x-if="!preview.url">
                                                     <div class="w-16 h-16 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-xs text-gray-500 p-1 text-center" x-text="preview.name"></div>
