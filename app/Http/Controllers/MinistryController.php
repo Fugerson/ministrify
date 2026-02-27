@@ -621,6 +621,7 @@ class MinistryController extends Controller
             'planned_amount' => 'required|numeric|min:0',
             'planned_date' => 'nullable|date',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
             'person_ids.*' => 'integer|exists:people,id',
@@ -631,9 +632,22 @@ class MinistryController extends Controller
             ->where('ministry_id', $ministry->id)
             ->firstOrFail();
 
-        if (!empty($validated['category_id'])) {
+        // Resolve category: existing ID or create from custom name
+        $categoryId = $validated['category_id'] ?? null;
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $category = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'expense',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $categoryId = $category->id;
+        }
+
+        if ($categoryId) {
             $exists = BudgetItem::where('ministry_budget_id', $ministryBudget->id)
-                ->where('category_id', $validated['category_id'])
+                ->where('category_id', $categoryId)
                 ->exists();
             if ($exists) {
                 return response()->json(['success' => false, 'message' => 'Ця категорія вже використовується в іншій статті бюджету.'], 422);
@@ -645,7 +659,7 @@ class MinistryController extends Controller
         $item = BudgetItem::create([
             'church_id' => $church->id,
             'ministry_budget_id' => $ministryBudget->id,
-            'category_id' => $validated['category_id'] ?? null,
+            'category_id' => $categoryId,
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
             'planned_date' => $validated['planned_date'] ?? null,
@@ -676,14 +690,29 @@ class MinistryController extends Controller
             'planned_amount' => 'required|numeric|min:0',
             'planned_date' => 'nullable|date',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
             'person_ids.*' => 'integer|exists:people,id',
         ]);
 
-        if (!empty($validated['category_id'])) {
+        // Resolve category: existing ID or create from custom name
+        $church = $this->getCurrentChurch();
+        $categoryId = $validated['category_id'] ?? null;
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $category = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'expense',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $categoryId = $category->id;
+        }
+
+        if ($categoryId) {
             $exists = BudgetItem::where('ministry_budget_id', $budgetItem->ministry_budget_id)
-                ->where('category_id', $validated['category_id'])
+                ->where('category_id', $categoryId)
                 ->where('id', '!=', $budgetItem->id)
                 ->exists();
             if ($exists) {
@@ -695,7 +724,7 @@ class MinistryController extends Controller
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
             'planned_date' => $validated['planned_date'] ?? null,
-            'category_id' => $validated['category_id'] ?? null,
+            'category_id' => $categoryId,
             'notes' => $validated['notes'] ?? null,
         ]);
 

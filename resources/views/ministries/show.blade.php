@@ -1908,12 +1908,20 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія витрат</label>
                                         <select x-model="itemForm.category_id"
+                                                :class="{ 'hidden': itemForm.category_id === '__custom__' }"
                                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                             <option value="">Без категорії</option>
                                             @foreach($expenseCategories as $cat)
                                                 <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
                                             @endforeach
+                                            <option value="__custom__">Інше (ввести вручну)...</option>
                                         </select>
+                                        <div x-show="itemForm.category_id === '__custom__'" class="flex gap-2">
+                                            <input type="text" x-model="itemForm.category_name" placeholder="Назва категорії..."
+                                                   class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                            <button type="button" @click="itemForm.category_id = ''; itemForm.category_name = ''"
+                                                    class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-lg">✕</button>
+                                        </div>
                                         <p class="text-xs text-gray-500 mt-1">Витрати з цією категорією автоматично враховуються у факті</p>
                                     </div>
                                     <div>
@@ -4808,7 +4816,7 @@ function budgetPage() {
         itemModalTitle: '',
         itemEditId: null,
         itemSaving: false,
-        itemForm: { name: '', planned_amount: '', planned_date: '', category_id: '', notes: '', person_ids: [] },
+        itemForm: { name: '', planned_amount: '', planned_date: '', category_id: '', category_name: '', notes: '', person_ids: [] },
 
         // Expense modal
         showExpenseModal: false,
@@ -4958,12 +4966,13 @@ function budgetPage() {
                     planned_amount: itemData.planned_amount,
                     planned_date: itemData.planned_date || '',
                     category_id: itemData.category_id || '',
+                    category_name: '',
                     notes: itemData.notes || '',
                     person_ids: (itemData.person_ids || []).map(String),
                 };
             } else {
                 this.itemEditId = null;
-                this.itemForm = { name: '', planned_amount: '', planned_date: '', category_id: '', notes: '', person_ids: [] };
+                this.itemForm = { name: '', planned_amount: '', planned_date: '', category_id: '', category_name: '', notes: '', person_ids: [] };
             }
 
             if (mode === 'create' && !this.budget.budget_id) {
@@ -4987,7 +4996,8 @@ function budgetPage() {
                     name: this.itemForm.name,
                     planned_amount: this.itemForm.planned_amount,
                     planned_date: this.itemForm.planned_date || null,
-                    category_id: this.itemForm.category_id || null,
+                    category_id: (this.itemForm.category_id && this.itemForm.category_id !== '__custom__') ? this.itemForm.category_id : null,
+                    category_name: (this.itemForm.category_id === '__custom__' && this.itemForm.category_name) ? this.itemForm.category_name : null,
                     notes: this.itemForm.notes || null,
                     person_ids: this.itemForm.person_ids.map(Number),
                 };
