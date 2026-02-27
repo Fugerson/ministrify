@@ -558,7 +558,8 @@ class FinanceController extends Controller
         }
 
         $validated = $request->validate([
-            'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
+            'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
+            'category_name' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
@@ -570,6 +571,25 @@ class FinanceController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
+
+        // Resolve category: existing ID or create from custom name
+        $categoryId = $validated['category_id'] ?? null;
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $cat = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'income',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $categoryId = $cat->id;
+        }
+
+        if (!$categoryId) {
+            return $this->errorResponse($request, 'Оберіть або введіть категорію.', 422);
+        }
+
+        $validated['category_id'] = $categoryId;
 
         // Determine source type based on category
         $category = TransactionCategory::find($validated['category_id']);
@@ -642,7 +662,8 @@ class FinanceController extends Controller
         }
 
         $validated = $request->validate([
-            'category_id' => ['required', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
+            'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'income')],
+            'category_name' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
@@ -652,6 +673,26 @@ class FinanceController extends Controller
             'is_anonymous' => 'boolean',
             'notes' => 'nullable|string',
         ]);
+
+        // Resolve category: existing ID or create from custom name
+        $church = $this->getCurrentChurch();
+        $categoryId = $validated['category_id'] ?? null;
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $cat = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'income',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $categoryId = $cat->id;
+        }
+
+        if (!$categoryId) {
+            return $this->errorResponse($request, 'Оберіть або введіть категорію.', 422);
+        }
+
+        $validated['category_id'] = $categoryId;
 
         $validated['is_anonymous'] = $request->boolean('is_anonymous');
         if ($validated['is_anonymous']) {
@@ -775,6 +816,7 @@ class FinanceController extends Controller
 
         $validated = $request->validate([
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
+            'category_name' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
@@ -789,6 +831,18 @@ class FinanceController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
+
+        // Resolve category: existing ID or create from custom name
+        if (empty($validated['category_id']) && !empty($validated['category_name'])) {
+            $cat = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'expense',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $validated['category_id'] = $cat->id;
+        }
 
         // Check ministry budget limits
         $budgetWarning = null;
@@ -916,6 +970,7 @@ class FinanceController extends Controller
 
         $validated = $request->validate([
             'category_id' => ['nullable', 'exists:transaction_categories,id', new BelongsToChurch(TransactionCategory::class, 'expense')],
+            'category_name' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
@@ -930,6 +985,19 @@ class FinanceController extends Controller
             'delete_attachments' => 'nullable|array',
             'delete_attachments.*' => 'integer|exists:transaction_attachments,id',
         ]);
+
+        // Resolve category: existing ID or create from custom name
+        $church = $this->getCurrentChurch();
+        if (empty($validated['category_id']) && !empty($validated['category_name'])) {
+            $cat = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'expense',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $validated['category_id'] = $cat->id;
+        }
 
         $validated['currency'] = $validated['currency'] ?? 'UAH';
 
@@ -1486,15 +1554,29 @@ class FinanceController extends Controller
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
             'person_ids.*' => 'integer|exists:people,id',
         ]);
 
+        // Resolve category: existing ID or create from custom name
+        $categoryId = $validated['category_id'] ?? null;
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $cat = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'expense',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $categoryId = $cat->id;
+        }
+
         // Check category uniqueness within this budget
-        if (!empty($validated['category_id'])) {
+        if ($categoryId) {
             $exists = BudgetItem::where('ministry_budget_id', $ministryBudget->id)
-                ->where('category_id', $validated['category_id'])
+                ->where('category_id', $categoryId)
                 ->exists();
             if ($exists) {
                 return response()->json([
@@ -1509,7 +1591,7 @@ class FinanceController extends Controller
         $item = BudgetItem::create([
             'church_id' => $church->id,
             'ministry_budget_id' => $ministryBudget->id,
-            'category_id' => $validated['category_id'] ?? null,
+            'category_id' => $categoryId,
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
             'notes' => $validated['notes'] ?? null,
@@ -1542,15 +1624,29 @@ class FinanceController extends Controller
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
             'person_ids.*' => 'integer|exists:people,id',
         ]);
 
+        // Resolve category: existing ID or create from custom name
+        $categoryId = $validated['category_id'] ?? null;
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $cat = TransactionCategory::firstOrCreate([
+                'church_id' => $church->id,
+                'name' => trim($validated['category_name']),
+                'type' => 'expense',
+            ], [
+                'sort_order' => TransactionCategory::where('church_id', $church->id)->max('sort_order') + 1,
+            ]);
+            $categoryId = $cat->id;
+        }
+
         // Check category uniqueness (excluding self)
-        if (!empty($validated['category_id'])) {
+        if ($categoryId) {
             $exists = BudgetItem::where('ministry_budget_id', $budgetItem->ministry_budget_id)
-                ->where('category_id', $validated['category_id'])
+                ->where('category_id', $categoryId)
                 ->where('id', '!=', $budgetItem->id)
                 ->exists();
             if ($exists) {
@@ -1564,7 +1660,7 @@ class FinanceController extends Controller
         $budgetItem->update([
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
-            'category_id' => $validated['category_id'] ?? null,
+            'category_id' => $categoryId,
             'notes' => $validated['notes'] ?? null,
         ]);
 

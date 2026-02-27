@@ -623,6 +623,7 @@ window.incomeModal = function() {
             amount: '',
             currency: 'UAH',
             category_id: '',
+            category_name: '',
             date: new Date().toISOString().split('T')[0],
             payment_method: 'cash',
             notes: '',
@@ -639,6 +640,7 @@ window.incomeModal = function() {
                 amount: '',
                 currency: 'UAH',
                 category_id: '',
+                category_name: '',
                 date: new Date().toISOString().split('T')[0],
                 payment_method: 'cash',
                 notes: '',
@@ -654,6 +656,7 @@ window.incomeModal = function() {
                 amount: transaction.amount,
                 currency: transaction.currency || 'UAH',
                 category_id: transaction.category_id || '',
+                category_name: '',
                 date: transaction.date.substring(0, 10),
                 payment_method: transaction.payment_method || 'cash',
                 notes: transaction.notes || '',
@@ -694,6 +697,9 @@ window.incomeModal = function() {
             this.errors = {};
             const url = this.isEdit ? `/finances/incomes/${this.editId}` : '/finances/incomes';
             try {
+                const payload = {...this.formData};
+                if (payload.category_id === '__custom__') { payload.category_id = ''; }
+                else { delete payload.category_name; }
                 const response = await fetch(url, {
                     method: this.isEdit ? 'PUT' : 'POST',
                     headers: {
@@ -702,7 +708,7 @@ window.incomeModal = function() {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(this.formData)
+                    body: JSON.stringify(payload)
                 });
                 const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
@@ -737,6 +743,7 @@ window.expenseModal = function() {
             currency: 'UAH',
             description: '',
             category_id: '',
+            category_name: '',
             ministry_id: '',
             date: new Date().toISOString().split('T')[0],
             payment_method: 'cash'
@@ -753,6 +760,7 @@ window.expenseModal = function() {
                 currency: 'UAH',
                 description: '',
                 category_id: '',
+                category_name: '',
                 ministry_id: '',
                 date: new Date().toISOString().split('T')[0],
                 payment_method: 'cash'
@@ -768,6 +776,7 @@ window.expenseModal = function() {
                 currency: transaction.currency || 'UAH',
                 description: transaction.description || '',
                 category_id: transaction.category_id || '',
+                category_name: '',
                 ministry_id: transaction.ministry_id || '',
                 date: transaction.date.substring(0, 10),
                 payment_method: transaction.payment_method || 'cash'
@@ -810,6 +819,9 @@ window.expenseModal = function() {
             this.errors = {};
             const url = this.isEdit ? `/finances/expenses/${this.editId}` : '/finances/expenses';
             try {
+                const payload = {...this.formData};
+                if (payload.category_id === '__custom__') { payload.category_id = ''; }
+                else { delete payload.category_name; }
                 const response = await fetch(url, {
                     method: this.isEdit ? 'PUT' : 'POST',
                     headers: {
@@ -818,7 +830,7 @@ window.expenseModal = function() {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(this.formData)
+                    body: JSON.stringify(payload)
                 });
                 const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
@@ -978,13 +990,21 @@ window.exchangeModal = function() {
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія *</label>
-                        <select x-model="formData.category_id" required
+                        <select x-model="formData.category_id" :required="formData.category_id !== '__custom__'"
+                                :class="{ 'hidden': formData.category_id === '__custom__' }"
                                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="">Оберіть категорію</option>
                             @foreach($incomeCategories ?? [] as $cat)
                                 <option value="{{ $cat->id }}">{{ $cat->icon ?? '💰' }} {{ $cat->name }}</option>
                             @endforeach
+                            <option value="__custom__">Інше (ввести вручну)...</option>
                         </select>
+                        <div x-show="formData.category_id === '__custom__'" class="flex gap-2">
+                            <input type="text" x-model="formData.category_name" placeholder="Назва категорії..." required
+                                   class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                            <button type="button" @click="formData.category_id = ''; formData.category_name = ''"
+                                    class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-xl">✕</button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати *</label>
@@ -1097,12 +1117,20 @@ window.exchangeModal = function() {
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
                         <select x-model="formData.category_id"
+                                :class="{ 'hidden': formData.category_id === '__custom__' }"
                                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="">Без категорії</option>
                             @foreach($expenseCategories ?? [] as $cat)
                                 <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
                             @endforeach
+                            <option value="__custom__">Інше (ввести вручну)...</option>
                         </select>
+                        <div x-show="formData.category_id === '__custom__'" class="flex gap-2">
+                            <input type="text" x-model="formData.category_name" placeholder="Назва категорії..."
+                                   class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                            <button type="button" @click="formData.category_id = ''; formData.category_name = ''"
+                                    class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-xl">✕</button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати</label>

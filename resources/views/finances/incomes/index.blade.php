@@ -266,6 +266,7 @@ window.incomesManager = function() {
             amount: '',
             currency: 'UAH',
             category_id: '',
+            category_name: '',
             date: new Date().toISOString().split('T')[0],
             payment_method: 'cash',
             notes: '',
@@ -304,6 +305,7 @@ window.incomesManager = function() {
                     amount: data.transaction.amount,
                     currency: data.transaction.currency || 'UAH',
                     category_id: data.transaction.category_id || '',
+                    category_name: '',
                     date: data.transaction.date.substring(0, 10),
                     payment_method: data.transaction.payment_method || 'cash',
                     notes: data.transaction.notes || '',
@@ -329,6 +331,9 @@ window.incomesManager = function() {
                 : '/finances/incomes';
 
             try {
+                const payload = {...this.formData};
+                if (payload.category_id === '__custom__') { payload.category_id = ''; }
+                else { delete payload.category_name; }
                 const response = await fetch(url, {
                     method: this.isEdit ? 'PUT' : 'POST',
                     headers: {
@@ -337,7 +342,7 @@ window.incomesManager = function() {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(this.formData)
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json().catch(() => ({}));
@@ -404,6 +409,7 @@ window.incomesManager = function() {
                 amount: '',
                 currency: 'UAH',
                 category_id: '',
+                category_name: '',
                 date: new Date().toISOString().split('T')[0],
                 payment_method: 'cash',
                 notes: '',
@@ -645,14 +651,21 @@ window.incomesManager = function() {
                 <!-- Category -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія *</label>
-                    <select x-model="formData.category_id" required
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                            :class="{ 'border-red-500': errors.category_id }">
+                    <select x-model="formData.category_id" :required="formData.category_id !== '__custom__'"
+                            :class="{ 'border-red-500': errors.category_id, 'hidden': formData.category_id === '__custom__' }"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                         <option value="">Оберіть категорію</option>
                         @foreach($categories as $cat)
                             <option value="{{ $cat->id }}">{{ $cat->icon ?? '💰' }} {{ $cat->name }}</option>
                         @endforeach
+                        <option value="__custom__">Інше (ввести вручну)...</option>
                     </select>
+                    <div x-show="formData.category_id === '__custom__'" class="flex gap-2">
+                        <input type="text" x-model="formData.category_name" placeholder="Назва категорії..." required
+                               class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                        <button type="button" @click="formData.category_id = ''; formData.category_name = ''"
+                                class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-xl">✕</button>
+                    </div>
                     <p class="text-red-500 text-sm mt-1" x-show="errors.category_id" x-text="errors.category_id?.[0]"></p>
                 </div>
 
