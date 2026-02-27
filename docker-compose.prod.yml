@@ -45,6 +45,9 @@ services:
       - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
       - VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:admin@ministrify.app}
+      - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY:-}
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY:-}
+      - RECAPTCHA_THRESHOLD=${RECAPTCHA_THRESHOLD:-0.5}
     volumes:
       - app_storage:/var/www/html/storage/app/public
       - ./docker/php/production.ini:/usr/local/etc/php/conf.d/production.ini
