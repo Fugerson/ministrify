@@ -36,17 +36,33 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <!-- View Toggle -->
-            <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
-                <button @click="switchView('week')" type="button"
-                   :class="currentView === 'week' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                   class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
-                    {{ __('app.week') }}
-                </button>
-                <button @click="switchView('month')" type="button"
-                   :class="currentView === 'month' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                   class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
-                    {{ __('app.month') }}
-                </button>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('events.index') }}"
+                       class="px-3 py-1.5 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        {{ __('Список') }}
+                    </a>
+                    <span class="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
+                        {{ __('Календар') }}
+                    </span>
+                    <a href="{{ route('schedule.matrix') }}"
+                       class="px-3 py-1.5 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        {{ __('Матриця') }}
+                    </a>
+                </div>
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+                    <button @click="switchView('week')" type="button"
+                       :class="currentView === 'week' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                       class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
+                        {{ __('app.week') }}
+                    </button>
+                    <button @click="switchView('month')" type="button"
+                       :class="currentView === 'month' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                       class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
+                        {{ __('app.month') }}
+                    </button>
+                </div>
             </div>
 
             <!-- Date Navigation with Month Picker -->

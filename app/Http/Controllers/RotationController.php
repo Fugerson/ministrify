@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assignment;
 use App\Models\Event;
 use App\Models\Ministry;
 use App\Models\Person;
+use App\Models\Position;
 use App\Services\RotationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -257,4 +259,59 @@ class RotationController extends Controller
             'positions' => $preview,
         ]);
     }
+
+    /**
+     * Manually assign a person to a position for an event (from Matrix View)
+     */
+    public function assignPosition(Request $request, Event $event)
+    {
+        $this->authorizeChurch($event);
+
+        $validated = $request->validate([
+            'position_id' => 'required|exists:positions,id',
+            'person_id' => 'required|exists:people,id',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $position = Position::findOrFail($validated['position_id']);
+        $person = Person::findOrFail($validated['person_id']);
+
+        abort_unless($position->ministry && $position->ministry->church_id === $church->id, 404);
+        abort_unless($person->church_id === $church->id, 404);
+
+        // Check duplicate
+        $exists = Assignment::where('event_id', $event->id)
+            ->where('position_id', $validated['position_id'])
+            ->where('person_id', $validated['person_id'])
+            ->exists();
+
+        if ($exists) {
+            return response()->json(['error' => 'Ця людина вже призначена на цю позицію'], 422);
+        }
+
+        $assignment = Assignment::create([
+            'event_id' => $event->id,
+            'position_id' => $validated['position_id'],
+            'person_id' => $validated['person_id'],
+            'status' => Assignment::STATUS_PENDING,
+        ]);
+
+        return response()->json(['success' => true, 'id' => $assignment->id]);
+    }
+
+    /**
+     * Remove an assignment (from Matrix View)
+     */
+    public function removeAssignment(Request $request, Assignment $assignment)
+    {
+        $church = $this->getCurrentChurch();
+        $event = $assignment->event;
+
+        abort_unless($event && $event->church_id === $church->id, 404);
+
+        $assignment->delete();
+
+        return response()->json(['success' => true]);
+    }
+
 }

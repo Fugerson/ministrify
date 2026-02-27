@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assignment;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\AuditLog;
 use App\Models\Board;
 use App\Models\Event;
+use App\Models\EventMinistryTeam;
 use App\Models\Ministry;
 use App\Models\MinistryMeeting;
 use App\Rules\BelongsToChurch;
@@ -841,6 +843,220 @@ class EventController extends Controller
         $url = $calendarService->getGoogleCalendarUrl($event);
 
         return redirect()->away($url);
+    }
+
+    /**
+     * Matrix View — multi-week schedule grid across all service ministries
+     */
+    public function matrix(Request $request)
+    {
+        if (!auth()->user()->canView('events')) {
+            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+        }
+
+        $church = $this->getCurrentChurch();
+
+        $serviceTypes = Event::serviceTypeLabels();
+
+        return view('schedule.matrix', compact('serviceTypes'));
+    }
+
+    /**
+     * Matrix View JSON data — events × ministries × roles/positions grid
+     */
+    public function matrixData(Request $request)
+    {
+        if (!auth()->user()->canView('events')) {
+            abort(403);
+        }
+
+        $church = $this->getCurrentChurch();
+
+        $serviceType = $request->get('service_type', 'sunday_service');
+        $weeks = min((int) $request->get('weeks', 4), 12);
+        $startDate = $request->get('start_date')
+            ? Carbon::parse($request->get('start_date'))->startOfDay()
+            : now()->startOfWeek(Carbon::MONDAY);
+        $endDate = $startDate->copy()->addWeeks($weeks)->subDay()->endOfDay();
+
+        $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
+
+        // 1. Load events for the period
+        $rawEvents = Event::where('church_id', $church->id)
+            ->where('service_type', $serviceType)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date')
+            ->orderBy('time')
+            ->get();
+
+        $events = $rawEvents->map(fn($e) => [
+            'id' => $e->id,
+            'title' => $e->title,
+            'date' => $e->date->format('Y-m-d'),
+            'dateLabel' => $e->date->format('j') . ' ' . $monthNames[$e->date->month],
+            'dayOfWeek' => mb_substr($e->date->translatedFormat('D'), 0, 2),
+            'time' => $e->time?->format('H:i') ?? '',
+        ]);
+
+        $eventIds = $events->pluck('id')->toArray();
+
+        // 2. Load all service ministries (sunday_service_part + worship_ministry)
+        $ministries = Ministry::where('church_id', $church->id)
+            ->where(function ($q) {
+                $q->where('is_sunday_service_part', true)
+                  ->orWhere('is_worship_ministry', true);
+            })
+            ->orderBy('name')
+            ->get();
+
+        // 3. Build ministry data with roles OR positions
+        $ministriesData = [];
+        $grid = [];
+        $members = [];
+
+        foreach ($ministries as $ministry) {
+            $roles = [];
+            $hasMinistryRoles = $ministry->ministryRoles()->exists();
+
+            if ($hasMinistryRoles) {
+                // Role-based (worship/service teams)
+                $roles = $ministry->ministryRoles()
+                    ->orderBy('sort_order')
+                    ->get()
+                    ->map(fn($r) => [
+                        'id' => $r->id,
+                        'name' => $r->name,
+                        'icon' => $r->icon,
+                        'type' => 'ministry_role',
+                    ])->values()->toArray();
+            } else {
+                // Position-based (rotation)
+                $roles = $ministry->positions()
+                    ->orderBy('sort_order')
+                    ->get()
+                    ->map(fn($p) => [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                        'icon' => null,
+                        'type' => 'position',
+                    ])->values()->toArray();
+            }
+
+            if (empty($roles)) {
+                continue;
+            }
+
+            $ministriesData[] = [
+                'id' => $ministry->id,
+                'name' => $ministry->name,
+                'color' => $ministry->color,
+                'icon' => $ministry->icon,
+                'roles' => $roles,
+            ];
+
+            // Initialize grid for this ministry
+            $mKey = (string) $ministry->id;
+            $grid[$mKey] = [];
+            foreach ($roles as $role) {
+                $rKey = $role['type'] . '_' . $role['id'];
+                $grid[$mKey][$rKey] = [];
+            }
+
+            // Load members for this ministry
+            $members[$mKey] = $ministry->members()
+                ->orderBy('last_name')
+                ->get()
+                ->map(fn($m) => [
+                    'id' => $m->id,
+                    'name' => $m->full_name,
+                    'short_name' => $m->first_name . ' ' . mb_substr($m->last_name ?? '', 0, 1) . '.',
+                    'has_telegram' => (bool) $m->telegram_chat_id,
+                ])->values()->toArray();
+        }
+
+        if (count($eventIds) > 0) {
+            // 4a. Load EventMinistryTeam entries (role-based)
+            $ministryIds = collect($ministriesData)->pluck('id')->toArray();
+            $teamEntries = EventMinistryTeam::whereIn('event_id', $eventIds)
+                ->whereIn('ministry_id', $ministryIds)
+                ->with('person')
+                ->get();
+
+            $seen = [];
+            foreach ($teamEntries as $entry) {
+                $mKey = (string) $entry->ministry_id;
+                $rKey = 'ministry_role_' . $entry->ministry_role_id;
+                $eKey = (string) $entry->event_id;
+                $dedup = $mKey . '-' . $rKey . '-' . $eKey . '-' . $entry->person_id;
+
+                if (isset($seen[$dedup]) || !isset($grid[$mKey][$rKey])) {
+                    continue;
+                }
+                $seen[$dedup] = true;
+
+                if (!isset($grid[$mKey][$rKey][$eKey])) {
+                    $grid[$mKey][$rKey][$eKey] = [];
+                }
+
+                $person = $entry->person;
+                $grid[$mKey][$rKey][$eKey][] = [
+                    'id' => $entry->id,
+                    'person_id' => $entry->person_id,
+                    'person_name' => $person
+                        ? $person->first_name . ' ' . mb_substr($person->last_name ?? '', 0, 1) . '.'
+                        : '?',
+                    'status' => $entry->status,
+                    'has_telegram' => (bool) $person?->telegram_chat_id,
+                    'source' => 'ministry_team',
+                ];
+            }
+
+            // 4b. Load Assignment entries (position-based)
+            $positionMinistryIds = collect($ministriesData)
+                ->filter(fn($m) => collect($m['roles'])->contains('type', 'position'))
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($positionMinistryIds)) {
+                $assignments = Assignment::whereIn('event_id', $eventIds)
+                    ->whereHas('position', fn($q) => $q->whereIn('ministry_id', $positionMinistryIds))
+                    ->with(['person', 'position'])
+                    ->get();
+
+                foreach ($assignments as $assignment) {
+                    $position = $assignment->position;
+                    if (!$position) continue;
+
+                    $mKey = (string) $position->ministry_id;
+                    $rKey = 'position_' . $position->id;
+                    $eKey = (string) $assignment->event_id;
+                    $dedup = $mKey . '-' . $rKey . '-' . $eKey . '-' . $assignment->person_id;
+
+                    if (isset($seen[$dedup]) || !isset($grid[$mKey][$rKey])) {
+                        continue;
+                    }
+                    $seen[$dedup] = true;
+
+                    if (!isset($grid[$mKey][$rKey][$eKey])) {
+                        $grid[$mKey][$rKey][$eKey] = [];
+                    }
+
+                    $person = $assignment->person;
+                    $grid[$mKey][$rKey][$eKey][] = [
+                        'id' => $assignment->id,
+                        'person_id' => $assignment->person_id,
+                        'person_name' => $person
+                            ? $person->first_name . ' ' . mb_substr($person->last_name ?? '', 0, 1) . '.'
+                            : '?',
+                        'status' => $assignment->status,
+                        'has_telegram' => (bool) $person?->telegram_chat_id,
+                        'source' => 'assignment',
+                    ];
+                }
+            }
+        }
+
+        return response()->json(compact('events', 'ministriesData', 'grid', 'members'));
     }
 
 }

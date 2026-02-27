@@ -28,6 +28,10 @@
                    class="px-4 py-2 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                     {{ __('Календар') }}
                 </a>
+                <a href="{{ route('schedule.matrix') }}"
+                   class="px-4 py-2 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    {{ __('Матриця') }}
+                </a>
             </div>
 
             @if($ministries->count() > 0)

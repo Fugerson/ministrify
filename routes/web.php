@@ -414,6 +414,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     // Schedule/Events
     Route::resource('events', EventController::class);
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
+    Route::get('schedule/matrix', [EventController::class, 'matrix'])->name('schedule.matrix');
+    Route::get('schedule/matrix-data', [EventController::class, 'matrixData'])->name('schedule.matrix-data');
     Route::get('calendar', [EventController::class, 'calendar'])->name('calendar');
     Route::get('qr-scanner', [QrCheckinController::class, 'scanner'])->name('qr-scanner')->middleware('permission:attendance,edit');
     Route::post('events/{event}/toggle-qr-checkin', [QrCheckinController::class, 'toggleQrCheckin'])->name('events.toggle-qr-checkin');
@@ -472,6 +474,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('ministry/{ministry}', [\App\Http\Controllers\RotationController::class, 'ministry'])->name('ministry');
         Route::post('ministry/{ministry}/auto-assign', [\App\Http\Controllers\RotationController::class, 'autoAssignBulk'])->name('ministry.auto-assign');
         Route::post('event/{event}/auto-assign', [\App\Http\Controllers\RotationController::class, 'autoAssignEvent'])->name('event.auto-assign');
+        Route::post('event/{event}/assign-position', [\App\Http\Controllers\RotationController::class, 'assignPosition'])->name('event.assign-position');
+        Route::delete('assignment/{assignment}', [\App\Http\Controllers\RotationController::class, 'removeAssignment'])->name('assignment.remove');
         Route::get('event/{event}/preview', [\App\Http\Controllers\RotationController::class, 'previewAutoAssign'])->name('event.preview');
         Route::get('report/{ministry}', [\App\Http\Controllers\RotationController::class, 'report'])->name('report');
         Route::get('volunteer/{person}/stats', [\App\Http\Controllers\RotationController::class, 'volunteerStats'])->name('volunteer.stats');
