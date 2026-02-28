@@ -64,7 +64,7 @@
                     <template x-if="errors.ministry_id"><p class="mt-1 text-sm text-red-500" x-text="errors.ministry_id[0]"></p></template>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Сума') }} <span class="text-red-500">*</span></label>
                         <div class="relative">
@@ -136,7 +136,7 @@
                 <a href="{{ route('finances.expenses.index') }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                     {{ __('Скасувати') }}
                 </a>
-                <button type="submit" :disabled="saving" class="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                <button type="submit" :disabled="saving" class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     <span x-show="!saving">{{ __('Зберегти') }}</span>
                     <span x-show="saving">{{ __('Збереження...') }}</span>
                 </button>

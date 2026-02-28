@@ -418,7 +418,8 @@ class SchedulingService
             return 1.0;
         }
 
-        return max(0, min(1, 1 - ($monthlyCount / $this->config['max_assignments_per_month'])));
+        $maxPerMonth = $this->config['max_assignments_per_month'] ?: 4;
+        return max(0, min(1, 1 - ($monthlyCount / $maxPerMonth)));
     }
 
     /**

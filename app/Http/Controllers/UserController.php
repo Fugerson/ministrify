@@ -31,15 +31,17 @@ class UserController extends Controller
 
         $users = $church->members()
             ->orderBy('name')
+            ->get();
+
+        // Preload all people for this church keyed by user_id to avoid N+1
+        $userIds = $users->pluck('id')->toArray();
+        $peopleByUserId = Person::where('church_id', $church->id)
+            ->whereIn('user_id', $userIds)
             ->get()
-            ->each(function ($user) use ($church, $churchRolesById) {
-                // Load person for this specific church from pivot
-                $user->setRelation('person',
-                    Person::where('user_id', $user->id)
-                        ->where('church_id', $church->id)
-                        ->first()
-                );
-                // Load church role from pivot (not from user's active church)
+            ->keyBy('user_id');
+
+        $users->each(function ($user) use ($peopleByUserId, $churchRolesById) {
+                $user->setRelation('person', $peopleByUserId[$user->id] ?? null);
                 $pivotRoleId = $user->pivot->church_role_id;
                 $user->setRelation('churchRole',
                     $pivotRoleId ? ($churchRolesById[$pivotRoleId] ?? null) : null

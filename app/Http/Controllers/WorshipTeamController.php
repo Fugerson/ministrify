@@ -102,17 +102,23 @@ class WorshipTeamController extends Controller
         $personIds = $topParticipants->pluck('person_id')->toArray();
         $people = Person::whereIn('id', $personIds)->get()->keyBy('id');
 
-        // Load person and roles for each participant
+        // Preload all roles for participants to avoid N+1
+        $allRoleIds = \DB::table('event_ministry_team')
+            ->whereIn('person_id', $personIds)
+            ->where('ministry_id', $ministry->id)
+            ->whereIn('event_id', $eventIds)
+            ->select('person_id', 'ministry_role_id')
+            ->distinct()
+            ->get()
+            ->groupBy('person_id');
+
+        $uniqueRoleIds = $allRoleIds->flatten()->pluck('ministry_role_id')->unique()->toArray();
+        $rolesById = MinistryRole::whereIn('id', $uniqueRoleIds)->get()->keyBy('id');
+
         foreach ($topParticipants as $participant) {
             $participant->person = $people[$participant->person_id] ?? null;
-            $participant->roles = MinistryRole::whereIn('id', function($q) use ($participant, $eventIds, $ministry) {
-                $q->select('ministry_role_id')
-                    ->from('event_ministry_team')
-                    ->where('person_id', $participant->person_id)
-                    ->where('ministry_id', $ministry->id)
-                    ->whereIn('event_id', $eventIds)
-                    ->distinct();
-            })->get();
+            $participantRoleIds = ($allRoleIds[$participant->person_id] ?? collect())->pluck('ministry_role_id')->unique();
+            $participant->roles = $participantRoleIds->map(fn($id) => $rolesById[$id] ?? null)->filter()->values();
         }
 
         // Top songs

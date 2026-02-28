@@ -232,7 +232,8 @@ class RotationService
         }
 
         // Higher score for less frequent volunteers
-        $score = 1 - ($monthlyCount / $this->config['max_assignments_per_month']);
+        $maxPerMonth = $this->config['max_assignments_per_month'] ?: 4;
+        $score = 1 - ($monthlyCount / $maxPerMonth);
         return max(0, min(1, $score));
     }
 

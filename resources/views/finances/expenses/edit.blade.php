@@ -50,7 +50,7 @@
                     </template>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4" x-data="{ currency: '{{ old('currency', $expense->currency ?? 'UAH') }}', exchangeRates: {{ json_encode($exchangeRates) }} }">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" x-data="{ currency: '{{ old('currency', $expense->currency ?? 'UAH') }}', exchangeRates: {{ json_encode($exchangeRates) }} }">
                     <div>
                         <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
@@ -99,7 +99,7 @@
                     </template>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
                         <x-searchable-select
@@ -242,7 +242,7 @@
                     Скасувати
                 </a>
                 <button type="submit" :disabled="saving"
-                        class="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                        class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                     <span x-show="!saving">Зберегти</span>
                     <span x-show="saving" class="flex items-center justify-center gap-2">
                         <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
