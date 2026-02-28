@@ -40,6 +40,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
             'Категорія',
             'Сума',
             'Валюта',
+            'Сума (UAH)',
             'Опис',
             'Служіння',
             'Особа',
@@ -55,6 +56,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
             $transaction->category?->name ?? '-',
             $transaction->amount,
             $transaction->currency ?? 'UAH',
+            $transaction->amount_uah ?? $transaction->amount,
             $transaction->description ?? '-',
             $transaction->ministry?->name ?? '-',
             $transaction->person?->full_name ?? ($transaction->is_anonymous ? 'Анонімно' : '-'),
@@ -73,6 +75,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
     {
         return [
             'D' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
+            'F' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
         ];
     }
 }

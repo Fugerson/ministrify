@@ -531,7 +531,12 @@ function messengerApp() {
         },
 
         filterConversations() {
-            // Client-side filter handled by CSS
+            const query = this.searchQuery.toLowerCase().trim();
+            document.querySelectorAll('.conversation-btn').forEach(btn => {
+                const name = btn.querySelector('.conv-name')?.textContent?.toLowerCase() || '';
+                const preview = btn.querySelector('.conv-preview')?.textContent?.toLowerCase() || '';
+                btn.style.display = (!query || name.includes(query) || preview.includes(query)) ? '' : 'none';
+            });
         },
 
         async sendComposeMessage() {

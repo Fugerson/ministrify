@@ -57,45 +57,12 @@
         </div>
     </div>
 </section>
-@else
-<section class="py-16">
+@elseif($isAdmin ?? false)
+<section class="py-16 opacity-60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h2 class="text-3xl font-bold text-gray-900">Найближчі події</h2>
-                <p class="text-gray-600 mt-1">Приєднуйтесь до нас</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @php
-                $demoEvents = [
-                    ['title' => 'Недільне богослужіння', 'day' => now()->next('Sunday')->format('d'), 'month' => now()->next('Sunday')->translatedFormat('M'), 'time' => '10:00', 'location' => 'Головний зал', 'color' => 'from-primary-500 to-primary-700'],
-                    ['title' => 'Молитовна зустріч', 'day' => now()->next('Wednesday')->format('d'), 'month' => now()->next('Wednesday')->translatedFormat('M'), 'time' => '18:30', 'location' => 'Молитовна кімната', 'color' => 'from-blue-500 to-blue-700'],
-                    ['title' => 'Молодіжна зустріч', 'day' => now()->next('Friday')->format('d'), 'month' => now()->next('Friday')->translatedFormat('M'), 'time' => '19:00', 'location' => 'Молодіжний зал', 'color' => 'from-green-500 to-green-700'],
-                ];
-            @endphp
-            @foreach($demoEvents as $event)
-                <div class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary-200 transition-all duration-300">
-                    <div class="h-48 bg-gradient-to-br {{ $event['color'] }} flex items-center justify-center">
-                        <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <div class="p-5">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex-shrink-0 w-14 text-center">
-                                <p class="text-2xl font-bold text-primary-600">{{ $event['day'] }}</p>
-                                <p class="text-xs text-gray-500 uppercase">{{ $event['month'] }}</p>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors truncate">{{ $event['title'] }}</h3>
-                                <p class="text-sm text-gray-500">{{ $event['time'] }} &bull; {{ $event['location'] }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Найближчі події</h2>
+            <p class="text-sm text-amber-600 mt-2">Створіть публічні події в розділі Розклад</p>
         </div>
     </div>
 </section>

@@ -54,33 +54,12 @@
         </div>
     </div>
 </section>
-@else
-<section class="py-16 bg-gray-50">
+@elseif($isAdmin ?? false)
+<section class="py-16 bg-gray-50 opacity-60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
+        <div class="text-center mb-8">
             <h2 class="text-3xl font-bold text-gray-900">Наша команда</h2>
-            <p class="text-gray-600 mt-2">Люди, які служать у церкві</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            @foreach([
-                ['name' => 'Пастор', 'title' => 'Старший пастор', 'color' => 'from-primary-100 to-primary-200'],
-                ['name' => 'Лідер прославлення', 'title' => 'Музичне служіння', 'color' => 'from-blue-100 to-blue-200'],
-                ['name' => 'Молодіжний лідер', 'title' => 'Молодіжне служіння', 'color' => 'from-green-100 to-green-200'],
-                ['name' => 'Координатор', 'title' => 'Дитяче служіння', 'color' => 'from-amber-100 to-amber-200'],
-            ] as $member)
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
-                    <div class="h-56 bg-gradient-to-br {{ $member['color'] }} flex items-center justify-center">
-                        <svg class="w-20 h-20 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                    </div>
-                    <div class="p-5 text-center">
-                        <h3 class="font-semibold text-gray-900">{{ $member['name'] }}</h3>
-                        <p class="text-sm text-primary-600">{{ $member['title'] }}</p>
-                    </div>
-                </div>
-            @endforeach
+            <p class="text-sm text-amber-600 mt-2">Додайте лідерів через Конструктор сайту → Команда</p>
         </div>
     </div>
 </section>

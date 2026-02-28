@@ -80,39 +80,76 @@ class ReportsController extends Controller
             ];
         }
 
-        // Attendance by weekday
-        $weekdayData = Attendance::where('church_id', $church->id)
-            ->whereYear('date', $year)
+        // Attendance by weekday (filtered by ministry if selected)
+        $weekdayQuery = Attendance::where('church_id', $church->id)
+            ->whereYear('date', $year);
+        if ($ministryId) {
+            $weekdayQuery->whereHas('attendable', fn($q) => $q->where('ministry_id', $ministryId));
+        }
+        $weekdayData = (clone $weekdayQuery)
             ->selectRaw('DAYOFWEEK(date) as day, SUM(members_present) as count')
             ->groupBy('day')
             ->pluck('count', 'day')
             ->toArray();
 
-        $weekdays = ['', 'Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+        // Days starting from Monday (Ukrainian convention)
+        $weekdays = [2 => __('Пн'), 3 => __('Вт'), 4 => __('Ср'), 5 => __('Чт'), 6 => __('Пт'), 7 => __('Сб'), 1 => __('Нд')];
         $weekdayStats = [];
-        for ($d = 1; $d <= 7; $d++) {
+        foreach ($weekdays as $d => $label) {
             $weekdayStats[] = [
-                'day' => $weekdays[$d],
+                'day' => $label,
                 'count' => $weekdayData[$d] ?? 0,
             ];
         }
 
-        // People who stopped attending (haven't attended in 3+ months but attended before)
-        $inactiveMembers = Person::where('church_id', $church->id)
+        // People who stopped attending (filtered by ministry if selected)
+        $inactiveQuery = Person::where('church_id', $church->id);
+        $attendanceFilter = function ($q) use ($ministryId) {
+            $q->where('present', true)
+                ->whereHas('attendance', function ($aq) use ($ministryId) {
+                    if ($ministryId) {
+                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                    }
+                });
+        };
+        $inactiveMembers = $inactiveQuery
             ->whereHas('attendanceRecords', fn($q) => $q->where('present', true)
-                ->whereHas('attendance', fn($aq) => $aq->where('date', '<', now()->subMonths(3))))
+                ->whereHas('attendance', function ($aq) use ($ministryId) {
+                    $aq->where('date', '<', now()->subMonths(3));
+                    if ($ministryId) {
+                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                    }
+                }))
             ->whereDoesntHave('attendanceRecords', fn($q) => $q->where('present', true)
-                ->whereHas('attendance', fn($aq) => $aq->where('date', '>=', now()->subMonths(3))))
-            ->with(['attendanceRecords' => fn($q) => $q->latest()->limit(1)])
+                ->whereHas('attendance', function ($aq) use ($ministryId) {
+                    $aq->where('date', '>=', now()->subMonths(3));
+                    if ($ministryId) {
+                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                    }
+                }))
+            ->with(['attendanceRecords' => fn($q) => $q->where('present', true)
+                ->with('attendance')
+                ->whereHas('attendance', fn($aq) => $aq->orderByDesc('date'))
+                ->limit(1)])
             ->take(20)
             ->get();
 
-        // Top attendees
+        // Top attendees (filtered by ministry if selected)
         $topAttendees = Person::where('church_id', $church->id)
             ->whereHas('attendanceRecords', fn($q) => $q->where('present', true)
-                ->whereHas('attendance', fn($aq) => $aq->whereYear('date', $year)))
+                ->whereHas('attendance', function ($aq) use ($year, $ministryId) {
+                    $aq->whereYear('date', $year);
+                    if ($ministryId) {
+                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                    }
+                }))
             ->withCount(['attendanceRecords' => fn($q) => $q->where('present', true)
-                ->whereHas('attendance', fn($aq) => $aq->whereYear('date', $year))])
+                ->whereHas('attendance', function ($aq) use ($year, $ministryId) {
+                    $aq->whereYear('date', $year);
+                    if ($ministryId) {
+                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                    }
+                })])
             ->orderByDesc('attendance_records_count')
             ->take(10)
             ->get();

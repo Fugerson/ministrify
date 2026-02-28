@@ -3,9 +3,9 @@
 @section('title', 'Нове повідомлення')
 
 @section('content')
-<div class="max-w-2xl" x-data="messageForm()">
+<div class="max-w-2xl" x-data="messageForm()" x-effect="recipientType; $nextTick(() => loadPreview())">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <form @submit.prevent="submit($refs.msgForm)" x-ref="msgForm" class="space-y-6">
+        <form @submit.prevent="confirmAndSubmit($refs.msgForm)" x-ref="msgForm" class="space-y-6">
 
             <!-- Recipient Type -->
             <div>
@@ -191,8 +191,25 @@
                 </div>
             </div>
 
-            <!-- Info -->
-            <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
+            <!-- Recipient Preview -->
+            <div x-show="previewData" class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <div class="ml-3 text-sm">
+                        <p class="text-blue-700 dark:text-blue-300">
+                            Отримувачів: <strong x-text="previewData?.total || 0"></strong>,
+                            з Telegram: <strong x-text="previewData?.with_telegram || 0"></strong>
+                            <template x-if="previewData?.without_telegram > 0">
+                                <span class="text-amber-600 dark:text-amber-400">(без Telegram: <span x-text="previewData.without_telegram"></span>)</span>
+                            </template>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="!previewData" class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
                 <div class="flex">
                     <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -230,7 +247,44 @@ function messageForm() {
         ...ajaxForm({ url: '{{ route('messages.send') }}', method: 'POST' }),
         recipientType: 'all',
         message: '',
-        templates: @json($templates->pluck('content'))
+        templates: @json($templates->pluck('content')),
+        previewData: null,
+        previewLoading: false,
+
+        async loadPreview() {
+            this.previewLoading = true;
+            try {
+                const formData = new FormData(this.$refs.form);
+                const response = await fetch('{{ route('messages.preview') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+                this.previewData = await response.json();
+            } catch (e) {
+                this.previewData = null;
+            }
+            this.previewLoading = false;
+        },
+
+        async confirmAndSubmit(formEl) {
+            // Load preview first if not loaded
+            if (!this.previewData) {
+                await this.loadPreview();
+            }
+            const count = this.previewData?.with_telegram || 0;
+            if (count === 0) {
+                showToast('error', 'Немає отримувачів з Telegram.');
+                return;
+            }
+            if (!confirm(`Надіслати повідомлення ${count} отримувачам?`)) {
+                return;
+            }
+            this.submit(formEl);
+        }
     }
 }
 </script>

@@ -33,36 +33,12 @@
         </div>
     </div>
 </section>
-@else
-<section class="py-16 bg-gray-50">
+@elseif($isAdmin ?? false)
+<section class="py-16 bg-gray-50 opacity-60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
+        <div class="text-center mb-8">
             <h2 class="text-3xl font-bold text-gray-900">Наші команди</h2>
-            <p class="text-gray-600 mt-2">Знайдіть своє місце в команді</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach([
-                ['name' => 'Прославлення', 'desc' => 'Музичне служіння та поклоніння Богу через пісні та музику', 'color' => '#8b5cf6', 'count' => 12],
-                ['name' => 'Дитяче служіння', 'desc' => 'Навчання та виховання дітей у вірі через ігри та біблійні уроки', 'color' => '#f59e0b', 'count' => 8],
-                ['name' => 'Молодіжне служіння', 'desc' => 'Спільнота молодих людей, що разом ростуть у вірі', 'color' => '#10b981', 'count' => 15],
-            ] as $ministry)
-                <div class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:border-primary-200 transition-all duration-300">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                             style="background-color: {{ $ministry['color'] }}30;">
-                            <svg class="w-7 h-7" style="color: {{ $ministry['color'] }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">{{ $ministry['name'] }}</h3>
-                            <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ $ministry['desc'] }}</p>
-                            <p class="text-xs text-gray-400 mt-2">{{ $ministry['count'] }} учасників</p>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+            <p class="text-sm text-amber-600 mt-2">Зробіть команди публічними в їх налаштуваннях</p>
         </div>
     </div>
 </section>

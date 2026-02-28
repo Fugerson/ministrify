@@ -399,7 +399,7 @@
 
                                     <!-- Quick complete button -->
                                     <button @click.stop="toggleComplete({{ $card->id }})"
-                                            class="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all
+                                            class="absolute top-2 right-2 p-1.5 rounded-lg sm:opacity-0 sm:group-hover:opacity-100 transition-all
                                                    {{ $card->is_completed ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-600 hover:text-green-600 dark:hover:text-green-400' }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -855,7 +855,7 @@ function churchBoard() {
                         <div class="card-assignee flex-shrink-0">${assigneeHtml}</div>
                     </div>
                     <button onclick="event.stopPropagation(); boardToggleComplete(${card.id})"
-                            class="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all bg-gray-100 text-gray-400 dark:bg-gray-600 hover:text-green-600 dark:hover:text-green-400">
+                            class="absolute top-2 right-2 p-1.5 rounded-lg sm:opacity-0 sm:group-hover:opacity-100 transition-all bg-gray-100 text-gray-400 dark:bg-gray-600 hover:text-green-600 dark:hover:text-green-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>

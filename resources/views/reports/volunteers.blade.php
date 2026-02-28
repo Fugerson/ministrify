@@ -102,9 +102,9 @@
             @foreach($inactiveVolunteers as $person)
                 <a href="{{ route('people.show', $person) }}" class="flex flex-col items-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors text-center">
                     <div class="w-12 h-12 bg-orange-200 dark:bg-orange-800 rounded-full flex items-center justify-center text-orange-700 dark:text-orange-300 font-medium text-lg mb-2">
-                        {{ substr($person->first_name, 0, 1) }}
+                        {{ mb_substr($person->first_name, 0, 1) }}
                     </div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate w-full">{{ $person->first_name }}</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate w-full">{{ $person->full_name }}</p>
                 </a>
             @endforeach
         </div>

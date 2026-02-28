@@ -41,13 +41,16 @@ class MessageController extends Controller
     public function preview(Request $request)
     {
         $churchId = $this->getCurrentChurch()->id;
-        $recipients = $this->getRecipients($request, $churchId);
+        $allRecipients = $this->getRecipients($request, $churchId, telegramOnly: false);
+        $withTelegram = $allRecipients->filter(fn($p) => !empty($p->telegram_chat_id))->count();
 
         return response()->json([
-            'count' => $recipients->count(),
-            'preview' => $recipients->take(10)->map(fn($p) => [
+            'total' => $allRecipients->count(),
+            'with_telegram' => $withTelegram,
+            'without_telegram' => $allRecipients->count() - $withTelegram,
+            'preview' => $allRecipients->take(10)->map(fn($p) => [
                 'name' => $p->full_name,
-                'telegram' => $p->telegram_chat_id ? true : false,
+                'telegram' => !empty($p->telegram_chat_id),
             ]),
         ]);
     }
@@ -69,10 +72,16 @@ class MessageController extends Controller
 
         $church = $this->getCurrentChurch();
         $churchId = $church->id;
-        $recipients = $this->getRecipients($request, $churchId);
+        $allRecipients = $this->getRecipients($request, $churchId, telegramOnly: false);
+        $recipients = $allRecipients->filter(fn($p) => !empty($p->telegram_chat_id));
+        $skippedNoTelegram = $allRecipients->count() - $recipients->count();
 
         if ($recipients->isEmpty()) {
-            return $this->errorResponse($request, 'Немає отримувачів з Telegram');
+            $msg = __('Немає отримувачів з Telegram');
+            if ($skippedNoTelegram > 0) {
+                $msg .= ' (' . __(':count без Telegram', ['count' => $skippedNoTelegram]) . ')';
+            }
+            return $this->errorResponse($request, $msg);
         }
 
         if (!config('services.telegram.bot_token')) {
@@ -84,12 +93,14 @@ class MessageController extends Controller
         $failed = 0;
 
         foreach ($recipients as $person) {
-            if (!$person->telegram_chat_id) {
-                continue;
-            }
-
             try {
-                $telegram->sendMessage($person->telegram_chat_id, $validated['message']);
+                // Substitute template variables for each recipient
+                $personalMessage = str_replace(
+                    ['{first_name}', '{last_name}', '{full_name}', '{phone}'],
+                    [$person->first_name ?? '', $person->last_name ?? '', $person->full_name ?? '', $person->phone ?? ''],
+                    $validated['message']
+                );
+                $telegram->sendMessage($person->telegram_chat_id, $personalMessage);
                 $sent++;
             } catch (\Exception $e) {
                 $failed++;
@@ -104,12 +115,21 @@ class MessageController extends Controller
             'recipients' => [
                 'type' => $validated['recipient_type'],
                 'ids' => $recipients->pluck('id')->toArray(),
+                'total' => $recipients->count(),
             ],
             'sent_count' => $sent,
             'failed_count' => $failed,
         ]);
 
-        return $this->successResponse($request, "Надіслано: {$sent}, помилок: {$failed}", 'messages.index');
+        $msg = __('Надіслано: :sent', ['sent' => $sent]);
+        if ($skippedNoTelegram > 0) {
+            $msg .= ', ' . __('пропущено (без Telegram): :skipped', ['skipped' => $skippedNoTelegram]);
+        }
+        if ($failed > 0) {
+            $msg .= ', ' . __('помилок: :failed', ['failed' => $failed]);
+        }
+
+        return $this->successResponse($request, $msg, 'messages.index');
     }
 
     public function storeTemplate(Request $request)
@@ -140,10 +160,12 @@ class MessageController extends Controller
         return $this->successResponse($request, 'Шаблон видалено');
     }
 
-    private function getRecipients(Request $request, int $churchId)
+    private function getRecipients(Request $request, int $churchId, bool $telegramOnly = true)
     {
-        $query = Person::where('church_id', $churchId)
-            ->whereNotNull('telegram_chat_id');
+        $query = Person::where('church_id', $churchId);
+        if ($telegramOnly) {
+            $query->whereNotNull('telegram_chat_id');
+        }
 
         switch ($request->recipient_type) {
             case 'tag':

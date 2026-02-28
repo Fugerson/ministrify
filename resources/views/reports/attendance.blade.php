@@ -103,7 +103,7 @@
                     <div class="ml-3">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $person->full_name }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            Останній раз: {{ $person->attendanceRecords->first()?->created_at->diffForHumans() ?? 'Невідомо' }}
+                            Останній раз: {{ $person->attendanceRecords->first()?->attendance?->date?->diffForHumans() ?? $person->attendanceRecords->first()?->created_at?->diffForHumans() ?? 'Невідомо' }}
                         </p>
                     </div>
                 </a>
