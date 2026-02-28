@@ -68,6 +68,8 @@ Route::prefix('pwa')->name('api.pwa.')->middleware(['web', 'auth'])->group(funct
     Route::get('my-schedule', [\App\Http\Controllers\Api\MyScheduleController::class, 'index'])->name('my-schedule');
     Route::post('responsibilities/{id}/confirm', [\App\Http\Controllers\Api\MyScheduleController::class, 'confirm'])->name('responsibilities.confirm');
     Route::post('responsibilities/{id}/decline', [\App\Http\Controllers\Api\MyScheduleController::class, 'decline'])->name('responsibilities.decline');
+    Route::post('assignments/{id}/confirm', [\App\Http\Controllers\Api\MyScheduleController::class, 'confirmAssignment'])->name('assignments.confirm');
+    Route::post('assignments/{id}/decline', [\App\Http\Controllers\Api\MyScheduleController::class, 'declineAssignment'])->name('assignments.decline');
 });
 
 // QR Check-in API

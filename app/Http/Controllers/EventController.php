@@ -35,10 +35,18 @@ class EventController extends Controller
             $query->where('ministry_id', $ministryId);
         }
 
-        $events = $query->upcoming()->paginate(20);
+        $showPast = $request->boolean('past');
+
+        if ($showPast) {
+            $query->where('date', '<', now()->startOfDay())->orderByDesc('date')->orderByDesc('time');
+        } else {
+            $query->upcoming();
+        }
+
+        $events = $query->paginate(20);
         $ministries = $church->ministries;
 
-        return view('schedule.index', compact('events', 'ministries'));
+        return view('schedule.index', compact('events', 'ministries', 'showPast'));
     }
 
     public function schedule(Request $request)

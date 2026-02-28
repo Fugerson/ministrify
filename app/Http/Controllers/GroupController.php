@@ -44,6 +44,9 @@ class GroupController extends Controller
             'description' => 'nullable|string|max:2000',
             'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'status' => 'nullable|in:active,paused,vacation',
+            'meeting_day' => 'nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'meeting_time' => 'nullable|date_format:H:i',
+            'location' => 'nullable|string|max:255',
         ]);
 
         $validated['church_id'] = $this->getCurrentChurch()->id;
@@ -104,6 +107,9 @@ class GroupController extends Controller
             'description' => 'nullable|string|max:2000',
             'leader_id' => ['nullable', new BelongsToChurch(Person::class)],
             'status' => 'nullable|in:active,paused,vacation',
+            'meeting_day' => 'nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'meeting_time' => 'nullable|date_format:H:i',
+            'location' => 'nullable|string|max:255',
         ]);
 
         $group->update($validated);

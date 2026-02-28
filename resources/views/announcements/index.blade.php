@@ -22,6 +22,15 @@
             <p class="text-sm text-primary-600 dark:text-primary-400">{{ $unreadCount }} нових</p>
             @endif
         </div>
+        @if($unreadCount > 0)
+        <button @click="ajaxAction('{{ route('announcements.mark-all-read') }}', 'POST').then(() => window.location.reload())"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Прочитати все
+        </button>
+        @endif
     </div>
 
     <!-- Announcements List -->

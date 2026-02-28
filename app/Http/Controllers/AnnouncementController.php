@@ -168,6 +168,23 @@ class AnnouncementController extends Controller
         }
     }
 
+    public function markAllRead(Request $request)
+    {
+        $user = auth()->user();
+        $church = $this->getCurrentChurch();
+
+        $unreadAnnouncements = Announcement::forChurch($church->id)
+            ->published()
+            ->whereDoesntHave('readByUsers', fn($q) => $q->where('user_id', $user->id))
+            ->get();
+
+        foreach ($unreadAnnouncements as $announcement) {
+            $announcement->markAsReadBy($user);
+        }
+
+        return $this->successResponse($request, 'Всі оголошення позначено як прочитані');
+    }
+
     public function togglePin(Request $request, Announcement $announcement)
     {
         $this->authorizeChurch($announcement);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assignment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -152,6 +153,64 @@ class MyScheduleController extends Controller
                 'id' => $responsibility->id,
                 'status' => 'declined',
                 'status_label' => $responsibility->status_label,
+            ],
+        ]);
+    }
+
+    /**
+     * Confirm an assignment
+     */
+    public function confirmAssignment(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user || !$user->person) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $assignment = $user->person->assignments()->find($id);
+
+        if (!$assignment) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        $assignment->confirm();
+
+        return response()->json([
+            'success' => true,
+            'assignment' => [
+                'id' => $assignment->id,
+                'status' => 'confirmed',
+                'status_label' => $assignment->status_label,
+            ],
+        ]);
+    }
+
+    /**
+     * Decline an assignment
+     */
+    public function declineAssignment(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user || !$user->person) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $assignment = $user->person->assignments()->find($id);
+
+        if (!$assignment) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        $assignment->decline();
+
+        return response()->json([
+            'success' => true,
+            'assignment' => [
+                'id' => $assignment->id,
+                'status' => 'declined',
+                'status_label' => $assignment->status_label,
             ],
         ]);
     }

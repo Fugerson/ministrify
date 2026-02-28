@@ -951,6 +951,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     // Church Announcements
     Route::prefix('announcements')->name('announcements.')->group(function () {
         Route::get('/', [AnnouncementController::class, 'index'])->name('index');
+        Route::post('mark-all-read', [AnnouncementController::class, 'markAllRead'])->name('mark-all-read');
         Route::get('create', [AnnouncementController::class, 'create'])->name('create')->middleware('permission:announcements,create');
         Route::post('/', [AnnouncementController::class, 'store'])->name('store')->middleware('permission:announcements,create');
         Route::get('{announcement}', [AnnouncementController::class, 'show'])->name('show');

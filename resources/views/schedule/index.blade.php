@@ -34,19 +34,26 @@
                 </a>
             </div>
 
-            @if($ministries->count() > 0)
-            <form method="GET" class="flex items-center gap-2">
-                <select name="ministry" onchange="this.form.submit()"
-                        class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
-                    <option value="">{{ __('Всі команди') }}</option>
-                    @foreach($ministries as $ministry)
-                        <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
-                            {{ $ministry->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
-            @endif
+            <div class="flex items-center gap-2">
+                <a href="{{ route('events.index', array_merge(request()->only('ministry'), ['past' => ($showPast ?? false) ? null : 1])) }}"
+                   class="px-3 py-2 text-sm font-medium rounded-xl whitespace-nowrap transition-colors {{ ($showPast ?? false) ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    {{ ($showPast ?? false) ? __('Майбутні') : __('Минулі') }}
+                </a>
+                @if($ministries->count() > 0)
+                <form method="GET" class="flex items-center gap-2">
+                    @if($showPast ?? false)<input type="hidden" name="past" value="1">@endif
+                    <select name="ministry" onchange="this.form.submit()"
+                            class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
+                        <option value="">{{ __('Всі команди') }}</option>
+                        @foreach($ministries as $ministry)
+                            <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
+                                {{ $ministry->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -119,7 +126,11 @@
                             @php
                                 $daysUntil = (int) now()->startOfDay()->diffInDays($event->date->startOfDay(), false);
                             @endphp
-                            @if($daysUntil === 0)
+                            @if($showPast ?? false)
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ $event->date->format('d.m.Y') }}
+                                </div>
+                            @elseif($daysUntil === 0)
                                 <div class="text-sm font-semibold text-primary-600 dark:text-primary-400">{{ __('Сьогодні') }}</div>
                             @elseif($daysUntil === 1)
                                 <div class="text-sm font-semibold text-primary-600 dark:text-primary-400">{{ __('Завтра') }}</div>

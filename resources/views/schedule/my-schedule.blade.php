@@ -46,7 +46,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white">Мій розклад</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Ваші майбутні відповідальності</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Ваші майбутні служіння та призначення</p>
                 </div>
                 <div class="flex items-center gap-2">
                     {{-- Sync status --}}
@@ -108,7 +108,7 @@
 
                             <template x-if="responsibility.status === 'pending'">
                                 <div class="flex gap-2">
-                                    <button @click="confirmResponsibility(responsibility)"
+                                    <button @click="confirmItem(responsibility)"
                                             :disabled="responsibility.processing"
                                             class="p-2.5 text-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 active:bg-green-200 dark:active:bg-green-900/50 rounded-xl disabled:opacity-50 transition-colors"
                                             title="Підтвердити">
@@ -116,7 +116,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </button>
-                                    <button @click="declineResponsibility(responsibility)"
+                                    <button @click="declineItem(responsibility)"
                                             :disabled="responsibility.processing"
                                             class="p-2.5 text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 active:bg-red-200 dark:active:bg-red-900/50 rounded-xl disabled:opacity-50 transition-colors"
                                             title="Відхилити">
@@ -137,7 +137,7 @@
                     <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <p>У вас немає майбутніх відповідальностей</p>
+                    <p>У вас немає майбутніх служінь та призначень</p>
                 </div>
             </template>
         </div>
@@ -236,12 +236,20 @@ function mySchedule() {
             this.loading = false;
         },
 
-        async confirmResponsibility(responsibility) {
-            responsibility.processing = true;
+        getApiUrl(item, action) {
+            if (item.type === 'assignment') {
+                const realId = String(item.id).replace('a_', '');
+                return `/api/pwa/assignments/${realId}/${action}`;
+            }
+            return `/api/pwa/responsibilities/${item.id}/${action}`;
+        },
+
+        async confirmItem(item) {
+            item.processing = true;
 
             if (navigator.onLine) {
                 try {
-                    const response = await fetch(`/api/pwa/responsibilities/${responsibility.id}/confirm`, {
+                    const response = await fetch(this.getApiUrl(item, 'confirm'), {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -251,29 +259,29 @@ function mySchedule() {
                     });
 
                     if (response.ok) {
-                        responsibility.status = 'confirmed';
-                        responsibility.status_label = 'Підтверджено';
-                        await PWA_DB.updateResponsibilityStatus(responsibility.id, 'confirmed', 'Підтверджено');
+                        item.status = 'confirmed';
+                        item.status_label = 'Підтверджено';
+                        await PWA_DB.updateResponsibilityStatus(item.id, 'confirmed', 'Підтверджено');
                     }
                 } catch (error) {
                     console.error('Confirm failed:', error);
-                    await this.queueOfflineAction(responsibility, 'confirm');
+                    await this.queueOfflineAction(item, 'confirm');
                 }
             } else {
-                await this.queueOfflineAction(responsibility, 'confirm');
-                responsibility.status = 'confirmed';
-                responsibility.status_label = 'Підтверджено (очікує синхр.)';
+                await this.queueOfflineAction(item, 'confirm');
+                item.status = 'confirmed';
+                item.status_label = 'Підтверджено (очікує синхр.)';
             }
 
-            responsibility.processing = false;
+            item.processing = false;
         },
 
-        async declineResponsibility(responsibility) {
-            responsibility.processing = true;
+        async declineItem(item) {
+            item.processing = true;
 
             if (navigator.onLine) {
                 try {
-                    const response = await fetch(`/api/pwa/responsibilities/${responsibility.id}/decline`, {
+                    const response = await fetch(this.getApiUrl(item, 'decline'), {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -283,29 +291,29 @@ function mySchedule() {
                     });
 
                     if (response.ok) {
-                        responsibility.status = 'declined';
-                        responsibility.status_label = 'Відхилено';
-                        await PWA_DB.updateResponsibilityStatus(responsibility.id, 'declined', 'Відхилено');
+                        item.status = 'declined';
+                        item.status_label = 'Відхилено';
+                        await PWA_DB.updateResponsibilityStatus(item.id, 'declined', 'Відхилено');
                     }
                 } catch (error) {
                     console.error('Decline failed:', error);
-                    await this.queueOfflineAction(responsibility, 'decline');
+                    await this.queueOfflineAction(item, 'decline');
                 }
             } else {
-                await this.queueOfflineAction(responsibility, 'decline');
-                responsibility.status = 'declined';
-                responsibility.status_label = 'Відхилено (очікує синхр.)';
+                await this.queueOfflineAction(item, 'decline');
+                item.status = 'declined';
+                item.status_label = 'Відхилено (очікує синхр.)';
             }
 
-            responsibility.processing = false;
+            item.processing = false;
         },
 
-        async queueOfflineAction(responsibility, action) {
+        async queueOfflineAction(item, action) {
             await PWA_DB.queueOfflineAction({
-                type: 'responsibility_' + action,
-                url: `/api/pwa/responsibilities/${responsibility.id}/${action}`,
+                type: (item.type || 'responsibility') + '_' + action,
+                url: this.getApiUrl(item, action),
                 method: 'POST',
-                responsibility_id: responsibility.id
+                responsibility_id: item.id
             });
             this.pendingActions++;
 
