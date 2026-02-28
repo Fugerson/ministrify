@@ -13,7 +13,7 @@ class AnnouncementController extends Controller
     public function index()
     {
         if (!auth()->user()->canView('announcements')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $user = auth()->user();

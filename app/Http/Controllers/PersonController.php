@@ -35,7 +35,7 @@ class PersonController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('people')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();
@@ -1174,7 +1174,7 @@ class PersonController extends Controller
     public function quickEdit(Request $request)
     {
         if (!auth()->user()->canView('people')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();

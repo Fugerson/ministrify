@@ -931,7 +931,7 @@
             @if(auth()->user()->canView('announcements'))
             <a wire:navigate href="{{ route('announcements.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Чат') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('Комунікації') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('reports'))
@@ -1365,7 +1365,7 @@
         </aside>
 
         <!-- Main Content -->
-        <div id="main-content" class="main-content-area flex-1 min-w-0 {{ $menuPosition === 'top' ? 'lg:pt-16' : '' }} {{ $menuPosition === 'bottom' ? 'lg:pb-20' : '' }}"
+        <div id="main-content" class="main-content-area flex-1 min-w-0 {{ $menuPosition === 'top' ? 'lg:pt-16' : '' }} pb-16 {{ $menuPosition === 'bottom' ? 'lg:pb-20' : 'lg:pb-0' }}"
              x-data="{ sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true' }"
              x-on:sidebar-toggle.window="sidebarCollapsed = $event.detail"
              :class="sidebarCollapsed ? '{{ $menuPosition === 'right' ? 'lg:pr-16' : 'lg:pl-16' }}' : '{{ $menuPosition === 'right' ? 'lg:pr-64' : 'lg:pl-64' }}'">
@@ -1462,29 +1462,35 @@
             </main>
         </div>
 
-        <!-- Mobile Bottom Nav -->
-        <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40 safe-bottom">
-            <div class="flex items-center justify-around h-16">
-                <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('dashboard') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+        <!-- Mobile Bottom Navigation -->
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+            <div class="flex items-center justify-around h-14 px-1">
+                <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('dashboard') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    <span class="text-xs mt-1">Головна</span>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Головна') }}</span>
                 </a>
-                <a wire:navigate href="{{ route('people.index') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('people.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
-                    <span class="text-xs mt-1">Люди</span>
+                @if(auth()->user()->canView('people'))
+                <a wire:navigate href="{{ route('people.index') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('people.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Люди') }}</span>
                 </a>
-                <a wire:navigate href="{{ route('schedule') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+                @endif
+                @if(auth()->user()->canView('events'))
+                <a wire:navigate href="{{ route('schedule') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span class="text-xs mt-1">Розклад</span>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Розклад') }}</span>
                 </a>
-                <a wire:navigate href="{{ route('groups.index') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('groups.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    <span class="text-xs mt-1">Групи</span>
+                @endif
+                @if(auth()->user()->canView('announcements'))
+                <a wire:navigate href="{{ route('announcements.index') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Чат') }}</span>
                 </a>
-                <a wire:navigate href="{{ route('my-profile') }}" class="flex flex-col items-center justify-center flex-1 py-2 {{ request()->routeIs('my-profile*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
-                    <span class="text-xs mt-1">Профіль</span>
-                </a>
+                @endif
+                <button @click="sidebarOpen = true" class="flex flex-col items-center justify-center w-full py-1 text-gray-500 dark:text-gray-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Ще') }}</span>
+                </button>
             </div>
         </nav>
 

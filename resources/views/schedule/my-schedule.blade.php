@@ -107,10 +107,10 @@
                                   x-text="responsibility.status_label"></span>
 
                             <template x-if="responsibility.status === 'pending'">
-                                <div class="flex gap-1">
+                                <div class="flex gap-2">
                                     <button @click="confirmResponsibility(responsibility)"
                                             :disabled="responsibility.processing"
-                                            class="p-1.5 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg disabled:opacity-50"
+                                            class="p-2.5 text-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 active:bg-green-200 dark:active:bg-green-900/50 rounded-xl disabled:opacity-50 transition-colors"
                                             title="Підтвердити">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -118,7 +118,7 @@
                                     </button>
                                     <button @click="declineResponsibility(responsibility)"
                                             :disabled="responsibility.processing"
-                                            class="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg disabled:opacity-50"
+                                            class="p-2.5 text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 active:bg-red-200 dark:active:bg-red-900/50 rounded-xl disabled:opacity-50 transition-colors"
                                             title="Відхилити">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

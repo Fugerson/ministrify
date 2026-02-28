@@ -23,7 +23,7 @@
                 </div>
             @endif
 
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
                     <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>
                     <input type="date" name="date" id="date"

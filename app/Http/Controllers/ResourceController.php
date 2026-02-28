@@ -18,7 +18,7 @@ class ResourceController extends Controller
     public function index(Request $request, ?Resource $folder = null)
     {
         if (!auth()->user()->canView('resources')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $churchId = $this->getCurrentChurch()->id;

@@ -45,6 +45,9 @@
                     <template x-if="currency !== 'UAH' && exchangeRates[currency]">
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                             Курс НБУ: 1 <span x-text="currency"></span> = <span x-text="exchangeRates[currency]?.toFixed(2)"></span> ₴
+                            @if(\App\Models\ExchangeRate::getLatestRateDate())
+                                <span class="text-gray-400">({{ __('станом на') }} {{ \App\Models\ExchangeRate::getLatestRateDate() }})</span>
+                            @endif
                         </p>
                     </template>
                     <template x-if="errors.amount">

@@ -206,12 +206,15 @@ class Ministry extends Model
         $newTotal = $spentForMonth + $amount;
         $newPercentage = ($newTotal / $this->monthly_budget) * 100;
 
+        $monthName = $carbonDate->translatedFormat('F Y');
+
         if ($newTotal > $this->monthly_budget) {
             return [
                 'allowed' => false,
                 'warning' => 'exceeded',
                 'message' => sprintf(
-                    'Ця витрата перевищить бюджет на %.2f грн. Залишок: %.2f грн.',
+                    'Ця витрата перевищить бюджет за %s на %.2f грн. Залишок: %.2f грн.',
+                    $monthName,
                     $newTotal - $this->monthly_budget,
                     $remainingForMonth
                 ),
@@ -223,8 +226,9 @@ class Ministry extends Model
                 'allowed' => true,
                 'warning' => 'high',
                 'message' => sprintf(
-                    'Увага! Після цієї витрати буде використано %.1f%% бюджету.',
-                    $newPercentage
+                    'Увага! Після цієї витрати буде використано %.1f%% бюджету за %s.',
+                    $newPercentage,
+                    $monthName
                 ),
             ];
         }

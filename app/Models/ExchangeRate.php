@@ -123,11 +123,23 @@ class ExchangeRate extends Model
     }
 
     /**
+     * Get the date of the latest exchange rates.
+     */
+    public static function getLatestRateDate(): ?string
+    {
+        return Cache::remember('latest_exchange_rate_date', 3600, function () {
+            $latest = static::orderByDesc('date')->first();
+            return $latest?->date?->format('d.m.Y');
+        });
+    }
+
+    /**
      * Clear the exchange rate cache.
      */
     public static function clearCache(): void
     {
         Cache::forget('latest_exchange_rates');
+        Cache::forget('latest_exchange_rate_date');
         // Note: Individual date caches will expire naturally
     }
 }

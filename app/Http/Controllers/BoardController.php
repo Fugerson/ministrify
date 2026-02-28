@@ -22,7 +22,7 @@ class BoardController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('boards')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();
@@ -129,7 +129,7 @@ class BoardController extends Controller
     public function show(Board $board)
     {
         if (!auth()->user()->canView('boards')) {
-            return redirect()->route('dashboard')->with('error', 'У вас немає доступу до цього розділу.');
+            return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         // Church-wide board — redirect to index

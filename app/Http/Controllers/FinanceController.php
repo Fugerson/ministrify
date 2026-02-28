@@ -25,7 +25,7 @@ class FinanceController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();
@@ -299,7 +299,7 @@ class FinanceController extends Controller
     public function journal(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();
@@ -483,7 +483,7 @@ class FinanceController extends Controller
     public function incomes(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();
@@ -733,7 +733,7 @@ class FinanceController extends Controller
     public function expenses(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();
@@ -1264,7 +1264,7 @@ class FinanceController extends Controller
     public function budgets(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();
@@ -2012,7 +2012,7 @@ class FinanceController extends Controller
     public function cards(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $church = $this->getCurrentChurch();

@@ -117,6 +117,18 @@ class PersonMergeService
                 }
             }
 
+            // For date fields, keep the earliest (most meaningful) value
+            $dateFields = ['first_visit_date', 'joined_date', 'baptism_date'];
+            foreach ($dateFields as $dateField) {
+                if (!empty($primary->{$dateField}) && !empty($secondary->{$dateField})) {
+                    $primaryDate = \Carbon\Carbon::parse($primary->{$dateField});
+                    $secondaryDate = \Carbon\Carbon::parse($secondary->{$dateField});
+                    if ($secondaryDate->lt($primaryDate)) {
+                        $updates[$dateField] = $secondary->{$dateField};
+                    }
+                }
+            }
+
             if (!empty($updates)) {
                 $primary->update($updates);
             }
@@ -189,6 +201,7 @@ class PersonMergeService
                 'event_responsibilities',
                 'person_worship_skills',
                 'event_worship_team',
+                'event_ministry_team',
                 'unavailable_dates',
                 'attendance_records',
                 'transactions',
@@ -429,6 +442,7 @@ class PersonMergeService
                 'event_responsibilities',
                 'person_worship_skills',
                 'event_worship_team',
+                'event_ministry_team',
                 'unavailable_dates',
                 'attendance_records',
                 'transactions',

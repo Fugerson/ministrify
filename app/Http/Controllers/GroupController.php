@@ -12,7 +12,7 @@ class GroupController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('groups')) {
-            return $this->errorResponse($request, 'У вас немає доступу до цього розділу.');
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         $groups = Group::where('church_id', $this->getCurrentChurch()->id)
