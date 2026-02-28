@@ -1,7 +1,7 @@
 @php
     $user = auth()->user();
     $tourCompleted = $user->preferences['tour_completed'] ?? false;
-    $showReminder = !$tourCompleted && $user->churchRole;
+    $showReminder = false;
 @endphp
 
 @if($showReminder)
