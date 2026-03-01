@@ -25,10 +25,11 @@
     $nextMonth = $month == 12 ? 1 : $month + 1;
     $nextYear = $month == 12 ? $year + 1 : $year;
 
-    $prevWeek = $currentWeek ? ($currentWeek == 1 ? 52 : $currentWeek - 1) : null;
+    $maxWeek = \Carbon\Carbon::create($year, 1, 1)->isoWeeksInYear;
+    $prevWeek = $currentWeek ? ($currentWeek == 1 ? \Carbon\Carbon::create($year - 1, 1, 1)->isoWeeksInYear : $currentWeek - 1) : null;
     $prevWeekYear = $currentWeek == 1 ? $year - 1 : $year;
-    $nextWeek = $currentWeek ? ($currentWeek == 52 ? 1 : $currentWeek + 1) : null;
-    $nextWeekYear = $currentWeek == 52 ? $year + 1 : $year;
+    $nextWeek = $currentWeek ? ($currentWeek >= $maxWeek ? 1 : $currentWeek + 1) : null;
+    $nextWeekYear = ($currentWeek && $currentWeek >= $maxWeek) ? $year + 1 : $year;
 @endphp
 
 <div class="space-y-4" x-data="calendarNavigator({{ json_encode(['view' => $view, 'year' => $year, 'month' => $month, 'week' => $currentWeek ?? null]) }})">

@@ -92,7 +92,7 @@ class MessageController extends Controller
         $sent = 0;
         $failed = 0;
 
-        foreach ($recipients as $person) {
+        foreach ($recipients as $index => $person) {
             try {
                 // Substitute template variables for each recipient
                 $personalMessage = str_replace(
@@ -102,6 +102,11 @@ class MessageController extends Controller
                 );
                 $telegram->sendMessage($person->telegram_chat_id, $personalMessage);
                 $sent++;
+
+                // Rate limit: Telegram allows ~30 msg/sec, pause every 25 messages
+                if (($index + 1) % 25 === 0) {
+                    usleep(1100000); // 1.1 seconds
+                }
             } catch (\Exception $e) {
                 $failed++;
             }
@@ -178,13 +183,17 @@ class MessageController extends Controller
                 $query->whereHas('groups', fn($q) => $q->where('groups.id', $request->group_id));
                 break;
             case 'custom':
-                if ($request->person_ids) {
+                if ($request->person_ids && is_array($request->person_ids) && count($request->person_ids) > 0) {
                     $query->whereIn('id', $request->person_ids);
+                } else {
+                    $query->whereRaw('1=0'); // No recipients selected
                 }
                 break;
             case 'gender':
                 if ($request->gender) {
                     $query->where('gender', $request->gender);
+                } else {
+                    $query->whereRaw('1=0'); // No gender selected
                 }
                 break;
             case 'birthday':
@@ -194,6 +203,8 @@ class MessageController extends Controller
             case 'membership':
                 if ($request->membership_status) {
                     $query->where('membership_status', $request->membership_status);
+                } else {
+                    $query->whereRaw('1=0'); // No status selected
                 }
                 break;
             case 'age':
@@ -214,7 +225,11 @@ class MessageController extends Controller
                             $query->whereNotNull('birth_date')
                                 ->whereDate('birth_date', '<=', $now->copy()->subYears(60));
                             break;
+                        default:
+                            $query->whereRaw('1=0'); // Invalid age group
                     }
+                } else {
+                    $query->whereRaw('1=0'); // No age group selected
                 }
                 break;
             case 'new_members':
@@ -227,8 +242,12 @@ class MessageController extends Controller
             case 'role':
                 if ($request->church_role_id) {
                     $query->whereHas('user', fn($q) => $q->where('church_role_id', $request->church_role_id));
+                } else {
+                    $query->whereRaw('1=0'); // No role selected
                 }
                 break;
+            default:
+                $query->whereRaw('1=0'); // Unknown recipient type — select nobody
         }
 
         return $query->get();

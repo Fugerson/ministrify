@@ -112,14 +112,24 @@ class GroupController extends Controller
             'location' => 'nullable|string|max:255',
         ]);
 
+        $oldLeaderId = $group->getOriginal('leader_id');
         $group->update($validated);
 
-        // Ensure new leader is a member
-        if ($group->leader_id && !$group->members()->where('people.id', $group->leader_id)->exists()) {
-            $group->members()->attach($group->leader_id, [
-                'role' => 'leader',
-                'joined_at' => now(),
-            ]);
+        // Demote old leader's pivot role if leader changed
+        if ($oldLeaderId && $oldLeaderId !== $group->leader_id) {
+            $group->members()->updateExistingPivot($oldLeaderId, ['role' => 'member']);
+        }
+
+        // Ensure new leader is a member with leader role
+        if ($group->leader_id) {
+            if (!$group->members()->where('people.id', $group->leader_id)->exists()) {
+                $group->members()->attach($group->leader_id, [
+                    'role' => 'leader',
+                    'joined_at' => now(),
+                ]);
+            } else {
+                $group->members()->updateExistingPivot($group->leader_id, ['role' => 'leader']);
+            }
         }
 
         return $this->successResponse($request, 'Групу оновлено!', 'groups.show', [$group]);

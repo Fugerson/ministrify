@@ -78,6 +78,7 @@ class RegisterController extends Controller
             // Check if already a member
             if ($existingUser->belongsToChurch($church->id)) {
                 Auth::login($existingUser);
+                $request->session()->regenerate();
                 $existingUser->switchToChurch($church->id);
                 return redirect()->route('dashboard')
                     ->with('info', 'Ви вже є членом цієї церкви.');
@@ -88,6 +89,7 @@ class RegisterController extends Controller
             $existingUser->switchToChurch($church->id);
 
             Auth::login($existingUser);
+            $request->session()->regenerate();
 
             Log::channel('security')->info('Existing user joined new church', [
                 'user_id' => $existingUser->id,
@@ -196,6 +198,7 @@ class RegisterController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+        $request->session()->regenerate();
 
         Log::channel('security')->info('User self-registered and joined church (pending approval)', [
             'user_id' => $user->id,
@@ -344,6 +347,7 @@ class RegisterController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+        $request->session()->regenerate();
 
         AuditLog::create([
             'church_id' => $user->church_id,

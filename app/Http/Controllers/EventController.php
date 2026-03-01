@@ -251,7 +251,7 @@ class EventController extends Controller
             'end_date' => 'nullable|date|after_or_equal:date',
             'notes' => 'nullable|string|max:5000',
             'recurrence_rule' => 'nullable|array',
-            'recurrence_rule.frequency' => 'required_with:recurrence_rule|string',
+            'recurrence_rule.frequency' => 'required_with:recurrence_rule|string|in:daily,weekly,biweekly,monthly',
             'recurrence_rule.days' => 'nullable|array',
             'recurrence_rule.day_of_month' => 'nullable|integer',
             'recurrence_rule.interval' => 'nullable|integer|min:1',

@@ -13,6 +13,7 @@ class EventResponsibilityController extends Controller
 {
     public function store(Request $request, Event $event)
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
@@ -31,6 +32,7 @@ class EventResponsibilityController extends Controller
 
     public function assign(Request $request, EventResponsibility $responsibility)
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
         $event = $responsibility->event;
         $this->authorizeChurch($event);
 
@@ -58,6 +60,7 @@ class EventResponsibilityController extends Controller
 
     public function unassign(Request $request, EventResponsibility $responsibility)
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
         $event = $responsibility->event;
         $this->authorizeChurch($event);
 

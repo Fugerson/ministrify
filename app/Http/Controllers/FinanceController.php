@@ -33,9 +33,12 @@ class FinanceController extends Controller
         $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
         $month = $request->input('month') !== null ? max(0, min(12, (int) $request->get('month'))) : (int) now()->month;
 
-        // Calculate totals using Transaction model
-        $incomeQuery = Transaction::where('church_id', $church->id)->incoming()->completed();
-        $expenseQuery = Transaction::where('church_id', $church->id)->outgoing()->completed();
+        // Calculate totals using Transaction model (exclude exchange/allocation to avoid double-counting)
+        $excludeTypes = [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION];
+        $incomeQuery = Transaction::where('church_id', $church->id)->incoming()->completed()
+            ->whereNotIn('source_type', $excludeTypes);
+        $expenseQuery = Transaction::where('church_id', $church->id)->outgoing()->completed()
+            ->whereNotIn('source_type', $excludeTypes);
 
         if ($month) {
             $incomeQuery->forMonth($year, $month);
@@ -70,9 +73,11 @@ class FinanceController extends Controller
             }
         }
         $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
             ->value('total') ?? 0;
         $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
             ->value('total') ?? 0;
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
@@ -109,9 +114,11 @@ class FinanceController extends Controller
             $balancesByCurrency[$curr] = $initialBal + $income - $expense;
         }
 
-        // Get balances by currency for the period
-        $incomeQueryForCurrency = Transaction::where('church_id', $church->id)->incoming()->completed();
-        $expenseQueryForCurrency = Transaction::where('church_id', $church->id)->outgoing()->completed();
+        // Get balances by currency for the period (exclude exchange/allocation for display)
+        $incomeQueryForCurrency = Transaction::where('church_id', $church->id)->incoming()->completed()
+            ->whereNotIn('source_type', $excludeTypes);
+        $expenseQueryForCurrency = Transaction::where('church_id', $church->id)->outgoing()->completed()
+            ->whereNotIn('source_type', $excludeTypes);
 
         if ($month) {
             $incomeQueryForCurrency->forMonth($year, $month);
@@ -147,7 +154,8 @@ class FinanceController extends Controller
                 $join->on('transaction_categories.id', '=', 'transactions.category_id')
                     ->where('transactions.church_id', $church->id)
                     ->where('transactions.direction', 'in')
-                    ->where('transactions.status', 'completed');
+                    ->where('transactions.status', 'completed')
+                    ->whereNull('transactions.deleted_at');
                 if ($month) {
                     $join->whereYear('transactions.date', $year)
                         ->whereMonth('transactions.date', $month);
@@ -169,7 +177,8 @@ class FinanceController extends Controller
                 $join->on('transaction_categories.id', '=', 'transactions.category_id')
                     ->where('transactions.church_id', $church->id)
                     ->where('transactions.direction', 'out')
-                    ->where('transactions.status', 'completed');
+                    ->where('transactions.status', 'completed')
+                    ->whereNull('transactions.deleted_at');
                 if ($month) {
                     $join->whereYear('transactions.date', $year)
                         ->whereMonth('transactions.date', $month);
@@ -190,7 +199,8 @@ class FinanceController extends Controller
                 $join->on('ministries.id', '=', 'transactions.ministry_id')
                     ->where('transactions.church_id', $church->id)
                     ->where('transactions.direction', 'out')
-                    ->where('transactions.status', 'completed');
+                    ->where('transactions.status', 'completed')
+                    ->whereNull('transactions.deleted_at');
                 if ($month) {
                     $join->whereYear('transactions.date', $year)
                         ->whereMonth('transactions.date', $month);
@@ -702,6 +712,18 @@ class FinanceController extends Controller
         }
 
         $validated['category_id'] = $categoryId;
+
+        // Recalculate source_type based on new category
+        $category = TransactionCategory::find($categoryId);
+        $sourceType = 'income';
+        if ($category->is_tithe) {
+            $sourceType = Transaction::SOURCE_TITHE;
+        } elseif ($category->is_offering) {
+            $sourceType = Transaction::SOURCE_OFFERING;
+        } elseif ($category->is_donation) {
+            $sourceType = Transaction::SOURCE_DONATION;
+        }
+        $validated['source_type'] = $sourceType;
 
         $validated['is_anonymous'] = $request->boolean('is_anonymous');
         if ($validated['is_anonymous']) {
@@ -1765,9 +1787,11 @@ class FinanceController extends Controller
     private function getMonthlyData(int $churchId, int $year): array
     {
         // Optimized: single query with groupBy instead of 24 queries
+        // Exclude exchange/allocation to avoid inflating income/expense
         $monthlyRaw = Transaction::where('church_id', $churchId)
             ->completed()
             ->whereYear('date', $year)
+            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->selectRaw('MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('month', 'direction')
             ->get();

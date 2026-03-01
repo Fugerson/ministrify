@@ -241,6 +241,7 @@ class BoardController extends Controller
     public function destroy(Request $request, Board $board)
     {
         $this->authorizeBoard($board);
+        abort_unless(auth()->user()->canDelete('boards'), 403);
         $board->delete();
 
         return $this->successResponse($request, 'Дошку видалено.', 'boards.index');
@@ -275,6 +276,7 @@ class BoardController extends Controller
     // Column Management
     public function storeColumn(Request $request, Board $board)
     {
+        abort_unless(auth()->user()->canEdit('boards'), 403);
         $this->authorizeBoard($board);
 
         $validated = $request->validate([
@@ -292,6 +294,7 @@ class BoardController extends Controller
 
     public function updateColumn(Request $request, BoardColumn $column)
     {
+        abort_unless(auth()->user()->canEdit('boards'), 403);
         $this->authorizeBoard($column->board);
 
         $validated = $request->validate([
@@ -307,6 +310,7 @@ class BoardController extends Controller
 
     public function destroyColumn(Request $request, BoardColumn $column)
     {
+        abort_unless(auth()->user()->canDelete('boards'), 403);
         $this->authorizeBoard($column->board);
         $board = $column->board;
 
@@ -344,6 +348,10 @@ class BoardController extends Controller
     public function storeCard(Request $request, BoardColumn $column)
     {
         $this->authorizeBoard($column->board);
+
+        if ($column->isAtLimit()) {
+            return response()->json(['error' => 'Ця колонка досягла ліміту карток.'], 422);
+        }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -710,6 +718,7 @@ class BoardController extends Controller
     public function destroyCard(Request $request, BoardCard $card)
     {
         $this->authorizeCardAccess($card);
+        abort_unless(auth()->user()->canDelete('boards'), 403);
         $board = $card->column->board;
         $card->delete();
 
@@ -729,6 +738,11 @@ class BoardController extends Controller
         $targetColumn = BoardColumn::find($validated['column_id']);
         if (!$targetColumn) {
             abort(404);
+        }
+
+        // Check card limit on target column (skip if moving within same column)
+        if ($targetColumn->id !== $card->board_column_id && $targetColumn->isAtLimit()) {
+            return response()->json(['error' => 'Цільова колонка досягла ліміту карток.'], 422);
         }
 
         // Cross-board move: card from ministry board shown on main board via show_in_general
@@ -966,7 +980,7 @@ class BoardController extends Controller
 
         $validated = $request->validate([
             'content' => 'nullable|string|max:10000',
-            'files.*' => 'file|max:10240',
+            'files.*' => 'file|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip,csv|max:10240',
         ]);
 
         $oldContent = $comment->content;
@@ -1008,7 +1022,7 @@ class BoardController extends Controller
                     'name' => $att['name'],
                     'url' => \Storage::url($att['path']),
                     'size' => isset($att['size']) ? number_format($att['size'] / 1024, 1) . ' KB' : '',
-                    'is_image' => str_starts_with($att['mime'] ?? '', 'image/'),
+                    'is_image' => str_starts_with($att['mime_type'] ?? '', 'image/'),
                 ];
             })->toArray(),
         ]);

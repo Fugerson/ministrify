@@ -64,9 +64,10 @@ class BudgetItem extends Model
      */
     public function getActualSpending(?float $autoMatchedAmount = null): float
     {
-        // Direct transactions (explicitly linked to this budget item)
+        // Direct transactions (explicitly linked to this budget item, exclude allocations)
         $direct = (float) Transaction::where('budget_item_id', $this->id)
             ->where('direction', Transaction::DIRECTION_OUT)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
             ->completed()
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
             ->value('total') ?? 0;

@@ -24,14 +24,8 @@ class SetLocale
 
         // 1. Cookie (set by JavaScript when user clicks language button)
         $cookie = $request->cookie('locale');
-        \Log::debug('🔍 SetLocale checking cookie', [
-            'cookie_value' => $cookie,
-            'all_cookies' => $request->cookies->all(),
-            'is_available' => $cookie && in_array($cookie, $available),
-        ]);
 
         if ($cookie && in_array($cookie, $available)) {
-            \Log::info('✅ SetLocale using cookie locale: ' . $cookie);
             return $cookie;
         }
 
@@ -39,13 +33,11 @@ class SetLocale
         if ($request->user()) {
             $userLocale = $request->user()->preferences['locale'] ?? null;
             if ($userLocale && in_array($userLocale, $available)) {
-                \Log::info('✅ SetLocale using user preference locale: ' . $userLocale);
                 return $userLocale;
             }
         }
 
         // 3. Default
-        \Log::info('ℹ️ SetLocale using default locale: uk');
         return config('app.locale', 'uk');
     }
 }

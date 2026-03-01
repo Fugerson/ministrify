@@ -37,9 +37,9 @@ class DonationCampaign extends Model
         return $this->belongsTo(Church::class);
     }
 
-    public function donations()
+    public function transactions()
     {
-        return $this->hasMany(Donation::class, 'campaign_id');
+        return $this->hasMany(Transaction::class, 'campaign_id');
     }
 
     public function getRaisedAmountAttribute(): float
@@ -49,19 +49,21 @@ class DonationCampaign extends Model
             return (float) $this->collected_amount;
         }
 
-        return $this->donations()
+        return (float) $this->transactions()
             ->where('status', 'completed')
-            ->sum('amount');
+            ->where('direction', 'in')
+            ->sum('amount_uah');
     }
 
     /**
-     * Update collected amount from donations
+     * Update collected amount from transactions
      */
     public function updateCollectedAmount(): void
     {
-        $total = $this->donations()
+        $total = $this->transactions()
             ->where('status', 'completed')
-            ->sum('amount');
+            ->where('direction', 'in')
+            ->sum('amount_uah');
 
         $this->update(['collected_amount' => $total]);
     }
@@ -86,6 +88,6 @@ class DonationCampaign extends Model
             return null;
         }
 
-        return max(0, now()->diffInDays($this->end_date, false));
+        return (int) max(0, now()->diffInDays($this->end_date, false));
     }
 }

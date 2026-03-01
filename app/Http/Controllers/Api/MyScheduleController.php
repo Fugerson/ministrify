@@ -116,7 +116,7 @@ class MyScheduleController extends Controller
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        $responsibility->update(['status' => 'confirmed']);
+        $responsibility->confirm();
 
         return response()->json([
             'success' => true,
@@ -145,7 +145,7 @@ class MyScheduleController extends Controller
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        $responsibility->update(['status' => 'declined']);
+        $responsibility->decline();
 
         return response()->json([
             'success' => true,

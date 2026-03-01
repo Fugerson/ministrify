@@ -40,16 +40,17 @@ class GalleryController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'event_date' => 'nullable|date',
-            'cover_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
+            'cover_image' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'is_public' => 'boolean',
         ]);
 
-        if ($request->hasFile('cover_photo')) {
-            $stored = ImageService::storeWithHeicConversion($request->file('cover_photo'), "churches/{$church->id}/galleries");
-            $validated['cover_photo'] = $stored['path'];
+        if ($request->hasFile('cover_image')) {
+            $stored = ImageService::storeWithHeicConversion($request->file('cover_image'), "churches/{$church->id}/galleries");
+            $validated['cover_image'] = $stored['path'];
         }
 
         $validated['church_id'] = $church->id;
+        $validated['created_by'] = auth()->id();
         $validated['sort_order'] = $church->galleries()->max('sort_order') + 1;
 
         $gallery = Gallery::create($validated);
@@ -87,16 +88,16 @@ class GalleryController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'event_date' => 'nullable|date',
-            'cover_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
+            'cover_image' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'is_public' => 'boolean',
         ]);
 
-        if ($request->hasFile('cover_photo')) {
-            if ($gallery->cover_photo) {
-                Storage::disk('public')->delete($gallery->cover_photo);
+        if ($request->hasFile('cover_image')) {
+            if ($gallery->cover_image) {
+                Storage::disk('public')->delete($gallery->cover_image);
             }
-            $stored = ImageService::storeWithHeicConversion($request->file('cover_photo'), "churches/{$church->id}/galleries");
-            $validated['cover_photo'] = $stored['path'];
+            $stored = ImageService::storeWithHeicConversion($request->file('cover_image'), "churches/{$church->id}/galleries");
+            $validated['cover_image'] = $stored['path'];
         }
 
         $gallery->update($validated);
@@ -122,8 +123,8 @@ class GalleryController extends Controller
             }
         }
 
-        if ($gallery->cover_photo) {
-            Storage::disk('public')->delete($gallery->cover_photo);
+        if ($gallery->cover_image) {
+            Storage::disk('public')->delete($gallery->cover_image);
         }
 
         $gallery->photos()->delete();
@@ -237,7 +238,7 @@ class GalleryController extends Controller
     {
         $this->authorize('update', $gallery);
 
-        $gallery->update(['cover_photo' => $photo->file_path]);
+        $gallery->update(['cover_image' => $photo->file_path]);
 
         return $this->successResponse($request, 'Обкладинку оновлено');
     }

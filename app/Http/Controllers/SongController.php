@@ -12,6 +12,7 @@ class SongController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->canView('ministries'), 403);
         $church = $this->getCurrentChurch();
 
         // Load all songs for client-side filtering
@@ -33,6 +34,7 @@ class SongController extends Controller
 
     public function create()
     {
+        abort_unless(auth()->user()->canCreate('ministries'), 403);
         $church = $this->getCurrentChurch();
 
         // Get existing artists for autocomplete
@@ -277,6 +279,7 @@ class SongController extends Controller
     public function addToEvent(Request $request, Song $song)
     {
         $this->authorizeChurch($song);
+        abort_unless(auth()->user()->canEdit('events'), 403);
 
         $validated = $request->validate([
             'event_id' => 'required|exists:events,id',
@@ -316,6 +319,7 @@ class SongController extends Controller
     public function updateSetlistOrder(Request $request, Event $event)
     {
         $this->authorizeChurch($event);
+        abort_unless(auth()->user()->canEdit('events'), 403);
 
         $validated = $request->validate([
             'songs' => 'required|array',
@@ -332,6 +336,7 @@ class SongController extends Controller
     public function removeFromEvent(Request $request, Event $event, Song $song)
     {
         $this->authorizeChurch($event);
+        abort_unless(auth()->user()->canEdit('events'), 403);
 
         $event->songs()->detach($song->id);
 
@@ -340,6 +345,7 @@ class SongController extends Controller
 
     public function importPage()
     {
+        abort_unless(auth()->user()->canCreate('ministries'), 403);
         return view('songs.import');
     }
 
@@ -380,6 +386,8 @@ class SongController extends Controller
 
     public function importProcess(Request $request)
     {
+        abort_unless(auth()->user()->canCreate('ministries'), 403);
+
         $request->validate([
             'file' => 'required|file|mimes:csv,txt|max:10240',
             'mappings' => 'required|array',

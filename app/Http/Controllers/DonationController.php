@@ -224,7 +224,7 @@ class DonationController extends Controller
         $donations = Transaction::where('church_id', $church->id)
             ->where('source_type', Transaction::SOURCE_DONATION)
             ->with(['campaign'])
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('date')
             ->paginate(20);
 
         // Statistics
@@ -287,6 +287,8 @@ class DonationController extends Controller
      */
     public function storeCampaign(Request $request)
     {
+        abort_unless(auth()->user()->hasPermission('finances', 'create'), 403);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',

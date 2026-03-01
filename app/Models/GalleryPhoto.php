@@ -15,6 +15,8 @@ class GalleryPhoto extends Model
         'gallery_id',
         'file_path',
         'thumbnail_path',
+        'original_filename',
+        'mime_type',
         'caption',
         'alt_text',
         'width',

@@ -379,6 +379,7 @@ class PersonController extends Controller
             ]);
 
         $activities = $attendanceRecords->merge($assignmentRecords)
+            ->filter(fn($a) => $a['date'] !== null)
             ->sortByDesc('date')
             ->take(20)
             ->values();
@@ -398,7 +399,7 @@ class PersonController extends Controller
             $attendanceChartData[] = [
                 'week' => $weekStart->format('d.m'),
                 'count' => $allAttendanceRecords->filter(
-                    fn($r) => $r->attendance->date->between($weekStart, $weekEnd)
+                    fn($r) => $r->attendance?->date?->between($weekStart, $weekEnd)
                 )->count(),
             ];
         }

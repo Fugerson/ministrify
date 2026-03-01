@@ -221,6 +221,7 @@ class LandingController extends Controller
         );
 
         auth()->login($user);
+        request()->session()->regenerate();
 
         return redirect()->route('dashboard')->with('success', 'Вітаємо! Ваша церква зареєстрована.');
     }

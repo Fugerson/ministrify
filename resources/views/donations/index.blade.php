@@ -93,7 +93,7 @@
                             @forelse($donations as $donation)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $donation->created_at->format('d.m.Y') }}
+                                        {{ ($donation->date ?? $donation->created_at)->format('d.m.Y') }}
                                     </td>
                                     <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                                         <span class="font-semibold text-green-600 dark:text-green-400">{{ $donation->formatted_amount }}</span>
