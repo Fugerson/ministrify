@@ -31,9 +31,16 @@
                             <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
                         </template>
                     </div>
-                    <div>
+                    <div class="relative">
                         <input type="text" name="icon" placeholder="Емодзі" maxlength="10"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                               class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                               oninput="this.nextElementSibling.style.display = this.value ? '' : 'none'">
+                        <button type="button" style="display:none"
+                                onclick="const i=this.previousElementSibling; i.value=''; i.focus(); this.style.display='none'"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                                title="Очистити">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
                     <div>
                         <input type="color" name="color" value="#3B82F6"
@@ -88,9 +95,16 @@
                                     <input type="text" name="name" value="{{ $category->name }}" required
                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                 </div>
-                                <div>
+                                <div class="relative">
                                     <input type="text" name="icon" value="{{ $category->icon_emoji }}" maxlength="10"
-                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                           class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                                           oninput="this.nextElementSibling.style.display = this.value ? '' : 'none'">
+                                    <button type="button" {!! $category->icon_emoji ? '' : 'style="display:none"' !!}
+                                            onclick="const i=this.previousElementSibling; i.value=''; i.focus(); this.style.display='none'"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                                            title="Очистити">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
                                 </div>
                                 <div>
                                     <input type="color" name="color" value="{{ $category->color }}"

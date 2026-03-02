@@ -3974,7 +3974,7 @@
                                             <div class="flex items-center gap-3">
                                                 <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base"
                                                      :style="`background-color: ${role.color}20; color: ${role.color}`"
-                                                     x-text="role.icon"></div>
+                                                     x-text="role.icon || role.name.charAt(0)"></div>
                                                 <span class="font-medium text-gray-900 dark:text-white text-sm" x-text="role.name"></span>
                                             </div>
                                             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -4012,8 +4012,13 @@
                                     <input type="text" x-model="newName" placeholder="Назва ролі (напр. Камера, Звук)"
                                            @keydown.enter.prevent="addRole(newName, newIcon, newColor)"
                                            class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <input type="text" x-model="newIcon" placeholder="🔧" maxlength="5"
-                                           class="w-14 px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                    <div class="relative w-14">
+                                        <input type="text" x-model="newIcon" placeholder="🔧" maxlength="5"
+                                               class="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                        <button type="button" x-show="newIcon" @click="newIcon = ''"
+                                                class="absolute -right-1 -top-1 w-4 h-4 bg-gray-300 dark:bg-gray-500 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] leading-none transition-colors"
+                                                title="Очистити">×</button>
+                                    </div>
                                     <input type="color" x-model="newColor"
                                            class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <button type="button" @click="addRole(newName, newIcon, newColor)"
@@ -4055,8 +4060,17 @@
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Іконка</label>
-                                            <input type="text" x-model="editIcon" maxlength="5"
-                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                            <div class="relative">
+                                                <input type="text" x-model="editIcon" maxlength="5"
+                                                       class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                                <button type="button" x-show="editIcon" @click="editIcon = ''"
+                                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                                                        title="Очистити іконку">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
@@ -4787,7 +4801,7 @@ function ministryRolesManager() {
         storeUrl: '',
         baseUrl: '',
         newName: '',
-        newIcon: '🔧',
+        newIcon: '',
         newColor: '#3b82f6',
         loading: false,
         showEditModal: false,
@@ -4812,7 +4826,7 @@ function ministryRolesManager() {
 
             const formData = new FormData();
             formData.append('name', name);
-            formData.append('icon', icon || '🔧');
+            formData.append('icon', icon || '');
             formData.append('color', color || '#3b82f6');
 
             try {
@@ -4827,9 +4841,9 @@ function ministryRolesManager() {
 
                 if (res.ok) {
                     const data = await res.json();
-                    this.roles.push({id: data.id, name, icon: icon || '🔧', color: color || '#3b82f6'});
+                    this.roles.push({id: data.id, name, icon: icon || '', color: color || '#3b82f6'});
                     this.newName = '';
-                    this.newIcon = '🔧';
+                    this.newIcon = '';
                     this.newColor = '#3b82f6';
                 }
             } catch (e) {
@@ -4854,7 +4868,7 @@ function ministryRolesManager() {
             const formData = new FormData();
             formData.append('_method', 'PUT');
             formData.append('name', this.editName);
-            formData.append('icon', this.editIcon || '🔧');
+            formData.append('icon', this.editIcon || '');
             formData.append('color', this.editColor || '#3b82f6');
 
             try {
@@ -4871,7 +4885,7 @@ function ministryRolesManager() {
                     const role = this.roles.find(r => r.id === this.editId);
                     if (role) {
                         role.name = this.editName;
-                        role.icon = this.editIcon || '🔧';
+                        role.icon = this.editIcon || '';
                         role.color = this.editColor || '#3b82f6';
                     }
                     this.showEditModal = false;

@@ -1531,8 +1531,8 @@ class MinistryController extends Controller
         $role = MinistryRole::create([
             'ministry_id' => $ministry->id,
             'name' => $validated['name'],
-            'icon' => $validated['icon'] ?? null,
-            'color' => $validated['color'] ?? null,
+            'icon' => !empty($validated['icon']) ? $validated['icon'] : null,
+            'color' => !empty($validated['color']) ? $validated['color'] : null,
             'sort_order' => $maxOrder + 1,
         ]);
 
@@ -1554,6 +1554,8 @@ class MinistryController extends Controller
             'color' => 'nullable|string|max:20',
         ]);
 
+        $validated['icon'] = !empty($validated['icon']) ? $validated['icon'] : null;
+        $validated['color'] = !empty($validated['color']) ? $validated['color'] : null;
         $role->update($validated);
 
         return $this->successResponse($request, 'Роль оновлено');
