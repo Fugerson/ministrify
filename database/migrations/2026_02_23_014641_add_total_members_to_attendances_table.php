@@ -16,15 +16,17 @@ return new class extends Migration
         }
 
         // Backfill existing group attendances with current member count using raw SQL
-        DB::statement("
-            UPDATE attendances a
-            SET a.total_members = (
-                SELECT COUNT(*) FROM group_person gp WHERE gp.group_id = a.attendable_id
-            )
-            WHERE a.type = 'group'
-              AND a.attendable_type = 'App\\\\Models\\\\Group'
-              AND a.attendable_id IS NOT NULL
-        ");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("
+                UPDATE attendances a
+                SET a.total_members = (
+                    SELECT COUNT(*) FROM group_person gp WHERE gp.group_id = a.attendable_id
+                )
+                WHERE a.type = 'group'
+                  AND a.attendable_type = 'App\\\\Models\\\\Group'
+                  AND a.attendable_id IS NOT NULL
+            ");
+        }
     }
 
     public function down(): void
