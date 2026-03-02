@@ -26,6 +26,7 @@ services:
       - .:/var/www/html
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
       - ./docker/nginx/ssl:/etc/nginx/ssl
+      - ./docker/nginx/errors/502.html:/usr/share/nginx/html/maintenance.html:ro
     networks:
       - ministrify
     depends_on:
