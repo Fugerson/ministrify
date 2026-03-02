@@ -3955,7 +3955,7 @@
                     <hr class="border-gray-200 dark:border-gray-700">
 
                     <!-- Ministry Roles Settings (AJAX) -->
-                    <div x-data="ministryRolesManager()" x-init="init(@js($ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'icon' => $r->icon ?? '🔧', 'color' => $r->color ?? '#3b82f6'])->values()), '{{ route('ministries.ministry-roles.store', $ministry) }}', '{{ url('ministries/' . $ministry->id . '/ministry-roles') }}')">
+                    <div x-data="ministryRolesManager()" x-init="init(@js($ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'icon' => $r->icon ?? '', 'color' => $r->color ?? '#3b82f6'])->values()), '{{ route('ministries.ministry-roles.store', $ministry) }}', '{{ url('ministries/' . $ministry->id . '/ministry-roles') }}')">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ролі служіння</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             @if($ministry->is_worship_ministry)
