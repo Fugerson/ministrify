@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class RegisterController extends Controller
 {
@@ -123,12 +124,45 @@ class RegisterController extends Controller
             $oldUser->forceDelete();
         }
 
-        $user = DB::transaction(function () use ($request, $church, $volunteerRole) {
-            // Parse name into first_name and last_name
-            $nameParts = explode(' ', $request->name, 2);
-            $firstName = $nameParts[0];
-            $lastName = $nameParts[1] ?? '';
+        // Pre-check: find existing Person and block if already linked to a user
+        $nameParts = explode(' ', $request->name, 2);
+        $firstName = $nameParts[0];
+        $lastName = $nameParts[1] ?? '';
 
+        $existingPerson = Person::where('church_id', $church->id)
+            ->where('email', $request->email)
+            ->first();
+
+        if ($existingPerson && $existingPerson->user_id) {
+            throw ValidationException::withMessages([
+                'email' => __('auth.person_already_registered_email'),
+            ]);
+        }
+
+        if (!$existingPerson && $firstName && $lastName) {
+            $existingPerson = Person::where('church_id', $church->id)
+                ->where('first_name', $firstName)
+                ->where('last_name', $lastName)
+                ->first();
+
+            if ($existingPerson && $existingPerson->user_id) {
+                throw ValidationException::withMessages([
+                    'name' => __('auth.person_already_registered_name'),
+                ]);
+            }
+        }
+
+        if (!$existingPerson && $request->phone) {
+            $existingPerson = Person::findByPhoneInChurch($request->phone, $church->id, false);
+
+            if ($existingPerson && $existingPerson->user_id) {
+                throw ValidationException::withMessages([
+                    'phone' => __('auth.person_already_registered_phone'),
+                ]);
+            }
+        }
+
+        $user = DB::transaction(function () use ($request, $church, $volunteerRole, $existingPerson, $firstName, $lastName) {
             // Create user with PENDING volunteer role approval
             // Don't assign church_role_id yet - set to pending approval instead
             $user = User::create([
@@ -141,25 +175,7 @@ class RegisterController extends Controller
                 'onboarding_completed' => true,
             ]);
 
-            // Find existing Person by email or create new
-            $person = Person::where('church_id', $church->id)
-                ->where('email', $request->email)
-                ->whereNull('user_id')
-                ->first();
-
-            // Fallback: try to find by first_name + last_name
-            if (!$person && $firstName && $lastName) {
-                $person = Person::where('church_id', $church->id)
-                    ->where('first_name', $firstName)
-                    ->where('last_name', $lastName)
-                    ->whereNull('user_id')
-                    ->first();
-            }
-
-            // Fallback: try to find by phone number
-            if (!$person && $request->phone) {
-                $person = Person::findByPhoneInChurch($request->phone, $church->id);
-            }
+            $person = $existingPerson;
 
             if ($person) {
                 $person->update([

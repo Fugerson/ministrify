@@ -86,6 +86,34 @@ class PersonMergeService
             }
         }
 
+        // Strategy 4: Similar email (same prefix before @ or Levenshtein ≤ 2)
+        $emailPeople = $people->filter(fn($p) => !empty($p->email));
+        $emailArray = $emailPeople->values()->all();
+        for ($i = 0; $i < count($emailArray); $i++) {
+            for ($j = $i + 1; $j < count($emailArray); $j++) {
+                $emailA = mb_strtolower($emailArray[$i]->email);
+                $emailB = mb_strtolower($emailArray[$j]->email);
+
+                if ($emailA === $emailB) {
+                    continue; // Already caught by Strategy 2
+                }
+
+                $prefixA = strstr($emailA, '@', true);
+                $prefixB = strstr($emailB, '@', true);
+
+                $isSimilar = ($prefixA && $prefixB && $prefixA === $prefixB)
+                    || levenshtein($emailA, $emailB) <= 2;
+
+                if ($isSimilar) {
+                    $key = min($emailArray[$i]->id, $emailArray[$j]->id) . '-' . max($emailArray[$i]->id, $emailArray[$j]->id);
+                    if (!isset($seen[$key])) {
+                        $seen[$key] = ['personA' => $emailArray[$i], 'personB' => $emailArray[$j], 'reasons' => []];
+                    }
+                    $seen[$key]['reasons'][] = 'similar_email';
+                }
+            }
+        }
+
         // Deduplicate reasons
         foreach ($seen as &$pair) {
             $pair['reasons'] = array_unique($pair['reasons']);

@@ -1115,9 +1115,10 @@
                                           :class="{
                                               'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300': reason === 'phone',
                                               'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300': reason === 'email',
-                                              'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300': reason === 'name'
+                                              'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300': reason === 'name',
+                                              'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300': reason === 'similar_email'
                                           }"
-                                          x-text="reason === 'phone' ? '{{ __('app.duplicates_reason_phone') }}' : (reason === 'email' ? '{{ __('app.duplicates_reason_email') }}' : '{{ __('app.duplicates_reason_name') }}')">
+                                          x-text="reason === 'phone' ? '{{ __('app.duplicates_reason_phone') }}' : (reason === 'email' ? '{{ __('app.duplicates_reason_email') }}' : (reason === 'similar_email' ? '{{ __('app.duplicates_reason_similar_email') }}' : '{{ __('app.duplicates_reason_name') }}'))">
                                     </span>
                                 </template>
                             </div>

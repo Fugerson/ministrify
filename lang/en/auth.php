@@ -95,4 +95,7 @@ return [
     'first_select_church' => 'Please select a church first',
     'join_with_google' => 'Join with Google',
     'already_have_account_q' => 'Already have an account?',
+    'person_already_registered_email' => 'A person with this email is already registered. Try logging in or resetting your password.',
+    'person_already_registered_name' => 'A person with this name is already registered. Try logging in.',
+    'person_already_registered_phone' => 'A person with this phone number is already registered. Try logging in.',
 ];

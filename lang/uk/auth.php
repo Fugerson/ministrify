@@ -95,4 +95,7 @@ return [
     'first_select_church' => 'Спочатку оберіть церкву',
     'join_with_google' => 'Приєднатися з Google',
     'already_have_account_q' => 'Вже маєте акаунт?',
+    'person_already_registered_email' => 'Людина з цим email вже зареєстрована. Спробуйте увійти або відновити пароль.',
+    'person_already_registered_name' => 'Людина з таким ім\'ям вже зареєстрована. Спробуйте увійти.',
+    'person_already_registered_phone' => 'Людина з цим номером вже зареєстрована. Спробуйте увійти.',
 ];

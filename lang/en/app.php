@@ -814,6 +814,7 @@ return [
     'duplicates_reason_phone' => 'Phone',
     'duplicates_reason_email' => 'Email',
     'duplicates_reason_name' => 'Name',
+    'duplicates_reason_similar_email' => 'Similar email',
     'duplicates_keep_record' => 'Keep this record',
     'duplicates_merged_success' => 'Records merged successfully',
     'duplicates_merge_confirm' => 'Data from the other record will be transferred to the selected one. The other record will be deleted. Continue?',

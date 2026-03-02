@@ -811,6 +811,7 @@ return [
     'duplicates_reason_phone' => 'Телефон',
     'duplicates_reason_email' => 'Email',
     'duplicates_reason_name' => 'Ім\'я',
+    'duplicates_reason_similar_email' => 'Схожий email',
     'duplicates_keep_record' => 'Залишити цей запис',
     'duplicates_merged_success' => 'Записи успішно об\'єднано',
     'duplicates_merge_confirm' => 'Дані з другого запису будуть перенесені до обраного. Другий запис буде видалено. Продовжити?',
