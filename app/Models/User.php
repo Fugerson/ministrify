@@ -392,8 +392,20 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        if ($this->isLeader() && $this->person) {
-            return $ministry->leader_id === $this->person->id;
+        if ($this->person) {
+            // Ministry leader can always manage their ministry
+            if ($ministry->leader_id === $this->person->id) {
+                return true;
+            }
+
+            // Co-leaders can manage the ministry too
+            $pivotRole = $ministry->members()
+                ->where('person_id', $this->person->id)
+                ->first()?->pivot?->role;
+
+            if ($pivotRole === 'co-leader') {
+                return true;
+            }
         }
 
         return false;
