@@ -1118,7 +1118,7 @@
                                               'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300': reason === 'name',
                                               'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300': reason === 'similar_email'
                                           }"
-                                          x-text="reason === 'phone' ? '{{ __('app.duplicates_reason_phone') }}' : (reason === 'email' ? '{{ __('app.duplicates_reason_email') }}' : (reason === 'similar_email' ? '{{ __('app.duplicates_reason_similar_email') }}' : '{{ __('app.duplicates_reason_name') }}'))">
+                                          x-text="({phone: '{{ addslashes(__('app.duplicates_reason_phone')) }}', email: '{{ addslashes(__('app.duplicates_reason_email')) }}', similar_email: '{{ addslashes(__('app.duplicates_reason_similar_email')) }}', name: '{{ addslashes(__('app.duplicates_reason_name')) }}'})[reason] || reason">
                                     </span>
                                 </template>
                             </div>
