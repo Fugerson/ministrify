@@ -188,11 +188,17 @@
                         </a>
                     @endif
                     @if($person->telegram_username)
-                        <a href="https://t.me/{{ ltrim($person->telegram_username, '@') }}" target="_blank" class="p-3 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors">
+                        <a href="https://t.me/{{ ltrim($person->telegram_username, '@') }}" target="_blank" class="p-3 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" title="Telegram: {{ '@' . ltrim($person->telegram_username, '@') }}">
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.535.223l.19-2.72 4.94-4.463c.215-.19-.047-.295-.334-.105l-6.11 3.85-2.63-.82c-.57-.18-.583-.57.12-.847l10.27-3.96c.475-.18.89.115.735.84z"/>
                             </svg>
                         </a>
+                    @elseif($person->telegram_chat_id)
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-400 dark:text-blue-500 rounded-xl" title="Telegram бот підключено">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.535.223l.19-2.72 4.94-4.463c.215-.19-.047-.295-.334-.105l-6.11 3.85-2.63-.82c-.57-.18-.583-.57.12-.847l10.27-3.96c.475-.18.89.115.735.84z"/>
+                            </svg>
+                        </div>
                     @endif
                     @if($person->email)
                         <a href="mailto:{{ $person->email }}" class="p-3 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-xl hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors">
@@ -268,7 +274,15 @@
             <!-- Additional Admin Fields -->
             <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Telegram</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+                        Telegram
+                        @if($person->telegram_chat_id)
+                            <span class="inline-flex items-center gap-0.5 text-green-600 dark:text-green-400" title="Бот підключено (chat_id: {{ $person->telegram_chat_id }})">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span class="text-[10px] font-medium">бот</span>
+                            </span>
+                        @endif
+                    </p>
                     <div class="flex items-center">
                         <span class="text-gray-400 text-sm">@</span>
                         <input type="text" name="telegram_username" value="{{ old('telegram_username', $person->telegram_username) }}"
