@@ -45,11 +45,9 @@
                 </div>
 
                 <div class="mt-4">
-                    @if($isLocked)
-                        <p class="text-sm text-gray-400 dark:text-gray-500">Тільки для учасників</p>
-                    @else
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Учасників: {{ $ministry->members->count() }}</p>
-                    @endif
+                    <p class="text-sm {{ $isLocked ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400' }}">
+                        Учасників: {{ $ministry->members->count() }}
+                    </p>
                 </div>
             </div>
 

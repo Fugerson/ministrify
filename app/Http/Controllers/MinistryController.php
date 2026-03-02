@@ -34,16 +34,11 @@ class MinistryController extends Controller
         $church = $this->getCurrentChurch();
         $user = auth()->user();
 
+        // Show ALL ministries — locked ones display with a lock icon in the view
         $ministries = Ministry::where('church_id', $church->id)
             ->with(['leader', 'members', 'positions'])
+            ->orderBy('name')
             ->get();
-
-        // Filter ministries based on visibility settings
-        if (!$user->isAdmin()) {
-            $ministries = $ministries->filter(function ($ministry) {
-                return $ministry->canAccess();
-            });
-        }
 
         return view('ministries.index', compact('ministries'));
     }
