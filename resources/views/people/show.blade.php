@@ -188,16 +188,18 @@
                         </a>
                     @endif
                     @if($person->telegram_username)
-                        <a href="https://t.me/{{ ltrim($person->telegram_username, '@') }}" target="_blank" class="p-3 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" title="Telegram: {{ '@' . ltrim($person->telegram_username, '@') }}">
+                        <a href="https://t.me/{{ ltrim($person->telegram_username, '@') }}" target="_blank" class="p-3 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" title="Написати в Telegram: {{ '@' . ltrim($person->telegram_username, '@') }}">
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.535.223l.19-2.72 4.94-4.463c.215-.19-.047-.295-.334-.105l-6.11 3.85-2.63-.82c-.57-.18-.583-.57.12-.847l10.27-3.96c.475-.18.89.115.735.84z"/>
                             </svg>
                         </a>
-                    @elseif($person->telegram_chat_id)
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-400 dark:text-blue-500 rounded-xl" title="Telegram бот підключено">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.535.223l.19-2.72 4.94-4.463c.215-.19-.047-.295-.334-.105l-6.11 3.85-2.63-.82c-.57-.18-.583-.57.12-.847l10.27-3.96c.475-.18.89.115.735.84z"/>
+                    @endif
+                    @if($person->telegram_chat_id)
+                        <div class="relative p-3 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-xl" title="Бот підключено — сповіщення та запити підтвердження">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
+                            <span class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
                         </div>
                     @endif
                     @if($person->email)
