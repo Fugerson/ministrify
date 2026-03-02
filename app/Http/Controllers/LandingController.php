@@ -141,7 +141,7 @@ class LandingController extends Controller
             'church_name' => 'required|string|max:255',
             'city' => 'required|string|max:100',
             'admin_name' => 'required|string|max:100',
-            'email' => ['required', 'email', Rule::unique('users')->whereNull('deleted_at')],
+            'email' => ['required', 'email:rfc,dns', Rule::unique('users')->whereNull('deleted_at')],
             'phone' => 'nullable|string|max:20',
             'password' => 'required|min:8|confirmed',
         ]);

@@ -49,7 +49,7 @@ class RegisterController extends Controller
         $request->validate([
             'church_id' => ['required', 'exists:churches,id'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'confirmed', new SecurePassword],
         ]);
@@ -231,7 +231,7 @@ class RegisterController extends Controller
             'church_name' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->whereNull('deleted_at')],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users')->whereNull('deleted_at')],
             'password' => ['required', 'string', 'confirmed', new SecurePassword],
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
