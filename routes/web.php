@@ -316,6 +316,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::patch('ministries/{ministry}/members/{person}/role', [MinistryController::class, 'updateMemberRole'])->name('ministries.members.role');
     Route::post('ministries/{ministry}/toggle-privacy', [MinistryController::class, 'togglePrivacy'])->name('ministries.toggle-privacy');
     Route::post('ministries/{ministry}/update-visibility', [MinistryController::class, 'updateVisibility'])->name('ministries.update-visibility');
+    Route::put('ministries/{ministry}/song-board-tags', [MinistryController::class, 'updateSongBoardTags'])->name('ministries.song-board-tags');
     Route::post('ministries/{ministry}/worship-roles', [MinistryController::class, 'storeWorshipRole'])->name('ministries.worship-roles.store');
     Route::put('ministries/{ministry}/worship-roles/{role}', [MinistryController::class, 'updateWorshipRole'])->name('ministries.worship-roles.update');
     Route::delete('ministries/{ministry}/worship-roles/{role}', [MinistryController::class, 'destroyWorshipRole'])->name('ministries.worship-roles.destroy');
@@ -614,7 +615,6 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
             Route::put('menu-position', [SettingsController::class, 'updateMenuPosition'])->name('menu-position');
             Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
             Route::put('currencies', [SettingsController::class, 'updateCurrencies'])->name('currencies');
-            Route::put('song-board-tags', [SettingsController::class, 'updateSongBoardTags'])->name('song-board-tags');
         });
 
         // Role permissions management (inline in settings page)

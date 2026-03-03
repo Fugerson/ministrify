@@ -581,22 +581,6 @@ class SettingsController extends Controller
         return $this->successResponse($request, 'Категорію видалено.');
     }
 
-    public function updateSongBoardTags(Request $request)
-    {
-        $validated = $request->validate([
-            'tags' => 'present|array',
-            'tags.*' => 'string|max:50',
-        ]);
-
-        $church = $this->getCurrentChurch();
-
-        $settings = $church->settings ?? [];
-        $settings['song_board_tags'] = array_values(array_filter($validated['tags']));
-        $church->update(['settings' => $settings]);
-
-        return response()->json(['success' => true, 'tags' => $settings['song_board_tags']]);
-    }
-
     private function findPersonMatches($user, $availablePeople): \Illuminate\Support\Collection
     {
         $nameParts = explode(' ', mb_strtolower(trim($user->name)), 2);

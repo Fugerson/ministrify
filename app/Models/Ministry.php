@@ -48,6 +48,7 @@ class Ministry extends Model
         'is_private',
         'visibility',
         'allowed_person_ids',
+        'settings',
     ];
 
     protected $casts = [
@@ -58,6 +59,7 @@ class Ministry extends Model
         'allow_registrations' => 'boolean',
         'is_private' => 'boolean',
         'allowed_person_ids' => 'array',
+        'settings' => 'array',
     ];
 
     public function church(): BelongsTo

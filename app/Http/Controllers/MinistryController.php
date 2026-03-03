@@ -183,7 +183,7 @@ class MinistryController extends Controller
             $songs = Song::where('church_id', $church->id)
                 ->orderBy('title')
                 ->get();
-            $songBoardTags = $church->settings['song_board_tags'] ?? [];
+            $songBoardTags = $ministry->settings['song_board_tags'] ?? [];
         }
 
         // Load schedule events and ministry roles for worship or sunday service part ministries
@@ -1447,6 +1447,23 @@ class MinistryController extends Controller
             'visibility' => $ministry->visibility,
             'allowed_person_ids' => $ministry->allowed_person_ids,
         ]);
+    }
+
+    public function updateSongBoardTags(Request $request, Ministry $ministry)
+    {
+        $this->authorizeChurch($ministry);
+        Gate::authorize('contribute-ministry', $ministry);
+
+        $validated = $request->validate([
+            'tags' => 'present|array',
+            'tags.*' => 'string|max:50',
+        ]);
+
+        $settings = $ministry->settings ?? [];
+        $settings['song_board_tags'] = array_values(array_filter($validated['tags']));
+        $ministry->update(['settings' => $settings]);
+
+        return response()->json(['success' => true, 'tags' => $settings['song_board_tags']]);
     }
 
     public function storeWorshipRole(Request $request, Ministry $ministry)
