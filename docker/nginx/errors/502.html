@@ -3,86 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ministrify — Технічні роботи</title>
+    <title>Ministrify — Оновлення</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
+            background: #0f172a;
+            color: #e2e8f0;
             padding: 20px;
+            overflow: hidden;
+        }
+        /* Animated background */
+        .bg-gradient {
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.15), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,92,246,0.1), transparent),
+                radial-gradient(ellipse 50% 50% at 20% 60%, rgba(14,165,233,0.08), transparent);
+            z-index: 0;
         }
         .container {
             text-align: center;
-            max-width: 480px;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
         }
-        .icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 24px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 20px;
+        /* Logo */
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 48px;
+            opacity: 0.7;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: pulse 2s ease-in-out infinite;
         }
-        .icon svg {
-            width: 40px;
-            height: 40px;
+        .logo-icon svg { width: 18px; height: 18px; }
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #f1f5f9;
+        }
+        /* Spinner */
+        .spinner-wrap {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 32px;
+            position: relative;
+        }
+        .spinner {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 3px solid rgba(59,130,246,0.1);
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+        .spinner-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: #60a5fa;
             fill: none;
-            stroke: #fff;
-            stroke-width: 2;
+            stroke-width: 1.5;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
         h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
+            color: #f8fafc;
             margin-bottom: 12px;
+            letter-spacing: -0.02em;
         }
-        p {
-            font-size: 16px;
-            opacity: 0.85;
+        .desc {
+            font-size: 15px;
+            color: #94a3b8;
             line-height: 1.6;
-            margin-bottom: 8px;
+            margin-bottom: 32px;
         }
-        .small {
+        /* Progress bar */
+        .progress-track {
+            width: 200px;
+            height: 3px;
+            background: rgba(59,130,246,0.15);
+            border-radius: 4px;
+            margin: 0 auto 32px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 4px;
+            animation: progress 2s ease-in-out infinite;
+        }
+        /* Status pill */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(59,130,246,0.08);
+            border: 1px solid rgba(59,130,246,0.15);
+            border-radius: 100px;
             font-size: 13px;
-            opacity: 0.6;
-            margin-top: 24px;
+            color: #60a5fa;
         }
-        .dots span {
-            animation: blink 1.4s infinite;
-            font-size: 24px;
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #3b82f6;
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
         }
-        .dots span:nth-child(2) { animation-delay: 0.2s; }
-        .dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        /* Footer */
+        .footer {
+            margin-top: 64px;
+            font-size: 12px;
+            color: #475569;
         }
-        @keyframes blink {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 1; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(250%); }
+            100% { transform: translateX(-100%); }
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
         }
     </style>
 </head>
 <body>
+    <div class="bg-gradient"></div>
     <div class="container">
-        <div class="icon">
-            <svg viewBox="0 0 24 24">
-                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
-            </svg>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                </svg>
+            </div>
+            <span class="logo-text">Ministrify</span>
         </div>
-        <h1>Технічні роботи</h1>
-        <p>Ми оновлюємо Ministrify для покращення сервісу<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
-        <p>Зазвичай це займає менше хвилини.</p>
-        <p class="small">Сторінка оновиться автоматично</p>
+
+        <div class="spinner-wrap">
+            <div class="spinner"></div>
+            <div class="spinner-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 14a1 1 0 01-.78-1.63l9.9-10.2a.5.5 0 01.86.46l-1.92 6.02A1 1 0 0013 10h7a1 1 0 01.78 1.63l-9.9 10.2a.5.5 0 01-.86-.46l1.92-6.02A1 1 0 0011 14H4z"/>
+                </svg>
+            </div>
+        </div>
+
+        <h1>Оновлюємо систему</h1>
+        <p class="desc">
+            Ministrify стає кращим! Оновлення зазвичай займає менше хвилини.
+        </p>
+
+        <div class="progress-track">
+            <div class="progress-bar"></div>
+        </div>
+
+        <div class="status">
+            <span class="status-dot"></span>
+            Сторінка оновиться автоматично
+        </div>
+
+        <p class="footer">&copy; 2026 Ministrify</p>
     </div>
     <script>
         setTimeout(function check() {
