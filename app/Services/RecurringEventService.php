@@ -49,6 +49,7 @@ class RecurringEventService
                 'time' => $parentEvent->time,
                 'notes' => $parentEvent->notes,
                 'is_service' => $parentEvent->is_service,
+                'service_type' => $parentEvent->service_type,
                 'track_attendance' => $parentEvent->track_attendance,
                 'parent_event_id' => $parentEvent->id,
             ]);
@@ -159,7 +160,7 @@ class RecurringEventService
      */
     public function updateFutureRecurringEvents(Event $parentEvent, array $data): int
     {
-        $allowedFields = ['title', 'time', 'notes', 'is_service', 'track_attendance'];
+        $allowedFields = ['title', 'time', 'notes', 'is_service', 'service_type', 'track_attendance'];
         $updateData = array_intersect_key($data, array_flip($allowedFields));
 
         return Event::where('church_id', $parentEvent->church_id)

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('Матриця розкладу'))
+@section('title', __('Призначення'))
 
 @section('actions')
 @if(auth()->user()->can('create', \App\Models\Event::class))
@@ -30,7 +30,7 @@
                     {{ __('Календар') }}
                 </a>
                 <span class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
-                    {{ __('Матриця') }}
+                    {{ __('Призначення') }}
                 </span>
             </div>
 

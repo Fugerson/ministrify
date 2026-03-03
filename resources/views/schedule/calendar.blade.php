@@ -48,7 +48,7 @@
                     </span>
                     <a href="{{ route('schedule.matrix') }}"
                        class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        {{ __('Матриця') }}
+                        {{ __('Призначення') }}
                     </a>
                 </div>
                 <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
