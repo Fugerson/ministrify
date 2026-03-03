@@ -29,10 +29,7 @@ class SongController extends Controller
             ->sort()
             ->values();
 
-        // Board columns config
-        $boardTags = $church->settings['song_board_tags'] ?? [];
-
-        return view('songs.index', compact('songs', 'allTags', 'boardTags'));
+        return view('songs.index', compact('songs', 'allTags'));
     }
 
     public function create()

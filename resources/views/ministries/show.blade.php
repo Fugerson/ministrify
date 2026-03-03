@@ -3308,11 +3308,11 @@
             <div x-show="activeTab === 'songs'"{{ $tab !== 'songs' ? ' style="display:none"' : '' }}
                  x-data="songsLibrary()">
                 <!-- Header -->
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center justify-between mb-4">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Бібліотека пісень</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Знайдено: <span x-text="filteredSongs.length"></span> пісень
+                            Всього: <span x-text="songs.length"></span> пісень
                         </p>
                     </div>
                     <div class="flex items-center gap-2">
@@ -3335,144 +3335,124 @@
                     </div>
                 </div>
 
-                <!-- Search & Filters -->
-                <div class="flex flex-wrap gap-3 mb-4">
-                    <div class="flex-1 min-w-[200px]">
-                        <input type="text" x-model="search" placeholder="Пошук пісень..."
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    </div>
-                    <div class="relative w-44" x-data="{
-                        open: false,
-                        query: '',
-                        keys: @js(\App\Models\Song::KEYS),
-                        get filtered() {
-                            if (!this.query) return Object.entries(this.keys);
-                            const q = this.query.toLowerCase();
-                            return Object.entries(this.keys).filter(([key, label]) =>
-                                key.toLowerCase().includes(q) || label.toLowerCase().includes(q)
-                            );
-                        }
-                    }">
-                        <input type="text"
-                               x-model="query"
-                               @focus="open = true"
-                               @click.away="open = false"
-                               @keydown.escape="open = false; query = filterKey"
-                               placeholder="Тональність"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                        <div x-show="open" x-transition
-                             class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto">
-                            <div @click="filterKey = ''; query = ''; open = false"
-                                 class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-500">
-                                Усі тональності
+                <!-- Search -->
+                <div class="mb-4">
+                    <input type="text" x-model="search" placeholder="Пошук пісень..."
+                           class="w-full sm:w-80 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 text-sm">
+                </div>
+
+                <!-- Kanban Columns -->
+                <template x-if="boardTags.length > 0 && songs.length > 0">
+                    <div class="overflow-x-auto pb-4 -mx-2">
+                        <div class="flex gap-4 px-2" style="min-width: max-content;">
+                            <template x-for="(col, colIdx) in boardTags" :key="col">
+                                <div class="w-80 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col max-h-[calc(100vh-280px)]">
+                                    <!-- Column Header -->
+                                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
+                                         :class="colIdx === 0 ? 'bg-blue-50 dark:bg-blue-900/20' : colIdx === 1 ? 'bg-teal-50 dark:bg-teal-900/20' : colIdx === 2 ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-gray-50 dark:bg-gray-700/50'"
+                                         :style="'border-top: 3px solid ' + (colIdx === 0 ? '#3b82f6' : colIdx === 1 ? '#14b8a6' : colIdx === 2 ? '#f59e0b' : '#6b7280')">
+                                        <h3 class="font-semibold text-sm" :class="colIdx === 0 ? 'text-blue-700 dark:text-blue-300' : colIdx === 1 ? 'text-teal-700 dark:text-teal-300' : colIdx === 2 ? 'text-amber-700 dark:text-amber-300' : 'text-gray-700 dark:text-gray-300'" x-text="col"></h3>
+                                        <span class="px-2 py-0.5 text-xs font-medium rounded-full"
+                                              :class="colIdx === 0 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' : colIdx === 1 ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300' : colIdx === 2 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'"
+                                              x-text="getSongsForColumn(col).length"></span>
+                                    </div>
+                                    <!-- Song Rows -->
+                                    <div class="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50">
+                                        <template x-for="song in getSongsForColumn(col)" :key="song.id">
+                                            <div class="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
+                                                <div class="flex-1 min-w-0 cursor-pointer" @click="openSongModal(song)">
+                                                    <span class="text-sm text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate block" x-text="song.title"></span>
+                                                </div>
+                                                @can('contribute-ministry', $ministry)
+                                                <div class="relative flex-shrink-0" x-data="{ open: false }">
+                                                    <button @click.stop="open = !open" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity" title="Перемістити">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                                                    </button>
+                                                    <div x-show="open" @click.away="open = false" x-transition
+                                                         class="absolute right-0 top-8 z-50 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1">
+                                                        <template x-for="targetTag in boardTags.filter(t => t !== col)" :key="targetTag">
+                                                            <button @click.stop="moveSong(song.id, col, targetTag); open = false"
+                                                                    class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                                <span class="text-gray-400 mr-1">&rarr;</span> <span x-text="targetTag"></span>
+                                                            </button>
+                                                        </template>
+                                                        <button @click.stop="moveSong(song.id, col, null); open = false"
+                                                                class="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            <span class="mr-1">&times;</span> Прибрати тег
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                @endcan
+                                            </div>
+                                        </template>
+                                        <div x-show="getSongsForColumn(col).length === 0" class="px-3 py-6 text-center text-xs text-gray-400">
+                                            Немає пісень
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Untagged Column -->
+                            <div class="w-80 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 border-dashed flex flex-col max-h-[calc(100vh-280px)]">
+                                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-700/50" style="border-top: 3px solid #9ca3af">
+                                    <h3 class="font-semibold text-gray-500 dark:text-gray-400 text-sm">Без тегу</h3>
+                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-full"
+                                          x-text="getUntaggedSongs().length"></span>
+                                </div>
+                                <div class="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50">
+                                    <template x-for="song in getUntaggedSongs()" :key="song.id">
+                                        <div class="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
+                                            <div class="flex-1 min-w-0 cursor-pointer" @click="openSongModal(song)">
+                                                <span class="text-sm text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate block" x-text="song.title"></span>
+                                            </div>
+                                            @can('contribute-ministry', $ministry)
+                                            <div class="relative flex-shrink-0" x-data="{ open: false }">
+                                                <button @click.stop="open = !open" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity" title="Додати тег">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                </button>
+                                                <div x-show="open" @click.away="open = false" x-transition
+                                                     class="absolute right-0 top-8 z-50 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1">
+                                                    <template x-for="targetTag in boardTags" :key="targetTag">
+                                                        <button @click.stop="moveSong(song.id, null, targetTag); open = false"
+                                                                class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            <span class="text-gray-400 mr-1">&rarr;</span> <span x-text="targetTag"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            @endcan
+                                        </div>
+                                    </template>
+                                    <div x-show="getUntaggedSongs().length === 0" class="px-3 py-6 text-center text-xs text-gray-400">
+                                        Немає пісень
+                                    </div>
+                                </div>
                             </div>
-                            <template x-for="[key, label] in filtered" :key="key">
-                                <div @click="filterKey = key; query = key; open = false"
-                                     class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                                     :class="filterKey === key ? 'bg-primary-50 dark:bg-primary-900/30' : ''">
-                                    <span x-text="key" class="font-medium"></span>
-                                    <span x-text="' - ' + label" class="text-gray-500 text-xs"></span>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- No board tags configured — show hint + fallback list -->
+                <template x-if="boardTags.length === 0 && songs.length > 0">
+                    <div>
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-4">
+                            <p class="text-sm text-amber-800 dark:text-amber-200">
+                                Колонки не налаштовані. Перейдіть в <a href="{{ route('settings.index') }}?tab=data" class="underline font-medium">Налаштування → Дані</a>, щоб додати теги-колонки для дошки пісень.
+                            </p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <template x-for="song in filteredSongs" :key="song.id">
+                                <div @click="openSongModal(song)" class="px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 flex items-center gap-3">
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="song.title"></span>
+                                    <span class="text-xs text-gray-400 truncate" x-text="song.artist || ''"></span>
+                                    <span x-show="song.key" class="ml-auto px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-mono rounded flex-shrink-0" x-text="song.key"></span>
                                 </div>
                             </template>
                         </div>
                     </div>
-                    <select x-model="filterTag"
-                            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                        <option value="">Усі теги</option>
-                        <template x-for="tag in allTags" :key="tag">
-                            <option :value="tag" x-text="tag"></option>
-                        </template>
-                    </select>
-                    <select x-model="sortBy" @change="sortDir = (sortBy === 'popular' || sortBy === 'recent' || sortBy === 'bpm') ? 'desc' : 'asc'"
-                            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                        <option value="title">За назвою</option>
-                        <option value="artist">За виконавцем</option>
-                        <option value="recent">Нові</option>
-                        <option value="popular">Популярні</option>
-                    </select>
-                </div>
+                </template>
 
-                <!-- Songs List -->
-                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                    <!-- Header -->
-                    <div class="hidden md:grid md:grid-cols-12 gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none">
-                        <div class="col-span-3 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1" @click="toggleSort('title')">
-                            Назва
-                            <svg x-show="sortBy === 'title'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                        </div>
-                        <div class="col-span-2 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1" @click="toggleSort('artist')">
-                            Виконавець
-                            <svg x-show="sortBy === 'artist'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                        </div>
-                        <div class="col-span-2 text-center cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center justify-center gap-1" @click="toggleSort('key')">
-                            Тональність
-                            <svg x-show="sortBy === 'key'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                        </div>
-                        <div class="col-span-1 text-center cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center justify-center gap-1" @click="toggleSort('bpm')">
-                            BPM
-                            <svg x-show="sortBy === 'bpm'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                        </div>
-                        <div class="col-span-2">Теги</div>
-                        <div class="col-span-2 text-center cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 flex items-center justify-center gap-1" @click="toggleSort('popular')">
-                            Використано
-                            <svg x-show="sortBy === 'popular'" class="w-3 h-3" :class="sortDir === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                        </div>
-                    </div>
-                    <!-- Rows -->
-                    <template x-for="song in filteredSongs" :key="song.id">
-                        <div @click="openSongModal(song)"
-                             class="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-2 px-4 py-3 cursor-pointer border-b border-gray-100 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors items-center group">
-                            <!-- Title (always visible) -->
-                            <div class="md:col-span-3 flex items-center gap-2 min-w-0">
-                                <span class="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate" x-text="song.title"></span>
-                            </div>
-                            <!-- Artist (always visible) -->
-                            <div class="md:col-span-2 min-w-0">
-                                <span class="text-sm text-gray-500 dark:text-gray-400 truncate block" x-text="song.artist || '—'"></span>
-                            </div>
-                            <!-- Key badge (always visible) -->
-                            <div class="md:col-span-2 md:text-center">
-                                <span x-show="song.key" class="inline-block px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-mono rounded" x-text="song.key"></span>
-                                <span x-show="!song.key" class="text-xs text-gray-400">—</span>
-                            </div>
-                            <!-- BPM (hidden on mobile) -->
-                            <div class="hidden md:block md:col-span-1 text-center text-sm text-gray-500 dark:text-gray-400">
-                                <span x-text="song.bpm || '—'"></span>
-                            </div>
-                            <!-- Tags (hidden on mobile) -->
-                            <div class="hidden md:flex md:col-span-2 flex-wrap gap-1 min-w-0">
-                                <template x-for="tag in (song.tags || []).slice(0, 3)" :key="tag">
-                                    <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full truncate max-w-[120px]" x-text="tag"></span>
-                                </template>
-                                <span x-show="song.tags && song.tags.length > 3" class="text-xs text-gray-400" x-text="'+' + (song.tags.length - 3)"></span>
-                            </div>
-                            <!-- Times used (hidden on mobile) -->
-                            <div class="hidden md:block md:col-span-2 text-center text-sm text-gray-500 dark:text-gray-400">
-                                <span x-text="(song.times_used || 0)"></span>
-                            </div>
-                            <!-- Mobile: secondary info row -->
-                            <div class="md:hidden flex items-center gap-3 text-xs text-gray-400 mt-0.5">
-                                <span x-show="song.bpm" x-text="song.bpm + ' BPM'"></span>
-                                <span x-text="(song.times_used || 0) + ' раз'"></span>
-                                <template x-for="tag in (song.tags || []).slice(0, 2)" :key="tag">
-                                    <span class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full" x-text="tag"></span>
-                                </template>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Empty States -->
-                <div x-show="filteredSongs.length === 0 && songs.length > 0" class="text-center py-12">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Нічого не знайдено</h3>
-                    <p class="text-gray-500 dark:text-gray-400">Спробуйте змінити параметри пошуку</p>
-                </div>
-
+                <!-- Empty Library -->
                 <div x-show="songs.length === 0" class="text-center py-12">
                     <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                         <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4600,12 +4580,14 @@ function goalsManager() {
     });
     $allTagsData = $songsCollection->pluck('tags')->flatten()->filter()->unique()->sort()->values();
     $artistsData = $songsCollection->pluck('artist')->filter()->unique()->sort()->values();
+    $boardTagsData = $songBoardTags ?? [];
 @endphp
 function songsLibrary() {
     return {
         songs: @json($songsData),
         allTags: @json($allTagsData),
         artists: @json($artistsData),
+        boardTags: @json($boardTagsData),
         search: '',
         filterKey: '',
         filterTag: '',
@@ -4805,6 +4787,49 @@ function songsLibrary() {
                 console.error('Error:', error);
                 alert('Помилка видалення');
             }
+        },
+
+        getSongsForColumn(tag) {
+            return this.filteredSongs.filter(s => s.tags && s.tags.includes(tag));
+        },
+
+        getUntaggedSongs() {
+            return this.filteredSongs.filter(s => {
+                if (!s.tags || s.tags.length === 0) return true;
+                return !s.tags.some(t => this.boardTags.includes(t));
+            });
+        },
+
+        async moveSong(songId, fromTag, toTag) {
+            const song = this.songs.find(s => s.id === songId);
+            if (!song) return;
+
+            const oldTags = [...(song.tags || [])];
+            let newTags = [...oldTags];
+            if (fromTag) newTags = newTags.filter(t => t !== fromTag);
+            if (toTag && !newTags.includes(toTag)) newTags.push(toTag);
+            song.tags = newTags.length > 0 ? newTags : [];
+
+            try {
+                const resp = await fetch(`/songs/${songId}/move-tag`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ from_tag: fromTag, to_tag: toTag })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    song.tags = data.tags;
+                } else {
+                    song.tags = oldTags;
+                }
+            } catch (e) {
+                song.tags = oldTags;
+            }
+            this.allTags = [...new Set(this.songs.flatMap(s => s.tags || []))].sort();
         }
     }
 }

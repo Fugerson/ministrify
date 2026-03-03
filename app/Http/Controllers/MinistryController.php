@@ -178,10 +178,12 @@ class MinistryController extends Controller
 
         // Load songs for worship ministries
         $songs = [];
+        $songBoardTags = [];
         if ($ministry->is_worship_ministry) {
             $songs = Song::where('church_id', $church->id)
                 ->orderBy('title')
                 ->get();
+            $songBoardTags = $church->settings['song_board_tags'] ?? [];
         }
 
         // Load schedule events and ministry roles for worship or sunday service part ministries
@@ -391,7 +393,7 @@ class MinistryController extends Controller
 
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics', 'budgetData', 'expenseCategories', 'enabledCurrencies'));
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'songBoardTags', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics', 'budgetData', 'expenseCategories', 'enabledCurrencies'));
     }
 
     /**
