@@ -3844,39 +3844,7 @@
                     <hr class="border-gray-200 dark:border-gray-700">
 
                     <!-- Song Board Tags -->
-                    <div x-data="{
-                        tags: @json($ministry->settings['song_board_tags'] ?? []),
-                        newTag: '',
-                        saving: false,
-                        async save() {
-                            this.saving = true;
-                            try {
-                                const resp = await fetch('{{ route('ministries.song-board-tags', $ministry) }}', {
-                                    method: 'PUT',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content,
-                                        'Accept': 'application/json',
-                                    },
-                                    body: JSON.stringify({ tags: this.tags })
-                                });
-                                const data = await resp.json();
-                                if (data.success) this.tags = data.tags;
-                            } catch(e) {}
-                            this.saving = false;
-                        },
-                        addTag() {
-                            const t = this.newTag.trim();
-                            if (!t || this.tags.includes(t)) return;
-                            this.tags.push(t);
-                            this.newTag = '';
-                            this.save();
-                        },
-                        removeTag(i) {
-                            this.tags.splice(i, 1);
-                            this.save();
-                        }
-                    }">
+                    <div x-data="songBoardTagsConfig()">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Колонки дошки пісень</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Теги, які стануть колонками на вкладці "Пісні"</p>
 
@@ -4646,7 +4614,44 @@ function goalsManager() {
     $allTagsData = $songsCollection->pluck('tags')->flatten()->filter()->unique()->sort()->values();
     $artistsData = $songsCollection->pluck('artist')->filter()->unique()->sort()->values();
     $boardTagsData = $songBoardTags ?? [];
+    $songBoardTagsUrl = route('ministries.song-board-tags', $ministry);
 @endphp
+function songBoardTagsConfig() {
+    return {
+        tags: @json($boardTagsData),
+        newTag: '',
+        saving: false,
+        async save() {
+            this.saving = true;
+            try {
+                const resp = await fetch(@json($songBoardTagsUrl), {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ tags: this.tags })
+                });
+                const data = await resp.json();
+                if (data.success) this.tags = data.tags;
+            } catch(e) {}
+            this.saving = false;
+        },
+        addTag() {
+            const t = this.newTag.trim();
+            if (!t || this.tags.includes(t)) return;
+            this.tags.push(t);
+            this.newTag = '';
+            this.save();
+        },
+        removeTag(i) {
+            this.tags.splice(i, 1);
+            this.save();
+        }
+    }
+}
+
 function songsLibrary() {
     return {
         songs: @json($songsData),
