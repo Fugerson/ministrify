@@ -124,36 +124,6 @@
             @endif
         </div>
 
-        <!-- Toggles -->
-        <div class="mt-4 flex items-center gap-6">
-            @if($canEdit)
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="isService" @change="saveField('is_service', isService); $store.event.isService = isService"
-                       class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.event_with_plan') }}</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="isSundayService" @change="if(isSundayService) { isService = true; hasMusic = true; saveField('is_service', true); $store.event.isService = true; saveField('service_type', 'sunday_service'); }"
-                       class="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500">
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.sunday_service') }}</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="trackAttendance" @change="saveField('track_attendance', trackAttendance); $store.event.trackAttendance = trackAttendance"
-                       class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Відвідуваність') }}</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="hasMusic" @change="if(!hasMusic) { isSundayService = false; } saveField('service_type', hasMusic ? 'sunday_service' : null)"
-                       class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія з музичним супроводом') }}</span>
-            </label>
-            @else
-            @if($event->is_service)<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> {{ __('Подія з планом') }}</span>@endif
-            @if($event->service_type === 'sunday_service')<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> {{ __('Недільне служіння') }}</span>@endif
-            @if($event->track_attendance)<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> {{ __('Відвідуваність') }}</span>@endif
-            @if($event->service_type === 'sunday_service')<span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> {{ __('Подія з музичним супроводом') }}</span>@endif
-            @endif
-        </div>
 
         <!-- Quick stats -->
         <div class="mt-4 flex items-center gap-4 text-sm">
@@ -184,7 +154,7 @@
         <!-- Main content (full width) -->
         <div class="space-y-6">
             <!-- План події -->
-            <div x-show="$store.event.isService" x-cloak class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="planEditor()">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="planEditor()">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -642,41 +612,10 @@
                 </div>
             </div>
 
-            {{-- Simple responsibility form for non-service events --}}
-            <div x-show="!$store.event.isService" x-cloak class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Відповідальності</h2>
-                @if($event->responsibilities->count() > 0)
-                <div id="simple-resp-list" class="space-y-2 mb-3">
-                    @foreach($event->responsibilities as $resp)
-                    <div class="flex items-center justify-between py-1.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg" data-resp>
-                        <span class="text-sm text-gray-900 dark:text-white">{{ $resp->name }}</span>
-                        @if($canEdit)
-                        <button type="button"
-                                @click="ajaxDelete('/responsibilities/{{ $resp->id }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('[data-resp]').remove())"
-                                class="p-1 text-gray-400 hover:text-red-500">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                        @endif
-                    </div>
-                    @endforeach
-                </div>
-                @endif
-                @if($canEdit)
-                <form @submit.prevent="submit($refs.respForm)" x-ref="respForm" x-data="{ ...ajaxForm({ url: '{{ route('events.responsibilities.store', $event) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _addSimpleResp(this, data); } }) }" class="flex gap-2">
-                    <input type="text" name="name" required placeholder="Нова відповідальність"
-                           class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                    <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white text-sm rounded-lg">
-                        Додати
-                    </button>
-                </form>
-                @endif
-            </div>
 
             <!-- Attendance Section -->
             @if($currentChurch->attendance_enabled)
-            <div x-show="$store.event.trackAttendance" x-cloak class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="attendanceManager()">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="attendanceManager()">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -1080,8 +1019,8 @@ function escapeHtml(text) {
 // Alpine store for shared event state
 document.addEventListener('alpine:init', () => {
     Alpine.store('event', {
-        isService: {{ $event->is_service ? 'true' : 'false' }},
-        trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }}
+        isService: true,
+        trackAttendance: true
     });
 });
 
@@ -1496,10 +1435,10 @@ function eventEditor() {
         allDay: {{ !$event->time ? 'true' : 'false' }},
         ministryId: @json($event->ministry_id),
         ministryColor: @json($event->ministry?->color ?? '#3b82f6'),
-        isService: {{ $event->is_service ? 'true' : 'false' }},
-        isSundayService: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
-        trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }},
-        hasMusic: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
+        isService: true,
+        isSundayService: true,
+        trackAttendance: true,
+        hasMusic: true,
         ministries: @json($ministriesData),
 
         // Store original values to detect changes
@@ -1509,10 +1448,10 @@ function eventEditor() {
             time: @json($event->time?->format('H:i')),
             notes: @json($event->notes ?? ''),
             ministryId: @json($event->ministry_id),
-            isService: {{ $event->is_service ? 'true' : 'false' }},
-            isSundayService: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
-            trackAttendance: {{ $event->track_attendance ? 'true' : 'false' }},
-            hasMusic: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }}
+            isService: true,
+            isSundayService: true,
+            trackAttendance: true,
+            hasMusic: true
         },
 
         async saveField(field, value) {

@@ -9,7 +9,7 @@
 @endphp
 
 @section('content')
-<div class="max-w-2xl mx-auto" x-data="eventCreateForm()" @set-music.window="hasMusicChecked = $event.detail">
+<div class="max-w-2xl mx-auto" x-data="eventCreateForm()">
     <form class="space-y-6" x-ref="form" @submit.prevent="submitForm">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -153,7 +153,7 @@
 
                 <!-- Ministry/Team Selection -->
                 @if($ministries->count() > 0)
-                <div x-data="ministrySelector()" x-effect="if(isServiceMinistry) { document.getElementById('is_service').checked = true; }">
+                <div x-data="ministrySelector()">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
                     <x-searchable-select
                         name="ministry_id"
@@ -175,77 +175,13 @@
                             <span x-text="selected?.name"></span>
                         </span>
                     </div>
-                    <!-- Auto-check music checkbox for worship/sunday service ministries -->
-                    <template x-if="isServiceMinistry">
-                        <script x-init="
-                            document.getElementById('is_service').checked = true;
-                            $dispatch('set-music', true);
-                        "></script>
-                    </template>
                 </div>
                 @endif
 
-                <!-- Service Plan Option -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center">
-                        <input type="checkbox" name="is_service" id="is_service" value="1"
-                               {{ old('is_service') ? 'checked' : '' }}
-                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
-                        <label for="is_service" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ __('Це подія з планом') }}
-                        </label>
-                    </div>
-                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Увімкніть, щоб створити план події з таймлайном (прославлення, проповідь, оголошення тощо)') }}
-                    </p>
-                </div>
-
-                <!-- Sunday Service Option -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center">
-                        <input type="checkbox" name="is_sunday_service" id="is_sunday_service" value="1"
-                               {{ old('is_sunday_service') ? 'checked' : '' }}
-                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600"
-                               x-on:change="if($el.checked) { document.getElementById('is_service').checked = true; hasMusicChecked = true; }">
-                        <label for="is_sunday_service" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ __('Недільне служіння') }}
-                        </label>
-                    </div>
-                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Автоматично вмикає план події та музичний супровід') }}
-                    </p>
-                </div>
-
-                <!-- Attendance Tracking Option -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center">
-                        <input type="checkbox" name="track_attendance" id="track_attendance" value="1"
-                               {{ old('track_attendance') ? 'checked' : '' }}
-                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
-                        <label for="track_attendance" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ __('Відстежувати відвідуваність') }}
-                        </label>
-                    </div>
-                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Увімкніть, щоб відмічати хто був на цій події') }}
-                    </p>
-                </div>
-
-                <!-- Musical Accompaniment Option -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="has_music" value="1"
-                               x-model="hasMusicChecked"
-                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
-                        <label for="has_music" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ __('Подія з музичним супроводом') }}
-                        </label>
-                    </div>
-                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Увімкніть, щоб подія з\'являлася в музичних командах з вибором пісень') }}
-                    </p>
-                    <input type="hidden" name="service_type" :value="hasMusicChecked ? 'sunday_service' : ''">
-                </div>
+                <!-- Always-on: plan + attendance + music -->
+                <input type="hidden" name="is_service" value="1">
+                <input type="hidden" name="track_attendance" value="1">
+                <input type="hidden" name="service_type" value="sunday_service">
 
                 <!-- Reminder Settings -->
                 @if($currentChurch->telegram_bot_token)
@@ -360,7 +296,6 @@ function eventCreateForm() {
     return {
         saving: false,
         errors: {},
-        hasMusicChecked: {{ old('service_type') === 'sunday_service' ? 'true' : 'false' }},
         async submitForm() {
             this.saving = true;
             this.errors = {};

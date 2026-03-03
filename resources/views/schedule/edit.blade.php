@@ -108,78 +108,19 @@
                 </div>
                 @endif
 
-                <!-- Service Plan Option -->
+                <!-- Always-on: plan + attendance + music -->
+                <input type="hidden" name="is_service" value="1">
+                <input type="hidden" name="track_attendance" value="1">
+                <input type="hidden" name="service_type" value="sunday_service">
+
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center">
-                        <input type="checkbox" name="is_service" id="is_service" value="1"
-                               {{ old('is_service', $event->is_service) ? 'checked' : '' }}
-                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
-                        <label for="is_service" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ __('Це подія з планом') }}
-                        </label>
-                    </div>
-                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Увімкніть, щоб створити план події з таймлайном') }}
-                    </p>
-
-                    @if($event->is_service)
-                        <div class="mt-3">
-                            <a href="{{ route('events.show', $event) }}"
-                               class="inline-flex items-center px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                </svg>
-                                {{ __('Переглянути план події') }}
-                            </a>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Sunday Service Option -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center">
-                        <input type="checkbox" name="is_sunday_service" id="is_sunday_service" value="1"
-                               {{ old('is_sunday_service', $event->service_type === 'sunday_service' && $event->is_service) ? 'checked' : '' }}
-                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600"
-                               x-on:change="if($el.checked) { document.getElementById('is_service').checked = true; document.getElementById('has_music').checked = true; document.getElementById('has_music').dispatchEvent(new Event('input')); }">
-                        <label for="is_sunday_service" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ __('Недільне служіння') }}
-                        </label>
-                    </div>
-                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Автоматично вмикає план події та музичний супровід') }}
-                    </p>
-                </div>
-
-                <!-- Attendance Tracking Option -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center">
-                        <input type="checkbox" name="track_attendance" id="track_attendance" value="1"
-                               {{ old('track_attendance', $event->track_attendance) ? 'checked' : '' }}
-                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
-                        <label for="track_attendance" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ __('Відстежувати відвідуваність') }}
-                        </label>
-                    </div>
-                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Увімкніть, щоб відмічати хто був на цій події') }}
-                    </p>
-                </div>
-
-                <!-- Musical Accompaniment Option -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-600" x-data="{ hasMusicChecked: {{ old('service_type', $event->service_type) === 'sunday_service' ? 'true' : 'false' }} }">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="has_music" value="1"
-                               x-model="hasMusicChecked"
-                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
-                        <label for="has_music" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ __('Подія з музичним супроводом') }}
-                        </label>
-                    </div>
-                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Увімкніть, щоб подія з\'являлася в музичних командах з вибором пісень') }}
-                    </p>
-                    <input type="hidden" name="service_type" :value="hasMusicChecked ? 'sunday_service' : ''">
+                    <a href="{{ route('events.show', $event) }}"
+                       class="inline-flex items-center px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        {{ __('Переглянути план події') }}
+                    </a>
                 </div>
 
                 <!-- Reminder Settings -->
