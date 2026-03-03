@@ -553,12 +553,27 @@ class Person extends Model
 
     public function getChurchRoleLabelAttribute(): string
     {
-        return self::CHURCH_ROLES[$this->church_role] ?? 'Член церкви';
+        $map = [
+            self::ROLE_MEMBER => __('app.role_member'),
+            self::ROLE_SERVANT => __('app.role_servant'),
+            self::ROLE_DEACON => __('app.role_deacon'),
+            self::ROLE_PRESBYTER => __('app.role_presbyter'),
+            self::ROLE_PASTOR => __('app.role_pastor'),
+        ];
+
+        return $map[$this->church_role] ?? __('app.role_member');
     }
 
     public function getMembershipStatusLabelAttribute(): string
     {
-        return self::MEMBERSHIP_STATUSES[$this->membership_status]['label'] ?? 'Член церкви';
+        $map = [
+            self::STATUS_GUEST => __('app.guest'),
+            self::STATUS_NEWCOMER => __('app.newcomer'),
+            self::STATUS_MEMBER => __('app.church_member'),
+            self::STATUS_ACTIVE => __('app.active_member'),
+        ];
+
+        return $map[$this->membership_status] ?? __('app.church_member');
     }
 
     public function getMembershipStatusColorAttribute(): string

@@ -137,11 +137,11 @@
             <div x-show="recipientType === 'membership'" x-cloak>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус членства</label>
                 <select name="membership_status" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
-                    <option value="">Оберіть...</option>
-                    <option value="member">Члени церкви</option>
-                    <option value="regular">Регулярні відвідувачі</option>
-                    <option value="guest">Гості</option>
-                    <option value="inactive">Неактивні</option>
+                    <option value="">{{ __('forms.select_option') }}</option>
+                    <option value="guest">{{ __('app.guest') }}</option>
+                    <option value="newcomer">{{ __('app.newcomer') }}</option>
+                    <option value="member">{{ __('app.church_member') }}</option>
+                    <option value="active">{{ __('app.active_member') }}</option>
                 </select>
             </div>
 

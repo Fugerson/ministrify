@@ -181,6 +181,13 @@ return [
     'membership_funnel' => 'Membership funnel',
     'total_lowercase' => 'total',
 
+    // Church roles (person.church_role)
+    'role_member' => 'Church member',
+    'role_servant' => 'Servant',
+    'role_deacon' => 'Deacon',
+    'role_presbyter' => 'Presbyter',
+    'role_pastor' => 'Pastor',
+
     // Support
     'support' => 'Support',
     'help' => 'Help',

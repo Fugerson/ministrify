@@ -283,11 +283,11 @@
                                 <select x-model="row.church_role" @change="markDirty(row)"
                                         class="w-full px-2 py-1.5 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-white dark:focus:bg-gray-700 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 rounded text-sm transition-colors">
                                     <option value="">—</option>
-                                    <option value="member">Член церкви</option>
-                                    <option value="servant">Служитель</option>
-                                    <option value="deacon">Диякон</option>
-                                    <option value="presbyter">Пресвітер</option>
-                                    <option value="pastor">Пастор</option>
+                                    <option value="member">{{ __('app.role_member') }}</option>
+                                    <option value="servant">{{ __('app.role_servant') }}</option>
+                                    <option value="deacon">{{ __('app.role_deacon') }}</option>
+                                    <option value="presbyter">{{ __('app.role_presbyter') }}</option>
+                                    <option value="pastor">{{ __('app.role_pastor') }}</option>
                                 </select>
                             </td>
 

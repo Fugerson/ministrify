@@ -178,6 +178,13 @@ return [
     'membership_funnel' => 'Воронка членства',
     'total_lowercase' => 'всього',
 
+    // Church roles (person.church_role)
+    'role_member' => 'Член церкви',
+    'role_servant' => 'Служитель',
+    'role_deacon' => 'Диякон',
+    'role_presbyter' => 'Пресвітер',
+    'role_pastor' => 'Пастор',
+
     // Support
     'support' => 'Підтримка',
     'help' => 'Довідка',
