@@ -108,10 +108,25 @@
                 </div>
                 @endif
 
-                <!-- Always-on: plan + attendance + music -->
+                <!-- Always-on: plan + attendance -->
                 <input type="hidden" name="is_service" value="1">
                 <input type="hidden" name="track_attendance" value="1">
-                <input type="hidden" name="service_type" value="sunday_service">
+
+                <!-- Sunday Service Option -->
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-600" x-data="{ isSunday: {{ old('is_sunday_service', $event->service_type === 'sunday_service') ? 'true' : 'false' }} }">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="is_sunday_service" value="1"
+                               x-model="isSunday"
+                               class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-600">
+                        <label for="is_sunday_service" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ __('Недільне служіння') }}
+                        </label>
+                    </div>
+                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('Позначте, якщо це недільне служіння') }}
+                    </p>
+                    <input type="hidden" name="service_type" :value="isSunday ? 'sunday_service' : ''">
+                </div>
 
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
                     <a href="{{ route('events.show', $event) }}"

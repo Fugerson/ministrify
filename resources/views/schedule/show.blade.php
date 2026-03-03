@@ -124,6 +124,21 @@
             @endif
         </div>
 
+        <!-- Sunday Service Toggle -->
+        <div class="mt-4 flex items-center gap-6">
+            @if($canEdit)
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" x-model="isSundayService" @change="saveField('service_type', isSundayService ? 'sunday_service' : null)"
+                       class="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500">
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.sunday_service') }}</span>
+            </label>
+            @elseif($event->service_type === 'sunday_service')
+            <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                {{ __('app.sunday_service') }}
+            </span>
+            @endif
+        </div>
 
         <!-- Quick stats -->
         <div class="mt-4 flex items-center gap-4 text-sm">
