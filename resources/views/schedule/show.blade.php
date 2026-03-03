@@ -630,32 +630,33 @@
 
             <!-- Attendance Section -->
             @if($currentChurch->attendance_enabled)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="attendanceManager()">
-                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ ...attendanceManager(), attendanceOpen: false }">
+                <button type="button" @click="attendanceOpen = !attendanceOpen" class="w-full px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="attendanceOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400 transition-transform" :class="attendanceOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        <h2 class="font-semibold text-gray-900 dark:text-white">Відвідуваність</h2>
+                        <span x-show="saving" class="text-xs text-gray-500 dark:text-gray-400">
+                            <svg class="w-4 h-4 animate-spin inline" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <h2 class="font-semibold text-gray-900 dark:text-white">Відвідуваність</h2>
-                            <span x-show="saving" class="text-xs text-gray-500 dark:text-gray-400">
-                                <svg class="w-4 h-4 animate-spin inline" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </span>
-                            <span x-show="saved" x-transition class="text-xs text-green-600 dark:text-green-400">Збережено</span>
-                            <span x-show="error" class="text-xs text-red-600 dark:text-red-400">Помилка!</span>
-                        </div>
-                        @php
-                            $presentCount = $event->attendance?->records->where('present', true)->count() ?? 0;
-                            $totalPeople = $allPeople->count();
-                        @endphp
-                        <span class="text-sm text-gray-500 dark:text-gray-400" x-text="attending.length + '/' + {{ $totalPeople }}">{{ $presentCount }}/{{ $totalPeople }}</span>
+                        </span>
+                        <span x-show="saved" x-transition class="text-xs text-green-600 dark:text-green-400">Збережено</span>
+                        <span x-show="error" class="text-xs text-red-600 dark:text-red-400">Помилка!</span>
                     </div>
-                </div>
+                    @php
+                        $presentCount = $event->attendance?->records->where('present', true)->count() ?? 0;
+                        $totalPeople = $allPeople->count();
+                    @endphp
+                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="attending.length + '/' + {{ $totalPeople }}">{{ $presentCount }}/{{ $totalPeople }}</span>
+                </button>
 
-                <div class="p-4">
+                <div class="p-4" x-show="attendanceOpen" x-collapse>
                     @php
                         $presentIds = $event->attendance?->records->where('present', true)->pluck('person_id')->toArray() ?? [];
                     @endphp
