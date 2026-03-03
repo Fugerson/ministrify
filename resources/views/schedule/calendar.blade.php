@@ -70,28 +70,26 @@
                     </button>
                 </div>
 
-                {{-- Calendar: Week/Month toggle --}}
-                <template x-if="activeTab === 'calendar'">
-                    <div class="flex items-center gap-3">
-                        <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
-                        <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
-                            <button @click="switchView('week')" type="button"
-                               :class="currentView === 'week' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                               class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
-                                {{ __('app.week') }}
-                            </button>
-                            <button @click="switchView('month')" type="button"
-                               :class="currentView === 'month' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                               class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
-                                {{ __('app.month') }}
-                            </button>
-                        </div>
+                {{-- Week/Month toggle --}}
+                <div class="flex items-center gap-3">
+                    <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
+                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+                        <button @click="switchView('week')" type="button"
+                           :class="currentView === 'week' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                           class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
+                            {{ __('app.week') }}
+                        </button>
+                        <button @click="switchView('month')" type="button"
+                           :class="currentView === 'month' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                           class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
+                            {{ __('app.month') }}
+                        </button>
                     </div>
-                </template>
+                </div>
             </div>
 
-            {{-- Calendar: Date Navigation --}}
-            <div x-show="activeTab === 'calendar'" class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
+            {{-- Date Navigation --}}
+            <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
                 <button @click="prevPeriod()" type="button"
                    class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
