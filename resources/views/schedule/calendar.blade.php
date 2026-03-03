@@ -116,7 +116,7 @@
 
                             {{-- Calendar Picker Dropdown --}}
                             <div x-show="showPicker" x-transition @click.outside="showPicker = false"
-                                 class="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+                                 class="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 min-w-[280px]">
                                 <div x-show="currentView === 'month'" class="space-y-3">
                                     <div class="flex items-center justify-between mb-3">
                                         <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
