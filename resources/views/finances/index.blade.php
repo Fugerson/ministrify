@@ -996,7 +996,7 @@ function financesDashboard() {
                         <label class="block text-sm font-medium text-green-700 dark:text-green-300 mb-2">Отримуєте</label>
                         <div class="flex gap-2">
                             <input type="number" x-model="formData.to_amount" step="0.01" min="0.01" required readonly
-                                   class="flex-1 px-4 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-white">
+                                   class="flex-1 px-4 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
                             <select x-model="formData.to_currency" @change="updateRate()"
                                     class="w-24 px-2 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                 @foreach($enabledCurrencies ?? ['UAH'] as $curr)

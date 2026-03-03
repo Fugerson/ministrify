@@ -9,22 +9,22 @@
 
 <div class="space-y-6">
     <!-- Summary -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-gray-900">{{ $months[$month - 1] }} {{ $year }}</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $months[$month - 1] }} {{ $year }}</h2>
         </div>
 
         <div class="grid grid-cols-3 gap-6">
             <div>
-                <p class="text-sm text-gray-500">{{ __('Загальний бюджет') }}</p>
-                <p class="text-3xl font-bold text-gray-900">{{ number_format($totalBudget, 0, ',', ' ') }} &#8372;</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Загальний бюджет') }}</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalBudget, 0, ',', ' ') }} &#8372;</p>
             </div>
             <div>
-                <p class="text-sm text-gray-500">{{ __('Витрачено') }}</p>
-                <p class="text-3xl font-bold text-gray-900">{{ number_format($totalSpent, 0, ',', ' ') }} &#8372;</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Витрачено') }}</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalSpent, 0, ',', ' ') }} &#8372;</p>
             </div>
             <div>
-                <p class="text-sm text-gray-500">{{ __('Залишок') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Залишок') }}</p>
                 <p class="text-3xl font-bold {{ $totalBudget - $totalSpent < 0 ? 'text-red-600' : 'text-green-600' }}">
                     {{ number_format($totalBudget - $totalSpent, 0, ',', ' ') }} &#8372;
                 </p>
@@ -34,16 +34,16 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- By ministry -->
-        <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b">
-                <h3 class="text-lg font-semibold text-gray-900">{{ __('По командах') }}</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('По командах') }}</h3>
             </div>
             <div class="p-6 space-y-4">
                 @foreach($byMinistry as $ministry)
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium text-gray-700">{{ $ministry['name'] }}</span>
-                            <span class="text-sm text-gray-500">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $ministry['name'] }}</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ number_format($ministry['spent'], 0, ',', ' ') }}
                                 @if($ministry['budget'])
                                     / {{ number_format($ministry['budget'], 0, ',', ' ') }} &#8372;
@@ -51,7 +51,7 @@
                             </span>
                         </div>
                         @if($ministry['budget'])
-                            <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                                 <div class="h-2 rounded-full {{ $ministry['percentage'] > 90 ? 'bg-red-500' : ($ministry['percentage'] > 70 ? 'bg-yellow-500' : 'bg-green-500') }}"
                                      style="width: {{ min(100, $ministry['percentage']) }}%"></div>
                             </div>
@@ -62,16 +62,16 @@
         </div>
 
         <!-- By category -->
-        <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b">
-                <h3 class="text-lg font-semibold text-gray-900">{{ __('По категоріях') }}</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('По категоріях') }}</h3>
             </div>
             <div class="p-6 space-y-3">
                 @foreach($byCategory as $category)
                     @if($category->total > 0)
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-700">{{ $category->name }}</span>
-                            <span class="text-sm font-medium text-gray-900">{{ number_format($category->total, 0, ',', ' ') }} &#8372;</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $category->name }}</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($category->total, 0, ',', ' ') }} &#8372;</span>
                         </div>
                     @endif
                 @endforeach
@@ -80,29 +80,29 @@
     </div>
 
     <!-- Recent expenses -->
-    <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-900">{{ __('Останні витрати') }}</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Останні витрати') }}</h3>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Дата') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Команда') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Опис') }}</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('Сума') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Хто') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Дата') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Команда') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Опис') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Сума') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Хто') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($recentExpenses as $expense)
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->date->format('d.m') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->ministry?->name ?? '-' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ $expense->description }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">{{ number_format($expense->amount, 0, ',', ' ') }} &#8372;</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->user?->name ?? __('Видалений') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $expense->date->format('d.m') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $expense->ministry?->name ?? '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ $expense->description }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white text-right">{{ number_format($expense->amount, 0, ',', ' ') }} &#8372;</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $expense->user?->name ?? __('Видалений') }}</td>
                         </tr>
                     @endforeach
                 </tbody>

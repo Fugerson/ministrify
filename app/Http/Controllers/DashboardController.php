@@ -948,21 +948,33 @@ class DashboardController extends Controller
             ->selectRaw("
                 COUNT(*) as total,
                 SUM(CASE WHEN membership_status = 'guest' THEN 1 ELSE 0 END) as guest,
-                SUM(CASE WHEN membership_status = 'regular' THEN 1 ELSE 0 END) as regular,
+                SUM(CASE WHEN membership_status = 'newcomer' THEN 1 ELSE 0 END) as newcomer,
                 SUM(CASE WHEN membership_status = 'member' THEN 1 ELSE 0 END) as member,
-                SUM(CASE WHEN membership_status = 'active_member' THEN 1 ELSE 0 END) as active_member,
-                SUM(CASE WHEN membership_status = 'leader' THEN 1 ELSE 0 END) as leader,
+                SUM(CASE WHEN membership_status = 'active' THEN 1 ELSE 0 END) as active,
                 SUM(CASE WHEN membership_status IS NULL OR membership_status = '' THEN 1 ELSE 0 END) as unset
             ")
             ->first();
 
+        // Leaders = people who lead a ministry or group
+        $leaderCount = DB::table('people')
+            ->where('people.church_id', $church->id)
+            ->whereNull('people.deleted_at')
+            ->where(function ($q) {
+                $q->whereIn('people.id', function ($sub) {
+                    $sub->select('leader_id')->from('ministries')->whereNull('deleted_at')->whereNotNull('leader_id');
+                })->orWhereIn('people.id', function ($sub) {
+                    $sub->select('leader_id')->from('groups')->whereNull('deleted_at')->whereNotNull('leader_id');
+                });
+            })
+            ->count();
+
         return [
             'total' => (int) ($stats->total ?? 0),
             'guest' => (int) ($stats->guest ?? 0),
-            'regular' => (int) ($stats->regular ?? 0),
+            'newcomer' => (int) ($stats->newcomer ?? 0),
             'member' => (int) ($stats->member ?? 0),
-            'active_member' => (int) ($stats->active_member ?? 0),
-            'leader' => (int) ($stats->leader ?? 0),
+            'active' => (int) ($stats->active ?? 0),
+            'leader' => $leaderCount,
             'unset' => (int) ($stats->unset ?? 0),
         ];
     }

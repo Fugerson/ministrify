@@ -1,20 +1,20 @@
 {{-- Membership Funnel Widget --}}
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-900 dark:text-white">Воронка членства</h2>
+        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.membership_funnel') }}</h2>
         <span class="text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/50 px-2 py-0.5 rounded-lg">
-            {{ $membershipStats['total'] }} всього
+            {{ $membershipStats['total'] }} {{ __('app.total_lowercase') }}
         </span>
     </div>
     <div class="p-4 lg:p-5">
         @php
             $total = max($membershipStats['total'], 1);
             $levels = [
-                ['key' => 'guest', 'label' => 'Гості', 'color' => 'from-blue-400 to-blue-500', 'bg' => 'bg-blue-500', 'light' => 'bg-blue-100 dark:bg-blue-900/50', 'text' => 'text-blue-600 dark:text-blue-400'],
-                ['key' => 'regular', 'label' => 'Постійні відвідувачі', 'color' => 'from-cyan-400 to-cyan-500', 'bg' => 'bg-cyan-500', 'light' => 'bg-cyan-100 dark:bg-cyan-900/50', 'text' => 'text-cyan-600 dark:text-cyan-400'],
-                ['key' => 'member', 'label' => 'Члени церкви', 'color' => 'from-teal-400 to-teal-500', 'bg' => 'bg-teal-500', 'light' => 'bg-teal-100 dark:bg-teal-900/50', 'text' => 'text-teal-600 dark:text-teal-400'],
-                ['key' => 'active_member', 'label' => 'Активні члени', 'color' => 'from-emerald-400 to-emerald-500', 'bg' => 'bg-emerald-500', 'light' => 'bg-emerald-100 dark:bg-emerald-900/50', 'text' => 'text-emerald-600 dark:text-emerald-400'],
-                ['key' => 'leader', 'label' => 'Лідери', 'color' => 'from-green-500 to-green-600', 'bg' => 'bg-green-600', 'light' => 'bg-green-100 dark:bg-green-900/50', 'text' => 'text-green-600 dark:text-green-400'],
+                ['key' => 'guest', 'label' => __('app.guest'), 'color' => 'from-blue-400 to-blue-500', 'bg' => 'bg-blue-500', 'light' => 'bg-blue-100 dark:bg-blue-900/50', 'text' => 'text-blue-600 dark:text-blue-400'],
+                ['key' => 'newcomer', 'label' => __('app.newcomer'), 'color' => 'from-cyan-400 to-cyan-500', 'bg' => 'bg-cyan-500', 'light' => 'bg-cyan-100 dark:bg-cyan-900/50', 'text' => 'text-cyan-600 dark:text-cyan-400'],
+                ['key' => 'member', 'label' => __('app.church_member'), 'color' => 'from-teal-400 to-teal-500', 'bg' => 'bg-teal-500', 'light' => 'bg-teal-100 dark:bg-teal-900/50', 'text' => 'text-teal-600 dark:text-teal-400'],
+                ['key' => 'active', 'label' => __('app.active_member'), 'color' => 'from-emerald-400 to-emerald-500', 'bg' => 'bg-emerald-500', 'light' => 'bg-emerald-100 dark:bg-emerald-900/50', 'text' => 'text-emerald-600 dark:text-emerald-400'],
+                ['key' => 'leader', 'label' => __('app.leaders'), 'color' => 'from-green-500 to-green-600', 'bg' => 'bg-green-600', 'light' => 'bg-green-100 dark:bg-green-900/50', 'text' => 'text-green-600 dark:text-green-400'],
             ];
         @endphp
 

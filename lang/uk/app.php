@@ -171,6 +171,12 @@ return [
     'administrator' => 'Адміністратор',
     'moderator' => 'Модератор',
     'guest' => 'Гість',
+    'church_member' => 'Член церкви',
+    'active_member' => 'Активний член',
+    'leaders' => 'Лідери',
+    'access_denied' => 'Доступ заборонено',
+    'membership_funnel' => 'Воронка членства',
+    'total_lowercase' => 'всього',
 
     // Support
     'support' => 'Підтримка',
@@ -696,6 +702,8 @@ return [
     'resources' => 'Ресурси',
     'songs_library' => 'Бібліотека пісень',
     'grid' => 'Сітка',
+    'list' => 'Список',
+    'compact' => 'Компактний',
     'remind' => 'Нагадати',
     'ask_telegram' => 'Запитати в Telegram',
     'team_not_assigned' => 'Команда не призначена',

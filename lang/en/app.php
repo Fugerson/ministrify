@@ -174,6 +174,12 @@ return [
     'moderator' => 'Moderator',
     'member' => 'Member',
     'guest' => 'Guest',
+    'church_member' => 'Church member',
+    'active_member' => 'Active member',
+    'leaders' => 'Leaders',
+    'access_denied' => 'Access denied',
+    'membership_funnel' => 'Membership funnel',
+    'total_lowercase' => 'total',
 
     // Support
     'support' => 'Support',
@@ -699,6 +705,8 @@ return [
     'resources' => 'Resources',
     'songs_library' => 'Song library',
     'grid' => 'Grid',
+    'list' => 'List',
+    'compact' => 'Compact',
     'remind' => 'Remind',
     'ask_telegram' => 'Ask in Telegram',
     'team_not_assigned' => 'Team not assigned',

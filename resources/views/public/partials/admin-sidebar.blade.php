@@ -65,8 +65,8 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 translate-y-2"
-             class="bg-gray-900/95 backdrop-blur-md text-white rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-3 max-w-[90vw]">
-            <div class="text-sm text-white/70 hidden sm:block">
+             class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md text-gray-900 dark:text-white rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-3 max-w-[90vw]">
+            <div class="text-sm text-gray-500 dark:text-white/70 hidden sm:block">
                 Перетягуйте секції для зміни порядку
             </div>
             <button @click="saveEditMode()" :disabled="saving"
@@ -85,7 +85,7 @@
                 <span x-text="saving ? 'Збереження...' : 'Зберегти'"></span>
             </button>
             <button @click="cancelEditMode()"
-                    class="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors flex-shrink-0">
+                    class="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-white rounded-xl transition-colors flex-shrink-0">
                 Скасувати
             </button>
         </div>
