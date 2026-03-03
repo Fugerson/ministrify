@@ -3335,10 +3335,53 @@
                     </div>
                 </div>
 
-                <!-- Search -->
-                <div class="mb-4">
-                    <input type="text" x-model="search" placeholder="Пошук пісень..."
-                           class="w-full sm:w-80 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 text-sm">
+                <!-- Search & Filters -->
+                <div class="mb-4 space-y-3">
+                    <div class="flex flex-wrap gap-3">
+                        <input type="text" x-model="search" placeholder="Пошук пісень..."
+                               class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 text-sm">
+                        <select x-model="filterArtist"
+                                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                            <option value="">Усі виконавці</option>
+                            <template x-for="a in artists" :key="a">
+                                <option :value="a" x-text="a"></option>
+                            </template>
+                        </select>
+                        <select x-model="filterBpm"
+                                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                            <option value="">Будь-який темп</option>
+                            <option value="slow">Повільні (< 80 BPM)</option>
+                            <option value="medium">Середні (80–120 BPM)</option>
+                            <option value="fast">Швидкі (> 120 BPM)</option>
+                            <option value="none">Без BPM</option>
+                        </select>
+                        <select x-model="filterUsage"
+                                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                            <option value="">Будь-яке використання</option>
+                            <option value="frequent">Часто (5+ разів)</option>
+                            <option value="moderate">Помірно (1–4 рази)</option>
+                            <option value="never">Ніколи не використані</option>
+                        </select>
+                        <select x-model="filterContent"
+                                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                            <option value="">Будь-який контент</option>
+                            <option value="has_lyrics">Зі словами</option>
+                            <option value="has_chords">З акордами</option>
+                            <option value="has_youtube">З YouTube</option>
+                            <option value="has_spotify">Зі Spotify</option>
+                            <option value="no_lyrics">Без слів</option>
+                            <option value="no_chords">Без акордів</option>
+                        </select>
+                    </div>
+                    <div x-show="filterArtist || filterBpm || filterUsage || filterContent" class="flex items-center gap-2">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            Знайдено: <span x-text="filteredSongs.length"></span> пісень
+                        </span>
+                        <button x-on:click="filterArtist=''; filterBpm=''; filterUsage=''; filterContent=''; search=''; filterKey=''; filterTag=''"
+                                class="text-xs text-primary-600 dark:text-primary-400 hover:underline">
+                            Скинути фільтри
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Kanban Columns -->
@@ -4673,6 +4716,10 @@ function songsLibrary() {
         search: '',
         filterKey: '',
         filterTag: '',
+        filterArtist: '',
+        filterBpm: '',
+        filterUsage: '',
+        filterContent: '',
         sortBy: 'title',
         sortDir: 'asc',
         keyQuery: '',
@@ -4683,6 +4730,10 @@ function songsLibrary() {
             this.$nextTick(() => this.initSortable());
             this.$watch('search', () => this.$nextTick(() => this.initSortable()));
             this.$watch('filterTag', () => this.$nextTick(() => this.initSortable()));
+            this.$watch('filterArtist', () => this.$nextTick(() => this.initSortable()));
+            this.$watch('filterBpm', () => this.$nextTick(() => this.initSortable()));
+            this.$watch('filterUsage', () => this.$nextTick(() => this.initSortable()));
+            this.$watch('filterContent', () => this.$nextTick(() => this.initSortable()));
         },
 
         initSortable() {
@@ -4753,6 +4804,44 @@ function songsLibrary() {
             }
             if (this.filterTag) {
                 result = result.filter(song => song.tags && song.tags.includes(this.filterTag));
+            }
+            if (this.filterArtist) {
+                result = result.filter(song => song.artist === this.filterArtist);
+            }
+            if (this.filterBpm) {
+                result = result.filter(song => {
+                    switch (this.filterBpm) {
+                        case 'slow': return song.bpm && song.bpm < 80;
+                        case 'medium': return song.bpm && song.bpm >= 80 && song.bpm <= 120;
+                        case 'fast': return song.bpm && song.bpm > 120;
+                        case 'none': return !song.bpm;
+                        default: return true;
+                    }
+                });
+            }
+            if (this.filterUsage) {
+                result = result.filter(song => {
+                    const used = song.times_used || 0;
+                    switch (this.filterUsage) {
+                        case 'frequent': return used >= 5;
+                        case 'moderate': return used >= 1 && used <= 4;
+                        case 'never': return used === 0;
+                        default: return true;
+                    }
+                });
+            }
+            if (this.filterContent) {
+                result = result.filter(song => {
+                    switch (this.filterContent) {
+                        case 'has_lyrics': return !!song.lyrics;
+                        case 'has_chords': return !!song.chords;
+                        case 'has_youtube': return !!song.youtube_url;
+                        case 'has_spotify': return !!song.spotify_url;
+                        case 'no_lyrics': return !song.lyrics;
+                        case 'no_chords': return !song.chords;
+                        default: return true;
+                    }
+                });
             }
             const dir = this.sortDir === 'asc' ? 1 : -1;
             return [...result].sort((a, b) => {
