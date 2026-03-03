@@ -955,26 +955,12 @@ class DashboardController extends Controller
             ")
             ->first();
 
-        // Leaders = people who lead a ministry or group
-        $leaderCount = DB::table('people')
-            ->where('people.church_id', $church->id)
-            ->whereNull('people.deleted_at')
-            ->where(function ($q) {
-                $q->whereIn('people.id', function ($sub) {
-                    $sub->select('leader_id')->from('ministries')->whereNull('deleted_at')->whereNotNull('leader_id');
-                })->orWhereIn('people.id', function ($sub) {
-                    $sub->select('leader_id')->from('groups')->whereNull('deleted_at')->whereNotNull('leader_id');
-                });
-            })
-            ->count();
-
         return [
             'total' => (int) ($stats->total ?? 0),
             'guest' => (int) ($stats->guest ?? 0),
             'newcomer' => (int) ($stats->newcomer ?? 0),
             'member' => (int) ($stats->member ?? 0),
             'active' => (int) ($stats->active ?? 0),
-            'leader' => $leaderCount,
             'unset' => (int) ($stats->unset ?? 0),
         ];
     }
