@@ -91,96 +91,104 @@
                 <div x-show="activeTab === 'matrix'" id="matrix-header-slot" class="flex items-center gap-2"></div>
             </div>
 
-            {{-- Calendar: Date Navigation --}}
-            <div x-show="activeTab === 'calendar'" class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
-                <button @click="prevPeriod()" type="button"
-                   class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </button>
+            {{-- Date/Period Navigation (shared position, different content per tab) --}}
+            <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
+                {{-- Calendar: Date Navigation --}}
+                <template x-if="activeTab === 'calendar'">
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <button @click="prevPeriod()" type="button"
+                           class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
+                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
 
-                {{-- Month/Week Picker Button --}}
-                <div x-data="{ showPicker: false }" class="relative">
-                    <button @click="showPicker = !showPicker" type="button"
-                       class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer">
-                        <span x-show="currentView === 'week'" x-text="weekDisplay"></span>
-                        <span x-show="currentView === 'month'" x-text="monthDisplay"></span>
-                        <svg class="w-4 h-4 inline-block ml-2 transition-transform" :class="showPicker ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-                        </svg>
-                    </button>
+                        {{-- Month/Week Picker Button --}}
+                        <div x-data="{ showPicker: false }" class="relative">
+                            <button @click="showPicker = !showPicker" type="button"
+                               class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer">
+                                <span x-show="currentView === 'week'" x-text="weekDisplay"></span>
+                                <span x-show="currentView === 'month'" x-text="monthDisplay"></span>
+                                <svg class="w-4 h-4 inline-block ml-2 transition-transform" :class="showPicker ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                                </svg>
+                            </button>
 
-                    {{-- Calendar Picker Dropdown --}}
-                    <div x-show="showPicker" x-transition @click.outside="showPicker = false"
-                         class="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
-                        <div x-show="currentView === 'month'" class="space-y-3">
-                            <div class="flex items-center justify-between mb-3">
-                                <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                                    </svg>
-                                </button>
-                                <span class="font-semibold" x-text="currentYear"></span>
-                                <button @click="currentYear++; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
-                                    <button @click="currentMonth = index + 1; showPicker = false; loadCalendar()" type="button"
-                                       :class="currentMonth === index + 1 ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
-                                       class="p-2 rounded-lg font-medium text-sm transition-colors">
-                                        <span x-text="month"></span>
-                                    </button>
-                                </template>
+                            {{-- Calendar Picker Dropdown --}}
+                            <div x-show="showPicker" x-transition @click.outside="showPicker = false"
+                                 class="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+                                <div x-show="currentView === 'month'" class="space-y-3">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                            </svg>
+                                        </button>
+                                        <span class="font-semibold" x-text="currentYear"></span>
+                                        <button @click="currentYear++; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
+                                            <button @click="currentMonth = index + 1; showPicker = false; loadCalendar()" type="button"
+                                               :class="currentMonth === index + 1 ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                               class="p-2 rounded-lg font-medium text-sm transition-colors">
+                                                <span x-text="month"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div x-show="currentView === 'week'" class="space-y-3">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                            </svg>
+                                        </button>
+                                        <span class="font-semibold" x-text="currentYear"></span>
+                                        <button @click="currentYear++; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2 mb-3">
+                                        <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
+                                            <button @click="currentMonth = index + 1" type="button"
+                                               :class="currentMonth === index + 1 ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                               class="p-2 rounded-lg font-medium text-xs transition-colors">
+                                                <span x-text="month"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+                                        <template x-for="week in Array.from({length: 52}, (_, i) => i + 1)" :key="week">
+                                            <button @click="currentWeek = week; showPicker = false; loadCalendar()" type="button"
+                                               :class="currentWeek === week ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                               class="p-2 rounded-lg font-medium text-xs transition-colors">
+                                                <span x-text="'W' + week"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div x-show="currentView === 'week'" class="space-y-3">
-                            <div class="flex items-center justify-between mb-3">
-                                <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                                    </svg>
-                                </button>
-                                <span class="font-semibold" x-text="currentYear"></span>
-                                <button @click="currentYear++; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2 mb-3">
-                                <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
-                                    <button @click="currentMonth = index + 1" type="button"
-                                       :class="currentMonth === index + 1 ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
-                                       class="p-2 rounded-lg font-medium text-xs transition-colors">
-                                        <span x-text="month"></span>
-                                    </button>
-                                </template>
-                            </div>
-                            <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-                                <template x-for="week in Array.from({length: 52}, (_, i) => i + 1)" :key="week">
-                                    <button @click="currentWeek = week; showPicker = false; loadCalendar()" type="button"
-                                       :class="currentWeek === week ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
-                                       class="p-2 rounded-lg font-medium text-xs transition-colors">
-                                        <span x-text="'W' + week"></span>
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
+                        <button @click="nextPeriod()" type="button"
+                           class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
+                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
                     </div>
-                </div>
+                </template>
 
-                <button @click="nextPeriod()" type="button"
-                   class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
+                {{-- Matrix: Period Navigation (teleport target) --}}
+                <div x-show="activeTab === 'matrix'" id="matrix-period-slot"></div>
             </div>
 
             {{-- Actions (Calendar tab) --}}
@@ -686,39 +694,41 @@
     <div x-show="activeTab === 'matrix'" x-cloak>
         <div x-data="matrixView()" @load-matrix.window="if (events.length === 0 && !loading) loadData()">
 
-            {{-- Matrix Filters (teleported to shared header) --}}
+            {{-- Matrix Filters: dropdowns (teleported to left side of header) --}}
             <template x-teleport="#matrix-header-slot">
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
                     <select x-model="serviceType" @change="loadData()"
                             class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm py-2">
                         @foreach($serviceTypes as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
                     </select>
-
                     <select x-model="weeks" @change="loadData()"
                             class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm py-2">
                         <option value="4">4 {{ __('тижні') }}</option>
                         <option value="8">8 {{ __('тижнів') }}</option>
                         <option value="12">12 {{ __('тижнів') }}</option>
                     </select>
+                </div>
+            </template>
 
-                    <div class="flex items-center gap-0.5">
-                        <button @click="prevPeriod()" type="button"
-                            class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                            <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </button>
-                        <button @click="nextPeriod()" type="button"
-                            class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                            <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <span class="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300" x-text="periodLabel"></span>
+            {{-- Matrix Period Nav (teleported to center — same style as calendar date nav) --}}
+            <template x-teleport="#matrix-period-slot">
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <button @click="prevPeriod()" type="button"
+                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
+                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <span class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center" x-text="periodLabel"></span>
+                    <button @click="nextPeriod()" type="button"
+                       class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
+                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
                 </div>
             </template>
 
