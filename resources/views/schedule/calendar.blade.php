@@ -70,8 +70,8 @@
                     </button>
                 </div>
 
-                {{-- Week/Month toggle --}}
-                <div class="flex items-center gap-3">
+                {{-- Calendar: Week/Month toggle --}}
+                <div x-show="activeTab === 'calendar'" class="flex items-center gap-3">
                     <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
                     <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
                         <button @click="switchView('week')" type="button"
@@ -86,10 +86,13 @@
                         </button>
                     </div>
                 </div>
+
+                {{-- Matrix: teleport target for filters --}}
+                <div x-show="activeTab === 'matrix'" id="matrix-header-slot" class="flex items-center gap-2"></div>
             </div>
 
-            {{-- Date Navigation --}}
-            <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
+            {{-- Calendar: Date Navigation --}}
+            <div x-show="activeTab === 'calendar'" class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
                 <button @click="prevPeriod()" type="button"
                    class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -683,8 +686,8 @@
     <div x-show="activeTab === 'matrix'" x-cloak>
         <div x-data="matrixView()" @load-matrix.window="if (events.length === 0 && !loading) loadData()">
 
-            {{-- Matrix Filters --}}
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
+            {{-- Matrix Filters (teleported to shared header) --}}
+            <template x-teleport="#matrix-header-slot">
                 <div class="flex flex-wrap items-center gap-2">
                     <select x-model="serviceType" @change="loadData()"
                             class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm py-2">
@@ -717,7 +720,7 @@
 
                     <span class="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300" x-text="periodLabel"></span>
                 </div>
-            </div>
+            </template>
 
             {{-- Loading --}}
             <div x-show="loading" class="flex items-center justify-center py-12">
