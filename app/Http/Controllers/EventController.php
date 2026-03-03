@@ -336,11 +336,14 @@ class EventController extends Controller
             'songs',
             'ministryTeams.person',
             'ministryTeams.ministryRole',
+            'ministryTeams.ministry',
             'checklist.items.completedByUser',
             'planItems.responsible',
             'planItems.song',
             'responsibilities.person',
             'attendance.records.person',
+            'assignments.person',
+            'assignments.position.ministry',
         ]);
 
         // Get available people for unfilled positions (only if ministry exists)
@@ -1012,6 +1015,7 @@ class EventController extends Controller
                     'status' => $entry->status,
                     'has_telegram' => (bool) $person?->telegram_chat_id,
                     'source' => 'ministry_team',
+                    'notes' => $entry->notes,
                 ];
             }
 
@@ -1055,6 +1059,7 @@ class EventController extends Controller
                         'status' => $assignment->status,
                         'has_telegram' => (bool) $person?->telegram_chat_id,
                         'source' => 'assignment',
+                        'notes' => $assignment->notes,
                     ];
                 }
             }

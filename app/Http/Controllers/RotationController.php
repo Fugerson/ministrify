@@ -271,6 +271,7 @@ class RotationController extends Controller
         $validated = $request->validate([
             'position_id' => 'required|exists:positions,id',
             'person_id' => 'required|exists:people,id',
+            'notes' => 'nullable|string|max:255',
         ]);
 
         $church = $this->getCurrentChurch();
@@ -292,9 +293,30 @@ class RotationController extends Controller
             'position_id' => $validated['position_id'],
             'person_id' => $validated['person_id'],
             'status' => Assignment::STATUS_PENDING,
+            'notes' => $validated['notes'] ?? null,
         ]);
 
         return response()->json(['success' => true, 'id' => $assignment->id]);
+    }
+
+    /**
+     * Update notes on an assignment (from Matrix View)
+     */
+    public function updateAssignmentNotes(Request $request, Assignment $assignment)
+    {
+        abort_unless(auth()->user()->canEdit('ministries'), 403);
+
+        $church = $this->getCurrentChurch();
+        $event = $assignment->event;
+        abort_unless($event && $event->church_id === $church->id, 404);
+
+        $validated = $request->validate([
+            'notes' => 'nullable|string|max:255',
+        ]);
+
+        $assignment->update(['notes' => $validated['notes']]);
+
+        return response()->json(['success' => true]);
     }
 
     /**

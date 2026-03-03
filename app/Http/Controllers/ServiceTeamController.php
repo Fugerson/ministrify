@@ -97,6 +97,27 @@ class ServiceTeamController extends Controller
         return back()->with('success', 'Учасника видалено');
     }
 
+    /**
+     * Update notes on a ministry team member entry
+     */
+    public function updateNotes(Request $request, Event $event, EventMinistryTeam $member)
+    {
+        abort_unless($this->canEditServiceEvent($member->ministry_id), 403);
+        $this->authorizeChurch($event);
+
+        if ($member->event_id !== $event->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'notes' => 'nullable|string|max:255',
+        ]);
+
+        $member->update(['notes' => $validated['notes']]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function sendNotification(Request $request, Event $event, EventMinistryTeam $member)
     {
         abort_unless($this->canEditServiceEvent($member->ministry_id), 403);

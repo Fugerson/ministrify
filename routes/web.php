@@ -352,6 +352,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add')->middleware('permission:events,edit');
     Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove')->middleware('permission:events,edit');
     Route::post('events/{event}/ministry-team/{member}/notify', [ServiceTeamController::class, 'sendNotification'])->name('events.ministry-team.notify')->middleware('permission:events,edit');
+    Route::patch('events/{event}/ministry-team/{member}/notes', [ServiceTeamController::class, 'updateNotes'])->name('events.ministry-team.update-notes')->middleware('permission:events,edit');
 
 
     // Person worship skills
@@ -477,6 +478,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('event/{event}/auto-assign', [\App\Http\Controllers\RotationController::class, 'autoAssignEvent'])->name('event.auto-assign');
         Route::post('event/{event}/assign-position', [\App\Http\Controllers\RotationController::class, 'assignPosition'])->name('event.assign-position');
         Route::delete('assignment/{assignment}', [\App\Http\Controllers\RotationController::class, 'removeAssignment'])->name('assignment.remove');
+        Route::patch('assignment/{assignment}/notes', [\App\Http\Controllers\RotationController::class, 'updateAssignmentNotes'])->name('assignment.update-notes');
         Route::get('event/{event}/preview', [\App\Http\Controllers\RotationController::class, 'previewAutoAssign'])->name('event.preview');
         Route::get('report/{ministry}', [\App\Http\Controllers\RotationController::class, 'report'])->name('report');
         Route::get('volunteer/{person}/stats', [\App\Http\Controllers\RotationController::class, 'volunteerStats'])->name('volunteer.stats');
