@@ -174,12 +174,13 @@
                                                     <div class="flex items-center gap-1 text-xs leading-tight w-full justify-center">
                                                         <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
                                                               :class="statusDotClass(person.status)"></span>
-                                                        <span class="truncate max-w-[100px] font-medium" x-text="person.person_name"
+                                                        <span class="truncate max-w-[110px] font-medium" x-text="person.person_name"
                                                               :class="statusTextClass(person.status)"></span>
-                                                        <template x-if="person.notes">
-                                                            <span class="flex-shrink-0 text-[10px] text-gray-400 dark:text-gray-500" title="" :title="person.notes">💬</span>
-                                                        </template>
                                                     </div>
+                                                </template>
+                                                {{-- Cell-level notes icon --}}
+                                                <template x-if="getCellNotes(ministry.id, role, event.id)">
+                                                    <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate max-w-[120px] mt-0.5" :title="getCellNotes(ministry.id, role, event.id)" x-text="'💬 ' + getCellNotes(ministry.id, role, event.id)"></div>
                                                 </template>
                                                 {{-- Empty cell --}}
                                                 <template x-if="getCellPersons(ministry.id, role, event.id).length === 0">
@@ -261,60 +262,50 @@
         <template x-if="dropdown.persons.length > 0">
             <div class="border-b border-gray-200 dark:border-gray-700">
                 <template x-for="person in dropdown.persons" :key="person.id">
-                    <div class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="w-2 h-2 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
-                                <span class="text-sm text-gray-900 dark:text-white truncate" x-text="person.person_name"></span>
-                                <span class="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
-                                      :class="statusBadgeClass(person.status)"
-                                      x-text="statusLabel(person.status)"></span>
-                            </div>
-                            <div class="flex items-center gap-0.5 flex-shrink-0 ml-2">
-                                <button @click.stop="person.editingNotes = !person.editingNotes"
-                                    class="p-1.5 transition-colors rounded-lg"
-                                    :class="person.notes ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                                    :title="person.notes || '{{ __('Додати примітку') }}'">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                                    </svg>
-                                </button>
-                                <template x-if="person.has_telegram && person.source !== 'assignment'">
-                                    <button @click.stop="notifyPerson(person)"
-                                        class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                        :title="'{{ __('Надіслати в Telegram') }}'">
-                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-                                        </svg>
-                                    </button>
-                                </template>
-                                <button @click.stop="removePerson(person)"
-                                    class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                                    :title="'{{ __('Видалити') }}'">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
+                    <div class="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-2 h-2 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
+                            <span class="text-sm text-gray-900 dark:text-white truncate" x-text="person.person_name"></span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
+                                  :class="statusBadgeClass(person.status)"
+                                  x-text="statusLabel(person.status)"></span>
                         </div>
-                        {{-- Inline notes editor --}}
-                        <template x-if="person.editingNotes">
-                            <div class="mt-1.5 ml-4">
-                                <input type="text" :value="person.notes || ''"
-                                       @input.debounce.600ms="saveNotes(person, $event.target.value)"
-                                       @keydown.escape="person.editingNotes = false"
-                                       placeholder="{{ __('Примітка...') }}"
-                                       class="w-full px-2 py-1 text-xs rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500">
-                            </div>
-                        </template>
-                        {{-- Show existing note text --}}
-                        <template x-if="!person.editingNotes && person.notes">
-                            <div class="mt-0.5 ml-4 text-[11px] text-gray-500 dark:text-gray-400 truncate" x-text="'💬 ' + person.notes"></div>
-                        </template>
+                        <div class="flex items-center gap-0.5 flex-shrink-0 ml-2">
+                            <template x-if="person.has_telegram && person.source !== 'assignment'">
+                                <button @click.stop="notifyPerson(person)"
+                                    class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                    :title="'{{ __('Надіслати в Telegram') }}'">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                                    </svg>
+                                </button>
+                            </template>
+                            <button @click.stop="removePerson(person)"
+                                class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                                :title="'{{ __('Видалити') }}'">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </template>
             </div>
         </template>
+
+        {{-- Cell-level notes --}}
+        <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-1.5 mb-1">
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                </svg>
+                <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('Примітка до позиції') }}</span>
+            </div>
+            <input type="text" :value="dropdown.cellNotes || ''"
+                   @input.debounce.600ms="saveCellNotes($event.target.value)"
+                   placeholder="{{ __('Примітка...') }}"
+                   class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500">
+        </div>
 
         {{-- Add member search --}}
         <div class="p-2">
@@ -370,6 +361,7 @@ function matrixView() {
             event: null,
             persons: [],
             search: '',
+            cellNotes: '',
         },
 
         toast: {
@@ -489,6 +481,14 @@ function matrixView() {
             return this.grid?.[mKey]?.[rKey]?.[eKey] || [];
         },
 
+        getCellNotes(ministryId, role, eventId) {
+            const persons = this.getCellPersons(ministryId, role, eventId);
+            for (const p of persons) {
+                if (p.notes) return p.notes;
+            }
+            return null;
+        },
+
         getCellClasses(ministryId, role, eventId) {
             const persons = this.getCellPersons(ministryId, role, eventId);
             if (persons.length === 0) {
@@ -559,8 +559,9 @@ function matrixView() {
             this.dropdown.ministry = ministry;
             this.dropdown.role = role;
             this.dropdown.event = event;
-            this.dropdown.persons = this.getCellPersons(ministry.id, role, event.id).map(p => ({...p, editingNotes: false}));
+            this.dropdown.persons = this.getCellPersons(ministry.id, role, event.id);
             this.dropdown.search = '';
+            this.dropdown.cellNotes = this.getCellNotes(ministry.id, role, event.id) || '';
             this.dropdown.open = true;
 
             this.$nextTick(() => {
@@ -642,7 +643,6 @@ function matrixView() {
                         has_telegram: member.has_telegram,
                         source: role.type === 'ministry_role' ? 'ministry_team' : 'assignment',
                         notes: null,
-                        editingNotes: false,
                     });
 
                     this.dropdown.persons = this.grid[mKey][rKey][eKey];
@@ -710,47 +710,45 @@ function matrixView() {
             }
         },
 
-        async saveNotes(person, value) {
-            const { ministry, role, event } = this.dropdown;
-            if (!ministry || !role || !event) return;
+        async saveCellNotes(value) {
+            const { ministry, role, event, persons } = this.dropdown;
+            if (!ministry || !role || !event || persons.length === 0) return;
 
             const notes = value.trim() || null;
+            this.dropdown.cellNotes = notes || '';
+
+            const mKey = String(ministry.id);
+            const rKey = this.getRoleKey(role);
+            const eKey = String(event.id);
 
             try {
-                let url;
-                if (person.source === 'assignment') {
-                    url = `/rotation/assignment/${person.id}/notes`;
-                } else {
-                    url = `/events/${event.id}/ministry-team/${person.id}/notes`;
-                }
+                // Save to all entries in this cell
+                const promises = persons.map(person => {
+                    const url = person.source === 'assignment'
+                        ? `/rotation/assignment/${person.id}/notes`
+                        : `/events/${event.id}/ministry-team/${person.id}/notes`;
 
-                const resp = await fetch(url, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: JSON.stringify({ notes }),
+                    return fetch(url, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ notes }),
+                    });
                 });
 
-                if (resp.ok) {
-                    // Update in grid
-                    const mKey = String(ministry.id);
-                    const rKey = this.getRoleKey(role);
-                    const eKey = String(event.id);
-                    if (this.grid[mKey]?.[rKey]?.[eKey]) {
-                        const p = this.grid[mKey][rKey][eKey].find(p => p.id === person.id);
-                        if (p) p.notes = notes;
-                    }
-                    person.notes = notes;
-                    this.showToast('{{ __("Примітку збережено") }}');
-                } else {
-                    this.showToast('{{ __("Помилка") }}', 'error');
+                await Promise.all(promises);
+
+                // Update in grid
+                if (this.grid[mKey]?.[rKey]?.[eKey]) {
+                    this.grid[mKey][rKey][eKey].forEach(p => p.notes = notes);
                 }
+                this.showToast('{{ __("Примітку збережено") }}');
             } catch (e) {
-                console.error('Save notes error:', e);
+                console.error('Save cell notes error:', e);
                 this.showToast('{{ __("Помилка") }}', 'error');
             }
         },

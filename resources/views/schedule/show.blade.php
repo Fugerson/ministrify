@@ -629,7 +629,7 @@
 
             <!-- Event Team Section -->
             @php
-                // Combine assignments and ministry teams, grouped by ministry
+                // Combine assignments and ministry teams, grouped by ministry → role
                 $eventTeam = collect();
 
                 // Position-based assignments
@@ -690,23 +690,32 @@
                             <span class="text-xs text-gray-400 dark:text-gray-500">{{ $members->count() }}</span>
                         </div>
                         <div class="ml-4 space-y-1">
-                            @foreach($members as $member)
-                            <div class="flex items-center gap-2 py-1">
-                                @php
-                                    $dotClass = match($member->status) {
-                                        'confirmed' => 'bg-green-500',
-                                        'pending' => 'bg-amber-500',
-                                        'declined' => 'bg-red-500',
-                                        default => 'bg-gray-400',
-                                    };
-                                @endphp
-                                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {{ $dotClass }}"></span>
-                                <span class="text-sm text-gray-900 dark:text-white">{{ $member->person_name }}</span>
-                                <span class="text-xs text-gray-400 dark:text-gray-500">{{ $member->role_name }}</span>
-                                @if($member->notes)
-                                    <span class="text-xs text-gray-400 dark:text-gray-500" title="{{ $member->notes }}">💬</span>
-                                @endif
-                            </div>
+                            @php $roleGroups = $members->groupBy('role_name'); @endphp
+                            @foreach($roleGroups as $roleName => $roleMembers)
+                                @php $roleNote = $roleMembers->pluck('notes')->filter()->first(); @endphp
+                                <div class="py-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $roleName }}:</span>
+                                        @foreach($roleMembers as $member)
+                                            @php
+                                                $dotClass = match($member->status) {
+                                                    'confirmed' => 'bg-green-500',
+                                                    'pending' => 'bg-amber-500',
+                                                    'declined' => 'bg-red-500',
+                                                    default => 'bg-gray-400',
+                                                };
+                                            @endphp
+                                            <span class="inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {{ $dotClass }}"></span>
+                                                <span class="text-sm text-gray-900 dark:text-white">{{ $member->person_name }}</span>
+                                            </span>
+                                            @if(!$loop->last)<span class="text-gray-300 dark:text-gray-600">·</span>@endif
+                                        @endforeach
+                                    </div>
+                                    @if($roleNote)
+                                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 ml-0.5">💬 {{ $roleNote }}</div>
+                                    @endif
+                                </div>
                             @endforeach
                         </div>
                     </div>
