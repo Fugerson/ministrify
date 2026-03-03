@@ -3360,6 +3360,9 @@
                                     <div class="song-column flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50" :data-tag="col">
                                         <template x-for="song in getSongsForColumn(col)" :key="song.id">
                                             <div class="song-item flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 group" :data-song-id="song.id">
+                                                @can('contribute-ministry', $ministry)
+                                                <svg class="drag-handle w-4 h-4 flex-shrink-0 text-gray-300 dark:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+                                                @endcan
                                                 <div class="flex-1 min-w-0 cursor-pointer" @click="openSongModal(song)">
                                                     <span class="text-sm text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate block" x-text="song.title"></span>
                                                 </div>
@@ -3402,6 +3405,9 @@
                                 <div class="song-column flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50" data-tag="">
                                     <template x-for="song in getUntaggedSongs()" :key="song.id">
                                         <div class="song-item flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 group" :data-song-id="song.id">
+                                            @can('contribute-ministry', $ministry)
+                                            <svg class="drag-handle w-4 h-4 flex-shrink-0 text-gray-300 dark:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+                                            @endcan
                                             <div class="flex-1 min-w-0 cursor-pointer" @click="openSongModal(song)">
                                                 <span class="text-sm text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate block" x-text="song.title"></span>
                                             </div>
@@ -4172,8 +4178,9 @@
 @push('styles')
 <style>
     /* Song kanban drag-and-drop */
-    .song-item { cursor: grab; }
-    .song-item.sortable-chosen { cursor: grabbing; }
+    .song-item .drag-handle { cursor: grab; }
+    .song-item.sortable-chosen .drag-handle { cursor: grabbing; }
+    .song-item.sortable-chosen { opacity: 0.8; }
 
     /* Custom document editor */
     .doc-toolbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 10px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; position: sticky; top: 0; z-index: 10; }
@@ -4687,6 +4694,7 @@ function songsLibrary() {
                 if (el._sortable) el._sortable.destroy();
                 el._sortable = new Sortable(el, {
                     group: 'songs',
+                    handle: '.drag-handle',
                     animation: 200,
                     ghostClass: 'opacity-40',
                     chosenClass: 'shadow-lg',
