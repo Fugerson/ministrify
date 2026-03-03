@@ -29,7 +29,16 @@ class SongController extends Controller
             ->sort()
             ->values();
 
-        return view('songs.index', compact('songs', 'allTags'));
+        // Get all unique artists for filter
+        $allArtists = Song::where('church_id', $church->id)
+            ->whereNotNull('artist')
+            ->where('artist', '!=', '')
+            ->pluck('artist')
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('songs.index', compact('songs', 'allTags', 'allArtists'));
     }
 
     public function create()
