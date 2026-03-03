@@ -3357,9 +3357,9 @@
                                               x-text="getSongsForColumn(col).length"></span>
                                     </div>
                                     <!-- Song Rows -->
-                                    <div class="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50">
+                                    <div class="song-column flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50" :data-tag="col">
                                         <template x-for="song in getSongsForColumn(col)" :key="song.id">
-                                            <div class="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
+                                            <div class="song-item flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 group" :data-song-id="song.id">
                                                 <div class="flex-1 min-w-0 cursor-pointer" @click="openSongModal(song)">
                                                     <span class="text-sm text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate block" x-text="song.title"></span>
                                                 </div>
@@ -3399,9 +3399,9 @@
                                     <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-full"
                                           x-text="getUntaggedSongs().length"></span>
                                 </div>
-                                <div class="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50">
+                                <div class="song-column flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50" data-tag="">
                                     <template x-for="song in getUntaggedSongs()" :key="song.id">
-                                        <div class="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
+                                        <div class="song-item flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 group" :data-song-id="song.id">
                                             <div class="flex-1 min-w-0 cursor-pointer" @click="openSongModal(song)">
                                                 <span class="text-sm text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate block" x-text="song.title"></span>
                                             </div>
@@ -4171,6 +4171,10 @@
 
 @push('styles')
 <style>
+    /* Song kanban drag-and-drop */
+    .song-item { cursor: grab; }
+    .song-item.sortable-chosen { cursor: grabbing; }
+
     /* Custom document editor */
     .doc-toolbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 10px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; position: sticky; top: 0; z-index: 10; }
     .dark .doc-toolbar { background: #1e293b; border-bottom-color: #374151; }
@@ -4206,6 +4210,7 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
 function _getOrCreateResourceList() {
     var list = document.getElementById('ministry-resources-list');
@@ -4666,6 +4671,42 @@ function songsLibrary() {
         keyQuery: '',
         keyDropdownOpen: false,
         songKeysMap: @js(\App\Models\Song::KEYS),
+
+        init() {
+            this.$nextTick(() => this.initSortable());
+            this.$watch('search', () => this.$nextTick(() => this.initSortable()));
+            this.$watch('filterTag', () => this.$nextTick(() => this.initSortable()));
+        },
+
+        initSortable() {
+            if (typeof Sortable === 'undefined') {
+                setTimeout(() => this.initSortable(), 100);
+                return;
+            }
+            document.querySelectorAll('.song-column').forEach(el => {
+                if (el._sortable) el._sortable.destroy();
+                el._sortable = new Sortable(el, {
+                    group: 'songs',
+                    animation: 200,
+                    ghostClass: 'opacity-40',
+                    chosenClass: 'shadow-lg',
+                    draggable: '.song-item',
+                    onEnd: (evt) => {
+                        const songId = parseInt(evt.item.dataset.songId);
+                        const fromTag = evt.from.dataset.tag || null;
+                        const toTag = evt.to.dataset.tag || null;
+                        // Revert DOM — Alpine перерендерить
+                        if (evt.from !== evt.to) {
+                            evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                        }
+                        if (fromTag !== toTag) {
+                            this.moveSong(songId, fromTag, toTag);
+                        }
+                    }
+                });
+            });
+        },
+
         get filteredKeys() {
             if (!this.keyQuery) return Object.entries(this.songKeysMap);
             const q = this.keyQuery.toLowerCase();
