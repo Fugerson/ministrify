@@ -29,7 +29,10 @@ class SongController extends Controller
             ->sort()
             ->values();
 
-        return view('songs.index', compact('songs', 'allTags'));
+        // Board columns config
+        $boardTags = $church->settings['song_board_tags'] ?? [];
+
+        return view('songs.index', compact('songs', 'allTags', 'boardTags'));
     }
 
     public function create()
@@ -261,6 +264,38 @@ class SongController extends Controller
         }
 
         return $this->successResponse($request, 'Пісню оновлено.', 'songs.show', [$song]);
+    }
+
+    public function moveTag(Request $request, Song $song)
+    {
+        $this->authorizeChurch($song);
+        abort_unless(auth()->user()->canEdit('ministries'), 403);
+
+        $validated = $request->validate([
+            'from_tag' => 'nullable|string|max:50',
+            'to_tag' => 'nullable|string|max:50',
+        ]);
+
+        $tags = $song->tags ?? [];
+
+        // Remove old tag if present
+        if (!empty($validated['from_tag'])) {
+            $tags = array_values(array_filter($tags, fn($t) => $t !== $validated['from_tag']));
+        }
+
+        // Add new tag if not already present
+        if (!empty($validated['to_tag']) && !in_array($validated['to_tag'], $tags)) {
+            $tags[] = $validated['to_tag'];
+        }
+
+        $song->update([
+            'tags' => !empty($tags) ? array_values($tags) : null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'tags' => $song->tags ?? [],
+        ]);
     }
 
     public function destroy(Request $request, Song $song)

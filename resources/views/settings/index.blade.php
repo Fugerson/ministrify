@@ -1313,6 +1313,70 @@
         </div>
     </div>
 
+    <!-- Song Board Tags (Kanban columns) -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="{
+             tags: @json($church->settings['song_board_tags'] ?? []),
+             newTag: '',
+             saving: false,
+             async save() {
+                 this.saving = true;
+                 try {
+                     const resp = await fetch('{{ route('settings.song-board-tags') }}', {
+                         method: 'PUT',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content,
+                             'Accept': 'application/json',
+                         },
+                         body: JSON.stringify({ tags: this.tags })
+                     });
+                     const data = await resp.json();
+                     if (data.success) this.tags = data.tags;
+                 } catch(e) {}
+                 this.saving = false;
+             },
+             addTag() {
+                 const t = this.newTag.trim();
+                 if (!t || this.tags.includes(t)) return;
+                 this.tags.push(t);
+                 this.newTag = '';
+                 this.save();
+             },
+             removeTag(i) {
+                 this.tags.splice(i, 1);
+                 this.save();
+             }
+         }">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Теги пісень (колонки)</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Визначте теги, які будуть колонками на дошці пісень</p>
+        </div>
+        <div class="p-6 space-y-4">
+            <!-- Current tags -->
+            <div class="space-y-2">
+                <template x-for="(tag, i) in tags" :key="i">
+                    <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <span class="text-gray-900 dark:text-white text-sm" x-text="tag"></span>
+                        <button @click="removeTag(i)" class="text-red-600 hover:text-red-800 text-sm">Видалити</button>
+                    </div>
+                </template>
+                <template x-if="tags.length === 0">
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Тегів ще немає. Додайте теги, щоб увімкнути дошку пісень.</p>
+                </template>
+            </div>
+            <!-- Add new tag -->
+            <form @submit.prevent="addTag()" class="flex gap-2">
+                <input type="text" x-model="newTag" placeholder="Новий тег..." maxlength="50"
+                       class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
+                <button type="submit" :disabled="saving || !newTag.trim()"
+                        class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50">
+                    Додати
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Finance Categories -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ showForm: false, editId: null, formType: 'income' }">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">

@@ -614,6 +614,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
             Route::put('menu-position', [SettingsController::class, 'updateMenuPosition'])->name('menu-position');
             Route::put('finance', [SettingsController::class, 'updateFinance'])->name('finance');
             Route::put('currencies', [SettingsController::class, 'updateCurrencies'])->name('currencies');
+            Route::put('song-board-tags', [SettingsController::class, 'updateSongBoardTags'])->name('song-board-tags');
         });
 
         // Role permissions management (inline in settings page)
@@ -985,6 +986,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('{song}', [\App\Http\Controllers\SongController::class, 'update'])->name('update');
         Route::delete('{song}', [\App\Http\Controllers\SongController::class, 'destroy'])->name('destroy');
         Route::post('{song}/add-to-event', [\App\Http\Controllers\SongController::class, 'addToEvent'])->name('add-to-event');
+        Route::put('{song}/move-tag', [\App\Http\Controllers\SongController::class, 'moveTag'])->name('move-tag');
     });
 
     // Resources (files & folders)
