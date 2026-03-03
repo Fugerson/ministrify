@@ -1452,9 +1452,9 @@ function eventEditor() {
         ministryId: @json($event->ministry_id),
         ministryColor: @json($event->ministry?->color ?? '#3b82f6'),
         isService: true,
-        isSundayService: true,
+        isSundayService: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
         trackAttendance: true,
-        hasMusic: true,
+        hasMusic: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
         ministries: @json($ministriesData),
 
         // Store original values to detect changes
@@ -1465,9 +1465,9 @@ function eventEditor() {
             notes: @json($event->notes ?? ''),
             ministryId: @json($event->ministry_id),
             isService: true,
-            isSundayService: true,
+            isSundayService: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }},
             trackAttendance: true,
-            hasMusic: true
+            hasMusic: {{ $event->service_type === 'sunday_service' ? 'true' : 'false' }}
         },
 
         async saveField(field, value) {
