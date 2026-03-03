@@ -20,10 +20,6 @@
     <div id="schedule-options" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex items-center gap-1.5 sm:gap-2">
-                <a href="{{ route('events.index') }}"
-                   class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
-                    {{ __('Список') }}
-                </a>
                 <a href="{{ route('schedule') }}"
                    class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                     {{ __('Календар') }}

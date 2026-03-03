@@ -23,8 +23,8 @@
             $visibility = $ministry->visibility ?? 'public';
             $isLocked = $visibility !== 'public' && !$canAccess;
         @endphp
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 {{ $isLocked ? 'opacity-60' : '' }}">
-            <div class="p-4 md:p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col {{ $isLocked ? 'opacity-60' : '' }}">
+            <div class="p-4 md:p-6 flex-1">
                 <div class="flex items-start justify-between">
                     <div>
                         <div class="flex items-center gap-2">

@@ -21,10 +21,6 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             {{-- View Toggle --}}
             <div class="flex items-center gap-1.5 sm:gap-2">
-                <a href="{{ route('events.index') }}"
-                   class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    {{ __('Список') }}
-                </a>
                 <a href="{{ route('schedule') }}"
                    class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                     {{ __('Календар') }}
@@ -56,10 +52,6 @@
                         <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
-                    </button>
-                    <button @click="goToday()" type="button"
-                        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
-                        {{ __('Сьогодні') }}
                     </button>
                     <button @click="nextPeriod()" type="button"
                         class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
