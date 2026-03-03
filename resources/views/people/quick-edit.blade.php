@@ -32,10 +32,10 @@
             </select>
             <select x-model="filterStatus" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
                 <option value="">Статус</option>
-                <option value="guest">Гість</option>
-                <option value="newcomer">Новоприбулий</option>
-                <option value="member">Член церкви</option>
-                <option value="active">Активний</option>
+                <option value="guest">{{ __('app.guest') }}</option>
+                <option value="newcomer">{{ __('app.newcomer') }}</option>
+                <option value="member">{{ __('app.church_member') }}</option>
+                <option value="active">{{ __('app.active_member') }}</option>
             </select>
             <select x-model="filterGender" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
                 <option value="">Стать</option>
@@ -271,10 +271,10 @@
                                 <select x-model="row.membership_status" @change="markDirty(row)"
                                         class="w-full px-2 py-1.5 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-white dark:focus:bg-gray-700 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 rounded text-sm transition-colors">
                                     <option value="">—</option>
-                                    <option value="guest">Гість</option>
-                                    <option value="newcomer">Новоприб.</option>
-                                    <option value="member">Член</option>
-                                    <option value="active">Активний</option>
+                                    <option value="guest">{{ __('app.guest') }}</option>
+                                    <option value="newcomer">{{ __('app.newcomer') }}</option>
+                                    <option value="member">{{ __('app.church_member') }}</option>
+                                    <option value="active">{{ __('app.active_member') }}</option>
                                 </select>
                             </td>
 
