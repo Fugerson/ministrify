@@ -206,10 +206,13 @@ class EventController extends Controller
         $isGoogleConnected = !empty($googleSettings['access_token']);
         $lastSyncedAt = $googleSettings['last_synced_at'] ?? null;
 
+        // Service types for matrix tab
+        $serviceTypes = Event::serviceTypeLabels();
+
         return view('schedule.calendar', compact(
             'events', 'year', 'month', 'startDate', 'endDate',
             'ministries', 'view', 'currentWeek', 'church', 'meetings', 'upcomingNextMonth', 'nextMonth', 'nextYear',
-            'isGoogleConnected', 'lastSyncedAt'
+            'isGoogleConnected', 'lastSyncedAt', 'serviceTypes'
         ));
     }
 
@@ -857,15 +860,7 @@ class EventController extends Controller
      */
     public function matrix(Request $request)
     {
-        if (!auth()->user()->canView('events')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
-        }
-
-        $church = $this->getCurrentChurch();
-
-        $serviceTypes = Event::serviceTypeLabels();
-
-        return view('schedule.matrix', compact('serviceTypes'));
+        return redirect()->route('schedule', ['tab' => 'matrix']);
     }
 
     /**
