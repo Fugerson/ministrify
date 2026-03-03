@@ -66,7 +66,7 @@
 
                     <div class="text-right flex-shrink-0">
                         @if($group['avg_attendance'])
-                            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $group['avg_attendance'] }}%</p>
+                            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $group['avg_attendance'] }}</p>
                             <p class="text-[10px] text-gray-400 dark:text-gray-500">сер. відв.</p>
                         @endif
                         @if($lastAttendance)

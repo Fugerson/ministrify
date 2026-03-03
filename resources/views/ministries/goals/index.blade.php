@@ -345,15 +345,18 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Період</label>
+                        @php $y = date('Y'); @endphp
                         <select name="period" x-model="goalForm.period" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                             <option value="">Не вказано</option>
-                            <option value="Q1 2025">Q1 2025</option>
-                            <option value="Q2 2025">Q2 2025</option>
-                            <option value="Q3 2025">Q3 2025</option>
-                            <option value="Q4 2025">Q4 2025</option>
-                            <option value="H1 2025">H1 2025</option>
-                            <option value="H2 2025">H2 2025</option>
-                            <option value="2025">2025</option>
+                            @foreach([$y, $y + 1] as $year)
+                                <option value="Q1 {{ $year }}">Q1 {{ $year }}</option>
+                                <option value="Q2 {{ $year }}">Q2 {{ $year }}</option>
+                                <option value="Q3 {{ $year }}">Q3 {{ $year }}</option>
+                                <option value="Q4 {{ $year }}">Q4 {{ $year }}</option>
+                                <option value="H1 {{ $year }}">H1 {{ $year }}</option>
+                                <option value="H2 {{ $year }}">H2 {{ $year }}</option>
+                                <option value="{{ $year }}">{{ $year }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>

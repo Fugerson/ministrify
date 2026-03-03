@@ -173,6 +173,9 @@ class MessageController extends Controller
         }
 
         switch ($request->recipient_type) {
+            case 'all':
+                // No additional filter — send to everyone
+                break;
             case 'tag':
                 $query->whereHas('tags', fn($q) => $q->where('tags.id', $request->tag_id));
                 break;
@@ -210,23 +213,20 @@ class MessageController extends Controller
             case 'age':
                 if ($request->age_group) {
                     $now = now();
-                    switch ($request->age_group) {
-                        case 'youth': // 14-30
-                            $query->whereNotNull('birth_date')
-                                ->whereDate('birth_date', '<=', $now->copy()->subYears(14))
-                                ->whereDate('birth_date', '>=', $now->copy()->subYears(30));
-                            break;
-                        case 'adults': // 30-60
-                            $query->whereNotNull('birth_date')
-                                ->whereDate('birth_date', '<=', $now->copy()->subYears(30))
-                                ->whereDate('birth_date', '>=', $now->copy()->subYears(60));
-                            break;
-                        case 'seniors': // 60+
-                            $query->whereNotNull('birth_date')
-                                ->whereDate('birth_date', '<=', $now->copy()->subYears(60));
-                            break;
-                        default:
-                            $query->whereRaw('1=0'); // Invalid age group
+                    $ageRanges = [
+                        'child'   => ['min' => 0,  'max' => 12],
+                        'teen'    => ['min' => 13, 'max' => 17],
+                        'youth'   => ['min' => 18, 'max' => 35],
+                        'adults'  => ['min' => 36, 'max' => 59],
+                        'seniors' => ['min' => 60, 'max' => 150],
+                    ];
+                    $range = $ageRanges[$request->age_group] ?? null;
+                    if ($range) {
+                        $query->whereNotNull('birth_date')
+                            ->whereDate('birth_date', '<=', $now->copy()->subYears($range['min']))
+                            ->whereDate('birth_date', '>=', $now->copy()->subYears($range['max'] + 1));
+                    } else {
+                        $query->whereRaw('1=0');
                     }
                 } else {
                     $query->whereRaw('1=0'); // No age group selected

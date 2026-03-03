@@ -544,7 +544,8 @@ class DashboardController extends Controller
     private function loadUrgentTasks($church)
     {
         $taskTracker = Board::where('church_id', $church->id)
-            ->where('name', 'Трекер завдань')
+            ->whereNull('ministry_id')
+            ->where('is_archived', false)
             ->first();
 
         if (!$taskTracker) {
@@ -760,7 +761,10 @@ class DashboardController extends Controller
 
     private function loadNewMembers($church)
     {
+        $startOfMonth = now()->startOfMonth()->toDateString();
+
         return Person::where('church_id', $church->id)
+            ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$startOfMonth])
             ->orderByDesc(DB::raw('COALESCE(joined_date, first_visit_date, created_at)'))
             ->limit(8)
             ->get();
@@ -955,13 +959,17 @@ class DashboardController extends Controller
             ")
             ->first();
 
+        $guest = (int) ($stats->guest ?? 0);
+        $newcomer = (int) ($stats->newcomer ?? 0);
+        $member = (int) ($stats->member ?? 0);
+        $active = (int) ($stats->active ?? 0);
+
         return [
-            'total' => (int) ($stats->total ?? 0),
-            'guest' => (int) ($stats->guest ?? 0),
-            'newcomer' => (int) ($stats->newcomer ?? 0),
-            'member' => (int) ($stats->member ?? 0),
-            'active' => (int) ($stats->active ?? 0),
-            'unset' => (int) ($stats->unset ?? 0),
+            'total' => $guest + $newcomer + $member + $active,
+            'guest' => $guest,
+            'newcomer' => $newcomer,
+            'member' => $member,
+            'active' => $active,
         ];
     }
 

@@ -1374,7 +1374,7 @@ function peopleTable() {
         filteredCount: {{ $people->count() }},
         perPage: parseInt(localStorage.getItem('people_per_page')) || 25,
         currentPage: 1,
-        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'id' => $p->id, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'tags' => $p->tags->pluck('name')->join(', '), 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
+        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'id' => $p->id, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'membership_status' => $p->membership_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'tags' => $p->tags->pluck('name')->join(', '), 'shepherd' => $p->shepherd?->full_name ?? ''])->values()),
         filteredIndices: [],
 
         // Bulk selection state

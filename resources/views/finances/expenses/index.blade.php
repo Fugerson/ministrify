@@ -602,6 +602,8 @@ window.expensesManager = function() {
                     <option value="">Усі способи</option>
                     <option value="cash">💵 Готівка</option>
                     <option value="card">💳 Картка</option>
+                    <option value="liqpay">💳 LiqPay</option>
+                    <option value="monobank">💳 Monobank</option>
                 </select>
 
                 <!-- Sort -->

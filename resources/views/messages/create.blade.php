@@ -149,10 +149,12 @@
             <div x-show="recipientType === 'age'" x-cloak>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Вікова група</label>
                 <select name="age_group" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
-                    <option value="">Оберіть...</option>
-                    <option value="youth">Молодь (14-30 років)</option>
-                    <option value="adults">Дорослі (30-60 років)</option>
-                    <option value="seniors">Старші (60+ років)</option>
+                    <option value="">{{ __('forms.select_option') }}</option>
+                    <option value="child">{{ \App\Models\Person::AGE_CATEGORIES['child']['label'] }} (0-12)</option>
+                    <option value="teen">{{ \App\Models\Person::AGE_CATEGORIES['teen']['label'] }} (13-17)</option>
+                    <option value="youth">{{ \App\Models\Person::AGE_CATEGORIES['youth']['label'] }} (18-35)</option>
+                    <option value="adults">{{ \App\Models\Person::AGE_CATEGORIES['adult']['label'] }} (36-59)</option>
+                    <option value="seniors">{{ \App\Models\Person::AGE_CATEGORIES['senior']['label'] }} (60+)</option>
                 </select>
             </div>
 
@@ -254,7 +256,7 @@ function messageForm() {
         async loadPreview() {
             this.previewLoading = true;
             try {
-                const formData = new FormData(this.$refs.form);
+                const formData = new FormData(this.$refs.msgForm);
                 const response = await fetch('{{ route('messages.preview') }}', {
                     method: 'POST',
                     headers: {
