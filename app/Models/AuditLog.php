@@ -583,9 +583,14 @@ class AuditLog extends Model
         // Status fields
         if ($field === 'status' || $field === 'membership_status') {
             return match($value) {
+                'guest' => 'Гість',
+                'newcomer' => 'Новачок',
+                'member' => 'Член церкви',
+                'servant' => 'Служитель',
+                'leader' => 'Лідер',
+                'leadership' => 'Керівництво церкви',
                 'active' => 'Активний',
                 'inactive' => 'Неактивний',
-                'member' => 'Член',
                 'regular' => 'Постійний відвідувач',
                 'visitor' => 'Гість',
                 'new' => 'Новий',

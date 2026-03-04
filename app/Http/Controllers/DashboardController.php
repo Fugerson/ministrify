@@ -513,7 +513,7 @@ class DashboardController extends Controller
             $threeWeeksAgo = now()->subWeeks(3);
 
             return Person::where('church_id', $church->id)
-                ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_ACTIVE])
+                ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_SERVANT, Person::STATUS_LEADER, Person::STATUS_ACTIVE])
                 ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
                 ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
                     $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
@@ -954,7 +954,9 @@ class DashboardController extends Controller
                 SUM(CASE WHEN membership_status = 'guest' THEN 1 ELSE 0 END) as guest,
                 SUM(CASE WHEN membership_status = 'newcomer' THEN 1 ELSE 0 END) as newcomer,
                 SUM(CASE WHEN membership_status = 'member' THEN 1 ELSE 0 END) as member,
-                SUM(CASE WHEN membership_status = 'active' THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN membership_status = 'servant' THEN 1 ELSE 0 END) as servant,
+                SUM(CASE WHEN membership_status = 'leader' THEN 1 ELSE 0 END) as leader,
+                SUM(CASE WHEN membership_status = 'leadership' THEN 1 ELSE 0 END) as leadership,
                 SUM(CASE WHEN membership_status IS NULL OR membership_status = '' THEN 1 ELSE 0 END) as unset
             ")
             ->first();
@@ -962,14 +964,18 @@ class DashboardController extends Controller
         $guest = (int) ($stats->guest ?? 0);
         $newcomer = (int) ($stats->newcomer ?? 0);
         $member = (int) ($stats->member ?? 0);
-        $active = (int) ($stats->active ?? 0);
+        $servant = (int) ($stats->servant ?? 0);
+        $leader = (int) ($stats->leader ?? 0);
+        $leadership = (int) ($stats->leadership ?? 0);
 
         return [
-            'total' => $guest + $newcomer + $member + $active,
+            'total' => $guest + $newcomer + $member + $servant + $leader + $leadership,
             'guest' => $guest,
             'newcomer' => $newcomer,
             'member' => $member,
-            'active' => $active,
+            'servant' => $servant,
+            'leader' => $leader,
+            'leadership' => $leadership,
         ];
     }
 

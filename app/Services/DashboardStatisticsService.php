@@ -272,7 +272,7 @@ class DashboardStatisticsService
                 $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $cutoffDate))
                     ->where('present', true);
             })
-            ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_ACTIVE])
+            ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_SERVANT, Person::STATUS_LEADER, Person::STATUS_ACTIVE])
             ->orderBy('last_name')
             ->limit(20)
             ->get();

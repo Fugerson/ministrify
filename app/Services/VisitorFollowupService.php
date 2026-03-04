@@ -183,7 +183,7 @@ class VisitorFollowupService
 
         $converted = Person::where('church_id', $churchId)
             ->whereNotNull('first_visit_date')
-            ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_ACTIVE])
+            ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_SERVANT, Person::STATUS_LEADER, Person::STATUS_ACTIVE])
             ->count();
 
         return round(($converted / $totalGuests) * 100, 1);

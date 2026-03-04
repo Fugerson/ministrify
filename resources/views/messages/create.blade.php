@@ -141,7 +141,9 @@
                     <option value="guest">{{ __('app.guest') }}</option>
                     <option value="newcomer">{{ __('app.newcomer') }}</option>
                     <option value="member">{{ __('app.church_member') }}</option>
-                    <option value="active">{{ __('app.active_member') }}</option>
+                    <option value="servant">{{ __('app.servant') }}</option>
+                    <option value="leader">{{ __('app.leader') }}</option>
+                    <option value="leadership">{{ __('app.leadership') }}</option>
                 </select>
             </div>
 

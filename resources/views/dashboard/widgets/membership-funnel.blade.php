@@ -10,10 +10,12 @@
         @php
             $total = max($membershipStats['total'], 1);
             $levels = [
-                ['key' => 'guest', 'label' => __('app.guest'), 'color' => 'from-blue-400 to-blue-500', 'bg' => 'bg-blue-500', 'light' => 'bg-blue-100 dark:bg-blue-900/50', 'text' => 'text-blue-600 dark:text-blue-400'],
-                ['key' => 'newcomer', 'label' => __('app.newcomer'), 'color' => 'from-cyan-400 to-cyan-500', 'bg' => 'bg-cyan-500', 'light' => 'bg-cyan-100 dark:bg-cyan-900/50', 'text' => 'text-cyan-600 dark:text-cyan-400'],
-                ['key' => 'member', 'label' => __('app.church_member'), 'color' => 'from-teal-400 to-teal-500', 'bg' => 'bg-teal-500', 'light' => 'bg-teal-100 dark:bg-teal-900/50', 'text' => 'text-teal-600 dark:text-teal-400'],
-                ['key' => 'active', 'label' => __('app.active_member'), 'color' => 'from-emerald-400 to-emerald-500', 'bg' => 'bg-emerald-500', 'light' => 'bg-emerald-100 dark:bg-emerald-900/50', 'text' => 'text-emerald-600 dark:text-emerald-400'],
+                ['key' => 'guest', 'label' => __('app.guest'), 'color' => 'from-gray-300 to-gray-400', 'bg' => 'bg-gray-400', 'light' => 'bg-gray-100 dark:bg-gray-900/50', 'text' => 'text-gray-600 dark:text-gray-400'],
+                ['key' => 'newcomer', 'label' => __('app.newcomer'), 'color' => 'from-amber-400 to-amber-500', 'bg' => 'bg-amber-500', 'light' => 'bg-amber-100 dark:bg-amber-900/50', 'text' => 'text-amber-600 dark:text-amber-400'],
+                ['key' => 'member', 'label' => __('app.church_member'), 'color' => 'from-blue-400 to-blue-500', 'bg' => 'bg-blue-500', 'light' => 'bg-blue-100 dark:bg-blue-900/50', 'text' => 'text-blue-600 dark:text-blue-400'],
+                ['key' => 'servant', 'label' => __('app.servant'), 'color' => 'from-emerald-400 to-emerald-500', 'bg' => 'bg-emerald-500', 'light' => 'bg-emerald-100 dark:bg-emerald-900/50', 'text' => 'text-emerald-600 dark:text-emerald-400'],
+                ['key' => 'leader', 'label' => __('app.leader'), 'color' => 'from-violet-400 to-violet-500', 'bg' => 'bg-violet-500', 'light' => 'bg-violet-100 dark:bg-violet-900/50', 'text' => 'text-violet-600 dark:text-violet-400'],
+                ['key' => 'leadership', 'label' => __('app.leadership'), 'color' => 'from-red-400 to-red-500', 'bg' => 'bg-red-500', 'light' => 'bg-red-100 dark:bg-red-900/50', 'text' => 'text-red-600 dark:text-red-400'],
             ];
         @endphp
 
@@ -24,7 +26,7 @@
                 $count = $membershipStats[$level['key']] ?? 0;
                 $percentage = round(($count / $total) * 100);
                 // Funnel width: widest at top (100%), narrowing down
-                $widthPercent = 100 - ($index * 20);
+                $widthPercent = 100 - ($index * 13);
             @endphp
             <div class="relative group" style="width: {{ $widthPercent }}%">
                 <div class="h-10 bg-gradient-to-r {{ $level['color'] }} rounded-lg flex items-center justify-between px-3 transition-all hover:opacity-90 cursor-default">

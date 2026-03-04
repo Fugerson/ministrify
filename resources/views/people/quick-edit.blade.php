@@ -35,7 +35,9 @@
                 <option value="guest">{{ __('app.guest') }}</option>
                 <option value="newcomer">{{ __('app.newcomer') }}</option>
                 <option value="member">{{ __('app.church_member') }}</option>
-                <option value="active">{{ __('app.active_member') }}</option>
+                <option value="servant">{{ __('app.servant') }}</option>
+                <option value="leader">{{ __('app.leader') }}</option>
+                <option value="leadership">{{ __('app.leadership') }}</option>
             </select>
             <select x-model="filterGender" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
                 <option value="">Стать</option>
@@ -274,7 +276,9 @@
                                     <option value="guest">{{ __('app.guest') }}</option>
                                     <option value="newcomer">{{ __('app.newcomer') }}</option>
                                     <option value="member">{{ __('app.church_member') }}</option>
-                                    <option value="active">{{ __('app.active_member') }}</option>
+                                    <option value="servant">{{ __('app.servant') }}</option>
+                                    <option value="leader">{{ __('app.leader') }}</option>
+                                    <option value="leadership">{{ __('app.leadership') }}</option>
                                 </select>
                             </td>
 

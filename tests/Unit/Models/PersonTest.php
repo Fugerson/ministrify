@@ -243,11 +243,13 @@ class PersonTest extends TestCase
     public function test_members_scope(): void
     {
         Person::factory()->forChurch($this->church)->create(['membership_status' => 'member']);
-        Person::factory()->forChurch($this->church)->create(['membership_status' => 'active']);
+        Person::factory()->forChurch($this->church)->create(['membership_status' => 'servant']);
+        Person::factory()->forChurch($this->church)->create(['membership_status' => 'leader']);
+        Person::factory()->forChurch($this->church)->create(['membership_status' => 'leadership']);
         Person::factory()->forChurch($this->church)->create(['membership_status' => 'guest']);
 
         $members = Person::members()->get();
-        $this->assertCount(2, $members);
+        $this->assertCount(4, $members);
     }
 
     public function test_baptized_scope(): void
@@ -286,9 +288,17 @@ class PersonTest extends TestCase
 
         $person->promoteStatus();
         $person->refresh();
+        $this->assertEquals(Person::STATUS_SERVANT, $person->membership_status);
+
+        $person->promoteStatus();
+        $person->refresh();
+        $this->assertEquals(Person::STATUS_LEADER, $person->membership_status);
+
+        $person->promoteStatus();
+        $person->refresh();
         $this->assertEquals(Person::STATUS_ACTIVE, $person->membership_status);
 
-        // Cannot promote beyond active
+        // Cannot promote beyond leadership
         $person->promoteStatus();
         $person->refresh();
         $this->assertEquals(Person::STATUS_ACTIVE, $person->membership_status);

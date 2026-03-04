@@ -1243,7 +1243,7 @@ class PersonController extends Controller
             'birth_date' => 'nullable|date',
             'gender' => 'nullable|in:male,female',
             'marital_status' => 'nullable|in:single,married,widowed,divorced',
-            'membership_status' => 'nullable|in:guest,newcomer,member,active',
+            'membership_status' => 'nullable|in:guest,newcomer,member,servant,leader,leadership',
             'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
             'ministry_id' => ['nullable', \Illuminate\Validation\Rule::exists('ministries', 'id')->where('church_id', $church->id)],
             'address' => 'nullable|string|max:500',

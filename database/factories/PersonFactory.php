@@ -45,10 +45,24 @@ class PersonFactory extends Factory
         ]);
     }
 
-    public function active(): static
+    public function servant(): static
     {
         return $this->state(fn (array $attributes) => [
-            'membership_status' => 'active',
+            'membership_status' => 'servant',
+        ]);
+    }
+
+    public function leader(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'membership_status' => 'leader',
+        ]);
+    }
+
+    public function leadership(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'membership_status' => 'leadership',
         ]);
     }
 }

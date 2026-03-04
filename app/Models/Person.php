@@ -36,17 +36,21 @@ class Person extends Model
         self::ROLE_PASTOR => 'Пастор',
     ];
 
-    // Membership statuses (journey from guest to active member)
+    // Membership statuses (journey from guest to church leadership)
     public const STATUS_GUEST = 'guest';
     public const STATUS_NEWCOMER = 'newcomer';
     public const STATUS_MEMBER = 'member';
-    public const STATUS_ACTIVE = 'active';
+    public const STATUS_SERVANT = 'servant';
+    public const STATUS_LEADER = 'leader';
+    public const STATUS_ACTIVE = 'leadership'; // renamed: was 'active', now 'leadership'
 
     public const MEMBERSHIP_STATUSES = [
         self::STATUS_GUEST => ['label' => 'Гість', 'color' => '#9ca3af', 'icon' => 'user'],
-        self::STATUS_NEWCOMER => ['label' => 'Новоприбулий', 'color' => '#f59e0b', 'icon' => 'star'],
+        self::STATUS_NEWCOMER => ['label' => 'Новачок', 'color' => '#f59e0b', 'icon' => 'star'],
         self::STATUS_MEMBER => ['label' => 'Член церкви', 'color' => '#3b82f6', 'icon' => 'users'],
-        self::STATUS_ACTIVE => ['label' => 'Активний член', 'color' => '#10b981', 'icon' => 'badge-check'],
+        self::STATUS_SERVANT => ['label' => 'Служитель', 'color' => '#10b981', 'icon' => 'hand-raised'],
+        self::STATUS_LEADER => ['label' => 'Лідер', 'color' => '#8b5cf6', 'icon' => 'shield-check'],
+        self::STATUS_ACTIVE => ['label' => 'Керівництво церкви', 'color' => '#dc2626', 'icon' => 'crown'],
     ];
 
     // Gender
@@ -566,14 +570,7 @@ class Person extends Model
 
     public function getMembershipStatusLabelAttribute(): string
     {
-        $map = [
-            self::STATUS_GUEST => __('app.guest'),
-            self::STATUS_NEWCOMER => __('app.newcomer'),
-            self::STATUS_MEMBER => __('app.church_member'),
-            self::STATUS_ACTIVE => __('app.active_member'),
-        ];
-
-        return $map[$this->membership_status] ?? __('app.church_member');
+        return self::MEMBERSHIP_STATUSES[$this->membership_status]['label'] ?? __('app.church_member');
     }
 
     public function getMembershipStatusColorAttribute(): string
@@ -654,7 +651,7 @@ class Person extends Model
      */
     public function promoteStatus(): void
     {
-        $order = [self::STATUS_GUEST, self::STATUS_NEWCOMER, self::STATUS_MEMBER, self::STATUS_ACTIVE];
+        $order = [self::STATUS_GUEST, self::STATUS_NEWCOMER, self::STATUS_MEMBER, self::STATUS_SERVANT, self::STATUS_LEADER, self::STATUS_ACTIVE];
         $currentIndex = array_search($this->membership_status, $order);
 
         if ($currentIndex !== false && $currentIndex < count($order) - 1) {
@@ -685,12 +682,12 @@ class Person extends Model
 
     public function scopeMembers($query)
     {
-        return $query->whereIn('membership_status', [self::STATUS_MEMBER, self::STATUS_ACTIVE]);
+        return $query->whereIn('membership_status', [self::STATUS_MEMBER, self::STATUS_SERVANT, self::STATUS_LEADER, self::STATUS_ACTIVE]);
     }
 
     public function scopeActiveMembers($query)
     {
-        return $query->where('membership_status', self::STATUS_ACTIVE);
+        return $query->whereIn('membership_status', [self::STATUS_SERVANT, self::STATUS_LEADER, self::STATUS_ACTIVE]);
     }
 
     public function scopeBaptized($query)

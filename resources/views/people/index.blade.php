@@ -1662,7 +1662,7 @@ function peopleTable() {
                 return map[person.gender] || person.gender || '';
             }
             if (key === 'membership_status') {
-                const map = { 'guest': '{{ __("app.guest") }}', 'newcomer': '{{ __("app.newcomer") }}', 'member': '{{ __("app.church_member") }}', 'active': '{{ __("app.active_member") }}' };
+                const map = { 'guest': '{{ __("app.guest") }}', 'newcomer': '{{ __("app.newcomer") }}', 'member': '{{ __("app.church_member") }}', 'servant': '{{ __("app.servant") }}', 'leader': '{{ __("app.leader") }}', 'leadership': '{{ __("app.leadership") }}' };
                 return map[person.membership_status] || person.membership_status || '';
             }
             if (key === 'photo_url') return person.photo_url || '';

@@ -214,29 +214,29 @@ class DemoChurchSeeder extends Seeder
         $this->command->info('Creating people...');
 
         $peopleData = [
-            // Пастор / Лідери
-            ['first_name' => 'Олександр', 'last_name' => 'Петренко', 'gender' => 'male', 'church_role' => 'pastor', 'membership_status' => 'active', 'is_shepherd' => true, 'email' => 'pastor@blagodat.church', 'phone' => '+380501234567', 'birth_date' => '1975-03-15', 'marital_status' => 'married', 'baptism_date' => '1995-06-20', 'joined_date' => '2010-01-01'],
-            ['first_name' => 'Наталія', 'last_name' => 'Петренко', 'gender' => 'female', 'church_role' => 'deacon', 'membership_status' => 'active', 'email' => 'natalia@blagodat.church', 'phone' => '+380501234568', 'birth_date' => '1978-07-22', 'marital_status' => 'married', 'baptism_date' => '1998-08-15', 'joined_date' => '2010-01-01'],
+            // Пастор / Керівництво
+            ['first_name' => 'Олександр', 'last_name' => 'Петренко', 'gender' => 'male', 'church_role' => 'pastor', 'membership_status' => 'leadership', 'is_shepherd' => true, 'email' => 'pastor@blagodat.church', 'phone' => '+380501234567', 'birth_date' => '1975-03-15', 'marital_status' => 'married', 'baptism_date' => '1995-06-20', 'joined_date' => '2010-01-01'],
+            ['first_name' => 'Наталія', 'last_name' => 'Петренко', 'gender' => 'female', 'church_role' => 'deacon', 'membership_status' => 'leader', 'email' => 'natalia@blagodat.church', 'phone' => '+380501234568', 'birth_date' => '1978-07-22', 'marital_status' => 'married', 'baptism_date' => '1998-08-15', 'joined_date' => '2010-01-01'],
 
             // Пресвітери
-            ['first_name' => 'Михайло', 'last_name' => 'Коваленко', 'gender' => 'male', 'church_role' => 'presbyter', 'membership_status' => 'active', 'is_shepherd' => true, 'email' => 'mikhail@blagodat.church', 'phone' => '+380502345678', 'birth_date' => '1968-11-08', 'marital_status' => 'married', 'baptism_date' => '1990-04-12', 'joined_date' => '2012-03-15'],
-            ['first_name' => 'Людмила', 'last_name' => 'Коваленко', 'gender' => 'female', 'church_role' => 'deacon', 'membership_status' => 'active', 'email' => 'ludmila@blagodat.church', 'phone' => '+380502345679', 'birth_date' => '1970-05-18', 'marital_status' => 'married', 'baptism_date' => '1992-06-28', 'joined_date' => '2012-03-15'],
+            ['first_name' => 'Михайло', 'last_name' => 'Коваленко', 'gender' => 'male', 'church_role' => 'presbyter', 'membership_status' => 'leadership', 'is_shepherd' => true, 'email' => 'mikhail@blagodat.church', 'phone' => '+380502345678', 'birth_date' => '1968-11-08', 'marital_status' => 'married', 'baptism_date' => '1990-04-12', 'joined_date' => '2012-03-15'],
+            ['first_name' => 'Людмила', 'last_name' => 'Коваленко', 'gender' => 'female', 'church_role' => 'deacon', 'membership_status' => 'leader', 'email' => 'ludmila@blagodat.church', 'phone' => '+380502345679', 'birth_date' => '1970-05-18', 'marital_status' => 'married', 'baptism_date' => '1992-06-28', 'joined_date' => '2012-03-15'],
 
             // Дякони
-            ['first_name' => 'Андрій', 'last_name' => 'Шевченко', 'gender' => 'male', 'church_role' => 'deacon', 'membership_status' => 'active', 'is_shepherd' => true, 'email' => 'andrii@blagodat.church', 'phone' => '+380503456789', 'birth_date' => '1985-02-28', 'marital_status' => 'married', 'baptism_date' => '2005-09-10', 'joined_date' => '2015-06-01'],
-            ['first_name' => 'Оксана', 'last_name' => 'Шевченко', 'gender' => 'female', 'church_role' => 'servant', 'membership_status' => 'active', 'email' => 'oksana@blagodat.church', 'phone' => '+380503456790', 'birth_date' => '1988-09-14', 'marital_status' => 'married', 'baptism_date' => '2008-05-25', 'joined_date' => '2015-06-01'],
+            ['first_name' => 'Андрій', 'last_name' => 'Шевченко', 'gender' => 'male', 'church_role' => 'deacon', 'membership_status' => 'leader', 'is_shepherd' => true, 'email' => 'andrii@blagodat.church', 'phone' => '+380503456789', 'birth_date' => '1985-02-28', 'marital_status' => 'married', 'baptism_date' => '2005-09-10', 'joined_date' => '2015-06-01'],
+            ['first_name' => 'Оксана', 'last_name' => 'Шевченко', 'gender' => 'female', 'church_role' => 'servant', 'membership_status' => 'servant', 'email' => 'oksana@blagodat.church', 'phone' => '+380503456790', 'birth_date' => '1988-09-14', 'marital_status' => 'married', 'baptism_date' => '2008-05-25', 'joined_date' => '2015-06-01'],
 
             // Лідер молоді
-            ['first_name' => 'Дмитро', 'last_name' => 'Бондаренко', 'gender' => 'male', 'church_role' => 'servant', 'membership_status' => 'active', 'email' => 'dmytro@blagodat.church', 'phone' => '+380504567890', 'birth_date' => '1995-12-03', 'marital_status' => 'single', 'baptism_date' => '2013-08-18', 'joined_date' => '2018-01-15'],
+            ['first_name' => 'Дмитро', 'last_name' => 'Бондаренко', 'gender' => 'male', 'church_role' => 'servant', 'membership_status' => 'leader', 'email' => 'dmytro@blagodat.church', 'phone' => '+380504567890', 'birth_date' => '1995-12-03', 'marital_status' => 'single', 'baptism_date' => '2013-08-18', 'joined_date' => '2018-01-15'],
 
             // Лідер прославлення
-            ['first_name' => 'Катерина', 'last_name' => 'Мельник', 'gender' => 'female', 'church_role' => 'servant', 'membership_status' => 'active', 'email' => 'kateryna@blagodat.church', 'phone' => '+380505678901', 'birth_date' => '1992-04-25', 'marital_status' => 'married', 'baptism_date' => '2010-07-14', 'joined_date' => '2016-09-01'],
+            ['first_name' => 'Катерина', 'last_name' => 'Мельник', 'gender' => 'female', 'church_role' => 'servant', 'membership_status' => 'leader', 'email' => 'kateryna@blagodat.church', 'phone' => '+380505678901', 'birth_date' => '1992-04-25', 'marital_status' => 'married', 'baptism_date' => '2010-07-14', 'joined_date' => '2016-09-01'],
 
-            // Активні члени
-            ['first_name' => 'Віктор', 'last_name' => 'Ткаченко', 'gender' => 'male', 'church_role' => 'member', 'membership_status' => 'active', 'email' => 'viktor@example.com', 'phone' => '+380506789012', 'birth_date' => '1980-06-17', 'marital_status' => 'married', 'baptism_date' => '2002-03-24', 'joined_date' => '2019-02-10'],
-            ['first_name' => 'Ірина', 'last_name' => 'Ткаченко', 'gender' => 'female', 'church_role' => 'member', 'membership_status' => 'active', 'email' => 'iryna@example.com', 'phone' => '+380506789013', 'birth_date' => '1983-10-30', 'marital_status' => 'married', 'baptism_date' => '2004-11-07', 'joined_date' => '2019-02-10'],
-            ['first_name' => 'Сергій', 'last_name' => 'Олійник', 'gender' => 'male', 'church_role' => 'member', 'membership_status' => 'active', 'email' => 'serhii@example.com', 'phone' => '+380507890123', 'birth_date' => '1990-01-12', 'marital_status' => 'single', 'baptism_date' => '2012-04-08', 'joined_date' => '2020-03-01'],
-            ['first_name' => 'Марія', 'last_name' => 'Савченко', 'gender' => 'female', 'church_role' => 'member', 'membership_status' => 'active', 'email' => 'mariia@example.com', 'phone' => '+380508901234', 'birth_date' => '1997-08-05', 'marital_status' => 'single', 'baptism_date' => '2016-06-19', 'joined_date' => '2020-05-15'],
+            // Служителі
+            ['first_name' => 'Віктор', 'last_name' => 'Ткаченко', 'gender' => 'male', 'church_role' => 'member', 'membership_status' => 'servant', 'email' => 'viktor@example.com', 'phone' => '+380506789012', 'birth_date' => '1980-06-17', 'marital_status' => 'married', 'baptism_date' => '2002-03-24', 'joined_date' => '2019-02-10'],
+            ['first_name' => 'Ірина', 'last_name' => 'Ткаченко', 'gender' => 'female', 'church_role' => 'member', 'membership_status' => 'servant', 'email' => 'iryna@example.com', 'phone' => '+380506789013', 'birth_date' => '1983-10-30', 'marital_status' => 'married', 'baptism_date' => '2004-11-07', 'joined_date' => '2019-02-10'],
+            ['first_name' => 'Сергій', 'last_name' => 'Олійник', 'gender' => 'male', 'church_role' => 'member', 'membership_status' => 'servant', 'email' => 'serhii@example.com', 'phone' => '+380507890123', 'birth_date' => '1990-01-12', 'marital_status' => 'single', 'baptism_date' => '2012-04-08', 'joined_date' => '2020-03-01'],
+            ['first_name' => 'Марія', 'last_name' => 'Савченко', 'gender' => 'female', 'church_role' => 'member', 'membership_status' => 'servant', 'email' => 'mariia@example.com', 'phone' => '+380508901234', 'birth_date' => '1997-08-05', 'marital_status' => 'single', 'baptism_date' => '2016-06-19', 'joined_date' => '2020-05-15'],
 
             // Члени церкви
             ['first_name' => 'Петро', 'last_name' => 'Руденко', 'gender' => 'male', 'church_role' => 'member', 'membership_status' => 'member', 'email' => 'petro@example.com', 'phone' => '+380509012345', 'birth_date' => '1972-03-28', 'marital_status' => 'married', 'baptism_date' => '1994-09-11', 'joined_date' => '2021-01-10'],
@@ -252,8 +252,8 @@ class DemoChurchSeeder extends Seeder
             ['first_name' => 'Анна', 'last_name' => 'Гончаренко', 'gender' => 'female', 'church_role' => 'member', 'membership_status' => 'guest', 'email' => 'anna@example.com', 'first_visit_date' => '2024-01-14'],
 
             // Молодь
-            ['first_name' => 'Максим', 'last_name' => 'Бойко', 'gender' => 'male', 'church_role' => 'member', 'membership_status' => 'active', 'email' => 'maxim@example.com', 'phone' => '+380513456789', 'birth_date' => '2002-02-14', 'marital_status' => 'single', 'baptism_date' => '2020-08-16', 'joined_date' => '2019-09-01'],
-            ['first_name' => 'Софія', 'last_name' => 'Марченко', 'gender' => 'female', 'church_role' => 'member', 'membership_status' => 'active', 'email' => 'sofia@example.com', 'phone' => '+380514567890', 'birth_date' => '2003-09-20', 'marital_status' => 'single', 'baptism_date' => '2021-07-11', 'joined_date' => '2020-01-15'],
+            ['first_name' => 'Максим', 'last_name' => 'Бойко', 'gender' => 'male', 'church_role' => 'member', 'membership_status' => 'servant', 'email' => 'maxim@example.com', 'phone' => '+380513456789', 'birth_date' => '2002-02-14', 'marital_status' => 'single', 'baptism_date' => '2020-08-16', 'joined_date' => '2019-09-01'],
+            ['first_name' => 'Софія', 'last_name' => 'Марченко', 'gender' => 'female', 'church_role' => 'member', 'membership_status' => 'servant', 'email' => 'sofia@example.com', 'phone' => '+380514567890', 'birth_date' => '2003-09-20', 'marital_status' => 'single', 'baptism_date' => '2021-07-11', 'joined_date' => '2020-01-15'],
 
             // Діти (для статистики)
             ['first_name' => 'Даніїл', 'last_name' => 'Шевченко', 'gender' => 'male', 'church_role' => 'member', 'membership_status' => 'member', 'birth_date' => '2015-03-08'],
@@ -930,7 +930,7 @@ class DemoChurchSeeder extends Seeder
 
         // Get all active members
         $activeMembers = Person::where('church_id', $this->church->id)
-            ->whereIn('membership_status', ['active', 'member'])
+            ->whereIn('membership_status', ['leadership', 'leader', 'servant', 'member'])
             ->get();
 
         // Attendance for past Sunday services
