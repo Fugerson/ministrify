@@ -11,8 +11,6 @@ class ChurchBudgetItem extends Model
     use Auditable;
 
     protected $fillable = [
-        'church_id',
-        'church_budget_id',
         'category_id',
         'name',
         'is_recurring',
@@ -65,11 +63,13 @@ class ChurchBudgetItem extends Model
     // Methods
     // ==================
 
-    public function getActualSpendingForMonth(int $month): float
+    public function getActualSpendingForMonth(int $month, ?int $year = null): float
     {
         if (!$this->category_id) {
             return 0;
         }
+
+        $year = $year ?? $this->churchBudget->year;
 
         return (float) (Transaction::where('church_id', $this->church_id)
             ->where('direction', Transaction::DIRECTION_OUT)
@@ -77,17 +77,19 @@ class ChurchBudgetItem extends Model
             ->whereNull('ministry_id')
             ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
             ->completed()
-            ->whereYear('date', $this->churchBudget->year)
+            ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
             ->value('total') ?? 0);
     }
 
-    public function getMatchedTransactions(int $month)
+    public function getMatchedTransactions(int $month, ?int $year = null)
     {
         if (!$this->category_id) {
             return collect();
         }
+
+        $year = $year ?? $this->churchBudget->year;
 
         return Transaction::where('church_id', $this->church_id)
             ->where('direction', Transaction::DIRECTION_OUT)
@@ -95,7 +97,7 @@ class ChurchBudgetItem extends Model
             ->whereNull('ministry_id')
             ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
             ->completed()
-            ->whereYear('date', $this->churchBudget->year)
+            ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->with(['category', 'attachments'])
             ->orderBy('date', 'desc')

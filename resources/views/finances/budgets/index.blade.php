@@ -125,12 +125,16 @@
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.church_expenses') }}</h2>
             @if(!$churchBudget && auth()->user()->canEdit('finances'))
-                <button x-on:click="createChurchBudget()"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button x-on:click="createChurchBudget()" x-bind:disabled="creatingBudget"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg x-show="!creatingBudget" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    {{ __('app.create_budget') }}
+                    <svg x-show="creatingBudget" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <span x-text="creatingBudget ? '{{ __('app.creating') }}' : '{{ __('app.create_budget') }}'"></span>
                 </button>
             @endif
         </div>
@@ -190,7 +194,7 @@
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap">
                             @if($cbi['category_id'])
-                                <button x-on:click="showChurchTransactions({{ $cbi['id'] }}, '{{ addslashes($cbi['name']) }}')"
+                                <button x-on:click="showChurchTransactions({{ $cbi['id'] }}, {{ json_encode($cbi['name']) }})"
                                         class="text-red-600 dark:text-red-400 hover:underline">
                                     {{ $cbi['actual'] > 0 ? number_format($cbi['actual'], 0, ',', ' ') . ' ₴' : '—' }}
                                 </button>
@@ -225,7 +229,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
-                                <button x-on:click="deleteChurchItem({{ $cbi['id'] }}, '{{ addslashes($cbi['name']) }}')"
+                                <button x-on:click="deleteChurchItem({{ $cbi['id'] }}, {{ json_encode($cbi['name']) }})"
                                         class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                                         title="{{ __('ui.delete') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -382,14 +386,14 @@
                         <td class="px-6 py-4 text-center" @click.stop>
                             @if(auth()->user()->canEdit('finances'))
                             <div class="flex items-center justify-center gap-1">
-                                <button @click="openAllocateModal({{ $item['ministry']->id }}, '{{ addslashes($item['ministry']->name) }}')"
+                                <button @click="openAllocateModal({{ $item['ministry']->id }}, {{ json_encode($item['ministry']->name) }})"
                                         class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                         title="Виділити бюджет">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </button>
-                                <button @click="openBudgetModal({{ $item['ministry']->id }}, '{{ addslashes($item['ministry']->name) }}', {{ $item['budget']?->monthly_budget ?? $item['ministry']->monthly_budget ?? 0 }}, '{{ addslashes($item['budget']?->notes ?? '') }}', {{ $item['has_items'] ? 'true' : 'false' }})"
+                                <button @click="openBudgetModal({{ $item['ministry']->id }}, {{ json_encode($item['ministry']->name) }}, {{ $item['budget']?->monthly_budget ?? $item['ministry']->monthly_budget ?? 0 }}, {{ json_encode($item['budget']?->notes ?? '') }}, {{ $item['has_items'] ? 'true' : 'false' }})"
                                         class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                         title="Редагувати бюджет">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,7 +433,7 @@
                                                 <td class="px-3 py-2.5">
                                                     <div class="font-medium text-gray-900 dark:text-white">{{ $bi['name'] }}</div>
                                                     @if($bi['category'])
-                                                        <div class="text-xs text-gray-500">{{ $bi['category']->icon ?? '' }} {{ $bi['category']->name }}</div>
+                                                        <div class="text-xs text-gray-500">{{ $bi['category']->icon_emoji ?? '' }} {{ $bi['category']->name }}</div>
                                                     @endif
                                                 </td>
                                                 <td class="px-3 py-2.5 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
@@ -451,7 +455,7 @@
                                                     </div>
                                                 </td>
                                                 <td class="px-3 py-2.5 text-center">
-                                                    <button @click.stop="showTransactions({{ $bi['id'] }}, '{{ addslashes($bi['name']) }}')"
+                                                    <button @click.stop="showTransactions({{ $bi['id'] }}, {{ json_encode($bi['name']) }})"
                                                             class="inline-flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 hover:underline">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -476,7 +480,7 @@
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                             </svg>
                                                         </button>
-                                                        <button @click.stop="deleteItem({{ $bi['id'] }}, '{{ addslashes($bi['name']) }}')"
+                                                        <button @click.stop="deleteItem({{ $bi['id'] }}, {{ json_encode($bi['name']) }})"
                                                                 class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                                                                 title="Видалити">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -762,7 +766,7 @@
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                             <option value="">Без категорії (ручна прив'язка)</option>
                             @foreach($expenseCategories ?? [] as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
+                                <option value="{{ $cat->id }}">{{ $cat->icon_emoji ?? '💸' }} {{ $cat->name }}</option>
                             @endforeach
                             <option value="__custom__">Інше (ввести вручну)...</option>
                         </select>
@@ -815,6 +819,7 @@
     {{-- Church Budget Item Create/Edit Modal --}}
     <div x-show="showChurchItemModal"
          x-cloak
+         x-on:keydown.escape.window="showChurchItemModal = false"
          class="fixed inset-0 z-50 overflow-y-auto"
          x-transition:enter="ease-out duration-200"
          x-transition:enter-start="opacity-0"
@@ -919,6 +924,7 @@
     {{-- Church Budget Transactions Modal --}}
     <div x-show="showChurchTransModal"
          x-cloak
+         x-on:keydown.escape.window="showChurchTransModal = false"
          class="fixed inset-0 z-50 overflow-y-auto"
          x-transition:enter="ease-out duration-200"
          x-transition:enter-start="opacity-0"
@@ -1130,6 +1136,7 @@ function budgetsPage() {
         membersByBudget: {},
 
         // Church budget
+        creatingBudget: false,
         churchBudgetId: {{ $churchBudget?->id ?? 'null' }},
         showChurchItemModal: false,
         churchItemMode: 'create',
@@ -1418,6 +1425,8 @@ function budgetsPage() {
         // ═══ Church Budget Methods ═══
 
         async createChurchBudget() {
+            if (this.creatingBudget) return;
+            this.creatingBudget = true;
             try {
                 const res = await fetch('/finances/church-budgets', {
                     method: 'POST',
@@ -1437,6 +1446,8 @@ function budgetsPage() {
                 }
             } catch (e) {
                 showToast('error', 'Помилка створення бюджету');
+            } finally {
+                this.creatingBudget = false;
             }
         },
 
@@ -1553,7 +1564,7 @@ function budgetsPage() {
             this.showChurchTransModal = true;
 
             try {
-                const res = await fetch(`/finances/church-budget-items/${itemId}/transactions?month=${this.month}`, {
+                const res = await fetch(`/finances/church-budget-items/${itemId}/transactions?month=${this.month}&year=${this.year}`, {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const data = await res.json().catch(() => ({}));
@@ -1785,7 +1796,7 @@ window.expenseEditModal = function() {
                                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="">Без категорії</option>
                             @foreach($expenseCategories ?? [] as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
+                                <option value="{{ $cat->id }}">{{ $cat->icon_emoji ?? '💸' }} {{ $cat->name }}</option>
                             @endforeach
                             <option value="__custom__">Інше (ввести вручну)...</option>
                         </select>

@@ -1425,9 +1425,27 @@ class FinanceController extends Controller
         $churchBudgetTotals = ['planned' => 0, 'actual' => 0, 'difference' => 0, 'annual_planned' => 0, 'annual_actual' => 0];
 
         if ($churchBudget) {
+            // Batch query: actual spending by category_id for this month (eliminates N+1)
+            $categoryIds = $churchBudget->items->pluck('category_id')->filter()->unique()->values()->all();
+            $actualByCategory = [];
+            if (!empty($categoryIds)) {
+                $actualByCategory = Transaction::where('church_id', $church->id)
+                    ->where('direction', Transaction::DIRECTION_OUT)
+                    ->whereIn('category_id', $categoryIds)
+                    ->whereNull('ministry_id')
+                    ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
+                    ->completed()
+                    ->whereYear('date', $year)
+                    ->whereMonth('date', $month)
+                    ->groupBy('category_id')
+                    ->selectRaw('category_id, SUM(COALESCE(amount_uah, amount)) as total')
+                    ->pluck('total', 'category_id')
+                    ->all();
+            }
+
             foreach ($churchBudget->items as $item) {
                 $planned = $item->getPlannedForMonth($month);
-                $actual = $item->getActualSpendingForMonth($month);
+                $actual = $item->category_id ? (float) ($actualByCategory[$item->category_id] ?? 0) : 0;
                 $annualPlanned = $item->getAnnualTotal();
 
                 $churchBudgetItems[] = [
@@ -2128,13 +2146,14 @@ class FinanceController extends Controller
             return $this->errorResponse($request, __('app.budget_for_year_exists'));
         }
 
-        ChurchBudget::create([
-            'church_id' => $church->id,
+        $budget = new ChurchBudget([
             'name' => $validated['name'] ?? (__('app.budget') . ' ' . $validated['year']),
             'year' => $validated['year'],
             'notes' => $validated['notes'] ?? null,
             'status' => 'active',
         ]);
+        $budget->church_id = $church->id;
+        $budget->save();
 
         return $this->successResponse($request, __('app.church_budget_created'));
     }
@@ -2156,7 +2175,17 @@ class FinanceController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $churchBudget->update(array_filter($validated, fn($v) => $v !== null));
+        $updateData = [];
+        if (array_key_exists('name', $validated) && $validated['name'] !== null) {
+            $updateData['name'] = $validated['name'];
+        }
+        if (array_key_exists('status', $validated) && $validated['status'] !== null) {
+            $updateData['status'] = $validated['status'];
+        }
+        if (array_key_exists('notes', $validated)) {
+            $updateData['notes'] = $validated['notes']; // allow null to clear
+        }
+        $churchBudget->update($updateData);
 
         return $this->successResponse($request, __('app.church_budget_updated'));
     }
@@ -2204,9 +2233,7 @@ class FinanceController extends Controller
 
         $maxSort = ChurchBudgetItem::where('church_budget_id', $churchBudget->id)->max('sort_order') ?? 0;
 
-        ChurchBudgetItem::create([
-            'church_id' => $church->id,
-            'church_budget_id' => $churchBudget->id,
+        $budgetItem = new ChurchBudgetItem([
             'category_id' => $validated['category_id'] ?? null,
             'name' => $validated['name'],
             'is_recurring' => $validated['is_recurring'],
@@ -2214,6 +2241,9 @@ class FinanceController extends Controller
             'notes' => $validated['notes'] ?? null,
             'sort_order' => $maxSort + 1,
         ]);
+        $budgetItem->church_id = $church->id;
+        $budgetItem->church_budget_id = $churchBudget->id;
+        $budgetItem->save();
 
         return $this->successResponse($request, __('app.budget_item_added'));
     }
@@ -2243,10 +2273,11 @@ class FinanceController extends Controller
 
         // Build amounts JSON
         if (!empty($validated['amounts_custom'])) {
-            // Custom per-month amounts
+            // Custom per-month amounts — only allow keys 1-12
             $amounts = [];
             foreach ($validated['amounts_custom'] as $m => $val) {
-                if ($val > 0) {
+                $m = (int) $m;
+                if ($m >= 1 && $m <= 12 && $val > 0) {
                     $amounts[(string) $m] = (float) $val;
                 }
             }
@@ -2298,13 +2329,18 @@ class FinanceController extends Controller
 
     public function churchBudgetItemTransactions(Request $request, ChurchBudgetItem $item)
     {
+        if (!auth()->user()->canView('finances')) {
+            abort(403);
+        }
+
         $church = $this->getCurrentChurch();
         if ($item->church_id !== $church->id) {
             abort(404);
         }
 
         $month = max(1, min(12, (int) $request->get('month', now()->month)));
-        $transactions = $item->getMatchedTransactions($month);
+        $year = (int) $request->get('year', $item->churchBudget->year);
+        $transactions = $item->getMatchedTransactions($month, $year);
 
         return response()->json([
             'transactions' => $transactions->map(fn ($t) => [

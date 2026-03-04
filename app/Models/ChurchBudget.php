@@ -12,7 +12,6 @@ class ChurchBudget extends Model
     use Auditable;
 
     protected $fillable = [
-        'church_id',
         'name',
         'year',
         'status',
@@ -92,9 +91,19 @@ class ChurchBudget extends Model
 
     public static function getOrCreate(int $churchId, int $year): self
     {
-        return static::firstOrCreate(
-            ['church_id' => $churchId, 'year' => $year],
-            ['name' => __('app.budget') . ' ' . $year, 'status' => 'active']
-        );
+        $existing = static::where('church_id', $churchId)->where('year', $year)->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        $budget = new static([
+            'name' => __('app.budget') . ' ' . $year,
+            'status' => 'active',
+            'year' => $year,
+        ]);
+        $budget->church_id = $churchId;
+        $budget->save();
+
+        return $budget;
     }
 }

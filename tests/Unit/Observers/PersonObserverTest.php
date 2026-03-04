@@ -5,6 +5,7 @@ namespace Tests\Unit\Observers;
 use App\Models\Church;
 use App\Models\Person;
 use App\Observers\PersonObserver;
+use App\Services\DashboardCacheService;
 use App\Services\VisitorFollowupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -15,11 +16,14 @@ class PersonObserverTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+    private $cacheMock;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->church = Church::factory()->create();
+        $this->cacheMock = Mockery::mock(DashboardCacheService::class);
+        $this->cacheMock->shouldReceive('forgetPeopleRelated')->zeroOrMoreTimes();
     }
 
     public function test_created_triggers_followup_for_guest(): void
@@ -29,7 +33,7 @@ class PersonObserverTest extends TestCase
             ->once()
             ->with(Mockery::on(fn ($person) => $person->membership_status === Person::STATUS_GUEST));
 
-        $observer = new PersonObserver($mock);
+        $observer = new PersonObserver($mock, $this->cacheMock);
 
         $person = Person::factory()->forChurch($this->church)->make([
             'membership_status' => Person::STATUS_GUEST,
@@ -56,7 +60,7 @@ class PersonObserverTest extends TestCase
         $mock = Mockery::mock(VisitorFollowupService::class);
         $mock->shouldNotReceive('createFollowupTasks');
 
-        $observer = new PersonObserver($mock);
+        $observer = new PersonObserver($mock, $this->cacheMock);
 
         $person = Person::factory()->forChurch($this->church)->create([
             'membership_status' => 'member',
@@ -71,7 +75,7 @@ class PersonObserverTest extends TestCase
     {
         $mock = Mockery::mock(VisitorFollowupService::class);
         $mock->shouldReceive('createFollowupTasks')->zeroOrMoreTimes();
-        $observer = new PersonObserver($mock);
+        $observer = new PersonObserver($mock, $this->cacheMock);
 
         $person = Person::factory()->forChurch($this->church)->create([
             'membership_status' => Person::STATUS_GUEST,
@@ -91,7 +95,7 @@ class PersonObserverTest extends TestCase
     {
         $mock = Mockery::mock(VisitorFollowupService::class);
         $mock->shouldReceive('createFollowupTasks')->zeroOrMoreTimes();
-        $observer = new PersonObserver($mock);
+        $observer = new PersonObserver($mock, $this->cacheMock);
 
         $person = Person::factory()->forChurch($this->church)->create();
 
