@@ -34,7 +34,7 @@
         {{-- Avg family size --}}
         <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ number_format($familyStats['avg_family_size'] ?? 0, 1) }}</p>
-            <p class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">Середній розмір</p>
+            <p class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">Осіб у сім'ї</p>
         </div>
 
         {{-- With family --}}
