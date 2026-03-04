@@ -16,6 +16,41 @@
                     <option value="8">8 {{ __('тижнів') }}</option>
                     <option value="12">12 {{ __('тижнів') }}</option>
                 </select>
+
+                {{-- Ministry filter --}}
+                <div class="relative" x-data="{ filterOpen: false }">
+                    <button @click="filterOpen = !filterOpen" type="button"
+                        class="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                        </svg>
+                        <span>{{ __('Команди') }}</span>
+                        <template x-if="Object.keys(hiddenMinistries).length > 0">
+                            <span class="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-full"
+                                  x-text="Object.keys(hiddenMinistries).length"></span>
+                        </template>
+                    </button>
+                    <div x-show="filterOpen" @click.outside="filterOpen = false"
+                         x-transition
+                         class="absolute left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-64 py-1 max-h-72 overflow-y-auto">
+                        <template x-for="ministry in ministries" :key="ministry.id">
+                            <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
+                                <input type="checkbox" :checked="!hiddenMinistries[ministry.id]"
+                                       @change="toggleMinistryFilter(ministry.id)"
+                                       class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                                <span class="w-1.5 h-4 rounded-full flex-shrink-0" :style="'background:' + (ministry.color || '#6B7280')"></span>
+                                <span class="text-sm text-gray-700 dark:text-gray-300 truncate" x-text="ministry.name"></span>
+                            </label>
+                        </template>
+                        <template x-if="ministries.length > 1">
+                            <div class="border-t border-gray-200 dark:border-gray-700 mt-1 pt-1 px-3 py-1.5 flex gap-2">
+                                <button @click="showAllMinistries()" type="button" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">{{ __('Показати всі') }}</button>
+                                <span class="text-gray-300 dark:text-gray-600">|</span>
+                                <button @click="hideAllMinistries()" type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:underline">{{ __('Приховати всі') }}</button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
             </div>
 
             {{-- Period Navigation --}}
@@ -79,10 +114,11 @@
                                 {{ __('Команда / Роль') }}
                             </th>
                             <template x-for="event in events" :key="event.id">
-                                <th class="px-2 py-3 text-center border-b border-gray-200 dark:border-gray-600 min-w-[140px]"
+                                <th class="px-2 py-2 text-center border-b border-gray-200 dark:border-gray-600 min-w-[140px]"
                                     :class="isNearestEvent(event) ? 'bg-primary-50 dark:bg-primary-900/30' : 'bg-gray-50 dark:bg-gray-700'">
                                     <a :href="'/events/' + event.id"
-                                       class="block hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                                       class="block hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                                       :title="event.title">
                                         <div class="text-[10px] font-medium uppercase tracking-wide"
                                              :class="isNearestEvent(event) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'"
                                              x-text="event.dayOfWeek"></div>
@@ -94,6 +130,9 @@
                                                  :class="isNearestEvent(event) ? 'text-primary-500 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'"
                                                  x-text="event.time"></div>
                                         </template>
+                                        <div class="text-[10px] font-medium truncate max-w-[130px] mx-auto mt-0.5"
+                                             :class="isNearestEvent(event) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                                             x-text="event.title"></div>
                                     </a>
                                 </th>
                             </template>
@@ -101,7 +140,7 @@
                     </thead>
 
                     <tbody>
-                        <template x-for="(ministry, mIdx) in ministries" :key="ministry.id">
+                        <template x-for="(ministry, mIdx) in visibleMinistries()" :key="ministry.id">
                             <template x-for="(row, rowIdx) in getMinistryRows(ministry)" :key="row.key">
                                 <tr class="border-b border-gray-100 dark:border-gray-700/50 group/row hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors"
                                     :class="rowIdx === 0 ? (mIdx > 0 ? 'border-t-2 border-gray-200 dark:border-gray-600' : 'border-t border-gray-200 dark:border-gray-600') : ''"
@@ -369,6 +408,7 @@ function servicePlanningMatrix() {
         periodLabel: '',
         nearestEventId: null,
         expanded: {},
+        hiddenMinistries: {},
 
         // Self-signup context
         currentPersonId: null,
@@ -444,6 +484,29 @@ function servicePlanningMatrix() {
         },
 
         isNearestEvent(event) { return event.id === this.nearestEventId; },
+
+        // Ministry filter
+        visibleMinistries() {
+            return this.ministries.filter(m => !this.hiddenMinistries[m.id]);
+        },
+
+        toggleMinistryFilter(ministryId) {
+            if (this.hiddenMinistries[ministryId]) {
+                delete this.hiddenMinistries[ministryId];
+            } else {
+                this.hiddenMinistries[ministryId] = true;
+            }
+        },
+
+        showAllMinistries() {
+            this.hiddenMinistries = {};
+        },
+
+        hideAllMinistries() {
+            const h = {};
+            this.ministries.forEach(m => h[m.id] = true);
+            this.hiddenMinistries = h;
+        },
 
         async loadData() {
             this.loading = true;
