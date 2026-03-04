@@ -898,4 +898,9 @@ return [
     'no_matched_transactions' => 'No transactions for this month',
     'monthly' => 'Monthly',
     'one_time' => 'One-time',
+
+    // Person create modal
+    'details' => 'Details',
+    'joined_date' => 'Joined church date',
+    'additional_info' => 'Additional information',
 ];

@@ -4,9 +4,9 @@
 
 @section('actions')
 @if(auth()->user()->canCreate('announcements'))
-<a href="{{ route('announcements.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
+<button onclick="openCreateAnnouncementModal()" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
     + Нове оголошення
-</a>
+</button>
 @endif
 @endsection
 
@@ -117,4 +117,122 @@
     </div>
     @endif
 </div>
+
+{{-- Create Announcement Modal --}}
+@if(auth()->user()->canCreate('announcements'))
+<div id="createAnnouncementModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 sm:p-0">
+        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="closeCreateAnnouncementModal()"></div>
+        <div class="relative w-full max-w-lg mx-auto mt-8 sm:mt-16 bg-white dark:bg-gray-800 rounded-2xl shadow-xl z-10" x-data="announcementCreateForm()">
+            <form x-ref="form" @submit.prevent="submitForm">
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Нове оголошення</h2>
+                    <button type="button" onclick="closeCreateAnnouncementModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                {{-- Body --}}
+                <div class="px-6 py-4 space-y-5 max-h-[70vh] overflow-y-auto">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Заголовок *</label>
+                        <input type="text" name="title" required
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                               placeholder="Введіть заголовок оголошення">
+                        <template x-if="errors.title">
+                            <p class="mt-1 text-sm text-red-600" x-text="errors.title[0]"></p>
+                        </template>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст оголошення *</label>
+                        <textarea name="content" rows="6" required
+                                  class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                                  placeholder="Напишіть текст оголошення..."></textarea>
+                        <template x-if="errors.content">
+                            <p class="mt-1 text-sm text-red-600" x-text="errors.content[0]"></p>
+                        </template>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Актуально до (необов'язково)</label>
+                        <input type="date" name="expires_at"
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Після цієї дати оголошення автоматично сховається</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" name="is_pinned" value="1" id="modal_is_pinned"
+                               class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:bg-gray-700">
+                        <label for="modal_is_pinned" class="ml-3 text-gray-700 dark:text-gray-300">
+                            Закріпити зверху
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                    <button type="button" onclick="closeCreateAnnouncementModal()"
+                            class="px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
+                        Скасувати
+                    </button>
+                    <button type="submit" :disabled="saving"
+                            class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl disabled:opacity-50">
+                        <span x-show="!saving">Опублікувати</span>
+                        <span x-show="saving" class="flex items-center gap-2">
+                            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            Збереження...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openCreateAnnouncementModal() {
+    document.getElementById('createAnnouncementModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeCreateAnnouncementModal() {
+    document.getElementById('createAnnouncementModal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('createAnnouncementModal').classList.contains('hidden')) {
+        closeCreateAnnouncementModal();
+    }
+});
+
+function announcementCreateForm() {
+    return {
+        saving: false,
+        errors: {},
+        async submitForm() {
+            this.saving = true;
+            this.errors = {};
+            const formData = new FormData(this.$refs.form);
+            try {
+                const response = await fetch('{{ route("announcements.store") }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: formData,
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', 'Перевірте правильність заповнення форми.'); }
+                    else { showToast('error', data.message || 'Помилка збереження.'); }
+                    this.saving = false; return;
+                }
+                showToast('success', data.message || 'Оголошення опубліковано!');
+                closeCreateAnnouncementModal();
+                setTimeout(() => Livewire.navigate(window.location.href), 600);
+            } catch (e) { showToast('error', "Помилка з'єднання з сервером."); this.saving = false; }
+        }
+    }
+}
+</script>
+@endif
 @endsection

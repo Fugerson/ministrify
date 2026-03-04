@@ -56,6 +56,13 @@
                         <!-- Dropdown -->
                         <div x-show="showDropdown" x-cloak @click.away="showDropdown = false"
                              class="absolute left-0 top-full mt-1 z-20 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-[180px]">
+                            <button type="button"
+                                    @click="ministryId = null; ministryColor = '#6b7280'; saveMinistry(); showDropdown = false"
+                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('Без команди') }}</span>
+                            </button>
+                            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                             <template x-for="ministry in ministries" :key="ministry.id">
                                 <button type="button"
                                         @click="ministryId = ministry.id; ministryColor = ministry.color; saveMinistry(); showDropdown = false"
@@ -1600,9 +1607,13 @@ function eventEditor() {
         },
 
         async saveMinistry() {
-            const ministry = this.ministries.find(m => m.id == this.ministryId);
-            if (ministry) {
-                this.ministryColor = ministry.color;
+            if (this.ministryId) {
+                const ministry = this.ministries.find(m => m.id == this.ministryId);
+                if (ministry) {
+                    this.ministryColor = ministry.color;
+                }
+            } else {
+                this.ministryColor = '#6b7280';
             }
             await this.saveField('ministry_id', this.ministryId);
         },

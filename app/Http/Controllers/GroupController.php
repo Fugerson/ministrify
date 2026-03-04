@@ -21,7 +21,11 @@ class GroupController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('groups.index', compact('groups'));
+        $people = Person::where('church_id', $this->getCurrentChurch()->id)
+            ->orderBy('first_name')
+            ->get();
+
+        return view('groups.index', compact('groups', 'people'));
     }
 
     public function create()

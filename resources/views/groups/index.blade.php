@@ -4,12 +4,12 @@
 
 @section('actions')
 @can('create', App\Models\Group::class)
-<a href="{{ route('groups.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
+<button type="button" onclick="openCreateGroupModal()" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
     </svg>
     Створити групу
-</a>
+</button>
 @endcan
 @endsection
 
@@ -25,12 +25,12 @@
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Немає груп</h3>
         <p class="text-gray-500 dark:text-gray-400 mb-6">Створіть групу для організації людей</p>
         @can('create', App\Models\Group::class)
-        <a href="{{ route('groups.create') }}" class="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-all">
+        <button type="button" onclick="openCreateGroupModal()" class="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-all">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
             Створити групу
-        </a>
+        </button>
         @endcan
     </div>
     @else
@@ -155,4 +155,170 @@
     </div>
     @endif
 </div>
+
+{{-- Create Group Modal --}}
+@can('create', App\Models\Group::class)
+<div id="createGroupModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 sm:p-0">
+        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="closeCreateGroupModal()"></div>
+        <div class="relative w-full max-w-lg mx-auto mt-8 sm:mt-16 bg-white dark:bg-gray-800 rounded-2xl shadow-xl z-10" x-data="groupCreateForm()">
+            <form x-ref="form" @submit.prevent="submitForm">
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Нова група</h3>
+                    <button type="button" onclick="closeCreateGroupModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- Body --}}
+                <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+                    {{-- Name --}}
+                    <div>
+                        <label for="modal_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва групи *</label>
+                        <input type="text" name="name" id="modal_name" required
+                               placeholder="Молодіжна група, Хор, Служіння дітям..."
+                               :class="errors.name ? 'ring-2 ring-red-500' : ''"
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                        <template x-if="errors.name">
+                            <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
+                        </template>
+                    </div>
+
+                    {{-- Description --}}
+                    <div>
+                        <label for="modal_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
+                        <textarea name="description" id="modal_description" rows="3"
+                                  placeholder="Коротко про групу та її діяльність..."
+                                  class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"></textarea>
+                    </div>
+
+                    {{-- Leader --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Лідер групи</label>
+                        <x-person-select
+                            name="leader_id"
+                            :people="$people"
+                            placeholder="Почніть вводити ім'я лідера..."
+                            null-text="Без лідера"
+                        />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Лідер автоматично стане учасником групи</p>
+                    </div>
+
+                    {{-- Meeting details --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label for="modal_meeting_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">День зустрічі</label>
+                            <select name="meeting_day" id="modal_meeting_day"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                                <option value="">Не вказано</option>
+                                @foreach(['monday' => 'Понеділок', 'tuesday' => 'Вівторок', 'wednesday' => 'Середа', 'thursday' => 'Четвер', 'friday' => "П'ятниця", 'saturday' => 'Субота', 'sunday' => 'Неділя'] as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="modal_meeting_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Час зустрічі</label>
+                            <input type="time" name="meeting_time" id="modal_meeting_time"
+                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="modal_location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Місце зустрічі</label>
+                            <input type="text" name="location" id="modal_location"
+                                   placeholder="Адреса або кімната"
+                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                        </div>
+                    </div>
+
+                    {{-- Status --}}
+                    <div>
+                        <label for="modal_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус</label>
+                        <select name="status" id="modal_status"
+                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
+                            @foreach(\App\Models\Group::getStatuses() as $value => $label)
+                            <option value="{{ $value }}" {{ $value === 'active' ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                    <button type="button" onclick="closeCreateGroupModal()"
+                            class="w-full sm:w-auto px-5 py-2.5 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
+                        Скасувати
+                    </button>
+                    <button type="submit" :disabled="saving"
+                            class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
+                        <span x-show="!saving">Створити групу</span>
+                        <span x-show="saving" class="flex items-center justify-center gap-2">
+                            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            Збереження...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
+
 @endsection
+
+@push('scripts')
+<script>
+function openCreateGroupModal() {
+    document.getElementById('createGroupModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeCreateGroupModal() {
+    document.getElementById('createGroupModal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('createGroupModal').classList.contains('hidden')) {
+        closeCreateGroupModal();
+    }
+});
+
+function groupCreateForm() {
+    return {
+        saving: false,
+        errors: {},
+        async submitForm() {
+            this.saving = true;
+            this.errors = {};
+            const formData = new FormData(this.$refs.form);
+            try {
+                const response = await fetch('{{ route("groups.store") }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: formData,
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.errors = data.errors;
+                        showToast('error', 'Перевірте правильність заповнення форми.');
+                    } else {
+                        showToast('error', data.message || 'Помилка збереження.');
+                    }
+                    this.saving = false;
+                    return;
+                }
+                showToast('success', data.message || 'Збережено!');
+                closeCreateGroupModal();
+                setTimeout(() => Livewire.navigate(window.location.href), 600);
+            } catch (e) {
+                showToast('error', "Помилка з'єднання з сервером.");
+                this.saving = false;
+            }
+        }
+    }
+}
+</script>
+@endpush

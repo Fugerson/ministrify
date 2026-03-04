@@ -40,7 +40,12 @@ class MinistryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('ministries.index', compact('ministries'));
+        // People for create modal (leader select)
+        $people = $user->canCreate('ministries')
+            ? Person::where('church_id', $church->id)->orderBy('last_name')->get()
+            : collect();
+
+        return view('ministries.index', compact('ministries', 'people'));
     }
 
     public function create()

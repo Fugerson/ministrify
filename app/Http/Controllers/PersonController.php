@@ -83,7 +83,7 @@ class PersonController extends Controller
         $peopleLimited = $people->count() >= 1000;
 
         $tags = Tag::where('church_id', $church->id)->get();
-        $ministries = $church->ministries;
+        $ministries = $church->ministries()->with('positions')->get();
         $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
         // Calculate statistics using database aggregation (optimized)

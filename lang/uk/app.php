@@ -895,4 +895,9 @@ return [
     'no_matched_transactions' => 'Немає транзакцій за цей місяць',
     'monthly' => 'Щомісячно',
     'one_time' => 'Одноразово',
+
+    // Person create modal
+    'details' => 'Деталі',
+    'joined_date' => 'Дата приходу в церкву',
+    'additional_info' => 'Додаткова інформація',
 ];
