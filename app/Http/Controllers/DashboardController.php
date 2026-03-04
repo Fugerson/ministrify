@@ -1002,12 +1002,11 @@ class DashboardController extends Controller
             ->distinct('family_relationships.person_id')
             ->count('family_relationships.person_id');
 
+        // Spouse relationships are stored one-way (A→B only, no reverse B→A)
         $marriedCouples = FamilyRelationship::where('relationship_type', 'spouse')
             ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
             ->whereHas('relatedPerson', fn($q) => $q->where('church_id', $church->id))
             ->count();
-        // Divide by 2 since spouse relationship is bidirectional
-        $marriedCouples = intdiv($marriedCouples, 2);
 
         $childrenCount = FamilyRelationship::where('relationship_type', 'child')
             ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
@@ -1020,10 +1019,13 @@ class DashboardController extends Controller
             ->distinct('person_id')
             ->count('person_id');
 
-        // Single parents = parents who are not in a spouse relationship
+        // Single parents = parents who are not in a spouse relationship (check both directions)
         $parentsWithSpouse = FamilyRelationship::where('relationship_type', 'parent')
             ->whereHas('person', fn($q) => $q->where('church_id', $church->id)
-                ->whereHas('familyRelationships', fn($r) => $r->where('relationship_type', 'spouse')))
+                ->where(fn($q2) => $q2
+                    ->whereHas('familyRelationships', fn($r) => $r->where('relationship_type', 'spouse'))
+                    ->orWhereHas('inverseFamilyRelationships', fn($r) => $r->where('relationship_type', 'spouse'))
+                ))
             ->distinct('person_id')
             ->count('person_id');
         $singleParents = $uniqueParents - $parentsWithSpouse;
