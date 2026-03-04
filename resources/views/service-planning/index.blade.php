@@ -47,7 +47,7 @@
             </div>
 
             {{-- Right: date navigation --}}
-            <div class="flex items-center gap-1" x-data="{ pickerOpen: false }">
+            <div class="flex items-center gap-1" x-data="{ pickerOpen: false, pickerYear: new Date().getFullYear() }">
                 <button @click="prevPeriod()" type="button"
                    class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,9 +55,9 @@
                     </svg>
                 </button>
 
-                {{-- Clickable date label → opens picker --}}
+                {{-- Clickable date label → opens month picker --}}
                 <div class="relative">
-                    <button @click="pickerOpen = !pickerOpen" type="button"
+                    <button @click="pickerOpen = !pickerOpen; pickerYear = startDate.getFullYear()" type="button"
                         class="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold text-gray-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap">
                         <span x-text="periodLabel"></span>
                         <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,15 +65,44 @@
                         </svg>
                     </button>
 
-                    {{-- Date picker dropdown --}}
+                    {{-- Month/year picker dropdown --}}
                     <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
-                         class="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 w-52">
+                         class="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 min-w-[240px]">
 
-                        <input type="date" :value="formatDate(startDate)"
-                               @change="jumpToDate($event.target.value); pickerOpen = false"
-                               class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 mb-2">
+                        {{-- Year navigation --}}
+                        <div class="flex items-center justify-between mb-3">
+                            <button @click="pickerYear--" type="button"
+                                class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <span class="text-sm font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
+                            <button @click="pickerYear++" type="button"
+                                class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
 
-                        <div class="flex gap-1.5">
+                        {{-- Month grid 3x4 --}}
+                        <div class="grid grid-cols-3 gap-1.5 mb-3">
+                            <template x-for="(month, index) in ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру']" :key="index">
+                                <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
+                                    :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index
+                                        ? 'bg-primary-500 text-white font-bold'
+                                        : (pickerYear === new Date().getFullYear() && index === new Date().getMonth()
+                                            ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
+                                    class="px-2 py-2 rounded-lg text-sm transition-colors">
+                                    <span x-text="month"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        {{-- Period buttons --}}
+                        <div class="flex gap-1.5 mb-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                             <button @click="weeks = '4'; loadData(); pickerOpen = false" type="button"
                                 :class="weeks == 4 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
                                 class="flex-1 px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors">4 тиж</button>
@@ -84,6 +113,12 @@
                                 :class="weeks == 12 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
                                 class="flex-1 px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors">12 тиж</button>
                         </div>
+
+                        {{-- Today button --}}
+                        <button @click="goToday(); pickerOpen = false" type="button"
+                            class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
+                            {{ __('common.today') }}
+                        </button>
                     </div>
                 </div>
 
@@ -92,11 +127,6 @@
                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
-                </button>
-
-                <button @click="goToday()" type="button"
-                   class="px-2.5 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors whitespace-nowrap">
-                    {{ __('common.today') }}
                 </button>
             </div>
         </div>
@@ -526,6 +556,15 @@ function servicePlanningMatrix() {
 
         jumpToDate(dateStr) {
             const d = new Date(dateStr + 'T00:00:00');
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            this.startDate = new Date(d.setDate(diff));
+            this.startDate.setHours(0, 0, 0, 0);
+            this.loadData();
+        },
+
+        pickMonth(year, monthIndex) {
+            const d = new Date(year, monthIndex, 1);
             const day = d.getDay();
             const diff = d.getDate() - day + (day === 0 ? -6 : 1);
             this.startDate = new Date(d.setDate(diff));
