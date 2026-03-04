@@ -127,14 +127,35 @@ window.exchangeManager = function() {
 };
 
 window.incomesPage = function() {
-    return {
-        allIncomes: @json($incomesJson),
+    const saved = filterStorage.load('finance_incomes', {
         search: '',
         categoryFilter: '',
         paymentFilter: '',
         sortBy: 'date_desc',
+    });
+    return {
+        allIncomes: @json($incomesJson),
+        search: saved.search,
+        categoryFilter: saved.categoryFilter,
+        paymentFilter: saved.paymentFilter,
+        sortBy: saved.sortBy,
         perPage: parseInt(localStorage.getItem('financePerPage') || '25'),
         currentPage: 1,
+
+        init() {
+            ['search', 'categoryFilter', 'paymentFilter', 'sortBy'].forEach(key => {
+                this.$watch(key, () => this._saveFilters());
+            });
+        },
+
+        _saveFilters() {
+            filterStorage.save('finance_incomes', {
+                search: this.search,
+                categoryFilter: this.categoryFilter,
+                paymentFilter: this.paymentFilter,
+                sortBy: this.sortBy,
+            });
+        },
 
         get filteredIncomes() {
             let items = [...this.allIncomes];

@@ -33,6 +33,29 @@
         }
     </script>
 
+    <script>
+        window.filterStorage = {
+            save(page, filters) {
+                try { localStorage.setItem('filters_' + page, JSON.stringify(filters)); } catch(e) {}
+            },
+            load(page, defaults) {
+                try {
+                    const saved = JSON.parse(localStorage.getItem('filters_' + page));
+                    if (saved && typeof saved === 'object') {
+                        const result = { ...defaults };
+                        for (const key in defaults) {
+                            if (key in saved && typeof saved[key] === typeof defaults[key]) {
+                                result[key] = saved[key];
+                            }
+                        }
+                        return result;
+                    }
+                } catch(e) {}
+                return { ...defaults };
+            }
+        };
+    </script>
+
     <style>
         [x-cloak] { display: none !important; }
 

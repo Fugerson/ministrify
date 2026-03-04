@@ -492,12 +492,18 @@
 
 <script>
 function quickEdit() {
-    return {
-        rows: @json($rows),
+    const saved = filterStorage.load('people_quick_edit', {
         searchQuery: '',
         filterMinistry: '',
         filterStatus: '',
         filterGender: '',
+    });
+    return {
+        rows: @json($rows),
+        searchQuery: saved.searchQuery,
+        filterMinistry: saved.filterMinistry,
+        filterStatus: saved.filterStatus,
+        filterGender: saved.filterGender,
         saving: false,
         showToast: false,
         toastMessage: '',
@@ -540,6 +546,22 @@ function quickEdit() {
             { key: 'anniversary', label: 'Річниця', width: '140px' },
             { key: 'notes', label: 'Нотатки', width: '250px' },
         ],
+
+        init() {
+            this.$watch('searchQuery', () => this._saveFilters());
+            this.$watch('filterMinistry', () => this._saveFilters());
+            this.$watch('filterStatus', () => this._saveFilters());
+            this.$watch('filterGender', () => this._saveFilters());
+        },
+
+        _saveFilters() {
+            filterStorage.save('people_quick_edit', {
+                searchQuery: this.searchQuery,
+                filterMinistry: this.filterMinistry,
+                filterStatus: this.filterStatus,
+                filterGender: this.filterGender,
+            });
+        },
 
         get filteredRows() {
             let result = this.rows.filter(row => {

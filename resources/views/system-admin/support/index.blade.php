@@ -358,6 +358,7 @@ function supportKanban() {
             this.searchQuery = '';
             this.filters.category = '';
             this.filters.priority = '';
+            this._saveFilters();
         },
 
         getCategoryClass(category) {
@@ -422,7 +423,24 @@ function supportKanban() {
         },
 
         init() {
+            const saved = filterStorage.load('admin_support', { searchQuery: '', category: '', priority: '' });
+            this.searchQuery = saved.searchQuery;
+            this.filters.category = saved.category;
+            this.filters.priority = saved.priority;
+
+            this.$watch('searchQuery', () => this._saveFilters());
+            this.$watch('filters.category', () => this._saveFilters());
+            this.$watch('filters.priority', () => this._saveFilters());
+
             this.initSortable();
+        },
+
+        _saveFilters() {
+            filterStorage.save('admin_support', {
+                searchQuery: this.searchQuery,
+                category: this.filters.category,
+                priority: this.filters.priority
+            });
         },
 
         initSortable() {

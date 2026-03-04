@@ -130,15 +130,38 @@ window.exchangeManager = function() {
 $remaining = $totals['budget'] - $totals['spent'];
 @endphp
 window.expensesPage = function() {
-    return {
-        allExpenses: @json($expensesJson),
+    const saved = filterStorage.load('finance_expenses', {
         search: '',
         categoryFilter: '',
         ministryFilter: '',
         paymentFilter: '',
         sortBy: 'date_desc',
+    });
+    return {
+        allExpenses: @json($expensesJson),
+        search: saved.search,
+        categoryFilter: saved.categoryFilter,
+        ministryFilter: saved.ministryFilter,
+        paymentFilter: saved.paymentFilter,
+        sortBy: saved.sortBy,
         perPage: parseInt(localStorage.getItem('financePerPage') || '25'),
         currentPage: 1,
+
+        init() {
+            ['search', 'categoryFilter', 'ministryFilter', 'paymentFilter', 'sortBy'].forEach(key => {
+                this.$watch(key, () => this._saveFilters());
+            });
+        },
+
+        _saveFilters() {
+            filterStorage.save('finance_expenses', {
+                search: this.search,
+                categoryFilter: this.categoryFilter,
+                ministryFilter: this.ministryFilter,
+                paymentFilter: this.paymentFilter,
+                sortBy: this.sortBy,
+            });
+        },
         budget: {{ $totals['budget'] }},
 
         get filteredExpenses() {

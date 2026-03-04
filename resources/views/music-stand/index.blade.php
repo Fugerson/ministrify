@@ -92,7 +92,16 @@
 
     <!-- Quick Song Search -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
-         x-data="{ search: '', songs: {{ json_encode($allSongs) }} }">
+         x-data="{
+            search: filterStorage.load('music_stand', { search: '' }).search,
+            songs: {{ json_encode($allSongs) }},
+            init() {
+                this.$watch('search', () => this._saveFilters());
+            },
+            _saveFilters() {
+                filterStorage.save('music_stand', { search: this.search });
+            }
+         }">
         <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Швидкий пошук пісні</h3>
         <input type="text" x-model="search" placeholder="Введіть назву пісні..."
                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
