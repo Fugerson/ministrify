@@ -256,7 +256,7 @@ window.handlePeriodReload = function(detail) {
     url.searchParams.set('start_date', startDate);
     url.searchParams.set('end_date', endDate);
 
-    window.location.href = url.toString();
+    Livewire.navigate(url.toString());
 };
 </script>
 @endif

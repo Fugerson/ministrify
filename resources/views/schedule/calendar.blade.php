@@ -828,7 +828,7 @@ function calendarNavigator(initialState) {
                 ...(this.currentView === 'week' ? { week: this.currentWeek } : { month: this.currentMonth })
             });
 
-            window.location.href = `{{ route('schedule') }}?${params}`;
+            Livewire.navigate(`{{ route('schedule') }}?${params}`);
         }
     };
 }

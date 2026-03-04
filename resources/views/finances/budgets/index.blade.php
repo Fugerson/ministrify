@@ -1167,7 +1167,7 @@ function budgetsPage() {
         churchTransLoading: false,
 
         updatePeriod() {
-            window.location.href = `{{ route('finances.budgets') }}?year=${this.year}&month=${this.month}`;
+            Livewire.navigate(`{{ route('finances.budgets') }}?year=${this.year}&month=${this.month}`);
         },
 
         toggleExpand(ministryId) {

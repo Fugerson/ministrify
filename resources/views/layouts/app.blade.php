@@ -1732,7 +1732,7 @@
 
                 goToSelected() {
                     if (this.results[this.selectedIndex]) {
-                        window.location.href = this.results[this.selectedIndex].url;
+                        Livewire.navigate(this.results[this.selectedIndex].url);
                     }
                 }
             };

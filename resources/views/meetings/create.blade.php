@@ -133,7 +133,7 @@ function meetingCreateForm() {
                     this.saving = false; return;
                 }
                 showToast('success', data.message || 'Збережено!');
-                setTimeout(() => window.location.href = data.redirect_url, 800);
+                setTimeout(() => Livewire.navigate(data.redirect_url), 800);
             } catch (e) { showToast('error', "Помилка з'єднання з сервером."); this.saving = false; }
         }
     }

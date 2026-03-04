@@ -304,7 +304,7 @@ function personCreateForm() {
                     return;
                 }
                 showToast('success', data.message || '{{ __("app.saved") }}');
-                setTimeout(() => window.location.href = data.redirect_url, 800);
+                setTimeout(() => Livewire.navigate(data.redirect_url), 800);
             } catch (e) {
                 showToast('error', "{{ __('app.connection_error') }}");
                 this.saving = false;

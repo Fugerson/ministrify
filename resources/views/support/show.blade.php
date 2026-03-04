@@ -107,7 +107,7 @@
                 </div>
 
                 <div class="flex items-center justify-between">
-                    <button type="button" @click="ajaxAction('{{ route('support.close', $ticket) }}', 'POST').then(() => setTimeout(() => window.location.href = '{{ route('support.index') }}', 600))" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    <button type="button" @click="ajaxAction('{{ route('support.close', $ticket) }}', 'POST').then(() => setTimeout(() => Livewire.navigate('{{ route('support.index') }}'), 600))" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                         Закрити запит
                     </button>
                     <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">

@@ -58,7 +58,7 @@ function ajaxForm(config = {}) {
                 if (config.onSuccess) {
                     config.onSuccess.call(this, data);
                 } else if (!config.stayOnPage && data.redirect_url) {
-                    setTimeout(() => window.location.href = data.redirect_url, 600);
+                    setTimeout(() => Livewire.navigate(data.redirect_url), 600);
                     return; // keep saving=true during redirect
                 }
 
@@ -109,7 +109,7 @@ async function ajaxDelete(url, confirmMsg, onSuccess, redirectUrl) {
         if (onSuccess) {
             onSuccess(data);
         } else if (redirectUrl || data.redirect_url) {
-            setTimeout(() => window.location.href = redirectUrl || data.redirect_url, 600);
+            setTimeout(() => Livewire.navigate(redirectUrl || data.redirect_url), 600);
         }
     } catch (e) {
         showToast('error', "Помилка з'єднання з сервером.");

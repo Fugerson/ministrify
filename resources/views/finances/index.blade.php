@@ -530,7 +530,7 @@ function financesDashboard() {
             if (this.selectedMonth) {
                 url += '&month=' + this.selectedMonth;
             }
-            window.location.href = url;
+            Livewire.navigate(url);
         },
 
         switchChartPeriod(period) {

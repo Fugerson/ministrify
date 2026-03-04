@@ -18,7 +18,7 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <select id="period" onchange="window.location.href='?period='+this.value" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            <select id="period" onchange="Livewire.navigate('?period='+this.value)" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <option value="month" {{ $period === 'month' ? 'selected' : '' }}>Цей місяць</option>
                 <option value="3months" {{ $period === '3months' ? 'selected' : '' }}>3 місяці</option>
                 <option value="6months" {{ $period === '6months' ? 'selected' : '' }}>6 місяців</option>

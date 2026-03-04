@@ -549,7 +549,7 @@ function tableFilters() {
                 }
             });
 
-            window.location.href = url.toString();
+            Livewire.navigate(url.toString());
         },
         clearFilters() {
             this.filters = {

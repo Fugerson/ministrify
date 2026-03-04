@@ -39,7 +39,7 @@ function financesDashboard() {
             const params = new URLSearchParams();
             params.set('year', this.selectedYear);
             if (this.selectedMonth) params.set('month', this.selectedMonth);
-            window.location.href = '{{ route("finances.index") }}?' + params.toString();
+            Livewire.navigate('{{ route("finances.index") }}?' + params.toString());
         },
 
         initChart() {

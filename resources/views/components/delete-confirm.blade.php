@@ -31,9 +31,9 @@
                     showToast('success', data.message || '{{ __('Видалено!') }}');
                 }
                 @if($redirect)
-                    setTimeout(() => window.location.href = '{{ $redirect }}', 500);
+                    setTimeout(() => Livewire.navigate('{{ $redirect }}'), 500);
                 @else
-                    setTimeout(() => window.location.href = '{{ url()->previous() }}', 500);
+                    setTimeout(() => Livewire.navigate('{{ url()->previous() }}'), 500);
                 @endif
             } else {
                 if (typeof showToast === 'function') {

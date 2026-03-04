@@ -324,7 +324,7 @@
                                     </div>
                                     <div class="space-y-0.5">
                                         <template x-for="event in day.events" :key="event.id">
-                                            <button @click="event.isSundayService ? openEventModal(event) : (window.location.href = event.eventUrl)"
+                                            <button @click="event.isSundayService ? openEventModal(event) : (Livewire.navigate(event.eventUrl))"
                                                class="block w-full text-left px-1 py-0.5 text-xs rounded truncate transition-colors cursor-pointer"
                                                :class="event.isPast ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60'">
                                                 <span x-text="event.time" class="font-medium"></span>
@@ -341,7 +341,7 @@
                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Події цього місяця</h4>
                             <div class="space-y-2">
                                 <template x-for="event in currentMonthEvents" :key="event.id">
-                                    <button @click="event.isSundayService ? openEventModal(event) : (window.location.href = event.eventUrl)"
+                                    <button @click="event.isSundayService ? openEventModal(event) : (Livewire.navigate(event.eventUrl))"
                                        class="block w-full text-left p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
                                        :class="{ 'opacity-60': event.isPast }">
                                         <div class="flex items-center justify-between">
@@ -2471,7 +2471,7 @@
                     @endphp
                     <div class="group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors" data-resource-id="{{ $resource->id }}"
                          @if($isFolder)
-                         @click="window.location.href='{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'resources', 'folder' => $resource->id]) }}'"
+                         @click="Livewire.navigate('{{ route('ministries.show', ['ministry' => $ministry, 'tab' => 'resources', 'folder' => $resource->id]) }}')"
                          @elseif($isDoc)
                          @click="openDocument({{ json_encode(['id' => $resource->id, 'name' => $resource->name, 'content' => $resource->content ?? '']) }})"
                          @else
@@ -4099,7 +4099,7 @@ function _addMinistryResourceFolder(ctx, data) {
     var el = document.createElement('div');
     el.className = 'group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors';
     el.setAttribute('data-resource-id', data.id);
-    el.onclick = function() { window.location.href = '/ministries/{{ $ministry->id }}/resources/folder/' + data.id; };
+    el.onclick = function() { Livewire.navigate('/ministries/{{ $ministry->id }}/resources/folder/' + data.id); };
     el.innerHTML = '\x3Cdiv class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">\x3Csvg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3C/div>\x3Cdiv class="flex-1 min-w-0">\x3Cp class="text-sm font-medium text-gray-900 dark:text-white truncate">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400">Папка \x3Cspan class="mx-1">\x26middot;\x3C/span> ' + dateStr + '\x3C/p>\x3C/div>';
     list.prepend(el);
     if (window.showGlobalToast) showGlobalToast('Папку створено', 'success');

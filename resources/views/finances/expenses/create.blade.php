@@ -338,7 +338,7 @@ function expenseCreateForm() {
                 if (data.budget_warning) {
                     showToast('warning', data.budget_warning);
                 }
-                setTimeout(() => window.location.href = data.redirect_url, 800);
+                setTimeout(() => Livewire.navigate(data.redirect_url), 800);
             } catch (e) {
                 showToast('error', 'Помилка з\'єднання з сервером.');
                 this.saving = false;
