@@ -28,6 +28,12 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6" x-data="eventEditor()">
         <div class="flex items-start justify-between gap-4">
             <div class="flex items-center flex-1">
+                <button onclick="history.back()" title="{{ __('Назад') }}"
+                        class="w-10 h-10 mr-3 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
                 <div class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
                      :style="'background-color: ' + (ministryColor || '#3b82f6') + '20'">
                     <svg class="w-7 h-7" :style="'color: ' + (ministryColor || '#3b82f6')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
