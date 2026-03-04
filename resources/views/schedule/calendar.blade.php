@@ -117,64 +117,44 @@
                             {{-- Calendar Picker Dropdown --}}
                             <div x-show="showPicker" x-transition @click.outside="showPicker = false"
                                  class="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 min-w-[280px]">
-                                <div x-show="currentView === 'month'" class="space-y-3">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                                            </svg>
-                                        </button>
-                                        <span class="font-semibold" x-text="currentYear"></span>
-                                        <button @click="currentYear++; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
-                                            <button @click="currentMonth = index + 1; showPicker = false; loadCalendar()" type="button"
-                                               :class="currentMonth === index + 1 ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
-                                               class="p-2 rounded-lg font-medium text-sm transition-colors">
-                                                <span x-text="month"></span>
-                                            </button>
-                                        </template>
-                                    </div>
+                                {{-- Year Navigation --}}
+                                <div class="flex items-center justify-between mb-4">
+                                    <button @click="currentYear--" type="button"
+                                       class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                    </button>
+                                    <span class="text-lg font-bold text-gray-900 dark:text-white" x-text="currentYear"></span>
+                                    <button @click="currentYear++" type="button"
+                                       class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </button>
                                 </div>
 
-                                <div x-show="currentView === 'week'" class="space-y-3">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <button @click="currentYear--; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                                            </svg>
+                                {{-- Month Grid --}}
+                                <div class="grid grid-cols-3 gap-2 mb-4">
+                                    <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
+                                        <button @click="pickMonth(index + 1); showPicker = false;" type="button"
+                                           :class="{
+                                               'bg-primary-600 text-white': currentMonth === index + 1 && currentYear === {{ now()->year }},
+                                               'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300': currentMonth === index + 1 && currentYear !== {{ now()->year }},
+                                               'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600': currentMonth !== index + 1,
+                                               'ring-2 ring-primary-400 ring-offset-1 dark:ring-offset-gray-800': index + 1 === {{ now()->month }} && currentYear === {{ now()->year }}
+                                           }"
+                                           class="px-3 py-2.5 rounded-lg font-medium text-sm transition-colors">
+                                            <span x-text="month"></span>
                                         </button>
-                                        <span class="font-semibold" x-text="currentYear"></span>
-                                        <button @click="currentYear++; loadCalendar()" type="button" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-2 mb-3">
-                                        <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
-                                            <button @click="currentMonth = index + 1" type="button"
-                                               :class="currentMonth === index + 1 ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
-                                               class="p-2 rounded-lg font-medium text-xs transition-colors">
-                                                <span x-text="month"></span>
-                                            </button>
-                                        </template>
-                                    </div>
-                                    <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-                                        <template x-for="week in Array.from({length: 52}, (_, i) => i + 1)" :key="week">
-                                            <button @click="currentWeek = week; showPicker = false; loadCalendar()" type="button"
-                                               :class="currentWeek === week ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'"
-                                               class="p-2 rounded-lg font-medium text-xs transition-colors">
-                                                <span x-text="'W' + week"></span>
-                                            </button>
-                                        </template>
-                                    </div>
+                                    </template>
                                 </div>
+
+                                {{-- Today Button --}}
+                                <button @click="goToday(); showPicker = false;" type="button"
+                                   class="w-full py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
+                                    {{ __('Сьогодні') }}
+                                </button>
                             </div>
                         </div>
 
@@ -1159,12 +1139,21 @@ function calendarNavigator(initialState) {
             this.loadCalendar();
         },
 
+        pickMonth(month) {
+            this.currentMonth = month;
+            if (this.currentView === 'week') {
+                // Jump to first week of the selected month
+                const d = new Date(this.currentYear, month - 1, 4);
+                this.currentWeek = d.getWeek();
+            }
+            this.loadCalendar();
+        },
+
         goToday() {
             const today = new Date();
             this.currentYear = today.getFullYear();
             this.currentMonth = today.getMonth() + 1;
             this.currentWeek = today.getWeek();
-            this.currentView = 'month';
             this.loadCalendar();
         },
 
