@@ -425,6 +425,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
     Route::get('schedule/matrix', [EventController::class, 'matrix'])->name('schedule.matrix');
     Route::get('schedule/matrix-data', [EventController::class, 'matrixData'])->name('schedule.matrix-data');
+    Route::patch('events/{event}/cell-note', [EventController::class, 'saveCellNote'])->name('events.cell-note');
 
     // Service Planning
     Route::get('service-planning', [EventController::class, 'servicePlanning'])->name('service-planning');

@@ -1061,6 +1061,14 @@ class EventController extends Controller
             }
         }
 
+        // Load cell notes (independent of person assignments)
+        $cellNotes = \App\Models\EventCellNote::where('church_id', $church->id)
+            ->whereIn('event_id', $eventIds)
+            ->get()
+            ->groupBy(fn($n) => $n->event_id . '_' . $n->role_type . '_' . $n->role_id)
+            ->map(fn($group) => $group->first()->notes)
+            ->toArray();
+
         // Current user context for self-signup
         $currentPerson = auth()->user()->person;
         $currentPersonId = $currentPerson?->id;
@@ -1069,7 +1077,46 @@ class EventController extends Controller
             : [];
         $isLeader = auth()->user()->canEdit('events');
 
-        return response()->json(compact('events', 'ministriesData', 'grid', 'members', 'currentPersonId', 'myMinistryIds', 'isLeader'));
+        return response()->json(compact('events', 'ministriesData', 'grid', 'members', 'cellNotes', 'currentPersonId', 'myMinistryIds', 'isLeader'));
+    }
+
+    /**
+     * Save cell note (independent of person assignment)
+     */
+    public function saveCellNote(Request $request, Event $event)
+    {
+        abort_unless(auth()->user()->canEdit('events'), 403);
+        $this->authorizeChurch($event);
+
+        $validated = $request->validate([
+            'role_type' => 'required|string|in:ministry_role,position',
+            'role_id' => 'required|integer',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $church = $this->getCurrentChurch();
+        $notes = trim($validated['notes'] ?? '') ?: null;
+
+        if ($notes) {
+            \App\Models\EventCellNote::updateOrCreate(
+                [
+                    'event_id' => $event->id,
+                    'role_type' => $validated['role_type'],
+                    'role_id' => $validated['role_id'],
+                ],
+                [
+                    'church_id' => $church->id,
+                    'notes' => $notes,
+                ]
+            );
+        } else {
+            \App\Models\EventCellNote::where('event_id', $event->id)
+                ->where('role_type', $validated['role_type'])
+                ->where('role_id', $validated['role_id'])
+                ->delete();
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**

@@ -411,6 +411,7 @@ function servicePlanningMatrix() {
         events: [],
         ministries: [],
         grid: {},
+        cellNotes: {},
         members: {},
         periodLabel: '',
         nearestEventId: null,
@@ -574,6 +575,7 @@ function servicePlanningMatrix() {
                 this.buildUniqueEventTitles();
                 this.ministries = data.ministriesData;
                 this.grid = data.grid;
+                this.cellNotes = data.cellNotes || {};
                 this.members = data.members;
                 this.currentPersonId = data.currentPersonId;
                 this.myMinistryIds = data.myMinistryIds || [];
@@ -732,6 +734,10 @@ function servicePlanningMatrix() {
         },
 
         getCellNotes(ministryId, role, eventId) {
+            // Check independent cell notes first
+            const noteKey = eventId + '_' + role.type + '_' + role.id;
+            if (this.cellNotes[noteKey]) return this.cellNotes[noteKey];
+            // Fall back to person-level notes
             for (const p of this.getCellPersons(ministryId, role, eventId)) {
                 if (p.notes) return p.notes;
             }
@@ -868,23 +874,27 @@ function servicePlanningMatrix() {
         },
 
         async saveCellNotes(value) {
-            const { ministry, role, event, persons } = this.dropdown;
-            if (!ministry || !role || !event || persons.length === 0) return;
+            const { ministry, role, event } = this.dropdown;
+            if (!ministry || !role || !event) return;
             const notes = value.trim() || null;
             this.dropdown.cellNotes = notes || '';
-            const mKey = String(ministry.id), rKey = this.getRoleKey(role), eKey = String(event.id);
+            const noteKey = event.id + '_' + role.type + '_' + role.id;
 
             try {
-                await Promise.all(persons.map(person => {
-                    const url = person.source === 'assignment' ? `/rotation/assignment/${person.id}/notes` : `/events/${event.id}/ministry-team/${person.id}/notes`;
-                    return fetch(url, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'X-Requested-With': 'XMLHttpRequest' },
-                        body: JSON.stringify({ notes }),
-                    });
-                }));
+                // Save independent cell note
+                await fetch(`/events/${event.id}/cell-note`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ role_type: role.type, role_id: role.id, notes }),
+                });
 
-                if (this.grid[mKey]?.[rKey]?.[eKey]) this.grid[mKey][rKey][eKey].forEach(p => p.notes = notes);
+                // Update local state
+                if (notes) {
+                    this.cellNotes[noteKey] = notes;
+                } else {
+                    delete this.cellNotes[noteKey];
+                }
+
                 this.showToast('{{ __("Примітку збережено") }}');
             } catch (e) {
                 console.error('Save cell notes error:', e);
