@@ -6,27 +6,21 @@
 <div class="space-y-4" x-data="servicePlanningMatrix()" x-init="loadData()">
 
     {{-- Header --}}
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <h1 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.service_planning') }}</h1>
-                <select x-model="weeks" @change="loadData()"
-                        class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm py-2">
-                    <option value="4">4 {{ __('тижні') }}</option>
-                    <option value="8">8 {{ __('тижнів') }}</option>
-                    <option value="12">12 {{ __('тижнів') }}</option>
-                </select>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div class="flex items-center justify-between gap-2">
+            {{-- Left: title + filter --}}
+            <div class="flex items-center gap-2 min-w-0">
+                <h1 class="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ __('app.service_planning') }}</h1>
 
                 {{-- Event type filter --}}
                 <div class="relative" x-data="{ filterOpen: false }">
                     <button @click="filterOpen = !filterOpen" type="button"
-                        class="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        class="flex items-center gap-1 px-2 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                         </svg>
-                        <span>{{ __('Події') }}</span>
                         <template x-if="hiddenEventTitles.size > 0">
-                            <span class="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-full"
+                            <span class="w-4 h-4 flex items-center justify-center text-[9px] font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-full"
                                   x-text="hiddenEventTitles.size"></span>
                         </template>
                     </button>
@@ -54,24 +48,35 @@
                 </div>
             </div>
 
-            {{-- Period Navigation --}}
-            <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
+            {{-- Right: compact navigation --}}
+            <div class="flex items-center gap-1">
                 <button @click="prevPeriod()" type="button"
-                   class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-                <span class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] sm:min-w-[200px] text-center" x-text="periodLabel"></span>
+
+                <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-default select-none">
+                    <span class="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap" x-text="periodLabel"></span>
+                    <select x-model="weeks" @change="loadData()"
+                            class="text-xs text-gray-500 dark:text-gray-400 bg-transparent border-0 p-0 pr-5 focus:ring-0 cursor-pointer">
+                        <option value="4">4 {{ __('тиж') }}</option>
+                        <option value="8">8 {{ __('тиж') }}</option>
+                        <option value="12">12 {{ __('тиж') }}</option>
+                    </select>
+                </div>
+
                 <button @click="nextPeriod()" type="button"
-                   class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
+
                 <button @click="goToday()" type="button"
-                   class="px-3 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-xl transition-colors">
-                    {{ __('app.today') }}
+                   class="px-2.5 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors whitespace-nowrap">
+                    {{ __('common.today') }}
                 </button>
             </div>
         </div>
