@@ -137,7 +137,8 @@ class DashboardController extends Controller
                 ['id' => 'ministry_budgets',    'order' => 7,  'cols' => 6,  'enabled' => true],
                 ['id' => 'expenses_breakdown',  'order' => 8,  'cols' => 6,  'enabled' => true],
                 ['id' => 'need_attention',      'order' => 9,  'cols' => 6,  'enabled' => true],
-                ['id' => 'urgent_tasks',        'order' => 10, 'cols' => 12, 'enabled' => false],
+                ['id' => 'member_demographics', 'order' => 10, 'cols' => 6,  'enabled' => true],
+                ['id' => 'urgent_tasks',        'order' => 11, 'cols' => 12, 'enabled' => false],
             ],
         ];
     }
