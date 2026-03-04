@@ -524,15 +524,7 @@ function servicePlanningMatrix() {
 
         updatePeriodLabel() {
             const months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
-            const end = new Date(this.startDate);
-            end.setDate(end.getDate() + this.weeks * 7 - 1);
-            if (this.startDate.getMonth() === end.getMonth() && this.startDate.getFullYear() === end.getFullYear()) {
-                this.periodLabel = months[this.startDate.getMonth()] + ' ' + this.startDate.getFullYear();
-            } else if (this.startDate.getFullYear() === end.getFullYear()) {
-                this.periodLabel = months[this.startDate.getMonth()] + ' — ' + months[end.getMonth()] + ' ' + end.getFullYear();
-            } else {
-                this.periodLabel = months[this.startDate.getMonth()] + ' ' + this.startDate.getFullYear() + ' — ' + months[end.getMonth()] + ' ' + end.getFullYear();
-            }
+            this.periodLabel = months[this.startDate.getMonth()] + ' ' + this.startDate.getFullYear();
         },
 
         prevPeriod() {
