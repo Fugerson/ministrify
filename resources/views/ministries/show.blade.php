@@ -71,7 +71,7 @@
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.schedule ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div x-show="sections.schedule" x-collapse class="px-4 sm:px-6 pb-6">
+            <div x-show="sections.schedule" x-transition class="px-4 sm:px-6 pb-6">
                     {{-- Schedule calendar view --}}
                     @php
                         $scheduleEventsGrouped = $scheduleEvents->groupBy(fn($e) => $e->date->format('Y-m-d'));
@@ -1275,7 +1275,7 @@
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.members ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div x-show="sections.members" x-collapse class="px-4 sm:px-6 pb-6"
+            <div x-show="sections.members" x-transition class="px-4 sm:px-6 pb-6"
                  x-data="{ membersView: localStorage.getItem('ministry_members_view') || 'grid' }"
                  x-init="$watch('membersView', v => localStorage.setItem('ministry_members_view', v))">
                 @php
@@ -1701,7 +1701,7 @@
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.expenses ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div x-show="sections.expenses" x-collapse class="px-4 sm:px-6 pb-6"
+            <div x-show="sections.expenses" x-transition class="px-4 sm:px-6 pb-6"
                  x-data="budgetPage()"
                  x-init="loadBudget()">
                 {{-- ===== BUDGET PLANNING SECTION (fully dynamic via Alpine.js) ===== --}}
@@ -2376,7 +2376,7 @@
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.resources ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div x-show="sections.resources" x-collapse class="px-4 sm:px-6 pb-6"
+            <div x-show="sections.resources" x-transition class="px-4 sm:px-6 pb-6"
                  x-data="resourcesManager()">
 
                 <!-- Breadcrumbs -->
@@ -2770,7 +2770,7 @@
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.board ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div x-show="sections.board" x-collapse class="px-4 sm:px-6 pb-6">
+            <div x-show="sections.board" x-transition class="px-4 sm:px-6 pb-6">
                 @include('boards._kanban', [
                     'board' => $ministryBoard,
                     'people' => $boardPeople,
@@ -2790,7 +2790,7 @@
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.goals ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div x-show="sections.goals" x-collapse class="px-4 sm:px-6 pb-6"
+            <div x-show="sections.goals" x-transition class="px-4 sm:px-6 pb-6"
                  x-data="goalsManager()">
 
                 <!-- Vision - Main section at top -->
@@ -3129,7 +3129,7 @@
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.songs ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div x-show="sections.songs" x-collapse class="px-4 sm:px-6 pb-6"
+            <div x-show="sections.songs" x-transition class="px-4 sm:px-6 pb-6"
                  x-data="songsLibrary()">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-4">
@@ -3657,7 +3657,7 @@
                 </span>
                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.settings ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
-            <div x-show="sections.settings" x-collapse class="px-4 sm:px-6 pb-6"
+            <div x-show="sections.settings" x-transition class="px-4 sm:px-6 pb-6"
                  x-data="settingsTab()"
                  x-init="init()">
                 <div class="max-w-2xl space-y-8">
