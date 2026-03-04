@@ -1481,6 +1481,9 @@ class FinanceController extends Controller
             ? round(($grandTotals['actual'] / $grandTotals['planned']) * 100, 1)
             : 0;
 
+        // ── Trend data: last 6 months plan vs fact ──
+        $trendData = $this->getBudgetTrendData($church, $year, $month);
+
         // For expense edit modal
         $expenseCategories = TransactionCategory::where('church_id', $church->id)
             ->forExpense()
@@ -1501,8 +1504,160 @@ class FinanceController extends Controller
             'churchBudget',
             'churchBudgetItems',
             'churchBudgetTotals',
-            'grandTotals'
+            'grandTotals',
+            'trendData'
         ));
+    }
+
+    /**
+     * Get plan vs fact trend data for last 6 months
+     */
+    private function getBudgetTrendData($church, int $currentYear, int $currentMonth): array
+    {
+        $months = [];
+        $date = \Carbon\Carbon::create($currentYear, $currentMonth, 1);
+
+        for ($i = 5; $i >= 0; $i--) {
+            $d = $date->copy()->subMonths($i);
+            $y = $d->year;
+            $m = $d->month;
+
+            // Ministry planned: sum of effective budgets
+            $ministryBudgets = MinistryBudget::where('church_id', $church->id)
+                ->where('year', $y)->where('month', $m)
+                ->with('items')
+                ->get();
+
+            $ministryPlanned = 0;
+            foreach ($ministryBudgets as $mb) {
+                $ministryPlanned += $mb->getEffectiveBudget();
+            }
+
+            // Ministry actual spending
+            $ministryActual = (float) (Transaction::where('church_id', $church->id)
+                ->where('direction', Transaction::DIRECTION_OUT)
+                ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
+                ->completed()
+                ->forMonth($y, $m)
+                ->whereNotNull('ministry_id')
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0);
+
+            // Church planned
+            $cb = ChurchBudget::where('church_id', $church->id)->where('year', $y)->with('items')->first();
+            $churchPlanned = 0;
+            if ($cb) {
+                foreach ($cb->items as $item) {
+                    $churchPlanned += $item->getPlannedForMonth($m);
+                }
+            }
+
+            // Church actual
+            $churchActual = (float) (Transaction::where('church_id', $church->id)
+                ->where('direction', Transaction::DIRECTION_OUT)
+                ->whereNull('ministry_id')
+                ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
+                ->completed()
+                ->forMonth($y, $m)
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+                ->value('total') ?? 0);
+
+            $monthNames = [1 => 'Січ', 2 => 'Лют', 3 => 'Бер', 4 => 'Кві', 5 => 'Тра', 6 => 'Чер',
+                           7 => 'Лип', 8 => 'Сер', 9 => 'Вер', 10 => 'Жов', 11 => 'Лис', 12 => 'Гру'];
+
+            $months[] = [
+                'label' => $monthNames[$m],
+                'year' => $y,
+                'month' => $m,
+                'planned' => round($churchPlanned + $ministryPlanned),
+                'actual' => round($churchActual + $ministryActual),
+            ];
+        }
+
+        return $months;
+    }
+
+    /**
+     * Copy all ministry budgets from one month to another
+     */
+    public function copyAllBudgets(Request $request)
+    {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403);
+        }
+
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'from_year' => 'required|integer|min:2020|max:2100',
+            'from_month' => 'required|integer|min:1|max:12',
+            'to_year' => 'required|integer|min:2020|max:2100',
+            'to_month' => 'required|integer|min:1|max:12',
+        ]);
+
+        $sourceBudgets = MinistryBudget::where('church_id', $church->id)
+            ->where('year', $validated['from_year'])
+            ->where('month', $validated['from_month'])
+            ->with('items.responsiblePeople')
+            ->get();
+
+        if ($sourceBudgets->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Немає бюджетів для копіювання.'], 422);
+        }
+
+        $copied = 0;
+        $skipped = 0;
+
+        foreach ($sourceBudgets as $source) {
+            // Check if target already has items
+            $target = MinistryBudget::where('church_id', $church->id)
+                ->where('ministry_id', $source->ministry_id)
+                ->where('year', $validated['to_year'])
+                ->where('month', $validated['to_month'])
+                ->first();
+
+            if ($target && $target->items()->count() > 0) {
+                $skipped++;
+                continue;
+            }
+
+            if (!$target) {
+                $target = MinistryBudget::create([
+                    'church_id' => $church->id,
+                    'ministry_id' => $source->ministry_id,
+                    'year' => $validated['to_year'],
+                    'month' => $validated['to_month'],
+                    'monthly_budget' => $source->monthly_budget,
+                ]);
+            } else {
+                $target->update(['monthly_budget' => $source->monthly_budget]);
+            }
+
+            foreach ($source->items as $item) {
+                $newItem = BudgetItem::create([
+                    'church_id' => $church->id,
+                    'ministry_budget_id' => $target->id,
+                    'category_id' => $item->category_id,
+                    'name' => $item->name,
+                    'planned_amount' => $item->planned_amount,
+                    'notes' => $item->notes,
+                    'sort_order' => $item->sort_order,
+                ]);
+                if ($item->responsiblePeople->isNotEmpty()) {
+                    $newItem->responsiblePeople()->attach($item->responsiblePeople->pluck('id'));
+                }
+            }
+
+            $copied++;
+        }
+
+        $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+        $msg = "Скопійовано {$copied} бюджетів на {$monthNames[$validated['to_month']]} {$validated['to_year']}";
+        if ($skipped > 0) {
+            $msg .= " (пропущено {$skipped} — вже мають статті)";
+        }
+
+        return response()->json(['success' => true, 'message' => $msg]);
     }
 
     public function updateBudget(Request $request, Ministry $ministry)

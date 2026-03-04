@@ -16,8 +16,18 @@
             </p>
         </div>
 
-        {{-- Period Selector --}}
+        {{-- Period Selector + Copy --}}
         <div class="flex items-center gap-2">
+            @if(auth()->user()->canEdit('finances'))
+            <button x-on:click="showCopyModal = true"
+                    title="Скопіювати всі бюджети команд на інший місяць"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Копіювати
+            </button>
+            @endif
             <select x-model="month" x-on:change="updatePeriod()"
                     title="Оберіть місяць для перегляду план/факт витрат"
                     class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -121,6 +131,45 @@
         </div>
     </div>
     @endif
+
+    {{-- ═══ Trend Chart: Plan vs Fact (6 months) ═══ --}}
+    @php
+        $maxTrend = max(1, max(array_column($trendData, 'planned') ?: [1]), max(array_column($trendData, 'actual') ?: [1]));
+    @endphp
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">План vs Факт (6 місяців)</h3>
+        <div class="flex items-end justify-between gap-2 h-32">
+            @foreach($trendData as $td)
+            <div class="flex-1 flex flex-col items-center gap-1">
+                <div class="w-full flex gap-0.5 items-end" style="height: 96px;">
+                    {{-- Plan bar --}}
+                    <div class="flex-1 bg-blue-200 dark:bg-blue-900/50 rounded-t transition-all relative group"
+                         style="height: {{ $maxTrend > 0 ? max(2, ($td['planned'] / $maxTrend) * 96) : 2 }}px;"
+                         title="План: {{ number_format($td['planned'], 0, ',', ' ') }} ₴">
+                    </div>
+                    {{-- Fact bar --}}
+                    @php
+                        $factColor = $td['actual'] > $td['planned'] && $td['planned'] > 0
+                            ? 'bg-red-400 dark:bg-red-600'
+                            : 'bg-emerald-400 dark:bg-emerald-600';
+                    @endphp
+                    <div class="flex-1 {{ $factColor }} rounded-t transition-all"
+                         style="height: {{ $maxTrend > 0 ? max(2, ($td['actual'] / $maxTrend) * 96) : 2 }}px;"
+                         title="Факт: {{ number_format($td['actual'], 0, ',', ' ') }} ₴">
+                    </div>
+                </div>
+                <span class="text-[10px] text-gray-500 dark:text-gray-400 {{ $td['month'] == $month && $td['year'] == $year ? 'font-bold text-primary-600 dark:text-primary-400' : '' }}">
+                    {{ $td['label'] }}
+                </span>
+            </div>
+            @endforeach
+        </div>
+        <div class="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-200 dark:bg-blue-900/50 rounded"></span> План</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-400 dark:bg-emerald-600 rounded"></span> Факт</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-400 dark:bg-red-600 rounded"></span> Перевищено</span>
+        </div>
+    </div>
 
     {{-- ═══ Church Budget Section ═══ --}}
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -304,9 +353,6 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Назва команди та її лідер. Натисніть на рядок щоб розгорнути деталі статей витрат">
                             Команда
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Скільки коштів виділено команді з церковного рахунку (allocation)">
-                            Виділено
-                        </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Місячний бюджет команди — ліміт на витрати за обраний місяць">
                             Бюджет
                         </th>
@@ -349,18 +395,14 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap">
-                            @if($item['allocated'] > 0)
-                            <span class="text-green-600 dark:text-green-400 font-medium" title="Кошти, виділені церквою цій команді (allocation транзакції)">
-                                {{ number_format($item['allocated'], 0, ',', ' ') }} ₴
-                            </span>
-                            @else
-                            <span class="text-gray-400 dark:text-gray-500" title="Кошти ще не виділені — натисніть кнопку ₴ в колонці Дії">—</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 text-right whitespace-nowrap">
                             <span class="font-medium text-gray-900 dark:text-white">
                                 {{ number_format($item['monthly_budget'], 0, ',', ' ') }} ₴
                             </span>
+                            @if($item['allocated'] > 0)
+                            <div class="text-[10px] text-green-600 dark:text-green-400 mt-0.5" title="Виділено з церковної каси (трансфер, не витрата)">
+                                ↳ виділено {{ number_format($item['allocated'], 0, ',', ' ') }} ₴
+                            </div>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap">
                             <span class="text-red-600 dark:text-red-400">
@@ -417,7 +459,7 @@
                         x-transition:enter-start="opacity-0"
                         x-transition:enter-end="opacity-100"
                         x-cloak>
-                        <td colspan="7" class="px-0 py-0 bg-gray-50 dark:bg-gray-800/80">
+                        <td colspan="6" class="px-0 py-0 bg-gray-50 dark:bg-gray-800/80">
                             <div class="px-8 py-4">
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-sm">
@@ -546,7 +588,7 @@
 
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                             Немає команд
                         </td>
                     </tr>
@@ -1084,6 +1126,75 @@
             </div>
         </div>
     </div>
+
+    {{-- Copy All Budgets Modal --}}
+    <div x-show="showCopyModal"
+         x-cloak
+         x-on:keydown.escape.window="showCopyModal = false"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="fixed inset-0 bg-black/50" x-on:click="showCopyModal = false"></div>
+
+            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-on:click.stop>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Копіювати бюджети команд</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Скопіювати всі статті бюджетів команд з поточного місяця на інший. Команди, у яких цільовий місяць вже має статті, будуть пропущені.
+                </p>
+
+                <form x-on:submit.prevent="submitCopyBudgets()" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">З:</label>
+                        <div class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                            <span x-text="monthNames[month - 1]"></span> <span x-text="year"></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">На місяць:</label>
+                            <select x-model="copyToMonth"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                @foreach([1 => 'Січень', 2 => 'Лютий', 3 => 'Березень', 4 => 'Квітень', 5 => 'Травень', 6 => 'Червень', 7 => 'Липень', 8 => 'Серпень', 9 => 'Вересень', 10 => 'Жовтень', 11 => 'Листопад', 12 => 'Грудень'] as $m => $name)
+                                    <option value="{{ $m }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Рік:</label>
+                            <select x-model="copyToYear"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                @for($y = now()->year + 1; $y >= 2020; $y--)
+                                    <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" x-on:click="showCopyModal = false"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                            Скасувати
+                        </button>
+                        <button type="submit" :disabled="copySaving"
+                                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                            <span x-show="!copySaving">Копіювати</span>
+                            <span x-show="copySaving">Копіювання...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1180,6 +1291,13 @@ function budgetsPage() {
         churchTransItemName: '',
         churchTransList: [],
         churchTransLoading: false,
+
+        // Copy budgets modal
+        showCopyModal: false,
+        copySaving: false,
+        copyToMonth: {{ $month == 12 ? 1 : $month + 1 }},
+        copyToYear: {{ $month == 12 ? $year + 1 : $year }},
+        monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
 
         updatePeriod() {
             filterStorage.save('finance_budgets', { month: Number(this.month), year: Number(this.year) });
@@ -1599,6 +1717,41 @@ function budgetsPage() {
                 showToast('error', 'Помилка завантаження транзакцій');
             } finally {
                 this.churchTransLoading = false;
+            }
+        },
+
+        async submitCopyBudgets() {
+            this.copySaving = true;
+            try {
+                const res = await fetch('/finances/budgets/copy-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        from_year: this.year,
+                        from_month: this.month,
+                        to_year: Number(this.copyToYear),
+                        to_month: Number(this.copyToMonth),
+                    }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.showCopyModal = false;
+                    showToast('success', data.message);
+                    // Navigate to the target month
+                    setTimeout(() => {
+                        Livewire.navigate(`{{ route('finances.budgets') }}?year=${this.copyToYear}&month=${this.copyToMonth}`);
+                    }, 800);
+                } else {
+                    showToast('error', data.message || 'Помилка копіювання');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка копіювання');
+            } finally {
+                this.copySaving = false;
             }
         },
 
