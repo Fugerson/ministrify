@@ -405,7 +405,7 @@
 function servicePlanningMatrix() {
     return {
         loading: false,
-        _savedFilters: filterStorage.load('service_planning', { weeks: 4, hiddenEventTitles: [] }),
+        _savedFilters: filterStorage.load('service_planning', { weeks: '4', hiddenEventTitles: [] }),
         weeks: null, // set in init from saved
         startDate: null,
         events: [],
