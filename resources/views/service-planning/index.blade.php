@@ -150,7 +150,7 @@
                             <template x-for="(row, rowIdx) in getMinistryRows(ministry)" :key="row.key">
                                 <tr class="border-b border-gray-100 dark:border-gray-700/50 group/row hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors"
                                     :class="rowIdx === 0 ? (mIdx > 0 ? 'border-t-2 border-gray-200 dark:border-gray-600' : 'border-t border-gray-200 dark:border-gray-600') : ''"
-                                    x-show="row.type === 'header' || expanded[ministry.id]">
+                                    x-show="row.type === 'header' || isExpanded(ministry.id)">
 
                                     {{-- Left column --}}
                                     <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 group-hover/row:bg-gray-50 dark:group-hover/row:bg-gray-700 px-3 sm:px-4 border-r border-gray-200 dark:border-gray-600 transition-colors"
@@ -162,7 +162,7 @@
                                             <div class="flex items-center justify-between">
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-3.5 h-3.5 transition-transform text-gray-400"
-                                                         :class="expanded[ministry.id] ? 'rotate-90' : ''"
+                                                         :class="isExpanded(ministry.id) ? 'rotate-90' : ''"
                                                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                                     </svg>
@@ -203,7 +203,7 @@
                                             <template x-if="row.type === 'header'">
                                                 <div class="min-h-[32px] flex items-center justify-center cursor-pointer"
                                                      @click.stop="toggleMinistry(ministry.id)">
-                                                    <template x-if="!expanded[ministry.id]">
+                                                    <template x-if="!isExpanded(ministry.id)">
                                                         <span class="text-xs font-semibold px-2 py-1 rounded-lg"
                                                               :class="getSummaryClasses(ministry, event)"
                                                               x-text="getSummaryText(ministry, event)"></span>
@@ -415,7 +415,7 @@ function servicePlanningMatrix() {
         members: {},
         periodLabel: '',
         nearestEventId: null,
-        expanded: {},
+        collapsed: JSON.parse(localStorage.getItem('sp_collapsed') || '{}'),
         hiddenEventTitles: new Set(), // set in init from saved
         uniqueEventTitles: [],
         allEvents: [],
@@ -591,7 +591,12 @@ function servicePlanningMatrix() {
 
         // Collapsible ministries
         toggleMinistry(ministryId) {
-            this.expanded[ministryId] = !this.expanded[ministryId];
+            this.collapsed[ministryId] = !this.collapsed[ministryId];
+            localStorage.setItem('sp_collapsed', JSON.stringify(this.collapsed));
+        },
+
+        isExpanded(ministryId) {
+            return !this.collapsed[ministryId];
         },
 
         getMinistryRows(ministry) {
