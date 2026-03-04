@@ -249,10 +249,8 @@
         </div>
     </div>
 
-    {{-- ============================== --}}
-    {{-- CALENDAR TAB                   --}}
-    {{-- ============================== --}}
-    <div x-show="activeTab === 'calendar'">
+    {{-- Calendar --}}
+    <div>
         @if($view === 'week')
             {{-- Week View --}}
             <div class="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -783,7 +781,6 @@ function calendarNavigator(initialState) {
         },
 
         prevPeriod() {
-            if (this.activeTab !== 'calendar') return;
             if (this.currentView === 'week') {
                 this.currentWeek = this.currentWeek === 1 ? 52 : this.currentWeek - 1;
                 if (this.currentWeek === 52) this.currentYear--;
@@ -795,7 +792,6 @@ function calendarNavigator(initialState) {
         },
 
         nextPeriod() {
-            if (this.activeTab !== 'calendar') return;
             if (this.currentView === 'week') {
                 this.currentWeek = this.currentWeek === 52 ? 1 : this.currentWeek + 1;
                 if (this.currentWeek === 1) this.currentYear++;
@@ -828,7 +824,7 @@ function calendarNavigator(initialState) {
             const params = new URLSearchParams({
                 view: this.currentView,
                 year: this.currentYear,
-                tab: this.activeTab || 'calendar',
+                tab: 'calendar',
                 ...(this.currentView === 'week' ? { week: this.currentWeek } : { month: this.currentMonth })
             });
 
