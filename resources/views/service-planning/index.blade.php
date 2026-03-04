@@ -48,8 +48,8 @@
                 </div>
             </div>
 
-            {{-- Right: compact navigation --}}
-            <div class="flex items-center gap-1">
+            {{-- Right: date navigation --}}
+            <div class="flex items-center gap-1" x-data="{ pickerOpen: false }">
                 <button @click="prevPeriod()" type="button"
                    class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,14 +57,40 @@
                     </svg>
                 </button>
 
-                <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-default select-none">
-                    <span class="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap" x-text="periodLabel"></span>
-                    <select x-model="weeks" @change="loadData()"
-                            class="text-xs text-gray-500 dark:text-gray-400 bg-transparent border-0 p-0 pr-5 focus:ring-0 cursor-pointer">
-                        <option value="4">4 {{ __('тиж') }}</option>
-                        <option value="8">8 {{ __('тиж') }}</option>
-                        <option value="12">12 {{ __('тиж') }}</option>
-                    </select>
+                {{-- Clickable date label → opens picker --}}
+                <div class="relative">
+                    <button @click="pickerOpen = !pickerOpen" type="button"
+                        class="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold text-gray-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap">
+                        <span x-text="periodLabel"></span>
+                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    {{-- Date picker dropdown --}}
+                    <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
+                         class="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 w-56">
+
+                        {{-- Start date --}}
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Від дати') }}</label>
+                        <input type="date" :value="formatDate(startDate)"
+                               @change="jumpToDate($event.target.value); pickerOpen = false"
+                               class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 mb-3">
+
+                        {{-- Period length --}}
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ __('Період') }}</label>
+                        <div class="flex gap-1.5">
+                            <button @click="weeks = '4'; loadData(); pickerOpen = false" type="button"
+                                :class="weeks == 4 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
+                                class="flex-1 px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors">4 тиж</button>
+                            <button @click="weeks = '8'; loadData(); pickerOpen = false" type="button"
+                                :class="weeks == 8 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
+                                class="flex-1 px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors">8 тиж</button>
+                            <button @click="weeks = '12'; loadData(); pickerOpen = false" type="button"
+                                :class="weeks == 12 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
+                                class="flex-1 px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors">12 тиж</button>
+                        </div>
+                    </div>
                 </div>
 
                 <button @click="nextPeriod()" type="button"
@@ -500,6 +526,15 @@ function servicePlanningMatrix() {
             const day = now.getDay();
             const diff = now.getDate() - day + (day === 0 ? -6 : 1);
             this.startDate = new Date(now.setDate(diff));
+            this.startDate.setHours(0, 0, 0, 0);
+            this.loadData();
+        },
+
+        jumpToDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            this.startDate = new Date(d.setDate(diff));
             this.startDate.setHours(0, 0, 0, 0);
             this.loadData();
         },
