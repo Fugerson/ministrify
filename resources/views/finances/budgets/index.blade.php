@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Бюджети команд')
+@section('title', __('app.budget'))
 
 @section('content')
 @include('finances.partials.tabs')
@@ -10,21 +10,21 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Бюджети команд</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.budget') }}</h1>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Розподіл та контроль витрат по командах
+                {{ __('app.church_expenses') }} + {{ __('app.ministry_budgets_section') }}
             </p>
         </div>
 
         {{-- Period Selector --}}
         <div class="flex items-center gap-2">
-            <select x-model="month" @change="updatePeriod()"
+            <select x-model="month" x-on:change="updatePeriod()"
                     class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 @foreach([1 => 'Січень', 2 => 'Лютий', 3 => 'Березень', 4 => 'Квітень', 5 => 'Травень', 6 => 'Червень', 7 => 'Липень', 8 => 'Серпень', 9 => 'Вересень', 10 => 'Жовтень', 11 => 'Листопад', 12 => 'Грудень'] as $m => $name)
                     <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ $name }}</option>
                 @endforeach
             </select>
-            <select x-model="year" @change="updatePeriod()"
+            <select x-model="year" x-on:change="updatePeriod()"
                     class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 @for($y = now()->year + 1; $y >= 2020; $y--)
                     <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
@@ -33,30 +33,14 @@
         </div>
     </div>
 
-    {{-- Summary Cards --}}
+    {{-- Summary Cards (Grand Total: Church + Ministry) --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Виділено</p>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
-                        {{ number_format($totals['allocated'], 0, ',', ' ') }} <span class="text-lg">₴</span>
-                    </p>
-                </div>
-                <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Загальний бюджет</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.planned') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                        {{ number_format($totals['budget'], 0, ',', ' ') }} <span class="text-lg text-gray-500">₴</span>
+                        {{ number_format($grandTotals['planned'], 0, ',', ' ') }} <span class="text-lg text-gray-500">₴</span>
                     </p>
                 </div>
                 <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -70,9 +54,9 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Витрачено</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.actual') }}</p>
                     <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
-                        {{ number_format($totals['spent'], 0, ',', ' ') }} <span class="text-lg">₴</span>
+                        {{ number_format($grandTotals['actual'], 0, ',', ' ') }} <span class="text-lg">₴</span>
                     </p>
                 </div>
                 <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
@@ -86,43 +70,222 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Залишок</p>
-                    <p class="text-2xl font-bold {{ $totals['remaining'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} mt-1">
-                        {{ number_format($totals['remaining'], 0, ',', ' ') }} <span class="text-lg">₴</span>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.remaining') }}</p>
+                    <p class="text-2xl font-bold {{ $grandTotals['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} mt-1">
+                        {{ number_format($grandTotals['difference'], 0, ',', ' ') }} <span class="text-lg">₴</span>
                     </p>
                 </div>
-                <div class="p-3 {{ $totals['remaining'] >= 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' }} rounded-lg">
-                    <svg class="w-6 h-6 {{ $totals['remaining'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-3 {{ $grandTotals['difference'] >= 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' }} rounded-lg">
+                    <svg class="w-6 h-6 {{ $grandTotals['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.used_percent') }}</p>
+                    <p class="text-2xl font-bold {{ $grandTotals['percentage'] > 100 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} mt-1">
+                        {{ number_format($grandTotals['percentage'], 1) }}%
+                    </p>
+                </div>
+                <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
                     </svg>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Progress Overview --}}
-    @if($totals['budget'] > 0)
+    {{-- Progress Bar --}}
+    @if($grandTotals['planned'] > 0)
     <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Використано загального бюджету</span>
-            <span class="text-sm font-semibold {{ ($totals['spent'] / $totals['budget']) * 100 > 100 ? 'text-red-600' : 'text-gray-900 dark:text-white' }}">
-                {{ number_format(($totals['spent'] / $totals['budget']) * 100, 1) }}%
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.used_percent') }}</span>
+            <span class="text-sm font-semibold {{ $grandTotals['percentage'] > 100 ? 'text-red-600' : 'text-gray-900 dark:text-white' }}">
+                {{ number_format($grandTotals['percentage'], 1) }}%
             </span>
         </div>
         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
             @php
-                $percentage = min(100, ($totals['spent'] / $totals['budget']) * 100);
-                $color = $percentage > 100 ? 'bg-red-600' : ($percentage > 80 ? 'bg-orange-500' : 'bg-green-500');
+                $pctBar = min(100, $grandTotals['percentage']);
+                $barColor = $grandTotals['percentage'] > 100 ? 'bg-red-600' : ($grandTotals['percentage'] > 80 ? 'bg-orange-500' : 'bg-green-500');
             @endphp
-            <div class="{{ $color }} h-3 rounded-full transition-all" style="width: {{ $percentage }}%"></div>
+            <div class="{{ $barColor }} h-3 rounded-full transition-all" style="width: {{ $pctBar }}%"></div>
         </div>
     </div>
     @endif
 
-    {{-- Ministry Budgets Table --}}
+    {{-- ═══ Church Budget Section ═══ --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.church_expenses') }}</h2>
+            @if(!$churchBudget && auth()->user()->canEdit('finances'))
+                <button x-on:click="createChurchBudget()"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    {{ __('app.create_budget') }}
+                </button>
+            @endif
+        </div>
+
+        @if($churchBudget)
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            {{ __('app.budget_item_name') }}
+                        </th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
+                            {{ __('app.budget_item_type') }}
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            {{ __('app.planned') }}
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            {{ __('app.actual') }}
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            {{ __('app.difference') }}
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            {{ __('app.annual_total') }}
+                        </th>
+                        @if(auth()->user()->canEdit('finances'))
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                            Дії
+                        </th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse($churchBudgetItems as $cbi)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-gray-900 dark:text-white">{{ $cbi['name'] }}</div>
+                            @if($cbi['category'])
+                                <div class="text-xs text-gray-500">{{ $cbi['category']->icon_emoji ?? '' }} {{ $cbi['category']->name }}</div>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            @if($cbi['is_recurring'])
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                    🔄 {{ __('app.monthly') }}
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                                    ☀️ {{ __('app.one_time') }}
+                                </span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
+                            {{ $cbi['planned'] > 0 ? number_format($cbi['planned'], 0, ',', ' ') . ' ₴' : '—' }}
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            @if($cbi['category_id'])
+                                <button x-on:click="showChurchTransactions({{ $cbi['id'] }}, '{{ addslashes($cbi['name']) }}')"
+                                        class="text-red-600 dark:text-red-400 hover:underline">
+                                    {{ $cbi['actual'] > 0 ? number_format($cbi['actual'], 0, ',', ' ') . ' ₴' : '—' }}
+                                </button>
+                            @else
+                                <span class="text-gray-400">—</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap font-medium {{ $cbi['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                            @if($cbi['planned'] > 0)
+                                {{ $cbi['difference'] >= 0 ? '+' : '' }}{{ number_format($cbi['difference'], 0, ',', ' ') }} ₴
+                            @else
+                                —
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap text-gray-500 dark:text-gray-400">
+                            {{ number_format($cbi['annual_planned'], 0, ',', ' ') }} ₴
+                        </td>
+                        @if(auth()->user()->canEdit('finances'))
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-1">
+                                <button x-on:click="openChurchItemModal('edit', {{ json_encode([
+                                    'id' => $cbi['id'],
+                                    'name' => $cbi['name'],
+                                    'category_id' => $cbi['category_id'],
+                                    'is_recurring' => $cbi['is_recurring'],
+                                    'amounts' => $cbi['amounts'],
+                                    'notes' => $cbi['notes'] ?? '',
+                                ]) }})"
+                                        class="p-1.5 text-gray-400 hover:text-primary-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        title="{{ __('ui.edit') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                                <button x-on:click="deleteChurchItem({{ $cbi['id'] }}, '{{ addslashes($cbi['name']) }}')"
+                                        class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        title="{{ __('ui.delete') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                        @endif
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="{{ auth()->user()->canEdit('finances') ? 7 : 6 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
+                            {{ __('app.add_budget_item') }}
+                        </td>
+                    </tr>
+                    @endforelse
+
+                    {{-- Church budget totals row --}}
+                    @if(count($churchBudgetItems) > 0)
+                    <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold">
+                        <td class="px-6 py-3 text-gray-900 dark:text-white" colspan="2">Всього</td>
+                        <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($churchBudgetTotals['planned'], 0, ',', ' ') }} ₴</td>
+                        <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($churchBudgetTotals['actual'], 0, ',', ' ') }} ₴</td>
+                        <td class="px-6 py-3 text-right {{ $churchBudgetTotals['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                            {{ $churchBudgetTotals['difference'] >= 0 ? '+' : '' }}{{ number_format($churchBudgetTotals['difference'], 0, ',', ' ') }} ₴
+                        </td>
+                        <td class="px-6 py-3 text-right text-gray-500 dark:text-gray-400">{{ number_format($churchBudgetTotals['annual_planned'], 0, ',', ' ') }} ₴</td>
+                        @if(auth()->user()->canEdit('finances'))
+                        <td class="px-6 py-3"></td>
+                        @endif
+                    </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Add church budget item button --}}
+        @if(auth()->user()->canEdit('finances'))
+        <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700">
+            <button x-on:click="openChurchItemModal('create')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                {{ __('app.add_budget_item') }}
+            </button>
+        </div>
+        @endif
+        @else
+        <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+            {{ __('app.no_church_budget') }}
+        </div>
+        @endif
+    </div>
+
+    {{-- ═══ Ministry Budgets Section ═══ --}}
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Бюджети по командах</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.ministry_budgets_section') }}</h2>
         </div>
 
         <div class="overflow-x-auto">
@@ -649,6 +812,179 @@
         </div>
     </div>
 
+    {{-- Church Budget Item Create/Edit Modal --}}
+    <div x-show="showChurchItemModal"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="fixed inset-0 bg-black/50" x-on:click="showChurchItemModal = false"></div>
+
+            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-on:click.stop>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                    x-text="churchItemMode === 'create' ? '{{ __('app.add_budget_item') }}' : '{{ __('app.edit_budget_item') }}'"></h3>
+
+                <form x-on:submit.prevent="saveChurchItem()" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.budget_item_name') }} *</label>
+                        <input type="text" x-model="churchItemForm.name" required maxlength="255"
+                               placeholder="{{ __('app.budget_item_name') }}"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                        <select x-model="churchItemForm.category_id"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                            <option value="">Без категорії</option>
+                            @foreach($expenseCategories ?? [] as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->icon_emoji ?? '💸' }} {{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Категорія — {{ __('app.actual') }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.budget_item_type') }} *</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" x-model="churchItemForm.is_recurring" value="1"
+                                       class="text-primary-600 focus:ring-primary-500">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">🔄 {{ __('app.monthly') }}</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" x-model="churchItemForm.is_recurring" value="0"
+                                       class="text-primary-600 focus:ring-primary-500">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">☀️ {{ __('app.one_time') }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Recurring: amount per month --}}
+                    <div x-show="churchItemForm.is_recurring == '1'">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.amount_per_month') }} (₴) *</label>
+                        <input type="number" x-model="churchItemForm.amount" min="0" step="1"
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+
+                    {{-- One-time: month + amount --}}
+                    <div x-show="churchItemForm.is_recurring == '0'" class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.select_month') }} *</label>
+                            <select x-model="churchItemForm.one_time_month"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                @foreach([1 => 'Січень', 2 => 'Лютий', 3 => 'Березень', 4 => 'Квітень', 5 => 'Травень', 6 => 'Червень', 7 => 'Липень', 8 => 'Серпень', 9 => 'Вересень', 10 => 'Жовтень', 11 => 'Листопад', 12 => 'Грудень'] as $m => $name)
+                                    <option value="{{ $m }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума (₴) *</label>
+                            <input type="number" x-model="churchItemForm.one_time_amount" min="0" step="1"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Примітки</label>
+                        <textarea x-model="churchItemForm.notes" rows="2" maxlength="500"
+                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" x-on:click="showChurchItemModal = false"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                            {{ __('ui.cancel') }}
+                        </button>
+                        <button type="submit" :disabled="churchItemSaving"
+                                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                            <span x-show="!churchItemSaving" x-text="churchItemMode === 'create' ? '{{ __('ui.add') }}' : '{{ __('ui.save') }}'"></span>
+                            <span x-show="churchItemSaving">Збереження...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Church Budget Transactions Modal --}}
+    <div x-show="showChurchTransModal"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="fixed inset-0 bg-black/50" x-on:click="showChurchTransModal = false"></div>
+
+            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-on:click.stop>
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ __('app.matched_transactions') }}: <span x-text="churchTransItemName"></span>
+                    </h3>
+                    <button x-on:click="showChurchTransModal = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6">
+                    <div x-show="churchTransLoading" class="text-center py-8">
+                        <svg class="animate-spin h-8 w-8 mx-auto text-primary-600" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </div>
+
+                    <div x-show="!churchTransLoading && churchTransList.length === 0" class="text-center py-8 text-gray-500">
+                        {{ __('app.no_matched_transactions') }}
+                    </div>
+
+                    <div x-show="!churchTransLoading && churchTransList.length > 0" class="space-y-3">
+                        <template x-for="tx in churchTransList" :key="tx.id">
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-medium text-gray-900 dark:text-white" x-text="tx.description || '{{ __('common.no_description') }}'"></div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            <span x-text="tx.date"></span>
+                                            <template x-if="tx.category">
+                                                <span> &bull; <span x-text="tx.category"></span></span>
+                                            </template>
+                                            <template x-if="tx.payment_method">
+                                                <span> &bull; <span x-text="tx.payment_method"></span></span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-semibold text-red-600 dark:text-red-400" x-text="formatMoney(tx.amount) + ' ₴'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Transactions Detail Modal --}}
     <div x-show="showTransactionsModal"
          x-cloak
@@ -792,6 +1128,28 @@ function budgetsPage() {
 
         // Ministry members cache
         membersByBudget: {},
+
+        // Church budget
+        churchBudgetId: {{ $churchBudget?->id ?? 'null' }},
+        showChurchItemModal: false,
+        churchItemMode: 'create',
+        churchItemEditId: null,
+        churchItemSaving: false,
+        churchItemForm: {
+            name: '',
+            category_id: '',
+            is_recurring: '1',
+            amount: '',
+            one_time_month: {{ $month }},
+            one_time_amount: '',
+            notes: '',
+        },
+
+        // Church budget transactions modal
+        showChurchTransModal: false,
+        churchTransItemName: '',
+        churchTransList: [],
+        churchTransLoading: false,
 
         updatePeriod() {
             window.location.href = `{{ route('finances.budgets') }}?year=${this.year}&month=${this.month}`;
@@ -1054,6 +1412,158 @@ function budgetsPage() {
                 showToast('error', 'Помилка завантаження транзакцій');
             } finally {
                 this.transactionsLoading = false;
+            }
+        },
+
+        // ═══ Church Budget Methods ═══
+
+        async createChurchBudget() {
+            try {
+                const res = await fetch('/finances/church-budgets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ year: this.year }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 600);
+                } else {
+                    showToast('error', data.message || 'Помилка');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка створення бюджету');
+            }
+        },
+
+        openChurchItemModal(mode, itemData) {
+            this.churchItemMode = mode;
+            this.churchItemEditId = mode === 'edit' ? itemData.id : null;
+
+            if (mode === 'edit' && itemData) {
+                const amounts = itemData.amounts || {};
+                const monthKeys = Object.keys(amounts);
+                const isRecurring = itemData.is_recurring;
+
+                this.churchItemForm = {
+                    name: itemData.name,
+                    category_id: itemData.category_id || '',
+                    is_recurring: isRecurring ? '1' : '0',
+                    amount: isRecurring && monthKeys.length > 0 ? amounts[monthKeys[0]] : '',
+                    one_time_month: !isRecurring && monthKeys.length > 0 ? monthKeys[0] : this.month,
+                    one_time_amount: !isRecurring && monthKeys.length > 0 ? amounts[monthKeys[0]] : '',
+                    notes: itemData.notes || '',
+                };
+            } else {
+                this.churchItemForm = {
+                    name: '',
+                    category_id: '',
+                    is_recurring: '1',
+                    amount: '',
+                    one_time_month: this.month,
+                    one_time_amount: '',
+                    notes: '',
+                };
+            }
+
+            this.showChurchItemModal = true;
+        },
+
+        async saveChurchItem() {
+            this.churchItemSaving = true;
+            try {
+                const isRecurring = this.churchItemForm.is_recurring == '1';
+                const url = this.churchItemMode === 'create'
+                    ? `/finances/church-budgets/${this.churchBudgetId}/items`
+                    : `/finances/church-budget-items/${this.churchItemEditId}`;
+                const method = this.churchItemMode === 'create' ? 'POST' : 'PUT';
+
+                const body = {
+                    name: this.churchItemForm.name,
+                    category_id: this.churchItemForm.category_id || null,
+                    is_recurring: isRecurring,
+                    notes: this.churchItemForm.notes || null,
+                };
+
+                if (isRecurring) {
+                    body.amount = this.churchItemForm.amount;
+                } else {
+                    body.one_time_month = this.churchItemForm.one_time_month;
+                    body.one_time_amount = this.churchItemForm.one_time_amount;
+                }
+
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(body),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    this.showChurchItemModal = false;
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 600);
+                } else if (res.status === 422) {
+                    const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
+                    showToast('error', msgs[0] || 'Помилка валідації');
+                } else {
+                    showToast('error', data.message || 'Помилка збереження');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка збереження');
+            } finally {
+                this.churchItemSaving = false;
+            }
+        },
+
+        async deleteChurchItem(itemId, itemName) {
+            if (!confirm(`Видалити статтю "${itemName}"?`)) return;
+
+            try {
+                const res = await fetch(`/finances/church-budget-items/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    showToast('success', data.message);
+                    setTimeout(() => location.reload(), 600);
+                } else {
+                    showToast('error', data.message || 'Помилка видалення');
+                }
+            } catch (e) {
+                showToast('error', 'Помилка видалення');
+            }
+        },
+
+        async showChurchTransactions(itemId, itemName) {
+            this.churchTransItemName = itemName;
+            this.churchTransList = [];
+            this.churchTransLoading = true;
+            this.showChurchTransModal = true;
+
+            try {
+                const res = await fetch(`/finances/church-budget-items/${itemId}/transactions?month=${this.month}`, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok) {
+                    this.churchTransList = data.transactions || [];
+                }
+            } catch (e) {
+                showToast('error', 'Помилка завантаження транзакцій');
+            } finally {
+                this.churchTransLoading = false;
             }
         },
 

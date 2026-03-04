@@ -560,6 +560,14 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::delete('budgets/items/{budgetItem}', [FinanceController::class, 'destroyBudgetItem'])->name('budgets.items.destroy');
         Route::get('budgets/items/{budgetItem}/transactions', [FinanceController::class, 'budgetItemTransactions'])->name('budgets.items.transactions');
 
+        // Church Budgets (annual)
+        Route::post('church-budgets', [FinanceController::class, 'storeChurchBudget'])->name('church-budgets.store');
+        Route::put('church-budgets/{churchBudget}', [FinanceController::class, 'updateChurchBudget'])->name('church-budgets.update');
+        Route::post('church-budgets/{churchBudget}/items', [FinanceController::class, 'storeChurchBudgetItem'])->name('church-budgets.items.store');
+        Route::put('church-budget-items/{item}', [FinanceController::class, 'updateChurchBudgetItem'])->name('church-budget-items.update');
+        Route::delete('church-budget-items/{item}', [FinanceController::class, 'destroyChurchBudgetItem'])->name('church-budget-items.destroy');
+        Route::get('church-budget-items/{item}/transactions', [FinanceController::class, 'churchBudgetItemTransactions'])->name('church-budget-items.transactions');
+
         // Unified Cards Page
         Route::get('cards', [FinanceController::class, 'cards'])->name('cards');
 

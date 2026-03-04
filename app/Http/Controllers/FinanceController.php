@@ -13,6 +13,8 @@ use App\Models\Person;
 use App\Models\Transaction;
 use App\Models\TransactionAttachment;
 use App\Models\BudgetItem;
+use App\Models\ChurchBudget;
+use App\Models\ChurchBudgetItem;
 use App\Models\TransactionCategory;
 use App\Rules\BelongsToChurch;
 use App\Services\ImageService;
@@ -1413,6 +1415,54 @@ class FinanceController extends Controller
             ->limit(10)
             ->get();
 
+        // ── Church Budget ──
+        $churchBudget = ChurchBudget::where('church_id', $church->id)
+            ->where('year', $year)
+            ->with(['items.category'])
+            ->first();
+
+        $churchBudgetItems = [];
+        $churchBudgetTotals = ['planned' => 0, 'actual' => 0, 'difference' => 0, 'annual_planned' => 0, 'annual_actual' => 0];
+
+        if ($churchBudget) {
+            foreach ($churchBudget->items as $item) {
+                $planned = $item->getPlannedForMonth($month);
+                $actual = $item->getActualSpendingForMonth($month);
+                $annualPlanned = $item->getAnnualTotal();
+
+                $churchBudgetItems[] = [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'category' => $item->category,
+                    'category_id' => $item->category_id,
+                    'is_recurring' => $item->is_recurring,
+                    'amounts' => $item->amounts,
+                    'planned' => $planned,
+                    'actual' => $actual,
+                    'difference' => $planned - $actual,
+                    'annual_planned' => $annualPlanned,
+                    'notes' => $item->notes,
+                    'sort_order' => $item->sort_order,
+                ];
+
+                $churchBudgetTotals['planned'] += $planned;
+                $churchBudgetTotals['actual'] += $actual;
+                $churchBudgetTotals['annual_planned'] += $annualPlanned;
+            }
+            $churchBudgetTotals['difference'] = $churchBudgetTotals['planned'] - $churchBudgetTotals['actual'];
+            $churchBudgetTotals['annual_actual'] = $churchBudget->getActualSpendingForYear();
+        }
+
+        // Grand total = church + ministry
+        $grandTotals = [
+            'planned' => $churchBudgetTotals['planned'] + $totals['budget'],
+            'actual' => $churchBudgetTotals['actual'] + $totals['spent'],
+        ];
+        $grandTotals['difference'] = $grandTotals['planned'] - $grandTotals['actual'];
+        $grandTotals['percentage'] = $grandTotals['planned'] > 0
+            ? round(($grandTotals['actual'] / $grandTotals['planned']) * 100, 1)
+            : 0;
+
         // For expense edit modal
         $expenseCategories = TransactionCategory::where('church_id', $church->id)
             ->forExpense()
@@ -1429,7 +1479,11 @@ class FinanceController extends Controller
             'month',
             'expenseCategories',
             'enabledCurrencies',
-            'exchangeRates'
+            'exchangeRates',
+            'churchBudget',
+            'churchBudgetItems',
+            'churchBudgetTotals',
+            'grandTotals'
         ));
     }
 
@@ -2046,5 +2100,224 @@ class FinanceController extends Controller
         $privatbankConnected = !empty($church->privatbank_merchant_id);
 
         return view('finances.cards.index', compact('church', 'monobankConnected', 'privatbankConnected'));
+    }
+
+    // ============================
+    // Church Budget methods
+    // ============================
+
+    public function storeChurchBudget(Request $request)
+    {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403);
+        }
+
+        $church = $this->getCurrentChurch();
+
+        $validated = $request->validate([
+            'year' => 'required|integer|min:2020|max:2100',
+            'name' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $existing = ChurchBudget::where('church_id', $church->id)
+            ->where('year', $validated['year'])
+            ->first();
+
+        if ($existing) {
+            return $this->errorResponse($request, __('app.budget_for_year_exists'));
+        }
+
+        ChurchBudget::create([
+            'church_id' => $church->id,
+            'name' => $validated['name'] ?? (__('app.budget') . ' ' . $validated['year']),
+            'year' => $validated['year'],
+            'notes' => $validated['notes'] ?? null,
+            'status' => 'active',
+        ]);
+
+        return $this->successResponse($request, __('app.church_budget_created'));
+    }
+
+    public function updateChurchBudget(Request $request, ChurchBudget $churchBudget)
+    {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403);
+        }
+
+        $church = $this->getCurrentChurch();
+        if ($churchBudget->church_id !== $church->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'status' => 'nullable|in:draft,active,closed',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $churchBudget->update(array_filter($validated, fn($v) => $v !== null));
+
+        return $this->successResponse($request, __('app.church_budget_updated'));
+    }
+
+    public function storeChurchBudgetItem(Request $request, ChurchBudget $churchBudget)
+    {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403);
+        }
+
+        $church = $this->getCurrentChurch();
+        if ($churchBudget->church_id !== $church->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'nullable|exists:transaction_categories,id',
+            'is_recurring' => 'required|boolean',
+            'amount' => 'required_if:is_recurring,true|nullable|numeric|min:0',
+            'one_time_month' => 'required_if:is_recurring,false|nullable|integer|min:1|max:12',
+            'one_time_amount' => 'required_if:is_recurring,false|nullable|numeric|min:0',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        // Build amounts JSON
+        if ($validated['is_recurring']) {
+            $amounts = [];
+            for ($m = 1; $m <= 12; $m++) {
+                $amounts[(string) $m] = (float) $validated['amount'];
+            }
+        } else {
+            $amounts = [(string) $validated['one_time_month'] => (float) $validated['one_time_amount']];
+        }
+
+        // Verify category belongs to this church
+        if (!empty($validated['category_id'])) {
+            $cat = TransactionCategory::where('id', $validated['category_id'])
+                ->where('church_id', $church->id)
+                ->first();
+            if (!$cat) {
+                abort(404);
+            }
+        }
+
+        $maxSort = ChurchBudgetItem::where('church_budget_id', $churchBudget->id)->max('sort_order') ?? 0;
+
+        ChurchBudgetItem::create([
+            'church_id' => $church->id,
+            'church_budget_id' => $churchBudget->id,
+            'category_id' => $validated['category_id'] ?? null,
+            'name' => $validated['name'],
+            'is_recurring' => $validated['is_recurring'],
+            'amounts' => $amounts,
+            'notes' => $validated['notes'] ?? null,
+            'sort_order' => $maxSort + 1,
+        ]);
+
+        return $this->successResponse($request, __('app.budget_item_added'));
+    }
+
+    public function updateChurchBudgetItem(Request $request, ChurchBudgetItem $item)
+    {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403);
+        }
+
+        $church = $this->getCurrentChurch();
+        if ($item->church_id !== $church->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'nullable|exists:transaction_categories,id',
+            'is_recurring' => 'required|boolean',
+            'amount' => 'required_if:is_recurring,true|nullable|numeric|min:0',
+            'one_time_month' => 'required_if:is_recurring,false|nullable|integer|min:1|max:12',
+            'one_time_amount' => 'required_if:is_recurring,false|nullable|numeric|min:0',
+            'amounts_custom' => 'nullable|array',
+            'amounts_custom.*' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        // Build amounts JSON
+        if (!empty($validated['amounts_custom'])) {
+            // Custom per-month amounts
+            $amounts = [];
+            foreach ($validated['amounts_custom'] as $m => $val) {
+                if ($val > 0) {
+                    $amounts[(string) $m] = (float) $val;
+                }
+            }
+        } elseif ($validated['is_recurring']) {
+            $amounts = [];
+            for ($m = 1; $m <= 12; $m++) {
+                $amounts[(string) $m] = (float) $validated['amount'];
+            }
+        } else {
+            $amounts = [(string) $validated['one_time_month'] => (float) $validated['one_time_amount']];
+        }
+
+        // Verify category belongs to this church
+        if (!empty($validated['category_id'])) {
+            $cat = TransactionCategory::where('id', $validated['category_id'])
+                ->where('church_id', $church->id)
+                ->first();
+            if (!$cat) {
+                abort(404);
+            }
+        }
+
+        $item->update([
+            'name' => $validated['name'],
+            'category_id' => $validated['category_id'] ?? null,
+            'is_recurring' => $validated['is_recurring'],
+            'amounts' => $amounts,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        return $this->successResponse($request, __('app.budget_item_updated'));
+    }
+
+    public function destroyChurchBudgetItem(Request $request, ChurchBudgetItem $item)
+    {
+        if (!auth()->user()->canEdit('finances')) {
+            abort(403);
+        }
+
+        $church = $this->getCurrentChurch();
+        if ($item->church_id !== $church->id) {
+            abort(404);
+        }
+
+        $item->delete();
+
+        return $this->successResponse($request, __('app.budget_item_deleted'));
+    }
+
+    public function churchBudgetItemTransactions(Request $request, ChurchBudgetItem $item)
+    {
+        $church = $this->getCurrentChurch();
+        if ($item->church_id !== $church->id) {
+            abort(404);
+        }
+
+        $month = max(1, min(12, (int) $request->get('month', now()->month)));
+        $transactions = $item->getMatchedTransactions($month);
+
+        return response()->json([
+            'transactions' => $transactions->map(fn ($t) => [
+                'id' => $t->id,
+                'date' => $t->date?->format('d.m.Y'),
+                'description' => $t->description,
+                'amount' => (float) ($t->amount_uah ?? $t->amount),
+                'currency' => $t->currency,
+                'original_amount' => (float) $t->amount,
+                'payment_method' => $t->payment_method,
+                'category' => $t->category?->name,
+                'has_receipt' => $t->attachments->isNotEmpty(),
+            ]),
+        ]);
     }
 }

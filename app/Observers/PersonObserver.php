@@ -3,12 +3,14 @@
 namespace App\Observers;
 
 use App\Models\Person;
+use App\Services\DashboardCacheService;
 use App\Services\VisitorFollowupService;
 
 class PersonObserver
 {
     public function __construct(
-        private VisitorFollowupService $followupService
+        private VisitorFollowupService $followupService,
+        private DashboardCacheService $cacheService
     ) {}
 
     /**
@@ -20,6 +22,8 @@ class PersonObserver
         if ($person->membership_status === Person::STATUS_GUEST) {
             $this->followupService->createFollowupTasks($person);
         }
+
+        $this->clearDashboardCache($person);
     }
 
     /**
@@ -35,6 +39,8 @@ class PersonObserver
             // Could trigger notifications or other actions on status change
             // Example: notify when guest becomes member
         }
+
+        $this->clearDashboardCache($person);
     }
 
     /**
@@ -42,7 +48,7 @@ class PersonObserver
      */
     public function deleted(Person $person): void
     {
-        // Cleanup tasks when person is deleted
+        $this->clearDashboardCache($person);
     }
 
     /**
@@ -50,7 +56,7 @@ class PersonObserver
      */
     public function restored(Person $person): void
     {
-        //
+        $this->clearDashboardCache($person);
     }
 
     /**
@@ -58,6 +64,13 @@ class PersonObserver
      */
     public function forceDeleted(Person $person): void
     {
-        //
+        $this->clearDashboardCache($person);
+    }
+
+    private function clearDashboardCache(Person $person): void
+    {
+        if ($person->church_id) {
+            $this->cacheService->forgetPeopleRelated($person->church_id);
+        }
     }
 }
