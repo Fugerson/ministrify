@@ -8,17 +8,11 @@
         </div>
         <div>
             <h3 class="font-semibold text-gray-900 dark:text-white">Сім'ї</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Огляд сімейних зв'язків</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Сімейні зв'язки в базі</p>
         </div>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {{-- Total families --}}
-        <div class="bg-rose-50 dark:bg-rose-900/30 rounded-xl p-3 text-center">
-            <p class="text-2xl font-bold text-rose-700 dark:text-rose-300">{{ $familyStats['total_families'] ?? 0 }}</p>
-            <p class="text-xs text-rose-600 dark:text-rose-400 mt-0.5">Всього сімей</p>
-        </div>
-
         {{-- Married couples --}}
         <div class="bg-pink-50 dark:bg-pink-900/30 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-pink-700 dark:text-pink-300">{{ $familyStats['married_couples'] ?? 0 }}</p>
@@ -31,22 +25,16 @@
             <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Дітей</p>
         </div>
 
-        {{-- Avg family size --}}
-        <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-3 text-center">
-            <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ number_format($familyStats['avg_children'] ?? 0, 1) }}</p>
-            <p class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">Дітей на сім'ю</p>
-        </div>
-
-        {{-- With family --}}
+        {{-- People linked to families --}}
         <div class="bg-green-50 dark:bg-green-900/30 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-green-700 dark:text-green-300">{{ $familyStats['total_with_family'] ?? 0 }}</p>
-            <p class="text-xs text-green-600 dark:text-green-400 mt-0.5">З сім'ями</p>
+            <p class="text-xs text-green-600 dark:text-green-400 mt-0.5">Зв'язані в базі</p>
         </div>
 
-        {{-- Without family --}}
+        {{-- People without family links in DB --}}
         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-gray-700 dark:text-gray-300">{{ $familyStats['total_without_family'] ?? 0 }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Без сім'ї</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Без зв'язків</p>
         </div>
     </div>
 </div>
