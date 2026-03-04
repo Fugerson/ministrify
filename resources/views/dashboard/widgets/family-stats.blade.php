@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 gap-3">
         {{-- Married couples --}}
         <div class="bg-pink-50 dark:bg-pink-900/30 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-pink-700 dark:text-pink-300">{{ $familyStats['married_couples'] ?? 0 }}</p>
@@ -23,18 +23,6 @@
         <div class="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-amber-700 dark:text-amber-300">{{ $familyStats['children_count'] ?? 0 }}</p>
             <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Дітей</p>
-        </div>
-
-        {{-- People linked to families --}}
-        <div class="bg-green-50 dark:bg-green-900/30 rounded-xl p-3 text-center">
-            <p class="text-2xl font-bold text-green-700 dark:text-green-300">{{ $familyStats['total_with_family'] ?? 0 }}</p>
-            <p class="text-xs text-green-600 dark:text-green-400 mt-0.5">Зв'язані в базі</p>
-        </div>
-
-        {{-- People without family links in DB --}}
-        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
-            <p class="text-2xl font-bold text-gray-700 dark:text-gray-300">{{ $familyStats['total_without_family'] ?? 0 }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Без зв'язків</p>
         </div>
     </div>
 </div>
