@@ -1032,7 +1032,7 @@ class DashboardController extends Controller
 
         // Total families = married couples + single parents
         $totalFamilies = $marriedCouples + max(0, $singleParents);
-        $avgFamilySize = $totalFamilies > 0 ? round($peopleWithFamily / $totalFamilies, 1) : 0;
+        $avgChildren = $totalFamilies > 0 ? round($childrenCount / $totalFamilies, 1) : 0;
 
         return [
             'total_families' => $totalFamilies,
@@ -1040,7 +1040,7 @@ class DashboardController extends Controller
             'total_without_family' => $totalPeople - $peopleWithFamily,
             'married_couples' => $marriedCouples,
             'children_count' => $childrenCount,
-            'avg_family_size' => $avgFamilySize,
+            'avg_children' => $avgChildren,
         ];
     }
 
