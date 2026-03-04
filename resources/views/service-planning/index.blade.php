@@ -17,36 +17,37 @@
                     <option value="12">12 {{ __('тижнів') }}</option>
                 </select>
 
-                {{-- Ministry filter --}}
+                {{-- Event type filter --}}
                 <div class="relative" x-data="{ filterOpen: false }">
                     <button @click="filterOpen = !filterOpen" type="button"
                         class="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                         </svg>
-                        <span>{{ __('Команди') }}</span>
-                        <template x-if="Object.keys(hiddenMinistries).length > 0">
+                        <span>{{ __('Події') }}</span>
+                        <template x-if="hiddenEventTitles.size > 0">
                             <span class="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-full"
-                                  x-text="Object.keys(hiddenMinistries).length"></span>
+                                  x-text="hiddenEventTitles.size"></span>
                         </template>
                     </button>
                     <div x-show="filterOpen" @click.outside="filterOpen = false"
                          x-transition
-                         class="absolute left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-64 py-1 max-h-72 overflow-y-auto">
-                        <template x-for="ministry in ministries" :key="ministry.id">
+                         class="absolute left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-72 py-1 max-h-80 overflow-y-auto">
+                        <template x-for="title in uniqueEventTitles" :key="title">
                             <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                                <input type="checkbox" :checked="!hiddenMinistries[ministry.id]"
-                                       @change="toggleMinistryFilter(ministry.id)"
+                                <input type="checkbox" :checked="!hiddenEventTitles.has(title)"
+                                       @change="toggleEventTitleFilter(title)"
                                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                                <span class="w-1.5 h-4 rounded-full flex-shrink-0" :style="'background:' + (ministry.color || '#6B7280')"></span>
-                                <span class="text-sm text-gray-700 dark:text-gray-300 truncate" x-text="ministry.name"></span>
+                                <span class="text-sm text-gray-700 dark:text-gray-300 truncate" x-text="title"></span>
+                                <span class="text-[10px] text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0"
+                                      x-text="eventCountByTitle(title)"></span>
                             </label>
                         </template>
-                        <template x-if="ministries.length > 1">
+                        <template x-if="uniqueEventTitles.length > 1">
                             <div class="border-t border-gray-200 dark:border-gray-700 mt-1 pt-1 px-3 py-1.5 flex gap-2">
-                                <button @click="showAllMinistries()" type="button" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">{{ __('Показати всі') }}</button>
+                                <button @click="showAllEventTitles()" type="button" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">{{ __('Показати всі') }}</button>
                                 <span class="text-gray-300 dark:text-gray-600">|</span>
-                                <button @click="hideAllMinistries()" type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:underline">{{ __('Приховати всі') }}</button>
+                                <button @click="hideAllEventTitles()" type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:underline">{{ __('Приховати всі') }}</button>
                             </div>
                         </template>
                     </div>
@@ -85,7 +86,7 @@
     </div>
 
     {{-- Empty State --}}
-    <template x-if="!loading && events.length === 0">
+    <template x-if="!loading && allEvents.length === 0">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
             <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -96,7 +97,7 @@
     </template>
 
     {{-- Empty Ministries --}}
-    <template x-if="!loading && events.length > 0 && ministries.length === 0">
+    <template x-if="!loading && allEvents.length > 0 && ministries.length === 0">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
             <p class="text-gray-500 dark:text-gray-400 text-lg">{{ __('Немає команд для відображення') }}</p>
             <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">{{ __('Додайте ролі в команди через налаштування команди') }}</p>
@@ -104,7 +105,7 @@
     </template>
 
     {{-- Matrix Grid --}}
-    <template x-if="!loading && events.length > 0 && ministries.length > 0">
+    <template x-if="!loading && allEvents.length > 0 && ministries.length > 0">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse min-w-[600px]">
@@ -113,7 +114,7 @@
                             <th class="sticky left-0 z-20 bg-gray-50 dark:bg-gray-700 px-3 sm:px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-r border-gray-200 dark:border-gray-600 w-[160px] sm:w-[200px] min-w-[160px] sm:min-w-[200px]">
                                 {{ __('Команда / Роль') }}
                             </th>
-                            <template x-for="event in events" :key="event.id">
+                            <template x-for="event in filteredEvents()" :key="event.id">
                                 <th class="px-2 py-2 text-center border-b border-gray-200 dark:border-gray-600 min-w-[140px]"
                                     :class="isNearestEvent(event) ? 'bg-primary-50 dark:bg-primary-900/30' : 'bg-gray-50 dark:bg-gray-700'">
                                     <a :href="'/events/' + event.id"
@@ -133,6 +134,11 @@
                                         <div class="text-[10px] font-medium truncate max-w-[130px] mx-auto mt-0.5"
                                              :class="isNearestEvent(event) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
                                              x-text="event.title"></div>
+                                        <template x-if="event.ministryName">
+                                            <div class="text-[9px] truncate max-w-[130px] mx-auto"
+                                                 :style="'color:' + event.ministryColor"
+                                                 x-text="event.ministryName"></div>
+                                        </template>
                                     </a>
                                 </th>
                             </template>
@@ -189,7 +195,7 @@
                                     </td>
 
                                     {{-- Event cells --}}
-                                    <template x-for="event in events" :key="event.id">
+                                    <template x-for="event in filteredEvents()" :key="event.id">
                                         <td class="px-1.5 py-1.5 text-center border-l border-gray-100 dark:border-gray-700/50"
                                             :class="isNearestEvent(event) ? 'bg-primary-50/30 dark:bg-primary-900/10' : ''">
 
@@ -408,7 +414,9 @@ function servicePlanningMatrix() {
         periodLabel: '',
         nearestEventId: null,
         expanded: {},
-        hiddenMinistries: {},
+        hiddenEventTitles: new Set(),
+        uniqueEventTitles: [],
+        allEvents: [],
 
         // Self-signup context
         currentPersonId: null,
@@ -477,35 +485,54 @@ function servicePlanningMatrix() {
         findNearestEvent() {
             const today = this.formatDate(new Date());
             let nearest = null;
-            for (const event of this.events) {
+            const evts = this.allEvents;
+            for (const event of evts) {
                 if (event.date >= today) { nearest = event.id; break; }
             }
-            this.nearestEventId = nearest || (this.events.length > 0 ? this.events[this.events.length - 1].id : null);
+            this.nearestEventId = nearest || (evts.length > 0 ? evts[evts.length - 1].id : null);
         },
 
         isNearestEvent(event) { return event.id === this.nearestEventId; },
 
-        // Ministry filter
-        visibleMinistries() {
-            return this.ministries.filter(m => !this.hiddenMinistries[m.id]);
+        // Event ministry filter
+        filteredEvents() {
+            if (this.hiddenEventTitles.size === 0) return this.allEvents;
+            return this.allEvents.filter(e => !this.hiddenEventTitles.has(e.ministryName));
         },
 
-        toggleMinistryFilter(ministryId) {
-            if (this.hiddenMinistries[ministryId]) {
-                delete this.hiddenMinistries[ministryId];
-            } else {
-                this.hiddenMinistries[ministryId] = true;
+        buildUniqueEventTitles() {
+            const seen = new Set();
+            const titles = [];
+            for (const e of this.allEvents) {
+                if (e.ministryName && !seen.has(e.ministryName)) {
+                    seen.add(e.ministryName);
+                    titles.push(e.ministryName);
+                }
             }
+            titles.sort();
+            this.uniqueEventTitles = titles;
         },
 
-        showAllMinistries() {
-            this.hiddenMinistries = {};
+        eventCountByTitle(title) {
+            return this.allEvents.filter(e => e.ministryName === title).length;
         },
 
-        hideAllMinistries() {
-            const h = {};
-            this.ministries.forEach(m => h[m.id] = true);
-            this.hiddenMinistries = h;
+        toggleEventTitleFilter(title) {
+            if (this.hiddenEventTitles.has(title)) {
+                this.hiddenEventTitles.delete(title);
+            } else {
+                this.hiddenEventTitles.add(title);
+            }
+            // Force reactivity
+            this.hiddenEventTitles = new Set(this.hiddenEventTitles);
+        },
+
+        showAllEventTitles() {
+            this.hiddenEventTitles = new Set();
+        },
+
+        hideAllEventTitles() {
+            this.hiddenEventTitles = new Set(this.uniqueEventTitles);
         },
 
         async loadData() {
@@ -526,7 +553,9 @@ function servicePlanningMatrix() {
                 if (!resp.ok) throw new Error('Failed to load');
 
                 const data = await resp.json();
+                this.allEvents = data.events;
                 this.events = data.events;
+                this.buildUniqueEventTitles();
                 this.ministries = data.ministriesData;
                 this.grid = data.grid;
                 this.members = data.members;

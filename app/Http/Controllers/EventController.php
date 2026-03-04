@@ -882,10 +882,12 @@ class EventController extends Controller
 
         $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
 
-        // 1. Load all service events for the period
+        // 1. Load all service events for the period (only events linked to a ministry)
         $rawEvents = Event::where('church_id', $church->id)
             ->where('is_service', true)
+            ->whereNotNull('ministry_id')
             ->whereBetween('date', [$startDate, $endDate])
+            ->with('ministry:id,name,color')
             ->orderBy('date')
             ->orderBy('time')
             ->get();
@@ -897,6 +899,9 @@ class EventController extends Controller
             'dateLabel' => $e->date->format('j') . ' ' . $monthNames[$e->date->month],
             'dayOfWeek' => mb_substr($e->date->translatedFormat('D'), 0, 2),
             'time' => $e->time?->format('H:i') ?? '',
+            'ministryId' => $e->ministry_id,
+            'ministryName' => $e->ministry?->name ?? '',
+            'ministryColor' => $e->ministry?->color ?? '#6B7280',
         ]);
 
         $eventIds = $events->pluck('id')->toArray();
