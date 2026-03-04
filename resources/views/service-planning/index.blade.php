@@ -101,22 +101,9 @@
                             </template>
                         </div>
 
-                        {{-- Period buttons --}}
-                        <div class="flex gap-1.5 mb-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                            <button @click="weeks = '4'; loadData(); pickerOpen = false" type="button"
-                                :class="weeks == 4 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
-                                class="flex-1 px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors">4 тиж</button>
-                            <button @click="weeks = '8'; loadData(); pickerOpen = false" type="button"
-                                :class="weeks == 8 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
-                                class="flex-1 px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors">8 тиж</button>
-                            <button @click="weeks = '12'; loadData(); pickerOpen = false" type="button"
-                                :class="weeks == 12 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
-                                class="flex-1 px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors">12 тиж</button>
-                        </div>
-
                         {{-- Today button --}}
                         <button @click="goToday(); pickerOpen = false" type="button"
-                            class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
+                            class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors pt-2 border-t border-gray-200 dark:border-gray-700">
                             {{ __('common.today') }}
                         </button>
                     </div>
@@ -460,9 +447,9 @@
 function servicePlanningMatrix() {
     return {
         loading: false,
-        _savedFilters: filterStorage.load('service_planning', { weeks: '4', hiddenEventTitles: [] }),
-        weeks: null, // set in init from saved
+        _savedFilters: filterStorage.load('service_planning', { hiddenEventTitles: [] }),
         startDate: null,
+        endDate: null,
         events: [],
         ministries: [],
         grid: {},
@@ -496,24 +483,18 @@ function servicePlanningMatrix() {
         busy: false,
 
         init() {
-            // Restore saved filters
-            this.weeks = this._savedFilters.weeks;
             this.hiddenEventTitles = new Set(this._savedFilters.hiddenEventTitles);
-
-            const now = new Date();
-            const day = now.getDay();
-            const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-            this.startDate = new Date(now.setDate(diff));
-            this.startDate.setHours(0, 0, 0, 0);
-
-            // Watch for filter changes
-            this.$watch('weeks', () => this._saveFilters());
+            this.setMonth(new Date().getFullYear(), new Date().getMonth());
             this.$watch('hiddenEventTitles', () => this._saveFilters());
+        },
+
+        setMonth(year, month) {
+            this.startDate = new Date(year, month, 1);
+            this.endDate = new Date(year, month + 1, 0); // last day of month
         },
 
         _saveFilters() {
             filterStorage.save('service_planning', {
-                weeks: this.weeks,
                 hiddenEventTitles: Array.from(this.hiddenEventTitles),
             });
         },
@@ -528,41 +509,22 @@ function servicePlanningMatrix() {
         },
 
         prevPeriod() {
-            this.startDate.setDate(this.startDate.getDate() - this.weeks * 7);
-            this.startDate = new Date(this.startDate);
+            this.setMonth(this.startDate.getFullYear(), this.startDate.getMonth() - 1);
             this.loadData();
         },
 
         nextPeriod() {
-            this.startDate.setDate(this.startDate.getDate() + this.weeks * 7);
-            this.startDate = new Date(this.startDate);
+            this.setMonth(this.startDate.getFullYear(), this.startDate.getMonth() + 1);
             this.loadData();
         },
 
         goToday() {
-            const now = new Date();
-            const day = now.getDay();
-            const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-            this.startDate = new Date(now.setDate(diff));
-            this.startDate.setHours(0, 0, 0, 0);
-            this.loadData();
-        },
-
-        jumpToDate(dateStr) {
-            const d = new Date(dateStr + 'T00:00:00');
-            const day = d.getDay();
-            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-            this.startDate = new Date(d.setDate(diff));
-            this.startDate.setHours(0, 0, 0, 0);
+            this.setMonth(new Date().getFullYear(), new Date().getMonth());
             this.loadData();
         },
 
         pickMonth(year, monthIndex) {
-            const d = new Date(year, monthIndex, 1);
-            const day = d.getDay();
-            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-            this.startDate = new Date(d.setDate(diff));
-            this.startDate.setHours(0, 0, 0, 0);
+            this.setMonth(year, monthIndex);
             this.loadData();
         },
 
@@ -626,8 +588,8 @@ function servicePlanningMatrix() {
 
             try {
                 const params = new URLSearchParams({
-                    weeks: this.weeks,
                     start_date: this.formatDate(this.startDate),
+                    end_date: this.formatDate(this.endDate),
                 });
 
                 const resp = await fetch(`{{ route('schedule.matrix-data') }}?${params}`, {

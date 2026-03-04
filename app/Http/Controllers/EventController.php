@@ -874,11 +874,15 @@ class EventController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        $weeks = min((int) $request->get('weeks', 4), 12);
         $startDate = $request->get('start_date')
             ? Carbon::parse($request->get('start_date'))->startOfDay()
             : now()->startOfWeek(Carbon::MONDAY);
-        $endDate = $startDate->copy()->addWeeks($weeks)->subDay()->endOfDay();
+        if ($request->has('end_date')) {
+            $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
+        } else {
+            $weeks = min((int) $request->get('weeks', 4), 12);
+            $endDate = $startDate->copy()->addWeeks($weeks)->subDay()->endOfDay();
+        }
 
         $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
 
