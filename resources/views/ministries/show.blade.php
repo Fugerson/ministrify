@@ -48,15 +48,25 @@
     </div>
 
     <!-- Sections -->
-    <div x-data="{
-            sections: { goals: true, schedule: true, members: true, expenses: true, board: true, resources: true, songs: true, settings: true },
+    <div x-data="ministrySections()" class="space-y-4">
+    <script>
+    function ministrySections() {
+        const key = 'ministry_{{ $ministry->id }}_sections';
+        const defaults = { goals: true, schedule: true, members: true, expenses: true, board: true, resources: true, songs: true, settings: true };
+        let sections = { ...defaults };
+        try {
+            const s = localStorage.getItem(key);
+            if (s) sections = { ...defaults, ...JSON.parse(s) };
+        } catch(e) {}
+        return {
+            sections,
             toggle(name) {
                 this.sections[name] = !this.sections[name];
-                localStorage.setItem('ministry_{{ $ministry->id }}_sections', JSON.stringify(this.sections));
+                localStorage.setItem(key, JSON.stringify(this.sections));
             }
-         }"
-         x-init="try { const s = localStorage.getItem('ministry_{{ $ministry->id }}_sections'); if (s) sections = JSON.parse(s); } catch(e) {}"
-         class="space-y-4">
+        };
+    }
+    </script>
 
         <!-- Schedule Section -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
