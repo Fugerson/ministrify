@@ -175,6 +175,9 @@ return [
     'member' => 'Member',
     'guest' => 'Guest',
     'church_member' => 'Church member',
+    'servant' => 'Servant',
+    'leader' => 'Leader',
+    'leadership' => 'Church leadership',
     'active_member' => 'Active member',
     'leaders' => 'Leaders',
     'access_denied' => 'Access denied',
@@ -850,4 +853,13 @@ return [
     'merge_both_have_accounts' => 'Both records have accounts. The second record\'s account will be unlinked.',
     'merge_select_base' => 'Select primary record',
     'merge_select_base_desc' => 'After selection you can customize each field individually.',
+
+    // Service Planning
+    'service_planning' => 'Service Planning',
+    'sign_up' => 'Sign Up',
+    'unsubscribe' => 'Unsubscribe',
+    'you_signed_up' => 'You signed up!',
+    'you_unsubscribed' => 'You unsubscribed',
+    'not_team_member' => 'You are not a member of this team',
+    'you' => 'you',
 ];

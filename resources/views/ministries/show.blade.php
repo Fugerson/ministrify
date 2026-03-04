@@ -128,7 +128,6 @@
 
         <div class="p-6">
             <div x-show="activeTab === 'schedule'"{{ $tab !== 'schedule' ? ' style="display:none"' : '' }}>
-                @if($ministry->is_worship_ministry || $ministry->is_sunday_service_part)
                     {{-- Schedule calendar view --}}
                     @php
                         $scheduleEventsGrouped = $scheduleEvents->groupBy(fn($e) => $e->date->format('Y-m-d'));
@@ -1495,7 +1494,6 @@
                             };
                         }
                     </script>
-                @endif
             </div>
 
             <div x-show="activeTab === 'members'"{{ $tab !== 'members' ? ' style="display:none"' : '' }}
@@ -3870,17 +3868,6 @@
                                 </label>
                             </div>
 
-                            <div class="flex items-center gap-3 pt-2">
-                                <input type="hidden" name="is_sunday_service_part" value="0">
-                                <input type="checkbox" name="is_sunday_service_part" id="is_sunday_service_part_settings" value="1"
-                                       {{ old('is_sunday_service_part', $ministry->is_sunday_service_part) ? 'checked' : '' }}
-                                       class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                                <label for="is_sunday_service_part_settings" class="text-sm text-gray-700 dark:text-gray-300">
-                                    <span class="font-medium">Частина недільного служіння</span>
-                                    <span class="block text-gray-500 dark:text-gray-400 text-xs">Команда бачить недільні події та може призначати людей на ролі</span>
-                                </label>
-                            </div>
-
                             <div class="pt-4">
                                 <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                                     Зберегти зміни
@@ -4051,7 +4038,6 @@
 
                 </div>
 
-                    @if($ministry->is_sunday_service_part || $ministry->is_worship_ministry)
                     <hr class="border-gray-200 dark:border-gray-700">
 
                     <!-- Ministry Roles Settings (AJAX) -->
@@ -4191,8 +4177,6 @@
                             </div>
                         </div>
                     </div>
-
-                    @endif
 
                     <hr class="border-gray-200 dark:border-gray-700">
 

@@ -29,9 +29,9 @@ class ServiceTeamController extends Controller
 
         $churchId = $this->getCurrentChurch()->id;
 
-        // Verify ministry belongs to same church and has the flag
+        // Verify ministry belongs to same church
         $ministry = Ministry::find($validated['ministry_id']);
-        if (!$ministry || $ministry->church_id !== $churchId || (!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry)) {
+        if (!$ministry || $ministry->church_id !== $churchId) {
             abort(404);
         }
 
@@ -172,6 +172,88 @@ class ServiceTeamController extends Controller
         }
 
         return response()->json(['success' => false, 'message' => 'Не вдалося надіслати повідомлення'], 500);
+    }
+
+    /**
+     * Self-signup: team member signs up for a role
+     */
+    public function selfSignup(Request $request, Event $event)
+    {
+        $this->authorizeChurch($event);
+
+        $validated = $request->validate([
+            'ministry_id' => 'required|exists:ministries,id',
+            'ministry_role_id' => 'required|exists:ministry_roles,id',
+        ]);
+
+        $person = auth()->user()->person;
+        if (!$person) {
+            return response()->json(['error' => __('app.not_team_member')], 403);
+        }
+
+        $churchId = $this->getCurrentChurch()->id;
+
+        $ministry = Ministry::find($validated['ministry_id']);
+        if (!$ministry || $ministry->church_id !== $churchId) {
+            abort(404);
+        }
+
+        // Check user is a member of this ministry
+        if (!$ministry->members()->where('people.id', $person->id)->exists()) {
+            return response()->json(['error' => __('app.not_team_member')], 403);
+        }
+
+        // Verify role belongs to the ministry
+        $role = MinistryRole::find($validated['ministry_role_id']);
+        if (!$role || $role->ministry_id !== $ministry->id) {
+            abort(404);
+        }
+
+        // Check duplicate
+        $exists = EventMinistryTeam::where('event_id', $event->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('person_id', $person->id)
+            ->where('ministry_role_id', $role->id)
+            ->exists();
+
+        if ($exists) {
+            return response()->json(['error' => 'Ви вже записані на цю роль'], 422);
+        }
+
+        $member = EventMinistryTeam::create([
+            'event_id' => $event->id,
+            'ministry_id' => $ministry->id,
+            'person_id' => $person->id,
+            'ministry_role_id' => $role->id,
+            'status' => 'confirmed',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'id' => $member->id,
+            'person_name' => $person->first_name . ' ' . mb_substr($person->last_name ?? '', 0, 1) . '.',
+        ]);
+    }
+
+    /**
+     * Self-unsubscribe: team member removes their own signup
+     */
+    public function selfUnsubscribe(Request $request, Event $event, EventMinistryTeam $member)
+    {
+        $this->authorizeChurch($event);
+
+        if ($member->event_id !== $event->id) {
+            abort(404);
+        }
+
+        $person = auth()->user()->person;
+        if (!$person || $member->person_id !== $person->id) {
+            return response()->json(['error' => 'Ви можете видалити тільки свій запис'], 403);
+        }
+
+        $member->delete();
+
+        return response()->json(['success' => true]);
     }
 
     /**

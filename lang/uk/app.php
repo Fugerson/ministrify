@@ -172,6 +172,9 @@ return [
     'moderator' => 'Модератор',
     'guest' => 'Гість',
     'church_member' => 'Член церкви',
+    'servant' => 'Служитель',
+    'leader' => 'Лідер',
+    'leadership' => 'Керівництво церкви',
     'active_member' => 'Активний член',
     'leaders' => 'Лідери',
     'access_denied' => 'Доступ заборонено',
@@ -847,4 +850,13 @@ return [
     'merge_both_have_accounts' => 'Обидва записи мають акаунти. Акаунт другого запису буде від\'єднано.',
     'merge_select_base' => 'Оберіть основний запис',
     'merge_select_base_desc' => 'Після вибору ви зможете налаштувати кожне поле окремо.',
+
+    // Service Planning
+    'service_planning' => 'Планування служінь',
+    'sign_up' => 'Записатися',
+    'unsubscribe' => 'Відписатися',
+    'you_signed_up' => 'Ви записалися!',
+    'you_unsubscribed' => 'Ви відписалися',
+    'not_team_member' => 'Ви не є учасником цієї команди',
+    'you' => 'ви',
 ];

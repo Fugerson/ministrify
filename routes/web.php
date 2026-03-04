@@ -129,6 +129,9 @@ Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 // Locale switcher (must be in web middleware group for CSRF)
 Route::post('locale/{locale}', [LocaleSwitchController::class, 'switch'])->middleware('web')->name('locale.switch');
 
+// Logo preview (hidden page)
+Route::get('logo-preview', fn() => view('logo-preview'));
+
 // Landing pages (public)
 Route::get('/', [LandingController::class, 'home'])->name('landing.home');
 Route::get('features', [LandingController::class, 'features'])->name('landing.features');
@@ -348,11 +351,15 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('events/{event}/worship-team', [WorshipTeamController::class, 'addTeamMember'])->name('events.worship-team.add')->middleware('permission:events,edit');
     Route::delete('events/{event}/worship-team/{member}', [WorshipTeamController::class, 'removeTeamMember'])->name('events.worship-team.remove')->middleware('permission:events,edit');
 
-    // Service Team (for ministries with is_sunday_service_part or is_worship_ministry)
+    // Service Team management
     Route::post('events/{event}/ministry-team', [ServiceTeamController::class, 'addTeamMember'])->name('events.ministry-team.add')->middleware('permission:events,edit');
     Route::delete('events/{event}/ministry-team/{member}', [ServiceTeamController::class, 'removeTeamMember'])->name('events.ministry-team.remove')->middleware('permission:events,edit');
     Route::post('events/{event}/ministry-team/{member}/notify', [ServiceTeamController::class, 'sendNotification'])->name('events.ministry-team.notify')->middleware('permission:events,edit');
     Route::patch('events/{event}/ministry-team/{member}/notes', [ServiceTeamController::class, 'updateNotes'])->name('events.ministry-team.update-notes')->middleware('permission:events,edit');
+
+    // Self-signup (no permission:events,edit — any team member can sign up)
+    Route::post('events/{event}/self-signup', [ServiceTeamController::class, 'selfSignup'])->name('events.self-signup');
+    Route::delete('events/{event}/self-unsubscribe/{member}', [ServiceTeamController::class, 'selfUnsubscribe'])->name('events.self-unsubscribe');
 
 
     // Person worship skills
@@ -418,6 +425,9 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('schedule', [EventController::class, 'schedule'])->name('schedule');
     Route::get('schedule/matrix', [EventController::class, 'matrix'])->name('schedule.matrix');
     Route::get('schedule/matrix-data', [EventController::class, 'matrixData'])->name('schedule.matrix-data');
+
+    // Service Planning
+    Route::get('service-planning', [EventController::class, 'servicePlanning'])->name('service-planning');
     Route::get('calendar', [EventController::class, 'calendar'])->name('calendar');
     Route::get('qr-scanner', [QrCheckinController::class, 'scanner'])->name('qr-scanner')->middleware('permission:attendance,edit');
     Route::post('events/{event}/toggle-qr-checkin', [QrCheckinController::class, 'toggleQrCheckin'])->name('events.toggle-qr-checkin');

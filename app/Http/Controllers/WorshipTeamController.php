@@ -23,12 +23,8 @@ class WorshipTeamController extends Controller
     {
         $this->authorizeChurch($ministry);
 
-        if (!$ministry->is_worship_ministry && !$ministry->is_sunday_service_part) {
-            abort(404);
-        }
-
         $events = Event::where('church_id', $this->getCurrentChurch()->id)
-            ->where('service_type', 'sunday_service')
+            ->where('is_service', true)
             ->where('date', '>=', now()->subDays(7))
             ->with(['songs', 'ministryTeams' => fn($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')])
             ->orderBy('date')
@@ -47,10 +43,6 @@ class WorshipTeamController extends Controller
     {
         $this->authorizeChurch($ministry);
 
-        if (!$ministry->is_worship_ministry && !$ministry->is_sunday_service_part) {
-            abort(404);
-        }
-
         $period = $request->get('period', 'month');
         $startDate = match($period) {
             'month' => now()->startOfMonth(),
@@ -65,7 +57,7 @@ class WorshipTeamController extends Controller
 
         // Base query for events
         $eventsQuery = Event::where('church_id', $churchId)
-            ->where('service_type', 'sunday_service');
+            ->where('is_service', true);
 
         if ($startDate) {
             $eventsQuery->where('date', '>=', $startDate);
@@ -143,7 +135,7 @@ class WorshipTeamController extends Controller
 
         // Recent events
         $recentEvents = Event::where('church_id', $churchId)
-            ->where('service_type', 'sunday_service')
+            ->where('is_service', true)
             ->where('date', '<=', now())
             ->withCount(['songs as songs_count', 'ministryTeams as team_count' => function($q) use ($ministry) {
                 $q->where('ministry_id', $ministry->id);
@@ -179,10 +171,6 @@ class WorshipTeamController extends Controller
     {
         $this->authorizeChurch($ministry);
         $this->authorizeChurch($event);
-
-        if (!$ministry->is_worship_ministry && !$ministry->is_sunday_service_part) {
-            abort(404);
-        }
 
         $event->load(['songs', 'ministryTeams' => fn($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')]);
 
@@ -493,9 +481,9 @@ class WorshipTeamController extends Controller
             return $ministry && $ministry->isMember();
         }
 
-        // Otherwise check if member of any worship/service ministry
+        // Otherwise check if member of any ministry with roles
         return Ministry::where('church_id', $this->getCurrentChurch()->id)
-            ->where(fn($q) => $q->where('is_worship_ministry', true)->orWhere('is_sunday_service_part', true))
+            ->whereHas('ministryRoles')
             ->get()
             ->contains(fn($m) => $m->isMember());
     }

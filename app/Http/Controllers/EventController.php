@@ -860,7 +860,7 @@ class EventController extends Controller
      */
     public function matrix(Request $request)
     {
-        return redirect()->route('schedule', ['tab' => 'matrix']);
+        return redirect()->route('service-planning');
     }
 
     /**
@@ -874,7 +874,6 @@ class EventController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        $serviceType = $request->get('service_type', 'sunday_service');
         $weeks = min((int) $request->get('weeks', 4), 12);
         $startDate = $request->get('start_date')
             ? Carbon::parse($request->get('start_date'))->startOfDay()
@@ -883,9 +882,9 @@ class EventController extends Controller
 
         $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
 
-        // 1. Load events for the period
+        // 1. Load all service events for the period
         $rawEvents = Event::where('church_id', $church->id)
-            ->where('service_type', $serviceType)
+            ->where('is_service', true)
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date')
             ->orderBy('time')
@@ -902,12 +901,9 @@ class EventController extends Controller
 
         $eventIds = $events->pluck('id')->toArray();
 
-        // 2. Load all service ministries (sunday_service_part + worship_ministry)
+        // 2. Load all ministries that have roles defined
         $ministries = Ministry::where('church_id', $church->id)
-            ->where(function ($q) {
-                $q->where('is_sunday_service_part', true)
-                  ->orWhere('is_worship_ministry', true);
-            })
+            ->whereHas('ministryRoles')
             ->orderBy('name')
             ->get();
 
@@ -1060,7 +1056,27 @@ class EventController extends Controller
             }
         }
 
-        return response()->json(compact('events', 'ministriesData', 'grid', 'members'));
+        // Current user context for self-signup
+        $currentPerson = auth()->user()->person;
+        $currentPersonId = $currentPerson?->id;
+        $myMinistryIds = $currentPerson
+            ? $currentPerson->ministries()->pluck('ministries.id')->toArray()
+            : [];
+        $isLeader = auth()->user()->canEdit('events');
+
+        return response()->json(compact('events', 'ministriesData', 'grid', 'members', 'currentPersonId', 'myMinistryIds', 'isLeader'));
+    }
+
+    /**
+     * Service Planning page
+     */
+    public function servicePlanning()
+    {
+        if (!auth()->user()->canView('events')) {
+            abort(403);
+        }
+
+        return view('service-planning.index');
     }
 
 }

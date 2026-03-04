@@ -1535,10 +1535,6 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('contribute-ministry', $ministry);
 
-        if (!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) {
-            abort(404);
-        }
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'icon' => 'nullable|string|max:50',
@@ -1563,7 +1559,7 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('contribute-ministry', $ministry);
 
-        if ((!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) || $role->ministry_id !== $ministry->id) {
+        if ($role->ministry_id !== $ministry->id) {
             abort(404);
         }
 
@@ -1585,7 +1581,7 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('contribute-ministry', $ministry);
 
-        if ((!$ministry->is_sunday_service_part && !$ministry->is_worship_ministry) || $role->ministry_id !== $ministry->id) {
+        if ($role->ministry_id !== $ministry->id) {
             abort(404);
         }
 
