@@ -332,10 +332,15 @@
 
 <script>
 function matrixView() {
+    const savedFilters = filterStorage.load('schedule_matrix', {
+        serviceType: 'sunday_service',
+        weeks: '4',
+    });
+
     return {
         loading: false,
-        serviceType: 'sunday_service',
-        weeks: 4,
+        serviceType: savedFilters.serviceType,
+        weeks: savedFilters.weeks,
         startDate: null,
         events: [],
         ministries: [],
@@ -371,6 +376,16 @@ function matrixView() {
             const diff = now.getDate() - day + (day === 0 ? -6 : 1);
             this.startDate = new Date(now.setDate(diff));
             this.startDate.setHours(0, 0, 0, 0);
+
+            this.$watch('serviceType', () => this._saveFilters());
+            this.$watch('weeks', () => this._saveFilters());
+        },
+
+        _saveFilters() {
+            filterStorage.save('schedule_matrix', {
+                serviceType: this.serviceType,
+                weeks: this.weeks,
+            });
         },
 
         formatDate(d) {

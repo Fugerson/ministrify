@@ -26,16 +26,38 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 function financesDashboard() {
+    // Restore saved filters if page loaded without explicit params
+    const _urlParams = new URLSearchParams(window.location.search);
+    if (!_urlParams.has('year') && !_urlParams.has('month')) {
+        const _saved = filterStorage.load('finance_analytics', { selectedYear: '', selectedMonth: '' });
+        if (_saved.selectedYear) {
+            const params = new URLSearchParams();
+            params.set('year', _saved.selectedYear);
+            if (_saved.selectedMonth) params.set('month', _saved.selectedMonth);
+            Livewire.navigate('{{ route("finances.index") }}?' + params.toString());
+            return {};
+        }
+    }
+
     return {
         selectedYear: '{{ $year }}',
         selectedMonth: '{{ $month ?? "" }}',
 
         init() {
+            // Save current filters so they persist on next visit
+            filterStorage.save('finance_analytics', {
+                selectedYear: this.selectedYear,
+                selectedMonth: this.selectedMonth
+            });
             this.initChart();
             this.initPaymentMethodsChart();
         },
 
         updatePeriod() {
+            filterStorage.save('finance_analytics', {
+                selectedYear: this.selectedYear,
+                selectedMonth: this.selectedMonth
+            });
             const params = new URLSearchParams();
             params.set('year', this.selectedYear);
             if (this.selectedMonth) params.set('month', this.selectedMonth);

@@ -1214,12 +1214,20 @@ function modalGoogleCalendarPicker() {
 function calendarNavigator(initialState) {
     const months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
 
+    // Restore saved view from localStorage if URL doesn't have explicit view param
+    const savedCalendarFilters = filterStorage.load('schedule_calendar', { currentView: 'month' });
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasExplicitView = urlParams.has('view');
+    const effectiveView = hasExplicitView ? initialState.view : savedCalendarFilters.currentView;
+
     return {
-        currentView: initialState.view,
+        currentView: effectiveView,
         currentYear: initialState.year,
         currentMonth: initialState.month,
         currentWeek: initialState.week,
         loading: false,
+
+        _needsRedirect: !hasExplicitView && effectiveView !== initialState.view,
 
         get monthDisplay() {
             return `${months[this.currentMonth - 1]} ${this.currentYear}`;
@@ -1231,6 +1239,16 @@ function calendarNavigator(initialState) {
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);
             return `${String(weekStart.getDate()).padStart(2, '0')}.${String(weekStart.getMonth() + 1).padStart(2, '0')} - ${String(weekEnd.getDate()).padStart(2, '0')}.${String(weekEnd.getMonth() + 1).padStart(2, '0')}.${weekEnd.getFullYear()}`;
+        },
+
+        init() {
+            // If saved view differs from server default and URL had no explicit view, redirect once
+            if (this._needsRedirect) {
+                this.$nextTick(() => this.loadCalendar());
+            }
+            this.$watch('currentView', () => {
+                filterStorage.save('schedule_calendar', { currentView: this.currentView });
+            });
         },
 
         switchView(view) {

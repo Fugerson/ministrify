@@ -405,7 +405,8 @@
 function servicePlanningMatrix() {
     return {
         loading: false,
-        weeks: 4,
+        _savedFilters: filterStorage.load('service_planning', { weeks: 4, hiddenEventTitles: [] }),
+        weeks: null, // set in init from saved
         startDate: null,
         events: [],
         ministries: [],
@@ -414,7 +415,7 @@ function servicePlanningMatrix() {
         periodLabel: '',
         nearestEventId: null,
         expanded: {},
-        hiddenEventTitles: new Set(),
+        hiddenEventTitles: new Set(), // set in init from saved
         uniqueEventTitles: [],
         allEvents: [],
 
@@ -439,11 +440,26 @@ function servicePlanningMatrix() {
         busy: false,
 
         init() {
+            // Restore saved filters
+            this.weeks = this._savedFilters.weeks;
+            this.hiddenEventTitles = new Set(this._savedFilters.hiddenEventTitles);
+
             const now = new Date();
             const day = now.getDay();
             const diff = now.getDate() - day + (day === 0 ? -6 : 1);
             this.startDate = new Date(now.setDate(diff));
             this.startDate.setHours(0, 0, 0, 0);
+
+            // Watch for filter changes
+            this.$watch('weeks', () => this._saveFilters());
+            this.$watch('hiddenEventTitles', () => this._saveFilters());
+        },
+
+        _saveFilters() {
+            filterStorage.save('service_planning', {
+                weeks: this.weeks,
+                hiddenEventTitles: Array.from(this.hiddenEventTitles),
+            });
         },
 
         formatDate(d) {

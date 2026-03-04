@@ -74,20 +74,19 @@ function financePeriodFilter() {
 
         init() {
             // localStorage is the source of truth for user's period selection
-            const saved = localStorage.getItem('financePeriod');
-            const savedCustom = localStorage.getItem('financeCustomRange');
+            const saved = filterStorage.load('finance_period', {
+                activePeriod: 'month',
+                customMode: false,
+                customStart: '',
+                customEnd: ''
+            });
 
-            if (savedCustom) {
-                try {
-                    const parsed = JSON.parse(savedCustom);
-                    if (parsed.start && parsed.end) {
-                        this.customMode = true;
-                        this.customStart = parsed.start;
-                        this.customEnd = parsed.end;
-                    }
-                } catch (e) {}
-            } else if (saved && this.periodLabels[saved]) {
-                this.activePeriod = saved;
+            if (saved.customMode && saved.customStart && saved.customEnd) {
+                this.customMode = true;
+                this.customStart = saved.customStart;
+                this.customEnd = saved.customEnd;
+            } else if (saved.activePeriod && this.periodLabels[saved.activePeriod]) {
+                this.activePeriod = saved.activePeriod;
             } else {
                 // Fallback: URL params (e.g. shared link with no localStorage)
                 const urlParams = new URLSearchParams(window.location.search);
@@ -172,34 +171,32 @@ function financePeriodFilter() {
                     this.customStart = formatDateLocal(firstDay);
                     this.customEnd = formatDateLocal(lastDay);
                 }
-                this.saveCustomRange();
+                this._saveFilters();
             } else {
-                localStorage.removeItem('financeCustomRange');
-                this.dispatchChange();
+                this._saveFilters();
             }
         },
 
         applyCustomRange() {
             if (this.customStart && this.customEnd) {
-                this.saveCustomRange();
+                this._saveFilters();
             }
         },
 
-        saveCustomRange() {
-            localStorage.setItem('financeCustomRange', JSON.stringify({
-                start: this.customStart,
-                end: this.customEnd
-            }));
-            localStorage.removeItem('financePeriod');
+        _saveFilters() {
+            filterStorage.save('finance_period', {
+                activePeriod: this.activePeriod,
+                customMode: this.customMode,
+                customStart: this.customStart,
+                customEnd: this.customEnd
+            });
             this.dispatchChange();
         },
 
         setPeriod(period) {
             this.customMode = false;
             this.activePeriod = period;
-            localStorage.setItem('financePeriod', period);
-            localStorage.removeItem('financeCustomRange');
-            this.dispatchChange();
+            this._saveFilters();
         },
 
         dispatchChange() {

@@ -504,18 +504,18 @@ let _pendingCommentFiles = [];
 let _editCommentFiles = [];
 
 function churchBoard() {
+    const _savedBoardFilters = filterStorage.load('boards_kanban', {
+        filters: { priority: '', assignee: '', ministry: '', epic: '' },
+        searchQuery: '',
+        activePreset: ''
+    });
     return {
         canCreateCards: @json(auth()->user()->canCreate('boards')),
         canEditCards: @json(auth()->user()->canEdit('boards')),
         canDeleteCards: @json(auth()->user()->canDelete('boards')),
-        filters: {
-            priority: '',
-            assignee: '',
-            ministry: '',
-            epic: ''
-        },
-        searchQuery: '',
-        activePreset: '',
+        filters: _savedBoardFilters.filters,
+        searchQuery: _savedBoardFilters.searchQuery,
+        activePreset: _savedBoardFilters.activePreset,
         cardPanel: {
             open: false,
             loading: false,
@@ -584,8 +584,14 @@ function churchBoard() {
 
         init() {
             this.initSortable();
-            this.$watch('filters', () => { this.applyFilters(); this.activePreset = ''; }, { deep: true });
-            this.$watch('searchQuery', () => this.applyFilters());
+            this.$watch('filters', () => { this.applyFilters(); this.activePreset = ''; this._saveBoardFilters(); }, { deep: true });
+            this.$watch('searchQuery', () => { this.applyFilters(); this._saveBoardFilters(); });
+            this.$watch('activePreset', () => this._saveBoardFilters());
+
+            // Apply restored filters on load
+            if (this.searchQuery || this.filters.priority || this.filters.assignee || this.filters.ministry || this.filters.epic || this.activePreset) {
+                this.$nextTick(() => this.applyFilters());
+            }
 
             // Expose methods globally for dynamically generated card HTML
             window.boardOpenCard = (id) => this.openCard(id);
@@ -598,6 +604,14 @@ function churchBoard() {
                 this.openCard(parseInt(cardId));
                 window.history.replaceState({}, '', window.location.pathname);
             }
+        },
+
+        _saveBoardFilters() {
+            filterStorage.save('boards_kanban', {
+                filters: this.filters,
+                searchQuery: this.searchQuery,
+                activePreset: this.activePreset,
+            });
         },
 
         handleKeydown(e) {

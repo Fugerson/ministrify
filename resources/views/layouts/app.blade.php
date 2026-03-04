@@ -40,6 +40,28 @@
             }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         })();
 
+        // Global filter persistence via localStorage
+        window.filterStorage = {
+            save(page, filters) {
+                try { localStorage.setItem('filters_' + page, JSON.stringify(filters)); } catch(e) {}
+            },
+            load(page, defaults) {
+                try {
+                    const saved = JSON.parse(localStorage.getItem('filters_' + page));
+                    if (saved && typeof saved === 'object') {
+                        const result = { ...defaults };
+                        for (const key in defaults) {
+                            if (key in saved && typeof saved[key] === typeof defaults[key]) {
+                                result[key] = saved[key];
+                            }
+                        }
+                        return result;
+                    }
+                } catch(e) {}
+                return { ...defaults };
+            }
+        };
+
         // Handle back/forward cache - check if user is still authenticated
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {

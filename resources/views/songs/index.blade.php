@@ -186,8 +186,7 @@ $songsJson = $songs->map(function($s) {
 @endphp
 <script>
 function songsLibrary() {
-    return {
-        songs: @json($songsJson),
+    const savedFilters = filterStorage.load('songs', {
         search: '',
         filterKey: '',
         filterTag: '',
@@ -196,6 +195,36 @@ function songsLibrary() {
         filterUsage: '',
         filterContent: '',
         sortBy: 'title',
+    });
+    return {
+        songs: @json($songsJson),
+        search: savedFilters.search,
+        filterKey: savedFilters.filterKey,
+        filterTag: savedFilters.filterTag,
+        filterArtist: savedFilters.filterArtist,
+        filterBpm: savedFilters.filterBpm,
+        filterUsage: savedFilters.filterUsage,
+        filterContent: savedFilters.filterContent,
+        sortBy: savedFilters.sortBy,
+
+        init() {
+            ['search', 'filterKey', 'filterTag', 'filterArtist', 'filterBpm', 'filterUsage', 'filterContent', 'sortBy'].forEach(key => {
+                this.$watch(key, () => this._saveFilters());
+            });
+        },
+
+        _saveFilters() {
+            filterStorage.save('songs', {
+                search: this.search,
+                filterKey: this.filterKey,
+                filterTag: this.filterTag,
+                filterArtist: this.filterArtist,
+                filterBpm: this.filterBpm,
+                filterUsage: this.filterUsage,
+                filterContent: this.filterContent,
+                sortBy: this.sortBy,
+            });
+        },
 
         get hasActiveFilters() {
             return this.search || this.filterKey || this.filterTag || this.filterArtist || this.filterBpm || this.filterUsage || this.filterContent;

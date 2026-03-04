@@ -380,8 +380,9 @@
 
 <script>
 function messengerApp() {
+    const _savedMsgFilters = filterStorage.load('messages', { searchQuery: '' });
     return {
-        searchQuery: '',
+        searchQuery: _savedMsgFilters.searchQuery,
         showNewChat: false,
         userSearch: '',
         selectedUser: null,
@@ -401,12 +402,22 @@ function messengerApp() {
         showUserDropdown: false,
 
         init() {
+            // Restore search filter and apply
+            if (this.searchQuery) {
+                this.$nextTick(() => this.filterConversations());
+            }
+            this.$watch('searchQuery', () => this._saveFilters());
+
             // Check if URL has user parameter
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get('user');
             if (userId) {
                 // Load that user's chat
             }
+        },
+
+        _saveFilters() {
+            filterStorage.save('messages', { searchQuery: this.searchQuery });
         },
 
         async selectUser(id, name, role, btnEl = null) {

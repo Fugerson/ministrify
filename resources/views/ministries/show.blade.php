@@ -50,9 +50,15 @@
     <!-- Tabs -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm"
          x-data="{
-            activeTab: '{{ $tab }}',
+            activeTab: new URLSearchParams(window.location.search).has('tab')
+                ? '{{ $tab }}'
+                : (filterStorage.load('ministry_tab', { tab: '{{ $tab }}' }).tab || '{{ $tab }}'),
+            init() {
+                filterStorage.save('ministry_tab', { tab: this.activeTab });
+            },
             setTab(tab) {
                 this.activeTab = tab;
+                filterStorage.save('ministry_tab', { tab });
                 const url = new URL(window.location);
                 url.searchParams.set('tab', tab);
                 if (tab !== 'resources') {
