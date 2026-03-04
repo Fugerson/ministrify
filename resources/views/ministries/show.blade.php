@@ -49,18 +49,14 @@
 
     <!-- Sections -->
     <div x-data="{
-            sections: (() => {
-                try {
-                    const stored = localStorage.getItem('ministry_{{ $ministry->id }}_sections');
-                    if (stored) return JSON.parse(stored);
-                } catch(e) {}
-                return { goals: true, schedule: true, members: true, expenses: true, board: true, resources: true, songs: true, settings: true };
-            })(),
+            sections: { goals: true, schedule: true, members: true, expenses: true, board: true, resources: true, songs: true, settings: true },
             toggle(name) {
                 this.sections[name] = !this.sections[name];
                 localStorage.setItem('ministry_{{ $ministry->id }}_sections', JSON.stringify(this.sections));
             }
-         }" class="space-y-4">
+         }"
+         x-init="try { const s = localStorage.getItem('ministry_{{ $ministry->id }}_sections'); if (s) sections = JSON.parse(s); } catch(e) {}"
+         class="space-y-4">
 
         <!-- Schedule Section -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
