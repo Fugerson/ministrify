@@ -523,14 +523,16 @@ function servicePlanningMatrix() {
         },
 
         updatePeriodLabel() {
-            const months = ['січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
+            const months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
             const end = new Date(this.startDate);
             end.setDate(end.getDate() + this.weeks * 7 - 1);
-            const startLabel = this.startDate.getDate() + ' ' + months[this.startDate.getMonth()];
-            const endLabel = end.getDate() + ' ' + months[end.getMonth()];
-            this.periodLabel = this.startDate.getFullYear() === end.getFullYear()
-                ? startLabel + ' — ' + endLabel + ', ' + this.startDate.getFullYear()
-                : startLabel + ' ' + this.startDate.getFullYear() + ' — ' + endLabel + ' ' + end.getFullYear();
+            if (this.startDate.getMonth() === end.getMonth() && this.startDate.getFullYear() === end.getFullYear()) {
+                this.periodLabel = months[this.startDate.getMonth()] + ' ' + this.startDate.getFullYear();
+            } else if (this.startDate.getFullYear() === end.getFullYear()) {
+                this.periodLabel = months[this.startDate.getMonth()] + ' — ' + months[end.getMonth()] + ' ' + end.getFullYear();
+            } else {
+                this.periodLabel = months[this.startDate.getMonth()] + ' ' + this.startDate.getFullYear() + ' — ' + months[end.getMonth()] + ' ' + end.getFullYear();
+            }
         },
 
         prevPeriod() {
