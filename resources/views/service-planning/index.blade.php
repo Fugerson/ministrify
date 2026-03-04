@@ -16,7 +16,7 @@
                 <div class="relative" x-data="{ filterOpen: false }">
                     <button @click="filterOpen = !filterOpen" type="button"
                         class="flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                        <span>{{ __('Події') }}</span>
+                        <span>{{ __('Фільтр') }}</span>
                         <template x-if="hiddenEventTitles.size > 0">
                             <span class="w-4 h-4 flex items-center justify-center text-[9px] font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-full"
                                   x-text="hiddenEventTitles.size"></span>
