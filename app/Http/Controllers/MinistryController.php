@@ -191,11 +191,15 @@ class MinistryController extends Controller
             $songBoardTags = $ministry->settings['song_board_tags'] ?? [];
         }
 
-        // Load schedule events and ministry roles for all ministries
+        // Load schedule events: worship/sunday-part ministries see sunday services + own events; others see only own events
         $scheduleEventsQuery = Event::where('church_id', $church->id)
             ->where(function ($q) use ($ministry) {
-                $q->where('is_service', true)
-                  ->orWhere('ministry_id', $ministry->id);
+                if ($ministry->is_worship_ministry || $ministry->is_sunday_service_part) {
+                    $q->where('service_type', 'sunday_service')
+                      ->orWhere('ministry_id', $ministry->id);
+                } else {
+                    $q->where('ministry_id', $ministry->id);
+                }
             })
             ->orderBy('date')
             ->orderBy('time');
