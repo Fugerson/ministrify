@@ -146,7 +146,7 @@
                     </thead>
 
                     <tbody>
-                        <template x-for="(ministry, mIdx) in visibleMinistries()" :key="ministry.id">
+                        <template x-for="(ministry, mIdx) in ministries" :key="ministry.id">
                             <template x-for="(row, rowIdx) in getMinistryRows(ministry)" :key="row.key">
                                 <tr class="border-b border-gray-100 dark:border-gray-700/50 group/row hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors"
                                     :class="rowIdx === 0 ? (mIdx > 0 ? 'border-t-2 border-gray-200 dark:border-gray-600' : 'border-t border-gray-200 dark:border-gray-600') : ''"
