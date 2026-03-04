@@ -186,31 +186,27 @@ class MinistryController extends Controller
             $songBoardTags = $ministry->settings['song_board_tags'] ?? [];
         }
 
-        // Load schedule events and ministry roles for worship or sunday service part ministries
-        $scheduleEvents = collect();
-        $ministryRoles = collect();
-        if ($ministry->is_worship_ministry || $ministry->is_sunday_service_part) {
-            $scheduleEventsQuery = Event::where('church_id', $church->id)
-                ->where(function ($q) use ($ministry) {
-                    $q->where('service_type', 'sunday_service')
-                      ->orWhere('ministry_id', $ministry->id);
-                })
-                ->orderBy('date')
-                ->orderBy('time');
+        // Load schedule events and ministry roles for all ministries
+        $scheduleEventsQuery = Event::where('church_id', $church->id)
+            ->where(function ($q) use ($ministry) {
+                $q->where('is_service', true)
+                  ->orWhere('ministry_id', $ministry->id);
+            })
+            ->orderBy('date')
+            ->orderBy('time');
 
-            if ($ministry->is_worship_ministry) {
-                $scheduleEventsQuery->withCount(['songs as songs_count', 'ministryTeams as team_count' => function ($q) use ($ministry) {
-                    $q->where('ministry_id', $ministry->id);
-                }]);
-            } else {
-                $scheduleEventsQuery->withCount(['ministryTeams as team_count' => function ($q) use ($ministry) {
-                    $q->where('ministry_id', $ministry->id);
-                }]);
-            }
-
-            $scheduleEvents = $scheduleEventsQuery->get();
-            $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
+        if ($ministry->is_worship_ministry) {
+            $scheduleEventsQuery->withCount(['songs as songs_count', 'ministryTeams as team_count' => function ($q) use ($ministry) {
+                $q->where('ministry_id', $ministry->id);
+            }]);
+        } else {
+            $scheduleEventsQuery->withCount(['ministryTeams as team_count' => function ($q) use ($ministry) {
+                $q->where('ministry_id', $ministry->id);
+            }]);
         }
+
+        $scheduleEvents = $scheduleEventsQuery->get();
+        $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
 
         // Get or create ministry board
         $ministryBoard = Board::firstOrCreate(
