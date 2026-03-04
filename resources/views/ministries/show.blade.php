@@ -49,7 +49,7 @@
 
     <!-- Sections -->
     <div x-data="{
-            _key: 'ministry_{{ $ministry->id }}_sections',
+            _key: 'ministry_{{ $ministry->id }}_sections_v2',
             sections: { goals: true, schedule: true, members: true, expenses: true, board: true, resources: true, songs: true, settings: true },
             init() {
                 try {
