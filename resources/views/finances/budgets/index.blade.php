@@ -19,12 +19,14 @@
         {{-- Period Selector --}}
         <div class="flex items-center gap-2">
             <select x-model="month" x-on:change="updatePeriod()"
+                    title="Оберіть місяць для перегляду план/факт витрат"
                     class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 @foreach([1 => 'Січень', 2 => 'Лютий', 3 => 'Березень', 4 => 'Квітень', 5 => 'Травень', 6 => 'Червень', 7 => 'Липень', 8 => 'Серпень', 9 => 'Вересень', 10 => 'Жовтень', 11 => 'Листопад', 12 => 'Грудень'] as $m => $name)
                     <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ $name }}</option>
                 @endforeach
             </select>
             <select x-model="year" x-on:change="updatePeriod()"
+                    title="Оберіть рік бюджету"
                     class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 @for($y = now()->year + 1; $y >= 2020; $y--)
                     <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
@@ -35,7 +37,7 @@
 
     {{-- Summary Cards (Grand Total: Church + Ministry) --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700" title="Загальна сума запланованих витрат за обраний місяць (церковні + командні)">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.planned') }}</p>
@@ -51,7 +53,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700" title="Фактичні витрати за обраний місяць — сума завершених транзакцій (церковні + командні)">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.actual') }}</p>
@@ -67,7 +69,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700" title="Різниця між запланованим і фактичним. Зелений = є запас, Червоний = перевищено бюджет">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.remaining') }}</p>
@@ -83,7 +85,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700" title="Відсоток використання бюджету. Більше 100% = бюджет перевищено">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.used_percent') }}</p>
@@ -103,7 +105,7 @@
 
     {{-- Progress Bar --}}
     @if($grandTotals['planned'] > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700" title="Візуальний прогрес використання бюджету. Зелений — в нормі, Помаранчевий — понад 80%, Червоний — перевищено">
         <div class="flex items-center justify-between mb-3">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.used_percent') }}</span>
             <span class="text-sm font-semibold {{ $grandTotals['percentage'] > 100 ? 'text-red-600' : 'text-gray-900 dark:text-white' }}">
@@ -123,9 +125,10 @@
     {{-- ═══ Church Budget Section ═══ --}}
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.church_expenses') }}</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white" title="Загальноцерковні витрати: оренда, комунальні, зарплати, заходи тощо">{{ __('app.church_expenses') }}</h2>
             @if(!$churchBudget && auth()->user()->canEdit('finances'))
                 <button x-on:click="createChurchBudget()" x-bind:disabled="creatingBudget"
+                        title="Створити річний бюджет церкви для планування витрат по місяцях"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg x-show="!creatingBudget" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -144,26 +147,26 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Назва статті витрат та прив'язана категорія транзакцій">
                             {{ __('app.budget_item_name') }}
                         </th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20" title="Щомісячна (повторюється) або одноразова витрата">
                             {{ __('app.budget_item_type') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Запланована сума витрат на обраний місяць">
                             {{ __('app.planned') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Фактичні витрати за місяць — рахуються автоматично з транзакцій по категорії. Натисніть для деталей">
                             {{ __('app.actual') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="План мінус Факт. Зелений (+) = є запас, Червоний (−) = перевитрата">
                             {{ __('app.difference') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Загальна запланована сума за весь рік (усі 12 місяців)">
                             {{ __('app.annual_total') }}
                         </th>
                         @if(auth()->user()->canEdit('finances'))
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24" title="Редагувати або видалити статтю бюджету">
                             Дії
                         </th>
                         @endif
@@ -180,11 +183,11 @@
                         </td>
                         <td class="px-6 py-4 text-center">
                             @if($cbi['is_recurring'])
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" title="Щомісячна витрата — однакова сума кожен місяць">
                                     🔄 {{ __('app.monthly') }}
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300" title="Одноразова витрата — тільки в конкретному місяці">
                                     ☀️ {{ __('app.one_time') }}
                                 </span>
                             @endif
@@ -195,11 +198,12 @@
                         <td class="px-6 py-4 text-right whitespace-nowrap">
                             @if($cbi['category_id'])
                                 <button x-on:click="showChurchTransactions({{ $cbi['id'] }}, {{ json_encode($cbi['name']) }})"
+                                        title="Натисніть щоб переглянути транзакції, з яких складається ця сума"
                                         class="text-red-600 dark:text-red-400 hover:underline">
                                     {{ $cbi['actual'] > 0 ? number_format($cbi['actual'], 0, ',', ' ') . ' ₴' : '—' }}
                                 </button>
                             @else
-                                <span class="text-gray-400">—</span>
+                                <span class="text-gray-400" title="Оберіть категорію для автоматичного підрахунку витрат">—</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap font-medium {{ $cbi['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
@@ -250,7 +254,7 @@
 
                     {{-- Church budget totals row --}}
                     @if(count($churchBudgetItems) > 0)
-                    <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold">
+                    <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold" title="Підсумок всіх загальноцерковних статей бюджету за обраний місяць">
                         <td class="px-6 py-3 text-gray-900 dark:text-white" colspan="2">Всього</td>
                         <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($churchBudgetTotals['planned'], 0, ',', ' ') }} ₴</td>
                         <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($churchBudgetTotals['actual'], 0, ',', ' ') }} ₴</td>
@@ -271,6 +275,7 @@
         @if(auth()->user()->canEdit('finances'))
         <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700">
             <button x-on:click="openChurchItemModal('create')"
+                    title="Додати нову статтю витрат: оренда, комунальні, зарплати, заходи тощо"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -289,32 +294,32 @@
     {{-- ═══ Ministry Budgets Section ═══ --}}
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.ministry_budgets_section') }}</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white" title="Бюджети окремих команд (служінь). Кожна команда має свій бюджет та витрати">{{ __('app.ministry_budgets_section') }}</h2>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Назва команди та її лідер. Натисніть на рядок щоб розгорнути деталі статей витрат">
                             Команда
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Скільки коштів виділено команді з церковного рахунку (allocation)">
                             Виділено
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Місячний бюджет команди — ліміт на витрати за обраний місяць">
                             Бюджет
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Фактичні витрати команди за обраний місяць (завершені транзакції)">
                             Витрачено
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" title="Бюджет мінус Витрачено. Зелений = є запас, Червоний = перевищено">
                             Залишок
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48" title="Візуальний індикатор використання бюджету команди">
                             Прогрес
                         </th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24" title="Виділити бюджет або редагувати налаштування команди">
                             Дії
                         </th>
                     </tr>
@@ -326,7 +331,7 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center">
                                 @if($item['has_items'])
-                                <svg class="w-4 h-4 mr-2 text-gray-400 transition-transform duration-200"
+                                <svg class="w-4 h-4 mr-2 text-gray-400 transition-transform duration-200" title="Натисніть щоб розгорнути/згорнути деталі статей витрат"
                                      :class="{ 'rotate-90': expandedMinistries.includes({{ $item['ministry']->id }}) }"
                                      fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
@@ -334,7 +339,7 @@
                                 @else
                                 <div class="w-4 mr-2"></div>
                                 @endif
-                                <div class="w-3 h-3 rounded-full mr-3" style="background-color: {{ $item['ministry']->color ?? '#6b7280' }}"></div>
+                                <div class="w-3 h-3 rounded-full mr-3" style="background-color: {{ $item['ministry']->color ?? '#6b7280' }}" title="Колір команди"></div>
                                 <div>
                                     <div class="font-medium text-gray-900 dark:text-white">{{ $item['ministry']->name }}</div>
                                     @if($item['ministry']->leader)
@@ -345,11 +350,11 @@
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap">
                             @if($item['allocated'] > 0)
-                            <span class="text-green-600 dark:text-green-400 font-medium">
+                            <span class="text-green-600 dark:text-green-400 font-medium" title="Кошти, виділені церквою цій команді (allocation транзакції)">
                                 {{ number_format($item['allocated'], 0, ',', ' ') }} ₴
                             </span>
                             @else
-                            <span class="text-gray-400 dark:text-gray-500">—</span>
+                            <span class="text-gray-400 dark:text-gray-500" title="Кошти ще не виділені — натисніть кнопку ₴ в колонці Дії">—</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap">
@@ -380,7 +385,7 @@
                                     <span class="text-xs {{ $item['percentage'] > 100 ? 'text-red-600' : 'text-gray-500' }} w-12 text-right">{{ number_format($item['percentage'], 0) }}%</span>
                                 </div>
                             @else
-                                <span class="text-xs text-gray-400 dark:text-gray-500">Не задано</span>
+                                <span class="text-xs text-gray-400 dark:text-gray-500" title="Бюджет команди не встановлений — натисніть кнопку редагування в колонці Дії">Не задано</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-center" @click.stop>
@@ -388,14 +393,14 @@
                             <div class="flex items-center justify-center gap-1">
                                 <button @click="openAllocateModal({{ $item['ministry']->id }}, {{ json_encode($item['ministry']->name) }})"
                                         class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                        title="Виділити бюджет">
+                                        title="Виділити кошти команді — створить транзакцію переведення з церковного рахунку на рахунок команди">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </button>
                                 <button @click="openBudgetModal({{ $item['ministry']->id }}, {{ json_encode($item['ministry']->name) }}, {{ $item['budget']?->monthly_budget ?? $item['ministry']->monthly_budget ?? 0 }}, {{ json_encode($item['budget']?->notes ?? '') }}, {{ $item['has_items'] ? 'true' : 'false' }})"
                                         class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                        title="Редагувати бюджет">
+                                        title="Редагувати місячний бюджет та нотатки команди">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
@@ -418,13 +423,13 @@
                                     <table class="w-full text-sm">
                                         <thead>
                                             <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase">
-                                                <th class="px-3 py-2 text-left">Стаття витрат</th>
-                                                <th class="px-3 py-2 text-right">План</th>
-                                                <th class="px-3 py-2 text-right">Факт</th>
-                                                <th class="px-3 py-2 text-right">Різниця</th>
-                                                <th class="px-3 py-2 text-left">Відповідальні</th>
-                                                <th class="px-3 py-2 text-center">Чеки</th>
-                                                <th class="px-3 py-2 text-center w-20">Дії</th>
+                                                <th class="px-3 py-2 text-left" title="Назва статті витрат та категорія транзакцій">Стаття витрат</th>
+                                                <th class="px-3 py-2 text-right" title="Запланована сума витрат на цю статтю">План</th>
+                                                <th class="px-3 py-2 text-right" title="Фактично витрачена сума (з транзакцій)">Факт</th>
+                                                <th class="px-3 py-2 text-right" title="План мінус Факт. (+) = економія, (−) = перевитрата">Різниця</th>
+                                                <th class="px-3 py-2 text-left" title="Люди, відповідальні за цю статтю витрат">Відповідальні</th>
+                                                <th class="px-3 py-2 text-center" title="Натисніть щоб переглянути транзакції та прикріплені чеки">Чеки</th>
+                                                <th class="px-3 py-2 text-center w-20" title="Редагувати або видалити статтю">Дії</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -456,6 +461,7 @@
                                                 </td>
                                                 <td class="px-3 py-2.5 text-center">
                                                     <button @click.stop="showTransactions({{ $bi['id'] }}, {{ json_encode($bi['name']) }})"
+                                                            title="Переглянути транзакції та чеки по цій статті витрат"
                                                             class="inline-flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 hover:underline">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -475,14 +481,14 @@
                                                             'person_ids' => $bi['responsible']->pluck('id')->toArray(),
                                                         ]) }}, {{ $item['budget']->id }})"
                                                                 class="p-1.5 text-gray-400 hover:text-primary-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                                title="Редагувати">
+                                                                title="Редагувати назву, суму, категорію та відповідальних">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                             </svg>
                                                         </button>
                                                         <button @click.stop="deleteItem({{ $bi['id'] }}, {{ json_encode($bi['name']) }})"
                                                                 class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                                title="Видалити">
+                                                                title="Видалити цю статтю витрат назавжди">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                             </svg>
@@ -495,7 +501,7 @@
 
                                             {{-- Unmatched spending row --}}
                                             @if($item['unmatched_spent'] > 0)
-                                            <tr class="bg-orange-50/50 dark:bg-orange-900/10">
+                                            <tr class="bg-orange-50/50 dark:bg-orange-900/10" title="Витрати команди, які не прив'язані до жодної статті бюджету (немає відповідної категорії)">
                                                 <td class="px-3 py-2.5 text-gray-500 dark:text-gray-400 italic">Інші витрати</td>
                                                 <td class="px-3 py-2.5 text-right text-gray-400">-</td>
                                                 <td class="px-3 py-2.5 text-right text-red-600 dark:text-red-400">{{ number_format($item['unmatched_spent'], 0, ',', ' ') }} ₴</td>
@@ -524,6 +530,7 @@
                                 @if(auth()->user()->canEdit('finances'))
                                 <div class="mt-3">
                                     <button @click.stop="openItemModal('create', null, {{ $item['budget']->id }})"
+                                            title="Додати нову статтю витрат для цієї команди"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -556,7 +563,7 @@
             <svg class="w-5 h-5 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
             </svg>
-            <h2 class="text-lg font-semibold text-orange-800 dark:text-orange-200">Витрати без чеків</h2>
+            <h2 class="text-lg font-semibold text-orange-800 dark:text-orange-200" title="Витрати, до яких не прикріплено фото чека або підтверджуючого документа. Додайте чеки для звітності">Витрати без чеків</h2>
         </div>
 
         <div class="divide-y divide-orange-200 dark:divide-orange-800">
@@ -573,6 +580,7 @@
                         {{ number_format($expense->amount, 0, ',', ' ') }} ₴
                     </span>
                     <button type="button" onclick="window.openExpenseEdit && window.openExpenseEdit({{ $expense->id }})"
+                       title="Відкрити транзакцію та прикріпити фото чека"
                        class="px-3 py-1 text-sm bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
                         Додати чек
                     </button>
@@ -606,7 +614,7 @@
 
                 <form @submit.prevent="saveBudget()" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Максимальна сума, яку команда може витратити за місяць. Якщо є статті — бюджет рахується як їх сума">
                             Місячний бюджет (₴)
                         </label>
                         <input type="number" name="monthly_budget" x-model="budgetAmount" min="0" step="100"
@@ -665,7 +673,7 @@
 
                 <form @submit.prevent="submitAllocation()" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Сума, яка буде переведена з церковного рахунку на рахунок команди">
                             Сума *
                         </label>
                         <div class="flex gap-2">
@@ -840,14 +848,14 @@
 
                 <form x-on:submit.prevent="saveChurchItem()" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.budget_item_name') }} *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Назва для ідентифікації статті: напр. Оренда, Комунальні, Літній табір">{{ __('app.budget_item_name') }} *</label>
                         <input type="text" x-model="churchItemForm.name" required maxlength="255"
                                placeholder="{{ __('app.budget_item_name') }}"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Прив'яжіть категорію транзакцій — факт буде рахуватись автоматично з транзакцій цієї категорії">Категорія</label>
                         <select x-model="churchItemForm.category_id"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                             <option value="">Без категорії</option>
@@ -859,14 +867,14 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.budget_item_type') }} *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Оберіть тип: щомісячна (однакова сума кожен місяць) або одноразова (тільки в одному місяці)">{{ __('app.budget_item_type') }} *</label>
                         <div class="flex gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer">
+                            <label class="flex items-center gap-2 cursor-pointer" title="Однакова сума кожен місяць протягом року (напр. оренда, зарплати)">
                                 <input type="radio" x-model="churchItemForm.is_recurring" value="1"
                                        class="text-primary-600 focus:ring-primary-500">
                                 <span class="text-sm text-gray-700 dark:text-gray-300">🔄 {{ __('app.monthly') }}</span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
+                            <label class="flex items-center gap-2 cursor-pointer" title="Витрата тільки в одному конкретному місяці (напр. літній табір, конференція)">
                                 <input type="radio" x-model="churchItemForm.is_recurring" value="0"
                                        class="text-primary-600 focus:ring-primary-500">
                                 <span class="text-sm text-gray-700 dark:text-gray-300">☀️ {{ __('app.one_time') }}</span>
@@ -876,7 +884,7 @@
 
                     {{-- Recurring: amount per month --}}
                     <div x-show="churchItemForm.is_recurring == '1'">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.amount_per_month') }} (₴) *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Ця сума буде запланована на кожен місяць року (×12)">{{ __('app.amount_per_month') }} (₴) *</label>
                         <input type="number" x-model="churchItemForm.amount" min="0" step="1"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
@@ -884,7 +892,7 @@
                     {{-- One-time: month + amount --}}
                     <div x-show="churchItemForm.is_recurring == '0'" class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.select_month') }} *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="В якому місяці заплановано цю витрату">{{ __('app.select_month') }} *</label>
                             <select x-model="churchItemForm.one_time_month"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                 @foreach([1 => 'Січень', 2 => 'Лютий', 3 => 'Березень', 4 => 'Квітень', 5 => 'Травень', 6 => 'Червень', 7 => 'Липень', 8 => 'Серпень', 9 => 'Вересень', 10 => 'Жовтень', 11 => 'Листопад', 12 => 'Грудень'] as $m => $name)
