@@ -47,93 +47,31 @@
         </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm"
-         x-data="{
-            activeTab: new URLSearchParams(window.location.search).has('tab')
-                ? '{{ $tab }}'
-                : (filterStorage.load('ministry_tab', { tab: '{{ $tab }}' }).tab || '{{ $tab }}'),
-            init() {
-                filterStorage.save('ministry_tab', { tab: this.activeTab });
-            },
-            setTab(tab) {
-                this.activeTab = tab;
-                filterStorage.save('ministry_tab', { tab });
-                const url = new URL(window.location);
-                url.searchParams.set('tab', tab);
-                if (tab !== 'resources') {
-                    url.searchParams.delete('folder');
-                }
-                history.pushState({}, '', url);
+    <!-- Sections -->
+    <div x-data="{
+            sections: (() => {
+                try {
+                    const stored = localStorage.getItem('ministry_{{ $ministry->id }}_sections');
+                    if (stored) return JSON.parse(stored);
+                } catch(e) {}
+                return { goals: true, schedule: true, members: true, expenses: true, board: true, resources: true, songs: true, settings: true };
+            })(),
+            toggle(name) {
+                this.sections[name] = !this.sections[name];
+                localStorage.setItem('ministry_{{ $ministry->id }}_sections', JSON.stringify(this.sections));
             }
-         }">
-        <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-            <nav class="flex -mb-px whitespace-nowrap">
-                <button @click="setTab('goals')" type="button"
-                   :class="activeTab === 'goals' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Планування
-                </button>
-                <button @click="setTab('schedule')" type="button"
-                   :class="activeTab === 'schedule' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
-                    Події
-                </button>
-                <button @click="setTab('members')" type="button"
-                   :class="activeTab === 'members' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
-                    Команда ({{ $ministry->members->count() }})
-                </button>
-                <button @click="setTab('expenses')" type="button"
-                   :class="activeTab === 'expenses' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
-                    Бюджет
-                </button>
-                <button @click="setTab('board')" type="button"
-                   :class="activeTab === 'board' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
-                    </svg>
-                    Завдання
-                </button>
-                <button @click="setTab('resources')" type="button"
-                   :class="activeTab === 'resources' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                    </svg>
-                    Ресурси
-                </button>
-                @if($ministry->is_worship_ministry)
-                <button @click="setTab('songs')" type="button"
-                   :class="activeTab === 'songs' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                    </svg>
-                    Бібліотека пісень
-                </button>
-                @endif
-                @can('manage-ministry', $ministry)
-                <button @click="setTab('settings')" type="button"
-                   :class="activeTab === 'settings' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                   class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    Налаштування
-                </button>
-                @endcan
-            </nav>
-        </div>
+         }" class="space-y-4">
 
-        <div class="p-6">
-            <div x-show="activeTab === 'schedule'"{{ $tab !== 'schedule' ? ' style="display:none"' : '' }}>
+        <!-- Schedule Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button @click="toggle('schedule')" type="button" class="w-full flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Події
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.schedule ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="sections.schedule" x-collapse class="px-4 sm:px-6 pb-6">
                     {{-- Schedule calendar view --}}
                     @php
                         $scheduleEventsGrouped = $scheduleEvents->groupBy(fn($e) => $e->date->format('Y-m-d'));
@@ -1326,8 +1264,18 @@
                         }
                     </script>
             </div>
+        </div>
 
-            <div x-show="activeTab === 'members'"{{ $tab !== 'members' ? ' style="display:none"' : '' }}
+        <!-- Members Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button @click="toggle('members')" type="button" class="w-full flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Команда ({{ $ministry->members->count() }})
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.members ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="sections.members" x-collapse class="px-4 sm:px-6 pb-6"
                  x-data="{ membersView: localStorage.getItem('ministry_members_view') || 'grid' }"
                  x-init="$watch('membersView', v => localStorage.setItem('ministry_members_view', v))">
                 @php
@@ -1742,8 +1690,18 @@
                 </div>
                 @endif
             </div>
+        </div>
 
-            <div x-show="activeTab === 'expenses'"{{ $tab !== 'expenses' ? ' style="display:none"' : '' }}
+        <!-- Budget Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button @click="toggle('expenses')" type="button" class="w-full flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Бюджет
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.expenses ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="sections.expenses" x-collapse class="px-4 sm:px-6 pb-6"
                  x-data="budgetPage()"
                  x-init="loadBudget()">
                 {{-- ===== BUDGET PLANNING SECTION (fully dynamic via Alpine.js) ===== --}}
@@ -2407,8 +2365,18 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div x-show="activeTab === 'resources'"{{ $tab !== 'resources' ? ' style="display:none"' : '' }}
+        <!-- Resources Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button @click="toggle('resources')" type="button" class="w-full flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                    Ресурси
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.resources ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="sections.resources" x-collapse class="px-4 sm:px-6 pb-6"
                  x-data="resourcesManager()">
 
                 <!-- Breadcrumbs -->
@@ -2791,9 +2759,18 @@
 
                 <!-- Rename & delete handled via AJAX in resourcesManager() -->
             </div>
+        </div>
 
-            <!-- Board Tab -->
-            <div x-show="activeTab === 'board'"{{ $tab !== 'board' ? ' style="display:none"' : '' }}>
+        <!-- Board Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button @click="toggle('board')" type="button" class="w-full flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+                    Завдання
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.board ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="sections.board" x-collapse class="px-4 sm:px-6 pb-6">
                 @include('boards._kanban', [
                     'board' => $ministryBoard,
                     'people' => $boardPeople,
@@ -2802,9 +2779,18 @@
                     'embedded' => true,
                 ])
             </div>
+        </div>
 
-            <!-- Goals Tab -->
-            <div x-show="activeTab === 'goals'"{{ $tab !== 'goals' ? ' style="display:none"' : '' }}
+        <!-- Goals Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button @click="toggle('goals')" type="button" class="w-full flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Планування
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.goals ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="sections.goals" x-collapse class="px-4 sm:px-6 pb-6"
                  x-data="goalsManager()">
 
                 <!-- Vision - Main section at top -->
@@ -3131,10 +3117,19 @@
                     Назад до списку
                 </a>
             </div>
+        </div>
 
-            <!-- Songs Library Tab (for worship ministries) -->
-            @if($ministry->is_worship_ministry)
-            <div x-show="activeTab === 'songs'"{{ $tab !== 'songs' ? ' style="display:none"' : '' }}
+        <!-- Songs Library Section (for worship ministries) -->
+        @if($ministry->is_worship_ministry)
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button @click="toggle('songs')" type="button" class="w-full flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                    Бібліотека пісень
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.songs ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="sections.songs" x-collapse class="px-4 sm:px-6 pb-6"
                  x-data="songsLibrary()">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-4">
@@ -3649,12 +3644,20 @@
                     </div>
                 </div>
             </div>
-            @endif
+        </div>
+        @endif
 
-
-            <!-- Settings Tab -->
-            @can('manage-ministry', $ministry)
-            <div x-show="activeTab === 'settings'"{{ $tab !== 'settings' ? ' style="display:none"' : '' }}
+        <!-- Settings Section -->
+        @can('manage-ministry', $ministry)
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button @click="toggle('settings')" type="button" class="w-full flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Налаштування
+                </span>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="sections.settings ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="sections.settings" x-collapse class="px-4 sm:px-6 pb-6"
                  x-data="settingsTab()"
                  x-init="init()">
                 <div class="max-w-2xl space-y-8">
@@ -4025,11 +4028,10 @@
                     </div>
             </div>
             </div>
-            @endcan
-
-            <!-- Delete ministry handled via ajaxDelete -->
         </div>
-    </div>
+        @endcan
+
+    </div>{{-- end sections x-data --}}
 
 </div>
 
