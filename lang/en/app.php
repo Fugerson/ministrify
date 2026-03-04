@@ -182,6 +182,7 @@ return [
     'leaders' => 'Leaders',
     'access_denied' => 'Access denied',
     'membership_funnel' => 'Membership funnel',
+    'membership_status' => 'Membership status',
     'total_lowercase' => 'total',
 
     // Church roles (person.church_role)

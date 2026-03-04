@@ -118,6 +118,27 @@
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 </div>
 
+                @php
+                    $statusLabels = [
+                        'guest' => __('app.guest'),
+                        'newcomer' => __('app.newcomer'),
+                        'member' => __('app.church_member'),
+                        'servant' => __('app.servant'),
+                        'leader' => __('app.leader'),
+                        'leadership' => __('app.leadership'),
+                    ];
+                @endphp
+                <div>
+                    <label for="membership_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.membership_status') }}</label>
+                    <select name="membership_status" id="membership_status"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <option value="">-- {{ __('app.not_specified') }} --</option>
+                        @foreach(\App\Models\Person::MEMBERSHIP_STATUSES as $status)
+                        <option value="{{ $status }}" {{ old('membership_status') == $status ? 'selected' : '' }}>{{ $statusLabels[$status] ?? $status }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <div>
                     <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Церковна роль</label>
                     <select name="church_role_id" id="church_role_id"

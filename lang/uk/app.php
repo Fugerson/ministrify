@@ -179,6 +179,7 @@ return [
     'leaders' => 'Лідери',
     'access_denied' => 'Доступ заборонено',
     'membership_funnel' => 'Воронка членства',
+    'membership_status' => 'Статус членства',
     'total_lowercase' => 'всього',
 
     // Church roles (person.church_role)
