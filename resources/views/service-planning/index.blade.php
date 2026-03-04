@@ -67,16 +67,12 @@
 
                     {{-- Date picker dropdown --}}
                     <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
-                         class="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 w-56">
+                         class="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 w-52">
 
-                        {{-- Start date --}}
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Від дати') }}</label>
                         <input type="date" :value="formatDate(startDate)"
                                @change="jumpToDate($event.target.value); pickerOpen = false"
-                               class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 mb-3">
+                               class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 mb-2">
 
-                        {{-- Period length --}}
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ __('Період') }}</label>
                         <div class="flex gap-1.5">
                             <button @click="weeks = '4'; loadData(); pickerOpen = false" type="button"
                                 :class="weeks == 4 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-primary-300 dark:border-primary-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'"
