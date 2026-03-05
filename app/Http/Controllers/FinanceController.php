@@ -33,7 +33,9 @@ class FinanceController extends Controller
         $church = $this->getCurrentChurch();
 
         $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
-        $month = $request->input('month') !== null ? max(0, min(12, (int) $request->get('month'))) : (int) now()->month;
+        $month = $request->has('year')
+            ? ($request->filled('month') ? max(1, min(12, (int) $request->get('month'))) : 0)
+            : (int) now()->month;
 
         // Calculate totals using Transaction model (exclude exchange/allocation to avoid double-counting)
         $excludeTypes = [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION];
