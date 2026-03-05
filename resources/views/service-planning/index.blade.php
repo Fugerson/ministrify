@@ -12,6 +12,20 @@
             <div class="flex items-center gap-2 min-w-0">
                 <h1 class="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ __('app.service_planning') }}</h1>
 
+                {{-- View mode toggle --}}
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                    <button @click="switchToWeek()" type="button"
+                        :class="viewMode === 'week' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
+                        {{ __('Тиждень') }}
+                    </button>
+                    <button @click="switchToMonth()" type="button"
+                        :class="viewMode === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
+                        {{ __('Місяць') }}
+                    </button>
+                </div>
+
                 {{-- Event type filter --}}
                 <div class="relative" x-data="{ filterOpen: false }">
                     <button @click="filterOpen = !filterOpen" type="button"
@@ -447,6 +461,7 @@
 function servicePlanningMatrix() {
     return {
         loading: false,
+        viewMode: localStorage.getItem('sp_viewMode') || 'month',
         _savedFilters: filterStorage.load('service_planning', { hiddenEventTitles: [] }),
         startDate: null,
         endDate: null,
@@ -484,13 +499,46 @@ function servicePlanningMatrix() {
 
         init() {
             this.hiddenEventTitles = new Set(this._savedFilters.hiddenEventTitles);
-            this.setMonth(new Date().getFullYear(), new Date().getMonth());
+            if (this.viewMode === 'week') {
+                this.setWeek(new Date());
+            } else {
+                this.setMonth(new Date().getFullYear(), new Date().getMonth());
+            }
             this.$watch('hiddenEventTitles', () => this._saveFilters());
         },
 
         setMonth(year, month) {
             this.startDate = new Date(year, month, 1);
             this.endDate = new Date(year, month + 1, 0); // last day of month
+        },
+
+        setWeek(date) {
+            const d = new Date(date);
+            const day = d.getDay(); // 0=Sun, 1=Mon...
+            const diffToMon = day === 0 ? -6 : 1 - day;
+            const monday = new Date(d);
+            monday.setDate(d.getDate() + diffToMon);
+            monday.setHours(0, 0, 0, 0);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            this.startDate = monday;
+            this.endDate = sunday;
+        },
+
+        switchToWeek() {
+            if (this.viewMode === 'week') return;
+            this.viewMode = 'week';
+            localStorage.setItem('sp_viewMode', 'week');
+            this.setWeek(new Date());
+            this.loadData();
+        },
+
+        switchToMonth() {
+            if (this.viewMode === 'month') return;
+            this.viewMode = 'month';
+            localStorage.setItem('sp_viewMode', 'month');
+            this.setMonth(new Date().getFullYear(), new Date().getMonth());
+            this.loadData();
         },
 
         _saveFilters() {
@@ -505,25 +553,54 @@ function servicePlanningMatrix() {
 
         updatePeriodLabel() {
             const months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
-            this.periodLabel = months[this.startDate.getMonth()] + ' ' + this.startDate.getFullYear();
+            if (this.viewMode === 'week') {
+                const sd = this.startDate;
+                const ed = this.endDate;
+                const fmt = (d) => d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0');
+                if (sd.getMonth() === ed.getMonth()) {
+                    this.periodLabel = sd.getDate() + ' – ' + fmt(ed) + '.' + ed.getFullYear();
+                } else {
+                    this.periodLabel = fmt(sd) + ' – ' + fmt(ed) + '.' + ed.getFullYear();
+                }
+            } else {
+                this.periodLabel = months[this.startDate.getMonth()] + ' ' + this.startDate.getFullYear();
+            }
         },
 
         prevPeriod() {
-            this.setMonth(this.startDate.getFullYear(), this.startDate.getMonth() - 1);
+            if (this.viewMode === 'week') {
+                const d = new Date(this.startDate);
+                d.setDate(d.getDate() - 7);
+                this.setWeek(d);
+            } else {
+                this.setMonth(this.startDate.getFullYear(), this.startDate.getMonth() - 1);
+            }
             this.loadData();
         },
 
         nextPeriod() {
-            this.setMonth(this.startDate.getFullYear(), this.startDate.getMonth() + 1);
+            if (this.viewMode === 'week') {
+                const d = new Date(this.startDate);
+                d.setDate(d.getDate() + 7);
+                this.setWeek(d);
+            } else {
+                this.setMonth(this.startDate.getFullYear(), this.startDate.getMonth() + 1);
+            }
             this.loadData();
         },
 
         goToday() {
-            this.setMonth(new Date().getFullYear(), new Date().getMonth());
+            if (this.viewMode === 'week') {
+                this.setWeek(new Date());
+            } else {
+                this.setMonth(new Date().getFullYear(), new Date().getMonth());
+            }
             this.loadData();
         },
 
         pickMonth(year, monthIndex) {
+            this.viewMode = 'month';
+            localStorage.setItem('sp_viewMode', 'month');
             this.setMonth(year, monthIndex);
             this.loadData();
         },
