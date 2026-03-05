@@ -43,7 +43,15 @@
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            {{ $daysRemaining }} {{ trans_choice('{1} день|[2,4] дні|[5,*] днів', $daysRemaining) }} залишилось
+                            @php
+                                $lastTwo = $daysRemaining % 100;
+                                $lastOne = $daysRemaining % 10;
+                                if ($lastTwo >= 11 && $lastTwo <= 19) $dayWord = 'днів';
+                                elseif ($lastOne === 1) $dayWord = 'день';
+                                elseif ($lastOne >= 2 && $lastOne <= 4) $dayWord = 'дні';
+                                else $dayWord = 'днів';
+                            @endphp
+                            {{ $daysRemaining }} {{ $dayWord }} залишилось
                         </span>
                     @elseif($daysRemaining == 0)
                         <span class="text-amber-500 font-medium">Останній день</span>

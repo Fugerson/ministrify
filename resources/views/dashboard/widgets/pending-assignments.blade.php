@@ -19,10 +19,18 @@
             </p>
             <div class="mt-2 space-y-2">
                 @foreach($pendingUsers as $pendingUser)
+                @if($pendingUser->person_id)
                 <a href="{{ route('people.show', $pendingUser->person_id) }}" class="block bg-white dark:bg-gray-800 rounded-xl p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                @else
+                <div class="block bg-white dark:bg-gray-800 rounded-xl p-3">
+                @endif
                     <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $pendingUser->name }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $pendingUser->email }} &bull; {{ \Carbon\Carbon::parse($pendingUser->joined_at)->diffForHumans() }}</p>
+                @if($pendingUser->person_id)
                 </a>
+                @else
+                </div>
+                @endif
                 @endforeach
             </div>
             @endif

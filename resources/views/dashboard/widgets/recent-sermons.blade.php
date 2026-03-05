@@ -27,7 +27,7 @@
                 <h4 class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ $sermon->title }}</h4>
                 <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
                     @if($sermon->speaker)
-                        <span>{{ $sermon->speaker->full_name }}</span>
+                        <span>{{ $sermon->speaker->name }}</span>
                         <span>&bull;</span>
                     @endif
                     <span>{{ $sermon->sermon_date->format('d.m.Y') }}</span>

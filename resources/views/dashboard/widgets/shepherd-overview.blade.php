@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    @if($shepherdData['total_shepherds'] > 0)
+    @if(!empty($shepherdData) && ($shepherdData['total_shepherds'] ?? 0) > 0)
         {{-- Stats summary --}}
         <div class="grid grid-cols-3 divide-x divide-gray-100 dark:divide-gray-700 border-b border-gray-100 dark:border-gray-700">
             <div class="px-4 py-3 text-center">

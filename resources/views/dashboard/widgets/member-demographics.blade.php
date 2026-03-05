@@ -8,15 +8,16 @@
         </div>
         <div>
             <h3 class="font-semibold text-gray-900 dark:text-white">Демографія</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $demographics['total'] }} учасників, {{ $demographics['with_birthdate'] }} з датою народження</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $demographics['total'] ?? 0 }} учасників, {{ $demographics['with_birthdate'] ?? 0 }} з датою народження</p>
         </div>
     </div>
 
+    @if(!empty($demographics))
     {{-- Gender Split --}}
     <div class="mb-5">
         <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Стать</p>
         @php
-            $genderTotal = $demographics['male'] + $demographics['female'] + $demographics['unknown_gender'];
+            $genderTotal = ($demographics['male'] ?? 0) + ($demographics['female'] ?? 0) + ($demographics['unknown_gender'] ?? 0);
             $malePercent = $genderTotal > 0 ? round($demographics['male'] / $genderTotal * 100) : 0;
             $femalePercent = $genderTotal > 0 ? round($demographics['female'] / $genderTotal * 100) : 0;
             $unknownPercent = $genderTotal > 0 ? (100 - $malePercent - $femalePercent) : 0;
@@ -35,16 +36,16 @@
         <div class="flex items-center gap-4 mt-2 text-xs">
             <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-blue-500 dark:bg-blue-400"></span>
-                <span class="text-gray-600 dark:text-gray-400">Чоловіки {{ $demographics['male'] }} ({{ $malePercent }}%)</span>
+                <span class="text-gray-600 dark:text-gray-400">Чоловіки {{ $demographics['male'] ?? 0 }} ({{ $malePercent }}%)</span>
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-pink-500 dark:bg-pink-400"></span>
-                <span class="text-gray-600 dark:text-gray-400">Жінки {{ $demographics['female'] }} ({{ $femalePercent }}%)</span>
+                <span class="text-gray-600 dark:text-gray-400">Жінки {{ $demographics['female'] ?? 0 }} ({{ $femalePercent }}%)</span>
             </div>
-            @if($demographics['unknown_gender'] > 0)
+            @if(($demographics['unknown_gender'] ?? 0) > 0)
             <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500"></span>
-                <span class="text-gray-600 dark:text-gray-400">Невідомо {{ $demographics['unknown_gender'] }}</span>
+                <span class="text-gray-600 dark:text-gray-400">Невідомо {{ $demographics['unknown_gender'] ?? 0 }}</span>
             </div>
             @endif
         </div>
@@ -82,4 +83,7 @@
             @endforeach
         </div>
     </div>
+    @else
+    <p class="text-sm text-gray-400 dark:text-gray-500 text-center py-4">Немає демографічних даних</p>
+    @endif
 </div>

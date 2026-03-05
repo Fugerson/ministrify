@@ -192,7 +192,7 @@ class DashboardController extends Controller
             $this->loadFinancialData($church, $data);
         }
 
-        if ($canViewFinances && in_array('expenses_breakdown', $enabledWidgets)) {
+        if ($canViewFinances && array_intersect($enabledWidgets, ['expenses_breakdown', 'financial_summary'])) {
             $this->loadExpensesBreakdown($church, $data);
         }
 
@@ -462,7 +462,7 @@ class DashboardController extends Controller
         return Event::where('church_id', $church->id)
             ->where('date', '>=', now()->startOfDay())
             ->where('date', '<=', now()->addDays(7))
-            ->with(['ministry', 'assignments.person', 'assignments.position'])
+            ->with(['ministry.positions', 'assignments.person', 'assignments.position'])
             ->orderBy('date')
             ->orderBy('time')
             ->limit(5)
@@ -471,7 +471,7 @@ class DashboardController extends Controller
 
     private function loadAttendanceData($church): array
     {
-        $fourWeeksAgo = now()->subWeeks(3)->startOfWeek(Carbon::SUNDAY);
+        $fourWeeksAgo = now()->subWeeks(3)->startOfWeek(Carbon::MONDAY);
         $attendanceRaw = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $fourWeeksAgo)
             ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(COALESCE(members_present, total_count)) as total')
@@ -482,7 +482,7 @@ class DashboardController extends Controller
 
         $attendanceData = [];
         for ($i = 3; $i >= 0; $i--) {
-            $date = now()->subWeeks($i)->startOfWeek(Carbon::SUNDAY);
+            $date = now()->subWeeks($i)->startOfWeek(Carbon::MONDAY);
             $weekKey = $date->format('o') . str_pad($date->format('W'), 2, '0', STR_PAD_LEFT);
             $attendanceData[] = [
                 'date' => $date->format('d.m'),
@@ -530,7 +530,6 @@ class DashboardController extends Controller
         return $church->ministries()
             ->whereNotNull('monthly_budget')
             ->where('monthly_budget', '>', 0)
-            ->with('expenses')
             ->get()
             ->map(fn($m) => [
                 'name' => $m->name,
@@ -923,7 +922,7 @@ class DashboardController extends Controller
               ->where('date', '>=', now())
               ->where('date', '<=', now()->addDays(7));
         })
-        ->where('status', 'confirmed')
+        ->whereIn('status', ['confirmed', 'pending'])
         ->with(['event.ministry', 'position', 'person'])
         ->get()
         ->sortBy('event.date');
@@ -968,9 +967,10 @@ class DashboardController extends Controller
         $servant = (int) ($stats->servant ?? 0);
         $leader = (int) ($stats->leader ?? 0);
         $leadership = (int) ($stats->leadership ?? 0);
+        $unset = (int) ($stats->unset ?? 0);
 
         return [
-            'total' => $guest + $newcomer + $member + $servant + $leader + $leadership,
+            'total' => $guest + $newcomer + $member + $servant + $leader + $leadership + $unset,
             'guest' => $guest,
             'newcomer' => $newcomer,
             'member' => $member,
@@ -1079,9 +1079,11 @@ class DashboardController extends Controller
             ? round(($totalThisMonth - $totalLastMonth) / $totalLastMonth * 100, 1)
             : 0;
 
-        $recurring = OnlineDonation::where('church_id', $church->id)
+        $recurringThisMonth = OnlineDonation::where('church_id', $church->id)
             ->where('status', 'success')
-            ->where('is_recurring', true);
+            ->where('is_recurring', true)
+            ->whereMonth('paid_at', now()->month)
+            ->whereYear('paid_at', now()->year);
 
         $recent = OnlineDonation::where('church_id', $church->id)
             ->where('status', 'success')
@@ -1089,13 +1091,16 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $recurringCount = (clone $recurringThisMonth)->distinct('person_id')->count('person_id')
+            ?: (clone $recurringThisMonth)->count();
+
         return [
             'total_this_month' => $totalThisMonth,
             'total_last_month' => $totalLastMonth,
             'count_this_month' => $countThisMonth,
             'avg_donation' => $countThisMonth > 0 ? round($totalThisMonth / $countThisMonth, 2) : 0,
-            'recurring_count' => (clone $recurring)->distinct('person_id')->count('person_id') ?: (clone $recurring)->count(),
-            'recurring_amount' => (clone $recurring)->whereMonth('paid_at', now()->month)->sum('amount'),
+            'recurring_count' => $recurringCount,
+            'recurring_amount' => (clone $recurringThisMonth)->sum('amount'),
             'change_percent' => $changePercent,
             'recent' => $recent,
         ];

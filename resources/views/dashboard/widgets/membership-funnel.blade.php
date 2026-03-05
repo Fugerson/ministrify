@@ -3,12 +3,12 @@
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.membership_funnel') }}</h2>
         <span class="text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/50 px-2 py-0.5 rounded-lg">
-            {{ $membershipStats['total'] }} {{ __('app.total_lowercase') }}
+            {{ $membershipStats['total'] ?? 0 }} {{ __('app.total_lowercase') }}
         </span>
     </div>
     <div class="p-4 lg:p-5">
         @php
-            $total = max($membershipStats['total'], 1);
+            $total = max($membershipStats['total'] ?? 0, 1);
             $levels = [
                 ['key' => 'guest', 'label' => __('app.guest'), 'color' => 'from-gray-300 to-gray-400', 'bg' => 'bg-gray-400', 'light' => 'bg-gray-100 dark:bg-gray-900/50', 'text' => 'text-gray-600 dark:text-gray-400'],
                 ['key' => 'newcomer', 'label' => __('app.newcomer'), 'color' => 'from-amber-400 to-amber-500', 'bg' => 'bg-amber-500', 'light' => 'bg-amber-100 dark:bg-amber-900/50', 'text' => 'text-amber-600 dark:text-amber-400'],

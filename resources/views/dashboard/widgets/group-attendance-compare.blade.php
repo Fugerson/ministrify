@@ -40,7 +40,7 @@
                         $barColorClass = 'bg-red-500 dark:bg-red-400';
                         $barBgClass = 'bg-red-100 dark:bg-red-900/30';
                     }
-                    $maxWeekly = max($group['last_4_weeks'] ?? [0]);
+                    $maxWeekly = max($group['last_4_weeks'] ?: [0]);
                 @endphp
                 <div>
                     {{-- Group name and rate --}}

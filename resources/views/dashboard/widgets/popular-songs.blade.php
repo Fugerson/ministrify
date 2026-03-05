@@ -39,9 +39,11 @@
                         <p class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                             {{ $song->title }}
                         </p>
+                        @if($song->artist)
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {{ $song->artist }}
                         </p>
+                        @endif
                     </div>
 
                     {{-- Key badge --}}

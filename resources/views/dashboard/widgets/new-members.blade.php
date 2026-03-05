@@ -33,7 +33,7 @@
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $member->full_name }}</p>
                         <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span>{{ $member->created_at->diffForHumans() }}</span>
+                            <span>{{ ($member->joined_date ?? $member->first_visit_date ?? $member->created_at)->diffForHumans() }}</span>
                             @if($member->phone)
                                 <span class="text-gray-300 dark:text-gray-600">&middot;</span>
                                 <span>{{ $member->phone }}</span>
