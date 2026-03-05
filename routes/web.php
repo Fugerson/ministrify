@@ -128,6 +128,7 @@ Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Locale switcher (must be in web middleware group for CSRF)
 Route::post('locale/{locale}', [LocaleSwitchController::class, 'switch'])->middleware('web')->name('locale.switch');
+Route::get('locale/{locale?}', fn () => redirect('/'))->middleware('web'); // Redirect bots that try GET
 
 // Logo preview (hidden page)
 Route::get('logo-preview', fn() => view('logo-preview'));
