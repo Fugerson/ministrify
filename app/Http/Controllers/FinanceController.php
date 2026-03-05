@@ -86,10 +86,9 @@ class FinanceController extends Controller
             ->value('total') ?? 0;
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
 
-        // Calculate balances per currency (all time) — exclude exchange/allocation to avoid double-counting
+        // Calculate balances per currency (all time) — include ALL transactions (exchanges are real currency movements)
         $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
             ->incoming()->completed()
-            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
             ->groupBy('currency')
             ->pluck('total', 'currency')
@@ -97,7 +96,6 @@ class FinanceController extends Controller
 
         $allTimeExpenseByCurrency = Transaction::where('church_id', $church->id)
             ->outgoing()->completed()
-            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
             ->groupBy('currency')
             ->pluck('total', 'currency')
