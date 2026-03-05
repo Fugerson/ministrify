@@ -3,7 +3,7 @@
 
 @php
     $currentRoute = Route::currentRouteName();
-    $showFilters = !in_array($currentRoute, ['finances.index', 'finances.cards']);
+    $showFilters = !in_array($currentRoute, ['finances.index', 'finances.cards', 'finances.budgets']);
 @endphp
 
 @if($showFilters)
