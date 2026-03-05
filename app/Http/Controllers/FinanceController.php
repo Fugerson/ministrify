@@ -1313,6 +1313,17 @@ class FinanceController extends Controller
             ? round(($grandTotals['actual'] / $grandTotals['planned']) * 100, 1)
             : 0;
 
+        // Separate percentages for tab indicators
+        $churchBudgetTotals['percentage'] = $churchBudgetTotals['planned'] > 0
+            ? round(($churchBudgetTotals['actual'] / $churchBudgetTotals['planned']) * 100, 1)
+            : 0;
+        $ministryPercentage = $totals['budget'] > 0
+            ? round(($totals['spent'] / $totals['budget']) * 100, 1)
+            : 0;
+
+        // Sort ministries: overspend first (negative remaining = overspend)
+        $ministries = $ministries->sortBy('remaining')->values();
+
         // ── Trend data: last 6 months plan vs fact ──
         $trendData = $this->getBudgetTrendData($church, $year, $month);
 
@@ -1337,7 +1348,8 @@ class FinanceController extends Controller
             'churchBudgetItems',
             'churchBudgetTotals',
             'grandTotals',
-            'trendData'
+            'trendData',
+            'ministryPercentage'
         ));
     }
 

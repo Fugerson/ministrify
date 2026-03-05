@@ -900,6 +900,24 @@ return [
     'monthly' => 'Щомісячно',
     'one_time' => 'Одноразово',
 
+    // Budget UX tabs & descriptions
+    'budget_tab_overview' => 'Огляд',
+    'budget_tab_church' => 'Загальний бюджет',
+    'budget_tab_teams' => 'Команди',
+    'budget_overview_hint' => 'Загальний бюджет — планування постійних витрат церкви (оренда, комунальні, зарплати). Бюджети команд — ліміти витрат для кожної команди.',
+    'budget_church_empty_title' => 'Бюджет ще не створено',
+    'budget_church_empty_desc' => 'Створіть річний бюджет для планування витрат по місяцях.',
+    'budget_church_empty_cta' => 'Створити бюджет на :year рік',
+    'budget_ministry_empty_hint' => 'Встановіть місячний ліміт для цієї команди',
+    'budget_allocate_tooltip' => 'Перерахування коштів з каси церкви на рахунок команди',
+    'budget_no_category_warning' => 'Прив\'яжіть категорію для автотрекінгу',
+    'budget_church_row' => 'Загальний бюджет',
+    'budget_ministry_row' => 'Бюджети команд',
+    'budget_setup_church' => 'Налаштувати загальний бюджет',
+    'budget_setup_teams' => 'Налаштувати бюджети команд',
+    'budget_recurring_group' => 'Щомісячні',
+    'budget_onetime_group' => 'Одноразові',
+
     // Person create modal
     'details' => 'Деталі',
     'joined_date' => 'Дата приходу в церкву',

@@ -903,6 +903,24 @@ return [
     'monthly' => 'Monthly',
     'one_time' => 'One-time',
 
+    // Budget UX tabs & descriptions
+    'budget_tab_overview' => 'Overview',
+    'budget_tab_church' => 'Church Budget',
+    'budget_tab_teams' => 'Teams',
+    'budget_overview_hint' => 'Church budget — planning fixed church expenses (rent, utilities, salaries). Team budgets — spending limits for each team.',
+    'budget_church_empty_title' => 'No budget created yet',
+    'budget_church_empty_desc' => 'Create an annual budget to plan monthly expenses.',
+    'budget_church_empty_cta' => 'Create budget for :year',
+    'budget_ministry_empty_hint' => 'Set a monthly limit for this team',
+    'budget_allocate_tooltip' => 'Transfer funds from church treasury to team account',
+    'budget_no_category_warning' => 'Link a category for auto-tracking',
+    'budget_church_row' => 'Church Budget',
+    'budget_ministry_row' => 'Team Budgets',
+    'budget_setup_church' => 'Set up church budget',
+    'budget_setup_teams' => 'Set up team budgets',
+    'budget_recurring_group' => 'Recurring',
+    'budget_onetime_group' => 'One-time',
+
     // Person create modal
     'details' => 'Details',
     'joined_date' => 'Joined church date',
