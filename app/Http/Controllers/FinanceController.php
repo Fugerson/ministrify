@@ -217,23 +217,6 @@ class FinanceController extends Controller
 
         $expenseByMinistry = $expenseByMinistryRaw->filter(fn($m) => $m->total_expense > 0);
 
-        // Recent transactions
-        $recentIncomes = Transaction::where('church_id', $church->id)
-            ->incoming()
-            ->completed()
-            ->with(['category', 'person'])
-            ->orderByDesc('date')
-            ->limit(5)
-            ->get();
-
-        $recentExpenses = Transaction::where('church_id', $church->id)
-            ->outgoing()
-            ->completed()
-            ->with(['category', 'ministry'])
-            ->orderByDesc('date')
-            ->limit(5)
-            ->get();
-
         // Year comparison
         $yearComparison = $this->getYearComparison($church->id, $year);
 
@@ -270,25 +253,6 @@ class FinanceController extends Controller
                 'total' => $pm->total,
             ]);
 
-        // === NEW: Activity Feed (last 10 transactions) ===
-        $activityFeed = Transaction::where('church_id', $church->id)
-            ->completed()
-            ->with(['category', 'person', 'ministry'])
-            ->orderByDesc('created_at')
-            ->limit(10)
-            ->get();
-
-        // Categories and ministries for modal forms
-        $incomeCategories = TransactionCategory::where('church_id', $church->id)
-            ->forIncome()
-            ->orderBy('sort_order')
-            ->get();
-        $expenseCategories = TransactionCategory::where('church_id', $church->id)
-            ->forExpense()
-            ->orderBy('sort_order')
-            ->get();
-        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
-
         return view('finances.index', compact(
             'church', 'year', 'month', 'periodLabel',
             'totalIncome', 'totalExpense', 'periodBalance',
@@ -298,78 +262,8 @@ class FinanceController extends Controller
             'exchangeRates', 'enabledCurrencies',
             'monthlyData',
             'incomeByCategory', 'expenseByCategory', 'expenseByMinistry',
-            'recentIncomes', 'recentExpenses',
             'yearComparison',
-            'quickStats', 'activeCampaigns', 'paymentMethods', 'activityFeed',
-            'incomeCategories', 'expenseCategories', 'ministries'
-        ));
-    }
-
-    /**
-     * Financial Journal - comprehensive ledger view
-     */
-    public function journal(Request $request)
-    {
-        if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
-        }
-
-        $church = $this->getCurrentChurch();
-
-        // Load ALL completed transactions for client-side period switching
-        $transactions = Transaction::where('church_id', $church->id)
-            ->completed()
-            ->with(['category', 'person', 'ministry', 'recorder', 'attachments'])
-            ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Balance before all transactions = church initial balance (multi-currency, converted to UAH)
-        $initialBalanceDate = $church->initial_balance_date;
-        $allInitialBalances = $church->getAllInitialBalances();
-        $balanceBeforeYear = 0;
-        foreach ($allInitialBalances as $currency => $amount) {
-            if ($currency === 'UAH') {
-                $balanceBeforeYear += $amount;
-            } else {
-                $balanceBeforeYear += ExchangeRate::toUah($amount, $currency, $initialBalanceDate);
-            }
-        }
-
-        // Get filter options
-        $categories = TransactionCategory::where('church_id', $church->id)->orderBy('name')->get();
-        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
-        $people = Person::where('church_id', $church->id)
-            ->whereHas('transactions')
-            ->orderBy('first_name')
-            ->get();
-
-        // Current balance (all time) - in UAH
-        $currentBalance = $balanceBeforeYear
-            + (Transaction::where('church_id', $church->id)->incoming()->completed()
-                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0)
-            - (Transaction::where('church_id', $church->id)->outgoing()->completed()
-                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
-
-        // Initial period from request or default to month
-        $initialPeriod = $request->get('period', 'month');
-
-        // For modal forms
-        $incomeCategories = TransactionCategory::where('church_id', $church->id)
-            ->forIncome()
-            ->orderBy('sort_order')
-            ->get();
-        $expenseCategories = TransactionCategory::where('church_id', $church->id)
-            ->forExpense()
-            ->orderBy('sort_order')
-            ->get();
-        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
-        $exchangeRates = ExchangeRate::getLatestRates();
-
-        return view('finances.journal', compact(
-            'transactions', 'initialPeriod', 'balanceBeforeYear', 'currentBalance',
-            'categories', 'ministries', 'people',
-            'incomeCategories', 'expenseCategories', 'enabledCurrencies', 'exchangeRates'
+            'quickStats', 'activeCampaigns', 'paymentMethods'
         ));
     }
 
@@ -446,6 +340,75 @@ class FinanceController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    /**
+     * Unified Transactions page (replaces journal + incomes + expenses)
+     */
+    public function transactions(Request $request)
+    {
+        if (!auth()->user()->canView('finances')) {
+            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
+        }
+
+        $church = $this->getCurrentChurch();
+
+        // Load ALL completed transactions for client-side period switching
+        $transactions = Transaction::where('church_id', $church->id)
+            ->completed()
+            ->with(['category', 'person', 'ministry', 'recorder', 'attachments'])
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Balance before all transactions = church initial balance (multi-currency, converted to UAH)
+        $initialBalanceDate = $church->initial_balance_date;
+        $allInitialBalances = $church->getAllInitialBalances();
+        $balanceBeforeYear = 0;
+        foreach ($allInitialBalances as $currency => $amount) {
+            if ($currency === 'UAH') {
+                $balanceBeforeYear += $amount;
+            } else {
+                $balanceBeforeYear += ExchangeRate::toUah($amount, $currency, $initialBalanceDate);
+            }
+        }
+
+        // Get filter options
+        $categories = TransactionCategory::where('church_id', $church->id)->orderBy('name')->get();
+        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
+        $people = Person::where('church_id', $church->id)
+            ->whereHas('transactions')
+            ->orderBy('first_name')
+            ->get();
+
+        // Current balance (all time) - in UAH
+        $currentBalance = $balanceBeforeYear
+            + (Transaction::where('church_id', $church->id)->incoming()->completed()
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0)
+            - (Transaction::where('church_id', $church->id)->outgoing()->completed()
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
+
+        // Initial period from request or default to month
+        $initialPeriod = $request->get('period', 'month');
+        $initialFilter = $request->get('filter', ''); // 'income', 'expense', or ''
+
+        // For modal forms
+        $incomeCategories = TransactionCategory::where('church_id', $church->id)
+            ->forIncome()
+            ->orderBy('sort_order')
+            ->get();
+        $expenseCategories = TransactionCategory::where('church_id', $church->id)
+            ->forExpense()
+            ->orderBy('sort_order')
+            ->get();
+        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
+        $exchangeRates = ExchangeRate::getLatestRates();
+
+        return view('finances.transactions', compact(
+            'transactions', 'initialPeriod', 'initialFilter', 'balanceBeforeYear', 'currentBalance',
+            'categories', 'ministries', 'people',
+            'incomeCategories', 'expenseCategories', 'enabledCurrencies', 'exchangeRates'
+        ));
+    }
+
     private function getJournalDates(string $period, ?string $startDate, ?string $endDate): array
     {
         $now = Carbon::now();
@@ -489,70 +452,6 @@ class FinanceController extends Controller
             ->value('total') ?? 0;
 
         return $initialBalance + $income - $expense;
-    }
-
-    // Income/Transactions list
-    public function incomes(Request $request)
-    {
-        if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
-        }
-
-        $church = $this->getCurrentChurch();
-
-        // Support both old year/month and new start_date/end_date params
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
-            $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
-        } else {
-            $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
-            $month = max(1, min(12, (int) $request->get('month', now()->month)));
-            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-        }
-
-        $incomes = Transaction::where('church_id', $church->id)
-            ->incoming()
-            ->completed()
-            ->whereBetween('date', [$startDate, $endDate])
-            ->with(['category', 'person', 'recorder'])
-            ->orderByDesc('date')
-            ->get();
-
-        $categories = TransactionCategory::where('church_id', $church->id)
-            ->forIncome()
-            ->orderBy('sort_order')
-            ->get();
-
-        $totals = [
-            'total' => $incomes->sum('amount_uah'),
-        ];
-
-        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
-        $exchangeRates = ExchangeRate::getLatestRates();
-
-        $incomesJson = $incomes->map(function ($income) {
-            return [
-                'id' => $income->id,
-                'date' => $income->date->format('d.m'),
-                'date_full' => $income->date->format('Y-m-d'),
-                'category_id' => $income->category_id,
-                'category_name' => $income->category?->name ?? 'Без категорії',
-                'category_icon' => $income->category?->icon_emoji ?? '💰',
-                'category_color' => $income->category?->color ?? '#3B82F6',
-                'payment_method' => $income->payment_method ?? '',
-                'payment_method_label' => $income->payment_method_label,
-                'person_name' => $income->is_anonymous ? 'Анонімно' : ($income->person ? $income->person->first_name . ' ' . $income->person->last_name : ''),
-                'is_anonymous' => $income->is_anonymous,
-                'notes' => $income->notes ?? '',
-                'amount' => $income->amount,
-                'amount_formatted' => CurrencyHelper::format($income->amount, $income->currency ?? 'UAH'),
-                'currency' => $income->currency ?? 'UAH',
-                'amount_uah' => $income->amount_uah,
-            ];
-        });
-
-        return view('finances.incomes.index', compact('incomes', 'incomesJson', 'categories', 'totals', 'enabledCurrencies', 'exchangeRates'));
     }
 
     public function createIncome(Request $request)
@@ -640,7 +539,7 @@ class FinanceController extends Controller
             'recorded_by' => auth()->id(),
         ]);
 
-        return $this->successResponse($request, 'Надходження додано.', 'finances.incomes', [], [
+        return $this->successResponse($request, 'Надходження додано.', 'finances.transactions', ['filter' => 'income'], [
             'transaction' => $transaction->load('category'),
         ]);
     }
@@ -735,7 +634,7 @@ class FinanceController extends Controller
 
         $transaction->update($validated);
 
-        return $this->successResponse($request, 'Надходження оновлено.', 'finances.incomes', [], [
+        return $this->successResponse($request, 'Надходження оновлено.', 'finances.transactions', ['filter' => 'income'], [
             'transaction' => $transaction->fresh()->load('category'),
         ]);
     }
@@ -750,76 +649,7 @@ class FinanceController extends Controller
 
         $transaction->delete();
 
-        return $this->successResponse($request, 'Надходження видалено.', 'finances.incomes');
-    }
-
-    // Expenses
-    public function expenses(Request $request)
-    {
-        if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
-        }
-
-        $church = $this->getCurrentChurch();
-
-        // Support both old year/month and new start_date/end_date params
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
-            $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
-        } else {
-            $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
-            $month = max(1, min(12, (int) $request->get('month', now()->month)));
-            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-        }
-
-        $expenses = Transaction::where('church_id', $church->id)
-            ->outgoing()
-            ->completed()
-            ->whereBetween('date', [$startDate, $endDate])
-            ->with(['category', 'ministry', 'recorder'])
-            ->orderByDesc('date')
-            ->get();
-
-        $categories = TransactionCategory::where('church_id', $church->id)
-            ->forExpense()
-            ->orderBy('sort_order')
-            ->get();
-
-        $ministries = Ministry::where('church_id', $church->id)->orderBy('name')->get();
-
-        $budget = $ministries->whereNotNull('monthly_budget')->sum('monthly_budget');
-
-        $totals = [
-            'budget' => $budget,
-            'spent' => $expenses->sum('amount_uah'),
-        ];
-
-        $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
-        $exchangeRates = ExchangeRate::getLatestRates();
-
-        $expensesJson = $expenses->map(function ($expense) {
-            return [
-                'id' => $expense->id,
-                'date' => $expense->date->format('d.m'),
-                'date_full' => $expense->date->format('Y-m-d'),
-                'description' => $expense->description ?? '',
-                'notes' => $expense->notes ?? '',
-                'ministry_id' => $expense->ministry_id,
-                'ministry_name' => $expense->ministry?->name ?? '-',
-                'category_id' => $expense->category_id,
-                'category_name' => $expense->category?->name ?? '-',
-                'payment_method' => $expense->payment_method ?? '',
-                'payment_method_label' => $expense->payment_method_label,
-                'expense_type' => $expense->expense_type ?? '',
-                'amount' => $expense->amount,
-                'amount_formatted' => CurrencyHelper::format($expense->amount, $expense->currency ?? 'UAH'),
-                'currency' => $expense->currency ?? 'UAH',
-                'amount_uah' => $expense->amount_uah,
-            ];
-        });
-
-        return view('finances.expenses.index', compact('expenses', 'expensesJson', 'categories', 'totals', 'ministries', 'enabledCurrencies', 'exchangeRates'));
+        return $this->successResponse($request, 'Надходження видалено.', 'finances.transactions', ['filter' => 'income']);
     }
 
     public function createExpense(Request $request)
@@ -951,8 +781,8 @@ class FinanceController extends Controller
 
         // Determine redirect target
         $redirectToMinistry = !empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry';
-        $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.expenses.index';
-        $routeParams = $redirectToMinistry ? ['ministry' => $validated['ministry_id'], 'tab' => 'expenses'] : [];
+        $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.transactions';
+        $routeParams = $redirectToMinistry ? ['ministry' => $validated['ministry_id'], 'tab' => 'expenses'] : ['filter' => 'expense'];
 
         return $this->successResponse($request, $message, $routeName, $routeParams, [
             'transaction' => $transaction->load(['category', 'ministry']),
@@ -1111,8 +941,8 @@ class FinanceController extends Controller
 
         // Determine redirect target
         $redirectToMinistry = $request->input('redirect_to') === 'ministry' && $request->input('redirect_ministry_id');
-        $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.expenses.index';
-        $routeParams = $redirectToMinistry ? ['ministry' => $request->input('redirect_ministry_id'), 'tab' => 'expenses'] : [];
+        $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.transactions';
+        $routeParams = $redirectToMinistry ? ['ministry' => $request->input('redirect_ministry_id'), 'tab' => 'expenses'] : ['filter' => 'expense'];
 
         return $this->successResponse($request, $message, $routeName, $routeParams, [
             'transaction' => $transaction->fresh()->load(['category', 'ministry', 'attachments']),

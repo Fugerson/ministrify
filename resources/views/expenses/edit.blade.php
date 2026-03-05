@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto">
-    <a href="{{ route('finances.expenses.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm mb-6">
+    <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm mb-6">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -21,7 +21,7 @@
                 :button-text="__('Видалити')"
                 :icon="false"
                 :ajax="true"
-                :redirect="route('finances.expenses.index')"
+                :redirect="route('finances.transactions', ['filter' => 'expense'])"
                 class="text-sm"
             />
         </div>
@@ -133,7 +133,7 @@
             </div>
 
             <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <a href="{{ route('finances.expenses.index') }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                     {{ __('Скасувати') }}
                 </a>
                 <button type="submit" :disabled="saving" class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">

@@ -2,7 +2,7 @@
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5">
     <div class="flex items-center justify-between mb-4">
         <h2 class="font-semibold text-gray-900 dark:text-white">Витрати за місяць</h2>
-        <a href="{{ route('finances.expenses.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
+        <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
     </div>
 
     @if(isset($stats['expenses_this_month']))

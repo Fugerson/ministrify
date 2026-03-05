@@ -116,7 +116,7 @@ class ExpenseController extends Controller
             'status' => Transaction::STATUS_COMPLETED,
         ]);
 
-        return $this->successResponse($request, 'Витрату додано.', 'finances.expenses.index');
+        return $this->successResponse($request, 'Витрату додано.', 'finances.transactions', ['filter' => 'expense']);
     }
 
     public function edit(Transaction $expense)
@@ -172,7 +172,7 @@ class ExpenseController extends Controller
             'payment_data' => !empty($paymentData) ? $paymentData : null,
         ]);
 
-        return $this->successResponse($request, 'Витрату оновлено.', 'finances.expenses.index');
+        return $this->successResponse($request, 'Витрату оновлено.', 'finances.transactions', ['filter' => 'expense']);
     }
 
     public function destroy(Request $request, Transaction $expense)

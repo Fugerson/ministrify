@@ -1,15 +1,13 @@
 @php
     $currentRoute = Route::currentRouteName();
     $tabs = [
-        ['id' => 'analytics', 'route' => 'finances.index', 'label' => 'Аналітика'],
-        ['id' => 'journal', 'route' => 'finances.journal', 'label' => 'Журнал'],
-        ['id' => 'incomes', 'route' => 'finances.incomes', 'label' => 'Надходження'],
-        ['id' => 'expenses', 'route' => 'finances.expenses.index', 'label' => 'Витрати'],
-        ['id' => 'budgets', 'route' => 'finances.budgets', 'label' => 'Бюджети'],
-        ['id' => 'cards', 'route' => 'finances.cards', 'label' => 'Моя карта'],
+        ['id' => 'overview', 'route' => 'finances.index', 'label' => __('app.overview')],
+        ['id' => 'transactions', 'route' => 'finances.transactions', 'label' => __('app.transactions')],
+        ['id' => 'budgets', 'route' => 'finances.budgets', 'label' => __('app.budgets')],
+        ['id' => 'banks', 'route' => 'finances.cards', 'label' => __('app.banks')],
     ];
-    $activeTab = collect($tabs)->first(fn($t) => $t['route'] === $currentRoute)['id'] ?? 'analytics';
-    $showFilters = !in_array($activeTab, ['cards']);
+    $activeTab = collect($tabs)->first(fn($t) => $t['route'] === $currentRoute)['id'] ?? 'overview';
+    $showFilters = !in_array($activeTab, ['banks']);
 @endphp
 
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm mb-4">
@@ -39,5 +37,5 @@
     </nav>
 </div>
 
-{{-- Universal filters (shown on all tabs except "Моя карта") --}}
+{{-- Universal filters (shown on all tabs except "Банки") --}}
 @include('finances.partials.filters')

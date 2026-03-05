@@ -2,34 +2,6 @@
 
 @section('title', __('app.finances'))
 
-@section('actions')
-@if(auth()->user()->canCreate('finances'))
-<div id="finance-actions" class="flex flex-wrap gap-2">
-    <button type="button" onclick="window.openIncomeModal && window.openIncomeModal()"
-       class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        {{ __('app.income_action') }}
-    </button>
-    <button type="button" onclick="window.openExpenseModal && window.openExpenseModal()"
-       class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-        </svg>
-        {{ __('app.expense_action') }}
-    </button>
-    <button type="button" onclick="window.openExchangeModal && window.openExchangeModal()"
-       class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-        </svg>
-        {{ __('app.exchange') }}
-    </button>
-</div>
-@endif
-@endsection
-
 @section('content')
 @include('finances.partials.tabs')
 
@@ -62,6 +34,16 @@
                     <option value="12" {{ $month == 12 ? 'selected' : '' }}>{{ __('app.december') }}</option>
                 </select>
             </div>
+            <!-- Link to transactions -->
+            @if(auth()->user()->canCreate('finances'))
+            <a href="{{ route('finances.transactions') }}"
+               class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                {{ __('app.add_transaction') }}
+            </a>
+            @endif
         </div>
     </div>
 
@@ -251,7 +233,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.income_by_category') }}</h3>
-                <a href="{{ route('finances.incomes') }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
+                <a href="{{ route('finances.transactions', ['filter' => 'income']) }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
             </div>
             <div class="p-6">
                 @if($incomeByCategory->count() > 0)
@@ -285,7 +267,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.expense_by_ministry') }}</h3>
-                <a href="{{ route('finances.expenses.index') }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
+                <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
             </div>
             <div class="p-6">
                 @if($expenseByMinistry->count() > 0)
@@ -316,124 +298,8 @@
         </div>
     </div>
 
-    <!-- Recent transactions -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <!-- Recent incomes -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.recent_incomes') }}</h3>
-            </div>
-            <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                @forelse($recentIncomes as $income)
-                    <div class="px-6 py-4 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400">
-                                {{ $income->category?->icon ?? '💰' }}
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $income->category?->name ?? __('app.no_category') }}
-                                </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $income->date->format('d.m.Y') }} • {{ $income->payment_method_label ?? 'Готівка' }}
-                                </p>
-                            </div>
-                        </div>
-                        <span class="text-sm font-semibold text-green-600 dark:text-green-400">
-                            +{{ \App\Helpers\CurrencyHelper::format($income->amount, $income->currency ?? 'UAH') }}
-                        </span>
-                    </div>
-                @empty
-                    <p class="px-6 py-8 text-gray-500 dark:text-gray-400 text-center">{{ __('app.no_incomes') }}</p>
-                @endforelse
-            </div>
-        </div>
-
-        <!-- Recent expenses -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.recent_expenses') }}</h3>
-            </div>
-            <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                @forelse($recentExpenses as $expense)
-                    <div class="px-6 py-4 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: {{ $expense->ministry?->color ?? '#ef4444' }}30;">
-                                <svg class="w-5 h-5" style="color: {{ $expense->ministry?->color ?? '#ef4444' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ Str::limit($expense->description, 30) }}
-                                </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $expense->date->format('d.m.Y') }}@if($expense->ministry) &bull; {{ $expense->ministry->name }}@endif
-                                </p>
-                            </div>
-                        </div>
-                        <span class="text-sm font-semibold text-red-600 dark:text-red-400">
-                            -{{ \App\Helpers\CurrencyHelper::format($expense->amount, $expense->currency ?? 'UAH') }}
-                        </span>
-                    </div>
-                @empty
-                    <p class="px-6 py-8 text-gray-500 dark:text-gray-400 text-center">{{ __('app.no_expenses') }}</p>
-                @endforelse
-            </div>
-        </div>
-    </div>
-
-    <!-- Activity Feed & Payment Methods -->
+    <!-- Payment Methods & Campaigns -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Activity Feed -->
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.activity_feed') }}</h3>
-            </div>
-            <div class="p-4 max-h-80 overflow-y-auto">
-                <div class="space-y-3">
-                    @forelse($activityFeed as $activity)
-                    <div class="flex items-start space-x-3">
-                        <div class="flex-shrink-0 mt-1">
-                            @if($activity->direction === 'in')
-                            <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
-                                </svg>
-                            </div>
-                            @else
-                            <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                                <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
-                                </svg>
-                            </div>
-                            @endif
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900 dark:text-white">
-                                @if($activity->direction === 'in')
-                                    <span class="font-medium text-green-600 dark:text-green-400">+{{ number_format($activity->amount, 0, ',', ' ') }} ₴</span>
-                                    <span class="text-gray-500 dark:text-gray-400">{{ $activity->category?->name ?? __('app.income_action') }}</span>
-                                @else
-                                    <span class="font-medium text-red-600 dark:text-red-400">-{{ number_format($activity->amount, 0, ',', ' ') }} ₴</span>
-                                    <span class="text-gray-500 dark:text-gray-400">{{ Str::limit($activity->description, 25) }}</span>
-                                @endif
-                            </p>
-                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                                {{ $activity->created_at->diffForHumans() }}
-                                @if($activity->direction === 'in' && $activity->person)
-                                    • {{ $activity->person->first_name }}
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                    @empty
-                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.no_activity') }}</p>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-
         <!-- Payment Methods -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -467,43 +333,45 @@
                 @endif
             </div>
         </div>
-    </div>
 
-    <!-- Active Campaigns -->
-    @if($activeCampaigns->count() > 0)
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.active_campaigns') }}</h3>
-            <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
-        </div>
-        <div class="space-y-4">
-            @foreach($activeCampaigns as $campaign)
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $campaign->name }}</span>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ number_format($campaign->raised_amount, 0, ',', ' ') }} / {{ number_format($campaign->goal_amount, 0, ',', ' ') }} ₴
-                        </span>
-                        <span class="text-sm font-semibold {{ $campaign->progress_percent >= 100 ? 'text-green-600' : 'text-primary-600' }}">
-                            {{ $campaign->progress_percent }}%
-                        </span>
+        <!-- Active Campaigns -->
+        <div class="lg:col-span-2">
+            @if($activeCampaigns->count() > 0)
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.active_campaigns') }}</h3>
+                    <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
+                </div>
+                <div class="space-y-4">
+                    @foreach($activeCampaigns as $campaign)
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $campaign->name }}</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ number_format($campaign->raised_amount, 0, ',', ' ') }} / {{ number_format($campaign->goal_amount, 0, ',', ' ') }} ₴
+                                </span>
+                                <span class="text-sm font-semibold {{ $campaign->progress_percent >= 100 ? 'text-green-600' : 'text-primary-600' }}">
+                                    {{ $campaign->progress_percent }}%
+                                </span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                            <div class="h-3 rounded-full transition-all duration-500 {{ $campaign->progress_percent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-primary-500 to-primary-400' }}"
+                                 style="width: {{ min($campaign->progress_percent, 100) }}%"></div>
+                        </div>
+                        @if($campaign->days_remaining !== null)
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                            {{ $campaign->days_remaining > 0 ? __('app.days_remaining', ['days' => $campaign->days_remaining]) : __('app.campaign_completed') }}
+                        </p>
+                        @endif
                     </div>
+                    @endforeach
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-                    <div class="h-3 rounded-full transition-all duration-500 {{ $campaign->progress_percent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-primary-500 to-primary-400' }}"
-                         style="width: {{ min($campaign->progress_percent, 100) }}%"></div>
-                </div>
-                @if($campaign->days_remaining !== null)
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {{ $campaign->days_remaining > 0 ? __('app.days_remaining', ['days' => $campaign->days_remaining]) : __('app.campaign_completed') }}
-                </p>
-                @endif
             </div>
-            @endforeach
+            @endif
         </div>
     </div>
-    @endif
 
 </div>
 
@@ -548,138 +416,81 @@ function financesDashboard() {
                 .then(r => r.json())
                 .then(data => {
                     this.updateChartTitle(period, year, month);
-                    this.initChart(data);
+                    if (this.chartInstance) {
+                        this.chartInstance.data.labels = data.labels;
+                        this.chartInstance.data.datasets[0].data = data.income;
+                        this.chartInstance.data.datasets[1].data = data.expense;
+                        this.chartInstance.update();
+                    }
                     this.chartLoading = false;
                 })
                 .catch(() => { this.chartLoading = false; });
         },
 
         updateChartTitle(period, year, month) {
-            const m = parseInt(month);
-            const q = Math.ceil(m / 3);
-            const chartDynTpl = '{{ __('app.chart_dynamics', ['year' => '__YEAR__']) }}';
-            const titles = {
-                month: (monthNames[m] || '') + ' ' + year,
-                quarter: q + '{{ __('app.quarter_label') }} ' + year,
-                year: chartDynTpl.replace('__YEAR__', year),
-                all: '{{ __('app.chart_dynamics_all') }}',
-            };
-            this.chartTitle = titles[period] || titles.year;
+            switch(period) {
+                case 'month': this.chartTitle = monthNames[month] + ' ' + year; break;
+                case 'quarter': this.chartTitle = '{{ __('app.chart_dynamics', ['year' => '']) }}' + year; break;
+                case 'year': this.chartTitle = '{{ __('app.chart_dynamics', ['year' => '']) }}' + year; break;
+                case 'all': this.chartTitle = '{{ __('app.period_all_time') }}'; break;
+            }
         },
 
-        initChart(chartData) {
+        initChart(data) {
             const ctx = document.getElementById('financeChart');
             if (!ctx) return;
 
-            if (this.chartInstance) {
-                this.chartInstance.destroy();
-            }
-
-            let cumulativeBalance = 0;
-            const balanceData = chartData.map(d => {
-                cumulativeBalance += d.balance;
-                return cumulativeBalance;
-            });
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
 
             this.chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: chartData.map(d => d.month),
+                    labels: data.labels,
                     datasets: [
                         {
                             label: '{{ __('app.income_action') }}',
-                            data: chartData.map(d => d.income),
-                            backgroundColor: 'rgba(34, 197, 94, 0.8)',
-                            borderRadius: 4,
-                            yAxisID: 'y',
-                            order: 2,
+                            data: data.income,
+                            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                            borderColor: 'rgb(34, 197, 94)',
+                            borderWidth: 1,
+                            borderRadius: 4
                         },
                         {
                             label: '{{ __('app.expenses') }}',
-                            data: chartData.map(d => d.expense),
-                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                            borderRadius: 4,
-                            yAxisID: 'y',
-                            order: 2,
-                        },
-                        {
-                            label: '{{ __('app.balance_cumulative') }}',
-                            data: balanceData,
-                            type: 'line',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: chartData.length > 20 ? 2 : 5,
-                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: chartData.length > 20 ? 1 : 2,
-                            pointHoverRadius: 7,
-                            yAxisID: 'y1',
-                            order: 1,
+                            data: data.expense,
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1,
+                            borderRadius: 4
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: {
-                            position: 'top',
+                            position: 'bottom',
+                            labels: { color: isDark ? '#9ca3af' : '#6b7280', usePointStyle: true, padding: 20 }
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    const value = context.parsed.y;
-                                    const sign = context.datasetIndex === 2 && value >= 0 ? '+' : '';
-                                    label += sign + value.toLocaleString('uk-UA') + ' ₴';
-                                    return label;
+                                label: function(ctx) {
+                                    return ctx.dataset.label + ': ' + new Intl.NumberFormat('uk-UA').format(ctx.raw) + ' ₴';
                                 }
                             }
                         }
                     },
                     scales: {
+                        x: { grid: { display: false }, ticks: { color: isDark ? '#9ca3af' : '#6b7280' } },
                         y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: '{{ __('app.incomes_expenses_axis') }}',
-                                color: '#6b7280',
-                            },
+                            grid: { color: gridColor },
                             ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString('uk-UA') + ' ₴';
-                                }
-                            },
-                            grid: { drawOnChartArea: true }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: '{{ __('app.cumulative_balance_axis') }}',
-                                color: '#3b82f6',
-                            },
-                            ticks: {
-                                color: '#3b82f6',
-                                callback: function(value) {
-                                    const sign = value >= 0 ? '+' : '';
-                                    return sign + value.toLocaleString('uk-UA') + ' ₴';
-                                }
-                            },
-                            grid: { drawOnChartArea: false }
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                callback: v => new Intl.NumberFormat('uk-UA', { notation: 'compact' }).format(v) + ' ₴'
+                            }
                         }
                     }
                 }
@@ -690,790 +501,28 @@ function financesDashboard() {
             const ctx = document.getElementById('paymentMethodsChart');
             if (!ctx) return;
 
-            const paymentMethods = @json($paymentMethods);
-            if (!paymentMethods || paymentMethods.length === 0) return;
-
+            const data = @json($paymentMethods);
             const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: paymentMethods.map(pm => pm.label),
+                    labels: data.map(d => d.label),
                     datasets: [{
-                        data: paymentMethods.map(pm => pm.total),
-                        backgroundColor: paymentMethods.map((_, i) => colors[i % colors.length]),
-                        borderWidth: 0,
-                        hoverOffset: 4
+                        data: data.map(d => d.total),
+                        backgroundColor: colors.slice(0, data.length)
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '60%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.parsed;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percent = Math.round((value / total) * 100);
-                                    return context.label + ': ' + value.toLocaleString('uk-UA') + ' ₴ (' + percent + '%)';
-                                }
-                            }
-                        }
-                    }
+                    plugins: { legend: { display: false } },
+                    cutout: '65%'
                 }
             });
         }
-    }
+    };
 }
 </script>
-</div><!-- /finance-content -->
-
-<!-- Income Modal -->
-<div x-data="incomeModal()" x-cloak>
-    <div x-show="modalOpen"
-         class="fixed inset-0 z-50 overflow-y-auto"
-         x-transition:enter="ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0">
-        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="modalOpen = false"></div>
-        <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 sm:p-0">
-            <div class="relative w-full max-w-lg mx-auto mt-8 sm:mt-16 bg-white dark:bg-gray-800 rounded-2xl shadow-xl z-10"
-                 x-transition:enter="ease-out duration-200"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 @click.stop>
-                <!-- Header -->
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.add_income_title') }}</h3>
-                    <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Body -->
-                <form @submit.prevent="submit()" class="max-h-[70vh] overflow-y-auto p-6 space-y-4">
-                    <!-- Amount + Currency -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума <span class="text-red-500">*</span></label>
-                        <div class="flex gap-2">
-                            <input type="number" x-model="formData.amount" step="0.01" min="0.01" required placeholder="0.00"
-                                   class="flex-1 px-4 py-2 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                                   :class="errors.amount ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
-                            @if(count($enabledCurrencies) > 1)
-                            <select x-model="formData.currency"
-                                    class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                @foreach($enabledCurrencies as $curr)
-                                    <option value="{{ $curr }}">{{ \App\Helpers\CurrencyHelper::symbol($curr) }} {{ $curr }}</option>
-                                @endforeach
-                            </select>
-                            @else
-                            <span class="inline-flex items-center px-3 py-2 text-gray-500 dark:text-gray-400">₴</span>
-                            @endif
-                        </div>
-                        @if(count($enabledCurrencies) > 1)
-                        <template x-if="formData.currency !== 'UAH' && exchangeRates[formData.currency]">
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Курс НБУ: 1 <span x-text="formData.currency"></span> = <span x-text="exchangeRates[formData.currency]?.toFixed(2)"></span> ₴
-                                @if(\App\Models\ExchangeRate::getLatestRateDate())
-                                    <span class="text-gray-400">({{ __('станом на') }} {{ \App\Models\ExchangeRate::getLatestRateDate() }})</span>
-                                @endif
-                            </p>
-                        </template>
-                        @endif
-                        <p class="text-red-500 text-sm mt-1" x-show="errors.amount" x-text="errors.amount?.[0]"></p>
-                    </div>
-
-                    <!-- Date -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата <span class="text-red-500">*</span></label>
-                        <input type="date" x-model="formData.date" required
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                        <p class="text-red-500 text-sm mt-1" x-show="errors.date" x-text="errors.date?.[0]"></p>
-                    </div>
-
-                    <!-- Category -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія <span class="text-red-500">*</span></label>
-                        <select x-model="formData.category_id" :required="formData.category_id !== '__custom__'"
-                                x-show="formData.category_id !== '__custom__'"
-                                class="w-full px-4 py-2 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                                :class="errors.category_id ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
-                            <option value="">Оберіть категорію</option>
-                            @foreach($incomeCategories ?? [] as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->icon ?? '💰' }} {{ $cat->name }}</option>
-                            @endforeach
-                            <option value="__custom__">Інше (ввести вручну)...</option>
-                        </select>
-                        <div x-show="formData.category_id === '__custom__'" class="flex gap-2">
-                            <input type="text" x-model="formData.category_name" placeholder="Назва категорії..." :required="formData.category_id === '__custom__'"
-                                   class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <button type="button" @click="formData.category_id = ''; formData.category_name = ''"
-                                    class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-xl transition-colors">&#x2715;</button>
-                        </div>
-                        <p class="text-red-500 text-sm mt-1" x-show="errors.category_id" x-text="errors.category_id?.[0]"></p>
-                    </div>
-
-                    <!-- Payment Method -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати <span class="text-red-500">*</span></label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                   :class="formData.payment_method === 'cash' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600'">
-                                <input type="radio" x-model="formData.payment_method" value="cash" class="sr-only">
-                                <span class="text-sm" :class="formData.payment_method === 'cash' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💵 Готівка</span>
-                            </label>
-                            <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                   :class="formData.payment_method === 'card' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600'">
-                                <input type="radio" x-model="formData.payment_method" value="card" class="sr-only">
-                                <span class="text-sm" :class="formData.payment_method === 'card' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💳 Картка</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Notes -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
-                        <textarea x-model="formData.notes" rows="2" placeholder="Внутрішні нотатки..."
-                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button type="button" @click="modalOpen = false"
-                                class="w-full sm:w-auto px-4 py-2 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                            Скасувати
-                        </button>
-                        <button type="submit" :disabled="loading"
-                                class="w-full sm:w-auto px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl disabled:opacity-50 transition-colors">
-                            <span x-show="!loading">Зберегти</span>
-                            <span x-show="loading" class="flex items-center justify-center gap-2">
-                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                                Збереження...
-                            </span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
-
-<!-- Expense Modal -->
-<div x-data="expenseModal()" x-cloak>
-    <div x-show="modalOpen"
-         class="fixed inset-0 z-50 overflow-y-auto"
-         x-transition:enter="ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0">
-        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="modalOpen = false"></div>
-        <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 sm:p-0">
-            <div class="relative w-full max-w-lg mx-auto mt-8 sm:mt-16 bg-white dark:bg-gray-800 rounded-2xl shadow-xl z-10"
-                 x-transition:enter="ease-out duration-200"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 @click.stop>
-                <!-- Header -->
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.add_expense_title') }}</h3>
-                    <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Body -->
-                <form @submit.prevent="submit()" class="max-h-[70vh] overflow-y-auto p-6 space-y-4">
-                    <!-- Ministry -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда <span class="text-red-500">*</span></label>
-                        <select x-model="formData.ministry_id" required
-                                class="w-full px-4 py-2 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                                :class="errors.ministry_id ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
-                            <option value="">Виберіть команду</option>
-                            @foreach($ministries ?? [] as $ministry)
-                                <option value="{{ $ministry->id }}">{{ $ministry->name }}@if($ministry->monthly_budget) (залишок: {{ number_format($ministry->remaining_budget, 0, ',', ' ') }} ₴)@endif</option>
-                            @endforeach
-                        </select>
-                        <p class="text-red-500 text-sm mt-1" x-show="errors.ministry_id" x-text="errors.ministry_id?.[0]"></p>
-                    </div>
-
-                    <!-- Amount + Currency / Date row -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума <span class="text-red-500">*</span></label>
-                            <div class="flex gap-2">
-                                <input type="number" x-model="formData.amount" step="0.01" min="0.01" required placeholder="0.00"
-                                       class="flex-1 px-3 py-2 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                                       :class="errors.amount ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
-                                @if(count($enabledCurrencies) > 1)
-                                <select x-model="formData.currency"
-                                        class="w-20 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 text-sm">
-                                    @foreach($enabledCurrencies as $curr)
-                                        <option value="{{ $curr }}">{{ \App\Helpers\CurrencyHelper::symbol($curr) }}</option>
-                                    @endforeach
-                                </select>
-                                @else
-                                <span class="inline-flex items-center px-2 py-2 text-gray-500 dark:text-gray-400">₴</span>
-                                @endif
-                            </div>
-                            @if(count($enabledCurrencies) > 1)
-                            <template x-if="formData.currency !== 'UAH' && exchangeRates[formData.currency]">
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    Курс: 1 <span x-text="formData.currency"></span> = <span x-text="exchangeRates[formData.currency]?.toFixed(2)"></span> ₴
-                                </p>
-                            </template>
-                            @endif
-                            <p class="text-red-500 text-sm mt-1" x-show="errors.amount" x-text="errors.amount?.[0]"></p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата <span class="text-red-500">*</span></label>
-                            <input type="date" x-model="formData.date" required
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <p class="text-red-500 text-sm mt-1" x-show="errors.date" x-text="errors.date?.[0]"></p>
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис <span class="text-red-500">*</span></label>
-                        <input type="text" x-model="formData.description" required maxlength="255" placeholder="Струни для гітари"
-                               class="w-full px-3 py-2 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                               :class="errors.description ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
-                        <p class="text-red-500 text-sm mt-1" x-show="errors.description" x-text="errors.description?.[0]"></p>
-                    </div>
-
-                    <!-- Category + Expense Type row -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
-                            <select x-model="formData.category_id"
-                                    x-show="formData.category_id !== '__custom__'"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                <option value="">Без категорії</option>
-                                @foreach($expenseCategories ?? [] as $cat)
-                                    <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
-                                @endforeach
-                                <option value="__custom__">Інше (ввести вручну)...</option>
-                            </select>
-                            <div x-show="formData.category_id === '__custom__'" class="flex gap-2">
-                                <input type="text" x-model="formData.category_name" placeholder="Назва категорії..."
-                                       class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                <button type="button" @click="formData.category_id = ''; formData.category_name = ''"
-                                        class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-xl transition-colors">&#x2715;</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип витрати</label>
-                            <select x-model="formData.expense_type"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                <option value="">Не вказано</option>
-                                <option value="recurring">Регулярна</option>
-                                <option value="one_time">Одноразова</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Payment Method -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                   :class="formData.payment_method === 'card' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600'">
-                                <input type="radio" x-model="formData.payment_method" value="card" class="sr-only">
-                                <span class="text-sm" :class="formData.payment_method === 'card' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💳 Картка</span>
-                            </label>
-                            <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                   :class="formData.payment_method === 'cash' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600'">
-                                <input type="radio" x-model="formData.payment_method" value="cash" class="sr-only">
-                                <span class="text-sm" :class="formData.payment_method === 'cash' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💵 Готівка</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Receipt upload -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Чеки / Квитанції</label>
-                        <div class="border-2 border-dashed rounded-xl p-3 text-center transition-colors cursor-pointer"
-                             :class="dragover ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-primary-500 dark:hover:border-primary-400'"
-                             @click="$refs.expenseFileInput.click()"
-                             @dragover.prevent="dragover = true"
-                             @dragleave.prevent="dragover = false"
-                             @drop.prevent="handleDrop($event)">
-                            <input type="file" multiple accept="image/*,.heic,.heif,.pdf" class="hidden" x-ref="expenseFileInput" @change="handleFiles($event)">
-                            <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Натисніть або перетягніть файли сюди</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-500">JPG, PNG, HEIC, PDF до 10 МБ (макс. 10 файлів)</p>
-                        </div>
-                        <!-- Preview grid -->
-                        <div class="grid grid-cols-3 gap-2 mt-2" x-show="previews.length > 0">
-                            <template x-for="(preview, index) in previews" :key="index">
-                                <div class="relative group">
-                                    <template x-if="preview.type === 'image'">
-                                        <img :src="preview.url" class="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
-                                    </template>
-                                    <template x-if="preview.type === 'heic'">
-                                        <div class="w-full h-20 flex flex-col items-center justify-center bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
-                                            <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                            </svg>
-                                            <span class="text-xs text-purple-600 dark:text-purple-400">HEIC</span>
-                                        </div>
-                                    </template>
-                                    <template x-if="preview.type === 'pdf'">
-                                        <div class="w-full h-20 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700">
-                                            <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
-                                            </svg>
-                                        </div>
-                                    </template>
-                                    <button type="button" @click="removeFile(index)"
-                                            class="absolute -top-1.5 -right-1.5 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                    </button>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate" x-text="preview.name"></p>
-                                </div>
-                            </template>
-                        </div>
-                        <p class="text-red-500 text-sm mt-1" x-show="errors.receipts || errors['receipts.0']"
-                           x-text="errors.receipts ? errors.receipts[0] : (errors['receipts.0'] ? errors['receipts.0'][0] : '')"></p>
-                    </div>
-
-                    <!-- Notes -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
-                        <textarea x-model="formData.notes" rows="2" placeholder="Внутрішні нотатки..."
-                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button type="button" @click="modalOpen = false"
-                                class="w-full sm:w-auto px-4 py-2 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                            Скасувати
-                        </button>
-                        <button type="submit" :disabled="loading"
-                                class="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl disabled:opacity-50 transition-colors">
-                            <span x-show="!loading">Зберегти</span>
-                            <span x-show="loading" class="flex items-center justify-center gap-2">
-                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                                Збереження...
-                            </span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Exchange Modal -->
-<div x-data="exchangeModal()" x-cloak>
-    <div x-show="modalOpen"
-         class="fixed inset-0 z-50 overflow-y-auto"
-         x-transition:enter="ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0">
-        <div class="fixed inset-0 bg-black/50" @click="modalOpen = false"></div>
-        <div class="relative min-h-screen flex items-center justify-center p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg relative"
-                 x-transition:enter="ease-out duration-200"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 @click.stop>
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Обмін валюти</h3>
-                    <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-                <form @submit.prevent="submit()" class="p-6 space-y-4">
-                    <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                        <label class="block text-sm font-medium text-red-700 dark:text-red-300 mb-2">Віддаєте</label>
-                        <div class="flex gap-2">
-                            <input type="number" x-model="formData.from_amount" @input="calculate()" step="0.01" min="0.01" required
-                                   class="flex-1 px-4 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <select x-model="formData.from_currency" @change="updateRate()"
-                                    class="w-24 px-2 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                @foreach($enabledCurrencies ?? ['UAH'] as $curr)
-                                    <option value="{{ $curr }}">{{ $curr }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 flex items-center justify-center gap-2 text-sm">
-                        <span>1</span>
-                        <span x-text="formData.from_currency !== 'UAH' ? formData.from_currency : formData.to_currency" class="font-medium"></span>
-                        <span>=</span>
-                        <input type="number" x-model="rate" @input="calculate()" step="0.0001" min="0.0001"
-                               class="w-24 px-2 py-1 text-center border border-amber-200 dark:border-amber-800 rounded-lg bg-white dark:bg-gray-700">
-                        <span class="font-medium">₴</span>
-                    </div>
-                    <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                        <label class="block text-sm font-medium text-green-700 dark:text-green-300 mb-2">Отримуєте</label>
-                        <div class="flex gap-2">
-                            <input type="number" x-model="formData.to_amount" step="0.01" min="0.01" required readonly
-                                   class="flex-1 px-4 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <select x-model="formData.to_currency" @change="updateRate()"
-                                    class="w-24 px-2 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                @foreach($enabledCurrencies ?? ['UAH'] as $curr)
-                                    <option value="{{ $curr }}">{{ $curr }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата</label>
-                        <input type="date" x-model="formData.date" required
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
-                        <input type="text" x-model="formData.notes" maxlength="500"
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                               placeholder="Де обміняли...">
-                    </div>
-                    <div x-show="formData.from_currency === formData.to_currency" class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                        <p class="text-sm text-red-700 dark:text-red-300">Оберіть різні валюти</p>
-                    </div>
-                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button type="button" @click="modalOpen = false"
-                                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            Скасувати
-                        </button>
-                        <button type="submit" :disabled="loading || formData.from_currency === formData.to_currency"
-                                class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg disabled:opacity-50">
-                            <span x-show="!loading">Обміняти</span>
-                            <span x-show="loading">Обмін...</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-@push('scripts')
-<script>
-window.incomeModal = function() {
-    return {
-        modalOpen: false,
-        loading: false,
-        errors: {},
-        exchangeRates: @json($exchangeRates ?? []),
-        formData: {
-            amount: '',
-            currency: 'UAH',
-            category_id: '',
-            category_name: '',
-            date: new Date().toISOString().split('T')[0],
-            payment_method: 'cash',
-            notes: '',
-            is_anonymous: true
-        },
-        init() {
-            window.openIncomeModal = () => this.openModal();
-        },
-        openModal() {
-            this.formData = {
-                amount: '',
-                currency: 'UAH',
-                category_id: '',
-                category_name: '',
-                date: new Date().toISOString().split('T')[0],
-                payment_method: 'cash',
-                notes: '',
-                is_anonymous: true
-            };
-            this.errors = {};
-            this.modalOpen = true;
-        },
-        async submit() {
-            this.loading = true;
-            this.errors = {};
-            try {
-                const payload = {...this.formData};
-                if (payload.category_id === '__custom__') { payload.category_id = ''; }
-                else { delete payload.category_name; }
-                const response = await fetch('/finances/incomes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json().catch(() => ({}));
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message || 'Збережено!');
-                    setTimeout(() => Livewire.navigate(window.location.href), 600);
-                } else if (response.status === 422) {
-                    this.errors = data.errors || {};
-                    showToast('error', 'Перевірте правильність заповнення форми.');
-                } else {
-                    showToast('error', data.message || 'Помилка збереження.');
-                }
-            } catch (e) {
-                showToast('error', 'Помилка з\'єднання з сервером.');
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-
-window.expenseModal = function() {
-    return {
-        modalOpen: false,
-        loading: false,
-        errors: {},
-        dragover: false,
-        previews: [],
-        files: [],
-        exchangeRates: @json($exchangeRates ?? []),
-        formData: {
-            amount: '',
-            currency: 'UAH',
-            description: '',
-            category_id: '',
-            category_name: '',
-            ministry_id: '',
-            expense_type: '',
-            date: new Date().toISOString().split('T')[0],
-            payment_method: 'card',
-            notes: ''
-        },
-        init() {
-            window.openExpenseModal = () => this.openModal();
-        },
-        openModal() {
-            this.formData = {
-                amount: '',
-                currency: 'UAH',
-                description: '',
-                category_id: '',
-                category_name: '',
-                ministry_id: '',
-                expense_type: '',
-                date: new Date().toISOString().split('T')[0],
-                payment_method: 'card',
-                notes: ''
-            };
-            this.errors = {};
-            this.previews = [];
-            this.files = [];
-            this.dragover = false;
-            this.modalOpen = true;
-        },
-        handleFiles(event) {
-            this.addFiles(event.target.files);
-        },
-        handleDrop(event) {
-            this.dragover = false;
-            this.addFiles(event.dataTransfer.files);
-        },
-        addFiles(fileList) {
-            for (let file of fileList) {
-                if (this.previews.length >= 10) break;
-                const isHeic = file.name.match(/\.heic$/i) || file.name.match(/\.heif$/i);
-                if (!file.type.match('image.*') && file.type !== 'application/pdf' && !isHeic) {
-                    showToast('error', 'Непідтримуваний формат: ' + file.name);
-                    continue;
-                }
-                if (file.size > 10 * 1024 * 1024) {
-                    showToast('error', 'Файл занадто великий: ' + file.name);
-                    continue;
-                }
-                this.previews.push({
-                    name: file.name,
-                    type: file.type === 'application/pdf' ? 'pdf' : (isHeic ? 'heic' : 'image'),
-                    url: (!isHeic && file.type !== 'application/pdf') ? URL.createObjectURL(file) : null
-                });
-                this.files.push(file);
-            }
-        },
-        removeFile(index) {
-            if (this.previews[index].url) URL.revokeObjectURL(this.previews[index].url);
-            this.previews.splice(index, 1);
-            this.files.splice(index, 1);
-        },
-        async submit() {
-            this.loading = true;
-            this.errors = {};
-            try {
-                const fd = new FormData();
-                // Add form fields
-                Object.keys(this.formData).forEach(key => {
-                    let value = this.formData[key];
-                    if (key === 'category_id' && value === '__custom__') {
-                        value = '';
-                    }
-                    if (key === 'category_name' && this.formData.category_id !== '__custom__') {
-                        return; // skip category_name if not custom
-                    }
-                    if (value !== null && value !== undefined) {
-                        fd.append(key, value);
-                    }
-                });
-                // Add files
-                this.files.forEach(f => fd.append('receipts[]', f));
-
-                const response = await fetch('/finances/expenses', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: fd
-                });
-
-                if (response.status === 413) {
-                    showToast('error', 'Файл занадто великий для завантаження. Максимум 10 МБ на файл.');
-                    this.loading = false;
-                    return;
-                }
-
-                const data = await response.json().catch(() => ({}));
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message || 'Збережено!');
-                    if (data.budget_warning) {
-                        showToast('warning', data.budget_warning);
-                    }
-                    setTimeout(() => Livewire.navigate(window.location.href), 600);
-                } else if (response.status === 422) {
-                    this.errors = data.errors || {};
-                    showToast('error', 'Перевірте правильність заповнення форми.');
-                } else {
-                    showToast('error', data.message || 'Помилка збереження.');
-                }
-            } catch (e) {
-                showToast('error', 'Помилка з\'єднання з сервером.');
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-
-window.exchangeModal = function() {
-    return {
-        modalOpen: false,
-        loading: false,
-        rate: {{ $exchangeRates['USD'] ?? 41 }},
-        nbuRates: @json($exchangeRates ?? ['USD' => 41, 'EUR' => 45]),
-        formData: {
-            from_currency: 'USD',
-            to_currency: 'UAH',
-            from_amount: '',
-            to_amount: '',
-            date: new Date().toISOString().split('T')[0],
-            notes: ''
-        },
-        init() {
-            window.openExchangeModal = () => this.openModal();
-        },
-        openModal() {
-            this.formData = {
-                from_currency: 'USD',
-                to_currency: 'UAH',
-                from_amount: '',
-                to_amount: '',
-                date: new Date().toISOString().split('T')[0],
-                notes: ''
-            };
-            this.updateRate();
-            this.modalOpen = true;
-        },
-        updateRate() {
-            const from = this.formData.from_currency;
-            const to = this.formData.to_currency;
-            if (from !== 'UAH' && to === 'UAH') {
-                this.rate = this.nbuRates[from] || 1;
-            } else if (from === 'UAH' && to !== 'UAH') {
-                this.rate = this.nbuRates[to] || 1;
-            } else {
-                this.rate = 1;
-            }
-            this.calculate();
-        },
-        calculate() {
-            const from = this.formData.from_currency;
-            const to = this.formData.to_currency;
-            const amount = parseFloat(this.formData.from_amount) || 0;
-            if (amount <= 0) {
-                this.formData.to_amount = '';
-                return;
-            }
-            if (from !== 'UAH' && to === 'UAH') {
-                this.formData.to_amount = (amount * this.rate).toFixed(2);
-            } else if (from === 'UAH' && to !== 'UAH') {
-                this.formData.to_amount = (amount / this.rate).toFixed(2);
-            } else {
-                this.formData.to_amount = (amount * this.rate).toFixed(2);
-            }
-        },
-        async submit() {
-            this.loading = true;
-            try {
-                const response = await fetch('/finances/exchange', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(this.formData)
-                });
-                const data = await response.json().catch(() => ({}));
-                if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
-                } else {
-                    showToast('error', data.message || 'Помилка');
-                }
-            } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-</script>
-@endpush
 @endsection

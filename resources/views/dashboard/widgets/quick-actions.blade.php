@@ -32,7 +32,7 @@
 
             {{-- Нова транзакція --}}
             @if(auth()->user()->canCreate('finances'))
-            <a href="{{ route('finances.incomes.create') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 hover:shadow-md transition-all group">
+            <a href="{{ route('finances.transactions') }}" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 hover:shadow-md transition-all group">
                 <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>

@@ -521,12 +521,16 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::get('/', [FinanceController::class, 'index'])->name('index');
         Route::get('chart-data', [FinanceController::class, 'chartData'])->name('chart-data');
 
-        // Journal (Ledger)
-        Route::get('journal', [FinanceController::class, 'journal'])->name('journal');
+        // Transactions (unified view — replaces journal + incomes list + expenses list)
+        Route::get('transactions', [FinanceController::class, 'transactions'])->name('transactions');
+        Route::get('transactions/export', [FinanceController::class, 'journalExport'])->name('transactions.export');
+
+        // Legacy redirects
+        Route::get('journal', fn() => redirect()->route('finances.transactions'))->name('journal');
         Route::get('journal/export', [FinanceController::class, 'journalExport'])->name('journal.export');
 
         // Incomes (using Transaction model)
-        Route::get('incomes', [FinanceController::class, 'incomes'])->name('incomes');
+        Route::get('incomes', fn() => redirect()->route('finances.transactions', ['filter' => 'income']))->name('incomes');
         Route::get('incomes/create', [FinanceController::class, 'createIncome'])->name('incomes.create');
         Route::post('incomes', [FinanceController::class, 'storeIncome'])->name('incomes.store');
         Route::get('incomes/{transaction}/edit', [FinanceController::class, 'editIncome'])->name('incomes.edit');
@@ -534,7 +538,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::delete('incomes/{transaction}', [FinanceController::class, 'destroyIncome'])->name('incomes.destroy');
 
         // Expenses (using Transaction model)
-        Route::get('expenses', [FinanceController::class, 'expenses'])->name('expenses.index');
+        Route::get('expenses', fn() => redirect()->route('finances.transactions', ['filter' => 'expense']))->name('expenses.index');
         Route::get('expenses/create', [FinanceController::class, 'createExpense'])->name('expenses.create');
         Route::post('expenses', [FinanceController::class, 'storeExpense'])->name('expenses.store');
         Route::get('expenses/{transaction}/edit', [FinanceController::class, 'editExpense'])->name('expenses.edit');
@@ -610,7 +614,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
 
     // Legacy expenses routes redirect
     Route::middleware('permission:finances')->group(function () {
-        Route::get('expenses', fn() => redirect()->route('finances.expenses.index'))->name('expenses.index');
+        Route::get('expenses', fn() => redirect()->route('finances.transactions', ['filter' => 'expense']))->name('expenses.index');
         Route::get('expenses/create', fn() => redirect()->route('finances.expenses.create'))->name('expenses.create');
     });
 
