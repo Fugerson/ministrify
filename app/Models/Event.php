@@ -230,7 +230,8 @@ class Event extends Model
             return false;
         }
 
-        if ($this->date->isPast()) {
+        $effectiveEndDate = $this->end_date ?? $this->date;
+        if ($effectiveEndDate->isPast()) {
             return false;
         }
 

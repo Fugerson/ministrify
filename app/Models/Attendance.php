@@ -75,10 +75,16 @@ class Attendance extends Model
     }
 
     /**
-     * Get the group if this is a group attendance
+     * Get the group if this is a group attendance.
+     * @deprecated Use attendable() instead. This returns null when attendable_type is not Group.
      */
     public function group(): BelongsTo
     {
+        // Safety: only resolve when this is actually a group attendance
+        if ($this->attendable_type && $this->attendable_type !== 'App\\Models\\Group') {
+            return $this->belongsTo(Group::class, 'attendable_id')->whereRaw('1 = 0');
+        }
+
         return $this->belongsTo(Group::class, 'attendable_id');
     }
 
