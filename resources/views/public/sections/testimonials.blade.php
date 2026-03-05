@@ -15,8 +15,8 @@
                     </svg>
                     <p class="text-gray-600 leading-relaxed mb-4">{{ $testimonial->content }}</p>
                     <div class="flex items-center gap-3">
-                        @if($testimonial->photo)
-                            <img src="{{ Storage::url($testimonial->photo) }}" alt="{{ $testimonial->author_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                        @if($testimonial->author_photo)
+                            <img src="{{ Storage::url($testimonial->author_photo) }}" alt="{{ $testimonial->author_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
                         @else
                             <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
                                 <span class="text-primary-600 font-semibold">{{ substr($testimonial->author_name, 0, 1) }}</span>

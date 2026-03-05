@@ -204,7 +204,8 @@ class FinanceController extends Controller
                     ->where('transactions.church_id', $church->id)
                     ->where('transactions.direction', 'out')
                     ->where('transactions.status', 'completed')
-                    ->whereNull('transactions.deleted_at');
+                    ->whereNull('transactions.deleted_at')
+                    ->where('transactions.source_type', '!=', Transaction::SOURCE_ALLOCATION);
                 if ($month) {
                     $join->whereYear('transactions.date', $year)
                         ->whereMonth('transactions.date', $month);
@@ -2035,6 +2036,7 @@ class FinanceController extends Controller
             ->whereNull('deleted_at')
             ->where('direction', Transaction::DIRECTION_IN)
             ->where('status', Transaction::STATUS_COMPLETED)
+            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->selectRaw("
                 SUM(CASE WHEN date >= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as this_week_income,
                 SUM(CASE WHEN date >= ? AND date <= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as last_week_income,

@@ -44,8 +44,8 @@
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="flex items-start gap-4 mb-4">
                         <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0 overflow-hidden">
-                            @if($testimonial->photo)
-                                <img src="{{ Storage::url($testimonial->photo) }}" alt="{{ $testimonial->author_name }}" class="w-full h-full object-cover" loading="lazy">
+                            @if($testimonial->author_photo)
+                                <img src="{{ Storage::url($testimonial->author_photo) }}" alt="{{ $testimonial->author_name }}" class="w-full h-full object-cover" loading="lazy">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-400">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +135,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Фото</label>
                             <div x-data="{ fileName: '' }" class="relative">
-                                <input type="file" name="photo" accept="image/*,.heic,.heif" class="sr-only" x-ref="photoInput" @change="fileName = $event.target.files[0]?.name || ''">
+                                <input type="file" name="author_photo" accept="image/*,.heic,.heif" class="sr-only" x-ref="photoInput" @change="fileName = $event.target.files[0]?.name || ''">
                                 <label @click="$refs.photoInput.click()" class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group">
                                     <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors">
                                         <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
