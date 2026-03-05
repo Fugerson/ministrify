@@ -86,9 +86,10 @@ class FinanceController extends Controller
             ->value('total') ?? 0;
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
 
-        // Calculate balances per currency (all time)
+        // Calculate balances per currency (all time) — exclude exchange/allocation to avoid double-counting
         $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
             ->incoming()->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
             ->groupBy('currency')
             ->pluck('total', 'currency')
@@ -96,6 +97,7 @@ class FinanceController extends Controller
 
         $allTimeExpenseByCurrency = Transaction::where('church_id', $church->id)
             ->outgoing()->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
             ->groupBy('currency')
             ->pluck('total', 'currency')
@@ -1891,6 +1893,7 @@ class FinanceController extends Controller
 
         $dailyRaw = Transaction::where('church_id', $churchId)
             ->completed()
+            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->selectRaw('DAY(date) as day, direction, SUM(COALESCE(amount_uah, amount)) as total')
@@ -1923,6 +1926,7 @@ class FinanceController extends Controller
 
         $monthlyRaw = Transaction::where('church_id', $churchId)
             ->completed()
+            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->whereYear('date', $year)
             ->whereRaw('MONTH(date) BETWEEN ? AND ?', [$startMonth, $endMonth])
             ->selectRaw('MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
@@ -1951,6 +1955,7 @@ class FinanceController extends Controller
     {
         $yearlyRaw = Transaction::where('church_id', $churchId)
             ->completed()
+            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->selectRaw('YEAR(date) as year, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('year', 'direction')
             ->get();
@@ -1982,15 +1987,16 @@ class FinanceController extends Controller
 
     private function getYearComparison(int $churchId, int $year): array
     {
+        $excludeTypes = [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION];
         $currentYear = [
-            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->forYear($year)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
-            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->forYear($year)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
+            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->whereNotIn('source_type', $excludeTypes)->forYear($year)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
+            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->whereNotIn('source_type', $excludeTypes)->forYear($year)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
         ];
         $currentYear['balance'] = $currentYear['income'] - $currentYear['expense'];
 
         $prevYear = [
-            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->forYear($year - 1)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
-            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->forYear($year - 1)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
+            'income' => Transaction::where('church_id', $churchId)->incoming()->completed()->whereNotIn('source_type', $excludeTypes)->forYear($year - 1)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
+            'expense' => Transaction::where('church_id', $churchId)->outgoing()->completed()->whereNotIn('source_type', $excludeTypes)->forYear($year - 1)->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0,
         ];
         $prevYear['balance'] = $prevYear['income'] - $prevYear['expense'];
 

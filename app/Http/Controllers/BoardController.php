@@ -741,7 +741,7 @@ class BoardController extends Controller
         }
 
         // Check card limit on target column (skip if moving within same column)
-        if ($targetColumn->id !== $card->board_column_id && $targetColumn->isAtLimit()) {
+        if ($targetColumn->id !== $card->column_id && $targetColumn->isAtLimit()) {
             return response()->json(['error' => 'Цільова колонка досягла ліміту карток.'], 422);
         }
 

@@ -211,9 +211,13 @@ class Attendance extends Model
      */
     public function recalculateCounts(): void
     {
+        $membersPresent = $this->records()->where('present', true)->count();
+        $calculatedTotal = $membersPresent + ($this->guests_count ?? 0);
+
         $this->update([
-            'members_present' => $this->records()->where('present', true)->count(),
-            'total_count' => $this->records()->where('present', true)->count() + ($this->guests_count ?? 0),
+            'members_present' => $membersPresent,
+            // Only update total_count if it was not manually set higher (preserve manual counts)
+            'total_count' => max($this->total_count ?? 0, $calculatedTotal),
         ]);
     }
 

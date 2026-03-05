@@ -1261,8 +1261,12 @@ function calendarNavigator(initialState) {
 
         prevPeriod() {
             if (this.currentView === 'week') {
-                this.currentWeek = this.currentWeek === 1 ? 52 : this.currentWeek - 1;
-                if (this.currentWeek === 52) this.currentYear--;
+                if (this.currentWeek === 1) {
+                    this.currentYear--;
+                    this.currentWeek = this.getISOWeeksInYear(this.currentYear);
+                } else {
+                    this.currentWeek--;
+                }
             } else {
                 this.currentMonth = this.currentMonth === 1 ? 12 : this.currentMonth - 1;
                 if (this.currentMonth === 12) this.currentYear--;
@@ -1272,13 +1276,23 @@ function calendarNavigator(initialState) {
 
         nextPeriod() {
             if (this.currentView === 'week') {
-                this.currentWeek = this.currentWeek === 52 ? 1 : this.currentWeek + 1;
-                if (this.currentWeek === 1) this.currentYear++;
+                const maxWeek = this.getISOWeeksInYear(this.currentYear);
+                if (this.currentWeek >= maxWeek) {
+                    this.currentWeek = 1;
+                    this.currentYear++;
+                } else {
+                    this.currentWeek++;
+                }
             } else {
                 this.currentMonth = this.currentMonth === 12 ? 1 : this.currentMonth + 1;
                 if (this.currentMonth === 1) this.currentYear++;
             }
             this.loadCalendar();
+        },
+
+        getISOWeeksInYear(year) {
+            const d = new Date(year, 11, 28); // Dec 28 is always in the last ISO week
+            return d.getWeek();
         },
 
         pickMonth(month) {

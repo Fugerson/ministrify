@@ -1244,10 +1244,29 @@ class MinistryController extends Controller
         $validated['is_worship_ministry'] = $request->boolean('is_worship_ministry');
         $validated['is_sunday_service_part'] = $request->boolean('is_sunday_service_part');
 
+        $oldLeaderId = $ministry->getOriginal('leader_id');
         $ministry->update($validated);
 
-        // Ensure new leader is a member
-        if ($ministry->leader_id && !$ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
+        // If leader changed, demote old leader and promote new one
+        if ($ministry->leader_id !== $oldLeaderId) {
+            // Demote old leader's role in pivot
+            if ($oldLeaderId && $ministry->members()->where('people.id', $oldLeaderId)->exists()) {
+                $ministry->members()->updateExistingPivot($oldLeaderId, ['role' => 'member']);
+            }
+
+            // Ensure new leader is a member with 'leader' role
+            if ($ministry->leader_id) {
+                if ($ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
+                    $ministry->members()->updateExistingPivot($ministry->leader_id, ['role' => 'leader']);
+                } else {
+                    $ministry->members()->attach($ministry->leader_id, [
+                        'role' => 'leader',
+                        'joined_at' => now(),
+                    ]);
+                }
+            }
+        } elseif ($ministry->leader_id && !$ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
+            // Leader unchanged but not in members yet
             $ministry->members()->attach($ministry->leader_id, [
                 'role' => 'leader',
                 'joined_at' => now(),
@@ -1304,7 +1323,7 @@ class MinistryController extends Controller
         }
 
         $ministry->members()->attach($validated['person_id'], [
-            'position_ids' => json_encode($validated['position_ids'] ?? []),
+            'position_ids' => json_encode(array_map('intval', $validated['position_ids'] ?? [])),
         ]);
 
         // Log member added
@@ -1323,6 +1342,11 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('contribute-ministry', $ministry);
         abort_unless($person->church_id === $this->getCurrentChurch()->id, 404);
+
+        // Prevent removing the leader from members
+        if ($ministry->leader_id === $person->id) {
+            return $this->errorResponse($request, 'Неможливо видалити лідера з команди. Спочатку змініть лідера.');
+        }
 
         $ministry->members()->detach($person->id);
 
@@ -1350,7 +1374,7 @@ class MinistryController extends Controller
         $oldPositionIds = $oldPivot ? json_decode($oldPivot->position_ids ?? '[]', true) : [];
 
         $ministry->members()->updateExistingPivot($person->id, [
-            'position_ids' => json_encode($validated['position_ids'] ?? []),
+            'position_ids' => json_encode(array_map('intval', $validated['position_ids'] ?? [])),
         ]);
 
         // Log positions update

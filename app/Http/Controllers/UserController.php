@@ -316,6 +316,14 @@ class UserController extends Controller
         $email = $validated['email'] ?? null;
         $churchRoleId = $validated['church_role_id'] ?: null; // Convert empty string to null
 
+        // Prevent non-admins from assigning admin roles (privilege escalation)
+        if ($churchRoleId) {
+            $targetRole = \App\Models\ChurchRole::find($churchRoleId);
+            if ($targetRole && $targetRole->is_admin_role && !auth()->user()->isAdmin()) {
+                return $this->errorResponse($request, 'Тільки адміністратори можуть призначати адміністративні ролі.');
+            }
+        }
+
         // Check role from pivot for THIS church, not from user's active church
         $pivotRecord = DB::table('church_user')
             ->where('user_id', $user->id)
@@ -485,6 +493,25 @@ class UserController extends Controller
         }
 
         $church = $this->getCurrentChurch();
+
+        // Prevent deleting the last admin
+        $userPivot = DB::table('church_user')
+            ->where('user_id', $user->id)
+            ->where('church_id', $church->id)
+            ->first();
+        if ($userPivot && $userPivot->church_role_id) {
+            $userRole = \App\Models\ChurchRole::find($userPivot->church_role_id);
+            if ($userRole && $userRole->is_admin_role) {
+                $adminCount = DB::table('church_user')
+                    ->join('church_roles', 'church_user.church_role_id', '=', 'church_roles.id')
+                    ->where('church_user.church_id', $church->id)
+                    ->where('church_roles.is_admin_role', true)
+                    ->count();
+                if ($adminCount <= 1) {
+                    return $this->errorResponse($request, 'Неможливо видалити останнього адміністратора церкви.');
+                }
+            }
+        }
 
         // Remove from this church's pivot
         DB::table('church_user')

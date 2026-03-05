@@ -14,6 +14,7 @@ class TelegramBroadcastController extends Controller
 
     public function index()
     {
+        abort_unless(auth()->user()->canView('communications'), 403);
         $church = $this->getChurchOrFail();
 
         $recipients = Person::where('church_id', $church->id)
@@ -28,6 +29,7 @@ class TelegramBroadcastController extends Controller
 
     public function send(Request $request)
     {
+        abort_unless(auth()->user()->canEdit('communications'), 403);
         $validated = $request->validate([
             'message' => 'required|string|max:4000',
             'recipients' => 'required|array|min:1',

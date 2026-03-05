@@ -353,6 +353,7 @@ class DonationController extends Controller
      */
     public function qrCode(Request $request)
     {
+        abort_unless(auth()->user()->canView('finances'), 403);
         $church = $this->getCurrentChurch();
 
         if (!$church->slug || !$church->public_site_enabled) {
@@ -369,6 +370,7 @@ class DonationController extends Controller
      */
     public function export(Request $request)
     {
+        abort_unless(auth()->user()->canView('finances'), 403);
         $church = $this->getCurrentChurch();
 
         $year = $request->input('year', now()->year);

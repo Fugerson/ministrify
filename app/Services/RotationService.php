@@ -206,8 +206,9 @@ class RotationService
         $monthStart = $event->date->copy()->startOfMonth();
         $monthEnd = $event->date->copy()->endOfMonth();
 
-        // Count assignments this month
+        // Count assignments this month (exclude declined)
         $monthlyCount = Assignment::where('person_id', $person->id)
+            ->where('status', '!=', 'declined')
             ->whereHas('event', function ($q) use ($monthStart, $monthEnd) {
                 $q->whereBetween('date', [$monthStart, $monthEnd]);
             })
@@ -217,8 +218,9 @@ class RotationService
             return 0; // Already at max
         }
 
-        // Check last assignment date
+        // Check last assignment date (exclude declined)
         $lastAssignment = Assignment::where('person_id', $person->id)
+            ->where('status', '!=', 'declined')
             ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
             ->with('event')
             ->latest('id')
@@ -261,7 +263,7 @@ class RotationService
             return 0;
         }
 
-        $level = 'intermediate';
+        $level = $pivot->experience_level ?? 'intermediate';
 
         return match($level) {
             'expert' => 1.0,
@@ -388,7 +390,7 @@ class RotationService
             'by_position' => $assignments->groupBy('position.name')
                 ->map(fn($group) => $group->count()),
             'last_served' => $assignments
-                ->whereIn('status', ['confirmed', 'completed'])
+                ->whereIn('status', ['confirmed', 'attended'])
                 ->sortByDesc('event.date')
                 ->first()?->event?->date,
         ];
@@ -412,7 +414,7 @@ class RotationService
         foreach ($members as $member) {
             $assignmentsCount = Assignment::where('person_id', $member->id)
                 ->whereIn('event_id', $events->pluck('id'))
-                ->whereIn('status', ['confirmed', 'completed', 'pending'])
+                ->whereIn('status', ['confirmed', 'attended', 'pending'])
                 ->count();
 
             $memberStats[$member->id] = [

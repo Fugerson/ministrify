@@ -15,6 +15,7 @@ class TelegramChatController extends Controller
 
     public function index()
     {
+        abort_unless(auth()->user()->canView('communications'), 403);
         $church = $this->getChurchOrFail();
 
         // Get people with Telegram linked, with their latest message
@@ -42,6 +43,7 @@ class TelegramChatController extends Controller
 
     public function show(Person $person)
     {
+        abort_unless(auth()->user()->canView('communications'), 403);
         $church = $this->getChurchOrFail();
 
         // Ensure person belongs to this church
@@ -73,6 +75,7 @@ class TelegramChatController extends Controller
 
     public function send(Request $request, Person $person)
     {
+        abort_unless(auth()->user()->canEdit('communications'), 403);
         $validated = $request->validate([
             'message' => 'required|string|max:4000',
         ]);

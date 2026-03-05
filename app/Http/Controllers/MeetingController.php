@@ -148,6 +148,7 @@ class MeetingController extends Controller
     public function storeCopy(Request $request, Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'date' => 'required|date',
@@ -167,6 +168,7 @@ class MeetingController extends Controller
     public function storeAgendaItem(Request $request, Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -227,7 +229,7 @@ class MeetingController extends Controller
 
         foreach ($validated['items'] as $index => $itemId) {
             MeetingAgendaItem::where('id', $itemId)
-                ->where('ministry_meeting_id', $meeting->id)
+                ->where('meeting_id', $meeting->id)
                 ->update(['sort_order' => $index]);
         }
 
@@ -238,6 +240,7 @@ class MeetingController extends Controller
     public function storeMaterial(Request $request, Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -268,6 +271,7 @@ class MeetingController extends Controller
     public function storeAttendee(Request $request, Ministry $ministry, MinistryMeeting $meeting)
     {
         $this->authorizeMinistry($ministry);
+        abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
             'person_id' => ['required', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],

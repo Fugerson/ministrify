@@ -149,7 +149,7 @@ class QrCheckinController extends Controller
             [
                 'type' => $event->is_service ? Attendance::TYPE_SERVICE : Attendance::TYPE_EVENT,
                 'time' => $event->time,
-                'recorded_by' => $user->id,
+                'recorded_by' => auth()->id(),
             ]
         );
 
