@@ -6,6 +6,7 @@ use App\Models\Song;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use League\Csv\Reader;
 
 class SongController extends Controller
@@ -364,7 +365,7 @@ class SongController extends Controller
 
         $validated = $request->validate([
             'songs' => 'required|array',
-            'songs.*' => 'exists:songs,id',
+            'songs.*' => [Rule::exists('songs', 'id')->where('church_id', $event->church_id)],
         ]);
 
         foreach ($validated['songs'] as $order => $songId) {

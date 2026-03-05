@@ -8,6 +8,7 @@ use App\Models\ServicePlanItem;
 use App\Rules\BelongsToChurch;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ServicePlanController extends Controller
 {
@@ -27,7 +28,7 @@ class ServicePlanController extends Controller
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
             'responsible_names' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:5000',
-            'song_id' => 'nullable|exists:songs,id',
+            'song_id' => ['nullable', Rule::exists('songs', 'id')->where('church_id', $event->church_id)],
         ]);
 
         // Get next sort order
@@ -70,7 +71,7 @@ class ServicePlanController extends Controller
             'responsible_names' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:5000',
             'status' => 'nullable|string|in:planned,confirmed,declined,completed',
-            'song_id' => 'nullable|exists:songs,id',
+            'song_id' => ['nullable', Rule::exists('songs', 'id')->where('church_id', $event->church_id)],
         ]);
 
         // Convert empty strings to null

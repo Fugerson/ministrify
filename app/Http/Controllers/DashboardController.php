@@ -483,7 +483,7 @@ class DashboardController extends Controller
         $attendanceData = [];
         for ($i = 3; $i >= 0; $i--) {
             $date = now()->subWeeks($i)->startOfWeek(Carbon::SUNDAY);
-            $weekKey = $date->format('oW');
+            $weekKey = $date->format('o') . str_pad($date->format('W'), 2, '0', STR_PAD_LEFT);
             $attendanceData[] = [
                 'date' => $date->format('d.m'),
                 'count' => $attendanceRaw[$weekKey]->total ?? 0,

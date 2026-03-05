@@ -81,9 +81,14 @@ class AttendanceController extends Controller
             Event::where('church_id', $church->id)->findOrFail($validated['event_id']);
         }
 
+        $eventId = $validated['event_id'] ?? null;
+
         $attendance = Attendance::create([
             'church_id' => $church->id,
-            'event_id' => $validated['event_id'] ?? null,
+            'event_id' => $eventId,
+            'attendable_type' => $eventId ? 'App\\Models\\Event' : null,
+            'attendable_id' => $eventId,
+            'type' => $eventId ? 'event' : 'general',
             'date' => $validated['date'],
             'total_count' => $validated['total_count'],
             'notes' => $validated['notes'] ?? null,

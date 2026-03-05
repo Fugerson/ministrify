@@ -324,7 +324,7 @@ class WorshipTeamController extends Controller
 
         $validated = $request->validate([
             'songs' => 'required|array',
-            'songs.*' => 'integer|exists:songs,id',
+            'songs.*' => ['integer', Rule::exists('songs', 'id')->where('church_id', $event->church_id)],
         ]);
 
         foreach ($validated['songs'] as $order => $songId) {

@@ -148,8 +148,8 @@ class FinanceController extends Controller
         $exchangeRates = ExchangeRate::getLatestRates();
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
 
-        // Monthly data for chart
-        $monthlyData = $this->getMonthlyData($church->id, $year);
+        // Monthly data for chart (formatted for Chart.js: {labels, income, expense})
+        $monthlyData = $this->formatChartData($this->getMonthlyData($church->id, $year));
 
         // Income by category - optimized single query with JOIN
         $incomeByCategoryRaw = TransactionCategory::where('transaction_categories.church_id', $church->id)
@@ -391,7 +391,11 @@ class FinanceController extends Controller
 
         // Initial period from request or default to month
         $initialPeriod = $request->get('period', 'month');
-        $initialFilter = $request->get('filter', ''); // 'income', 'expense', or ''
+        $initialFilter = match ($request->get('filter', '')) {
+            'income' => 'in',
+            'expense' => 'out',
+            default => $request->get('filter', ''),
+        };
 
         // For modal forms
         $incomeCategories = TransactionCategory::where('church_id', $church->id)
@@ -1852,7 +1856,19 @@ class FinanceController extends Controller
             default => $this->getMonthlyData($church->id, $year),
         };
 
-        return response()->json($data);
+        return response()->json($this->formatChartData($data));
+    }
+
+    /**
+     * Transform array of {month, income, expense} objects into {labels, income, expense} arrays for Chart.js
+     */
+    private function formatChartData(array $items): array
+    {
+        return [
+            'labels' => array_column($items, 'month'),
+            'income' => array_column($items, 'income'),
+            'expense' => array_column($items, 'expense'),
+        ];
     }
 
     // Private helpers

@@ -108,9 +108,9 @@
                 </div>
                 @endif
 
-                <!-- Always-on: plan + attendance -->
-                <input type="hidden" name="is_service" value="1">
-                <input type="hidden" name="track_attendance" value="1">
+                <!-- Preserve original values -->
+                <input type="hidden" name="is_service" value="{{ old('is_service', $event->is_service ? '1' : '0') }}">
+                <input type="hidden" name="track_attendance" value="{{ old('track_attendance', $event->track_attendance ? '1' : '0') }}">
 
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
                     <a href="{{ route('events.show', $event) }}"
