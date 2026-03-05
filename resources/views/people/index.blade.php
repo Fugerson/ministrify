@@ -1432,8 +1432,8 @@
                                 <select name="membership_status"
                                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     <option value="">-- {{ __('app.not_specified') }} --</option>
-                                    @foreach(\App\Models\Person::MEMBERSHIP_STATUSES as $status)
-                                    <option value="{{ $status }}">{{ $modalStatusLabels[$status] ?? $status }}</option>
+                                    @foreach(\App\Models\Person::MEMBERSHIP_STATUSES as $status => $statusData)
+                                    <option value="{{ $status }}">{{ $modalStatusLabels[$status] ?? $statusData['label'] }}</option>
                                     @endforeach
                                 </select>
                             </div>

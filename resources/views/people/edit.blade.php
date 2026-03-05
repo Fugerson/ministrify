@@ -168,8 +168,8 @@
                     <select name="membership_status" id="membership_status"
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white">
                         <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- {{ __('app.not_specified') }} --</option>
-                        @foreach(\App\Models\Person::MEMBERSHIP_STATUSES as $status)
-                        <option value="{{ $status }}" {{ old('membership_status', $person->membership_status) == $status ? 'selected' : '' }} class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $statusLabels[$status] ?? $status }}</option>
+                        @foreach(\App\Models\Person::MEMBERSHIP_STATUSES as $status => $statusData)
+                        <option value="{{ $status }}" {{ old('membership_status', $person->membership_status) == $status ? 'selected' : '' }} class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $statusLabels[$status] ?? $statusData['label'] }}</option>
                         @endforeach
                     </select>
                 </div>
