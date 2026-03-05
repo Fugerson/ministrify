@@ -181,11 +181,21 @@ function exportButton() {
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дата</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Опис</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Категорія</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Команда</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Сума</th>
+                        <th @click="toggleSort('date')" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
+                            <span class="inline-flex items-center gap-1">Дата <template x-if="sortColumn === 'date'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                        </th>
+                        <th @click="toggleSort('description')" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
+                            <span class="inline-flex items-center gap-1">Опис <template x-if="sortColumn === 'description'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                        </th>
+                        <th @click="toggleSort('category')" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
+                            <span class="inline-flex items-center gap-1">Категорія <template x-if="sortColumn === 'category'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                        </th>
+                        <th @click="toggleSort('ministry')" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
+                            <span class="inline-flex items-center gap-1">Команда <template x-if="sortColumn === 'ministry'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                        </th>
+                        <th @click="toggleSort('amount')" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
+                            <span class="inline-flex items-center justify-end gap-1">Сума <template x-if="sortColumn === 'amount'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                        </th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" x-show="subFilter === ''">Баланс</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16"></th>
                     </tr>
@@ -415,6 +425,10 @@ function transactionsApp() {
         // Sub-filter (direction): '' = all, 'in' = income, 'out' = expense
         subFilter: '{{ $initialFilter ?? '' }}',
 
+        // Sorting
+        sortColumn: 'date',
+        sortDir: 'desc',
+
         // Filter state
         filters: {
             search: '',
@@ -430,6 +444,15 @@ function transactionsApp() {
 
         setSubFilter(filter) {
             this.subFilter = filter;
+        },
+
+        toggleSort(column) {
+            if (this.sortColumn === column) {
+                this.sortDir = this.sortDir === 'desc' ? 'asc' : 'desc';
+            } else {
+                this.sortColumn = column;
+                this.sortDir = column === 'date' ? 'desc' : 'asc';
+            }
         },
 
         handlePeriodChange(detail) {
@@ -564,6 +587,27 @@ function transactionsApp() {
                     result.push({ transaction: t, balance: balance });
                 }
             }
+
+            // Sort
+            const col = this.sortColumn;
+            const dir = this.sortDir === 'asc' ? 1 : -1;
+            result.sort((a, b) => {
+                let va, vb;
+                switch (col) {
+                    case 'date': va = a.transaction.date; vb = b.transaction.date; break;
+                    case 'description': va = (a.transaction.description || '').toLowerCase(); vb = (b.transaction.description || '').toLowerCase(); break;
+                    case 'category': va = (a.transaction.category?.name || '').toLowerCase(); vb = (b.transaction.category?.name || '').toLowerCase(); break;
+                    case 'ministry': va = (a.transaction.ministry?.name || '').toLowerCase(); vb = (b.transaction.ministry?.name || '').toLowerCase(); break;
+                    case 'amount':
+                        va = parseFloat(a.transaction.amount_uah || a.transaction.amount) * (a.transaction.direction === 'in' ? 1 : -1);
+                        vb = parseFloat(b.transaction.amount_uah || b.transaction.amount) * (b.transaction.direction === 'in' ? 1 : -1);
+                        return (va - vb) * dir;
+                    default: return 0;
+                }
+                if (va < vb) return -1 * dir;
+                if (va > vb) return 1 * dir;
+                return 0;
+            });
 
             return result;
         },
