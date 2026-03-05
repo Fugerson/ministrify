@@ -57,8 +57,8 @@
                     <div class="w-24 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex-shrink-0 overflow-hidden relative">
                         @if($sermon->thumbnail)
                             <img src="{{ Storage::url($sermon->thumbnail) }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover" loading="lazy">
-                        @elseif($sermon->youtube_thumbnail)
-                            <img src="{{ $sermon->youtube_thumbnail }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover" loading="lazy">
+                        @elseif($sermon->thumbnail_url)
+                            <img src="{{ $sermon->thumbnail_url }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover" loading="lazy">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
                                 </svg>
                             </div>
                         @endif
-                        @if($sermon->video_url)
+                        @if($sermon->hasVideo())
                             <div class="absolute inset-0 flex items-center justify-center bg-black/30">
                                 <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M8 5v14l11-7z"/>
@@ -82,7 +82,7 @@
                             @if($sermon->series)
                                 <span class="px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded text-xs">{{ $sermon->series->title }}</span>
                             @endif
-                            <span>{{ $sermon->speaker_name ?? $sermon->speaker?->name ?? 'Спікер' }}</span>
+                            <span>{{ $sermon->speaker?->name ?? 'Спікер' }}</span>
                             <span>&middot;</span>
                             <span>{{ $sermon->sermon_date->format('d.m.Y') }}</span>
                         </div>
@@ -90,14 +90,14 @@
 
                     <!-- Type Icons -->
                     <div class="flex items-center gap-2">
-                        @if($sermon->video_url)
+                        @if($sermon->hasVideo())
                             <span class="p-1.5 bg-red-100 dark:bg-red-900/30 rounded-full" title="Відео">
                                 <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                 </svg>
                             </span>
                         @endif
-                        @if($sermon->audio_url || $sermon->audio_file)
+                        @if($sermon->hasAudio())
                             <span class="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full" title="Аудіо">
                                 <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>

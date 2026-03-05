@@ -81,8 +81,10 @@ class SectionController extends Controller
     {
         $church = $this->getChurchOrFail();
 
+        $allowedSections = ['hero', 'about', 'service_times', 'events', 'sermons', 'gallery', 'testimonials', 'donations', 'contact', 'cta', 'faq', 'blog', 'groups', 'ministries', 'leadership', 'pastor_message'];
+
         $validated = $request->validate([
-            'section_id' => 'required|string',
+            'section_id' => ['required', 'string', \Illuminate\Validation\Rule::in($allowedSections)],
             'settings' => 'required|array',
         ]);
 

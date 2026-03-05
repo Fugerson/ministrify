@@ -125,6 +125,10 @@
     @yield('breadcrumbs')
     </script>
     @endif
+
+    @if($church->custom_css)
+    <style>{!! $church->custom_css !!}</style>
+    @endif
 </head>
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Navigation -->

@@ -33,16 +33,16 @@ class TestimonialController extends Controller
             'author_name' => 'required|string|max:255',
             'author_role' => 'nullable|string|max:255',
             'content' => 'required|string|max:2000',
-            'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
+            'author_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'video_url' => 'nullable|url|max:500',
             'rating' => 'nullable|integer|min:1|max:5',
             'is_featured' => 'boolean',
             'is_public' => 'boolean',
         ]);
 
-        if ($request->hasFile('photo')) {
-            $stored = ImageService::storeWithHeicConversion($request->file('photo'), "churches/{$church->id}/testimonials");
-            $validated['photo'] = $stored['path'];
+        if ($request->hasFile('author_photo')) {
+            $stored = ImageService::storeWithHeicConversion($request->file('author_photo'), "churches/{$church->id}/testimonials");
+            $validated['author_photo'] = $stored['path'];
         }
 
         $validated['church_id'] = $church->id;
@@ -62,7 +62,7 @@ class TestimonialController extends Controller
             'author_name' => 'required|string|max:255',
             'author_role' => 'nullable|string|max:255',
             'content' => 'required|string|max:2000',
-            'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
+            'author_photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'video_url' => 'nullable|url|max:500',
             'rating' => 'nullable|integer|min:1|max:5',
             'is_featured' => 'boolean',
@@ -70,8 +70,8 @@ class TestimonialController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            if ($testimonial->photo) {
-                Storage::disk('public')->delete($testimonial->photo);
+            if ($testimonial->author_photo) {
+                Storage::disk('public')->delete($testimonial->author_photo);
             }
             $stored = ImageService::storeWithHeicConversion($request->file('photo'), "churches/{$church->id}/testimonials");
             $validated['photo'] = $stored['path'];
@@ -86,8 +86,8 @@ class TestimonialController extends Controller
     {
         $this->authorize('delete', $testimonial);
 
-        if ($testimonial->photo) {
-            Storage::disk('public')->delete($testimonial->photo);
+        if ($testimonial->author_photo) {
+            Storage::disk('public')->delete($testimonial->author_photo);
         }
 
         $testimonial->delete();

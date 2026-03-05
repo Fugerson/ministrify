@@ -14,10 +14,9 @@
                         <div class="h-48 overflow-hidden">
                             <img src="{{ Storage::url($sermon->thumbnail) }}" alt="{{ $sermon->title }}" class="w-full h-full object-cover" loading="lazy">
                         </div>
-                    @elseif($sermon->video_url && str_contains($sermon->video_url, 'youtube'))
+                    @elseif($sermon->youtube_url)
                         @php
-                            preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $sermon->video_url, $matches);
-                            $videoId = $matches[1] ?? null;
+                            $videoId = $sermon->youtube_id;
                         @endphp
                         @if($videoId)
                             <div class="h-48 overflow-hidden">
@@ -35,21 +34,28 @@
                     <div class="p-5">
                         <p class="text-sm text-gray-500 mb-2">{{ $sermon->sermon_date->translatedFormat('d F Y') }}</p>
                         <h3 class="font-semibold text-gray-900">{{ $sermon->title }}</h3>
-                        @if($sermon->speaker_name)
-                            <p class="text-sm text-primary-600 mt-1">{{ $sermon->speaker_name }}</p>
+                        @if($sermon->speaker?->name)
+                            <p class="text-sm text-primary-600 mt-1">{{ $sermon->speaker->name }}</p>
                         @endif
-                        @if($sermon->video_url || $sermon->audio_url)
+                        @if($sermon->hasVideo() || $sermon->hasAudio())
                             <div class="flex gap-2 mt-4">
-                                @if($sermon->video_url)
-                                    <a href="{{ $sermon->video_url }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors">
+                                @if($sermon->youtube_url)
+                                    <a href="{{ $sermon->youtube_url }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                        </svg>
+                                        Дивитись
+                                    </a>
+                                @elseif($sermon->vimeo_url)
+                                    <a href="{{ $sermon->vimeo_url }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                                         </svg>
                                         Дивитись
                                     </a>
                                 @endif
-                                @if($sermon->audio_url)
-                                    <a href="{{ $sermon->audio_url }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors">
+                                @if($sermon->podcast_url)
+                                    <a href="{{ $sermon->podcast_url }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                                         </svg>

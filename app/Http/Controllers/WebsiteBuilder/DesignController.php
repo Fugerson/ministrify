@@ -70,7 +70,7 @@ class DesignController extends Controller
             'title' => 'nullable|string|max:200',
             'subtitle' => 'nullable|string|max:500',
             'cta_text' => 'nullable|string|max:100',
-            'cta_url' => 'nullable|string|max:255',
+            'cta_url' => 'nullable|url|max:255',
             'video_url' => 'nullable|url|max:255',
         ]);
 

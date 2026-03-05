@@ -10,7 +10,7 @@
 
     {{-- List view --}}
     <div x-show="!cnt.sermons.loading && cnt.sermons.editing === null">
-        <button x-on:click="contentNew('sermons', { title: '', sermon_date: '', video_url: '', speaker_name: '', description: '' })"
+        <button x-on:click="contentNew('sermons', { title: '', sermon_date: '', youtube_url: '', speaker_id: '', description: '' })"
                 class="w-full mb-2 px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">
             + Додати проповідь
         </button>
@@ -20,10 +20,10 @@
                     <p x-text="item.title" class="text-xs font-medium text-gray-800 truncate"></p>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span x-text="item.sermon_date" class="text-[10px] text-gray-400"></span>
-                        <span x-show="item.speaker_name || item.speaker?.name" x-text="item.speaker_name || item.speaker?.name" class="text-[10px] text-gray-400"></span>
+                        <span x-show="item.speaker?.name" x-text="item.speaker?.name" class="text-[10px] text-gray-400"></span>
                     </div>
                     <div class="flex gap-2 mt-1">
-                        <button x-on:click="contentEdit('sermons', item, ['title', 'sermon_date', 'video_url', 'speaker_name', 'description'])" class="text-[10px] text-blue-500 hover:text-blue-700">Ред.</button>
+                        <button x-on:click="contentEdit('sermons', item, ['title', 'sermon_date', 'youtube_url', 'speaker_id', 'description'])" class="text-[10px] text-blue-500 hover:text-blue-700">Ред.</button>
                         <button x-on:click="contentDeleteItem('sermons', item.id)" class="text-[10px] text-red-500 hover:text-red-700">Вид.</button>
                     </div>
                 </div>
@@ -38,9 +38,9 @@
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
         <input x-model="cnt.sermons.form.sermon_date" type="date"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
-        <input x-model="cnt.sermons.form.speaker_name" type="text" placeholder="Спікер"
+        <input x-model="cnt.sermons.form.speaker_id" type="text" placeholder="Спікер"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
-        <input x-model="cnt.sermons.form.video_url" type="url" placeholder="URL відео (YouTube тощо)"
+        <input x-model="cnt.sermons.form.youtube_url" type="url" placeholder="URL відео (YouTube тощо)"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
         <textarea x-model="cnt.sermons.form.description" placeholder="Опис (необов'язково)" rows="2"
                   class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-y"></textarea>

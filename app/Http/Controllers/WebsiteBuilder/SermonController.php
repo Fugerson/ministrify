@@ -48,10 +48,10 @@ class SermonController extends Controller
             'description' => 'nullable|string|max:5000',
             'sermon_series_id' => ['nullable', Rule::exists('sermon_series', 'id')->where('church_id', $church->id)],
             'speaker_id' => ['nullable', Rule::exists('staff_members', 'id')->where('church_id', $church->id)],
-            'speaker_name' => 'nullable|string|max:255',
             'sermon_date' => 'required|date',
-            'video_url' => 'nullable|url|max:500',
-            'audio_url' => 'nullable|url|max:500',
+            'youtube_url' => 'nullable|url|max:500',
+            'vimeo_url' => 'nullable|url|max:500',
+            'podcast_url' => 'nullable|url|max:500',
             'audio_file' => 'nullable|file|mimes:mp3,wav,m4a|max:51200',
             'thumbnail' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'scripture_reference' => 'nullable|string|max:255',
@@ -70,6 +70,7 @@ class SermonController extends Controller
         }
 
         $validated['church_id'] = $church->id;
+        $validated['created_by'] = auth()->id();
 
         Sermon::create($validated);
 
@@ -96,10 +97,10 @@ class SermonController extends Controller
             'description' => 'nullable|string|max:5000',
             'sermon_series_id' => ['nullable', Rule::exists('sermon_series', 'id')->where('church_id', $church->id)],
             'speaker_id' => ['nullable', Rule::exists('staff_members', 'id')->where('church_id', $church->id)],
-            'speaker_name' => 'nullable|string|max:255',
             'sermon_date' => 'required|date',
-            'video_url' => 'nullable|url|max:500',
-            'audio_url' => 'nullable|url|max:500',
+            'youtube_url' => 'nullable|url|max:500',
+            'vimeo_url' => 'nullable|url|max:500',
+            'podcast_url' => 'nullable|url|max:500',
             'audio_file' => 'nullable|file|mimes:mp3,wav,m4a|max:51200',
             'thumbnail' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'scripture_reference' => 'nullable|string|max:255',

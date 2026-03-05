@@ -9,11 +9,11 @@
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach($galleries as $gallery)
-                @if($gallery->images && count($gallery->images) > 0)
-                    @foreach(array_slice($gallery->images, 0, 4) as $image)
+                @if($gallery->photos->count() > 0)
+                    @foreach($gallery->photos->take(4) as $photo)
                         <div class="aspect-square rounded-xl overflow-hidden">
-                            <img src="{{ Storage::url($image) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer hover:opacity-80 transition-opacity" loading="lazy"
-                                 @click="$dispatch('open-lightbox', '{{ Storage::url($image) }}')">
+                            <img src="{{ Storage::url($photo->file_path) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer hover:opacity-80 transition-opacity" loading="lazy"
+                                 @click="$dispatch('open-lightbox', '{{ Storage::url($photo->file_path) }}')">
                         </div>
                     @endforeach
                 @endif
