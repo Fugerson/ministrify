@@ -2084,12 +2084,12 @@ function peopleTable() {
             let accountNote = null;
             let bothHaveAccounts = false;
             if (personA.has_user && personB.has_user) {
-                accountNote = '{{ __("app.merge_both_have_accounts") }}';
+                accountNote = @json(__("app.merge_both_have_accounts"));
                 bothHaveAccounts = true;
             } else if (!personA.has_user && personB.has_user) {
-                accountNote = '{{ __("app.duplicates_has_account") }} ← ' + personB.full_name;
+                accountNote = @json(__("app.duplicates_has_account")) + ' ← ' + personB.full_name;
             } else if (personA.has_user) {
-                accountNote = '{{ __("app.duplicates_has_account") }}: ' + personA.full_name;
+                accountNote = @json(__("app.duplicates_has_account")) + ': ' + personA.full_name;
             }
 
             this.mergeState = {
