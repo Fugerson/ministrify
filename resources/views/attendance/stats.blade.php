@@ -1,22 +1,22 @@
 @extends('layouts.app')
 
-@section('title', __('Статистика відвідуваності'))
+@section('title', __('app.attendance_stats_title'))
 
 @section('content')
 <div class="space-y-6">
     <!-- Summary -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Середня відвідуваність') }}</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.attendance_average') }}</h2>
 
         <div class="text-center">
             <p class="text-5xl font-bold text-primary-600">{{ round($monthlyAttendance ?? 0) }}</p>
-            <p class="text-gray-500 dark:text-gray-400">{{ __('осіб в середньому') }}</p>
+            <p class="text-gray-500 dark:text-gray-400">{{ __('app.attendance_people_avg') }}</p>
         </div>
     </div>
 
     <!-- Chart -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Динаміка за останні 12 тижнів') }}</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.attendance_dynamics_12weeks') }}</h2>
 
         <div class="h-64 flex items-end justify-between space-x-2">
             @php $maxCount = max(array_column($chartData, 'count')) ?: 1; @endphp
@@ -25,7 +25,7 @@
                     <div class="w-full bg-primary-100 dark:bg-primary-900 rounded-t"
                          style="height: {{ ($data['count'] / $maxCount) * 100 }}%">
                         <div class="w-full h-full bg-primary-500 rounded-t hover:bg-primary-600 transition-colors"
-                             title="{{ __(':count осіб', ['count' => $data['count']]) }}"></div>
+                             title="{{ __('app.attendance_n_people', ['count' => $data['count']]) }}"></div>
                     </div>
                     <span class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $data['date'] }}</span>
                 </div>
@@ -37,8 +37,8 @@
     @if(count($needAttention) > 0)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">&#9888; {{ __('Потребують уваги') }}</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Не відвідували 3+ тижні') }}</p>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">&#9888; {{ __('app.attendance_need_attention') }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.attendance_absent_3weeks') }}</p>
         </div>
 
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -57,7 +57,7 @@
                     <div class="flex items-center space-x-3">
                         @if($person->phone)
                             <a href="tel:{{ $person->phone }}" class="text-primary-600 hover:text-primary-500 text-sm">
-                                {{ __('Зателефонувати') }}
+                                {{ __('app.attendance_call') }}
                             </a>
                         @endif
                         @if($person->telegram_username)
@@ -71,7 +71,7 @@
     @endif
 
     <a href="{{ route('attendance.index') }}" class="inline-block text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-        &larr; {{ __('Назад до списку') }}
+        &larr; {{ __('app.attendance_back_to_list') }}
     </a>
 </div>
 @endsection

@@ -1519,12 +1519,12 @@
                                             <span class="w-px h-3 bg-gray-200 dark:bg-gray-600"></span>
                                             @endif
                                             @if($member->user_id)
-                                            <span class="text-emerald-500 dark:text-emerald-400" title="Користувач Ministrify">
+                                            <span class="text-emerald-500 dark:text-emerald-400" title="{{ __('app.ministry_user_ministrify') }}">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                             </span>
                                             @endif
                                             @if($member->telegram_chat_id)
-                                            <span class="text-emerald-500 dark:text-emerald-400" title="Telegram бот підключено">
+                                            <span class="text-emerald-500 dark:text-emerald-400" title="{{ __('app.ministry_telegram_connected') }}">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                                             </span>
                                             @endif
@@ -1612,22 +1612,22 @@
                                             <div x-show="open" @click.away="open = false" x-transition
                                                  class="absolute left-0 mt-1 w-36 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-20 border border-gray-200 dark:border-gray-600 py-1">
                                                 <button type="button" @click="setRole('leader')" :disabled="saving" class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2" :class="role === 'leader' ? 'text-amber-700 dark:text-amber-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
-                                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span> Лідер
+                                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span> {{ __('app.ministry_role_leader') }}
                                                 </button>
                                                 <button type="button" @click="setRole('co-leader')" :disabled="saving" class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2" :class="role === 'co-leader' ? 'text-primary-700 dark:text-primary-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
-                                                    <span class="w-2 h-2 rounded-full bg-primary-400"></span> Со-лідер
+                                                    <span class="w-2 h-2 rounded-full bg-primary-400"></span> {{ __('app.ministry_role_co_leader') }}
                                                 </button>
                                                 <button type="button" @click="setRole('member')" :disabled="saving" class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2" :class="role === 'member' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-700 dark:text-gray-300'">
-                                                    <span class="w-2 h-2 rounded-full bg-gray-400"></span> Учасник
+                                                    <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ __('app.ministry_role_member') }}
                                                 </button>
                                             </div>
                                         </div>
                                         @else
                                         <template x-if="role === 'leader'">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">Лідер</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">{{ __('app.ministry_role_leader') }}</span>
                                         </template>
                                         <template x-if="role === 'co-leader'">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400">Со-лідер</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400">{{ __('app.ministry_role_co_leader') }}</span>
                                         </template>
                                         @endcan
                                     </div>
@@ -1660,12 +1660,12 @@
                                     <span class="w-px h-3.5 bg-gray-200 dark:bg-gray-600"></span>
                                     @endif
                                     @if($member->user_id)
-                                    <span class="text-emerald-500 dark:text-emerald-400" title="Користувач Ministrify">
+                                    <span class="text-emerald-500 dark:text-emerald-400" title="{{ __('app.ministry_user_ministrify') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                     </span>
                                     @endif
                                     @if($member->telegram_chat_id)
-                                    <span class="text-emerald-500 dark:text-emerald-400" title="Telegram бот підключено">
+                                    <span class="text-emerald-500 dark:text-emerald-400" title="{{ __('app.ministry_telegram_connected') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                                     </span>
                                     @endif
@@ -1713,12 +1713,12 @@
                                 <span class="hidden sm:inline text-xs text-gray-400">{{ $member->phone }}</span>
                                 @endif
                                 @if($member->user_id)
-                                <span class="hidden sm:inline text-emerald-500 dark:text-emerald-400" title="Користувач Ministrify">
+                                <span class="hidden sm:inline text-emerald-500 dark:text-emerald-400" title="{{ __('app.ministry_user_ministrify') }}">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                 </span>
                                 @endif
                                 @if($member->telegram_chat_id)
-                                <span class="hidden sm:inline text-emerald-500 dark:text-emerald-400" title="Telegram бот підключено">
+                                <span class="hidden sm:inline text-emerald-500 dark:text-emerald-400" title="{{ __('app.ministry_telegram_connected') }}">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                                 </span>
                                 @endif
@@ -1738,7 +1738,7 @@
                 @else
                 <div class="text-center py-10">
                     <svg class="mx-auto w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Немає учасників</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.ministry_no_members') }}</p>
                 </div>
                 @endif
             </div>
@@ -1756,7 +1756,7 @@
                                     <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                     </svg>
-                                    Бюджет
+                                    {{ __('app.ministry_budget_label') }}
                                 </h3>
                                 <div class="flex items-center gap-2">
                                     <button @click="prevMonth()" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -1772,22 +1772,22 @@
                             <div x-show="budget.total_allocated > 0 || budget.total_income > 0 || budget.total_spent > 0 || budget.has_items" class="mt-2 flex flex-wrap items-center gap-3 text-sm">
                                 <span class="text-green-600 dark:text-green-400 flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
-                                    Отримано <span x-text="fmt((budget.total_allocated || 0) + (budget.total_income || 0)) + ' ₴'"></span>
+                                    {{ __('app.ministry_received') }} <span x-text="fmt((budget.total_allocated || 0) + (budget.total_income || 0)) + ' ₴'"></span>
                                 </span>
                                 <span class="text-gray-300 dark:text-gray-600">|</span>
                                 <span class="text-red-500 dark:text-red-400 flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
-                                    Витрачено <span x-text="fmt(budget.total_spent) + ' ₴'"></span>
+                                    {{ __('app.ministry_spent') }} <span x-text="fmt(budget.total_spent) + ' ₴'"></span>
                                 </span>
                                 <span class="text-gray-300 dark:text-gray-600">|</span>
                                 <span class="font-medium px-2 py-0.5 rounded-full text-xs"
                                       :class="balance >= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
-                                    <span x-text="'Баланс ' + (balance >= 0 ? '+' : '') + fmt(balance) + ' ₴'"></span>
+                                    <span x-text="'{{ __('app.ministry_balance') }} ' + (balance >= 0 ? '+' : '') + fmt(balance) + ' ₴'"></span>
                                 </span>
                                 @can('contribute-ministry', $ministry)
-                                <button x-show="budget.has_items" @click="copyBudget()" class="ml-auto text-xs text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1" title="Копіювати на наступний місяць">
+                                <button x-show="budget.has_items" @click="copyBudget()" class="ml-auto text-xs text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1" title="{{ __('app.ministry_copy_next_month') }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                    Копіювати на наст. місяць
+                                    {{ __('app.ministry_copy_next_month') }}
                                 </button>
                                 @endcan
                             </div>
@@ -1819,12 +1819,12 @@
                                 <table class="w-full text-sm">
                                     <thead>
                                         <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase border-b border-gray-200 dark:border-gray-600">
-                                            <th class="px-2 py-2 text-left">Стаття</th>
-                                            <th class="px-2 py-2 text-center hidden sm:table-cell">Дата</th>
-                                            <th class="px-2 py-2 text-right">План</th>
-                                            <th class="px-2 py-2 text-right">Факт</th>
-                                            <th class="px-2 py-2 text-right">Різниця</th>
-                                            <th class="px-2 py-2 text-left hidden sm:table-cell">Відповідальні</th>
+                                            <th class="px-2 py-2 text-left">{{ __('app.ministry_item_name') }}</th>
+                                            <th class="px-2 py-2 text-center hidden sm:table-cell">{{ __('app.ministry_date_col') }}</th>
+                                            <th class="px-2 py-2 text-right">{{ __('app.ministry_plan') }}</th>
+                                            <th class="px-2 py-2 text-right">{{ __('app.ministry_fact') }}</th>
+                                            <th class="px-2 py-2 text-right">{{ __('app.ministry_difference') }}</th>
+                                            <th class="px-2 py-2 text-left hidden sm:table-cell">{{ __('app.ministry_responsible') }}</th>
                                             @can('contribute-ministry', $ministry)
                                             <th class="px-2 py-2 text-center w-16"></th>
                                             @endcan
@@ -1858,13 +1858,13 @@
                                                 <td class="px-2 py-2.5 text-center">
                                                     <div class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button @click="openItemModal('edit', bi)"
-                                                                class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg" title="Редагувати">
+                                                                class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg" title="{{ __('app.ministry_edit_title') }}">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                             </svg>
                                                         </button>
                                                         <button @click="deleteItem(bi.id, bi.name)"
-                                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити">
+                                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="{{ __('app.ministry_delete_title') }}">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                             </svg>
@@ -1876,7 +1876,7 @@
                                         </template>
 
                                         <tr x-show="budget.unmatched_spent > 0" class="bg-orange-50/50 dark:bg-orange-900/10">
-                                            <td class="px-2 py-2.5 text-gray-500 italic">Інші витрати</td>
+                                            <td class="px-2 py-2.5 text-gray-500 italic">{{ __('app.ministry_other_expenses') }}</td>
                                             <td class="px-2 py-2.5 hidden sm:table-cell"></td>
                                             <td class="px-2 py-2.5 text-right text-gray-400">—</td>
                                             <td class="px-2 py-2.5 text-right font-medium text-gray-900 dark:text-white" x-text="fmt(budget.unmatched_spent) + ' ₴'"></td>
@@ -1887,7 +1887,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr class="border-t-2 border-gray-200 dark:border-gray-600 font-semibold text-sm">
-                                            <td class="px-2 py-2.5 text-gray-900 dark:text-white">Всього</td>
+                                            <td class="px-2 py-2.5 text-gray-900 dark:text-white">{{ __('app.ministry_total') }}</td>
                                             <td class="px-2 py-2.5 hidden sm:table-cell"></td>
                                             <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white" x-text="fmt(totalPlanned) + ' ₴'"></td>
                                             <td class="px-2 py-2.5 text-right text-gray-900 dark:text-white" x-text="fmt(budget.total_spent) + ' ₴'"></td>
@@ -2049,7 +2049,7 @@
                                     </div>
                                     @can('contribute-ministry', $ministry)
                                     <button @click="deleteIncome(inc.id)"
-                                            class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0" title="Видалити">
+                                            class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0" title="{{ __('app.ministry_delete_title') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -2198,13 +2198,13 @@
                                         <div class="flex items-center gap-1">
                                             <button @click="openExpenseModal('edit', t)"
                                                     class="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded"
-                                                    title="Редагувати">
+                                                    title="{{ __('app.ministry_edit_title') }}">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
                                             </button>
                                             <button @click="deleteExpense(t.id)"
-                                                    class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded" title="Видалити">
+                                                    class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded" title="{{ __('app.ministry_delete_title') }}">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                 </svg>

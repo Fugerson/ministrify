@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Швидке редагування')
+@section('title', __('app.quick_edit'))
 
 @section('content')
 <div x-data="quickEdit()" class="space-y-4">
@@ -10,7 +10,7 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Швидке редагування
+            {{ __('app.quick_edit') }}
         </a>
     </div>
 
@@ -19,19 +19,19 @@
         <div class="max-w-screen-2xl mx-auto flex flex-wrap items-center gap-3">
             <!-- Search -->
             <div class="w-full sm:w-48">
-                <input type="text" x-model="searchQuery" placeholder="Пошук..."
+                <input type="text" x-model="searchQuery" placeholder="{{ __('app.search') }}..."
                        class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20 dark:text-white">
             </div>
 
             <!-- Filters -->
             <select x-model="filterMinistry" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
-                <option value="">Команда</option>
+                <option value="">{{ __('app.team_label') }}</option>
                 @foreach($ministries as $ministry)
                 <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                 @endforeach
             </select>
             <select x-model="filterStatus" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
-                <option value="">Статус</option>
+                <option value="">{{ __('app.status_filter') }}</option>
                 <option value="guest">{{ __('app.guest') }}</option>
                 <option value="newcomer">{{ __('app.newcomer') }}</option>
                 <option value="member">{{ __('app.church_member') }}</option>
@@ -40,9 +40,9 @@
                 <option value="leadership">{{ __('app.leadership') }}</option>
             </select>
             <select x-model="filterGender" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white">
-                <option value="">Стать</option>
-                <option value="male">Ч</option>
-                <option value="female">Ж</option>
+                <option value="">{{ __('app.gender') }}</option>
+                <option value="male">{{ __('app.male_short') }}</option>
+                <option value="female">{{ __('app.female_short') }}</option>
             </select>
 
             <button @click="clearFilters()" x-show="hasFilters" x-cloak class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
@@ -58,7 +58,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Новий
+                {{ __('app.new_row') }}
             </button>
             @endif
 
@@ -66,20 +66,20 @@
             <template x-if="selectedCount > 0">
                 <div class="flex items-center gap-2 ml-2 pl-3 border-l border-gray-300 dark:border-gray-600">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Вибрано: <span x-text="selectedCount" class="font-bold text-primary-600"></span>
+                        {{ __('app.selected_label') }} <span x-text="selectedCount" class="font-bold text-primary-600"></span>
                     </span>
                     <button @click="bulkGrantAccess()" class="inline-flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                         </svg>
-                        Доступ
+                        {{ __('app.access') }}
                     </button>
                     @if(auth()->user()->canDelete('people'))
                     <button @click="bulkDelete()" class="inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Видалити
+                        {{ __('app.delete') }}
                     </button>
                     @endif
                     <button @click="clearSelection()" class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
@@ -98,7 +98,7 @@
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <circle cx="10" cy="10" r="5"/>
                 </svg>
-                Зміни
+                {{ __('app.changes_label') }}
             </span>
             <button @click="saveAll()" :disabled="saving || !hasChanges"
                     class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white rounded-lg font-medium text-sm">

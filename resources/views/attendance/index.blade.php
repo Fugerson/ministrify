@@ -77,7 +77,7 @@
                 <p>{{ __('app.attendance_no_records_month') }}</p>
                 @can('create', \App\Models\Attendance::class)
                 <a href="{{ route('attendance.create') }}" class="mt-2 inline-block text-primary-600 hover:text-primary-500">
-                    {{ __('Створити check-in') }}
+                    {{ __('app.attendance_create_checkin') }}
                 </a>
                 @endcan
             </div>

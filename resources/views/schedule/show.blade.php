@@ -653,7 +653,7 @@
                     $eventTeam->push((object)[
                         'ministry_name' => $ministryName,
                         'ministry_color' => $ministryColor,
-                        'role_name' => $member->ministryRole?->name ?? __('Учасник'),
+                        'role_name' => $member->ministryRole?->name ?? __('app.schedule_member'),
                         'person_name' => $member->person->full_name,
                         'status' => $member->status,
                         'notes' => $member->notes,
@@ -674,7 +674,7 @@
                         <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
-                        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('Команда події') }}</h2>
+                        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_team') }}</h2>
                     </div>
                     <span class="text-sm text-gray-500 dark:text-gray-400">{{ $eventTeamCount }}</span>
                 </button>
@@ -733,15 +733,15 @@
                         <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
-                        <h2 class="font-semibold text-gray-900 dark:text-white">Відвідуваність</h2>
+                        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_attendance') }}</h2>
                         <span x-show="saving" class="text-xs text-gray-500 dark:text-gray-400">
                             <svg class="w-4 h-4 animate-spin inline" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </span>
-                        <span x-show="saved" x-transition class="text-xs text-green-600 dark:text-green-400">Збережено</span>
-                        <span x-show="error" class="text-xs text-red-600 dark:text-red-400">Помилка!</span>
+                        <span x-show="saved" x-transition class="text-xs text-green-600 dark:text-green-400">{{ __('app.schedule_saved') }}</span>
+                        <span x-show="error" class="text-xs text-red-600 dark:text-red-400">{{ __('app.schedule_error') }}</span>
                     </div>
                     @php
                         $presentCount = $event->attendance?->records->where('present', true)->count() ?? 0;
@@ -757,7 +757,7 @@
 
                     <!-- Search -->
                     <div class="mb-4">
-                        <input type="text" x-model="search" placeholder="Пошук..."
+                        <input type="text" x-model="search" placeholder="{{ __('app.schedule_search') }}"
                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500">
                     </div>
 
@@ -799,7 +799,7 @@
                     @if($canEdit || auth()->user()->canEdit('attendance'))
                     <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between">
-                            <label class="text-sm text-gray-700 dark:text-gray-300">Гості</label>
+                            <label class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.schedule_guests') }}</label>
                             <input type="number" x-model="guestsCount" min="0"
                                    @change="saveAttendance()"
                                    class="w-20 px-2 py-1 text-sm text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -810,7 +810,7 @@
                     <!-- Total -->
                     <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-600 dark:text-gray-400">Всього присутніх:</span>
+                            <span class="text-gray-600 dark:text-gray-400">{{ __('app.schedule_total_present') }}</span>
                             <span class="font-semibold text-gray-900 dark:text-white" x-text="attending.length + parseInt(guestsCount || 0)"></span>
                         </div>
                     </div>
@@ -899,9 +899,9 @@
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
-                        Нагадування
+                        {{ __('app.schedule_reminders') }}
                     </h3>
-                    <span x-show="saving" class="text-xs text-gray-400">Збереження...</span>
+                    <span x-show="saving" class="text-xs text-gray-400">{{ __('app.schedule_saving') }}</span>
                 </div>
 
                 <div class="space-y-3">
@@ -911,8 +911,8 @@
                             <div class="flex items-center gap-2">
                                 <select x-model="reminder.type" @change="updateReminder(index)"
                                         class="flex-1 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <option value="days">За днів</option>
-                                    <option value="hours">За годин</option>
+                                    <option value="days">{{ __('app.schedule_in_days') }}</option>
+                                    <option value="hours">{{ __('app.schedule_in_hours') }}</option>
                                 </select>
                                 <input type="number" x-model="reminder.value" min="1" max="30" @change="saveReminders()"
                                        class="w-14 px-2 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
@@ -930,13 +930,13 @@
 
                             <!-- Recipients row -->
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-500 dark:text-gray-400 shrink-0">Кому:</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 shrink-0">{{ __('app.schedule_to_whom') }}</span>
                                 <select x-model="reminder.recipients" @change="saveReminders()"
                                         class="flex-1 px-2 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <option value="all">Всім призначеним</option>
-                                    <option value="confirmed">Тільки підтвердженим</option>
-                                    <option value="pending">Тільки очікуючим</option>
-                                    <option value="custom">Вибрати людей...</option>
+                                    <option value="all">{{ __('app.schedule_all_assigned') }}</option>
+                                    <option value="confirmed">{{ __('app.schedule_confirmed_only') }}</option>
+                                    <option value="pending">{{ __('app.schedule_pending_only') }}</option>
+                                    <option value="custom">{{ __('app.schedule_choose_people') }}</option>
                                 </select>
                             </div>
 
@@ -955,7 +955,7 @@
                                         </template>
                                     </div>
                                     <p x-show="availablePeople.length === 0" class="text-xs text-gray-400 italic">
-                                        Немає призначених людей
+                                        {{ __('app.schedule_no_assigned_people') }}
                                     </p>
                                 </div>
                             </template>
@@ -964,7 +964,7 @@
 
                     <template x-if="reminders.length === 0">
                         <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
-                            Нагадування не налаштовані
+                            {{ __('app.schedule_no_reminders') }}
                         </p>
                     </template>
                 </div>
@@ -974,7 +974,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Додати нагадування
+                    {{ __('app.schedule_add_reminder') }}
                 </button>
             </div>
             @endcan
@@ -983,7 +983,7 @@
 
             <!-- Quick Actions -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Швидкі дії</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.schedule_quick_actions') }}</h3>
                 <div class="space-y-2">
                     <!-- Add to Google Calendar -->
                     <a href="{{ route('events.google', $event) }}" target="_blank"
@@ -991,7 +991,7 @@
                         <svg class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zM8.25 18.75h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm4 8h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm4 8h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5z"/>
                         </svg>
-                        <span>Додати в Google Calendar</span>
+                        <span>{{ __('app.schedule_add_to_google') }}</span>
                     </a>
 
                     <a href="{{ route('schedule') }}"
@@ -999,7 +999,7 @@
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <span>Назад до розкладу</span>
+                        <span>{{ __('app.schedule_back_to_schedule') }}</span>
                     </a>
 
                     @can('delete', $event)
@@ -1017,7 +1017,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                 </svg>
-                                <span>Видалити подію</span>
+                                <span>{{ __('app.schedule_delete_event') }}</span>
                             </button>
 
                             <!-- Delete Modal -->
@@ -1054,12 +1054,12 @@
                                             </div>
 
                                             <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">
-                                                Видалити подію?
+                                                {{ __('app.schedule_delete_event_title') }}
                                             </h3>
 
                                             @if($hasRelatedEvents)
                                                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
-                                                    Ця подія є частиною серії з {{ $relatedCount }} подій. Що ви хочете видалити?
+                                                    {{ __('app.schedule_series_part', ['count' => $relatedCount]) }}
                                                 </p>
 
                                                 <div class="mt-6 space-y-3">
@@ -1067,16 +1067,16 @@
                                                     <button type="button"
                                                             @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 0 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
                                                             class="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
-                                                        <div class="font-medium">Тільки цю подію</div>
-                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Інші події серії залишаться</div>
+                                                        <div class="font-medium">{{ __('app.schedule_only_this') }}</div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.schedule_others_remain') }}</div>
                                                     </button>
 
                                                     <!-- Delete all in series -->
                                                     <button type="button"
                                                             @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 1 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
                                                             class="w-full px-4 py-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-left">
-                                                        <div class="font-medium">Всю серію ({{ $relatedCount }} подій)</div>
-                                                        <div class="text-xs text-red-200 mt-0.5">Видалити всі пов'язані події</div>
+                                                        <div class="font-medium">{{ __('app.schedule_whole_series', ['count' => $relatedCount]) }}</div>
+                                                        <div class="text-xs text-red-200 mt-0.5">{{ __('app.schedule_delete_all_related') }}</div>
                                                     </button>
                                                 </div>
 

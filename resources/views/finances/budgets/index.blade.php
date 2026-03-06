@@ -341,11 +341,11 @@
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Команда</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Бюджет</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Витрачено</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Залишок</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">Прогрес</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.finance_team') }}</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.budget') }}</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.expenses') }}</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.finance_remaining') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">{{ __('app.progress') }}</th>
                             @if(auth()->user()->canEdit('finances'))
                             <th class="px-3 py-3 w-16"></th>
                             @endif
@@ -381,7 +381,7 @@
                                 </span>
                                 @if($item['allocated'] > 0)
                                 <div class="text-[10px] text-green-600 dark:text-green-400 mt-0.5">
-                                    ↳ виділено {{ number_format($item['allocated'], 0, ',', ' ') }} ₴
+                                    ↳ {{ __('app.finance_allocated') }} {{ number_format($item['allocated'], 0, ',', ' ') }} ₴
                                 </div>
                                 @endif
                             </td>
@@ -456,13 +456,13 @@
                                         <table class="w-full text-sm">
                                             <thead>
                                                 <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase">
-                                                    <th class="px-3 py-2 text-left">Стаття витрат</th>
-                                                    <th class="px-3 py-2 text-right">План</th>
-                                                    <th class="px-3 py-2 text-right">Факт</th>
-                                                    <th class="px-3 py-2 text-right">Різниця</th>
-                                                    <th class="px-3 py-2 text-left">Відповідальні</th>
-                                                    <th class="px-3 py-2 text-center">Чеки</th>
-                                                    <th class="px-3 py-2 text-center w-20">Дії</th>
+                                                    <th class="px-3 py-2 text-left">{{ __('app.finance_budget_item_col') }}</th>
+                                                    <th class="px-3 py-2 text-right">{{ __('app.finance_plan_col') }}</th>
+                                                    <th class="px-3 py-2 text-right">{{ __('app.finance_fact_col') }}</th>
+                                                    <th class="px-3 py-2 text-right">{{ __('app.finance_difference_col') }}</th>
+                                                    <th class="px-3 py-2 text-left">{{ __('app.finance_responsible_col') }}</th>
+                                                    <th class="px-3 py-2 text-center">{{ __('app.finance_receipts_col') }}</th>
+                                                    <th class="px-3 py-2 text-center w-20">{{ __('app.finance_actions') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -498,7 +498,7 @@
                                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                                             </svg>
-                                                            Деталі
+                                                            {{ __('app.finance_details') }}
                                                         </button>
                                                     </td>
                                                     <td class="px-3 py-2.5 text-center">
@@ -532,7 +532,7 @@
                                                 {{-- Unmatched spending --}}
                                                 @if($item['unmatched_spent'] > 0)
                                                 <tr class="bg-orange-50/50 dark:bg-orange-900/10">
-                                                    <td class="px-3 py-2.5 text-gray-500 dark:text-gray-400 italic">Інші витрати</td>
+                                                    <td class="px-3 py-2.5 text-gray-500 dark:text-gray-400 italic">{{ __('app.finance_other_expenses') }}</td>
                                                     <td class="px-3 py-2.5 text-right text-gray-400">-</td>
                                                     <td class="px-3 py-2.5 text-right text-red-600 dark:text-red-400">{{ number_format($item['unmatched_spent'], 0, ',', ' ') }} ₴</td>
                                                     <td class="px-3 py-2.5"></td>
@@ -544,7 +544,7 @@
 
                                                 {{-- Totals --}}
                                                 <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold">
-                                                    <td class="px-3 py-2.5 text-gray-900 dark:text-white">Всього</td>
+                                                    <td class="px-3 py-2.5 text-gray-900 dark:text-white">{{ __('app.finance_total') }}</td>
                                                     <td class="px-3 py-2.5 text-right text-gray-900 dark:text-white">{{ number_format(collect($item['items'])->sum('planned_amount'), 0, ',', ' ') }} ₴</td>
                                                     <td class="px-3 py-2.5 text-right text-red-600 dark:text-red-400">{{ number_format($item['spent'], 0, ',', ' ') }} ₴</td>
                                                     <td class="px-3 py-2.5 text-right {{ $item['remaining'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
@@ -563,7 +563,7 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                             </svg>
-                                            Додати статтю
+                                            {{ __('app.finance_add_item') }}
                                         </button>
                                     </div>
                                     @endif
@@ -575,7 +575,7 @@
                         @empty
                         <tr>
                             <td colspan="{{ auth()->user()->canEdit('finances') ? 6 : 5 }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                Немає команд
+                                {{ __('app.finance_no_teams') }}
                             </td>
                         </tr>
                         @endforelse
@@ -609,7 +609,7 @@
             <svg class="w-5 h-5 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
             </svg>
-            <h2 class="text-lg font-semibold text-orange-800 dark:text-orange-200">Витрати без чеків</h2>
+            <h2 class="text-lg font-semibold text-orange-800 dark:text-orange-200">{{ __('app.finance_expenses_no_receipts') }}</h2>
         </div>
 
         <div class="divide-y divide-orange-200 dark:divide-orange-800">
@@ -618,7 +618,7 @@
                 <div>
                     <div class="font-medium text-orange-900 dark:text-orange-100">{{ $expense->description }}</div>
                     <div class="text-sm text-orange-600 dark:text-orange-400">
-                        {{ $expense->ministry?->name ?? 'Без команди' }} &bull; {{ $expense->date->format('d.m.Y') }}
+                        {{ $expense->ministry?->name ?? __('app.finance_no_team') }} &bull; {{ $expense->date->format('d.m.Y') }}
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -627,7 +627,7 @@
                     </span>
                     <button type="button" onclick="window.openExpenseEdit && window.openExpenseEdit({{ $expense->id }})"
                        class="px-3 py-1 text-sm bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
-                        Додати чек
+                        {{ __('app.finance_add_receipt') }}
                     </button>
                 </div>
             </div>
@@ -752,7 +752,7 @@ function budgetsPage() {
         copySaving: false,
         copyToMonth: {{ $month == 12 ? 1 : $month + 1 }},
         copyToYear: {{ $month == 12 ? $year + 1 : $year }},
-        monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
+        monthNames: ['{{ __('app.finance_month_jan') }}', '{{ __('app.finance_month_feb') }}', '{{ __('app.finance_month_mar') }}', '{{ __('app.finance_month_apr') }}', '{{ __('app.finance_month_may') }}', '{{ __('app.finance_month_jun') }}', '{{ __('app.finance_month_jul') }}', '{{ __('app.finance_month_aug') }}', '{{ __('app.finance_month_sep') }}', '{{ __('app.finance_month_oct') }}', '{{ __('app.finance_month_nov') }}', '{{ __('app.finance_month_dec') }}'],
 
         updatePeriod() {
             filterStorage.save('finance_budgets', { month: Number(this.month), year: Number(this.year) });
@@ -813,16 +813,16 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     this.showAllocateModal = false;
-                    showToast('success', data.message || 'Бюджет виділено');
+                    showToast('success', data.message || '{{ __('app.finance_budget_allocated_toast') }}');
                     setTimeout(() => location.reload(), 600);
                 } else if (res.status === 422 && data.errors) {
                     const msgs = Object.values(data.errors).flat();
-                    showToast('error', msgs[0] || 'Помилка валідації');
+                    showToast('error', msgs[0] || '{{ __('app.finance_validation_error') }}');
                 } else {
-                    showToast('error', data.message || 'Помилка виділення бюджету');
+                    showToast('error', data.message || '{{ __('app.finance_allocation_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка виділення бюджету');
+                showToast('error', '{{ __('app.finance_allocation_error') }}');
             } finally {
                 this.allocateSaving = false;
             }
@@ -849,16 +849,16 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     this.showBudgetModal = false;
-                    showToast('success', data.message || 'Збережено');
+                    showToast('success', data.message || '{{ __('app.finance_saved_toast') }}');
                     setTimeout(() => location.reload(), 600);
                 } else if (res.status === 422 && data.errors) {
                     const msgs = Object.values(data.errors).flat();
-                    showToast('error', msgs[0] || 'Помилка валідації');
+                    showToast('error', msgs[0] || '{{ __('app.finance_validation_error') }}');
                 } else {
-                    showToast('error', data.message || 'Помилка збереження');
+                    showToast('error', data.message || '{{ __('app.finance_save_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка збереження');
+                showToast('error', '{{ __('app.finance_save_error') }}');
             } finally {
                 this.budgetSaving = false;
             }
@@ -868,7 +868,7 @@ function budgetsPage() {
             this.itemModalMode = mode;
             this.itemBudgetId = budgetId;
             this.itemEditId = mode === 'edit' ? itemData.id : null;
-            this.itemModalTitle = mode === 'create' ? 'Нова стаття бюджету' : 'Редагувати статтю';
+            this.itemModalTitle = mode === 'create' ? '{{ __('app.finance_new_budget_item') }}' : '{{ __('app.finance_edit_budget_item') }}';
 
             if (mode === 'edit' && itemData) {
                 this.itemForm = {
@@ -959,12 +959,12 @@ function budgetsPage() {
                     setTimeout(() => location.reload(), 600);
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
-                    showToast('error', msgs[0] || 'Помилка валідації');
+                    showToast('error', msgs[0] || '{{ __('app.finance_validation_error') }}');
                 } else {
-                    showToast('error', data.message || 'Помилка збереження');
+                    showToast('error', data.message || '{{ __('app.finance_save_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка збереження');
+                showToast('error', '{{ __('app.finance_save_error') }}');
             } finally {
                 this.itemSaving = false;
             }

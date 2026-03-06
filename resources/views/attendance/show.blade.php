@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', __('Відвідуваність') . ': ' . $attendance->date->format('d.m.Y'))
+@section('title', __('app.attendance') . ': ' . $attendance->date->format('d.m.Y'))
 
 @section('actions')
 @can('update', $attendance)
 <a href="{{ route('attendance.edit', $attendance) }}"
    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
-    {{ __('Редагувати') }}
+    {{ __('app.edit') }}
 </a>
 @endcan
 @endsection
@@ -23,7 +23,7 @@
             </div>
             <div class="text-right">
                 <p class="text-3xl sm:text-4xl font-bold text-primary-600">{{ $attendance->total_count }}</p>
-                <p class="text-gray-500 dark:text-gray-400">{{ __('загальна кількість') }}</p>
+                <p class="text-gray-500 dark:text-gray-400">{{ __('app.attendance_total_count_label') }}</p>
             </div>
         </div>
 
@@ -37,7 +37,7 @@
     @if($attendance->records->count() > 0)
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Присутні з бази') }} ({{ $attendance->present_count }})</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.attendance_present_from_db') }} ({{ $attendance->present_count }})</h2>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($attendance->records->where('present', true) as $record)
@@ -58,13 +58,13 @@
 
     <div class="flex items-center justify-between">
         <a href="{{ route('attendance.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-            &larr; {{ __('Назад') }}
+            &larr; {{ __('app.attendance_back') }}
         </a>
         @can('delete', $attendance)
         <button type="button"
-                @click="ajaxDelete('{{ route('attendance.destroy', $attendance) }}', '{{ __('Видалити цей запис?') }}', null, '{{ route('attendance.index') }}')"
+                @click="ajaxDelete('{{ route('attendance.destroy', $attendance) }}', '{{ __('app.attendance_confirm_delete') }}', null, '{{ route('attendance.index') }}')"
                 class="text-red-600 hover:text-red-800">
-            {{ __('Видалити') }}
+            {{ __('app.delete') }}
         </button>
         @endcan
     </div>

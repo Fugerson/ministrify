@@ -2015,11 +2015,11 @@
                                                 this.editing = false;
                                             } else {
                                                 const data = await res.json();
-                                                alert(data.message || 'Помилка');
+                                                alert(data.message || '{{ __('app.settings_error') }}');
                                             }
                                         } catch (e) {
                                             console.error(e);
-                                            alert('Помилка збереження');
+                                            alert('{{ __('app.settings_save_error') }}');
                                         } finally {
                                             this.saving = false;
                                         }
@@ -2069,7 +2069,7 @@
                                             {{-- Suggested matches --}}
                                             <template x-if="suggestedMatches.length > 0 && !linkedPersonId">
                                                 <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded p-2 mb-1">
-                                                    <p class="text-xs font-medium text-amber-800 dark:text-amber-200 mb-1">Можливий збіг:</p>
+                                                    <p class="text-xs font-medium text-amber-800 dark:text-amber-200 mb-1">{{ __('app.settings_possible_match') }}:</p>
                                                     <template x-for="m in suggestedMatches" x-bind:key="m.id">
                                                         <button x-on:click="selectPerson(m)"
                                                                 class="block w-full text-left px-2 py-1 text-xs bg-white dark:bg-gray-700 rounded border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 mb-1">
@@ -2085,7 +2085,7 @@
                                             <template x-if="linkedPersonId">
                                                 <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded px-2 py-1 flex items-center justify-between text-xs">
                                                     <span class="text-green-800 dark:text-green-200">
-                                                        Привʼязати: <span class="font-medium" x-text="linkedPersonName"></span>
+                                                        {{ __('app.settings_link_to') }}: <span class="font-medium" x-text="linkedPersonName"></span>
                                                     </span>
                                                     <button x-on:click="clearPerson()" class="text-red-500 hover:text-red-700 ml-1">&times;</button>
                                                 </div>
@@ -2096,12 +2096,12 @@
                                                 <div>
                                                     <button x-on:click="showPersonSearch = !showPersonSearch"
                                                             class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                                                        <span x-text="showPersonSearch ? 'Сховати' : 'Знайти в базі'"></span>
+                                                        <span x-text="showPersonSearch ? '{{ __('app.settings_hide') }}' : '{{ __('app.settings_find_in_db') }}'"></span>
                                                     </button>
                                                     <template x-if="showPersonSearch">
                                                         <div class="mt-1 relative">
                                                             <input type="text" x-model="personSearch"
-                                                                   placeholder="Імʼя, email, телефон..."
+                                                                   placeholder="{{ __('app.settings_search_placeholder') }}"
                                                                    class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                                             <template x-if="filteredPeople.length > 0">
                                                                 <div class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-32 overflow-y-auto">
@@ -2115,7 +2115,7 @@
                                                                 </div>
                                                             </template>
                                                             <template x-if="personSearch.length >= 2 && filteredPeople.length === 0">
-                                                                <p class="text-xs text-gray-400 mt-1">Нікого не знайдено</p>
+                                                                <p class="text-xs text-gray-400 mt-1">{{ __('app.settings_nobody_found') }}</p>
                                                             </template>
                                                         </div>
                                                     </template>
@@ -2143,7 +2143,7 @@
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
                                 <span class="inline-flex items-center text-sm text-green-600 dark:text-green-400">
                                     <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                    <span class="hidden md:inline">Активний</span>
+                                    <span class="hidden md:inline">{{ __('app.settings_active') }}</span>
                                 </span>
                             </td>
                             <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -2161,7 +2161,7 @@
                                     </svg>
                                 </button>
                                 @else
-                                <span class="text-gray-400 dark:text-gray-500 text-xs">Це ви</span>
+                                <span class="text-gray-400 dark:text-gray-500 text-xs">{{ __('app.settings_this_is_you') }}</span>
                                 @endif
                                 @endif
                             </td>
@@ -2182,8 +2182,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
                 <div>
-                    <p class="font-medium text-yellow-800 dark:text-yellow-200">Немає церковних ролей</p>
-                    <p class="text-sm text-yellow-600 dark:text-yellow-400">Спочатку створіть ролі на сторінці <a href="{{ route('settings.church-roles.index') }}" class="underline">Церковні ролі</a>.</p>
+                    <p class="font-medium text-yellow-800 dark:text-yellow-200">{{ __('app.settings_no_church_roles') }}</p>
+                    <p class="text-sm text-yellow-600 dark:text-yellow-400">{{ __('app.settings_create_roles_first') }} <a href="{{ route('settings.church-roles.index') }}" class="underline">{{ __('app.settings_church_roles') }}</a>.</p>
                 </div>
             </div>
         </div>
@@ -2215,8 +2215,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                             </svg>
                             <div>
-                                <p class="font-medium text-blue-800 dark:text-blue-200">Ця роль має повний доступ</p>
-                                <p class="text-sm text-blue-600 dark:text-blue-400">Права ролі з повним доступом не можна обмежити.</p>
+                                <p class="font-medium text-blue-800 dark:text-blue-200">{{ __('app.settings_full_access_role') }}</p>
+                                <p class="text-sm text-blue-600 dark:text-blue-400">{{ __('app.settings_full_access_role_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -2227,7 +2227,7 @@
                     <table class="w-full">
                         <thead>
                             <tr class="text-left border-b border-gray-200 dark:border-gray-700">
-                                <th class="pb-3 text-sm font-semibold text-gray-900 dark:text-white">Модуль</th>
+                                <th class="pb-3 text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.settings_module') }}</th>
                                 @foreach($permissionActions as $actionKey => $actionLabel)
                                 <th class="pb-3 text-sm font-semibold text-gray-900 dark:text-white text-center w-24">{{ $actionLabel }}</th>
                                 @endforeach
@@ -2301,18 +2301,18 @@
                         <button @click="resetToDefaults()"
                                 type="button"
                                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                            Скинути до стандартних
+                            {{ __('app.settings_reset_to_defaults') }}
                         </button>
                         <button @click="savePermissions()"
                                 :disabled="!isDirty || saving"
                                 class="px-6 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <span x-show="!saving">Зберегти зміни</span>
+                            <span x-show="!saving">{{ __('app.settings_save_changes') }}</span>
                             <span x-show="saving" class="flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Збереження...
+                                {{ __('app.saving') }}
                             </span>
                         </button>
                     </div>
@@ -2328,8 +2328,8 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
              x-data="userOverridesManager()">
             <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Персональні права</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Додаткові права для конкретних користувачів понад їхню роль</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_personal_permissions') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.settings_personal_permissions_desc') }}</p>
             </div>
 
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -2364,7 +2364,7 @@
                     </div>
                     <button @click="openUserModal({{ $u->id }}, @js($u->name), @js($u->churchRole?->name ?? '{{ __('app.settings_no_role') }}'))"
                             class="flex-shrink-0 px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
-                        Налаштувати
+                        {{ __('app.settings_configure') }}
                     </button>
                 </div>
                 @endforeach
@@ -2389,7 +2389,7 @@
 
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-1">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додаткові права</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_additional_permissions') }}</h3>
                                 <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -2398,7 +2398,7 @@
                             </div>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                                 <span class="font-medium text-gray-700 dark:text-gray-300" x-text="modalUserName"></span>
-                                — роль: <span x-text="modalRoleName"></span>
+                                — {{ __('app.settings_role') }}: <span x-text="modalRoleName"></span>
                             </p>
 
                             {{-- Legend --}}
